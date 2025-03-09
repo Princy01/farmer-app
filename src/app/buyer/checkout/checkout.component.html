@@ -1,0 +1,94 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="chevron-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Checkout</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<!-- Delivery Address Section -->
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Delivery Address</ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <p *ngIf="selectedAddress">
+      <strong>{{ selectedAddress.name }}</strong> <br />
+      {{ selectedAddress.street }}, {{ selectedAddress.city }},
+      {{ selectedAddress.state }} - {{ selectedAddress.zip }}
+    </p>
+    <ion-button class="change-address-btn" (click)="changeAddress()">
+      Change Address
+    </ion-button>
+  </ion-card-content>
+</ion-card>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let item of cartItems">
+      <ion-thumbnail slot="start">
+        <img [src]="item.image" alt="{{ item.name }}" />
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{ item.name }} <span class="hindi-name">({{ item.hindiName }})</span></h2>
+        <p>₹{{ item.price }} x {{ item.quantity }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <!-- Payment Options -->
+<ion-card>
+  <ion-card-content>
+    <h2>Total: ₹{{ totalPrice }}</h2>
+  </ion-card-content>
+  <ion-card-header>
+    <ion-card-title>Payment Options</ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <ion-item
+      [ngClass]="{'selected-option': selectedPaymentMethod === 'upi'}"
+      (click)="selectPayment('upi')">
+      <ion-label>UPI, Debit/Credit Card, Bank Transfer</ion-label>
+      <ion-icon name="chevron-forward" slot="end"></ion-icon>
+    </ion-item>
+
+    <ion-item
+      [ngClass]="{'selected-option': selectedPaymentMethod === 'credit'}"
+      (click)="selectPayment('credit')">
+      <ion-label>On Credit - Pay Later as per agreed terms</ion-label>
+      <ion-icon name="chevron-forward" slot="end"></ion-icon>
+    </ion-item>
+
+    <ion-item
+      [ngClass]="{'selected-option': selectedPaymentMethod === 'finance'}"
+      (click)="selectPayment('finance')">
+      <ion-label>Avail Finance - Partnered financial options available</ion-label>
+      <ion-icon name="chevron-forward" slot="end"></ion-icon>
+    </ion-item>
+  </ion-card-content>
+</ion-card>
+
+  <!-- Order Confirmation (Shown only after order is placed) -->
+  <ion-card *ngIf="orderPlaced">
+    <ion-card-header>
+      <ion-card-title>Order Confirmation</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Estimated Delivery:</strong> {{ estimatedDelivery }}</p>
+      <p><strong>Tracking Number:</strong> {{ trackingNumber }}</p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-button color="success" expand="full" (click)="confirmOrder()" [disabled]="orderPlaced">
+        Confirm Order
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

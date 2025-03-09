@@ -1,0 +1,18 @@
+<ion-content>
+  <form [formGroup]="cashPayment" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <ion-item [class.invalid]="isFieldInvalid('payment_type')">
+        <ion-input label="Payment Type" labelPlacement="floating" formControlName="payment_type"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('payment_type')">Payment Type is required (max 50 characters).</p>
+
+      <div class="center-button">
+        <ion-button class="custom-button" type="submit">
+          SUBMIT
+        </ion-button>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>

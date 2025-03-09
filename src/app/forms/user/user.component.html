@@ -1,0 +1,61 @@
+<ion-content>
+  <form [formGroup]="user" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <ion-item [class.invalid]="isFieldInvalid('name')">
+        <ion-input label="Name" labelPlacement="floating" formControlName="name"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('name')">Name is required (max 255 characters).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('mobile_num')">
+        <ion-input label="Mobile Number" labelPlacement="floating" type="tel" formControlName="mobile_num"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('mobile_num')">Mobile Number is required (max 15 digits).</p>
+
+      <ion-item>
+        <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-textarea label="Address" labelPlacement="floating" formControlName="address"></ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-input label="Pincode" labelPlacement="floating" type="text" formControlName="pincode"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-select label="Location" formControlName="location">
+          <ion-select-option *ngFor="let loc of locations" [value]="loc.id">{{ loc.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-select label="State" formControlName="state">
+          <ion-select-option *ngFor="let st of states" [value]="st.id">{{ st.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-select label="User Type" formControlName="user_type_id">
+          <ion-select-option *ngFor="let type of userTypes" [value]="type.user_type_id">{{ type.user_type_name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-select label="Status" formControlName="status">
+          <ion-select-option [value]="1">Active</ion-select-option>
+          <ion-select-option [value]="0">Inactive</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div class="center-button">
+        <ion-button class="custom-button" type="submit">
+          SUBMIT
+        </ion-button>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>
+

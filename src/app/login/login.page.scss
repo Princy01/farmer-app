@@ -1,0 +1,208 @@
+// :host {
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   height: 100vh;
+//   background: #fafafa;
+// }
+
+// ion-content {
+//   --background: #fafafa;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+// }
+
+ion-segment-button {
+  --background: white; /* Default background for unselected buttons */
+  --color: black;
+  --indicator-color:  rgb(134, 175, 139);
+}
+
+
+.login-container {
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.app-title {
+  font-family: "Franklin Gothic Medium", sans-serif;
+  // font-style: italic;
+  font-size: 38px;
+  color: rgb(136, 172, 140);
+  margin-top: 50px;
+  margin-bottom: 50px;
+  // background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+}
+
+ion-item {
+  --background: transparent;
+  --inner-padding-end: 10px;
+  --border-color: rgb(139, 167, 141);
+  border-radius: 3px;
+  margin: 10px 20px 10px 20px;
+}
+ion-input {
+  --padding-start: 10px;
+  font-size: 14px;
+}
+
+// ion-button {
+//   --border-radius: 10px;
+//   --background: rgb(136, 172, 140);
+//   --color: #fff;
+//   font-weight: bold;
+//   height: 40px;
+//   margin: 20px 20px 0 20px;
+//   width: 90%;
+//   display: block; /* Ensure it's treated as a block-level element */
+// }
+
+.center-button {
+  display: flex;
+  justify-content: center;  /* Horizontally centers the button */
+  align-items: center;      /* Vertically centers the button */
+  height: 20vh;            /* Makes the container take some viewport height */
+}
+
+.custom-button {
+  font-family: 'Georgia', 'Times', serif;
+  --background: rgb(136, 172, 140);
+  --color: white;
+  --border-radius: 8px;  /* round the button corners */
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  // margin-bottom: 0px;
+}
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #dbdbdb;
+}
+
+.or-divider span {
+  margin: 0 10px;
+  color: #8e8e8e;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.forgot-password {
+  font-size: 12px;
+  color: rgb(82, 104, 84);
+  margin-top: 10px;
+}
+
+
+
+
+
+// :host {
+//         display: flex;
+//         justify-content: center;
+//         align-items: center;
+//         height: 100vh;
+//         background: #fafafa;
+//       }
+
+//       ion-content {
+//         --background: #fafafa;
+//         display: flex;
+//         justify-content: center;
+//         align-items: center;
+//       }
+
+//       .login-container {
+//         width: 100%;
+//         max-width: 380px;
+//         text-align: center;
+//       }
+
+//       .app-title {
+//         font-family: "Georgia", serif;
+//         font-style: italic;
+//         font-size: 38px;
+//         color: #000;
+//         margin-bottom: 20px;
+//       }
+
+//       .auth-card {
+//         background: #fff;
+//         padding: 30px;
+//         border-radius: 1px;
+//         border: 1px solid #dbdbdb;
+//         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+//       }
+
+//       ion-item {
+//         --background: transparent;
+//         --inner-padding-end: 10px;
+//         --border-color: #dbdbdb;
+//         border-radius: 3px;
+//         margin-bottom: 10px;
+//       }
+
+//       ion-input {
+//         --padding-start: 10px;
+//         font-size: 14px;
+//       }
+
+//       ion-button {
+//         --border-radius: 10px;
+//         --background: #0095f6;
+//         --color: #fff;
+//         font-weight: bold;
+//         height: 40px;
+//         margin-top: 10px;
+//       }
+
+//       .or-divider {
+//         display: flex;
+//         align-items: center;
+//         margin: 20px 0;
+//       }
+
+//       .or-divider::before,
+//       .or-divider::after {
+//         content: "";
+//         flex: 1;
+//         height: 1px;
+//         background: #dbdbdb;
+//       }
+
+//       .or-divider span {
+//         margin: 0 10px;
+//         color: #8e8e8e;
+//         font-size: 12px;
+//         font-weight: bold;
+//       }
+
+//       .forgot-password {
+//         font-size: 12px;
+//         color: #00376b;
+//         margin-top: 10px;
+//       }
+
+//       .switch-auth {
+//         margin-top: 15px;
+//         font-size: 14px;
+//         color: #262626;
+//         background: #fff;
+//         padding: 15px;
+//         border: 1px solid #dbdbdb;
+//       }
+
+//       .switch-auth span {
+//         color: #0095f6;
+//         font-weight: bold;
+//         cursor: pointer;
+//       }

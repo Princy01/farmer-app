@@ -1,0 +1,18 @@
+<ion-content>
+  <form [formGroup]="paymentModeForm" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <ion-item [class.invalid]="isFieldInvalid('payment_mode')">
+        <ion-input label="Payment Mode" labelPlacement="floating" formControlName="payment_mode"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('payment_mode')">Payment Mode is required (max 50 characters).</p>
+
+      <div class="center-button">
+        <ion-button class="custom-button" type="submit">
+          SUBMIT
+        </ion-button>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>

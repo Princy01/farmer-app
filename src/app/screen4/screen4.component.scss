@@ -1,0 +1,80 @@
+ion-toolbar{
+        --background: rgb(136, 172, 140);
+
+      }
+
+h2{
+    background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+    padding: 3%;
+  }
+
+.custom-badge {
+    --background: rgb(150, 235, 85);
+    --color: white;  /* Text color inside the badge */
+        // --font-weight: bold;
+    }
+
+      ion-button {
+        --color: rgb(245, 240, 230);
+      }
+
+.filters {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      ion-item {
+        width: 100%;
+      }
+
+      ion-card {
+        background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+        text-align: center;
+        text-transform: uppercase;
+        font-family: "Poppins", sans-serif;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        // &.selected {
+        //   background: #007bff;
+        //   color: white;
+        // }
+
+        &:hover::before {
+          content: "";
+          position: absolute;
+          top: -10px;
+          left: -10px;
+          right: -10px;
+          bottom: -10px;
+          background: rgba(0, 123, 255, 0.1);
+          filter: blur(15px);
+          z-index: -1;
+          border-radius: 16px;
+        }
+      }
+
+      ion-card-title{
+        font-size: 1.5rem;
+      }
+
+
+      .fixed-button {
+        position: fixed;
+        bottom: 20px; /* Distance from the bottom */
+        left: 20px; /* Distance from the left */
+        z-index: 1000; /* Ensures it's above other content */
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .fixed-button:hover {
+        transform: rotate(360deg);
+      }

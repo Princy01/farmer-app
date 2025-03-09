@@ -1,0 +1,18 @@
+<ion-content>
+  <form [formGroup]="orderStatus" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <ion-item [class.invalid]="isFieldInvalid('order_status')">
+        <ion-input label="Order Status" labelPlacement="floating" formControlName="order_status"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('order_status')">Order Status is required (max 50 characters).</p>
+
+      <div class="center-button">
+        <ion-button class="custom-button" type="submit">
+          SUBMIT
+        </ion-button>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>

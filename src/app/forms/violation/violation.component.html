@@ -1,0 +1,33 @@
+<ion-content>
+  <form [formGroup]="violation" (ngSubmit)="submitForm()">
+    <ion-list>
+      <ion-item [class.invalid]="isFieldInvalid('violation_name')">
+        <!-- <ion-label position="floating">Violation Name</ion-label> -->
+        <ion-input label="Violation Name" labelPlacement="floating" formControlName="violation_name"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('violation_name')">Violation Name is required (max 255 characters).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('level_of_serious')">
+        <!-- <ion-label position="floating">Level of Seriousness</ion-label> -->
+        <ion-input label="Level of Seriousness" labelPlacement="floating" formControlName="level_of_serious"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('level_of_serious')">Level of Seriousness is required (max 255 characters).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('status')">
+        <!-- <ion-label>Status</ion-label> -->
+        <ion-select label="Status" formControlName="status">
+          <ion-select-option [value]="1">Active</ion-select-option>
+          <ion-select-option [value]="0">Inactive</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('status')">Status is required.</p>
+
+      <div class="center-button">
+        <ion-button class="custom-button">
+          SUBMIT
+        </ion-button>
+        </div>
+
+  </ion-list>
+  </form>
+</ion-content>

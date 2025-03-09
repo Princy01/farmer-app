@@ -1,0 +1,69 @@
+<ion-content>
+  <form [formGroup]="business" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <ion-item [class.invalid]="isFieldInvalid('b_name')">
+        <ion-input label="Business Name" labelPlacement="floating" formControlName="b_name"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_name')">Business Name is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('b_typeid')">
+        <ion-select label="Business Type" formControlName="b_typeid">
+          <ion-select-option *ngFor="let type of businessTypes" [value]="type.b_typeid">{{ type.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_typeid')">Business Type is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('b_location_id')">
+        <ion-select label="Location" formControlName="b_location_id">
+          <ion-select-option *ngFor="let location of locations" [value]="location.id">{{ location.location }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_location_id')">Location is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('b_state_id')">
+        <ion-select label="State" formControlName="b_state_id">
+          <ion-select-option *ngFor="let state of states" [value]="state.id">{{ state.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_state_id')">State is required.</p>
+
+      <ion-item>
+        <ion-select label="Mandi" formControlName="b_mandi_id">
+          <ion-select-option *ngFor="let mandi of mandis" [value]="mandi.mandi_id">{{ mandi.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item [class.invalid]="isFieldInvalid('b_address')">
+        <ion-textarea label="Address" labelPlacement="floating" formControlName="b_address"></ion-textarea>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_address')">Address is required.</p>
+
+      <ion-item>
+        <ion-input label="Phone Number" labelPlacement="floating" formControlName="b_phone_num"></ion-input>
+      </ion-item>
+
+      <ion-item [class.invalid]="isFieldInvalid('b_email')">
+        <ion-input label="Email" labelPlacement="floating" type="email" formControlName="b_email"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_email')">Valid Email is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('b_gst_num')">
+        <ion-input label="GST Number" labelPlacement="floating" formControlName="b_gst_num"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_gst_num')">GST Number is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('b_pan_num')">
+        <ion-input label="PAN Number" labelPlacement="floating" formControlName="b_pan_num"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_pan_num')">PAN Number is required.</p>
+
+      <div class="center-button">
+        <ion-button class="custom-button" type="submit">
+          SUBMIT
+        </ion-button>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>

@@ -1,0 +1,66 @@
+/* Delivery Address Card */
+ion-card-title{
+  font-size: 18px;
+}
+/* Address Text */
+ion-card-content p {
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Center the button */
+.change-address-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px auto; /* Centers the button horizontally */
+  width: 80%; /* Adjust width as needed */
+}
+
+/* Button Styling */
+ion-button.change-address-btn {
+  --border-radius: 8px;
+  --background: rgb(136, 172, 140);
+  --color: white;
+  --padding: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Hover effect */
+ion-button.change-address-btn:hover {
+  --background: rgb(160, 147, 120);
+}
+
+ion-header ion-toolbar {
+  --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+  --color: rgb(174, 172, 172);
+
+  ion-icon{
+    color:rgb(136, 172, 140);
+  }
+}
+
+/* Highlight selected payment option */
+ion-item.selected-option {
+  --background: rgb(178, 222, 183);
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+/* Styling for Payment Option Items */
+ion-item {
+  cursor: pointer;
+  --padding-start: 16px;
+  --inner-padding-end: 12px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Chevron icon style */
+ion-icon {
+  font-size: 18px;
+  color: rgb(100, 100, 100);
+}

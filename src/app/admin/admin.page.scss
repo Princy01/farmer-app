@@ -1,0 +1,112 @@
+ion-toolbar.main-toolbar {
+  --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+  color: rgb(152, 151, 151);
+  font-family: "Garamond", serif;
+  text-transform: uppercase;
+}
+
+ion-toolbar.custom-toolbar {
+  --background: rgb(136, 172, 140);
+  --color: white;
+  font-family: "Garamond", serif;
+
+}
+ion-menu-button {
+  --color: rgb(136, 172, 140);
+}
+
+ion-content {
+  --padding-top: 20px;
+
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font-family: "Century Gothic", sans-serif;
+
+    ion-list {
+      width: 90%;
+      max-width: 500px;
+    }
+  }
+
+  ion-item {
+    margin-bottom: 10px;
+    --inner-border-width: 0px;
+    position: relative;
+  }
+
+  ion-label {
+    padding-left: 5px;
+    flex-grow: 1;
+  }
+
+  ion-input,
+  ion-textarea {
+    // border: 1px solid rgb(136, 172, 140);
+    border-bottom: 1px solid lightgray;
+    transition: border-color 0.3s ease;
+    // min-height: 50px;
+    --padding-start: 10px;
+    // --padding-end: 10px;
+    // --padding-top: 10px;
+    // --padding-bottom: 10px;
+    font-size: 16px;
+  }
+
+  .label-text {
+    color: rgb(115, 112, 112);
+    font-family: "Century Gothic", sans-serif;
+  }
+
+  ion-select {
+    // padding-inline: 10px; /* Ensures dropdown text aligns well */
+    // position: absolute;
+    // right: 16px; // Adjust this value as needed
+    // width: auto;
+    font-family: "Century Gothic", sans-serif;
+    border-bottom: 1px solid lightgray;
+    // .label-text{
+    color: rgb(115, 112, 112);
+    // }
+  }
+
+  // ion-button {
+  //   // margin-top: 15px;
+  //   // --border-radius: 8px;
+  //   // --box-shadow: none;
+  //   // --background: rgb(153, 190, 157);
+  //   // font-family: "Century Gothic", sans-serif;
+  // }
+
+  .center-button {
+    display: flex;
+    justify-content: center;  /* Horizontally centers the button */
+    align-items: center;      /* Vertically centers the button */
+    height: 20vh;            /* Makes the container take some viewport height */
+  }
+
+  .custom-button {
+    font-family: 'Georgia', 'Times', serif;
+    --background: rgb(136, 172, 140);
+    --color: white;
+    --border-radius: 8px;  /* round the button corners */
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    // margin-bottom: 0px;
+  }
+
+  .error {
+    color: red;
+    font-size: 14px;
+    margin-left: 16px;
+  }
+
+  .invalid ion-input,
+  .invalid ion-textarea,
+  .invalid ion-select {
+    border: 1px solid red;
+  }
+}

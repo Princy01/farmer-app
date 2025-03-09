@@ -1,0 +1,51 @@
+<ion-header [class.hidden]="hideHeader">
+  <ion-toolbar>
+    <ion-title slot="start">Farmer App</ion-title>
+    <ion-buttons slot="start">
+      <ion-icon name="person-circle-outline" size="large"></ion-icon>
+    </ion-buttons>
+
+      <ion-buttons slot="end">
+        <ion-button [routerLink]="'/buyer/wishlist'">
+          <ion-icon name="heart-outline"></ion-icon>
+        </ion-button>
+        <ion-button [routerLink]="'/buyer/cart'">
+          <ion-icon name="cart-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+  </ion-toolbar>
+
+  <div class="location-container">
+    <ion-icon name="location-outline"></ion-icon>
+    <h2>Deliver to</h2>
+    <span>Your Location</span>
+    <ion-icon name="chevron-forward-outline"></ion-icon>
+  </div>
+</ion-header>
+
+<!-- Sticky search bar -->
+<ion-header class="sticky-searchbar" *ngIf="hideHeader">
+  <ion-toolbar>
+    <ion-searchbar placeholder="Search products..."></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content scrollEvents="true" (ionScroll)="onScroll($event)">
+  <div class="search-container">
+    <ion-searchbar placeholder="Search products..."></ion-searchbar>
+  </div>
+
+  <ion-grid>
+    <ion-row>
+      <h1>Explore Our Collections</h1>
+      <ion-col size="6" *ngFor="let category of categories">
+        <ion-card [routerLink]="['/buyer/category', category.name]">
+          <img [src]="category.image" alt="{{ category.name }}">
+          <ion-card-content>
+            <h3><b>{{ category.name }}</b></h3>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

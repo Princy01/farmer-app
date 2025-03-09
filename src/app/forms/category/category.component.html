@@ -1,0 +1,52 @@
+<ion-content>
+  <form [formGroup]="category" (ngSubmit)="submitForm()">
+    <ion-list>
+      <ion-item [class.invalid]="isFieldInvalid('category_name')">
+        <!-- <ion-label position="floating">Category Name</ion-label> -->
+        <ion-input label="Variety" labelPlacement="floating" formControlName="category_name"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('category_name')">Category Name is required (max 255 characters).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('super_cat_id')">
+        <!-- <ion-label position="floating">Super Category</ion-label> -->
+        <ion-select placeholder="Select Parent Category" label="Food Type"  formControlName="super_cat_id">
+          @for(super_cat of superCategories;track super_cat.category_id){
+          <ion-select-option [value]="super_cat.category_id">{{ super_cat.category_name }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('super_cat_id')">Enter a valid number.</p>
+
+      <ion-item>
+        <!-- <ion-label position="floating">Remarks</ion-label> -->
+        <ion-textarea label="Remarks (Optional)" labelPlacement="floating" formControlName="remarks"></ion-textarea>
+      </ion-item>
+
+      <!-- <ion-button expand="full" type="submit" [disabled]="category.invalid">
+        Submit
+      </ion-button> -->
+
+      <div class="center-button">
+        <ion-button class="custom-button">
+          SUBMIT
+        </ion-button>
+        </div>
+
+      <ion-list>
+        <ion-label class="center-label">AVAILABLE ITEMS</ion-label>
+        <ion-item-group *ngFor="let category of objectKeys(availableItems)">
+          <ion-item button (click)="toggleCategory(category)">
+            <ion-label><strong>{{ category }}</strong></ion-label>
+            <ion-icon slot="end" [name]="expandedCategories[category] ? 'chevron-up' : 'chevron-down'"></ion-icon>
+          </ion-item>
+          <ion-list *ngIf="expandedCategories[category]" class="nested-list">
+            <ion-item *ngFor="let item of availableItems[category]">
+              <ion-label>{{ item }}</ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-item-group>
+      </ion-list>
+
+    </ion-list>
+  </form>
+</ion-content>

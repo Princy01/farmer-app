@@ -1,0 +1,22 @@
+<ion-content>
+  <form [formGroup]="location" (ngSubmit)="submitForm()">
+    <ion-list>
+      <ion-item [class.invalid]="isFieldInvalid('location')">
+        <!-- <ion-label position="floating">Location Name</ion-label> -->
+        <ion-input label="Location Name (Optional)" labelPlacement="floating" formControlName="location"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('location')">Location name cannot exceed 50 characters.</p>
+
+    <!-- <ion-button expand="full" type="submit" [disabled]="location.invalid">
+      Submit
+    </ion-button> -->
+
+    <div class="center-button">
+      <ion-button class="custom-button">
+        SUBMIT
+      </ion-button>
+      </div>
+
+  </ion-list>
+  </form>
+</ion-content>

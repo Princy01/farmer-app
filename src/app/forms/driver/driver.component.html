@@ -1,0 +1,118 @@
+<ion-content>
+  <form [formGroup]="driver" (ngSubmit)="submitForm()">
+    <ion-list>
+      <ion-item [class.invalid]="isFieldInvalid('driver_name')">
+        <!-- <ion-label position="floating">Driver Name</ion-label> -->
+        <ion-input label="Name" labelPlacement="floating" formControlName="driver_name"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('driver_name')">Driver Name is required (max 255 characters).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('driver_age')">
+        <ion-input label="Age (Optional)" labelPlacement="floating" type="number" formControlName="driver_age"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('driver_age')">Age must be at least 18 and a valid number.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('driver_license')">
+        <ion-input label="License" labelPlacement="floating" formControlName="driver_license"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('driver_license')">License is required (max 50 characters).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('driver_number')">
+        <ion-input label="Number" labelPlacement="floating" type="tel" formControlName="driver_number"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('driver_number')">Enter a valid phone number (max 15 digits).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('driver_address')">
+        <ion-textarea label="Address (Optional)" labelPlacement="floating" formControlName="driver_address"></ion-textarea>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('driver_address')">Address cannot exceed 255 characters).</p>
+
+      <ion-item>
+        <!-- <ion-label>Driver Status</ion-label> -->
+        <ion-select label="Status (Optional)" formControlName="driver_status">
+          <ion-select-option value="Active">Active</ion-select-option>
+          <ion-select-option value="Inactive">Inactive</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+    <ion-item>
+        <!-- <ion-label position="stacked">Date of Joining</ion-label> -->
+        <ion-input label="Date of Joining (Optional)" labelPlacement="stacked" type="date" formControlName="date_of_joining"></ion-input>
+      </ion-item>
+
+      <ion-item [class.invalid]="isFieldInvalid('experience_years')">
+        <!-- <ion-label position="floating">Experience Years</ion-label> -->
+        <ion-input label= "Experience Years (Optional)" position="floating" type="number" formControlName="experience_years"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('experience_years')">Experience must be a valid number (min 0).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('vehicle_id')">
+        <ion-select label="Vehicle" placeholder="Select a Vehicle"  formControlName="vehicle_id">
+          @for(veh_id of vehicle;track veh_id.vehicle_id){
+            <ion-select-option [value]="veh_id.vehicle_id">{{ veh_id.vehicle_name }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('vehicle_id')">Vehicle ID is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('license_expiry_date')">
+        <!-- <ion-label position="stacked">License Expiry Date</ion-label> -->
+        <ion-input label="License Expiry Date" labelPlacement="stacked" type="date" formControlName="license_expiry_date"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('license_expiry_date')">License Expiry Date is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('emergency_contact')">
+        <!-- <ion-label position="floating">Emergency Contact</ion-label> -->
+        <ion-input label="Emergency Contact (Optional)" labelPlacement="floating" type="tel" formControlName="emergency_contact"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('emergency_contact')">Enter a valid emergency contact (max 15 digits).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('assigned_route_id')">
+        <!-- <ion-label position="floating">Assigned Route ID</ion-label> -->
+        <ion-input label="Assigned Route ID (Optional)" labelPlacement="floating" type="number" formControlName="assigned_route_id"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('assigned_route_id')">Enter valid Assigned Route ID.</p>
+
+    <ion-item>
+        <!-- <ion-label position="stacked">Date of Birth</ion-label> -->
+        <ion-input label="Date of Birth (Optional)" labelPlacement="stacked" type="date"  formControlName="d_o_b"></ion-input>
+      </ion-item>
+
+      <ion-item [class.invalid]="isFieldInvalid('violation')">
+        <!-- <ion-label>Violation</ion-label> -->
+        <ion-textarea label="Violation" labelPlacement="floating" formControlName="violation"></ion-textarea>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('violation')">Violation details are required.</p>
+
+
+      <div class="center-button">
+        <ion-button class="custom-button">
+          SUBMIT
+        </ion-button>
+        </div>
+
+  </ion-list>
+
+  <ion-list>
+    <ion-label class="center-label">AVAILABLE DRIVERS</ion-label>
+    <ion-item-group *ngFor="let driver of drivers">
+      <ion-item button (click)="toggleDriver(driver.driver_id)">
+        <!-- (click)="toggleCategory(driver)" -->
+        <ion-label><strong>{{ driver.driver_name }}</strong></ion-label>
+        <ion-icon slot="end" [name]="expandedDrivers[driver.driver_id] ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </ion-item>
+      <ion-list class="nested-list" *ngIf="expandedDrivers[driver.driver_id]"
+      >
+        <ion-item >
+          <ion-label>Driver License</ion-label>: {{driver.driver_license}}
+          </ion-item>
+          <ion-item >
+          <ion-label>Driver Age</ion-label>: {{driver.driver_age}}
+          </ion-item>
+      </ion-list>
+      <!-- <ion-item>{{ driver|json }}</ion-item> -->
+    </ion-item-group>
+  </ion-list>
+
+  </form>
+</ion-content>

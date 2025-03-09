@@ -1,0 +1,80 @@
+<ion-content  class="ion-padding">
+   <div class="login-container">
+  <h1 class="app-title">Farmer-App</h1>
+
+  <ion-segment [(ngModel)]="authMode">
+    <ion-segment-button value="login" class="btn">Login</ion-segment-button>
+    <ion-segment-button value="register" class="btn">Register</ion-segment-button>
+  </ion-segment>
+
+  <form [formGroup]="loginForm" *ngIf="authMode === 'login'" (ngSubmit)="onLogin()">
+    <ion-list>
+    <ion-item>
+      <ion-label position="floating">Email / Phone</ion-label>
+      <ion-input formControlName="emailOrPhone" type="text" autocapitalize="none"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="loginForm.get('emailOrPhone')?.invalid && loginForm.get('emailOrPhone')?.touched">
+      <p *ngIf="loginForm.get('emailOrPhone')?.errors?.['required']">Email or Phone is required</p>
+      <p *ngIf="loginForm.get('emailOrPhone')?.errors?.['invalidFormat']">Enter a valid Email or Phone</p>
+    </ion-text>
+
+    <ion-item>
+      <ion-label position="floating">Password</ion-label>
+      <ion-input formControlName="password" type="password" autocomplete="current-password"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+      <p *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</p>
+      <p *ngIf="loginForm.get('password')?.errors?.['minlength']">Minimum 6 characters required</p>
+    </ion-text>
+
+    <div class="center-button">
+      <ion-button class="custom-button" expand="full" type="submit" [disabled]="loginForm.invalid">Login
+
+      </ion-button>
+    </div>
+
+    <div class="or-divider">
+      <span>OR</span>
+    </div>
+
+    <p class="forgot-password">Forgot Password?</p>
+    </ion-list>
+  </form>
+
+ <!-- Registration Form -->
+<form [formGroup]="registerForm" *ngIf="authMode === 'register'" (ngSubmit)="onRegisterSubmit()">
+  <ion-list>
+  <ion-item>
+    <ion-label position="floating">Name</ion-label>
+    <ion-input formControlName="name"></ion-input>
+  </ion-item>
+  <ion-text color="danger" *ngIf="registerForm.get('name')?.invalid && registerForm.get('name')?.touched">
+    <p *ngIf="registerForm.get('name')?.errors?.['required']">Name is required</p>
+  </ion-text>
+
+  <ion-item>
+    <ion-label position="floating">Email / Phone</ion-label>
+    <ion-input formControlName="emailOrPhone" type="text" autocapitalize="none"></ion-input>
+  </ion-item>
+  <ion-text color="danger" *ngIf="registerForm.get('emailOrPhone')?.invalid && registerForm.get('emailOrPhone')?.touched">
+    <p *ngIf="registerForm.get('emailOrPhone')?.errors?.['required']">Email or Phone is required</p>
+    <p *ngIf="registerForm.get('emailOrPhone')?.errors?.['invalidFormat']">Enter a valid Email or Phone</p>
+  </ion-text>
+
+  <ion-item>
+    <ion-label position="floating">Password</ion-label>
+    <ion-input formControlName="password" type="password" autocomplete="new-password"></ion-input>
+  </ion-item>
+  <ion-text color="danger" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+    <p *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</p>
+    <p *ngIf="registerForm.get('password')?.errors?.['minlength']">Minimum 6 characters required</p>
+  </ion-text>
+
+  <div class="center-button">
+    <ion-button class="custom-button" expand="full" type="submit" [disabled]="registerForm.invalid">Register</ion-button>
+  </div>
+
+  </ion-list>
+  </form>
+  </div>
+</ion-content>

@@ -1,0 +1,63 @@
+ion-header ion-toolbar {
+        --border-width: 0; /* Removes the bottom border */
+        // box-shadow: none;
+        --background: white;
+        --color: rgb(154, 192, 159);
+}
+ion-icon{
+  color: rgb(154, 192, 159);
+}
+ion-title{
+  font-family: var(--ion-font-family, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Roboto", sans-serif);
+  font-size: 33px;
+}
+
+.hidden {
+        display: none;
+      }
+
+      .sticky-searchbar {
+        position: fixed;
+        top: 0; /* Ensure it sticks to the very top */
+        left: 0;
+        width: 100%;
+        z-index: 999; /* High z-index to stay above everything */
+        background: white; /* Solid background to block visibility */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 10px 0; /* Better spacing */
+      }
+
+      .location-container {
+        font-family: "Monotype Corsiva", cursive;
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        font-size: 1.2rem;
+        gap: 5px; /* Adds spacing between elements */
+      }
+
+      .location-container h2 {
+        font-family: "Perpetua", serif; /* Change the font for h2 */
+        font-size: 1.2rem;
+        margin: 0; /* Removes default margin */
+      }
+
+      .location-container ion-icon {
+        margin-right: 8px;
+        color: rgb(112, 140, 116);
+      }
+
+      .search-container {
+        padding: 5px;
+      }
+
+      h1{
+        font-family: "Perpetua", serif;
+        margin-left: 15px;
+        color: rgb(117, 116, 116);
+
+}
+h3{
+  font-family: "Perpetua", serif;
+  font-size: 1rem;
+}

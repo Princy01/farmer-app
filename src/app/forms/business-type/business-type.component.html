@@ -1,0 +1,22 @@
+<ion-content>
+  <form [formGroup]="businessType" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <ion-item [class.invalid]="isFieldInvalid('b_typename')">
+        <ion-input label="Business Type Name" labelPlacement="floating" formControlName="b_typename"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_typename')">Business Type Name is required.</p>
+
+      <ion-item>
+        <ion-textarea label="Remarks" labelPlacement="floating" formControlName="remarks"></ion-textarea>
+      </ion-item>
+
+      <div class="center-button">
+        <ion-button class="custom-button" type="submit">
+          SUBMIT
+        </ion-button>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>

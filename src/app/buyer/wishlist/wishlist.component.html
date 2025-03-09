@@ -1,0 +1,59 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="chevron-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Wishlist</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row *ngIf="wishlistItems.length > 0; else emptyWishlist">
+      <ion-col size="6" size-md="6" *ngFor="let item of wishlistItems">
+        <ion-card class="wishlist-card">
+          <ion-icon name="close-outline" class="close-icon" (click)="removeFromWishlist(item)"></ion-icon>
+
+          <img [src]="item.image" alt="{{ item.name }}" class="wishlist-img" />
+
+          <ion-card-header>
+            <ion-card-title class="item-title">
+              {{ item.name }} <span class="hindi-name">({{ item.hindiName }})</span>
+            </ion-card-title>
+            <p class="price">₹{{ item.price }}</p>
+          </ion-card-header>
+
+          <!-- Add to Cart Button at the Bottom -->
+          <ion-card-content class="cart-section">
+            <div class="cart-container" (click)="addToCart(item)">
+              <ion-icon name="cart" class="cart-icon"></ion-icon>
+              <span class="cart-text">Add to Cart</span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Empty Wishlist Message -->
+  <ng-template #emptyWishlist>
+    <ion-item lines="none" class="empty-message">
+      <ion-label class="ion-text-center">
+        <h2>Your wishlist is empty!</h2>
+        <p>Start adding your favorite products.</p>
+      </ion-label>
+    </ion-item>
+  </ng-template>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-button color="success" expand="full" (click)="goToCart()" [disabled]="cartItems.length === 0">
+        Go to Cart ({{ cartItems.length }})
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

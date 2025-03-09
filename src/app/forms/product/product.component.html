@@ -1,0 +1,47 @@
+<ion-content>
+  <form [formGroup]="product" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <!-- <ion-item> -->
+      <!-- <ion-label position="floating">Category</ion-label> -->
+      <!-- <ion-input label="Category" labelPlacement="floating" formControlName="category_id" type="number" readonly></ion-input> -->
+      <!-- <ion-button fill="solid" shape="round" color="dark" size="small" (click)="navigateToCategoryForm()">
+          <ion-icon slot="start" name="list-outline"></ion-icon>
+          Select
+        </ion-button> -->
+      <!-- </ion-item> -->
+      <ion-item [class.invalid]="isFieldInvalid('product_name')">
+        <!-- <ion-label position="floating">Product Name</ion-label> -->
+        <ion-input label="Product Name" labelPlacement="floating" formControlName="product_name"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('product_name')">Product Name is required (max 100 characters).</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('category_id')">
+        <ion-select label="Category" formControlName="category_id">
+          <ion-select-option *ngFor="let category of categories" [value]="category.id">
+            {{ category.category_name }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('category_id')">Category is required.</p>
+
+
+      <ion-item [class.invalid]="isFieldInvalid('status')">
+        <!-- <ion-label>Product Status</ion-label> -->
+        <ion-select label="Product Status" formControlName="status">
+          <ion-select-option [value]="1">Active</ion-select-option>
+          <ion-select-option [value]="0">Inactive</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('status')">Status is required.</p>
+
+
+      <div class="center-button">
+        <ion-button class="custom-button">
+          SUBMIT
+        </ion-button>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>

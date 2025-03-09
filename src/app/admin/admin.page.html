@@ -1,0 +1,76 @@
+<ion-app>
+  <ion-menu contentId="main-content">
+    <ion-header>
+      <ion-toolbar class="custom-toolbar">
+        <ion-title>Menu</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list>
+        <ion-menu-toggle>
+          <ion-item routerLink="/admin/driver">
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-label>Driver</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/admin/vehicle">
+            <ion-icon name="car-outline" slot="start"></ion-icon>
+            <ion-label>Vehicle</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/admin/category">
+            <ion-icon name="pricetags-outline" slot="start"></ion-icon>
+            <ion-label>Category</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/admin/mandi">
+            <ion-icon name="storefront-outline" slot="start"></ion-icon>
+            <ion-label>Mandi</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/admin/location">
+            <ion-icon name="location-outline" slot="start"></ion-icon>
+            <ion-label>Location</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/admin/states">
+            <ion-icon name="map-outline" slot="start"></ion-icon>
+            <ion-label>State</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/admin/violation">
+            <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+            <ion-label>Violation</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item routerLink="/admin/product">
+            <ion-icon name="cube-outline" slot="start"></ion-icon>
+            <ion-label>Product</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <div class="ion-page" id="main-content">
+    <ion-header>
+      <ion-toolbar class="main-toolbar">
+        <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>{{ pageTitle }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+        <ion-router-outlet></ion-router-outlet>
+    </ion-content>
+  </div>
+</ion-app>

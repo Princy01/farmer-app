@@ -1,0 +1,60 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="openProfile()">
+        <ion-icon name="person-circle-sharp" size="large"></ion-icon>
+      </ion-button>
+
+      <ion-button (click)="openNotifications()">
+        <ion-badge *ngIf="notifications > 0" class="custom-badge">{{ notifications }}</ion-badge>
+        <ion-icon name="notifications-circle-sharp" slot="icon-only"></ion-icon>
+      </ion-button>
+
+    </ion-buttons>
+
+    <ion-title style="--color: rgb(245, 240, 230);">Go4u</ion-title>
+.
+      <ion-buttons slot="end">
+      <ion-button (click)="openMessages()">
+        <ion-badge *ngIf="messages > 0" class="custom-badge">{{ messages }}</ion-badge>
+        <ion-icon name="chatbubbles-sharp" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <ion-button (click)="openLogoPage()">
+        <ion-icon name="logo-android"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true">
+  <div class="search-wrapper">
+  <ion-searchbar placeholder="Search items..." (ionInput)="searchItems($event)"></ion-searchbar>
+</div>
+  <ion-list>
+    <ion-item *ngFor="let item of items" lines="none">
+      <ion-label>
+        <h2>{{ item.name }}</h2>
+        <p>Total Quantity: {{ item.qty }} kg</p>
+        <p>Orders placed: {{ item.orders }} kg</p>
+      </ion-label>
+      <ion-icon
+      name="chevron-forward-outline" size="small" (click)="viewDetails(item)">
+    </ion-icon>
+    </ion-item>
+  </ion-list>
+
+  <div class="center-button">
+    <ion-button (click)="loadMore()" class="loadMore">Load More</ion-button>
+  </div>
+
+
+    <app-screen2></app-screen2>
+    <app-screen3></app-screen3>
+
+
+  <div class="fixed-button">
+      <ion-icon (click)="navigateToScreen4()" name="arrow-forward-circle-sharp" style="color: rgb(153, 101, 58); font-size: 45px;"></ion-icon>
+  </div>
+
+</ion-content>

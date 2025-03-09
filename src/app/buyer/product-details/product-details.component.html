@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Product Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ng-container *ngIf="productDetails; else loading">
+    <ion-card>
+      <img [src]="productDetails.image" [alt]="productDetails.name" />
+      <ion-card-header>
+        <ion-card-title>{{ productDetails.name }}</ion-card-title>
+        <p class="hindi-name">({{ productDetails.hindiName }})</p>
+      </ion-card-header>
+      <ion-card-content>
+        <p><strong>Source:</strong> {{ productDetails.source }}</p>
+        <p><strong>Nutrition:</strong> {{ productDetails.nutrition }}</p>
+        <p><strong>Location:</strong> {{ productDetails.location }}</p>
+        <p><strong>Customer Ratings:</strong> {{ productDetails.ratings }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-list>
+      <ion-list-header>
+        <strong>Available in Mandi: {{ productDetails.mandiName }}</strong>
+      </ion-list-header>
+      <ion-item *ngFor="let wholesaler of productDetails.wholesalers">
+        <ion-label>
+          <h2>{{ wholesaler.name }}</h2>
+          <p><strong>Price:</strong> ₹{{ wholesaler.price }} per kg</p>
+          <p><strong>Earliest Delivery:</strong> {{ wholesaler.deliveryDate }}</p>
+          <p><strong>Wastage:</strong> {{ wholesaler.wastage }}%</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-container>
+
+  <ng-template #loading>
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading product details...</p>
+  </ng-template>
+</ion-content>

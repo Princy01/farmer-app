@@ -1,0 +1,19 @@
+<ion-content>
+  <form [formGroup]="state" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <ion-item [class.invalid]="isFieldInvalid('state')">
+        <!-- <ion-label position="floating">State Name</ion-label> -->
+        <ion-input label="Name (Optional)" labelPlacement="floating" formControlName="state"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('state')">Max 50 characters allowed.</p>
+
+      <div class="center-button">
+        <ion-button class="custom-button">
+          SUBMIT
+        </ion-button>
+        </div>
+
+  </ion-list>
+  </form>
+</ion-content>

@@ -1,0 +1,106 @@
+ion-header ion-toolbar {
+  --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+  --color: rgb(174, 172, 172);
+
+  ion-icon{
+    color:rgb(136, 172, 140);
+  }
+}
+
+.cart-content {
+  padding: 10px;
+}
+
+ion-card {
+  position: relative;
+  border-radius: 12px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+.item-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.hindi-name {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.item-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: rgb(169, 226, 177);
+}
+
+.discount-text {
+  font-size: 1rem;
+  color: rgb(136, 172, 140);
+  margin-left: 8px;
+}
+
+.quantity-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // height: 40px;
+  gap: 10px; /* Controls spacing between buttons and text */
+}
+.quantity-text {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #555;
+  margin: 0 5px; /* Keeps the text centered between buttons */
+}
+
+.quantity-label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #555;
+}
+ion-button {
+  --border-radius: 8px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+.qty-btn {
+  color: rgb(136, 172, 140) !important; /* Text color */
+  --border-color: rgb(136, 172, 140) !important; /* Border color */
+  --ion-color-primary: rgb(136, 172, 140) !important; /* Ensures color consistency */
+  --ion-color-primary-rgb: 136, 172, 140 !important;
+  --padding-top:0px !important;
+  --padding-bottom:0px !important;
+}
+/* Position the trash icon in the top-right corner */
+.trash-container {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 10; /* Ensures visibility above other elements */
+}
+.trash-icon {
+  color: #bf6c07;
+  font-size: 1.2rem;
+}
+
+.discount-card,
+.delivery-card {
+  padding: 10px;
+  text-align: center;
+}
+
+.empty-cart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #ccc;
+  margin-bottom: 10px;
+}
