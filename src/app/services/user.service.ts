@@ -30,8 +30,6 @@ export interface userRead{
   status?: number;
 }
 
-
-
 @Injectable({
   providedIn: 'root'
 })

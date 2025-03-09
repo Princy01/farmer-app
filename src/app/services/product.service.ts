@@ -19,17 +19,17 @@ export class ProductService {
 
   constructor(private http: HttpClient) { }
 
-  createProduct(product: Product): Observable<any> { // Or Observable<Product>
+  createProduct(product: Product): Observable<any> { 
     return this.http.post(`${this.apiUrl}/productDetails`, product)
       .pipe(catchError(this.handleError));
   }
 
-  updateProduct(product: Product): Observable<any> { // Or Observable<Product>
+  updateProduct(product: Product): Observable<any> {
     return this.http.put(`${this.apiUrl}/productUpdate`, product)
       .pipe(catchError(this.handleError));
   }
 
-  deleteProduct(id: number): Observable<any> { // Or Observable<void>
+  deleteProduct(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/productDelete/${id}`)
       .pipe(catchError(this.handleError));
   }

@@ -26,17 +26,17 @@ export class MandiService {
 
   constructor(private http: HttpClient) { }
 
-  createMandi(mandi: Mandi): Observable<any> { // Or Observable<Mandi>
+  createMandi(mandi: Mandi): Observable<any> {
     return this.http.post(`${this.apiUrl}/mandiDetails`, mandi)
       .pipe(catchError(this.handleError));
   }
 
-  updateMandi(mandi: Mandi): Observable<any> { // Or Observable<Mandi>
+  updateMandi(mandi: Mandi): Observable<any> {
     return this.http.put(`${this.apiUrl}/mandiUpdate`, mandi)
       .pipe(catchError(this.handleError));
   }
 
-  deleteMandi(id: number): Observable<any> { // Or Observable<void>
+  deleteMandi(id: number): Observable<any> { 
     return this.http.delete(`${this.apiUrl}/mandiDelete/${id}`)
       .pipe(catchError(this.handleError));
   }

@@ -112,8 +112,9 @@ export const routes: Routes = [
       },
       {
         path: 'checkout',
-        loadComponent: () => import('./buyer/checkout/checkout.component').then((m) => m.CheckoutComponent)
+        loadComponent: () => import('./buyer/checkout/checkout.component').then((m) => m.CheckoutComponent),
       }
     ]
+
   }
-];
+]

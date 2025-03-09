@@ -11,7 +11,7 @@ export class BusinessTypeService {
   constructor(private http: HttpClient) {}
 
   createBusinessType(businessType: any): Observable<any> {
-    // route assumend to be /insertBusinessType
+    // route assumed to be /insertBusinessType
     return this.http.post(`${this.apiUrl}/insertBusinessType`, businessType);
   }
 

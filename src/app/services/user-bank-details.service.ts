@@ -17,7 +17,6 @@ export interface UserBankDetail {
   status: boolean;
 }
 
-
 @Injectable({
   providedIn: 'root'
 })
@@ -26,17 +25,17 @@ export class UserBankDetailService {
 
   constructor(private http: HttpClient) { }
 
-  createUserBankDetail(bankDetail: UserBankDetail): Observable<any> { // Or Observable<UserBankDetail>
+  createUserBankDetail(bankDetail: UserBankDetail): Observable<any> {
     return this.http.post(`${this.apiUrl}/user-bank-details`, bankDetail)
       .pipe(catchError(this.handleError));
   }
 
-  updateUserBankDetail(bankDetail: UserBankDetail): Observable<any> { // Or Observable<UserBankDetail>
+  updateUserBankDetail(bankDetail: UserBankDetail): Observable<any> {
     return this.http.put(`${this.apiUrl}/user-bank-details`, bankDetail)
       .pipe(catchError(this.handleError));
   }
 
-  deleteUserBankDetail(id: number): Observable<any> { // Or Observable<void>
+  deleteUserBankDetail(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/user-bank-details/${id}`)
       .pipe(catchError(this.handleError));
   }
