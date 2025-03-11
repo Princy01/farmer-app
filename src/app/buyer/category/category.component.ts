@@ -16,9 +16,10 @@ import { FormsModule } from '@angular/forms';
 export class CategoryPageComponent {
   @ViewChild('filterModal') filterModal!: IonModal;
   @ViewChild('sortModal') sortModal!: IonModal;
-  // @ViewChild('productModal') productModal!: IonModal;
+  @ViewChild('productModal') productModal!: IonModal;
 
-  selectedSegment = 'nutrition'; // Default segment
+  // isProductModalOpen = false;
+  selectedSegment: string = 'nutrition';
 
   isSearchActive = false;
   searchQuery = '';
@@ -67,6 +68,10 @@ export class CategoryPageComponent {
  sortOption: string = 'priceAsc';
  selectedProduct: any = null;
 
+ onSegmentChange(event: any) {
+  this.selectedSegment = event.detail.value.toString(); // Ensure string conversion
+}
+
   toggleSearch() {
     this.isSearchActive = !this.isSearchActive;
     if (!this.isSearchActive) {
@@ -81,69 +86,186 @@ export class CategoryPageComponent {
 
   vegetableSubcategories = [
     { name: 'All', hindiName: 'सभी', image: 'assets/img/Vegetables2.png', items: [] },
+
     { name: 'Leafy Greens', hindiName: 'पत्तेदार सब्जियां', image: 'assets/img/Spinach2.png', items: [
-      { name: 'Spinach', hindiName: 'पालक', image: 'assets/img/Spinach2.png', price: 40, quantity: '250g', discount: 5, rating: 4.5, inStock: true, deliveryTime: '1-3 days', organic: true, paymentMode: ['cash', 'upi'], minOrderQty: 2 }
+      {
+        name: 'Spinach', hindiName: 'पालक', image: 'assets/img/Spinach2.png', price: 50, quantity: '250g', discount: 5,
+        rating: 4.5, inStock: true, deliveryTime: '1-3 days', organic: true, minOrderQty: 2,
+        mandi: { name: 'Azadpur Mandi', location: 'Delhi' },
+        wholesalers: [
+          { name: 'Agro Traders Pvt Ltd', price: 38, earliestDelivery: 'March 12, 2025', wastage: 5, rating: 4.3 },
+          { name: 'Green Fresh Supplies', price: 39, earliestDelivery: 'March 11, 2025', wastage: 4, rating: 4.7 },
+        ]
+      }
     ]},
+
     { name: 'Root Vegetables', hindiName: 'जड़ वाली सब्जियां', image: 'assets/img/Carrot1.png', items: [
-      { name: 'Carrots', hindiName: 'गाजर', image: 'assets/img/Carrot1.png', price: 35, quantity: '500g', discount: 5, rating: 4.5, inStock: true, deliveryTime: '2-4 days', organic: true, paymentMode: ['upi', 'cash'], minOrderQty: 2 },
+      {
+        name: 'Carrots', hindiName: 'गाजर', image: 'assets/img/Carrot1.png', price: 35, quantity: '500g', discount: 5,
+        rating: 4.5, inStock: true, deliveryTime: '2-4 days', organic: true, minOrderQty: 2,
+        mandi: { name: 'Kolkata Mandi', location: 'West Bengal' },
+        wholesalers: [
+          { name: 'Eastern Agro Traders', price: 32, earliestDelivery: 'March 10, 2025', wastage: 6, rating: 4.1 },
+          { name: 'Bengal Fresh Wholesale', price: 34, earliestDelivery: 'March 9, 2025', wastage: 5, rating: 4.5 },
+        ]
+      }
     ]},
+
     { name: 'Bulbs', hindiName: 'बल्ब सब्जियां', image: 'assets/img/Onion1.png', items: [
-      { name: 'Onions', hindiName: 'प्याज', image: 'assets/img/Onion1.png', price: 20, quantity: '1kg', discount: 2, rating: 4.1, inStock: true, deliveryTime: '1-3 days', organic: false, paymentMode: ['cash', 'card'], minOrderQty: 1 },
+      {
+        name: 'Onions', hindiName: 'प्याज', image: 'assets/img/Onion1.png', price: 20, quantity: '1kg', discount: 2,
+        rating: 4.1, inStock: true, deliveryTime: '1-3 days', organic: false, minOrderQty: 1,
+        mandi: { name: 'Lasalgaon Mandi', location: 'Maharashtra' },
+        wholesalers: [
+          { name: 'Nashik Onion Traders', price: 18, earliestDelivery: 'March 11, 2025', wastage: 7, rating: 4.0 },
+          { name: 'Fresh Onion Wholesalers', price: 19, earliestDelivery: 'March 10, 2025', wastage: 6, rating: 4.2 },
+        ]
+      }
     ]},
+
     { name: 'Beans & Peas', hindiName: 'बीन्स और मटर', image: 'assets/img/Peas1.png', items: [
-      { name: 'Green Beans', hindiName: 'हरी बीन्स', image: 'assets/img/green_beans.png', price: 40, quantity: '500g', discount: 5, rating: 4.5, inStock: true, deliveryTime: '2-4 days', organic: true, paymentMode: ['cash', 'upi'], minOrderQty: 2 },
+      {
+        name: 'Green Beans', hindiName: 'हरी बीन्स', image: 'assets/img/green_beans.png', price: 40, quantity: '500g', discount: 5,
+        rating: 4.5, inStock: true, deliveryTime: '2-4 days', organic: true, minOrderQty: 2,
+        mandi: { name: 'Pune Mandi', location: 'Maharashtra' },
+        wholesalers: [
+          { name: 'Farm Fresh Beans', price: 38, earliestDelivery: 'March 13, 2025', wastage: 5, rating: 4.4 },
+          { name: 'Organic Green Traders', price: 39, earliestDelivery: 'March 12, 2025', wastage: 4, rating: 4.6 },
+        ]
+      }
     ]},
-    { name: 'Stems', hindiName: 'तने वाली सब्जियां', image: 'assets/img/Asparagus1.png', items: [
-      { name: 'Celery', hindiName: 'अजवाइन', image: 'assets/img/celery.png', price: 45, quantity: '1 bunch', discount: 3, rating: 4.2, inStock: false, deliveryTime: '3-5 days', organic: true, paymentMode: ['cash'], minOrderQty: 1 },
-    ]},
-    { name: 'Gourds & Pumpkins', hindiName: 'लौकी और कद्दू', image: 'assets/img/Gourd1.png', items: [
-      { name: 'Bottle Gourd', hindiName: 'लौकी', image: 'assets/img/bottle_gourd.png', price: 35, quantity: '1 piece', discount: 3, rating: 4.2, inStock: false, deliveryTime: '3-5 days', organic: true, paymentMode: ['cash'], minOrderQty: 1 },
-      ]},
-    { name: 'Flowering Vegetables', hindiName: 'फूल वाली सब्जियां', image: 'assets/img/Broccoli1.png', items: [
-      { name: 'Broccoli', hindiName: 'ब्रोकली', image: 'assets/img/broccoli.png', price: 80, quantity: '500g', discount: 3, rating: 4.2, inStock: false, deliveryTime: '3-5 days', organic: true, paymentMode: ['cash'], minOrderQty: 1 },
-    ]},
+
     { name: 'Fruity Vegetables', hindiName: 'फल वाली सब्जियां', image: 'assets/img/Tomato1.png', items: [
-      { name: 'Tomatoes', hindiName: 'टमाटर', image: 'assets/img/tomatoes.png', price: 30, quantity: '1kg', discount: 3, rating: 4.2, inStock: false, deliveryTime: '3-5 days', organic: true, paymentMode: ['cash'], minOrderQty: 1 },
+      {
+        name: 'Tomatoes', hindiName: 'टमाटर', image: 'assets/img/tomatoes.png', price: 30, quantity: '1kg', discount: 3,
+        rating: 4.2, inStock: false, deliveryTime: '3-5 days', organic: true, minOrderQty: 1,
+        mandi: { name: 'Koyambedu Mandi', location: 'Chennai' },
+        wholesalers: [
+          { name: 'South India Tomatoes', price: 28, earliestDelivery: 'March 14, 2025', wastage: 8, rating: 4.0 },
+          { name: 'Chennai Agro Wholesalers', price: 29, earliestDelivery: 'March 13, 2025', wastage: 7, rating: 4.3 },
+        ]
+      }
     ]},
+
     { name: 'Tubers', hindiName: 'कंद वाली सब्जियां', image: 'assets/img/Potato1.png', items: [
-      { name: 'Potatoes', hindiName: 'आलू', image: 'assets/img/potatoes.png', price: 25, quantity: '1kg', discount: 3, rating: 4.2, inStock: false, deliveryTime: '3-5 days', organic: true, paymentMode: ['cash'], minOrderQty: 1 },
+      {
+        name: 'Potatoes', hindiName: 'आलू', image: 'assets/img/potatoes.png', price: 25, quantity: '1kg', discount: 3,
+        rating: 4.2, inStock: false, deliveryTime: '3-5 days', organic: true, minOrderQty: 1,
+        mandi: { name: 'Kanpur Mandi', location: 'Uttar Pradesh' },
+        wholesalers: [
+          { name: 'UP Fresh Potato Traders', price: 22, earliestDelivery: 'March 15, 2025', wastage: 6, rating: 4.1 },
+          { name: 'Golden Potatoes Ltd', price: 23, earliestDelivery: 'March 14, 2025', wastage: 5, rating: 4.4 },
+        ]
+      }
     ]}
   ];
 
   fruitSubcategories = [
     { name: 'All', hindiName: 'सभी', image: 'assets/img/Fruits.png', items: [] },
+
     { name: 'Citrus Fruits', hindiName: 'खट्टे फल', image: 'assets/img/oranges.png', items: [
-        { name: 'Oranges', hindiName: 'संतरा', image: 'assets/img/oranges.png', price: 60, quantity: '1kg', discount: 10, rating: 4.3, inStock: true, deliveryTime: '1-2 days', organic: false, paymentMode: ['cash', 'upi', 'card'], minOrderQty: 1 }
-      ]},
+      {
+        name: 'Oranges', hindiName: 'संतरा', image: 'assets/img/oranges.png', price: 60, quantity: '1kg', discount: 10,
+        rating: 4.3, inStock: true, deliveryTime: '1-2 days', organic: false, minOrderQty: 1,
+        mandi: { name: 'Nagpur Mandi', location: 'Maharashtra' },
+        wholesalers: [
+          { name: 'Maharashtra Orange Traders', price: 55, earliestDelivery: 'March 12, 2025', wastage: 4, rating: 4.4 },
+          { name: 'Fresh Citrus Suppliers', price: 57, earliestDelivery: 'March 11, 2025', wastage: 5, rating: 4.6 },
+        ]
+      }
+    ]},
+
     { name: 'Berries', hindiName: 'बेरी फल', image: 'assets/img/strawberries.png', items: [
-        { name: 'Strawberries', hindiName: 'स्ट्रॉबेरी', image: 'assets/img/strawberries.png', price: 120, quantity: '500g', discount: 5, rating: 4.7, inStock: true, deliveryTime: '2-3 days', organic: true, paymentMode: ['cash', 'upi'], minOrderQty: 2 }
-      ]},
+      {
+        name: 'Strawberries', hindiName: 'स्ट्रॉबेरी', image: 'assets/img/strawberries.png', price: 120, quantity: '500g', discount: 5,
+        rating: 4.7, inStock: true, deliveryTime: '2-3 days', organic: true, minOrderQty: 2,
+        mandi: { name: 'Mahabaleshwar Mandi', location: 'Maharashtra' },
+        wholesalers: [
+          { name: 'Mahabaleshwar Fresh Berries', price: 110, earliestDelivery: 'March 10, 2025', wastage: 3, rating: 4.8 },
+          { name: 'Organic Strawberry Suppliers', price: 115, earliestDelivery: 'March 9, 2025', wastage: 4, rating: 4.7 },
+        ]
+      }
+    ]},
+
     { name: 'Stone Fruits', hindiName: 'गुठली वाले फल', image: 'assets/img/mangoes.png', items: [
-        { name: 'Mangoes', hindiName: 'आम', image: 'assets/img/mangoes.png', price: 100, quantity: '1kg', discount: 8, rating: 4.6, inStock: true, deliveryTime: '1-3 days', organic: true, paymentMode: ['cash', 'upi', 'card'], minOrderQty: 1 }
-      ]},
+      {
+        name: 'Mangoes', hindiName: 'आम', image: 'assets/img/mangoes.png', price: 100, quantity: '1kg', discount: 8,
+        rating: 4.6, inStock: true, deliveryTime: '1-3 days', organic: true, minOrderQty: 1,
+        mandi: { name: 'Ratnagiri Mandi', location: 'Maharashtra' },
+        wholesalers: [
+          { name: 'Ratnagiri Alphonso Suppliers', price: 95, earliestDelivery: 'March 15, 2025', wastage: 6, rating: 4.5 },
+          { name: 'Golden Mango Traders', price: 98, earliestDelivery: 'March 14, 2025', wastage: 5, rating: 4.6 },
+        ]
+      }
+    ]},
+
     { name: 'Tropical Fruits', hindiName: 'उष्णकटिबंधीय फल', image: 'assets/img/bananas.png', items: [
-        { name: 'Bananas', hindiName: 'केला', image: 'assets/img/bananas.png', price: 40, quantity: '1 dozen', discount: 0, rating: 4.5, inStock: true, deliveryTime: '1 day', organic: false, paymentMode: ['cash', 'upi'], minOrderQty: 3 }
-      ]}
+      {
+        name: 'Bananas', hindiName: 'केला', image: 'assets/img/bananas.png', price: 40, quantity: '1 dozen', discount: 0,
+        rating: 4.5, inStock: true, deliveryTime: '1 day', organic: false, minOrderQty: 3,
+        mandi: { name: 'Kolkata Banana Mandi', location: 'West Bengal' },
+        wholesalers: [
+          { name: 'Fresh Banana Suppliers', price: 35, earliestDelivery: 'March 13, 2025', wastage: 5, rating: 4.3 },
+          { name: 'Organic Banana Traders', price: 38, earliestDelivery: 'March 12, 2025', wastage: 4, rating: 4.5 },
+        ]
+      }
+    ]}
   ];
 
   grainSubcategories = [
     { name: 'All', hindiName: 'सभी', image: 'assets/img/Grains.png', items: [] },
+
     { name: 'Cereal Grains', hindiName: 'अनाज', image: 'assets/img/rice.png', items: [
-        { name: 'Rice', hindiName: 'चावल', image: 'assets/img/rice.png', price: 60, quantity: '1kg', discount: 5, rating: 4.2, inStock: true, deliveryTime: '2-3 days', organic: true, paymentMode: ['cash', 'upi', 'card'], minOrderQty: 1 }
-      ]},
+      {
+        name: 'Rice', hindiName: 'चावल', image: 'assets/img/rice.png', price: 60, quantity: '1kg', discount: 5,
+        rating: 4.2, inStock: true, deliveryTime: '2-3 days', organic: true, minOrderQty: 1,
+        mandi: { name: 'Karnal Grain Mandi', location: 'Haryana' },
+        wholesalers: [
+          { name: 'Haryana Rice Suppliers', price: 58, earliestDelivery: 'March 14, 2025', wastage: 3, rating: 4.5 },
+          { name: 'Best Basmati Traders', price: 60, earliestDelivery: 'March 13, 2025', wastage: 4, rating: 4.6 },
+        ]
+      }
+    ]},
+
     { name: 'Millets', hindiName: 'बाजरा एवं अन्य मोटे अनाज', image: 'assets/img/millets.png', items: [
-        { name: 'Bajra (Pearl Millet)', hindiName: 'बाजरा', image: 'assets/img/bajra.png', price: 80, quantity: '1kg', discount: 7, rating: 4.5, inStock: true, deliveryTime: '3-4 days', organic: true, paymentMode: ['cash', 'upi'], minOrderQty: 2 }
-      ]}
+      {
+        name: 'Bajra (Pearl Millet)', hindiName: 'बाजरा', image: 'assets/img/bajra.png', price: 80, quantity: '1kg', discount: 7,
+        rating: 4.5, inStock: true, deliveryTime: '3-4 days', organic: true, minOrderQty: 2,
+        mandi: { name: 'Jaipur Mandi', location: 'Rajasthan' },
+        wholesalers: [
+          { name: 'Rajasthan Millet Traders', price: 75, earliestDelivery: 'March 15, 2025', wastage: 2, rating: 4.7 },
+          { name: 'Organic Bajra Suppliers', price: 78, earliestDelivery: 'March 14, 2025', wastage: 3, rating: 4.6 },
+        ]
+      }
+    ]}
   ];
 
   pulsesSubcategories = [
     { name: 'All', hindiName: 'सभी', image: 'assets/img/Pulses.png', items: [] },
+
     { name: 'Lentils', hindiName: 'मसूर', image: 'assets/img/lentils.png', items: [
-        { name: 'Red Lentils (Masoor)', hindiName: 'मसूर दाल', image: 'assets/img/masoor_lentils.png', price: 90, quantity: '1kg', discount: 5, rating: 4.3, inStock: true, deliveryTime: '2-3 days', organic: true, paymentMode: ['cash', 'upi', 'card'], minOrderQty: 1 }
-      ]},
+      {
+        name: 'Red Lentils (Masoor)', hindiName: 'मसूर दाल', image: 'assets/img/masoor_lentils.png', price: 90, quantity: '1kg', discount: 5,
+        rating: 4.3, inStock: true, deliveryTime: '2-3 days', organic: true, minOrderQty: 1,
+        mandi: { name: 'Indore Mandi', location: 'Madhya Pradesh' },
+        wholesalers: [
+          { name: 'Madhya Pradesh Lentils Traders', price: 85, earliestDelivery: 'March 12, 2025', wastage: 4, rating: 4.5 },
+          { name: 'Organic Dal Suppliers', price: 88, earliestDelivery: 'March 11, 2025', wastage: 3, rating: 4.6 },
+        ]
+      }
+    ]},
+
     { name: 'Beans', hindiName: 'सेम', image: 'assets/img/beans.png', items: [
-        { name: 'Kidney Beans (Rajma)', hindiName: 'राजमा', image: 'assets/img/kidney_beans.png', price: 110, quantity: '1kg', discount: 8, rating: 4.6, inStock: true, deliveryTime: '3-4 days', organic: false, paymentMode: ['cash', 'upi'], minOrderQty: 2 }
-      ]}
+      {
+        name: 'Kidney Beans (Rajma)', hindiName: 'राजमा', image: 'assets/img/kidney_beans.png', price: 110, quantity: '1kg', discount: 8,
+        rating: 4.6, inStock: true, deliveryTime: '3-4 days', organic: false, minOrderQty: 2,
+        mandi: { name: 'Jammu Rajma Mandi', location: 'Jammu & Kashmir' },
+        wholesalers: [
+          { name: 'Jammu Rajma Suppliers', price: 105, earliestDelivery: 'March 14, 2025', wastage: 5, rating: 4.4 },
+          { name: 'Premium Rajma Traders', price: 108, earliestDelivery: 'March 13, 2025', wastage: 4, rating: 4.7 },
+        ]
+      }
+    ]}
   ];
 
   constructor(private route: ActivatedRoute, private router: Router) {
@@ -277,17 +399,17 @@ export class CategoryPageComponent {
     this.filteredAndSortedItems = this.getFilteredAndSortedItems();
   }
 
-  // openProductModal(product: any) {
-  //   this.selectedProduct = product;
-  //   this.productModal?.present();
-  // }
-
-  // closeProductModal() {
-  //   this.productModal?.dismiss();
-  // }
-  openProductDetails(item: any) {
-    this.router.navigate(['/buyer/product-details', item.id]); // Navigate to product details page
+  openProductModal(product: any) {
+    this.selectedProduct = product;
+    this.productModal?.present();
   }
+
+  closeProductModal() {
+    this.productModal?.dismiss();
+  }
+  // openProductDetails(item: any) {
+  //   this.router.navigate(['/buyer/product-details', item.id]); // Navigate to product details page
+  // }
 
 
   updatePriceRange(event: any) {

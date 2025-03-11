@@ -8,7 +8,9 @@ import {
 import { addIcons } from 'ionicons';
 import {
   personOutline, carOutline, pricetagsOutline, storefrontOutline,
-  locationOutline, mapOutline, alertCircleOutline, cubeOutline
+  locationOutline, mapOutline, alertCircleOutline, cubeOutline,
+  personCircleOutline, listOutline, cashOutline, businessOutline,
+  briefcaseOutline, cardOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -35,12 +37,20 @@ export class AdminPage implements OnInit {
     '/admin/states': 'State',
     '/admin/violation': 'Violation',
     '/admin/product': 'Product',
+    '/admin/user': 'User',
+    '/admin/order-status': 'Order Status',
+    '/admin/cash-payment': 'Cash Payment',
+    '/admin/business': 'Business',
+    '/admin/business-type': 'Business Type',
+    '/admin/payment-mode': 'Payment Mode',
   };
 
   constructor(private router: Router) {
     addIcons({
       personOutline, carOutline, pricetagsOutline, storefrontOutline,
-      locationOutline, mapOutline, alertCircleOutline, cubeOutline
+      locationOutline, mapOutline, alertCircleOutline, cubeOutline,
+      personCircleOutline, listOutline, cashOutline, businessOutline,
+      briefcaseOutline, cardOutline
     });
 
     // Listen for route changes

@@ -3,12 +3,12 @@
     <ion-list>
 
       <ion-item [class.invalid]="isFieldInvalid('b_name')">
-        <ion-input label="Business Name" labelPlacement="floating" formControlName="b_name"></ion-input>
+        <ion-input label="Name" labelPlacement="floating" formControlName="b_name"></ion-input>
       </ion-item>
       <p class="error" *ngIf="isFieldInvalid('b_name')">Business Name is required.</p>
 
       <ion-item [class.invalid]="isFieldInvalid('b_typeid')">
-        <ion-select label="Business Type" formControlName="b_typeid">
+        <ion-select label="Type" formControlName="b_typeid">
           <ion-select-option *ngFor="let type of businessTypes" [value]="type.b_typeid">{{ type.name }}</ion-select-option>
         </ion-select>
       </ion-item>
