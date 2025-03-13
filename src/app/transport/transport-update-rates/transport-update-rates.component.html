@@ -1,0 +1,64 @@
+<ion-content class="ion-padding">
+  <form [formGroup]="rateForm" (ngSubmit)="updateRates()">
+    <ion-list>
+      <!-- Fleet Availability Toggle (With Border) -->
+      <ion-card class="toggle-card">
+        <ion-item class="toggle-item">
+          <ion-label class="label-text">Available for Delivery</ion-label>
+          <ion-toggle formControlName="isAvailable" class="custom-toggle"></ion-toggle>
+        </ion-item>
+      </ion-card>
+
+
+      <!-- Distance-Based Pricing -->
+      <ion-item [class.invalid]="rateForm.get('perKmRate')?.invalid && rateForm.get('perKmRate')?.touched">
+        <ion-label class="label-text" position="floating">₹ per km</ion-label>
+        <ion-input type="number" formControlName="perKmRate"></ion-input>
+      </ion-item>
+      <ion-text class="error" *ngIf="rateForm.get('perKmRate')?.invalid && rateForm.get('perKmRate')?.touched">
+        Enter a valid price per km.
+      </ion-text>
+
+      <!-- Load-Based Pricing -->
+      <ion-item [class.invalid]="rateForm.get('perKgRate')?.invalid && rateForm.get('perKgRate')?.touched">
+        <ion-label class="label-text" position="floating">₹ per kg</ion-label>
+        <ion-input type="number" formControlName="perKgRate"></ion-input>
+      </ion-item>
+      <ion-text class="error" *ngIf="rateForm.get('perKgRate')?.invalid && rateForm.get('perKgRate')?.touched">
+        Enter a valid price per kg/ton.
+      </ion-text>
+
+      <!-- Time-Based Pricing -->
+      <!-- <ion-item [class.invalid]="rateForm.get('peakHourRate')?.invalid && rateForm.get('peakHourRate')?.touched">
+        <ion-label class="label-text" position="floating">₹ Peak/Off-Hours</ion-label>
+        <ion-input type="number" formControlName="peakHourRate"></ion-input>
+      </ion-item>
+      <ion-text class="error" *ngIf="rateForm.get('peakHourRate')?.invalid && rateForm.get('peakHourRate')?.touched">
+        Enter a valid price for peak/off-hours.
+      </ion-text> -->
+
+       <!-- Fleet Capacity (Now Required) -->
+       <ion-item [class.invalid]="rateForm.get('fleetCapacity')?.invalid && rateForm.get('fleetCapacity')?.touched">
+        <ion-label class="label-text" position="floating">Fleet Capacity (kg)</ion-label>
+        <ion-input type="number" formControlName="fleetCapacity"></ion-input>
+      </ion-item>
+      <ion-text class="error" *ngIf="rateForm.get('fleetCapacity')?.invalid && rateForm.get('fleetCapacity')?.touched">
+        Fleet Capacity must be at least 50 kg.
+      </ion-text>
+
+      <!-- Preferred Service Areas (Optional) -->
+      <ion-item>
+        <ion-label class="label-text" position="stacked">Preferred Service Areas</ion-label>
+        <ion-textarea formControlName="serviceAreas" placeholder="e.g., Delhi, Mumbai"></ion-textarea>
+      </ion-item>
+    </ion-list>
+
+    <!-- Submit Button -->
+    <div class="center-button">
+      <ion-button type="submit" class="custom-button" [disabled]="isSubmitting">
+        <ion-spinner *ngIf="isSubmitting"></ion-spinner>
+        <span *ngIf="!isSubmitting">SAVE CHANGES</span>
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

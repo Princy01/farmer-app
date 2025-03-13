@@ -118,7 +118,7 @@ export const routes: Routes = [
   },
   {
     path: 'transport',
-    // loadComponent: () => import('./transport/transport.component').then((m) => m.TransportComponent),
+    loadComponent: () => import('./transport/transport.component').then((m) => m.TransportComponent),
     children: [
       {
         path: '',
@@ -128,6 +128,14 @@ export const routes: Routes = [
       {
         path: 'transport-dashboard',
         loadComponent: () => import('./transport/transport-dashboard/transport-dashboard.component').then((m) => m.TransportDashboardComponent),
+      },
+      {
+        path: 'transport-update-rates',
+        loadComponent: () => import('./transport/transport-update-rates/transport-update-rates.component').then((m) => m.TransportUpdateRatesComponent),
+      },
+      {
+        path: 'manage-vehicles',
+        loadComponent: () => import('./transport/manage-vehicles/manage-vehicles.component').then((m) => m.ManageVehiclesComponent),
       },
       {
         path: 'orders-to-deliver',

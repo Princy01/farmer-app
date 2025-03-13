@@ -1,3 +1,98 @@
-<p>
-  transport works!
-</p>
+<ion-app>
+  <ion-menu contentId="main-content">
+    <ion-header>
+      <ion-toolbar class="custom-toolbar">
+        <ion-title>MENU</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/transport-dashboard">
+            <ion-icon name="speedometer-outline" slot="start"></ion-icon>
+            <ion-label>Dashboard</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/transport-update-rates">
+            <ion-icon name="pricetag-outline" slot="start"></ion-icon>
+            <ion-label>Update Transport Rates</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/manage-vehicles">
+            <ion-icon name="car-outline" slot="start"></ion-icon>
+            <ion-label>Manage Vehicles</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/drivers">
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-label>Manage Drivers</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/active-deliveries">
+            <ion-icon name="navigate-outline" slot="start"></ion-icon>
+            <ion-label>Active Deliveries</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/live-tracking">
+            <ion-icon name="location-outline" slot="start"></ion-icon>
+            <ion-label>Live Tracking</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/delivery-confirmation">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            <ion-label>Delivery Confirmation</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/earnings">
+            <ion-icon name="cash-outline" slot="start"></ion-icon>
+            <ion-label>Earnings & Reports</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/history">
+            <ion-icon name="time-outline" slot="start"></ion-icon>
+            <ion-label>Delivery History</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item routerLink="/transport/notifications">
+            <ion-icon name="notifications-outline" slot="start"></ion-icon>
+            <ion-label>Notifications</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <div class="ion-page" id="main-content">
+    <ion-header>
+      <ion-toolbar class="main-toolbar">
+        <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>{{ pageTitle }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-router-outlet></ion-router-outlet>
+    </ion-content>
+  </div>
+</ion-app>

@@ -1,9 +1,3 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Dashboard</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
   <ion-segment [(ngModel)]="selectedTab">
     <ion-segment-button value="active">Active Deliveries</ion-segment-button>
@@ -20,9 +14,9 @@
           <p><ion-chip [color]="getStatusColor(order.status)">{{ order.status }}</ion-chip></p>
         </ion-label>
         <ion-buttons slot="end">
-          <ion-button fill="clear" color="primary">📍 Track</ion-button>
-          <ion-button fill="clear" color="secondary">📋 Details</ion-button>
-          <ion-button fill="clear" color="warning">🛠 Modify</ion-button>
+          <ion-button class = "track-btn" fill="clear">📍 Track</ion-button>
+          <ion-button class = "details-btn" fill="clear">📋 Details</ion-button>
+          <ion-button class = "modify-btn" fill="clear">🛠 Modify</ion-button>
         </ion-buttons>
       </ion-item>
     </ion-list>
