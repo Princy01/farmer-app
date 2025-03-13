@@ -1,0 +1,26 @@
+ion-toolbar {
+        --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+        color: rgb(152, 151, 151);
+        font-family: "Garamond", serif;
+        text-transform: uppercase;
+      }
+
+      ion-content{
+        ion-segment {
+                margin: 10px;
+                font-family: "Century Gothic", sans-serif;
+              }
+              ion-item {
+                --border-color: #e0e0e0;
+              ion-label {
+                font-family: "Century Gothic", sans-serif;
+                ion-chip{
+                        font-family: "Century Gothic", sans-serif;
+                        font-size: 14px;
+                }
+        }
+        ion-button{
+                font-family: "Century Gothic", sans-serif;
+        }
+}
+}

@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Orders to Deliver</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let order of orders">
+      <ion-label>
+        <h2>Order ID: {{ order.id }}</h2>
+        <p><strong>Buyer:</strong> {{ order.buyer }} - {{ order.location }}</p>
+        <p><strong>Delivery Date:</strong> {{ order.deliveryDate }} ({{ order.timeSlot }})</p>
+        <p><strong>Distance:</strong> {{ order.distance }} km</p>
+
+        <h3><br>Order Items</h3>
+        <ion-list>
+          <ion-item *ngFor="let item of order.items">
+            <p>{{ item.product }} - {{ item.quantity }} units ({{ item.weight }})</p>
+          </ion-item>
+        </ion-list>
+
+        <p><strong>Total Quantity:</strong> {{ totalQuantity(order) }} units</p>
+
+        <ion-button class="custom-delivered-btn" fill="solid" (click)="placeBid(order.id, 'Transporter X', 500)">
+          Place Bid
+        </ion-button>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

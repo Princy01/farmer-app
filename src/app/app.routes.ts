@@ -115,6 +115,29 @@ export const routes: Routes = [
         loadComponent: () => import('./buyer/checkout/checkout.component').then((m) => m.CheckoutComponent),
       }
     ]
+  },
+  {
+    path: 'transport',
+    // loadComponent: () => import('./transport/transport.component').then((m) => m.TransportComponent),
+    children: [
+      {
+        path: '',
+        redirectTo: 'transport-dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'transport-dashboard',
+        loadComponent: () => import('./transport/transport-dashboard/transport-dashboard.component').then((m) => m.TransportDashboardComponent),
+      },
+      {
+        path: 'orders-to-deliver',
+        loadComponent: () => import('./transport/orders-to-deliver/orders-to-deliver.component').then((m) => m.OrdersToDeliverComponent),
+      },
+      {
+        path: 'route-optimization',
+        loadComponent: () => import('./transport/route-optimization/route-optimization.component').then((m) => m.RouteOptimizationComponent),
+      },
 
-  }
 ]
+}
+];

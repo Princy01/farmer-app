@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Dashboard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-segment [(ngModel)]="selectedTab">
+    <ion-segment-button value="active">Active Deliveries</ion-segment-button>
+    <ion-segment-button value="upcoming">Upcoming</ion-segment-button>
+    <ion-segment-button value="completed">Completed</ion-segment-button>
+  </ion-segment>
+
+  <div *ngIf="selectedTab === 'active'">
+    <ion-list>
+      <ion-item *ngFor="let order of activeDeliveries">
+        <ion-label>
+          <h2>{{ order.id }} - {{ order.buyer }}</h2>
+          <p>{{ order.location }}</p>
+          <p><ion-chip [color]="getStatusColor(order.status)">{{ order.status }}</ion-chip></p>
+        </ion-label>
+        <ion-buttons slot="end">
+          <ion-button fill="clear" color="primary">📍 Track</ion-button>
+          <ion-button fill="clear" color="secondary">📋 Details</ion-button>
+          <ion-button fill="clear" color="warning">🛠 Modify</ion-button>
+        </ion-buttons>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <div *ngIf="selectedTab === 'upcoming'">
+    <ion-list>
+      <ion-item *ngFor="let order of upcomingDeliveries">
+        <ion-label>
+          <h2>{{ order.id }} - {{ order.buyer }}</h2>
+          <p>{{ order.location }}</p>
+          <p><ion-chip [color]="getStatusColor(order.status)">{{ order.status }}</ion-chip></p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <div *ngIf="selectedTab === 'completed'">
+    <ion-list>
+      <ion-item *ngFor="let order of completedDeliveries">
+        <ion-label>
+          <h2>{{ order.id }} - {{ order.buyer }}</h2>
+          <p>{{ order.location }}</p>
+          <p><ion-chip [color]="getStatusColor(order.status)">{{ order.status }}</ion-chip></p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>

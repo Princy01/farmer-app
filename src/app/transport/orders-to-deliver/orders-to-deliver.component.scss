@@ -1,0 +1,43 @@
+ion-toolbar {
+        --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+        color: rgb(152, 151, 151);
+        font-family: "Garamond", serif;
+        text-transform: uppercase;
+      }
+
+      ion-content{
+
+        ion-list{
+                font-family: "Century Gothic", sans-serif;
+
+              ion-item {
+                --border-color: #e0e0e0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                p {
+                        font-family: "Century Gothic", sans-serif;
+
+                }
+              ion-label {
+                font-family: "Century Gothic", sans-serif;
+                ion-chip{
+                        font-family: "Century Gothic", sans-serif;
+                        font-size: 14px;
+                        font-weight: bold;
+
+                }
+        }
+        }
+        ion-button{
+                font-family: "Century Gothic", sans-serif;
+        }
+        .custom-delivered-btn {
+                --background: rgb(163, 201, 168);
+                --color: white;
+              }
+
+
+}
+}

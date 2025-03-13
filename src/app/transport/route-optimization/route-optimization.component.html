@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Route Optimization & Mapping</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div id="map"></div>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Optimized Delivery Route</ion-card-title>
+    </ion-card-header>
+
+    <ion-list>
+      <ion-item *ngFor="let retailer of retailers">
+        <ion-label>
+          <h2>{{ retailer.name }}</h2>
+          <p>Location: {{ retailer.location.lat }}, {{ retailer.location.lng }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+
+  <ion-button expand="block" color="success" (click)="calculateOptimizedRoute()">
+    🔄 Recalculate Route
+  </ion-button>
+</ion-content>
