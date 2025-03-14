@@ -22,16 +22,23 @@ interface Vehicle {
   imports: [CommonModule, IonicModule, FormsModule],
 })
 export class ManageVehiclesComponent {
-  vehicles: Vehicle[] = [];
+  vehicles: Vehicle[] = [
+    { id: 1, type: 'Truck', capacity: 5000, available: true, driver: 'Rajesh Kumar', driverContact: '9876543210' },
+    { id: 2, type: 'Mini Van', capacity: 1500, available: false, driver: 'Amit Sharma', driverContact: '9123456789' },
+    { id: 3, type: 'Pickup', capacity: 2000, available: true, driver: 'Sunil Verma', driverContact: '9988776655' },
+    { id: 4, type: 'Bike', capacity: 200, available: true, driver: 'Vikram Singh', driverContact: '9871234560' }
+  ];
 
   constructor(
     private alertCtrl: AlertController,
     private toastCtrl: ToastController
-  ) { addIcons({
-    'add-outline': addOutline,
-    'create-outline': createOutline,
-    'trash-outline': trashOutline
-  }); }
+  ) {
+    addIcons({
+      'add-outline': addOutline,
+      'create-outline': createOutline,
+      'trash-outline': trashOutline
+    });
+  }
 
   async addVehicle() {
     const alert = await this.alertCtrl.create({

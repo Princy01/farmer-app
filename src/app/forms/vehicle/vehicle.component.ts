@@ -45,10 +45,6 @@ export class VehicleComponent {
         next: data => {
           console.log('Data:', data);
           this.vehicle.reset();
-
-        // this.navCtrl.navigateBack('/admin/driver', {
-        //   queryParams: { vehicle_id: data.vehicle_id }
-        // });
       },
         error: error => {
           console.error('Error:', error);

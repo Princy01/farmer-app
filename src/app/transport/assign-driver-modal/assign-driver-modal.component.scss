@@ -1,0 +1,29 @@
+ion-toolbar {
+        // --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+        --color: rgb(174, 172, 172);
+        height: 55px;
+        border:none;
+        border-radius: 0px;
+
+      }
+      ion-button {
+        --border-radius: 6px;
+        --color: rgb(164, 192, 154);
+        font-size: 14px;
+        padding: 6px 10px;
+      }
+
+.center-button {
+        display: flex;
+        justify-content: center;  /* Horizontally centers the button */
+        align-items: center;      /* Vertically centers the button */
+        height: 20vh;            /* Makes the container take some viewport height */
+      }
+
+      .custom-button {
+        font-family: 'Georgia', 'Times', serif;
+        --background: rgb(136, 172, 140);
+        --color: white;
+        --border-radius: 8px;  /* round the button corners */
+        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }

@@ -64,12 +64,4 @@ export class MandiComponent {
       if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth' });
     }
   }
-
-  // navigateToLocationForm() {
-  //   this.navCtrl.navigateForward('/admin/location');
-  // }
-
-  // navigateToStateForm() {
-  //   this.navCtrl.navigateForward('/admin/state');
-  // }
 }

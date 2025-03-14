@@ -1,0 +1,30 @@
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label>Add new driver</ion-label>
+      <ion-buttons slot="end">
+        <ion-button (click)="addDriver()">
+          <ion-icon name="add-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+
+    <ion-item *ngFor="let driver of drivers">
+      <ion-label>
+        <h2>{{ driver.name }}</h2>
+        <p>📞 {{ driver.phone }} </p>
+        <p>🚚 {{ driver.vehicle }}</p>
+      </ion-label>
+
+      <ion-toggle [(ngModel)]="driver.available"></ion-toggle>
+
+      <ion-button fill="clear" color="tertiary" (click)="editDriver(driver)">
+        <ion-icon name="create-outline"></ion-icon>
+      </ion-button>
+
+      <ion-button fill="clear" color="danger" (click)="deleteDriver(driver.id)">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>

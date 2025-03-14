@@ -138,6 +138,19 @@ export const routes: Routes = [
         loadComponent: () => import('./transport/manage-vehicles/manage-vehicles.component').then((m) => m.ManageVehiclesComponent),
       },
       {
+        path: 'manage-drivers',
+        loadComponent: () => import('./transport/manage-drivers/manage-drivers.component').then((m) => m.ManageDriversComponent),
+      },
+      {
+        path: 'transport-requests',
+        loadComponent: () => import('./transport/transport-requests/transport-requests.component').then((m) => m.TransportRequestsComponent),
+      },
+      {
+        path: 'assign-driver-modal',
+        loadComponent: () => import('./transport/assign-driver-modal/assign-driver-modal.component').then((m) => m.AssignDriverModalComponent),
+      },
+
+      {
         path: 'orders-to-deliver',
         loadComponent: () => import('./transport/orders-to-deliver/orders-to-deliver.component').then((m) => m.OrdersToDeliverComponent),
       },

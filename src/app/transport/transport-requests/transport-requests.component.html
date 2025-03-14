@@ -1,0 +1,60 @@
+<ion-content>
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="loadPendingDeliveries()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- List of Pending Deliveries -->
+  <ion-list *ngIf="pendingDeliveries.length > 0; else noOrders">
+    <ion-card *ngFor="let order of pendingDeliveries">
+      <ion-card-header>
+        <ion-icon class="forward-btn" name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p><strong>Pickup:</strong> {{ order.pickupLocation }}</p>
+        <p><strong>Delivery:</strong> {{ order.dropoffLocation }}</p>
+        <p><strong>Distance:</strong> {{ order.distance }} km</p>
+        <p><strong>Load:</strong> {{ order.weight }} kg ({{ order.type }})</p>
+        <p><strong>Suggested Price:</strong> ₹{{ order.suggestedPrice }}</p>
+        <p><strong>Delivery Date:</strong> {{ formatDate(order.deliveryDate) }}</p>
+
+        <!-- Button changes dynamically -->
+        <ion-button
+          expand="block"
+          class="accept-button"
+          *ngIf="!order.accepted"
+          (click)="acceptOrder(order)">
+          Accept Delivery
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          class="assign-button"
+          *ngIf="order.accepted && !order.assigned"
+          (click)="openAssignDriverModal(order)">
+          Assign Vehicle & Driver
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          color="medium"
+          class="assigned-button"
+          *ngIf="order.accepted && order.assigned"
+          disabled>
+          Vehicle & Driver Assigned
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+
+  <!-- Spinner if orders are loading -->
+  <ion-spinner *ngIf="pendingDeliveries.length === 0"></ion-spinner>
+
+  <!-- No Orders Message -->
+  <ng-template #noOrders>
+    <p style="text-align: center; color: #888; font-size: 16px; margin-top: 20px;">
+      No pending deliveries available.
+    </p>
+  </ng-template>
+</ion-content>

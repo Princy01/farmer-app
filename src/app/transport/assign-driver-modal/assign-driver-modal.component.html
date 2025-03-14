@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-item>
+    <ion-label>Assign Driver</ion-label>
+    <ion-select [(ngModel)]="selectedDriver" interface="popover">
+      <ion-select-option *ngFor="let driver of drivers" [value]="driver.id">
+        {{ driver.name }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Assign Vehicle</ion-label>
+    <ion-select [(ngModel)]="selectedVehicle" interface="popover">
+      <ion-select-option *ngFor="let vehicle of vehicles" [value]="vehicle.id">
+        {{ vehicle.licensePlate }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <div class="center-button">
+    <ion-button class="custom-button" type="submit">
+      SUBMIT
+    </ion-button>
+  </div>
+</ion-content>

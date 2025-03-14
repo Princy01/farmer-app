@@ -86,7 +86,7 @@ export class DriverService {
         violation: 2,
       }
     ]);
-  
+
       return this.http.get<any[]>(`${this.apiUrl}/getDrivers`)
     }
 
