@@ -11,22 +11,18 @@ export class BusinessTypeService {
   constructor(private http: HttpClient) {}
 
   createBusinessType(businessType: any): Observable<any> {
-    // route assumed to be /insertBusinessType
-    return this.http.post(`${this.apiUrl}/insertBusinessType`, businessType);
+    return this.http.post(`${this.apiUrl}/businessTypeDetails`, businessType);
   }
 
   getBusinessTypes(): Observable<any[]> {
-    // needs name change for route
-    return this.http.get<any[]>(`${this.apiUrl}/getBusinessStatus`);
+    return this.http.get<any[]>(`${this.apiUrl}/getBusinessTypes`);
   }
 
   getBusinessTypeById(id: number): Observable<any> {
-    // needs to create a route for this
-    return this.http.get<any>(`${this.apiUrl}/getBusinessStatus/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/getBusinessTypeById/${id}`);
   }
 
   updateBusinessType(id: number, businessType: any): Observable<any> {
-    // needs to create a route for this
     return this.http.put(`${this.apiUrl}/updateBusinessType/${id}`, businessType);
   }
 

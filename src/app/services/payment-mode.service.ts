@@ -11,10 +11,7 @@ export class PaymentModeService {
   constructor(private http: HttpClient) {}
 
   createPaymentMode(paymentModeData: any): Observable<any> {
-    // Need to create this API endpoint in your backend
-    throw new Error('Method not implemented.');
-        
-    return this.http.post(`${this.baseUrl}/create`, paymentModeData);
+    return this.http.post(`${this.baseUrl}/paymentModes`, paymentModeData);
   }
 
   getPaymentModes(): Observable<any> {
@@ -22,20 +19,15 @@ export class PaymentModeService {
   }
 
   getPaymentModeById(id: number): Observable<any> {
-    // Need to create this API endpoint in your backend
-    throw new Error('Method not implemented.');
-    return this.http.get(`${this.baseUrl}/getModeOfPayments/${id}`);
+    return this.http.get(`${this.baseUrl}/getPaymentModeById/${id}`);
   }
 
   updatePaymentMode(id: number, updatedData: any): Observable<any> {
-    // Need to create this API endpoint in your backend
-    throw new Error('Method not implemented.');
-    return this.http.put(`${this.baseUrl}/update/${id}`, updatedData);
+    return this.http.put(`${this.baseUrl}/paymentModeUpdate/${id}`, updatedData);
   }
 
   deletePaymentMode(id: number): Observable<any> {
     // Need to create this API endpoint in your backend
-    throw new Error('Method not implemented.');
     return this.http.delete(`${this.baseUrl}/delete/${id}`);
   }
 }

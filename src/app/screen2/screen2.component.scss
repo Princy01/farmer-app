@@ -2,10 +2,10 @@ ion-toolbar {
   --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
   font-family: 'Georgia', 'Times', serif;
 }
-// :host {
-//   display: block;
-//   height: 100%; /* Ensure the component takes full height */
-// }
+:host {
+  display: block;
+  height: 100%; /* Ensure the component takes full height */
+}
 ion-content {
   --overflow: hidden; /* Prevent extra scrolling */
 }

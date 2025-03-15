@@ -11,8 +11,7 @@ export class CashPaymentService {
   constructor(private http: HttpClient) {}
 
   createPayment(paymentData: any): Observable<any> {
-    // need to create this API endpoint
-    return this.http.post(`${this.baseUrl}/insertPaymentMethod`, paymentData);
+    return this.http.post(`${this.baseUrl}/listPaymentsDetails`, paymentData);
   }
 
   getAllPayments(): Observable<any> {
@@ -20,13 +19,11 @@ export class CashPaymentService {
   }
 
   getPaymentById(id: number): Observable<any> {
-    // need to create this API endpoint
-    return this.http.get(`${this.baseUrl}/getPaymentMethod/${id}`);
+    return this.http.get(`${this.baseUrl}/getPaymentTypeById/${id}`);
   }
 
   updatePayment(id: number, updatedData: any): Observable<any> {
-    // need to create this API endpoint
-    return this.http.put(`${this.baseUrl}/updatePaymentMethod/${id}`, updatedData);
+    return this.http.put(`${this.baseUrl}/listPaymentUpdate/${id}`, updatedData);
   }
 
   deletePayment(id: number): Observable<any> {

@@ -20,8 +20,7 @@ export class OrderStatusService {
   }
 
   getOrderStatusById(orderStatusId: number): Observable<any> {
-    // need to create the endpoint in the backend
-    return this.http.get<any>(`${this.apiUrl}/getOrderStatus/${orderStatusId}`);
+    return this.http.get<any>(`${this.apiUrl}/getOrderStatusById/${orderStatusId}`);
   }
 
   insertOrderStatus(statusData: any): Observable<any> {
