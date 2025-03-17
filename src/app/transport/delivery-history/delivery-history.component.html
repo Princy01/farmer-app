@@ -1,0 +1,32 @@
+<ion-content>
+
+  <!-- Search Past Deliveries -->
+  <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="filterDeliveries()"></ion-searchbar>
+
+  <!-- Delivery History List -->
+  <ion-list>
+    <ion-item *ngFor="let order of filteredOrders">
+      <ion-label>
+        <h3>Order ID: #{{ order.id }}</h3>
+        <p><strong>Pickup:</strong> {{ order.pickup }} → <strong>Drop:</strong> {{ order.drop }}</p>
+        <p><strong>Load:</strong> {{ order.load }} | <strong>Charges:</strong> ₹{{ order.charges }}</p>
+        <p><strong>Status:</strong> {{ order.status }}</p>
+      </ion-label>
+
+      <!-- Dispute Button (Visible only if needed) -->
+      <ion-button *ngIf="order.hasDispute" color="danger" (click)="resolveDispute(order.id)">
+        Resolve Dispute
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+</ion-content>
+
+<!-- Footer Navigation -->
+<!-- <ion-footer>
+  <ion-toolbar>
+    <div class="center-button">
+      <ion-button class="custom-button" (click)="goToReports()">📊 Go to Reports</ion-button>
+</div>
+  </ion-toolbar>
+</ion-footer> -->

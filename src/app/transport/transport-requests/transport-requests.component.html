@@ -1,60 +1,79 @@
 <ion-content>
-  <!-- Pull to refresh -->
-  <ion-refresher slot="fixed" (ionRefresh)="loadPendingDeliveries()">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
+  <ion-grid>
+    <ion-row>
+      <!-- Left Column: Even Index Orders -->
+      <ion-col size="6" class="scroll-column">
+        <ion-list *ngIf="evenOrders.length > 0; else noOrders">
+          <ion-card *ngFor="let order of evenOrders">
+            <ion-card-content>
+              <p><strong>Pickup:</strong> {{ order.pickupLocation }}</p>
+              <p><strong>Delivery:</strong> {{ order.dropoffLocation }}</p>
+              <p><strong>Distance:</strong> {{ order.distance }} km</p>
+              <p><strong>Load:</strong> {{ order.weight }} kg ({{ order.type }})</p>
+              <p><strong>Price:</strong> ₹{{ order.suggestedPrice }}</p>
+              <p><strong>Date:</strong> {{ formatDate(order.deliveryDate) }}</p>
 
-  <!-- List of Pending Deliveries -->
-  <ion-list *ngIf="pendingDeliveries.length > 0; else noOrders">
-    <ion-card *ngFor="let order of pendingDeliveries">
-      <ion-card-header>
-        <ion-icon class="forward-btn" name="chevron-forward-outline" slot="end"></ion-icon>
-      </ion-card-header>
+              <div class="center-button">
+                <ion-button size="small" class="accept-button" *ngIf="!order.accepted" (click)="acceptOrder(order)">
+                  Accept
+                </ion-button>
+                <ion-button size="small" class="assign-button" *ngIf="order.accepted && !order.assigned" (click)="openAssignDriverModal(order)">
+                  Assign
+                </ion-button>
+                <ion-button size="small" class="assigned-button" *ngIf="order.accepted && order.assigned" disabled>
+                  Assigned
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-list>
+      </ion-col>
 
-      <ion-card-content>
-        <p><strong>Pickup:</strong> {{ order.pickupLocation }}</p>
-        <p><strong>Delivery:</strong> {{ order.dropoffLocation }}</p>
-        <p><strong>Distance:</strong> {{ order.distance }} km</p>
-        <p><strong>Load:</strong> {{ order.weight }} kg ({{ order.type }})</p>
-        <p><strong>Suggested Price:</strong> ₹{{ order.suggestedPrice }}</p>
-        <p><strong>Delivery Date:</strong> {{ formatDate(order.deliveryDate) }}</p>
+      <!-- Right Column: Odd Index Orders -->
+      <ion-col size="6" class="scroll-column">
+        <ion-list *ngIf="oddOrders.length > 0">
+          <ion-card *ngFor="let order of oddOrders">
+            <ion-card-content>
+              <p><strong>Pickup:</strong> {{ order.pickupLocation }}</p>
+              <p><strong>Delivery:</strong> {{ order.dropoffLocation }}</p>
+              <p><strong>Distance:</strong> {{ order.distance }} km</p>
+              <p><strong>Load:</strong> {{ order.weight }} kg ({{ order.type }})</p>
+              <p><strong>Price:</strong> ₹{{ order.suggestedPrice }}</p>
+              <p><strong>Date:</strong> {{ formatDate(order.deliveryDate) }}</p>
 
-        <!-- Button changes dynamically -->
-        <ion-button
-          expand="block"
-          class="accept-button"
-          *ngIf="!order.accepted"
-          (click)="acceptOrder(order)">
-          Accept Delivery
-        </ion-button>
-
-        <ion-button
-          expand="block"
-          class="assign-button"
-          *ngIf="order.accepted && !order.assigned"
-          (click)="openAssignDriverModal(order)">
-          Assign Vehicle & Driver
-        </ion-button>
-
-        <ion-button
-          expand="block"
-          color="medium"
-          class="assigned-button"
-          *ngIf="order.accepted && order.assigned"
-          disabled>
-          Vehicle & Driver Assigned
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
-  </ion-list>
-
-  <!-- Spinner if orders are loading -->
-  <ion-spinner *ngIf="pendingDeliveries.length === 0"></ion-spinner>
+              <div class="center-button">
+                <ion-button size="small" class="accept-button" *ngIf="!order.accepted" (click)="acceptOrder(order)">
+                  Accept
+                </ion-button>
+                <ion-button size="small" class="assign-button" *ngIf="order.accepted && !order.assigned" (click)="openAssignDriverModal(order)">
+                  Assign
+                </ion-button>
+                <ion-button size="small" class="assigned-button" *ngIf="order.accepted && order.assigned" disabled>
+                  Assigned
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 
   <!-- No Orders Message -->
   <ng-template #noOrders>
-    <p style="text-align: center; color: #888; font-size: 16px; margin-top: 20px;">
-      No pending deliveries available.
-    </p>
+    <p class="no-orders-text">No pending deliveries available.</p>
   </ng-template>
 </ion-content>
+
+<ion-footer class="filter-sort-toolbar">
+  <ion-toolbar class="toolbar-container">
+    <ion-buttons class="button-group">
+      <ion-button class="filter-button" (click)="openFilterModal()">
+        <ion-icon name="funnel-outline"></ion-icon> Filter
+      </ion-button>
+      <ion-button class="sort-button" (click)="openSortModal()">
+        <ion-icon name="swap-vertical-outline"></ion-icon> Sort
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

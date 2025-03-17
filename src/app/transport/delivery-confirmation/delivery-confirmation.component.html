@@ -1,0 +1,49 @@
+<ion-content class="ion-padding">
+
+  <!-- Order Details -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>📦 Order ID: #123456</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>🏪 <strong>Retailer:</strong> ABC Supermarket</p>
+      <p>📍 <strong>Delivery Location:</strong> XYZ City, Street 10</p>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Send OTP Button -->
+  <div class="center-button">
+    <ion-button class="custom-button" (click)="sendOtpToCustomer()" [disabled]="otpSent">
+      📩 {{ otpSent ? 'OTP Sent to Customer' : 'Send OTP to Customer' }}
+    </ion-button>
+    </div>
+
+  <!-- OTP Verification -->
+  <ion-item>
+    <ion-label position="stacked">🔢 Enter OTP</ion-label>
+    <ion-input type="number" maxlength="4" [(ngModel)]="otp"></ion-input>
+  </ion-item>
+  <p class="resend-otp" (click)="resendOtp()">Resend OTP in {{ otpTimer }}s</p>
+
+  <!-- Notes -->
+  <ion-item>
+    <ion-label position="stacked">📜 Additional Notes (Optional)</ion-label>
+    <ion-textarea [(ngModel)]="notes"></ion-textarea>
+  </ion-item>
+
+  <!-- Submit Button -->
+  <div class="center-button">
+    <ion-button class="custom-button" (click)="submitDelivery()">
+      📮 Submit Delivery Report
+        </ion-button>
+    </div>
+
+
+  <!-- Customer Feedback -->
+  <div class="center-button">
+    <ion-button class="custom-button" (click)="requestFeedback()">
+      ⭐ Request Customer Feedback
+    </ion-button>
+  </div>
+  
+</ion-content>

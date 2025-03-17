@@ -1,0 +1,70 @@
+       ion-toolbar {
+          --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+          --color: rgb(174, 172, 172);
+          height: 55px;
+        }
+
+        ion-title {
+          font-size: 16px;
+        }
+
+        ion-content {
+          --padding-start: 12px;
+          --padding-end: 12px;
+          --padding-top: 10px;
+          --padding-bottom: 10px;
+        }
+
+        ion-item {
+          --background: transparent;
+          --color: #333;
+          font-size: 14px;
+          min-height: 40px;
+        }
+
+        ion-toggle {
+          padding: 12px;
+
+          --track-background: #ddd;
+          --track-background-checked: #ddd;
+
+          --handle-background: rgba(241, 238, 238, 0.968);
+          --handle-background-checked: rgb(136, 172, 140);
+
+          --handle-width: 15px;
+          --handle-height: 27px;
+          --handle-max-height: auto;
+          --handle-spacing: 6px;
+
+          --handle-border-radius: 4px;
+          --handle-box-shadow: none;
+        }
+
+        ion-toggle::part(track) {
+          height: 8px; /* Smaller toggle track */
+          width: 55px;
+           /* Required for iOS handle to overflow the height of the track */
+           overflow: visible;
+        }
+        ion-button {
+          --border-radius: 6px;
+          --color: rgb(164, 192, 154);
+          font-size: 14px;
+          padding: 6px 10px;
+        }
+
+        ion-footer {
+          padding: 8px;
+          background: #fff;
+          border-top: 1px solid #ccc;
+
+          ion-button {
+            font-family: 'Georgia', 'Times', serif;
+            --background: rgb(136, 172, 140);
+            --color: white;
+            --border-radius: 8px; /* Rounded corners */
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 14px; /* Optional: Reduce size for consistency */
+            padding: 8px 12px; /* Optional: Adjust padding */
+          }
+        }

@@ -1,0 +1,55 @@
+<ion-content>
+  <!-- Earnings Summary -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Total Earnings</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <h2>₹{{ totalEarnings }}</h2>
+      <p>Trips Completed: {{ totalTrips }}</p>
+      <p>Pending Payments: ₹{{ pendingPayments }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Total Trips Completed -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Recent Completed Trips</ion-card-title>
+    </ion-card-header>
+    <ion-list>
+      <ion-item *ngFor="let trip of trips">
+        <ion-label>
+          <h3>Trip ID: #{{ trip.id }}</h3>
+          <p>{{ trip.pickup }} → {{ trip.drop }}</p>
+          <p>Earnings: ₹{{ trip.earnings }} | Status: {{ trip.status }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+
+  <!-- Pending Payments -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Pending Payments</ion-card-title>
+    </ion-card-header>
+    <ion-list>
+      <ion-item *ngFor="let payment of pendingPaymentsList">
+        <ion-label>
+          <h3>Order ID: #{{ payment.orderId }}</h3>
+          <p>Amount Due: ₹{{ payment.amount }}</p>
+          <p>Expected Date: {{ payment.dueDate }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+
+  <!-- Withdraw Funds Button -->
+  <ion-footer>
+    <ion-toolbar>
+      <div class="center-button">
+      <ion-button class="custom-button" (click)="withdrawFunds()">Withdraw Funds</ion-button>
+    </div>
+    </ion-toolbar>
+  </ion-footer>
+</ion-content>
+

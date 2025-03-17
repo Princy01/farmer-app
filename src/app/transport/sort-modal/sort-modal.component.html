@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Sort</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-radio-group [(ngModel)]="sortOption">
+      <ion-item>
+        <ion-label>Distance - Low to High</ion-label>
+        <ion-radio slot="end" value="distance-asc"></ion-radio>
+      </ion-item>
+      <ion-item>
+        <ion-label>Distance - High to Low</ion-label>
+        <ion-radio slot="end" value="distance-desc"></ion-radio>
+      </ion-item>
+      <ion-item>
+        <ion-label>Price - High to Low</ion-label>
+        <ion-radio slot="end" value="price-desc"></ion-radio>
+      </ion-item>
+      <ion-item>
+        <ion-label>Quantity - Low to High</ion-label>
+        <ion-radio slot="end" value="quantity-asc"></ion-radio>
+      </ion-item>
+      <ion-item>
+        <ion-label>Quantity - High to Low</ion-label>
+        <ion-radio slot="end" value="quantity-desc"></ion-radio>
+      </ion-item>
+    </ion-radio-group>
+  </ion-list>
+</ion-content>
+
+<ion-footer>
+  <ion-button expand="full" (click)="applySort()">Apply</ion-button>
+</ion-footer>

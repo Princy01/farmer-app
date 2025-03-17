@@ -1,0 +1,22 @@
+<ion-content>
+  <!-- List of Notifications -->
+  <ion-list>
+    <ion-item *ngFor="let notification of notifications">
+      <ion-icon [name]="notification.icon" slot="start" [color]="notification.color"></ion-icon>
+      <ion-label>
+        <h3>{{ notification.title }}</h3>
+        <p>{{ notification.message }}</p>
+        <p><small>{{ notification.time }}</small></p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
+
+<!-- Navigation to Orders Dashboard -->
+<ion-footer>
+  <ion-toolbar>
+    <div class="center-button">
+      <ion-button class="custom-button" (click)="goToOrdersDashboard()">🚚 Go to Orders Dashboard</ion-button>
+      </div>
+  </ion-toolbar>
+</ion-footer>

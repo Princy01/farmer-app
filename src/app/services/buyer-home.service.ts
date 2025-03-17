@@ -3,33 +3,33 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 interface Category {
-  category_id: number;
+  category_id?: number;
   category_name: string;
-  super_cat_id: number;
-  remarks: string;
+  super_cat_id?: number | null;
+  remarks?: string;
 }
 
 @Injectable({
   providedIn: 'root',
 })
-export class BuyerHomeService {
+export class CategoryService {
   private baseUrl = 'http://127.0.0.1:3000';
 
   constructor(private http: HttpClient) {}
 
   getCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(`${this.baseUrl}/categories`);
+    return this.http.get<Category[]>(`${this.baseUrl}/getCategories`);
   }
 
-  addCategory(category: Partial<Category>): Observable<any> {
-    return this.http.post(`${this.baseUrl}/category`, category);
+  getCategoryById(categoryId: number): Observable<Category> {
+    return this.http.get<Category>(`${this.baseUrl}/categories/${categoryId}`);
+  }
+
+  addCategory(category: Category): Observable<any> {
+    return this.http.post(`${this.baseUrl}/categoryDetails`, category);
   }
 
   updateCategory(category: Category): Observable<any> {
-    return this.http.put(`${this.baseUrl}/category`, category);
-  }
-
-  deleteCategory(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/category/${id}`);
+    return this.http.put(`${this.baseUrl}/categoryUpdate`, category);
   }
 }

@@ -150,16 +150,26 @@ export const routes: Routes = [
         path: 'assign-driver-modal',
         loadComponent: () => import('./transport/assign-driver-modal/assign-driver-modal.component').then((m) => m.AssignDriverModalComponent),
       },
-
       {
-        path: 'orders-to-deliver',
-        loadComponent: () => import('./transport/orders-to-deliver/orders-to-deliver.component').then((m) => m.OrdersToDeliverComponent),
+        path: 'delivery-confirmation',
+        loadComponent: () => import('./transport/delivery-confirmation/delivery-confirmation.component').then((m) => m.DeliveryConfirmationComponent),
+      },
+      {
+        path: 'earnings-dashboard',
+        loadComponent: () => import('./transport/earnings-dashboard/earnings-dashboard.component').then((m) => m.EarningsDashboardComponent),
+      },
+      {
+        path: 'delivery-history',
+        loadComponent: () => import('./transport/delivery-history/delivery-history.component').then((m) => m.DeliveryHistoryComponent),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./transport/notifications/notifications.component').then((m) => m.NotificationsComponent),
       },
       {
         path: 'route-optimization',
         loadComponent: () => import('./transport/route-optimization/route-optimization.component').then((m) => m.RouteOptimizationComponent),
-      },
-
+      }
 ]
 }
 ];

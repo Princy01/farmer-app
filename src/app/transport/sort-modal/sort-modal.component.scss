@@ -1,0 +1,76 @@
+      ion-toolbar {
+          --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+          --color: rgb(174, 172, 172);
+          height: 55px;
+        }
+        ion-title {
+          font-size: 16px;
+        }
+
+        ion-content {
+          --padding-start: 16px;
+          --padding-end: 16px;
+          --padding-top: 12px;
+          --padding-bottom: 12px;
+        }
+
+        ion-item {
+          --background: transparent;
+          --color: #333;
+          font-size: 14px;
+          min-height: 40px;
+        }
+
+        ion-radio {
+          --color-checked: rgb(136, 172, 140);
+        }
+
+        ion-button {
+          --border-radius: 6px;
+          --color: rgb(164, 192, 154);
+          font-size: 14px;
+          padding: 6px 10px;
+        }
+
+        ion-footer {
+          padding: 8px;
+          background: #fff;
+          border-top: 1px solid #ccc;
+
+          ion-button {
+            font-family: 'Georgia', 'Times', serif;
+            --background: rgb(136, 172, 140);
+            --color: white;
+            --border-radius: 8px; /* Rounded corners */
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 14px; /* Optional: Reduce size for consistency */
+            padding: 8px 12px; /* Optional: Adjust padding */
+          }
+        }
+        .radio-item {
+          display: flex;
+          justify-content: space-between; /* Push label to left, radio to right */
+          align-items: center;
+        }
+
+      /* Ensures radio buttons are always visible */
+      ion-radio::part(container) {
+        border: 2px solid rgb(136, 172, 140); /* Outline for unselected radio */
+        border-radius: 50%; /* Circular shape */
+        width: 18px;
+        height: 18px;
+        background: white; /* Keep the background white when unselected */
+      }
+
+      /* When selected, show filled color */
+      ion-radio[aria-checked="true"]::part(container) {
+        background: rgb(136, 172, 140); /* Green fill for selected radio */
+        border: 2px solid rgb(136, 172, 140);
+      }
+
+      ion-radio[aria-checked="true"]::part(mark) {
+        background: white; /* Inner mark becomes white when selected */
+        width: 10px; /* Adjust inner dot size */
+        height: 10px;
+        border-radius: 5%;
+      }

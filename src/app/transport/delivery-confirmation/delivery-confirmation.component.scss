@@ -1,0 +1,19 @@
+ion-card-title{
+font-size: medium;
+}
+
+.center-button {
+        display: flex;
+        justify-content: center;  /* Horizontally centers the button */
+        align-items: center;      /* Vertically centers the button */
+      }
+
+      .custom-button {
+        font-family: 'Georgia', 'Times', serif;
+        --background: rgb(136, 172, 140);
+        --color: white;
+        --border-radius: 8px;  /* round the button corners */
+        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        // margin-bottom: 0px;
+         font-size: 0.8rem;
+      }
