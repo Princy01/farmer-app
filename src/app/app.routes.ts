@@ -167,6 +167,10 @@ export const routes: Routes = [
         loadComponent: () => import('./transport/notifications/notifications.component').then((m) => m.NotificationsComponent),
       },
       {
+        path: 'live-tracking',
+        loadComponent: () => import('./transport/live-tracking/live-tracking.component').then((m) => m.LiveTrackingComponent),
+      },
+      {
         path: 'route-optimization',
         loadComponent: () => import('./transport/route-optimization/route-optimization.component').then((m) => m.RouteOptimizationComponent),
       }

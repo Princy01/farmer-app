@@ -1,26 +1,28 @@
 <ion-content>
   <ion-list>
     <ion-item>
-    <ion-label>Add new vehicle</ion-label>
-    <ion-buttons slot="end">
-      <ion-button (click)="addVehicle()">
-        <ion-icon color = "dark" name="add-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-item>
+      <ion-label>Add new vehicle</ion-label>
+      <ion-buttons slot="end">
+        <ion-button (click)="openVehicleForm()">
+          <ion-icon color="dark" name="add-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
 
     <ion-item *ngFor="let vehicle of vehicles">
       <ion-label>
-        <h2>{{ vehicle.type }}</h2>
+        <h2>
+          {{ vehicle.type }}
+          <ion-badge *ngIf="vehicle.isElectric" color="success">EV</ion-badge>
+        </h2>
         <p>Capacity: {{ vehicle.capacity }} kg</p>
         <p *ngIf="vehicle.driver">Driver: {{ vehicle.driver }} ({{ vehicle.driverContact }})</p>
+        <p *ngIf="vehicle.isElectric">🌱 Carbon Credits: {{ vehicle.carbonCredits }}</p>
       </ion-label>
-      <ion-toggle [(ngModel)]="vehicle.available">
-        Available
-      </ion-toggle>
+      <ion-toggle [(ngModel)]="vehicle.available">Available</ion-toggle>
       <ion-buttons slot="end">
-        <ion-button (click)="editVehicle(vehicle)">
-          <ion-icon color = "tertiary" name="create-outline"></ion-icon>
+        <ion-button (click)="openVehicleForm(vehicle)">
+          <ion-icon color="tertiary" name="create-outline"></ion-icon>
         </ion-button>
         <ion-button color="danger" (click)="deleteVehicle(vehicle.id)">
           <ion-icon name="trash-outline"></ion-icon>

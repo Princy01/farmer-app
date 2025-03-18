@@ -1,0 +1,59 @@
+ion-toolbar {
+        --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+        --color: rgb(174, 172, 172);
+        height: 55px;
+      }
+
+      ion-content {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 10px;
+    --padding-bottom: 10px;
+  }
+
+  ion-item {
+        --background: transparent;
+        --color: #333;
+        font-size: 14px;
+        min-height: 40px;
+        --border-width: 0 0 1px 0; /* Bottom border only */
+        --border-color: #ccc; /* Light gray border */
+        --border-style: solid;
+        margin-left: 15px;
+        margin-right: 15px;
+        margin-bottom: 33px;
+      }
+//       ion-input {
+//         // --padding-bottom: 0px;
+//       }
+
+      ion-button {
+        --border-radius: 6px;
+        --color: rgb(146, 171, 137);
+        font-size: 14px;
+        padding: 6px 10px;
+      }
+      ion-toggle {
+        padding: 12px;
+
+        --track-background: #ddd;
+        --track-background-checked: #ddd;
+
+        --handle-background: rgba(241, 238, 238, 0.968);
+        --handle-background-checked: rgb(136, 172, 140);
+
+        --handle-width: 15px;
+        --handle-height: 27px;
+        --handle-max-height: auto;
+        --handle-spacing: 6px;
+
+        --handle-border-radius: 4px;
+        --handle-box-shadow: none;
+      }
+
+      ion-toggle::part(track) {
+        height: 8px; /* Smaller toggle track */
+        width: 55px;
+         /* Required for iOS handle to overflow the height of the track */
+         overflow: visible;
+      }

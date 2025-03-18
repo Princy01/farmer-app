@@ -1,0 +1,51 @@
+ <ion-header>
+    <ion-toolbar>
+      <ion-title>{{ isEdit ? 'Edit Vehicle' : 'Add Vehicle' }}</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="dismiss()">Close</ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label position="stacked">Vehicle Type</ion-label>
+      <ion-input [(ngModel)]="vehicle.type"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Capacity (kg)</ion-label>
+      <ion-input type="number" [(ngModel)]="vehicle.capacity"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Driver Name</ion-label>
+      <ion-input [(ngModel)]="vehicle.driver"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Driver Contact</ion-label>
+      <ion-input type="tel" [(ngModel)]="vehicle.driverContact"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Electric Vehicle</ion-label>
+      <ion-toggle [(ngModel)]="vehicle.isElectric"></ion-toggle>
+    </ion-item>
+
+    <ion-item *ngIf="vehicle.isElectric">
+      <ion-label position="stacked">Carbon Credits</ion-label>
+      <ion-input type="number" [(ngModel)]="vehicle.carbonCredits"></ion-input>
+    </ion-item>
+  </ion-list>
+</ion-content>
+
+  <ion-footer>
+    <ion-toolbar>
+      <ion-buttons slot="end">
+        <ion-button (click)="saveVehicle()">
+          {{ isEdit ? 'Update' : 'Add' }}
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-footer>

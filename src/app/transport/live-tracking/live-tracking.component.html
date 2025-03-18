@@ -1,0 +1,31 @@
+<ion-content>
+  <!-- Leaflet Map -->
+  <div id="map"></div>
+
+  <!-- Order Status & ETA -->
+  <ion-card class="status-card">
+    <ion-card-header>
+      <ion-card-title>Order Status</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Status: <strong>{{ orderStatus }}</strong></p>
+      <p>ETA: <strong>{{ eta }}</strong></p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+
+  <!-- Contact Driver & Confirm Delivery -->
+  <ion-footer>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button color="primary" (click)="callDriver()">
+          <ion-icon name="call-outline"></ion-icon> Contact Driver
+        </ion-button>
+      </ion-buttons>
+      <ion-buttons slot="end">
+        <ion-button color="success" [disabled]="orderStatus !== 'Delivered'" (click)="confirmDelivery()">
+          <ion-icon name="checkmark-circle-outline"></ion-icon> Confirm Delivery
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-footer>
