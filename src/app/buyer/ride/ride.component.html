@@ -1,0 +1,69 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="chevron-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Arrange a Ride</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="ride-container">
+    <h2>Select Delivery Type</h2>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="6">
+          <div
+            class="option-card"
+            [ngClass]="{'selected': selectedDeliveryType === 'single'}"
+            (click)="selectDeliveryType('single')">
+            <ion-icon name="cube" size="large"></ion-icon>
+            <p>Single Delivery</p>
+          </div>
+        </ion-col>
+        <ion-col size="6">
+          <div
+            class="option-card"
+            [ngClass]="{'selected': selectedDeliveryType === 'shared'}"
+            (click)="selectDeliveryType('shared')">
+            <ion-icon name="people" size="large"></ion-icon>
+            <p>Shared Delivery</p>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <h2>Select Delivery Urgency</h2>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="6">
+          <div
+            class="option-card"
+            [ngClass]="{'selected': selectedUrgency === 'priority'}"
+            (click)="selectUrgency('priority')">
+            <ion-icon name="flash" size="large"></ion-icon>
+            <p>Priority Delivery</p>
+          </div>
+        </ion-col>
+        <ion-col size="6">
+          <div
+            class="option-card"
+            [ngClass]="{'selected': selectedUrgency === 'delayed'}"
+            (click)="selectUrgency('delayed')">
+            <ion-icon name="hourglass" size="large"></ion-icon>
+            <p>Delayed Delivery</p>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <div class="center-button">
+      <ion-button class="custom-button" (click)="confirmRide()" [disabled]="!selectedDeliveryType || !selectedUrgency">
+        Confirm Ride
+      </ion-button>
+    </div>
+    
+  </div>
+</ion-content>

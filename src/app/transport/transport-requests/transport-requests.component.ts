@@ -6,6 +6,7 @@ import { chevronForwardOutline, funnelOutline, swapVerticalOutline } from 'ionic
 import { AssignDriverModalComponent } from '../assign-driver-modal/assign-driver-modal.component';
 import { FilterModalComponent } from '../filter-modal/filter-modal.component';
 import { SortModalComponent } from '../sort-modal/sort-modal.component';
+import { formatDate } from '@angular/common';
 
 interface DeliveryOrder {
   id: number;
@@ -31,8 +32,13 @@ export class TransportRequestsComponent implements OnInit {
   private modalController = inject(ModalController);
 
   pendingDeliveries: DeliveryOrder[] = [];
+  originalDeliveries: DeliveryOrder[] = []; // Store original dataset
   evenOrders: DeliveryOrder[] = [];
   oddOrders: DeliveryOrder[] = [];
+
+  // Transporter Load Constraints
+  minLoad: number = 300;  // Minimum load transporter can take
+  maxLoad: number = 1000; // Maximum load transporter can take
 
   // Sorting & Filtering States
   sortOption: string = '';
@@ -53,7 +59,7 @@ export class TransportRequestsComponent implements OnInit {
   }
 
   loadPendingDeliveries() {
-    this.pendingDeliveries = [
+    this.originalDeliveries = [
       { id: 1, pickupLocation: 'Mandi A', dropoffLocation: 'Retailer X', weight: 500, type: 'Vegetables', distance: 120, deliveryDate: '2025-03-17', suggestedPrice: 1500, accepted: false, assigned: false },
       { id: 2, pickupLocation: 'Mandi B', dropoffLocation: 'Retailer Y', weight: 300, type: 'Pulses', distance: 80, deliveryDate: '2025-03-18', suggestedPrice: 1000, accepted: false, assigned: false },
       { id: 3, pickupLocation: 'Mandi C', dropoffLocation: 'Retailer Z', weight: 400, type: 'Fruits', distance: 95, deliveryDate: '2025-03-19', suggestedPrice: 1300, accepted: false, assigned: false },
@@ -61,6 +67,9 @@ export class TransportRequestsComponent implements OnInit {
       { id: 5, pickupLocation: 'Mandi E', dropoffLocation: 'Retailer B', weight: 200, type: 'Dairy', distance: 50, deliveryDate: '2025-03-21', suggestedPrice: 800, accepted: false, assigned: false },
       { id: 6, pickupLocation: 'Mandi F', dropoffLocation: 'Retailer C', weight: 700, type: 'Spices', distance: 140, deliveryDate: '2025-03-22', suggestedPrice: 2000, accepted: false, assigned: false },
     ];
+
+    // Initialize pending deliveries
+    this.pendingDeliveries = [...this.originalDeliveries];
     this.applyFilters();
   }
 
@@ -87,23 +96,13 @@ export class TransportRequestsComponent implements OnInit {
     }
   }
 
-  async openSortModal() {
-    const modal = await this.modalController.create({
-      component: SortModalComponent,
-      componentProps: { sortOption: this.sortOption },
-    });
-
-    await modal.present();
-
-    const { data } = await modal.onDidDismiss();
-    if (data) {
-      this.sortOption = data.sortOption;
-      this.applySort();
-    }
-  }
-
   applyFilters() {
-    let filteredOrders = [...this.pendingDeliveries];
+    let filteredOrders = [...this.originalDeliveries];
+
+    // Apply transporter's min/max load constraints
+    filteredOrders = filteredOrders.filter(order =>
+      order.weight >= this.minLoad && order.weight <= this.maxLoad
+    );
 
     if (this.priorityDeliveries) {
       filteredOrders = filteredOrders.filter(order => order.distance < 100);
@@ -120,6 +119,21 @@ export class TransportRequestsComponent implements OnInit {
 
     this.pendingDeliveries = filteredOrders;
     this.splitOrders();
+  }
+
+  async openSortModal() {
+    const modal = await this.modalController.create({
+      component: SortModalComponent,
+      componentProps: { sortOption: this.sortOption },
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data) {
+      this.sortOption = data.sortOption;
+      this.applySort();
+    }
   }
 
   applySort() {
@@ -181,28 +195,6 @@ export class TransportRequestsComponent implements OnInit {
     }
   }
 
-  async autoAssignTransporter() {
-    if (this.pendingDeliveries.length === 0) {
-      this.showToast('No orders to assign.');
-      return;
-    }
-
-    this.pendingDeliveries.forEach(order => {
-      order.accepted = true;
-      order.assigned = true;
-      this.showToast(`Order ${order.id} auto-assigned at ₹${order.suggestedPrice}`);
-    });
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  }
-
   async showToast(message: string) {
     const toast = await this.toastCtrl.create({
       message,
@@ -210,5 +202,9 @@ export class TransportRequestsComponent implements OnInit {
       position: 'bottom',
     });
     await toast.present();
+  }
+
+  formatDate(dateString: string): string {
+    return formatDate(dateString, 'dd MMM yyyy', 'en-US');
   }
 }

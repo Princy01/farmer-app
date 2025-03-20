@@ -9,77 +9,90 @@
       <ion-list>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/transport/transport-dashboard">
+          <ion-item
+            routerLink="/transport/transport-dashboard"
+            [ngClass]="{'selected': isActive('/transport/transport-dashboard')}">
             <ion-icon name="speedometer-outline" slot="start"></ion-icon>
             <ion-label>Dashboard</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/transport/transport-update-rates">
-            <ion-icon name="pricetag-outline" slot="start"></ion-icon>
-            <ion-label>Update Transport Rates</ion-label>
-          </ion-item>
-        </ion-menu-toggle>
-
-        <ion-menu-toggle>
-          <ion-item routerLink="/transport/manage-vehicles">
-            <ion-icon name="car-outline" slot="start"></ion-icon>
-            <ion-label>Manage Vehicles</ion-label>
-          </ion-item>
-        </ion-menu-toggle>
-
-        <ion-menu-toggle>
-          <ion-item routerLink="/transport/manage-drivers">
-            <ion-icon name="person-outline" slot="start"></ion-icon>
-            <ion-label>Manage Drivers</ion-label>
-          </ion-item>
-        </ion-menu-toggle>
-
-        <ion-menu-toggle>
-          <ion-item routerLink="/transport/transport-requests">
+          <ion-item
+            routerLink="/transport/transport-requests"
+            [ngClass]="{'selected': isActive('/transport/transport-requests')}">
             <ion-icon name="document-text-outline" slot="start"></ion-icon>
             <ion-label>Transport Requests</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/transport/active-deliveries">
-            <ion-icon name="navigate-outline" slot="start"></ion-icon>
-            <ion-label>Active Deliveries</ion-label>
+          <ion-item
+            routerLink="/transport/transport-update-rates"
+            [ngClass]="{'selected': isActive('/transport/transport-update-rates')}">
+            <ion-icon name="pricetag-outline" slot="start"></ion-icon>
+            <ion-label>Update Transport Rates</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/transport/live-tracking">
+          <ion-item
+            routerLink="/transport/manage-vehicles"
+            [ngClass]="{'selected': isActive('/transport/manage-vehicles')}">
+            <ion-icon name="car-outline" slot="start"></ion-icon>
+            <ion-label>Manage Vehicles</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item
+            routerLink="/transport/manage-drivers"
+            [ngClass]="{'selected': isActive('/transport/manage-drivers')}">
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-label>Manage Drivers</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item
+            routerLink="/transport/live-tracking"
+            [ngClass]="{'selected': isActive('/transport/live-tracking')}">
             <ion-icon name="location-outline" slot="start"></ion-icon>
             <ion-label>Live Tracking</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/transport/delivery-confirmation">
+          <ion-item
+            routerLink="/transport/delivery-confirmation"
+            [ngClass]="{'selected': isActive('/transport/delivery-confirmation')}">
             <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
             <ion-label>Delivery Confirmation</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/transport/earnings-dashboard">
+          <ion-item
+            routerLink="/transport/earnings-dashboard"
+            [ngClass]="{'selected': isActive('/transport/earnings-dashboard')}">
             <ion-icon name="cash-outline" slot="start"></ion-icon>
             <ion-label>Earnings & Reports</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/transport/delivery-history">
+          <ion-item
+            routerLink="/transport/delivery-history"
+            [ngClass]="{'selected': isActive('/transport/delivery-history')}">
             <ion-icon name="time-outline" slot="start"></ion-icon>
             <ion-label>Delivery History</ion-label>
           </ion-item>
         </ion-menu-toggle>
 
         <ion-menu-toggle>
-          <ion-item routerLink="/transport/notifications">
+          <ion-item
+            routerLink="/transport/notifications"
+            [ngClass]="{'selected': isActive('/transport/notifications')}">
             <ion-icon name="notifications-outline" slot="start"></ion-icon>
             <ion-label>Notifications</ion-label>
           </ion-item>

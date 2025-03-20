@@ -32,6 +32,12 @@ ion-toolbar.main-toolbar {
             background-color: rgba(136, 172, 140, 0.2);
           }
         }
+        ion-item.selected {
+          --background: rgba(10, 130, 24, 0.3);
+          color: white;
+          font-weight: bold;
+          border-radius: 5px;
+        }
 
         ion-label {
           font-family: "Century Gothic", sans-serif;

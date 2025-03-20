@@ -1,28 +1,65 @@
-      ion-content{
+ion-content {
         ion-segment {
-                margin: 10px;
-                font-family: "Century Gothic", sans-serif;
-              }
-              ion-item {
-                --border-color: #e0e0e0;
-              ion-label {
-                font-family: "Century Gothic", sans-serif;
-                ion-chip{
-                        font-family: "Century Gothic", sans-serif;
-                        font-size: 14px;
-                }
+          margin: 10px;
+          font-family: "Century Gothic", sans-serif;
         }
-        ion-button{
-                font-family: "Century Gothic", sans-serif;
+
+        ion-item {
+          --border-color: #e0e0e0;
+          font-size: 15px;
+
+          ion-label {
+            font-family: "Century Gothic", sans-serif;
+
+            h2{
+              font-size: 15px;
+              color: gray;
+            }
+
+            ion-chip {
+              font-family: "Century Gothic", sans-serif;
+              font-size: 14px;
+            }
+          }
         }
-        .track-btn{
-                color: rgb(89, 111, 92);}
 
-        .details-btn{
-                color: rgb(113, 142, 116);}
+        ion-button {
+          font-family: "Century Gothic", sans-serif;
+        }
 
-        .modify-btn{
-                color: rgb(134, 167, 139);}
+        .track-btn {
+          color: rgb(89, 111, 92);
+        }
 
-}
-}
+        .details-btn {
+          color: rgb(113, 142, 116);
+        }
+
+        .modify-btn {
+          color: rgb(134, 167, 139);
+        }
+
+        /* New styles for structured layout */
+        .order-locations {
+          display: flex;
+          flex-wrap: wrap;
+          margin-top: 5px;
+
+          .half-width {
+            width: 100%;
+          }
+
+          @media (min-width: 768px) {
+            .half-width {
+              width: 50%;
+            }
+          }
+        }
+
+        .order-status {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: 5px;
+        }
+      }

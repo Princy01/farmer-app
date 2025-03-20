@@ -29,17 +29,29 @@ ion-button.change-address-btn {
   text-transform: uppercase;
 }
 
-/* Hover effect */
-ion-button.change-address-btn:hover {
-  --background: rgb(160, 147, 120);
-}
-
 ion-header ion-toolbar {
   --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
   --color: rgb(174, 172, 172);
 
   ion-icon{
     color:rgb(136, 172, 140);
+  }
+}
+.ride-selection {
+  background: linear-gradient(135deg, rgb(136, 172, 140), rgb(254, 245, 72));
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+
+  ion-card-content {
+    padding: 16px;
+  }
+
+  .ride-link {
+    color: rgb(79, 78, 78);
+    font-weight: bold;
   }
 }
 

@@ -114,6 +114,10 @@ export const routes: Routes = [
       {
         path: 'checkout',
         loadComponent: () => import('./buyer/checkout/checkout.component').then((m) => m.CheckoutComponent),
+      },
+      {
+        path: 'ride',
+        loadComponent: () => import('./buyer/ride/ride.component').then((m) => m.RideComponent),
       }
     ]
   },
@@ -123,7 +127,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'transport-dashboard',
+        redirectTo: 'transport-requests',
         pathMatch: 'full',
       },
       {

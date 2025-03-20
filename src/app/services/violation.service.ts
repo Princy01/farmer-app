@@ -10,7 +10,6 @@ export interface Violation {
   level_of_serious: string;
   status: number; // Or boolean, if you convert it in the service
 }
-
 @Injectable({
   providedIn: 'root'
 })

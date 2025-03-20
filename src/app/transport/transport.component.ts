@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import {
   IonApp, IonButtons, IonContent, IonHeader, IonMenu, IonMenuButton, IonMenuToggle,
   IonTitle, IonToolbar, IonRouterOutlet, IonList, IonItem, IonLabel, IonIcon
@@ -19,11 +19,12 @@ import {
   encapsulation: ViewEncapsulation.None,
   imports: [
     RouterModule, IonApp, IonButtons, IonContent, IonHeader, IonMenu, IonMenuButton, IonMenuToggle,
-    IonTitle, IonToolbar, IonRouterOutlet, IonList, IonItem, IonLabel, IonIcon
+    IonTitle, IonToolbar, IonRouterOutlet, IonList, IonItem, IonLabel, IonIcon, CommonModule
   ]
 })
 export class TransportComponent implements OnInit {
   pageTitle: string = 'Transport';
+  activeRoute: string = ''; // Stores the current active route
 
   // Mapping of routes to titles
   titleMap: { [key: string]: string } = {
@@ -49,8 +50,8 @@ export class TransportComponent implements OnInit {
     // Listen for route changes
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        const currentRoute = event.urlAfterRedirects; // Get final redirected URL
-        this.pageTitle = this.getPageTitle(currentRoute);
+        this.activeRoute = event.urlAfterRedirects; // Store the active route
+        this.pageTitle = this.getPageTitle(this.activeRoute);
       }
     });
   }
@@ -65,5 +66,10 @@ export class TransportComponent implements OnInit {
       }
     }
     return 'Transport'; // Default title
+  }
+
+  // Function to check if a menu item is active
+  isActive(route: string): boolean {
+    return this.activeRoute.startsWith(route);
   }
 }
