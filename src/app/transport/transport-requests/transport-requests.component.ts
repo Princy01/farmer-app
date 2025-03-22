@@ -37,8 +37,9 @@ export class TransportRequestsComponent implements OnInit {
   oddOrders: DeliveryOrder[] = [];
 
   // Transporter Load Constraints
-  minLoad: number = 300;  // Minimum load transporter can take
-  maxLoad: number = 1000; // Maximum load transporter can take
+  minLoad: number = 300;
+  maxLoad: number = 1000;
+  currentLoad: number = 0;
 
   // Sorting & Filtering States
   sortOption: string = '';
@@ -170,14 +171,54 @@ export class TransportRequestsComponent implements OnInit {
         { text: 'Cancel', role: 'cancel' },
         {
           text: 'Accept',
-          handler: () => {
+          handler: async () => {
             order.accepted = true;
+            this.currentLoad += order.weight; // Increase current load
             this.showToast('Delivery Accepted!');
+
+            // Check if transporter still has capacity for more orders
+            const remainingCapacity = this.maxLoad - this.currentLoad;
+            if (remainingCapacity > 0) {
+              this.promptForMoreOrders(remainingCapacity);
+            }
           },
         },
       ],
     });
     await alert.present();
+  }
+
+
+  async promptForMoreOrders(remainingCapacity: number) {
+    const alert = await this.alertCtrl.create({
+      header: 'More Capacity Available',
+      message: `You still have ${remainingCapacity} kg of available capacity. Do you want to accept more orders?`,
+      buttons: [
+        { text: 'No', role: 'cancel' },
+        {
+          text: 'Yes',
+          handler: () => {
+            this.showAvailableOrders(remainingCapacity);
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+  
+  showAvailableOrders(remainingCapacity: number) {
+    const availableOrders = this.pendingDeliveries.filter(order =>
+      !order.accepted && order.weight <= remainingCapacity
+    );
+
+    if (availableOrders.length === 0) {
+      this.showToast('No more orders fit within your remaining capacity.');
+      return;
+    }
+
+    availableOrders.sort((a, b) => a.distance - b.distance);
+    this.pendingDeliveries = availableOrders;
+    this.splitOrders();
   }
 
   async openAssignDriverModal(order: DeliveryOrder) {
