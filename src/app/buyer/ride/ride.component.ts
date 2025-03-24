@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { chevronBack } from 'ionicons/icons';
+import { chevronBack, cube, people, flash, hourglass } from 'ionicons/icons';
 
 @Component({
   selector: 'app-ride',
@@ -17,7 +17,7 @@ export class RideComponent {
   selectedUrgency: string | null = null;
 
   constructor(private router: Router) {
-    addIcons({ chevronBack });
+    addIcons({ chevronBack, cube, people, flash, hourglass });
   }
 
   goBack() {

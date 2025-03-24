@@ -7,6 +7,7 @@ import { AssignDriverModalComponent } from '../assign-driver-modal/assign-driver
 import { FilterModalComponent } from '../filter-modal/filter-modal.component';
 import { SortModalComponent } from '../sort-modal/sort-modal.component';
 import { formatDate } from '@angular/common';
+import { DatabaseService } from '../../services/database.service';
 
 interface DeliveryOrder {
   id: number;
@@ -29,6 +30,9 @@ interface DeliveryOrder {
   styleUrls: ['./transport-requests.component.scss'],
 })
 export class TransportRequestsComponent implements OnInit {
+
+  transporterId: string = 'T001'; // Replace with actual transporter ID
+
   private modalController = inject(ModalController);
 
   pendingDeliveries: DeliveryOrder[] = [];
@@ -50,8 +54,10 @@ export class TransportRequestsComponent implements OnInit {
 
   constructor(
     private alertCtrl: AlertController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private databaseService: DatabaseService
   ) {
+
     addIcons({ chevronForwardOutline, funnelOutline, swapVerticalOutline });
   }
 
@@ -163,10 +169,45 @@ export class TransportRequestsComponent implements OnInit {
     this.oddOrders = this.pendingDeliveries.filter((_, index) => index % 2 !== 0);
   }
 
+  // async acceptOrder(order: DeliveryOrder) {
+  //   const alert = await this.alertCtrl.create({
+  //     header: 'Confirm Delivery',
+  //     message: `Do you want to accept this delivery for ₹${order.suggestedPrice}?`,
+  //     buttons: [
+  //       { text: 'Cancel', role: 'cancel' },
+  //       {
+  //         text: 'Accept',
+  //         handler: async () => {
+  //           order.accepted = true;
+  //           this.currentLoad += order.weight; // Increase current load
+  //           this.showToast('Delivery Accepted!');
+
+  //           // Check if transporter still has capacity for more orders
+  //           const remainingCapacity = this.maxLoad - this.currentLoad;
+  //           if (remainingCapacity > 0) {
+  //             this.promptForMoreOrders(remainingCapacity);
+  //           }
+  //         },
+  //       },
+  //     ],
+  //   });
+  //   await alert.present();
+  // }
+
   async acceptOrder(order: DeliveryOrder) {
+    // Calculate price using transporter-specific rates
+    const calculatedPrice = this.databaseService.calculateBasePrice(
+      order.pickupLocation,
+      order.dropoffLocation,
+      order.weight,
+      order.type,
+      'normal',
+      this.transporterId
+    );
+
     const alert = await this.alertCtrl.create({
       header: 'Confirm Delivery',
-      message: `Do you want to accept this delivery for ₹${order.suggestedPrice}?`,
+      message: `Do you want to accept this delivery for ₹${calculatedPrice}?`,
       buttons: [
         { text: 'Cancel', role: 'cancel' },
         {
@@ -188,7 +229,6 @@ export class TransportRequestsComponent implements OnInit {
     await alert.present();
   }
 
-
   async promptForMoreOrders(remainingCapacity: number) {
     const alert = await this.alertCtrl.create({
       header: 'More Capacity Available',
@@ -205,7 +245,7 @@ export class TransportRequestsComponent implements OnInit {
     });
     await alert.present();
   }
-  
+
   showAvailableOrders(remainingCapacity: number) {
     const availableOrders = this.pendingDeliveries.filter(order =>
       !order.accepted && order.weight <= remainingCapacity
