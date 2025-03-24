@@ -1,4 +1,33 @@
 <ion-content>
+
+  <ion-list *ngIf="unassignedOrders.length > 0">
+    <ion-list-header>
+      <ion-label>New Delivery Requests</ion-label>
+    </ion-list-header>
+
+    <ion-card *ngFor="let order of unassignedOrders">
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="8">
+              <p><strong>From:</strong> {{ order.pickup }}</p>
+              <p><strong>To:</strong> {{ order.delivery }}</p>
+              <p><strong>Distance:</strong> {{ order.distance }} km</p>
+              <p><strong>Load:</strong> {{ order.load.weight }} kg ({{ order.load.type }})</p>
+              <p><strong>Price:</strong> ₹{{ order.basePrice }}</p>
+              <p><strong>Date:</strong> {{ order.requestedDate }}</p>
+            </ion-col>
+            <ion-col size="4" class="ion-text-center">
+              <ion-button expand="block" (click)="acceptUnassignedOrder(order)">
+                Accept
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+  
   <ion-grid>
     <ion-row>
       <!-- Left Column: Even Index Orders -->

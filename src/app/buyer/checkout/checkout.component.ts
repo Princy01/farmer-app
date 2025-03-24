@@ -5,10 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { chevronBack, chevronForward } from 'ionicons/icons';
-// New imports
 import { DatabaseService } from '../../services/database.service';
 
-// New interfaces
 interface CartItem {
   id: number;
   name: string;
@@ -19,12 +17,39 @@ interface CartItem {
   weight: number;
 }
 
+interface DirectOrder {
+  id: number;
+  buyerId: string;
+  sellerId: string;
+  items: any[];
+  totalAmount: number;
+  pickupLocation: string;
+  dropoffLocation: string;
+  weight: number;
+  distance?: number;
+  status: 'pending' | 'accepted' | 'rejected' | 'completed';
+  createdAt: Date;
+  transportRequired: false;
+}
+
 interface DeliveryAddress {
   name: string;
   street: string;
   city: string;
   state: string;
   zip: string;
+}
+
+interface Order {
+  items: CartItem[];
+  paymentMethod: string;
+  total: number;
+  deliveryType: string | null;
+  urgency: string | null;
+  transporterId: string | null;
+  pickupLocation: string;
+  dropoffLocation: string;
+  weight: number;
 }
 
 @Component({
@@ -35,30 +60,6 @@ interface DeliveryAddress {
   styleUrls: ['./checkout.component.scss'],
 })
 export class CheckoutComponent {
-  // Old properties
-  /*
-  cartItems: any[] = [];
-  totalPrice: number = 0;
-  selectedPaymentMethod: string = 'upi';
-  estimatedDelivery: string = '3-5 Business Days';
-  trackingNumber: string = 'TRK123456789';
-  orderPlaced: boolean = false;
-
-  selectedDeliveryType: string | null = null;
-  selectedUrgency: string | null = null;
-  estimatedRidePrice: number = 0;
-  grandTotal: number = 0;
-
-  selectedAddress: any = {
-    name: 'ABC',
-    street: '123 XY',
-    city: 'New Delhi',
-    state: 'Delhi',
-    zip: '110001',
-  };
-  */
-
-  // Updated properties with proper typing
   cartItems: CartItem[] = [];
   totalPrice: number = 0;
   selectedPaymentMethod: string = 'upi';
@@ -85,30 +86,6 @@ export class CheckoutComponent {
     zip: '110001',
   };
 
-  // Old constructor
-  /*
-  constructor(private router: Router, private route: ActivatedRoute) {
-    addIcons({ chevronBack, chevronForward });
-
-    const navData = this.router.getCurrentNavigation()?.extras.state;
-    if (navData) {
-      this.cartItems = navData['cartItems'] || [];
-      this.totalPrice = navData['totalPrice'] || 0;
-    }
-
-    this.route.queryParams.subscribe((params) => {
-      if (params['deliveryType']) {
-        this.selectedDeliveryType = params['deliveryType'];
-      }
-      if (params['urgency']) {
-        this.selectedUrgency = params['urgency'];
-      }
-      this.calculateRidePrice();
-    });
-  }
-  */
-
-  // Updated constructor with DatabaseService
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -133,41 +110,30 @@ export class CheckoutComponent {
         this.selectedUrgency = params['urgency'];
       }
       if (this.hasRideRequest) {
-        this.startDriverSearch();
-        this.calculateRidePrice();
+        // First calculate price
+        // Wait for next render cycle before showing alert
+        setTimeout(() => this.confirmDriverSearch(), 100);
       }
+              this.calculateRidePrice();
+
     });
   }
 
-  // New method to load transporters
   private loadTransporters() {
     this.availableTransporters = this.databaseService.getAvailableTransporters();
   }
 
-  // Old calculateRidePrice method
-  /*
-  calculateRidePrice() {
-    if (this.selectedDeliveryType) {
-      this.estimatedRidePrice = 50 + this.cartItems.length * 10;
-    } else {
-      this.estimatedRidePrice = 0;
-    }
-    this.grandTotal = this.totalPrice + this.estimatedRidePrice;
-  }
-  */
-
-  // Updated calculateRidePrice method
   calculateRidePrice() {
     if (this.selectedDeliveryType && this.selectedAddress) {
-      const totalWeight = this.cartItems.reduce((sum, item) => sum + (item.weight || 0), 0);
+      const totalWeight = this.calculateTotalWeight();
 
       this.estimatedRidePrice = this.databaseService.calculateBasePrice(
         this.selectedAddress.city,
-        'Destination', // TODO: Update with actual delivery address
+        'Destination',
         totalWeight,
         this.selectedDeliveryType,
         this.selectedUrgency || 'normal',
-        // this.selectedTransporter || undefined
+        this.selectedTransporter || undefined
       );
     } else {
       this.estimatedRidePrice = 0;
@@ -175,32 +141,46 @@ export class CheckoutComponent {
     this.grandTotal = this.totalPrice + this.estimatedRidePrice;
   }
 
-  // New method for transporter selection
   selectTransporter(transporterId: string) {
     this.selectedTransporter = transporterId;
     this.calculateRidePrice();
   }
 
-  // Old arrangeRide method
-  /*
   arrangeRide() {
     this.router.navigate(['/buyer/ride'], {
       queryParams: {
-        deliveryType: this.selectedDeliveryType,
-        urgency: this.selectedUrgency,
-      },
+        totalWeight: this.calculateTotalWeight(),
+        pickup: this.selectedAddress.city,
+        delivery: 'Destination'
+      }
     });
   }
-  */
 
-  // Updated arrangeRide method
-  arrangeRide() {
-    this.router.navigate(['/buyer/ride'], {
-      queryParams: {
-        deliveryType: this.selectedDeliveryType,
-        urgency: this.selectedUrgency,
-      },
+  async confirmDriverSearch() {
+    const alert = await this.alertCtrl.create({
+      header: 'Estimated Transport Cost',
+      message: `The estimated transport cost is ₹${this.estimatedRidePrice}. Would you like to search for an available driver?`,
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+          handler: () => {
+            this.hasRideRequest = false;
+            this.selectedDeliveryType = null;
+            this.selectedUrgency = null;
+            this.estimatedRidePrice = 0;
+            this.calculateRidePrice();
+          }
+        },
+        {
+          text: 'Yes',
+          handler: () => {
+            this.startDriverSearch();
+          }
+        }
+      ]
     });
+    await alert.present();
   }
 
   private calculateTotalWeight(): number {
@@ -209,35 +189,65 @@ export class CheckoutComponent {
 
   private async startDriverSearch() {
     this.isSearchingDriver = true;
-    // Start polling for driver assignment
     this.pollForDriverAssignment();
   }
 
+  private currentOrderId: string | null = null;
+
   private async pollForDriverAssignment() {
-    // Simulate polling every 5 seconds
+    if (this.currentOrderId) {
+      console.warn('Already polling for order:', this.currentOrderId);
+      return;
+    }
+
+    const request = {
+      deliveryType: this.selectedDeliveryType!,
+      urgency: this.selectedUrgency!,
+      pickup: this.selectedAddress.city,
+      delivery: 'Destination',
+      distance: this.getDistance(),
+      load: {
+        weight: this.calculateTotalWeight(),
+        type: ""
+      },
+      basePrice: this.estimatedRidePrice,
+      requestedDate: new Date().toISOString()
+    };
+
+    // Create order only once
+    const newOrderId = await this.databaseService.createUnassignedOrder(request);
+    this.currentOrderId = newOrderId;
+
     const pollInterval = setInterval(async () => {
-      const assignedDriver = await this.databaseService.checkDriverAssignment(
-        this.selectedDeliveryType!,
-        this.selectedUrgency!,
-        this.calculateTotalWeight()
-      );
+      console.log("Checking driver assignment for order:", this.currentOrderId);
+
+      const assignedDriver = await this.databaseService.checkOrderAssignment(this.currentOrderId!);
+      console.log('Driver assignment result:', assignedDriver);
 
       if (assignedDriver) {
         this.isSearchingDriver = false;
         this.selectedTransporter = assignedDriver.id;
         clearInterval(pollInterval);
+        this.currentOrderId = null;
         this.showDriverFoundAlert(assignedDriver);
       }
     }, 5000);
 
-    // Stop polling after 2 minutes if no driver found
+    // Clear polling after timeout
     setTimeout(() => {
       if (this.isSearchingDriver) {
         clearInterval(pollInterval);
         this.isSearchingDriver = false;
+        this.currentOrderId = null;
         this.showNoDriverAlert();
       }
     }, 120000);
+  }
+
+  private getDistance(): number {
+    // You could either calculate this based on actual locations
+    // or get it from a previous calculation
+    return Math.floor(Math.random() * (150 - 50 + 1)) + 50; // Sample 50-150km
   }
 
   private async showDriverFoundAlert(driver: any) {
@@ -276,30 +286,84 @@ export class CheckoutComponent {
     await alert.present();
   }
 
-  // Old confirmOrder method
-  /*
-  confirmOrder() {
-    this.orderPlaced = true;
-    console.log('Order Confirmed!', {
-      items: this.cartItems,
-      paymentMethod: this.selectedPaymentMethod,
-      total: this.grandTotal,
-      deliveryType: this.selectedDeliveryType,
-      urgency: this.selectedUrgency,
-    });
-  }
-  */
-
-  // Updated confirmOrder method
   async confirmOrder() {
     if (!this.selectedTransporter) {
-      // TODO: Add proper error handling UI
+      const alert = await this.alertCtrl.create({
+        header: 'No Transporter Selected',
+        message: 'Your order will be processed directly with the seller without transport arrangement.',
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel'
+          },
+          {
+            text: 'Continue',
+            handler: () => {
+              this.processDirectOrder();
+            }
+          }
+        ]
+      });
+      await alert.present();
       return;
     }
 
+    // Process normal order with transporter
+    await this.processOrderWithTransport();
+  }
+
+  private async processDirectOrder() {
     this.isLoading = true;
     try {
-      const order = {
+      const directOrder: DirectOrder = {
+        id: Date.now(),
+        buyerId: 'currentUserId', // Replace with actual user ID
+        sellerId: 'sellerId', // Get this from your cart items or store
+        items: this.cartItems,
+        totalAmount: this.totalPrice, // Using only item price, no transport cost
+        pickupLocation: this.selectedAddress.city,
+        dropoffLocation: 'Destination',
+        weight: this.calculateTotalWeight(),
+        status: 'pending',
+        createdAt: new Date(),
+        transportRequired: false
+      };
+
+      const result = await this.databaseService.assignDirectOrder(directOrder);
+
+      if (result.success) {
+        this.orderPlaced = true;
+        const alert = await this.alertCtrl.create({
+          header: 'Success',
+          message: 'Order sent directly to seller!',
+          buttons: ['OK']
+        });
+        await alert.present();
+      } else {
+        const alert = await this.alertCtrl.create({
+          header: 'Error',
+          message: result.message || 'Failed to place direct order.',
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
+    } catch (error) {
+      console.error('Error processing direct order:', error);
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: 'An unexpected error occurred.',
+        buttons: ['OK']
+      });
+      await alert.present();
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private async processOrderWithTransport() {
+    this.isLoading = true;
+    try {
+      const order: Order = {
         items: this.cartItems,
         paymentMethod: this.selectedPaymentMethod,
         total: this.grandTotal,
@@ -307,25 +371,33 @@ export class CheckoutComponent {
         urgency: this.selectedUrgency,
         transporterId: this.selectedTransporter,
         pickupLocation: this.selectedAddress.city,
-        dropoffLocation: 'Destination', // TODO: Update with actual delivery address
-        weight: this.cartItems.reduce((sum, item) => sum + (item.weight || 0), 0)
+        dropoffLocation: 'Destination',
+        weight: this.calculateTotalWeight()
       };
 
       const result = await this.databaseService.assignOrderToTransporters(order);
 
       if (result.success) {
         this.orderPlaced = true;
-        console.log('Order Confirmed!', order);
+        const alert = await this.alertCtrl.create({
+          header: 'Success',
+          message: 'Order confirmed successfully!',
+          buttons: ['OK']
+        });
+        await alert.present();
       } else {
-        console.error('Failed to assign order:', result.message);
-        // TODO: Add proper error handling UI
+        const alert = await this.alertCtrl.create({
+          header: 'Error',
+          message: result.message || 'Failed to assign order.',
+          buttons: ['OK']
+        });
+        await alert.present();
       }
     } finally {
       this.isLoading = false;
     }
   }
 
-  // Existing unchanged methods
   goBack() {
     this.router.navigate(['/buyer/cart']);
   }
@@ -338,8 +410,9 @@ export class CheckoutComponent {
     this.selectedPaymentMethod = method;
   }
 
-  getAvailableTransporterName() {
-    console.log(this.availableTransporters,this.selectedTransporter)
-    return this.availableTransporters.find(transporter => transporter.name == this.selectedTransporter!)!.name
+  getAvailableTransporterName(): string {
+    if (!this.selectedTransporter) return '';
+    const transporter = this.availableTransporters.find(t => t.id === this.selectedTransporter);
+    return transporter?.name || '';
   }
 }

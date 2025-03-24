@@ -89,9 +89,14 @@
           <p><strong>Assigned Driver:</strong> {{ getAvailableTransporterName() }}</p>
         </div>
 
-        <ion-button expand="block" (click)="arrangeRide()" *ngIf="!isSearchingDriver && !selectedTransporter">
-          Change Transport Options
-        </ion-button>
+        <div *ngIf="!isSearchingDriver && !selectedTransporter" class="action-buttons">
+          <ion-button expand="block" (click)="confirmDriverSearch()">
+            Search for Driver
+          </ion-button>
+          <ion-button expand="block" fill="outline" (click)="arrangeRide()">
+            Change Transport Options
+          </ion-button>
+        </div>
       </div>
     </ion-card-content>
   </ion-card>

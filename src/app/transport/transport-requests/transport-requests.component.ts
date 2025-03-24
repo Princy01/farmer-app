@@ -30,6 +30,8 @@ interface DeliveryOrder {
   styleUrls: ['./transport-requests.component.scss'],
 })
 export class TransportRequestsComponent implements OnInit {
+  unassignedOrders: any[] = [];
+  private pollInterval: any;
 
   transporterId: string = 'T001'; // Replace with actual transporter ID
 
@@ -63,7 +65,79 @@ export class TransportRequestsComponent implements OnInit {
 
   ngOnInit() {
     this.loadPendingDeliveries();
+    this.startPolling();
   }
+
+  ngOnDestroy() {
+    this.stopPolling();
+  }
+
+  private startPolling() {
+    this.loadUnassignedOrders();
+    this.pollInterval = setInterval(() => {
+      this.loadUnassignedOrders();
+    }, 5000); // Poll every 5 seconds
+  }
+
+  private stopPolling() {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+    }
+  }
+
+  private loadUnassignedOrders() {
+    const orders = this.databaseService.getUnassignedOrders();
+
+    // Filter out expired orders
+    this.unassignedOrders = orders.filter((order:any) => {
+      const orderAge = Date.now() - new Date(order.createdAt).getTime();
+      return orderAge < 120000; // 2 minutes
+    });
+
+    // Clean up expired orders
+    if (orders.length !== this.unassignedOrders.length) {
+      this.databaseService.saveUnassignedOrders(this.unassignedOrders);
+    }
+  }
+
+  async acceptUnassignedOrder(order: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Confirm Order Acceptance',
+      message: `
+        Pickup: ${order.pickup}
+        Delivery: ${order.delivery}
+        Distance: ${order.distance} km
+        Load: ${order.load.weight} kg (${order.load.type})
+        Base Price: ₹${order.basePrice}
+        Date: ${order.requestedDate}
+      `,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Accept',
+          handler: () => {
+            const accepted = this.databaseService.acceptUnassignedOrder(
+              order.id,
+              this.transporterId
+            );
+
+            if (accepted) {
+              this.showToast('Order accepted successfully!');
+              this.loadUnassignedOrders(); // Refresh the list
+            } else {
+              this.showToast('Failed to accept order');
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
 
   loadPendingDeliveries() {
     this.originalDeliveries = [
