@@ -82,7 +82,7 @@ export class DatabaseService {
       {
         id: 'T001',
         name: 'Fast Logistics',
-        loadCapacity: 1000,
+        loadCapacity: 3,
         available: true,
         assignedOrders: [],
         vehicleType: 'truck',
@@ -291,17 +291,18 @@ export class DatabaseService {
   }
 
   assignOrderToTransporters(order: any): { success: boolean; message: string } {
-    const eligibleTransporters = this.findEligibleTransporters(order.weight);
+    const eligibleTransporters = this.getAvailableTransporters();
 
-    if (eligibleTransporters.length === 0) {
-      return {
-        success: false,
-        message: 'No transporters available for this load.'
-      };
-    }
+    // if (eligibleTransporters.length === 0) {
+    //   return {
+    //     success: false,
+    //     message: 'No transporters available for this load.'
+    //   };
+    // }
 
     eligibleTransporters.forEach(transporter => {
       transporter.assignedOrders = transporter.assignedOrders || [];
+      if (transporter.id === order.transporterId)
       transporter.assignedOrders.push({
         orderId: order.id,
         pickup: order.pickupLocation,
@@ -318,8 +319,8 @@ export class DatabaseService {
       });
     });
 
-    // this.saveTransporters(eligibleTransporters);
-    this.saveTransporters(this.getAvailableTransporters());
+    this.saveTransporters(eligibleTransporters);
+    // this.saveTransporters(this.getAvailableTransporters());
 
     return {
       success: true,
@@ -570,6 +571,14 @@ getDirectOrders(userId: string, userType: 'buyer' | 'seller'): DirectOrder[] {
   return allOrders.filter(order =>
     userType === 'buyer' ? order.buyerId === userId : order.sellerId === userId
   );
+}
+
+getTransporterDetails (transporterId: string){
+  return this.getAvailableTransporters().find(
+    transporter => {
+      return transporter.id === transporterId
+    }
+  )
 }
 
 }

@@ -1,0 +1,55 @@
+Sheet: Overview
+Columns:
+A: Module Name
+B: Description
+C: Key Features
+D: Dependencies
+E: Entry Points
+
+A2: Retailer/Buyer Module
+B2: Main module for retail customers to browse and purchase products
+C2: - Product category browsing
+    - Shopping cart
+    - Wishlist
+    - Location-based delivery
+D2: - @angular/common
+    - @angular/forms
+    - @ionic/angular
+    - ionicons
+E2: /buyer/*
+
+Sheet: Retailer Module
+Columns:
+A: Component/Service Name
+B: File Path
+C: Purpose/Description
+D: Key Functions
+E: Data Flow
+F: Dependencies
+G: API Endpoints
+H: Notes
+
+A2: BuyerPage
+B2: /src/app/buyer/buyer.page.ts
+C2: Root component for buyer module that handles routing
+D2: ngOnInit()
+E2: Acts as container for child routes
+F2: IonicModule, RouterModule, FormsModule
+G2: N/A
+H2: Serves as the main wrapper component
+
+A3: BuyerHomeComponent
+B3: /src/app/buyer/buyer-home/buyer-home.component.ts
+C3: Home page displaying product categories and search functionality
+D3: - onScroll(): Handles header visibility
+    - Category interface implementation
+E3: Top-down flow: Header > Search > Category Grid
+F3: IonicModule, RouterModule
+G3: N/A
+H3: Features dynamic header, search bar, and category grid layout
+
+Sheet: Wholesaler Module
+[Same columns as Retailer Module]
+
+Sheet: Transporter Module
+[Same columns as Retailer Module]

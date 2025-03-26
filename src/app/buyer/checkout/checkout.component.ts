@@ -16,7 +16,6 @@ interface CartItem {
   price: number;
   weight: number;
 }
-
 interface DirectOrder {
   id: number;
   buyerId: string;
@@ -110,7 +109,6 @@ export class CheckoutComponent {
         this.selectedUrgency = params['urgency'];
       }
       if (this.hasRideRequest) {
-        // First calculate price
         // Wait for next render cycle before showing alert
         setTimeout(() => this.confirmDriverSearch(), 100);
       }
@@ -184,7 +182,8 @@ export class CheckoutComponent {
   }
 
   private calculateTotalWeight(): number {
-    return this.cartItems.reduce((sum, item) => sum + (item.weight || 0), 0);
+    console.log(this.cartItems)
+    return this.cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
   }
 
   private async startDriverSearch() {

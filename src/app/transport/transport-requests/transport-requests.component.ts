@@ -34,6 +34,7 @@ export class TransportRequestsComponent implements OnInit {
   private pollInterval: any;
 
   transporterId: string = 'T001'; // Replace with actual transporter ID
+  transporterDetails: any
 
   private modalController = inject(ModalController);
 
@@ -64,6 +65,7 @@ export class TransportRequestsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.transporterDetails = this.databaseService.getTransporterDetails(this.transporterId)
     this.loadPendingDeliveries();
     this.startPolling();
   }
@@ -75,6 +77,7 @@ export class TransportRequestsComponent implements OnInit {
   private startPolling() {
     this.loadUnassignedOrders();
     this.pollInterval = setInterval(() => {
+      this.transporterDetails = this.databaseService.getTransporterDetails(this.transporterId)
       this.loadUnassignedOrders();
     }, 5000); // Poll every 5 seconds
   }
@@ -85,13 +88,21 @@ export class TransportRequestsComponent implements OnInit {
     }
   }
 
+  private checkLoadWithinCapacity(orderWeight: number){
+    const currentLoad = this.transporterDetails.assignedOrders.reduce((acc: number, current: any) => {
+console.log(current)
+      return current.weight + acc}, 0)
+    console.log(this.transporterDetails.loadCapacity, currentLoad, orderWeight)
+    return this.transporterDetails.loadCapacity >= currentLoad + orderWeight
+  }
+
   private loadUnassignedOrders() {
     const orders = this.databaseService.getUnassignedOrders();
-
+console.log(orders)
     // Filter out expired orders
     this.unassignedOrders = orders.filter((order:any) => {
       const orderAge = Date.now() - new Date(order.createdAt).getTime();
-      return orderAge < 120000; // 2 minutes
+      return orderAge < 120000;
     });
 
     // Clean up expired orders
@@ -101,6 +112,18 @@ export class TransportRequestsComponent implements OnInit {
   }
 
   async acceptUnassignedOrder(order: any) {
+    const withinCapacity = this.checkLoadWithinCapacity(order.load.weight)
+
+    if (!withinCapacity){
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: '🔴 Load Capacity Exceeded.',
+        buttons: ['OK']
+      });
+      await alert.present();
+      return
+    }
+
     const alert = await this.alertCtrl.create({
       header: 'Confirm Order Acceptance',
       message: `
