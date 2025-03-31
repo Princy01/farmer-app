@@ -16,16 +16,16 @@ export class TransportDashboardComponent implements OnInit  {
   selectedTab = 'active';
 
   activeDeliveries = [
-    { id: 'ORD12345', wholesaler: 'Wholesaler X', buyer: 'Retailer A', location: 'Market X', deliveryAddress: '123 Main St, City A', status: 'On the way' },
-    { id: 'ORD67890', wholesaler: 'Wholesaler Y', buyer: 'Retailer B', location: 'Market Y', deliveryAddress: '456 Elm St, City B', status: 'Delayed' },
-    { id: 'ORD54321', wholesaler: 'Wholesaler Z', buyer: 'Retailer C', location: 'Market O', deliveryAddress: '789 Pine St, City C', status: 'On the way' },
+    { id: 'ORD12345', wholesaler: 'Wholesaler X', buyer: 'Retailer A', pickupLocation: 'Market X', dropoffLocation: '123 Main St, City A', status: 'On the way' },
+    { id: 'ORD67890', wholesaler: 'Wholesaler Y', buyer: 'Retailer B', pickupLocation: 'Market Y', dropoffLocation: '456 Elm St, City B', status: 'Delayed' },
+    { id: 'ORD54321', wholesaler: 'Wholesaler Z', buyer: 'Retailer C', pickupLocation: 'Market O', dropoffLocation: '789 Pine St, City C', status: 'On the way' },
   ];
 
 
   upcomingDeliveries: any[] = [];
 
   completedDeliveries = [
-    { id: 'ORD33445', wholesaler: 'Wholesaler B', buyer: 'Retailer E', location: 'Market W', deliveryAddress: '202 Oak St, City E', status: 'Delivered' }
+    { id: 'ORD33445', wholesaler: 'Wholesaler B', buyer: 'Retailer E', pickupLocation: 'Market W', dropoffLocation: '202 Oak St, City E', status: 'Delivered' }
   ];
   constructor(private upcomingDeliveriesService: UpcomingDeliveriesService) {}
 

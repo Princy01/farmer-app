@@ -16,9 +16,6 @@ export interface Vehicle {
   vehicle_engine_type: number;
   vehicle_purchase_date: string; // Or Date
   vehicle_color: string;
-  col1: string;
-  col2: string;
-  col3: string;
   vehicle_insurance_id: number;
 }
 
@@ -28,19 +25,29 @@ export interface Vehicle {
 export class VehicleService {
   private apiUrl = 'http://127.0.0.1:3000';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  createVehicle(vehicle: Vehicle): Observable<any> { // Or Observable<Vehicle>
+  getAllVehicles(): Observable<Vehicle[]> {
+    return this.http.get<Vehicle[]>(`${this.apiUrl}/getVehicles`)
+      .pipe(catchError(this.handleError));
+  }
+
+  getVehicleById(id: number): Observable<Vehicle> {
+    return this.http.get<Vehicle>(`${this.apiUrl}/getVehicles/${id}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  createVehicle(vehicle: Vehicle): Observable<any> {
     return this.http.post(`${this.apiUrl}/vehicleDetails`, vehicle)
       .pipe(catchError(this.handleError));
   }
 
-  updateVehicle(vehicle: Vehicle): Observable<any> { // Or Observable<Vehicle>
-    return this.http.put(`${this.apiUrl}/vehicleUpdate`, vehicle)
+  updateVehicle(id: number, vehicle: Vehicle): Observable<any> {
+    return this.http.put(`${this.apiUrl}/vehicleUpdate/${id}`, vehicle)
       .pipe(catchError(this.handleError));
   }
 
-  deleteVehicle(id: number): Observable<any> { // Or Observable<void>
+  deleteVehicle(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/vehicleDelete/${id}`)
       .pipe(catchError(this.handleError));
   }

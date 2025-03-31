@@ -10,7 +10,7 @@ import { HttpClient } from '@angular/common/http';
   standalone: true,
   templateUrl: './delivery-confirmation.component.html',
   styleUrls: ['./delivery-confirmation.component.scss'],
-  imports: [IonicModule, FormsModule, CommonModule] // ✅ Ensure necessary imports
+  imports: [IonicModule, FormsModule, CommonModule] 
 })
 export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   orderId: string = '';

@@ -370,7 +370,7 @@ export class CheckoutComponent {
         urgency: this.selectedUrgency,
         transporterId: this.selectedTransporter,
         pickupLocation: this.selectedAddress.city,
-        dropoffLocation: 'Destination',
+        dropoffLocation: 'XYZ Street',
         weight: this.calculateTotalWeight()
       };
 

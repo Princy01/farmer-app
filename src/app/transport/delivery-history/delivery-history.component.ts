@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-delivery-history',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],  // ✅ Import necessary modules
+  imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './delivery-history.component.html',
   styleUrls: ['./delivery-history.component.scss']
 })

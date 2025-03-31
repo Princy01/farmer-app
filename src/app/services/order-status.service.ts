@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface OrderStatus {
-  order_id: number;
+  order_status_id: number;
   order_status: string;
 }
 
@@ -11,29 +11,25 @@ export interface OrderStatus {
   providedIn: 'root'
 })
 export class OrderStatusService {
-  private apiUrl = 'http://127.0.0.1:3000/orders';
+  private apiUrl = 'http://127.0.0.1:3000';
 
   constructor(private http: HttpClient) {}
 
-  getOrderStatuses(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/getOrderStatus`);
+  getOrderStatuses(): Observable<OrderStatus[]> {
+    return this.http.get<OrderStatus[]>(`${this.apiUrl}/getOrderStatus`);
   }
 
-  getOrderStatusById(orderStatusId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/getOrderStatusById/${orderStatusId}`);
+  getOrderStatusById(orderStatusId: number): Observable<OrderStatus> {
+    return this.http.get<OrderStatus>(`${this.apiUrl}/getOrderStatusById/${orderStatusId}`);
   }
 
-  insertOrderStatus(statusData: any): Observable<any> {
+  insertOrderStatus(statusData: OrderStatus): Observable<any> {
     return this.http.post(`${this.apiUrl}/orderStatusDetails`, statusData);
   }
 
-  updateOrderStatus(orderStatus:any): Observable<any> {
-    const orderStatusId = orderStatus.order_id;
-    const statusData = orderStatus
-    return this.http.put(`${this.apiUrl}/orderStatusUpdate`, statusData);
+  updateOrderStatus(orderStatus: OrderStatus): Observable<any> {
+    return this.http.put(`${this.apiUrl}/orderStatusUpdate`, orderStatus);
   }
 
-  deleteOrderStatus(orderStatusId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/orderStatusDelete/${orderStatusId}`);
-  }
+  // No delete method in backend
 }

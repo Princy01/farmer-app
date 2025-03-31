@@ -1,19 +1,30 @@
 <ion-content>
-  <form [formGroup]="state" (ngSubmit)="submitForm()">
+  <form [formGroup]="stateForm" (ngSubmit)="submitForm()">
     <ion-list>
-
       <ion-item [class.invalid]="isFieldInvalid('state')">
-        <!-- <ion-label position="floating">State Name</ion-label> -->
-        <ion-input label="Name (Optional)" labelPlacement="floating" formControlName="state"></ion-input>
+        <ion-input label="State Name" labelPlacement="floating" formControlName="state"></ion-input>
       </ion-item>
       <p class="error" *ngIf="isFieldInvalid('state')">Max 50 characters allowed.</p>
 
-      <div class="center-button">
-        <ion-button class="custom-button">
-          SUBMIT
-        </ion-button>
-        </div>
+      <ion-item [class.invalid]="isFieldInvalid('stateShortNames')">
+        <ion-input label="State Short Name" labelPlacement="floating" formControlName="stateShortNames"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('stateShortNames')">Max 10 characters allowed.</p>
 
-  </ion-list>
+      <div class="center-button">
+        <ion-button type="submit" class="custom-button">SUBMIT</ion-button>
+      </div>
+    </ion-list>
   </form>
+
+  <!-- a DeleteState function in Go is needed for this-->
+  <ion-list>
+    <ion-item *ngFor="let state of states">
+      <ion-label>
+        <h2>{{ state.state }}</h2>
+        <p>{{ state.stateShortNames }}</p>
+      </ion-label>
+      <ion-button color="danger" (click)="deleteState(state.id)">Delete</ion-button>
+    </ion-item>
+  </ion-list>
 </ion-content>

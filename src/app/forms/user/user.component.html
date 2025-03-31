@@ -1,49 +1,59 @@
 <ion-content>
-  <form [formGroup]="user" (ngSubmit)="submitForm()">
+  <form [formGroup]="userForm" (ngSubmit)="submitForm()">
     <ion-list>
 
+      <!-- Name -->
       <ion-item [class.invalid]="isFieldInvalid('name')">
         <ion-input label="Name" labelPlacement="floating" formControlName="name"></ion-input>
       </ion-item>
       <p class="error" *ngIf="isFieldInvalid('name')">Name is required (max 255 characters).</p>
 
+      <!-- Mobile Number -->
       <ion-item [class.invalid]="isFieldInvalid('mobile_num')">
         <ion-input label="Mobile Number" labelPlacement="floating" type="tel" formControlName="mobile_num"></ion-input>
       </ion-item>
       <p class="error" *ngIf="isFieldInvalid('mobile_num')">Mobile Number is required (max 15 digits).</p>
 
+      <!-- Email -->
       <ion-item>
         <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"></ion-input>
       </ion-item>
 
+      <!-- Address -->
       <ion-item>
         <ion-textarea label="Address" labelPlacement="floating" formControlName="address"></ion-textarea>
       </ion-item>
 
-      <ion-item>
+      <!-- Pincode -->
+      <ion-item [class.invalid]="isFieldInvalid('pincode')">
         <ion-input label="Pincode" labelPlacement="floating" type="text" formControlName="pincode"></ion-input>
       </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('pincode')">Pincode is required (max 10 characters).</p>
 
+      <!-- Location -->
       <ion-item>
         <ion-select label="Location" formControlName="location">
           <ion-select-option *ngFor="let loc of locations" [value]="loc.id">{{ loc.name }}</ion-select-option>
         </ion-select>
       </ion-item>
 
+      <!-- State -->
       <ion-item>
         <ion-select label="State" formControlName="state">
           <ion-select-option *ngFor="let st of states" [value]="st.id">{{ st.name }}</ion-select-option>
         </ion-select>
       </ion-item>
 
+      <!-- Role ID -->
       <ion-item>
-        <ion-select label="User Type" formControlName="user_type_id">
-          <ion-select-option *ngFor="let type of userTypes" [value]="type.user_type_id">{{ type.user_type_name }}</ion-select-option>
+        <ion-select label="User Role" formControlName="role_id">
+          <ion-select-option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</ion-select-option>
         </ion-select>
       </ion-item>
 
+      <!-- Active Status -->
       <ion-item>
-        <ion-select label="Status" formControlName="status">
+        <ion-select label="Active Status" formControlName="active_status">
           <ion-select-option [value]="1">Active</ion-select-option>
           <ion-select-option [value]="0">Inactive</ion-select-option>
         </ion-select>
@@ -58,4 +68,3 @@
     </ion-list>
   </form>
 </ion-content>
-

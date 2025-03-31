@@ -9,11 +9,13 @@
     <ion-list>
       <ion-item *ngFor="let order of activeDeliveries">
         <ion-label>
-          <h2><strong>{{ order.id }} - From {{ order.wholesaler }} to {{ order.buyer }}</strong></h2>
+          <!-- <h2><strong>{{ order.id }} - From {{ order.wholesaler }} to {{ order.buyer }}</strong></h2> -->
+          <h2><strong>{{ order.id }} - From Wholesaler to Buyer</strong></h2>
+
 
           <div class="order-locations">
-            <div class="half-width"><strong>Pickup:</strong> {{ order.location }}</div>
-            <div class="half-width"><strong>Delivery:</strong> {{ order.deliveryAddress }}</div>
+            <div class="half-width"><strong>Pickup:</strong> {{ order.pickupLocation }}</div>
+            <div class="half-width"><strong>Delivery:</strong> {{ order.dropoffLocation }}</div>
           </div>
 
           <div class="order-status">
@@ -33,11 +35,13 @@
     <ion-list>
       <ion-item *ngFor="let order of upcomingDeliveries">
         <ion-label>
-          <h2><strong>{{ order.id }} - From {{ order.wholesaler }} to {{ order.buyer }}</strong></h2>
+          <!-- <h2><strong>{{ order.id }} - From {{ order.wholesaler }} to {{ order.buyer }}</strong></h2> -->
+          <h2><strong>{{ order.id }} - From Wholesaler to Buyer</strong></h2>
+
 
           <div class="order-locations">
-            <div class="half-width"><strong>Pickup:</strong> {{ order.location }}</div>
-            <div class="half-width"><strong>Delivery:</strong> {{ order.deliveryAddress }}</div>
+            <div class="half-width"><strong>Pickup:</strong> {{ order.pickupLocation }}</div>
+            <div class="half-width"><strong>Delivery:</strong> {{ order.dropoffLocation }}</div>
           </div>
 
           <div class="order-status">
@@ -52,11 +56,13 @@
     <ion-list>
       <ion-item *ngFor="let order of completedDeliveries">
         <ion-label>
-          <h2><strong>{{ order.id }} - From {{ order.wholesaler }} to {{ order.buyer }}</strong></h2>
+          <!-- <h2><strong>{{ order.id }} - From {{ order.wholesaler }} to {{ order.buyer }}</strong></h2> -->
+          <h2><strong>{{ order.id }} - From Wholesaler to Buyer</strong></h2>
+
 
           <div class="order-locations">
-            <div class="half-width"><strong>Pickup:</strong> {{ order.location }}</div>
-            <div class="half-width"><strong>Delivery:</strong> {{ order.deliveryAddress }}</div>
+            <div class="half-width"><strong>Pickup:</strong> {{ order.pickupLocation }}</div>
+            <div class="half-width"><strong>Delivery:</strong> {{ order.dropoffLocation }}</div>
           </div>
 
           <div class="order-status">

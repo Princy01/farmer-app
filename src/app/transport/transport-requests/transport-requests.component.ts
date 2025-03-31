@@ -8,18 +8,35 @@ import { FilterModalComponent } from '../filter-modal/filter-modal.component';
 import { SortModalComponent } from '../sort-modal/sort-modal.component';
 import { formatDate } from '@angular/common';
 import { DatabaseService } from '../../services/database.service';
+import { MockDataService } from '../../services/mock-data.service';
 
 interface DeliveryOrder {
-  id: number;
+  id: string;
+  items: CartItem[];
+  paymentMethod: string;
+  total: number;
+  deliveryType: string;
+  urgency: string;
+  transporterId: string | null;
   pickupLocation: string;
   dropoffLocation: string;
   weight: number;
-  type: string;
   distance: number;
-  deliveryDate: string;
   suggestedPrice: number;
   accepted?: boolean;
   assigned?: boolean;
+  createdAt: string;
+  deliveryDate: string;
+}
+
+interface CartItem {
+  id: number;
+  name: string;
+  image: string;
+  hindiName: string;
+  quantity: number;
+  price: number;
+  weight: number;
 }
 
 @Component({
@@ -58,7 +75,8 @@ export class TransportRequestsComponent implements OnInit {
   constructor(
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
-    private databaseService: DatabaseService
+    private databaseService: DatabaseService,
+    private mockDataService: MockDataService
   ) {
 
     addIcons({ chevronForwardOutline, funnelOutline, swapVerticalOutline });
@@ -66,7 +84,6 @@ export class TransportRequestsComponent implements OnInit {
 
   ngOnInit() {
     this.transporterDetails = this.databaseService.getTransporterDetails(this.transporterId)
-    this.loadPendingDeliveries();
     this.startPolling();
   }
 
@@ -76,9 +93,12 @@ export class TransportRequestsComponent implements OnInit {
 
   private startPolling() {
     this.loadUnassignedOrders();
+    this.loadPendingDeliveries();
     this.pollInterval = setInterval(() => {
       this.transporterDetails = this.databaseService.getTransporterDetails(this.transporterId)
       this.loadUnassignedOrders();
+      this.loadPendingDeliveries();
+
     }, 5000); // Poll every 5 seconds
   }
 
@@ -90,20 +110,19 @@ export class TransportRequestsComponent implements OnInit {
 
   private checkLoadWithinCapacity(orderWeight: number){
     const currentLoad = this.transporterDetails.assignedOrders.reduce((acc: number, current: any) => {
-console.log(current)
       return current.weight + acc}, 0)
-    console.log(this.transporterDetails.loadCapacity, currentLoad, orderWeight)
     return this.transporterDetails.loadCapacity >= currentLoad + orderWeight
   }
 
   private loadUnassignedOrders() {
     const orders = this.databaseService.getUnassignedOrders();
-console.log(orders)
-    // Filter out expired orders
+    // Filter out expired and unassigned orders
     this.unassignedOrders = orders.filter((order:any) => {
       const orderAge = Date.now() - new Date(order.createdAt).getTime();
-      return orderAge < 120000;
+      return orderAge < 120000 && !order.assigned;
     });
+    //Instead of filtering manually in the frontend, a better approach is to modify the backend
+    //  query to only return unassigned orders directly.
 
     // Clean up expired orders
     if (orders.length !== this.unassignedOrders.length) {
@@ -162,20 +181,21 @@ console.log(orders)
   }
 
 
-  loadPendingDeliveries() {
-    this.originalDeliveries = [
-      { id: 1, pickupLocation: 'Mandi A', dropoffLocation: 'Retailer X', weight: 500, type: 'Vegetables', distance: 120, deliveryDate: '2025-03-17', suggestedPrice: 1500, accepted: false, assigned: false },
-      { id: 2, pickupLocation: 'Mandi B', dropoffLocation: 'Retailer Y', weight: 300, type: 'Pulses', distance: 80, deliveryDate: '2025-03-18', suggestedPrice: 1000, accepted: false, assigned: false },
-      { id: 3, pickupLocation: 'Mandi C', dropoffLocation: 'Retailer Z', weight: 400, type: 'Fruits', distance: 95, deliveryDate: '2025-03-19', suggestedPrice: 1300, accepted: false, assigned: false },
-      { id: 4, pickupLocation: 'Mandi D', dropoffLocation: 'Retailer A', weight: 600, type: 'Grains', distance: 110, deliveryDate: '2025-03-20', suggestedPrice: 1700, accepted: false, assigned: false },
-      { id: 5, pickupLocation: 'Mandi E', dropoffLocation: 'Retailer B', weight: 200, type: 'Dairy', distance: 50, deliveryDate: '2025-03-21', suggestedPrice: 800, accepted: false, assigned: false },
-      { id: 6, pickupLocation: 'Mandi F', dropoffLocation: 'Retailer C', weight: 700, type: 'Spices', distance: 140, deliveryDate: '2025-03-22', suggestedPrice: 2000, accepted: false, assigned: false },
-    ];
-
-    // Initialize pending deliveries
-    this.pendingDeliveries = [...this.originalDeliveries];
-    this.applyFilters();
-  }
+  // loadPendingDeliveries() {
+  //   this.originalDeliveries = [
+  //     { id: 1, pickupLocation: 'Mandi A', dropoffLocation: 'Retailer X', weight: 500, type: 'Vegetables', distance: 120, deliveryDate: '2025-03-17', suggestedPrice: 1500, accepted: false, assigned: false },
+  //     { id: 2, pickupLocation: 'Mandi B', dropoffLocation: 'Retailer Y', weight: 300, type: 'Pulses', distance: 80, deliveryDate: '2025-03-18', suggestedPrice: 1000, accepted: false, assigned: false },
+  //     { id: 3, pickupLocation: 'Mandi C', dropoffLocation: 'Retailer Z', weight: 400, type: 'Fruits', distance: 95, deliveryDate: '2025-03-19', suggestedPrice: 1300, accepted: false, assigned: false },
+  //     { id: 4, pickupLocation: 'Mandi D', dropoffLocation: 'Retailer A', weight: 600, type: 'Grains', distance: 110, deliveryDate: '2025-03-20', suggestedPrice: 1700, accepted: false, assigned: false },
+  //     { id: 5, pickupLocation: 'Mandi E', dropoffLocation: 'Retailer B', weight: 200, type: 'Dairy', distance: 50, deliveryDate: '2025-03-21', suggestedPrice: 800, accepted: false, assigned: false },
+  //     { id: 6, pickupLocation: 'Mandi F', dropoffLocation: 'Retailer C', weight: 700, type: 'Spices', distance: 140, deliveryDate: '2025-03-22', suggestedPrice: 2000, accepted: false, assigned: false },
+  //   ];
+  // In the loadPendingDeliveries method:
+loadPendingDeliveries() {
+  this.originalDeliveries = this.databaseService.getPendingDeliveriesFromLocalStorage(this.transporterId)
+  this.pendingDeliveries = [...this.originalDeliveries];
+  this.applyFilters();
+}
 
   async openFilterModal() {
     const modal = await this.modalController.create({
@@ -207,10 +227,10 @@ console.log(orders)
     filteredOrders = filteredOrders.filter(order =>
       order.weight >= this.minLoad && order.weight <= this.maxLoad
     );
-
     if (this.priorityDeliveries) {
       filteredOrders = filteredOrders.filter(order => order.distance < 100);
     }
+
     if (this.delayedDeliveries) {
       filteredOrders = filteredOrders.filter(order => new Date(order.deliveryDate) < new Date());
     }
@@ -291,30 +311,67 @@ console.log(orders)
   //   await alert.present();
   // }
 
+  // async acceptOrder(order: DeliveryOrder) {
+  //   // Calculate price using transporter-specific rates
+  //   const calculatedPrice = this.databaseService.calculateBasePrice(
+  //     order.pickupLocation,
+  //     order.dropoffLocation,
+  //     order.weight,
+  //     order.type,
+  //     'normal',
+  //     this.transporterId
+  //   );
+
+  //   const alert = await this.alertCtrl.create({
+  //     header: 'Confirm Delivery',
+  //     message: `Do you want to accept this delivery for ₹${calculatedPrice}?`,
+  //     buttons: [
+  //       { text: 'Cancel', role: 'cancel' },
+  //       {
+  //         text: 'Accept',
+  //         handler: async () => {
+  //           order.accepted = true;
+  //           this.currentLoad += order.weight; // Increase current load
+  //           this.showToast('Delivery Accepted!');
+
+  //           // Check if transporter still has capacity for more orders
+  //           const remainingCapacity = this.maxLoad - this.currentLoad;
+  //           if (remainingCapacity > 0) {
+  //             this.promptForMoreOrders(remainingCapacity);
+  //           }
+  //         },
+  //       },
+  //     ],
+  //   });
+  //   await alert.present();
+  // }
+
   async acceptOrder(order: DeliveryOrder) {
-    // Calculate price using transporter-specific rates
     const calculatedPrice = this.databaseService.calculateBasePrice(
       order.pickupLocation,
       order.dropoffLocation,
       order.weight,
-      order.type,
-      'normal',
+      order.deliveryType,
+      order.urgency,
       this.transporterId
     );
 
     const alert = await this.alertCtrl.create({
       header: 'Confirm Delivery',
-      message: `Do you want to accept this delivery for ₹${calculatedPrice}?`,
+      message: `Do you want to accept this delivery for ₹${calculatedPrice}?
+                \nItems: ${order.items.map(item => `${item.name} (${item.quantity})`).join(', ')}
+                \nTotal Weight: ${order.weight}kg
+                \nDistance: ${order.distance}km`,
       buttons: [
         { text: 'Cancel', role: 'cancel' },
         {
           text: 'Accept',
           handler: async () => {
-            order.accepted = true;
-            this.currentLoad += order.weight; // Increase current load
+            order.transporterId = this.transporterId;
+            this.databaseService.updateOrderForTransporterInLocalStorage(this.transporterId, order.id,{accepted:true})
+            this.currentLoad += order.weight;
             this.showToast('Delivery Accepted!');
 
-            // Check if transporter still has capacity for more orders
             const remainingCapacity = this.maxLoad - this.currentLoad;
             if (remainingCapacity > 0) {
               this.promptForMoreOrders(remainingCapacity);
@@ -325,7 +382,6 @@ console.log(orders)
     });
     await alert.present();
   }
-
   async promptForMoreOrders(remainingCapacity: number) {
     const alert = await this.alertCtrl.create({
       header: 'More Capacity Available',
@@ -366,9 +422,9 @@ console.log(orders)
 
     await modal.present();
 
-    const { data } = await modal.onDidDismiss();
+    const { data } = await modal.onDidDismiss(); 
     if (data && data.assigned) {
-      order.assigned = true;
+      this.databaseService.updateOrderForTransporterInLocalStorage(this.transporterId, order.id,data)
       this.showToast(`Vehicle & Driver Assigned for Order ${order.id}`);
     }
   }

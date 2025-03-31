@@ -13,7 +13,7 @@
               <p><strong>From:</strong> {{ order.pickup }}</p>
               <p><strong>To:</strong> {{ order.delivery }}</p>
               <p><strong>Distance:</strong> {{ order.distance }} km</p>
-              <p><strong>Load:</strong> {{ order.load.weight }} kg ({{ order.load.type }})</p>
+              <p><strong>Load:</strong> {{ order.load.weight }} kg {{ order.load.type }}</p>
               <p><strong>Price:</strong> ₹{{ order.basePrice }}</p>
               <p><strong>Date:</strong> {{ order.requestedDate }}</p>
             </ion-col>
@@ -27,33 +27,36 @@
       </ion-card-content>
     </ion-card>
   </ion-list>
-  
+
   <ion-grid>
     <ion-row>
       <!-- Left Column: Even Index Orders -->
       <ion-col size="6" class="scroll-column">
         <ion-list *ngIf="evenOrders.length > 0; else noOrders">
           <ion-card *ngFor="let order of evenOrders">
-            <ion-card-content>
-              <p><strong>Pickup:</strong> {{ order.pickupLocation }}</p>
-              <p><strong>Delivery:</strong> {{ order.dropoffLocation }}</p>
-              <p><strong>Distance:</strong> {{ order.distance }} km</p>
-              <p><strong>Load:</strong> {{ order.weight }} kg ({{ order.type }})</p>
-              <p><strong>Price:</strong> ₹{{ order.suggestedPrice }}</p>
-              <p><strong>Date:</strong> {{ formatDate(order.deliveryDate) }}</p>
+<ion-card-content>
+  <p><strong>Order ID:</strong> {{ order.id }}</p>
+  <p><strong>From:</strong> {{ order.pickupLocation }}</p>
+  <p><strong>To:</strong> {{ order.dropoffLocation }}</p>
+  <p><strong>Distance:</strong> {{ order.distance }} km</p>
+  <p><strong>Load:</strong> {{ order.weight }} kg</p>
+  <p><strong>Delivery Type:</strong> {{ order.deliveryType }}</p>
+  <p><strong>Urgency:</strong> {{ order.urgency }}</p>
+  <p><strong>Price:</strong> ₹{{ order.suggestedPrice }}</p>
+  <p><strong>Deliver by:</strong> {{ formatDate(order.deliveryDate) }}</p>
 
-              <div class="center-button">
-                <ion-button size="small" class="accept-button" *ngIf="!order.accepted" (click)="acceptOrder(order)">
-                  Accept
-                </ion-button>
-                <ion-button size="small" class="assign-button" *ngIf="order.accepted && !order.assigned" (click)="openAssignDriverModal(order)">
-                  Assign
-                </ion-button>
-                <ion-button size="small" class="assigned-button" *ngIf="order.accepted && order.assigned" disabled>
-                  Assigned
-                </ion-button>
-              </div>
-            </ion-card-content>
+  <div class="center-button">
+    <!-- <ion-button size="small" class="accept-button" *ngIf="!order.accepted" (click)="acceptOrder(order)">
+      Accept
+    </ion-button> -->
+    <ion-button size="small" class="assign-button" *ngIf="!order.assigned" (click)="openAssignDriverModal(order)">
+      Assign
+    </ion-button>
+    <ion-button size="small" class="assigned-button" *ngIf="order.assigned" disabled>
+      Assigned
+    </ion-button>
+  </div>
+</ion-card-content>
           </ion-card>
         </ion-list>
       </ion-col>
@@ -62,26 +65,29 @@
       <ion-col size="6" class="scroll-column">
         <ion-list *ngIf="oddOrders.length > 0">
           <ion-card *ngFor="let order of oddOrders">
-            <ion-card-content>
-              <p><strong>Pickup:</strong> {{ order.pickupLocation }}</p>
-              <p><strong>Delivery:</strong> {{ order.dropoffLocation }}</p>
-              <p><strong>Distance:</strong> {{ order.distance }} km</p>
-              <p><strong>Load:</strong> {{ order.weight }} kg ({{ order.type }})</p>
-              <p><strong>Price:</strong> ₹{{ order.suggestedPrice }}</p>
-              <p><strong>Date:</strong> {{ formatDate(order.deliveryDate) }}</p>
+<ion-card-content>
+  <p><strong>Order ID:</strong> {{ order.id }}</p>
+  <p><strong>From:</strong> {{ order.pickupLocation }}</p>
+  <p><strong>To:</strong> {{ order.dropoffLocation }}</p>
+  <p><strong>Distance:</strong> {{ order.distance }} km</p>
+  <p><strong>Load:</strong> {{ order.weight }} kg</p>
+  <p><strong>Delivery Type:</strong> {{ order.deliveryType }}</p>
+  <p><strong>Urgency:</strong> {{ order.urgency }}</p>
+  <p><strong>Price:</strong> ₹{{ order.suggestedPrice }}</p>
+  <p><strong>Deliver by:</strong> {{ formatDate(order.deliveryDate) }}</p>
 
-              <div class="center-button">
-                <ion-button size="small" class="accept-button" *ngIf="!order.accepted" (click)="acceptOrder(order)">
-                  Accept
-                </ion-button>
-                <ion-button size="small" class="assign-button" *ngIf="order.accepted && !order.assigned" (click)="openAssignDriverModal(order)">
-                  Assign
-                </ion-button>
-                <ion-button size="small" class="assigned-button" *ngIf="order.accepted && order.assigned" disabled>
-                  Assigned
-                </ion-button>
-              </div>
-            </ion-card-content>
+  <div class="center-button">
+    <!-- <ion-button size="small" class="accept-button" *ngIf="!order.accepted" (click)="acceptOrder(order)">
+      Accept
+    </ion-button> -->
+    <ion-button size="small" class="assign-button" *ngIf="!order.assigned" (click)="openAssignDriverModal(order)">
+      Assign
+    </ion-button>
+    <ion-button size="small" class="assigned-button" *ngIf="order.assigned" disabled>
+      Assigned
+    </ion-button>
+  </div>
+</ion-card-content>
           </ion-card>
         </ion-list>
       </ion-col>

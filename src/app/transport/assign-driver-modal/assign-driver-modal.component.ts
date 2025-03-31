@@ -31,10 +31,10 @@ export class AssignDriverModalComponent {
     private modalCtrl: ModalController,
     private toastController: ToastController,
     private upcomingDeliveriesService: UpcomingDeliveriesService
-  ) {}
+  ) { }
 
   dismiss() {
-    this.modalCtrl.dismiss();
+    this.modalCtrl.dismiss({ assigned: false });
   }
 
   async assignDriver() {
@@ -43,12 +43,13 @@ export class AssignDriverModalComponent {
       return;
     }
 
-        // Update order as assigned
+    // Update order as assigned
     this.order.status = 'Scheduled'; // Mark as "Scheduled" for Upcoming tab
     this.order.driverId = this.selectedDriver;
     this.order.vehicleId = this.selectedVehicle;
 
     // Save the assigned order in the Upcoming Deliveries Service
+    console.log(this.order)
     this.upcomingDeliveriesService.addAcceptedOrder(this.order);
 
     const toast = await this.toastController.create({
@@ -62,7 +63,9 @@ export class AssignDriverModalComponent {
 
     // Auto-dismiss modal after a short delay
     setTimeout(() => {
-      this.modalCtrl.dismiss();
+      this.modalCtrl.dismiss({
+        driverId: this.selectedDriver, vehicleId: this.selectedVehicle, assigned: true, status: 'Scheduled'
+      });
     }, 1000);
   }
 }

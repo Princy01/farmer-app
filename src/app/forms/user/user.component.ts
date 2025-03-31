@@ -13,10 +13,10 @@ import { UserService } from '../../services/user.service';
   styleUrls: ['./user.component.scss']
 })
 export class UserComponent {
-  user: FormGroup;
+  userForm: FormGroup;
   locations: any[] = [];
   states: any[] = [];
-  userTypes: any[] = [];
+  roles: any[] = [];
   users: any[] = [];
 
   constructor(
@@ -25,30 +25,34 @@ export class UserComponent {
     private userService: UserService,
     private navCtrl: NavController
   ) {
-    this.user = this.fb.group({
+    this.userForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(255)]],
-      mobile_num: ['', [Validators.required, Validators.maxLength(15)]],
+      mobile_num: [
+        '',
+        [Validators.required, Validators.pattern('^[0-9]{10,15}$'), Validators.maxLength(15)] // Numeric, 10-15 digits
+      ],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
       address: [''],
-      pincode: ['', [Validators.maxLength(10)]],
-      location: [''],
-      state: [''],
-      user_type_id: [''],
-      status: [1]
+      pincode: ['', [Validators.required, Validators.maxLength(10), Validators.pattern('^[0-9]{5,10}$')]], // Numeric, 5-10 digits
+      location: [null],
+      state: [null],
+      role_id: [5, Validators.required], // Default role
+      active_status: [1, Validators.required] //Default active
     });
 
     this.loadDropdownData();
     this.loadUsers();
   }
 
+  // Load dropdown data (locations, states, roles)
   loadDropdownData() {
     this.userService.getLocations().subscribe((data) => (this.locations = data));
     this.userService.getStates().subscribe((data) => (this.states = data));
-    this.userService.getUserTypes().subscribe((data) => (this.userTypes = data));
+    this.userService.getUserTypes().subscribe((data) => (this.roles = data)); // Fixed role fetching
   }
-  
-   // Fetch all users from the backend
-   loadUsers() {
+
+  // Fetch all users from the backend
+  loadUsers() {
     this.userService.getAllUsers().subscribe({
       next: (data) => (this.users = data),
       error: (err) => console.error('Error fetching users:', err)
@@ -56,16 +60,16 @@ export class UserComponent {
   }
 
   isFieldInvalid(field: string): boolean {
-    const control = this.user.get(field);
+    const control = this.userForm.get(field);
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
   submitForm() {
-    if (this.user.valid) {
-      this.userService.insertUser(this.user.value).subscribe({
+    if (this.userForm.valid) {
+      this.userService.createUser(this.userForm.value).subscribe({
         next: (response) => {
           console.log('User added:', response);
-          this.user.reset();
+          this.userForm.reset();
           this.loadUsers(); // Refresh user list after adding
         },
         error: (error) => {
@@ -80,7 +84,11 @@ export class UserComponent {
   }
 
   updateUser(user: any) {
-    this.userService.updateUser(user).subscribe({
+    if (!user.user_id) {
+      console.error('User ID is missing for update');
+      return;
+    }
+    this.userService.updateUserById(user).subscribe({
       next: (response) => {
         console.log('User updated:', response);
         this.loadUsers(); // Refresh user list after updating

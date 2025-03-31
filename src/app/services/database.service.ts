@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { MockDataService } from './mock-data.service';
 
 interface TransporterRate {
   perKmRate: number;
@@ -66,10 +67,32 @@ export class DatabaseService {
   private apiUrl = 'https://your-api-endpoint.com/api/orders';
   private unassignedOrdersKey = 'unassignedOrders'
 
-  constructor(private http: HttpClient) {
-    this.initializeDummyTransporters();
-    this.initializeUnassignedOrders();
+  constructor(private http: HttpClient, private mockDataService: MockDataService
+  ) {
+    // this.initializeDummyTransporters();
+    // this.initializeUnassignedOrders();
+    this.initializeDummyData();
   }
+
+  private initializeDummyData() {
+    // Initialize transporters
+    const existingTransporters = this.getAvailableTransporters();
+  if (existingTransporters.length === 0) {
+    this.saveTransporters(this.mockDataService.generateTransporters());
+  }
+
+    // Initialize unassigned orders
+    const existingUnassignedOrders = this.getUnassignedOrders();
+    if (existingUnassignedOrders.length === 0) {
+      this.saveUnassignedOrders(this.mockDataService.generateUnassignedOrders());
+    }
+    const existingPendingOrders = this.getPendingDeliveriesFromLocalStorage("T001")
+    if (existingPendingOrders.length === 0) {
+
+    console.log(existingPendingOrders,this.mockDataService.generatePendingDeliveries())
+      this.savePendingDeliveriesForTransporterInLocalStorage("T001", this.mockDataService.generatePendingDeliveries())
+  }
+}
 
   private initializeUnassignedOrders(){
     const existingUnassignedOrders = this.getUnassignedOrders();
@@ -77,57 +100,57 @@ export class DatabaseService {
       this.saveUnassignedOrders([]);
     }
   }
-  private initializeDummyTransporters() {
-    const dummyTransporters: Transporter[] = [
-      {
-        id: 'T001',
-        name: 'Fast Logistics',
-        loadCapacity: 3,
-        available: true,
-        assignedOrders: [],
-        vehicleType: 'truck',
-        rates: {
-          perKmRate: 5,
-          perKgRate: 2,
-          peakHourRate: 10,
-          lastUpdated: new Date().toISOString()
-        }
-      },
-      {
-        id: 'T002',
-        name: 'Quick Transport',
-        loadCapacity: 2000,
-        available: true,
-        assignedOrders: [],
-        vehicleType: 'lorry',
-        rates: {
-          perKmRate: 4,
-          perKgRate: 3,
-          peakHourRate: 9,
-          lastUpdated: new Date().toISOString()
-        }
-      },
-      {
-        id: 'T003',
-        name: 'Safe Cargo',
-        loadCapacity: 1500,
-        available: true,
-        assignedOrders: [],
-        vehicleType: 'truck',
-        rates: {
-          perKmRate: 7,
-          perKgRate: 5,
-          peakHourRate: 15,
-          lastUpdated: new Date().toISOString()
-        }
-      }
-    ];
+  // private initializeDummyTransporters() {
+  //   const dummyTransporters: Transporter[] = [
+  //     {
+  //       id: 'T001',
+  //       name: 'Fast Logistics',
+  //       loadCapacity: 3,
+  //       available: true,
+  //       assignedOrders: [],
+  //       vehicleType: 'truck',
+  //       rates: {
+  //         perKmRate: 5,
+  //         perKgRate: 2,
+  //         peakHourRate: 10,
+  //         lastUpdated: new Date().toISOString()
+  //       }
+  //     },
+  //     {
+  //       id: 'T002',
+  //       name: 'Quick Transport',
+  //       loadCapacity: 2000,
+  //       available: true,
+  //       assignedOrders: [],
+  //       vehicleType: 'lorry',
+  //       rates: {
+  //         perKmRate: 4,
+  //         perKgRate: 3,
+  //         peakHourRate: 9,
+  //         lastUpdated: new Date().toISOString()
+  //       }
+  //     },
+  //     {
+  //       id: 'T003',
+  //       name: 'Safe Cargo',
+  //       loadCapacity: 1500,
+  //       available: true,
+  //       assignedOrders: [],
+  //       vehicleType: 'truck',
+  //       rates: {
+  //         perKmRate: 7,
+  //         perKgRate: 5,
+  //         peakHourRate: 15,
+  //         lastUpdated: new Date().toISOString()
+  //       }
+  //     }
+  //   ];
 
-    const existingTransporters = this.getAvailableTransporters();
-    if (existingTransporters.length === 0) {
-      this.saveTransporters(dummyTransporters);
-    }
-  }
+  //   const existingTransporters = this.getAvailableTransporters();
+  //   if (existingTransporters.length === 0) {
+  //     this.saveTransporters(dummyTransporters);
+  //   }
+  // }
 
   updateTransporterRates(transporterId: string, rates: TransporterRate): boolean {
     const transporters = this.getAvailableTransporters();
@@ -290,9 +313,16 @@ export class DatabaseService {
     return transporters.filter(t => t.available && t.loadCapacity >= orderWeight);
   }
 
+  private generateOrderId(): string {
+    const prefix = 'ORD';
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${prefix}-${timestamp}-${random}`;
+  }
+
   assignOrderToTransporters(order: any): { success: boolean; message: string } {
     const eligibleTransporters = this.getAvailableTransporters();
-
+console.log(order)
     // if (eligibleTransporters.length === 0) {
     //   return {
     //     success: false,
@@ -304,18 +334,14 @@ export class DatabaseService {
       transporter.assignedOrders = transporter.assignedOrders || [];
       if (transporter.id === order.transporterId)
       transporter.assignedOrders.push({
-        orderId: order.id,
-        pickup: order.pickupLocation,
-        delivery: order.dropoffLocation,
-        weight: order.weight,
-        distance: order.distance,
-        suggestedPrice: this.calculateBasePrice(
+        ...order, suggestedPrice: this.calculateBasePrice(
           order.pickupLocation,
           order.dropoffLocation,
           order.weight,
           order.type,
           order.urgency
-        ),
+        ),id: this.generateOrderId(),
+        deliveryDate:new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
       });
     });
 
@@ -326,6 +352,54 @@ export class DatabaseService {
       success: true,
       message: 'Order requests sent to available transporters.'
     };
+  }
+
+  updateOrderForTransporterInLocalStorage(transporterId: string, orderId: string, addition:any){
+    const transporters = this.getAvailableTransporters();
+    const updatedTransporters = transporters.map(transporter => {
+      if (transporter.id === transporterId) {
+        const updatedOrders = transporter.assignedOrders.map(order => {
+          if (order.id === orderId) {
+            return { ...order, ...addition };
+          }
+          return order;
+        });
+        return { ...transporter, assignedOrders: updatedOrders };
+      }
+      return transporter;
+    });
+    this.saveTransporters(updatedTransporters);
+  }
+
+  savePendingDeliveriesForTransporterInLocalStorage(transporterId: string, orders: any[]){
+   const transporters = this.getAvailableTransporters()
+   transporters.forEach(transporter => {
+    console.log("1")
+   if (transporter.id !== transporterId) return
+   console.log("2")
+
+      transporter.assignedOrders = transporter.assignedOrders || [];
+      orders.forEach(order => {
+
+      transporter.assignedOrders.push({
+        ...order, suggestedPrice: this.calculateBasePrice(
+          order.pickupLocation,
+          order.dropoffLocation,
+          order.weight,
+          order.type,
+          order.urgency
+        ),id: this.generateOrderId(), transporterId,
+        deliveryDate:new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+      });
+    });})
+
+    this.saveTransporters(transporters);
+  }
+
+  getPendingDeliveriesFromLocalStorage(transporterId: string): any[] {
+    const transporters = this.getAvailableTransporters();
+    const transporter = transporters.find(t => t.id === transporterId);
+    return transporter ? transporter.assignedOrders || [] : [];
   }
 
   private calculateMedian(values: number[]): number {
@@ -573,12 +647,9 @@ getDirectOrders(userId: string, userType: 'buyer' | 'seller'): DirectOrder[] {
   );
 }
 
-getTransporterDetails (transporterId: string){
+getTransporterDetails(transporterId: string) {
   return this.getAvailableTransporters().find(
-    transporter => {
-      return transporter.id === transporterId
-    }
-  )
+    transporter => transporter.id === transporterId
+  );
 }
-
 }

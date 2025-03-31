@@ -17,6 +17,14 @@ export class StateService {
 
   constructor(private http: HttpClient) { }
 
+  getAllStates(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/getStates`);
+  }
+
+  getStateById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/getStates/${id}`);
+  }
+
   createState(state: State): Observable<any> { // Or Observable<State>
     return this.http.post(`${this.apiUrl}/stateDetails`, state)
       .pipe(catchError(this.handleError));
@@ -26,7 +34,7 @@ export class StateService {
     return this.http.put(`${this.apiUrl}/statesUpdate`, state) // Corrected endpoint
       .pipe(catchError(this.handleError));
   }
-
+  // a DeleteState function in Go is needed 
   deleteState(id: number): Observable<any> { // Or Observable<void>
     return this.http.delete(`${this.apiUrl}/stateDelete/${id}`)
       .pipe(catchError(this.handleError));

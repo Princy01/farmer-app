@@ -17,8 +17,8 @@ import { trashOutline, cartOutline, chevronBack } from 'ionicons/icons';
 export class CartComponent implements OnInit {
   cartForm: FormGroup;
   cartItems = [
-    { id: '1', name: 'Spinach', hindiName: 'पालक', image: 'assets/img/Spinach2.png', price: 40, quantity: 1, discount: 5 },
-    { id: '2', name: 'Tomato', hindiName: 'टमाटर', image: 'assets/img/Tomato1.png', price: 30, quantity: 2, discount: 3 }
+    { id: '1', name: 'Spinach', hindiName: 'पालक', image: 'assets/img/Spinach2.png', price: 40, quantity: 100, discount: 5 },
+    { id: '2', name: 'Tomato', hindiName: 'टमाटर', image: 'assets/img/Tomato1.png', price: 30, quantity: 250, discount: 3 }
   ];
   discount = 0;
 
