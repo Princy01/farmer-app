@@ -422,7 +422,7 @@ loadPendingDeliveries() {
 
     await modal.present();
 
-    const { data } = await modal.onDidDismiss(); 
+    const { data } = await modal.onDidDismiss();
     if (data && data.assigned) {
       this.databaseService.updateOrderForTransporterInLocalStorage(this.transporterId, order.id,data)
       this.showToast(`Vehicle & Driver Assigned for Order ${order.id}`);

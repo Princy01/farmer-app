@@ -84,7 +84,11 @@ export const routes: Routes = [
       {
         path: 'payment-mode',
         loadComponent: () => import('./forms/payment-mode/payment-mode.component').then((m) => m.PaymentModeComponent),
-      }
+      },
+      {
+        path: 'business-branch',
+        loadComponent: () => import('./forms/business-branch/business-branch.component').then((m) => m.BusinessBranchComponent),
+      },
     ]
   },
   {

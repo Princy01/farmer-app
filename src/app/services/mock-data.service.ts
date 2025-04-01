@@ -19,7 +19,7 @@ export class MockDataService {
       {
         id: 'T001',
         name: 'Fast Logistics',
-        loadCapacity: 3000,
+        loadCapacity: 10000,
         available: true,
         assignedOrders: [],
         vehicleType: 'truck',

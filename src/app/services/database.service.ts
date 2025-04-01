@@ -90,7 +90,7 @@ export class DatabaseService {
     if (existingPendingOrders.length === 0) {
 
     console.log(existingPendingOrders,this.mockDataService.generatePendingDeliveries())
-      this.savePendingDeliveriesForTransporterInLocalStorage("T001", this.mockDataService.generatePendingDeliveries())
+      this.savePendingDeliveriesForTransporterInLocalStorage("T001", this.mockDataService.generatePendingDeliveries(30))
   }
 }
 

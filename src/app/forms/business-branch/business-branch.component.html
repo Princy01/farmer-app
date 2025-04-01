@@ -1,0 +1,83 @@
+<ion-content>
+  <form [formGroup]="businessBranch" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <ion-item [class.invalid]="isFieldInvalid('bid')">
+        <ion-input label="Business ID (BID)" labelPlacement="floating" type="number" formControlName="bid"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('bid')">Business ID is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('shop_name')">
+        <ion-input label="Shop Name" labelPlacement="floating" formControlName="shop_name"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('shop_name')">Shop name is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('type_id')">
+        <ion-input label="Type ID" labelPlacement="floating" type="number" formControlName="type_id"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('type_id')">Type ID is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('location')">
+        <ion-input label="Location" labelPlacement="floating" type="number" formControlName="location"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('location')">Location is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('state')">
+        <ion-input label="State" labelPlacement="floating" type="number" formControlName="state"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('state')">State is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('mandi_id')">
+        <ion-input label="Mandi ID" labelPlacement="floating" type="number" formControlName="mandi_id"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('mandi_id')">Mandi ID is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('address')">
+        <ion-input label="Address" labelPlacement="floating" formControlName="address"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('address')">Address is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('email')">
+        <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('email')">Email is required and should be valid.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('number')">
+        <ion-input label="Phone Number" labelPlacement="floating" formControlName="number"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('number')">Phone number is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('gst_num')">
+        <ion-input label="GST Number" labelPlacement="floating" formControlName="gst_num"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('gst_num')">GST number is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('pan_num')">
+        <ion-input label="PAN Number" labelPlacement="floating" formControlName="pan_num"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('pan_num')">PAN number is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('privilege_user')">
+        <ion-input label="Privilege User" labelPlacement="floating" type="number" formControlName="privilege_user"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('privilege_user')">Privilege user is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('established_year')">
+        <ion-input label="Established Year" labelPlacement="floating" type="number" formControlName="established_year"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('established_year')">Established year is required.</p>
+
+      <ion-item [class.invalid]="isFieldInvalid('active_status')">
+        <ion-input label="Active Status" labelPlacement="floating" type="number" formControlName="active_status"></ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('active_status')">Active status is required.</p>
+
+      <div class="center-button">
+        <ion-button class="custom-button" type="submit" [disabled]="!businessBranch.valid">
+          SUBMIT
+        </ion-button>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>
