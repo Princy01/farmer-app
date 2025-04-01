@@ -89,6 +89,10 @@ export const routes: Routes = [
         path: 'business-branch',
         loadComponent: () => import('./forms/business-branch/business-branch.component').then((m) => m.BusinessBranchComponent),
       },
+      {
+        path: 'business-category',
+        loadComponent: () => import('./forms/business-category/business-category.component').then((m) => m.BusinessCategoryComponent),
+      },
     ]
   },
   {

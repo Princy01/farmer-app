@@ -1,0 +1,26 @@
+<ion-content>
+  <form [formGroup]="businessCategoryForm" (ngSubmit)="submitForm()">
+    <ion-list>
+
+      <!-- Business Category Name -->
+      <ion-item [class.invalid]="isFieldInvalid('b_category_name')">
+        <ion-input
+          label="Category Name"
+          labelPlacement="floating"
+          formControlName="b_category_name">
+        </ion-input>
+      </ion-item>
+      <p class="error" *ngIf="isFieldInvalid('b_category_name')">
+        Business Category Name is required (max 25 characters).
+      </p>
+
+      <!-- Submit Button -->
+      <div class="center-button">
+        <ion-button type="submit" class="custom-button" [disabled]="businessCategoryForm.invalid">
+          SUBMIT
+        </ion-button>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>

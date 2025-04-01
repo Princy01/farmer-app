@@ -10,7 +10,7 @@ import {
   personOutline, carOutline, pricetagsOutline, storefrontOutline,
   locationOutline, mapOutline, alertCircleOutline, cubeOutline,
   personCircleOutline, listOutline, cashOutline, businessOutline,
-  briefcaseOutline, cardOutline, addCircleOutline } from 'ionicons/icons';
+  briefcaseOutline, cardOutline, addCircleOutline, layersOutline, basketOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-admin',
@@ -42,13 +42,12 @@ export class AdminPage implements OnInit {
     '/admin/business': 'Business',
     '/admin/business-type': 'Business Type',
     '/admin/payment-mode': 'Payment Mode',
-    '/admin/business-branch': 'Business Branch'
+    '/admin/business-branch': 'Business Branch',
+    '/admin/business-category': 'Business Category'
   };
 
   constructor(private router: Router) {
-    addIcons({personOutline,carOutline,pricetagsOutline,storefrontOutline,locationOutline,mapOutline,
-      alertCircleOutline,cubeOutline,personCircleOutline,listOutline,cashOutline,businessOutline,
-      addCircleOutline,briefcaseOutline,cardOutline});
+    addIcons({personOutline,carOutline,pricetagsOutline,basketOutline,locationOutline,mapOutline,alertCircleOutline,cubeOutline,personCircleOutline,listOutline,cashOutline,businessOutline,storefrontOutline,layersOutline,briefcaseOutline,cardOutline,addCircleOutline});
 
     // Listen for route changes
     this.router.events.subscribe((event) => {
