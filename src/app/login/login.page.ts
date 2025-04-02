@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { eye, eyeOff } from 'ionicons/icons';
 
 @Component({
   selector: 'app-login',
@@ -14,21 +16,31 @@ import { Router } from '@angular/router';
 export class LoginPage {
   loginForm: FormGroup;
   registerForm: FormGroup;
-  authMode: 'login' | 'register' = 'login'; // Toggle between Login & Register
+  authMode: 'login' | 'register' = 'login';
+  showLoginPassword: boolean = false;
+  showRegisterPassword: boolean = false;
 
   constructor(private fb: FormBuilder, private router: Router) {
-    // Login Form
+    addIcons({ eye, eyeOff });
+
     this.loginForm = this.fb.group({
       emailOrPhone: ['', [Validators.required, this.emailOrPhoneValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
-    // Register Form
     this.registerForm = this.fb.group({
       name: ['', Validators.required],
       emailOrPhone: ['', [Validators.required, this.emailOrPhoneValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+  }
+
+  toggleLoginPasswordVisibility() {
+    this.showLoginPassword = !this.showLoginPassword;
+  }
+
+  toggleRegisterPasswordVisibility() {
+    this.showRegisterPassword = !this.showRegisterPassword;
   }
 
   emailOrPhoneValidator(control: AbstractControl) {
@@ -39,12 +51,11 @@ export class LoginPage {
     const phonePattern = /^[0-9]{10}$/;
 
     if (emailPattern.test(value) || phonePattern.test(value)) {
-      return null; // Valid
+      return null;
     }
-    return { invalidFormat: true }; // Invalid
+    return { invalidFormat: true };
   }
 
-  // Handle Login
   onLogin() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -53,7 +64,6 @@ export class LoginPage {
 
     const { emailOrPhone } = this.loginForm.value;
 
-    // Mock user role determination (Replace with API call)
     let userRole: string;
     switch (emailOrPhone) {
       case 'admin@example.com':
@@ -73,20 +83,13 @@ export class LoginPage {
         return;
     }
 
-    // Redirect based on role
     switch (userRole) {
       case 'admin':
         this.router.navigate(['/admin/driver']);
         break;
-      // case 'wholesaler':
-      //   this.router.navigate(['/wholesaler/home']);
-      //   break;
       case 'wholesaler':
         this.router.navigate(['/home']);
         break;
-      // case 'retailer':
-      //   this.router.navigate(['/retailer/home']);
-      //   break;
       case 'retailer':
         this.router.navigate(['/buyer/buyer-home']);
         break;
@@ -96,17 +99,12 @@ export class LoginPage {
     }
   }
 
-  // Handle Registration
   onRegisterSubmit() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
     }
-
-    // Mock API call (replace with real API)
     console.log('User Registered:', this.registerForm.value);
-
-    // After successful registration, switch to login form
     this.authMode = 'login';
   }
 }

@@ -102,6 +102,14 @@ ion-input {
   margin-top: 10px;
 }
 
+.password-toggle {
+  font-size: 1.2rem;
+  opacity: 0.7;
+  &:hover {
+    opacity: 1;
+  }
+}
+
 
 
 
