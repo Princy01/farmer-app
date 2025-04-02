@@ -51,11 +51,49 @@ export class LoginPage {
       return;
     }
 
-    const { email } = this.loginForm.value;
-    const userRole = email === 'admin@example.com' ? 'admin' : 'user';
+    const { emailOrPhone } = this.loginForm.value;
 
-    // Navigate based on role
-    this.router.navigate([userRole === 'admin' ? '/admin/category' : '/admin']);
+    // Mock user role determination (Replace with API call)
+    let userRole: string;
+    switch (emailOrPhone) {
+      case 'admin@example.com':
+        userRole = 'admin';
+        break;
+      case 'wholesaler@example.com':
+        userRole = 'wholesaler';
+        break;
+      case 'retailer@example.com':
+        userRole = 'retailer';
+        break;
+      case 'transporter@example.com':
+        userRole = 'transporter';
+        break;
+      default:
+        console.error('Invalid login credentials');
+        return;
+    }
+
+    // Redirect based on role
+    switch (userRole) {
+      case 'admin':
+        this.router.navigate(['/admin/driver']);
+        break;
+      // case 'wholesaler':
+      //   this.router.navigate(['/wholesaler/home']);
+      //   break;
+      case 'wholesaler':
+        this.router.navigate(['/home']);
+        break;
+      // case 'retailer':
+      //   this.router.navigate(['/retailer/home']);
+      //   break;
+      case 'retailer':
+        this.router.navigate(['/buyer/buyer-home']);
+        break;
+      case 'transporter':
+        this.router.navigate(['/transport/transport-requests']);
+        break;
+    }
   }
 
   // Handle Registration
