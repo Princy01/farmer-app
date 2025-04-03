@@ -1,6 +1,6 @@
 <ion-content>
   <div class="controls-container">
-    <ion-segment [(ngModel)]="selectedView" (ionChange)="onViewChange()">
+    <ion-segment [(ngModel)]="selectedView" mode="ios" (ionChange)="onViewChange()">
       <ion-segment-button value="trends">
         <ion-label>Sales Trends</ion-label>
       </ion-segment-button>
