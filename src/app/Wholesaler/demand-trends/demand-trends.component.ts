@@ -1,165 +1,383 @@
-import { Component, OnInit } from '@angular/core';
-import { NgApexchartsModule } from 'ng-apexcharts';  // For charts
-import { IonicModule } from '@ionic/angular';
-import { register } from 'swiper/element/bundle'; // For carousel
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';  // Allows usage of Swiper Web Components
+//CREATE MATERIALIZED VIEW IN SQL AND THEN MAKE CHANGES HERE FOR THAT
 
+import { Component, OnInit } from '@angular/core';
+import { NgApexchartsModule } from 'ng-apexcharts';
+import { IonicModule } from '@ionic/angular';
+import { register } from 'swiper/element/bundle';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+
+interface ProductData {
+  name: string;
+  isSelected: boolean;
+  data: number[];
+}
 
 @Component({
-  selector: 'app-demand-trends',
   template: `
     <ion-content>
-      <swiper-container [slidesPerView]="1" [pagination]="true">
-        <!-- Seasonal Demand Chart -->
-        <swiper-slide>
-          <div class="chart-container">
-            <h3>Seasonal Demand Patterns</h3>
-            <apx-chart
-              [series]="seasonalDemandOptions.series"
-              [chart]="seasonalDemandOptions.chart"
-              [xaxis]="seasonalDemandOptions.xaxis"
-              [yaxis]="seasonalDemandOptions.yaxis"
-              [colors]="seasonalDemandOptions.colors"
-            ></apx-chart>
-          </div>
-        </swiper-slide>
+      <ion-grid class="ion-no-padding">
+        <ion-row class="full-height">
+          <!-- Filters Sidebar -->
+          <ion-col size="12" size-md="3" class="sidebar">
+            <div class="filters-container">
+              <ion-item>
+                <ion-label position="stacked">Time Range</ion-label>
+                <ion-select [(ngModel)]="selectedTimeRange"
+                          (ionChange)="updateCharts()"
+                          interface="popover">
+                  <ion-select-option value="3">3 Months</ion-select-option>
+                  <ion-select-option value="6">6 Months</ion-select-option>
+                  <ion-select-option value="12">12 Months</ion-select-option>
+                </ion-select>
+              </ion-item>
 
-        <!-- Product Demand Comparison -->
-        <swiper-slide>
-          <div class="chart-container">
-            <h3>Product Demand Comparison</h3>
-            <apx-chart
-              [series]="productDemandOptions.series"
-              [chart]="productDemandOptions.chart"
-              [xaxis]="productDemandOptions.xaxis"
-              [yaxis]="productDemandOptions.yaxis"
-              [colors]="productDemandOptions.colors"
-              [plotOptions]="productDemandOptions.plotOptions"
-            ></apx-chart>
-          </div>
-        </swiper-slide>
-      </swiper-container>
+              <ion-item>
+                <ion-label position="stacked">Select Products</ion-label>
+                <ion-select [(ngModel)]="selectedProducts"
+                          [multiple]="true"
+                          (ionChange)="onProductSelectionChange()"
+                          interface="action-sheet"
+                          [interfaceOptions]="customActionSheetOptions">
+                  <div slot="header">
+                    <ion-searchbar [(ngModel)]="searchTerm"
+                                 (ionInput)="filterProducts()"
+                                 placeholder="Search products">
+                    </ion-searchbar>
+                    <ion-item lines="none">
+                      <ion-checkbox [(ngModel)]="allSelected"
+                                  (ionChange)="toggleAllProducts()">
+                        Select All
+                      </ion-checkbox>
+                    </ion-item>
+                  </div>
+                  <ion-select-option *ngFor="let product of filteredProducts"
+                                   [value]="product.name">
+                    {{product.name}}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+          </ion-col>
+
+          <!-- Charts Area -->
+          <ion-col size="12" size-md="9" class="charts-area">
+            <div class="charts-container">
+              <!-- Seasonal Demand Chart -->
+              <div class="chart-wrapper">
+                <h3>Seasonal Demand Patterns</h3>
+                <apx-chart
+                  [series]="seasonalDemandOptions.series"
+                  [chart]="seasonalDemandOptions.chart"
+                  [xaxis]="seasonalDemandOptions.xaxis"
+                  [yaxis]="seasonalDemandOptions.yaxis"
+                  [colors]="seasonalDemandOptions.colors"
+                  [tooltip]="seasonalDemandOptions.tooltip">
+                </apx-chart>
+              </div>
+
+              <!-- Product Demand Chart -->
+              <div class="chart-wrapper">
+                <h3>Product Demand Comparison</h3>
+                <apx-chart
+                  [series]="productDemandOptions.series"
+                  [chart]="productDemandOptions.chart"
+                  [xaxis]="productDemandOptions.xaxis"
+                  [yaxis]="productDemandOptions.yaxis"
+                  [colors]="productDemandOptions.colors"
+                  [plotOptions]="productDemandOptions.plotOptions"
+                  [tooltip]="productDemandOptions.tooltip">
+                </apx-chart>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </ion-content>
   `,
+
   styles: [`
-    :host {
-      display: block;
+    .full-height {
       height: 100%;
     }
-    swiper-container {
+
+    .sidebar {
+      background: #f5f5f5;
       height: 100%;
     }
+
+    .filters-container {
+      padding: 16px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .products-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      background: #e0e0e0;
+      border-radius: 8px;
+    }
+
+    .product-search {
+      --background: #ffffff;
+      --box-shadow: none;
+      --border-radius: 8px;
+    }
+
+    .product-list {
+      overflow-y: auto;
+      flex: 1;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 8px;
+    }
+
+    .product-list ion-item {
+      --background: transparent;
+      --padding-start: 8px;
+      --padding-end: 8px;
+      --min-height: 40px;
+      margin-bottom: 4px;
+    }
+
+    .charts-area {
+      padding: 16px;
+      height: 100%;
+    }
+
     .chart-container {
-      width: 100%;
-      height: 100%;
-      padding: 20px;
-      background: #fff;
+      background: #ffffff;
       border-radius: 10px;
+      padding: 20px;
+      height: calc(100vh - 32px);
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
+
     h3 {
       color: #333;
-      margin-bottom: 20px;
+      margin: 0 0 20px;
       text-align: center;
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        height: auto;
+      }
+
+      .filters-container {
+        max-height: 300px;
+      }
+
+      .chart-container {
+        height: 400px;
+      }
+
+      ion-select::part(icon) {
+    color: #666;
+  }
+
+  ion-searchbar {
+    padding: 8px 16px;
+    --background: #f5f5f5;
+    --border-radius: 8px;
+  }
+
+  ion-select::part(placeholder),
+  ion-select::part(text) {
+    color: #333;
+    font-size: 14px;
+  }
+
+  .select-header {
+    padding: 16px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+  }
     }
   `],
   standalone: true,
-  imports: [IonicModule, NgApexchartsModule],
+  imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class DemandTrendsComponent implements OnInit {
+  selectedTimeRange = '3';
+  searchTerm = '';
+  allSelected = false;
+  products: ProductData[] = [
+    { name: 'Potato', isSelected: true, data: [] },
+    { name: 'Tomato', isSelected: true, data: [] },
+    { name: 'Onion', isSelected: false, data: [] },
+    { name: 'Cauliflower', isSelected: false, data: [] },
+    { name: 'Green Peas', isSelected: false, data: [] },
+    { name: 'Cabbage', isSelected: false, data: [] }
+  ];
+  filteredProducts: ProductData[] = [];
   seasonalDemandOptions: any;
   productDemandOptions: any;
 
+  selectedProducts: string[] = ['Potato', 'Tomato'];
+  customActionSheetOptions = {
+    header: 'Select Products',
+    subHeader: 'Choose products to display in charts'
+  };
+
   ngOnInit() {
-    this.initializeCharts();
+    this.filteredProducts = [...this.products];
+    this.loadInitialData();
+    this.syncProductSelections();
+    this.updateCharts();
   }
 
-  private initializeCharts() {
-    // Seasonal Demand Chart Options
+  onProductSelectionChange() {
+    this.products.forEach(p => {
+      p.isSelected = this.selectedProducts.includes(p.name);
+    });
+    this.updateCharts();
+  }
+
+  filterProducts() {
+    if (!this.searchTerm.trim()) {
+      this.filteredProducts = [...this.products];
+      return;
+    }
+
+    const search = this.searchTerm.toLowerCase();
+    this.filteredProducts = this.products.filter(product =>
+      product.name.toLowerCase().includes(search)
+    );
+  }
+
+  toggleAllProducts() {
+    this.allSelected = !this.allSelected;
+    if (this.allSelected) {
+      this.selectedProducts = this.products.map(p => p.name);
+    } else {
+      this.selectedProducts = [];
+    }
+    this.onProductSelectionChange();
+  }
+
+  private syncProductSelections() {
+    this.products.forEach(p => {
+      p.isSelected = this.selectedProducts.includes(p.name);
+    });
+    this.allSelected = this.selectedProducts.length === this.products.length;
+  }
+
+  private loadInitialData() {
+    this.products.forEach(product => {
+      product.data = Array.from({ length: 12 }, () =>
+        Math.floor(Math.random() * (100000 - 20000) + 20000)
+      );
+    });
+  }
+
+  updateCharts() {
+    const months = parseInt(this.selectedTimeRange);
+    const selectedProducts = this.products.filter(p => p.isSelected);
+
+    this.updateSeasonalDemandChart(selectedProducts, months);
+    this.updateProductDemandChart(selectedProducts);
+  }
+
+  private updateSeasonalDemandChart(selectedProducts: ProductData[], months: number) {
     this.seasonalDemandOptions = {
-      series: [{
-        name: 'Potato',
-        data: [45000, 52000, 38000, 24000, 33000, 26000, 21000, 20000, 40000, 55000, 58000, 56000]
-      }, {
-        name: 'Tomato',
-        data: [35000, 41000, 62000, 42000, 13000, 18000, 29000, 37000, 36000, 51000, 32000, 35000]
-      }, {
-        name: 'Onion',
-        data: [87000, 57000, 74000, 99000, 75000, 38000, 62000, 47000, 82000, 56000, 45000, 47000]
-      }],
+      series: selectedProducts.map(product => ({
+        name: product.name,
+        data: product.data.slice(-months)
+      })),
       chart: {
         height: 350,
         type: 'line',
-        background: '#ffffff'
+        background: '#ffffff',
+        toolbar: {
+          show: false
+        }
       },
-      colors: ['#FF6B6B', '#45B7D1', '#4ECDC4'],
+      colors: ['#FF6B6B', '#45B7D1', '#4ECDC4', '#96CEB4', '#FFEEAD', '#D4A5A5'],
       xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        categories: this.getLastXMonths(months)
       },
       yaxis: {
         title: {
           text: 'Demand (kg)'
         },
         labels: {
-          formatter: function(val: number) {
-            return val.toLocaleString() + ' kg';
-          }
+          formatter: (val: number) => val.toLocaleString() + ' kg'
         }
       },
       tooltip: {
         y: {
-          formatter: function(val: number) {
-            return val.toLocaleString() + ' kg';
-          }
+          formatter: (val: number) => val.toLocaleString() + ' kg'
         }
       }
     };
+  }
 
-    // Product Demand Comparison
+  private updateProductDemandChart(selectedProducts: ProductData[]) {
+    const currentData = selectedProducts.map(p => p.data[p.data.length - 1]);
+    const previousData = selectedProducts.map(p => p.data[p.data.length - 2]);
+
     this.productDemandOptions = {
       series: [{
-        name: 'Current Demand',
-        data: [44000, 55000, 57000, 56000, 61000, 58000]
+        name: 'Current Month',
+        data: currentData
       }, {
         name: 'Previous Month',
-        data: [76000, 85000, 101000, 98000, 87000, 105000]
+        data: previousData
       }],
       chart: {
         type: 'bar',
         height: 350,
-        background: '#ffffff'
+        background: '#ffffff',
+        toolbar: {
+          show: false
+        }
       },
       plotOptions: {
         bar: {
           horizontal: false,
           columnWidth: '55%',
-          endingShape: 'rounded'
-        },
+          borderRadius: 5
+        }
       },
-      colors: ['#20E647', '#FEB019'],
+      colors: ['#2E7D32', '#1976D2'],
       xaxis: {
-        categories: ['Potato', 'Onion', 'Tomato', 'Cauliflower',
-                    'Green Peas', 'Cabbage'],
+        categories: selectedProducts.map(p => p.name)
       },
       yaxis: {
         title: {
           text: 'Demand (kg)'
         },
         labels: {
-          formatter: function(val: number) {
-            return val.toLocaleString() + ' kg';
-          }
+          formatter: (val: number) => val.toLocaleString() + ' kg'
         }
       },
       tooltip: {
         y: {
-          formatter: function(val: number) {
-            return val.toLocaleString() + ' kg';
-          }
+          formatter: (val: number) => val.toLocaleString() + ' kg'
         }
       }
     };
+  }
+
+  private getLastXMonths(count: number): string[] {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentMonth = new Date().getMonth();
+    const result = [];
+
+    for (let i = count - 1; i >= 0; i--) {
+      const monthIndex = (currentMonth - i + 12) % 12;
+      result.push(months[monthIndex]);
+    }
+    return result;
   }
 }

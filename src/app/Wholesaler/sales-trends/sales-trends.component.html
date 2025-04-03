@@ -1,3 +1,52 @@
-<p>
-  sales-trends works!
-</p>
+<ion-content>
+  <div class="controls-container">
+    <ion-segment [(ngModel)]="selectedView" (ionChange)="onViewChange()">
+      <ion-segment-button value="trends">
+        <ion-label>Sales Trends</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="products">
+        <ion-label>Top Products</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <ion-select
+      *ngIf="selectedView === 'trends'"
+      [(ngModel)]="selectedPeriod"
+      (ionChange)="onPeriodChange()"
+      interface="popover"
+      class="period-selector"
+    >
+      <ion-select-option value="weekly">Weekly</ion-select-option>
+      <ion-select-option value="monthly">Monthly</ion-select-option>
+      <ion-select-option value="quarterly">Quarterly</ion-select-option>
+      <ion-select-option value="yearly">Yearly</ion-select-option>
+    </ion-select>
+  </div>
+
+  <div class="chart-container">
+    <ng-container *ngIf="selectedView === 'trends'">
+      <apx-chart
+        [series]="chartOptions.series"
+        [chart]="chartOptions.chart"
+        [xaxis]="chartOptions.xaxis"
+        [yaxis]="chartOptions.yaxis"
+        [colors]="chartOptions.colors"
+        [title]="chartOptions.title"
+      ></apx-chart>
+    </ng-container>
+
+    <ng-container *ngIf="selectedView === 'products'">
+      <apx-chart
+        [series]="topProductsOptions.series"
+        [chart]="topProductsOptions.chart"
+        [xaxis]="topProductsOptions.xaxis"
+        [yaxis]="topProductsOptions.yaxis"
+        [plotOptions]="topProductsOptions.plotOptions"
+        [dataLabels]="topProductsOptions.dataLabels"
+        [colors]="topProductsOptions.colors"
+        [title]="topProductsOptions.title"
+        [grid]="topProductsOptions.grid"
+      ></apx-chart>
+    </ng-container>
+  </div>
+</ion-content>

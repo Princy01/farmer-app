@@ -1,109 +1,69 @@
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { IonicModule } from '@ionic/angular';
-import { register } from 'swiper/element/bundle';
+import { FormsModule } from '@angular/forms';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-
-register();
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sales-trends',
-  template: `
-    <ion-content>
-      <swiper-container [slidesPerView]="1" [pagination]="true">
-        <!-- Monthly Sales Chart -->
-        <swiper-slide>
-          <div class="chart-container">
-            <h3>Monthly Sales Trends</h3>
-            <apx-chart
-              [series]="monthlySalesOptions.series"
-              [chart]="monthlySalesOptions.chart"
-              [xaxis]="monthlySalesOptions.xaxis"
-              [yaxis]="monthlySalesOptions.yaxis"
-              [colors]="monthlySalesOptions.colors"
-            ></apx-chart>
-          </div>
-        </swiper-slide>
-
-        <!-- Weekly Sales Chart -->
-        <swiper-slide>
-          <div class="chart-container">
-            <h3>Weekly Sales Comparison</h3>
-            <apx-chart
-              [series]="weeklySalesOptions.series"
-              [chart]="weeklySalesOptions.chart"
-              [xaxis]="weeklySalesOptions.xaxis"
-              [yaxis]="weeklySalesOptions.yaxis"
-              [colors]="weeklySalesOptions.colors"
-            ></apx-chart>
-          </div>
-        </swiper-slide>
-
-        <!-- Top Products Chart -->
-        <swiper-slide>
-          <div class="chart-container">
-            <h3>Top Selling Products</h3>
-            <apx-chart
-              [series]="topProductsOptions.series"
-              [chart]="topProductsOptions.chart"
-              [labels]="topProductsOptions.labels"
-              [colors]="topProductsOptions.colors"
-            ></apx-chart>
-          </div>
-        </swiper-slide>
-      </swiper-container>
-    </ion-content>
-  `,
-  styles: [`
-    :host {
-      display: block;
-      height: 100%;
-    }
-    swiper-container {
-      height: 100%;
-    }
-    .chart-container {
-      width: 100%;
-      height: 100%;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    h3 {
-      color: #333;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-  `],
+  templateUrl: './sales-trends.component.html',
+  styleUrls: ['./sales-trends.component.scss'],
   standalone: true,
-  imports: [IonicModule, NgApexchartsModule],
+  imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class SalesTrendsComponent implements OnInit {
-  monthlySalesOptions: any;
-  weeklySalesOptions: any;
+  selectedView: string = 'trends';
+  selectedPeriod: string = 'monthly';
+  chartOptions: any;
   topProductsOptions: any;
 
   ngOnInit() {
     this.initializeCharts();
   }
 
+  onViewChange() {
+    if (this.selectedView === 'trends') {
+      this.updateTrendsChart();
+    } else {
+      this.initializeTopProductsChart();
+    }
+  }
+
+  onPeriodChange() {
+    this.updateTrendsChart();
+  }
+
   private initializeCharts() {
-    // Monthly Sales Chart Options
-    this.monthlySalesOptions = {
+    this.updateTrendsChart();
+    this.initializeTopProductsChart();
+  }
+
+  private updateTrendsChart() {
+    const data = this.getDataForPeriod(this.selectedPeriod);
+    this.chartOptions = {
       series: [{
         name: 'Sales',
-        data: [320000, 450000, 380000, 540000, 420000, 680000, 720000, 850000, 690000, 920000, 850000, 990000]
+        data: data.values
       }],
       chart: {
         height: 350,
         type: 'line',
-        background: '#ffffff'
+        background: '#ffffff',
+        toolbar: {
+          show: true
+        },
+        padding: {
+          top: 20,
+          right: 20,
+          bottom: 0,
+          left: 0
+        }
       },
       colors: ['#2E93fA'],
       xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        categories: data.categories
       },
       yaxis: {
         title: {
@@ -112,56 +72,135 @@ export class SalesTrendsComponent implements OnInit {
         labels: {
           formatter: (value: number) => `₹${(value/1000).toFixed(0)}K`
         }
+      },
+      title: {
+        text: `${this.selectedPeriod.charAt(0).toUpperCase() + this.selectedPeriod.slice(1)} Sales Trends`,
+        align: 'center',
+        style: {
+          fontSize: '16px'
+        },
+        margin: 40
+      },
+      margin: {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 20
       }
     };
+  }
 
-    // Weekly Sales Chart Options for Top Products
-    this.weeklySalesOptions = {
+  private initializeTopProductsChart() {
+    const productData = [
+      { name: 'Onion (Lasalgaon Mandi)', value: 8500 },
+      { name: 'Potato (Agra Mandi)', value: 7200 },
+      { name: 'Tomato (Kolar Mandi)', value: 6800 },
+      { name: 'Cabbage (Pune Mandi)', value: 5900 },
+      { name: 'Cauliflower (Delhi Mandi)', value: 5500 },
+      { name: 'Green Peas (Indore Mandi)', value: 4800 },
+      { name: 'Carrot (Bangalore Mandi)', value: 4200 },
+      { name: 'Bitter Gourd (Chennai Mandi)', value: 3900 },
+      { name: 'Lady Finger (Ahmedabad Mandi)', value: 3500 },
+      { name: 'Brinjal (Kolkata Mandi)', value: 3200 }
+    ];
+
+    this.topProductsOptions = {
       series: [{
-        name: 'This Week',
-        data: [2500, 3200, 2800, 4100, 3600, 2900, 3800]
-      }, {
-        name: 'Last Week',
-        data: [2100, 2800, 2400, 3500, 3200, 2600, 3400]
+        name: 'Sales Volume',
+        data: productData.map(item => item.value)
       }],
       chart: {
-        height: 350,
         type: 'bar',
-        background: '#ffffff'
+        height: 500,
+        background: '#ffffff',
+        toolbar: {
+          show: false
+        }
       },
-      colors: ['purple', 'pink'],
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          borderRadius: 4,
+          distributed: true,
+          dataLabels: {
+            position: 'center',
+          },
+          barHeight: '80%'
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (value: number) => `${value} kg`,
+        style: {
+          fontSize: '12px',
+          colors: ['#ffffff']
+        }
+      },
       xaxis: {
-        categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        categories: productData.map(item => item.name),
+        title: {
+          text: 'Sales Volume (kg)'
+        }
       },
       yaxis: {
         title: {
-          text: 'Sales (kg)'
+          text: 'Products & Mandi Location'
         }
-      }
-    };
-
-    // Top Products Chart Options
-    this.topProductsOptions = {
-      series: [4800, 3900, 3200, 2800, 2500],
-      chart: {
-        height: 350,
-        type: 'pie',
-        background: '#ffffff'
       },
-      labels: ['Potato', 'Onion', 'Tomato', 'Cauliflower', 'Green Peas'],
-      colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD'],
+      colors: [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
+        '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
+      ],
+      title: {
+        text: 'Top Selling Mandi Products',
+        align: 'center',
+        style: {
+          fontSize: '16px'
+        },
+        margin: 20
+      },
       tooltip: {
         y: {
           formatter: (value: number) => `${value} kg`
         }
       },
-      title: {
-        text: 'Weekly Sales Volume by Product',
-        align: 'center',
-        style: {
-          fontSize: '16px'
+      grid: {
+        xaxis: {
+          lines: {
+            show: true
+          }
         }
       }
     };
+  }
+
+  private getDataForPeriod(period: string): { categories: string[], values: number[] } {
+    switch (period) {
+      case 'weekly':
+        return {
+          categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          values: [42000, 38000, 45000, 50000, 49000, 60000, 55000]
+        };
+      case 'monthly':
+        return {
+          categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          values: [320000, 450000, 380000, 540000, 420000, 680000, 720000, 850000, 690000, 920000, 850000, 990000]
+        };
+      case 'quarterly':
+        return {
+          categories: ['Q1', 'Q2', 'Q3', 'Q4'],
+          values: [1150000, 1640000, 2260000, 2760000]
+        };
+      case 'yearly':
+        return {
+          categories: ['2020', '2021', '2022', '2023', '2024'],
+          values: [5800000, 6500000, 7800000, 8900000, 9500000]
+        };
+      default:
+        return {
+          categories: [],
+          values: []
+        };
+    }
   }
 }
