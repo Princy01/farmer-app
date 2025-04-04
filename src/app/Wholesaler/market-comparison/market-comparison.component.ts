@@ -1,78 +1,65 @@
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { IonicModule } from '@ionic/angular';
-import { register } from 'swiper/element/bundle';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
-register();
+interface ProductPrices {
+  [key: string]: number;
+}
+
+interface MarketPrices {
+  [key: string]: ProductPrices;
+}
 
 @Component({
   selector: 'app-market-comparison',
-  template: `
-    <ion-content>
-      <div class="chart-container">
-        <h3>Price Comparison Across Markets</h3>
-        <apx-chart
-          [series]="priceComparisonOptions.series"
-          [chart]="priceComparisonOptions.chart"
-          [xaxis]="priceComparisonOptions.xaxis"
-          [yaxis]="priceComparisonOptions.yaxis"
-          [plotOptions]="priceComparisonOptions.plotOptions"
-          [colors]="priceComparisonOptions.colors"
-          [tooltip]="priceComparisonOptions.tooltip"
-        ></apx-chart>
-      </div>
-    </ion-content>
-  `,
-  styles: [`
-    :host {
-      display: block;
-      height: 100%;
-    }
-    .chart-container {
-      width: 100%;
-      height: 100%;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    h3 {
-      color: #333;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-  `],
+  templateUrl: './market-comparison.component.html',
+  styleUrls: ['./market-comparison.component.scss'],
   standalone: true,
-  imports: [IonicModule, NgApexchartsModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule]
 })
 export class MarketComparisonComponent implements OnInit {
   priceComparisonOptions: any;
+  availableMandis = ['Azadpur Mandi', 'Ghazipur Mandi', 'Okhla Mandi'];
+  availableProducts = ['Potato', 'Onion', 'Tomato', 'Cauliflower', 'Green Peas', 'Cabbage'];
+  selectedMandis: string[] = ['Azadpur Mandi'];
+  selectedProducts: string[] = ['Potato', 'Onion', 'Tomato'];
+
+  private priceData: MarketPrices = {
+    'Azadpur Mandi': { 'Potato': 45, 'Onion': 52, 'Tomato': 38, 'Cauliflower': 24, 'Green Peas': 33, 'Cabbage': 26 },
+    'Ghazipur Mandi': { 'Potato': 42, 'Onion': 48, 'Tomato': 35, 'Cauliflower': 22, 'Green Peas': 31, 'Cabbage': 24 },
+    'Okhla Mandi': { 'Potato': 48, 'Onion': 55, 'Tomato': 42, 'Cauliflower': 28, 'Green Peas': 36, 'Cabbage': 29 }
+  };
 
   ngOnInit() {
     this.initializeCharts();
   }
 
+  updateChart() {
+    const series = this.selectedMandis.map(mandi => ({
+      name: mandi,
+      data: this.selectedProducts.map(product => this.priceData[mandi][product])
+    }));
+
+    this.priceComparisonOptions = {
+      ...this.priceComparisonOptions,
+      series: series,
+      xaxis: {
+        ...this.priceComparisonOptions.xaxis,
+        categories: this.selectedProducts
+      }
+    };
+  }
+
   private initializeCharts() {
     this.priceComparisonOptions = {
-      series: [{
-        name: 'Azadpur Mandi',
-        data: [45, 52, 38, 24, 33, 26]
-      }, {
-        name: 'Ghazipur Mandi',
-        data: [42, 48, 35, 22, 31, 24]
-      }, {
-        name: 'Okhla Mandi',
-        data: [48, 55, 42, 28, 36, 29]
-      }],
+      series: [],
       chart: {
         type: 'bar',
         height: 350,
         stacked: false,
-        toolbar: {
-          show: false
-        }
+        toolbar: { show: false }
       },
       plotOptions: {
         bar: {
@@ -83,29 +70,21 @@ export class MarketComparisonComponent implements OnInit {
       },
       colors: ['#008FFB', '#00E396', '#FEB019'],
       xaxis: {
-        categories: ['Potato', 'Onion', 'Tomato', 'Cauliflower',
-                    'Green Peas', 'Cabbage'],
-        title: {
-          text: 'Products'
-        }
+        categories: this.selectedProducts,
+        title: { text: 'Products' }
       },
       yaxis: {
-        title: {
-          text: 'Price (₹/kg)'
-        },
+        title: { text: 'Price (₹/kg)' },
         labels: {
-          formatter: function(val: number) {
-            return '₹' + val;
-          }
+          formatter: (val: number) => `₹${val}`
         }
       },
       tooltip: {
         y: {
-          formatter: function(val: number) {
-            return '₹' + val + '/kg';
-          }
+          formatter: (val: number) => `₹${val}/kg`
         }
       }
     };
+    this.updateChart();
   }
 }

@@ -1,3 +1,34 @@
-<p>
-  market-comparison works!
-</p>
+<ion-content>
+  <div class="filters-container">
+    <ion-list>
+      <ion-item>
+        <ion-label>Select Mandis</ion-label>
+        <ion-select multiple="true" [(ngModel)]="selectedMandis" (ionChange)="updateChart()">
+          <ion-select-option *ngFor="let mandi of availableMandis" [value]="mandi">
+            {{mandi}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label>Select Products</ion-label>
+        <ion-select multiple="true" [(ngModel)]="selectedProducts" (ionChange)="updateChart()">
+          <ion-select-option *ngFor="let product of availableProducts" [value]="product">
+            {{product}}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-list>
+  </div>
+  <div class="chart-container">
+    <h3>Price Comparison Across Markets</h3>
+    <apx-chart
+      [series]="priceComparisonOptions.series"
+      [chart]="priceComparisonOptions.chart"
+      [xaxis]="priceComparisonOptions.xaxis"
+      [yaxis]="priceComparisonOptions.yaxis"
+      [plotOptions]="priceComparisonOptions.plotOptions"
+      [colors]="priceComparisonOptions.colors"
+      [tooltip]="priceComparisonOptions.tooltip"
+    ></apx-chart>
+  </div>
+</ion-content>
