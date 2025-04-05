@@ -1,17 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, NavController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
+import { addIcons } from 'ionicons';
+import { chevronBackOutline } from 'ionicons/icons';
 @Component({
   selector: 'app-sales-trends',
   templateUrl: './sales-trends.component.html',
   styleUrls: ['./sales-trends.component.scss'],
   standalone: true,
   imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class SalesTrendsComponent implements OnInit {
   selectedView: string = 'trends';
@@ -19,9 +18,18 @@ export class SalesTrendsComponent implements OnInit {
   chartOptions: any;
   topProductsOptions: any;
 
+  constructor(private navController: NavController) {
+    addIcons({ chevronBackOutline})
+   }
+
   ngOnInit() {
     this.initializeCharts();
   }
+
+  goToTrends() {
+    this.navController.navigateBack('/wholesaler/trends'); // Change the path as per your route
+  }
+
 
   onViewChange() {
     if (this.selectedView === 'trends') {

@@ -1,8 +1,9 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="openProfile()">
-        <ion-icon name="person-circle-sharp" size="large"></ion-icon>
+    <ion-buttons  mode="ios" slot="start">
+
+      <ion-button (click)="openTrends()">
+        <ion-icon name="stats-chart-outline" slot="icon-only"></ion-icon>
       </ion-button>
 
       <ion-button (click)="openNotifications()">
@@ -12,17 +13,18 @@
 
     </ion-buttons>
 
-    <ion-title style="--color: rgb(245, 240, 230);">Go4u</ion-title>
+    <ion-title  mode="ios" style="--color: rgb(245, 240, 230);">Go4u</ion-title>
 .
-      <ion-buttons slot="end">
+      <ion-buttons  mode="ios" slot="end">
       <ion-button (click)="openMessages()">
         <ion-badge *ngIf="messages > 0" class="custom-badge">{{ messages }}</ion-badge>
         <ion-icon name="chatbubbles-sharp" slot="icon-only"></ion-icon>
       </ion-button>
 
-      <ion-button (click)="openLogoPage()">
-        <ion-icon name="logo-android"></ion-icon>
+      <ion-button (click)="openProfile()">
+        <ion-icon name="person-circle-sharp" size="large"></ion-icon>
       </ion-button>
+
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -48,13 +50,23 @@
     <ion-button (click)="loadMore()" class="loadMore">Load More</ion-button>
   </div>
 
-
-    <app-screen2></app-screen2>
-    <app-screen3></app-screen3>
-
-
-  <div class="fixed-button">
-      <ion-icon (click)="navigateToScreen4()" name="arrow-forward-circle-sharp" style="color: rgb(153, 101, 58); font-size: 45px;"></ion-icon>
-  </div>
-
 </ion-content>
+
+<ion-footer class="Orders-toolbar">
+  <ion-toolbar>
+    <ion-buttons class="button-group">
+      <ion-button class="footer-button" (click)="viewMyOrders()">
+        <ion-icon name="list-circle-outline"></ion-icon>
+        My Orders
+      </ion-button>
+      <ion-button class="footer-button" (click)="createOrder()">
+        <ion-icon name="add-circle-outline"></ion-icon>
+        Create Order
+      </ion-button>
+      <ion-button class="footer-button" (click)="viewPastOrders()">
+        <ion-icon name="time-outline"></ion-icon>
+        Past Orders
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

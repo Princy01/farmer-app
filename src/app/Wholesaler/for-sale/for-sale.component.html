@@ -1,0 +1,92 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="ion-text-center custom-title">For Sale</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="form-container">
+    <h2 class="section-title">Create New Order</h2>
+
+    <ion-card mode="md">
+      <ion-card-content>
+        <ion-list lines="full">
+          <ion-item class="custom-item">
+            <ion-label position="floating">
+              <ion-icon name="leaf-outline" class="input-icon"></ion-icon>
+              Enter Item Name
+            </ion-label>
+            <ion-input [(ngModel)]="order.item"></ion-input>
+          </ion-item>
+
+          <ion-item class="custom-item">
+            <ion-label position="floating">
+              <ion-icon name="star-outline" class="input-icon"></ion-icon>
+              Select Quality
+            </ion-label>
+            <ion-select [(ngModel)]="order.quality" interface="action-sheet">
+              <ion-select-option *ngFor="let quality of qualities" [value]="quality">
+                {{ quality }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="custom-item">
+            <ion-label position="floating">
+              <ion-icon name="warning-outline" class="input-icon"></ion-icon>
+              Select Wastage Percentage
+            </ion-label>
+            <ion-select [(ngModel)]="order.wastage" interface="action-sheet">
+              <ion-select-option *ngFor="let wastage of wastages" [value]="wastage">
+                {{ wastage }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="custom-item">
+            <ion-label position="floating">
+              <ion-icon name="cube-outline" class="input-icon"></ion-icon>
+              Enter Quantity (kg)
+            </ion-label>
+            <ion-input type="number" [(ngModel)]="order.quantity"></ion-input>
+          </ion-item>
+
+          <ion-item class="custom-item">
+            <ion-label position="floating">
+              <ion-icon name="cash-outline" class="input-icon"></ion-icon>
+              Enter Price per kg (₹)
+            </ion-label>
+            <ion-input type="number" [(ngModel)]="order.price"></ion-input>
+          </ion-item>
+
+          <ion-item class="custom-item">
+            <ion-label position="stacked">
+              <ion-icon name="calendar-outline" class="input-icon"></ion-icon>
+              Select Pickup Date & Time
+            </ion-label>
+            <ion-input type="datetime-local"></ion-input>
+          </ion-item>
+
+          <ion-item class="custom-item">
+            <ion-label position="floating">
+              <ion-icon name="location-outline" class="input-icon"></ion-icon>
+              Enter Pickup Location
+            </ion-label>
+            <ion-input [(ngModel)]="order.location"></ion-input>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="ion-padding-top ion-text-center">
+      <ion-button class="custom-button" expand="block" shape="round" (click)="createOrder()">
+        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+        Create Order
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

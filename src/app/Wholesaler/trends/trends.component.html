@@ -1,3 +1,40 @@
-<p>
-  trends works!
-</p>
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="header-title">TRENDS</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="trends-container">
+    <ion-card (click)="navigateTo('sales-trends')">
+      <ion-card-content>
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        <p>Sales Trends</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card (click)="navigateTo('demand-trends')">
+      <ion-card-content>
+        <ion-icon name="analytics-outline"></ion-icon>
+        <p>Demand Trends</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card (click)="navigateTo('stock-insights')">
+      <ion-card-content>
+        <ion-icon name="cube-outline"></ion-icon>
+        <p>Stock Insights</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card (click)="navigateTo('market-comparison')">
+      <ion-card-content>
+        <ion-icon name="podium-outline"></ion-icon>
+        <p>Market Comparison</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

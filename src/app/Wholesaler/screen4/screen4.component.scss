@@ -1,12 +1,15 @@
-ion-toolbar{
-        --background: rgb(136, 172, 140);
+ion-toolbar:first-child {
+  --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+  --border-width: 0;
+}
 
-      }
-
-h2{
-    background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
-    padding: 3%;
-  }
+.custom-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: black;
+  font-family: 'Georgia', 'Times', serif;
+  margin-bottom: 1.5rem;
+}
 
 .custom-badge {
     --background: rgb(150, 235, 85);

@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, NavController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { addIcons } from 'ionicons';
+import { chevronBackOutline } from 'ionicons/icons';
 
 interface ProductPrices {
   [key: string]: number;
@@ -20,6 +22,13 @@ interface MarketPrices {
   imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule]
 })
 export class MarketComparisonComponent implements OnInit {
+  constructor(private navController: NavController) {
+      addIcons({ chevronBackOutline})
+     }
+     goToTrends() {
+      this.navController.navigateBack('/wholesaler/trends'); // Change the path as per your route
+    }
+
   priceComparisonOptions: any;
   availableMandis = ['Azadpur Mandi', 'Ghazipur Mandi', 'Okhla Mandi'];
   availableProducts = ['Potato', 'Onion', 'Tomato', 'Cauliflower', 'Green Peas', 'Cabbage'];

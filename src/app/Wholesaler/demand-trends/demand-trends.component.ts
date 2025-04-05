@@ -2,11 +2,11 @@
 
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IonicModule } from '@ionic/angular';
-import { register } from 'swiper/element/bundle';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { IonicModule, NavController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { addIcons } from 'ionicons';
+import { chevronBackOutline } from 'ionicons/icons';
 
 interface ProductData {
   name: string;
@@ -17,6 +17,14 @@ interface ProductData {
 @Component({
   template: `
     <ion-content>
+    <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button  color="dark" (click)="goToTrends()">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Trends</ion-title>
+  </ion-toolbar>
       <ion-grid class="ion-no-padding">
         <ion-row class="full-height">
           <!-- Filters Sidebar -->
@@ -204,9 +212,15 @@ interface ProductData {
   `],
   standalone: true,
   imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class DemandTrendsComponent implements OnInit {
+  constructor(private navController: NavController) {
+    addIcons({ chevronBackOutline})
+   }
+   goToTrends() {
+    this.navController.navigateBack('/wholesaler/trends'); // Change the path as per your route
+  }
+
   selectedTimeRange = '3';
   searchTerm = '';
   allSelected = false;

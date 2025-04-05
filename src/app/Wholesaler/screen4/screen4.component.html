@@ -1,42 +1,14 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="openProfile()">
-        <ion-icon name="person-circle-sharp" size="large"></ion-icon>
-      </ion-button>
-
-      <ion-button (click)="openNotifications()">
-        <ion-badge *ngIf="notifications > 0" class="custom-badge">{{ notifications }}</ion-badge>
-        <ion-icon name="notifications-circle-sharp" slot="icon-only"></ion-icon>
-      </ion-button>
-
+      <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
     </ion-buttons>
 
-    <ion-title style="--color: rgb(245, 240, 230);">Go4u</ion-title>
-
-      <ion-buttons slot="end">
-      <ion-button (click)="openMessages()">
-        <ion-badge *ngIf="messages > 0" class="custom-badge">{{ messages }}</ion-badge>
-        <ion-icon name="chatbubbles-sharp" slot="icon-only"></ion-icon>
-      </ion-button>
-
-      <ion-button (click)="openLogoPage()">
-        <ion-icon name="logo-android"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-
+    <ion-title class="ion-text-center custom-title">Orders Completed</ion-title>
+        </ion-toolbar>
 </ion-header>
 
-
-<ion-content [scrollEvents]="true">
-    <ion-grid>
-    <ion-row>
-      <ion-col size="12">
-        <h2 style="color: rgb(144, 141, 135); font-size: 14px ;">ORDERS COMPLETED</h2>
-      </ion-col>
-    </ion-row>
-
+    <ion-content [scrollEvents]="true">
     <!-- Filter Dropdown -->
     <ion-row>
       <ion-col size="12" class="filters">
@@ -75,16 +47,4 @@
       </ion-col>
     </ion-row>
 
-    <app-heatmap></app-heatmap>
-    <app-trends></app-trends>
-
-    <div class="fixed-button">
-      <ion-icon (click)="navigateToHome()" name="arrow-back-circle-sharp" style="color: rgb(153, 101, 58); font-size: 45px;"></ion-icon>
-    </div>
-  </ion-grid>
-  <!-- <ion-fab vertical="bottom" horizontal="start" slot="fixed">
-    <ion-fab-button (click)="navigateToHome()">
-      <ion-icon name="arrow-back-circle-sharp"></ion-icon>
-    </ion-fab-button>
-  </ion-fab> -->
 </ion-content>

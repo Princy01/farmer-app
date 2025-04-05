@@ -1,10 +1,19 @@
 import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, IonContent } from '@ionic/angular';
+import { IonicModule, IonContent, MenuController } from '@ionic/angular';
 import { RouterModule, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { personCircleOutline, locationOutline, chevronForwardOutline, heartOutline, cartOutline } from 'ionicons/icons';
-
+import {
+  personCircleOutline,
+  locationOutline,
+  chevronForwardOutline,
+  heartOutline,
+  cartOutline,
+  personOutline,
+  archiveOutline,
+  linkOutline,
+  settingsOutline
+} from 'ionicons/icons';
 interface Category {
   name: string;
   image: string;
@@ -32,8 +41,25 @@ export class BuyerHomeComponent {
 
   hideHeader = false;
 
-  constructor(private router: Router) {
-    addIcons({ personCircleOutline, locationOutline, chevronForwardOutline, heartOutline, cartOutline });
+  constructor(
+    private router: Router,
+    private menuController: MenuController
+  ) {
+    addIcons({
+      personCircleOutline,
+      locationOutline,
+      chevronForwardOutline,
+      heartOutline,
+      cartOutline,
+      personOutline,
+      archiveOutline,
+      linkOutline,
+      settingsOutline
+    });
+  }
+
+  async openMenu() {
+    await this.menuController.open();
   }
 
   onScroll(event: any) {

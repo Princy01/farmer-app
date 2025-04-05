@@ -1,4 +1,13 @@
 <ion-content>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button  color="dark" (click)="goToTrends()">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Trends</ion-title>
+  </ion-toolbar>
+  
   <ion-segment [(ngModel)]="selectedView" mode="ios">
     <ion-segment-button value="chart">
       <ion-label>Stock Levels</ion-label>

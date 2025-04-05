@@ -1,20 +1,17 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, OnInit } from '@angular/core';
 import { IonicModule, NavController, IonContent } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowBackCircleSharp } from 'ionicons/icons';
-import { HeatmapComponent } from '../heatmap/heatmap.component';
-import { TrendsComponent } from '../trends/trends.component';
-
 
 @Component({
   selector: 'app-screen4',
   templateUrl: './screen4.component.html',
   styleUrls: ['./screen4.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, HeatmapComponent, TrendsComponent]
+  imports: [IonicModule, CommonModule, FormsModule]
 })
 export class Screen4Component implements AfterViewInit {
   @ViewChild(IonContent) content!: IonContent;
@@ -36,10 +33,7 @@ export class Screen4Component implements AfterViewInit {
   selectedOrderId: number | null = null;
 
   notifications = 5;  // Example notification count
-  messages = 3;
-
-  showHeatmap = false;
-  showTrends = false;
+  messages = 3;;
 
 
   constructor(private router: Router, private navCtrl: NavController) {
@@ -47,24 +41,6 @@ export class Screen4Component implements AfterViewInit {
   }
 
 
-  openProfile() {
-    this.navCtrl.navigateForward('/profile');
-  }
-
-  openNotifications() {
-    console.log('Opening notifications');
-    // Add logic to navigate to notifications page if needed
-  }
-
-  openMessages() {
-    console.log('Opening messages');
-    // Add logic to navigate to messages page if needed
-  }
-
-  openLogoPage() {
-    console.log('Opening logo page');
-    // Add navigation logic if there's a specific page for the logo
-  }
   ngAfterViewInit() {
     this.content.scrollEvents = true;
   }
@@ -80,26 +56,6 @@ export class Screen4Component implements AfterViewInit {
 
   trackById(index: number, order: any) {
     return order.id;
-  }
-
-  loadHeatmap(event: any) {
-    setTimeout(() => {
-      this.showHeatmap = true;
-      console.log(this.showHeatmap,event)
-      // event.target.complete();
-    }, 1000);
-  }
-
-  loadTrends(event: any) {
-    setTimeout(() => {
-      this.showTrends = true;
-      console.log(this.showTrends,event)
-      // event.target.complete();
-    }, 1000);
-  }
-
-  navigateToHome() {
-    this.navCtrl.navigateBack('/home');
   }
 
 }

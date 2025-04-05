@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, NavController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { addIcons } from 'ionicons';
+import { chevronBackOutline } from 'ionicons/icons';
 
 interface SlowMovingProduct {
   product: string;
@@ -29,6 +31,13 @@ interface StockData {
   imports: [IonicModule, NgApexchartsModule, CommonModule, FormsModule],
 })
 export class StockInsightsComponent implements OnInit {
+  constructor(private navController: NavController) {
+    addIcons({ chevronBackOutline})
+   }
+   goToTrends() {
+    this.navController.navigateBack('/wholesaler/trends'); // Change the path as per your route
+  }
+  
   selectedView: string = 'chart';
   selectedWarehouse: string = 'Azadpur Mandi';
   slowMovingProducts: SlowMovingProduct[] = [];

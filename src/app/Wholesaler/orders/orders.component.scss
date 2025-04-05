@@ -1,0 +1,137 @@
+ion-header {
+  ion-toolbar:first-child {
+    --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+    --border-width: 0;
+
+    ion-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      font-family: 'Georgia', 'Times', serif;
+    }
+  }
+
+  .filter-toolbar {
+    --background: #f8f9fa;
+    padding: 0 8px;
+
+    ion-segment {
+      --background: transparent;
+
+      ion-segment-button {
+        --color: #666666;
+        // --color-checked: #2dd36f;
+        --indicator-color: rgb(136, 172, 140);
+        min-width: 90px;
+        text-transform: none;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.orders-container {
+  padding: 16px;
+  background: #f8f9fa;
+  min-height: 100%;
+}
+
+.order-wrapper {
+  margin-bottom: 16px;
+}
+
+.order-card {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  .order-header {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+
+    .order-id {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .label {
+        font-weight: 600;
+        color: #333;
+      }
+
+      ion-chip {
+        margin: 0;
+        height: 24px;
+      }
+    }
+  }
+
+  .order-content {
+    padding: 16px;
+
+    .items {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 16px 0;
+    }
+
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .total {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .label {
+          font-size: 0.8rem;
+          color: #666;
+        }
+
+        .amount {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: rgb(136, 172, 140);
+        }
+      }
+    }
+  }
+  .custom-button {
+  --background: rgb(136, 172, 140);
+  --background-hover: rgb(116, 152, 120);
+  --background-activated: rgb(116, 152, 120);
+  --background-focused: rgb(116, 152, 120);
+
+  --color: white;
+  --box-shadow: 0 2px 6px rgba(136, 172, 140, 0.3);
+
+  --ripple-color: rgb(116, 152, 120);
+  --border-radius: 6px;
+}
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .order-card {
+    background: #1e1e1e;
+
+    .order-header {
+      border-bottom-color: #333;
+    }
+
+    .order-content .divider {
+      background: #333;
+    }
+  }
+}

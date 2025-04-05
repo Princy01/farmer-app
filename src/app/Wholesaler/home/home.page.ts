@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
-import { IonicModule, NavController } from '@ionic/angular';
+import { IonicModule, NavController, MenuController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import {addIcons} from 'ionicons';
-import { chatbubblesSharp, notificationsCircleSharp,logoAndroid, personCircleSharp, arrowForwardCircleSharp, chevronForwardOutline } from 'ionicons/icons';
-import { Screen2Component } from '../screen2/screen2.component';
-import { Screen3Component } from '../screen3/screen3.component';
+import { chatbubblesSharp, notificationsCircleSharp,logoAndroid, personCircleSharp, arrowForwardCircleSharp,
+   chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline } from 'ionicons/icons';
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, Screen2Component,Screen3Component]
+  imports: [IonicModule, CommonModule]
 })
 export class HomePage {
   items = [
@@ -24,12 +25,21 @@ export class HomePage {
   messages = 3;       // Example message count
 
 
-  showScreen2 = false;
-  showScreen3 = false;
+  constructor(private navCtrl: NavController, private router: Router, private menuCtrl: MenuController
+  ) {
+    addIcons({chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
+       chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline});
+  }
+  createOrder() {
+    this.router.navigate(['/wholesaler/for-sale']);
+  }
 
+  viewMyOrders() {
+    this.router.navigate(['/wholesaler/orders']);
+  }
 
-  constructor(private navCtrl: NavController) {
-    addIcons({chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp, chevronForwardOutline});
+  viewPastOrders() {
+    this.router.navigate(['/wholesaler/screen4']);
   }
 
   searchItems(event: any) {
@@ -38,7 +48,9 @@ export class HomePage {
       item.name.toLowerCase().includes(searchTerm)
     );
   }
-
+  async toggleMenu() {
+    await this.menuCtrl.toggle();
+  }
 
   viewDetails(item: any) {
     console.log('Item details:', item);
@@ -62,28 +74,7 @@ export class HomePage {
     // Add logic to navigate to messages page if needed
   }
 
-  openLogoPage() {
-    console.log('Opening logo page');
-    // Add navigation logic if there's a specific page for the logo
-  }
-
-  loadScreen2(event: any) {
-    setTimeout(() => {
-      this.showScreen2 = true;
-      console.log(this.showScreen2,event)
-      // event.target.complete();
-    }, 1000);
-  }
-
-  loadScreen3(event: any) {
-    setTimeout(() => {
-      this.showScreen3 = true;
-      console.log(this.showScreen3,event)
-      // event.target.complete();
-    }, 1000);
-  }
-
-  navigateToScreen4() {
-    this.navCtrl.navigateForward('/screen4');
-  }
+  openTrends() {
+    this.router.navigate(['/wholesaler/trends']);
+}
 }

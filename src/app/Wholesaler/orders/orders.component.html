@@ -1,0 +1,53 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title>My Orders</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon color="dark" slot="icon-only" name="search-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar class="filter-toolbar" mode="ios">
+    <ion-segment [value]="selectedFilter" (ionChange)="handleFilterChange($event)" scrollable>
+      <ion-segment-button *ngFor="let filter of filterOptions" [value]="filter.value">
+        <ion-label>{{filter.name}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="orders-container">
+    <div class="order-wrapper" *ngFor="let order of filteredOrders">
+      <div class="order-card">
+        <div class="order-header">
+          <div class="order-id">
+            <span class="label">Order #{{order.id}}</span>
+          </div>
+          <ion-button fill="clear" size="small">
+            <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+          </ion-button>
+        </div>
+
+        <div class="order-content">
+          <div class="items" [innerHTML]="order.items"></div>
+          <div class="divider"></div>
+          <div class="order-footer">
+            <div class="total">
+              <span class="label">Total Amount</span>
+              <span class="amount">₹{{order.total}}</span>
+            </div>
+            <ion-button fill="solid" size="small" class="custom-button">
+              View Details
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -4,6 +4,34 @@ ion-header ion-toolbar {
         --background: white;
         --color: rgb(154, 192, 159);
 }
+ion-menu {
+  --width: 280px;
+
+  ion-toolbar {
+    --background: rgb(154, 192, 159);
+    --color: white;
+  }
+
+  ion-content {
+    --background: white;
+  }
+
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --min-height: 50px;
+
+    ion-icon {
+      color: rgb(154, 192, 159);
+      margin-right: 8px;
+    }
+
+    ion-label {
+      font-family: "Perpetua", serif;
+      color: rgb(117, 116, 116);
+    }
+  }
+}
 ion-icon{
   color: rgb(154, 192, 159);
 }
