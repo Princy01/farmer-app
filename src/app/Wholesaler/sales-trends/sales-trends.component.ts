@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
+
 @Component({
   selector: 'app-sales-trends',
   templateUrl: './sales-trends.component.html',
@@ -19,33 +20,36 @@ export class SalesTrendsComponent implements OnInit {
   topProductsOptions: any;
 
   constructor(private navController: NavController) {
-    addIcons({ chevronBackOutline})
-   }
+    addIcons({ chevronBackOutline });
+  }
 
   ngOnInit() {
     this.initializeCharts();
   }
 
   goToTrends() {
-    this.navController.navigateBack('/wholesaler/trends'); // Change the path as per your route
+    this.navController.navigateBack('/wholesaler/trends');
   }
-
 
   onViewChange() {
     if (this.selectedView === 'trends') {
       this.updateTrendsChart();
     } else {
-      this.initializeTopProductsChart();
+      this.updateTopProductsChart();
     }
   }
 
   onPeriodChange() {
-    this.updateTrendsChart();
+    if (this.selectedView === 'trends') {
+      this.updateTrendsChart();
+    } else {
+      this.updateTopProductsChart();
+    }
   }
 
   private initializeCharts() {
     this.updateTrendsChart();
-    this.initializeTopProductsChart();
+    this.updateTopProductsChart();
   }
 
   private updateTrendsChart() {
@@ -61,12 +65,6 @@ export class SalesTrendsComponent implements OnInit {
         background: '#ffffff',
         toolbar: {
           show: true
-        },
-        padding: {
-          top: 20,
-          right: 20,
-          bottom: 0,
-          left: 0
         }
       },
       colors: ['#2E93fA'],
@@ -78,39 +76,22 @@ export class SalesTrendsComponent implements OnInit {
           text: 'Sales (₹)'
         },
         labels: {
-          formatter: (value: number) => `₹${(value/1000).toFixed(0)}K`
+          formatter: (value: number) => `₹${(value / 1000).toFixed(0)}K`
         }
       },
       title: {
-        text: `${this.selectedPeriod.charAt(0).toUpperCase() + this.selectedPeriod.slice(1)} Sales Trends`,
+        text: `${this.capitalize(this.selectedPeriod)} Sales Trends`,
         align: 'center',
         style: {
           fontSize: '16px'
         },
         margin: 40
-      },
-      margin: {
-        top: 20,
-        right: 20,
-        bottom: 20,
-        left: 20
       }
     };
   }
 
-  private initializeTopProductsChart() {
-    const productData = [
-      { name: 'Onion (Lasalgaon Mandi)', value: 8500 },
-      { name: 'Potato (Agra Mandi)', value: 7200 },
-      { name: 'Tomato (Kolar Mandi)', value: 6800 },
-      { name: 'Cabbage (Pune Mandi)', value: 5900 },
-      { name: 'Cauliflower (Delhi Mandi)', value: 5500 },
-      { name: 'Green Peas (Indore Mandi)', value: 4800 },
-      { name: 'Carrot (Bangalore Mandi)', value: 4200 },
-      { name: 'Bitter Gourd (Chennai Mandi)', value: 3900 },
-      { name: 'Lady Finger (Ahmedabad Mandi)', value: 3500 },
-      { name: 'Brinjal (Kolkata Mandi)', value: 3200 }
-    ];
+  private updateTopProductsChart() {
+    const productData = this.getTopProductsForPeriod(this.selectedPeriod);
 
     this.topProductsOptions = {
       series: [{
@@ -119,40 +100,65 @@ export class SalesTrendsComponent implements OnInit {
       }],
       chart: {
         type: 'bar',
-        height: 500,
+        height: 450,
         background: '#ffffff',
         toolbar: {
           show: false
+        },
+        animations: {
+          enabled: true
+        },
+        foreColor: '#333',
+        fontFamily: 'inherit'
+      },
+      grid: {
+        padding: {
+          bottom: 70
+        },
+        xaxis: {
+          lines: {
+            show: true
+          }
         }
       },
       plotOptions: {
         bar: {
-          horizontal: true,
+          horizontal: false,
           borderRadius: 4,
-          distributed: true,
-          dataLabels: {
-            position: 'center',
-          },
-          barHeight: '80%'
+          columnWidth: '60%'
         }
       },
       dataLabels: {
         enabled: true,
-        formatter: (value: number) => `${value} kg`,
+        formatter: (value: number) => `${value}`,
         style: {
-          fontSize: '12px',
-          colors: ['#ffffff']
+          fontSize: '7px',
+          colors: ['#000']
         }
       },
       xaxis: {
         categories: productData.map(item => item.name),
         title: {
-          text: 'Sales Volume (kg)'
+          text: 'Products & Mandi Location',
+          offsetY: 70,
+          style: {
+            fontSize: '14px'
+          },
+          floating: false
+        },
+        labels: {
+          rotate: -90,
+          style: {
+            fontSize: '11px'
+          }
         }
       },
       yaxis: {
         title: {
-          text: 'Products & Mandi Location'
+          text: 'Sales Volume (kg)'
+        },
+        labels: {
+          formatter: (value: number) => `${value} kg`
         }
       },
       colors: [
@@ -160,7 +166,7 @@ export class SalesTrendsComponent implements OnInit {
         '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
       ],
       title: {
-        text: 'Top Selling Mandi Products',
+        text: `Top Products - ${this.capitalize(this.selectedPeriod)}`,
         align: 'center',
         style: {
           fontSize: '16px'
@@ -171,15 +177,30 @@ export class SalesTrendsComponent implements OnInit {
         y: {
           formatter: (value: number) => `${value} kg`
         }
-      },
-      grid: {
-        xaxis: {
-          lines: {
-            show: true
-          }
-        }
       }
     };
+  }
+
+  private getTopProductsForPeriod(period: string): { name: string, value: number }[] {
+    const base = {
+      weekly: 1000,
+      monthly: 4000,
+      quarterly: 12000,
+      yearly: 50000
+    }[period] || 1000;
+
+    return [
+      { name: 'Onion (Lasalgaon Mandi)', value: base + 500 },
+      { name: 'Potato (Agra Mandi)', value: base + 300 },
+      { name: 'Tomato (Kolar Mandi)', value: base + 200 },
+      { name: 'Cabbage (Pune Mandi)', value: base - 100 },
+      { name: 'Cauliflower (Delhi Mandi)', value: base - 300 },
+      { name: 'Green Peas (Indore Mandi)', value: base - 500 },
+      { name: 'Carrot (Bangalore Mandi)', value: base - 800 },
+      { name: 'Bitter Gourd (Chennai Mandi)', value: base - 900 },
+      { name: 'Lady Finger (Ahmedabad Mandi)', value: base - 1000 },
+      { name: 'Brinjal (Kolkata Mandi)', value: base - 1200 }
+    ];
   }
 
   private getDataForPeriod(period: string): { categories: string[], values: number[] } {
@@ -210,5 +231,9 @@ export class SalesTrendsComponent implements OnInit {
           values: []
         };
     }
+  }
+
+  private capitalize(text: string): string {
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 }
