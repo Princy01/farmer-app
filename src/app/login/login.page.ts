@@ -88,7 +88,7 @@ export class LoginPage {
         this.router.navigate(['/admin/driver']);
         break;
       case 'wholesaler':
-        this.router.navigate(['/home']);
+        this.router.navigate(['/wholesaler/home']);
         break;
       case 'retailer':
         this.router.navigate(['/buyer/buyer-home']);

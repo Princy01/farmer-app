@@ -27,24 +27,24 @@ export const routes: Routes = [
     loadComponent: () => import('./Wholesaler/screen4/screen4.component').then((m) => m.Screen4Component),
   },
   {
-    path: 'wholesaler/sales-trends',
+    path: 'wholesaler/trends',
+    loadComponent: () => import('./Wholesaler/trends/trends.component').then((m) => m.TrendsComponent),
+  },
+  {
+    path: 'wholesaler/trends/sales-trends',
     loadComponent: () => import('./Wholesaler/sales-trends/sales-trends.component').then((m) => m. SalesTrendsComponent),
   },
   {
-    path: 'wholesaler/demand-trends',
+    path: 'wholesaler/trends/demand-trends',
     loadComponent: () => import('./Wholesaler/demand-trends/demand-trends.component').then((m) => m. DemandTrendsComponent),
   },
   {
-    path: 'wholesaler/stock-insights',
+    path: 'wholesaler/trends/stock-insights',
     loadComponent: () => import('./Wholesaler/stock-insights/stock-insights.component').then((m) => m. StockInsightsComponent),
   },
   {
-    path: 'wholesaler/market-comparison',
+    path: 'wholesaler/trends/market-comparison',
     loadComponent: () => import('./Wholesaler/market-comparison/market-comparison.component').then((m) => m. MarketComparisonComponent),
-  },
-  {
-    path: 'wholesaler/trends',
-    loadComponent: () => import('./Wholesaler/trends/trends.component').then((m) => m.TrendsComponent),
   },
 
   {

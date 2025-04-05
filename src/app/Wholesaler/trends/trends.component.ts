@@ -18,6 +18,6 @@ export class TrendsComponent{
   }
 
   navigateTo(route: string) {
-    this.router.navigate([`/wholesaler/${route}`]);
+    this.router.navigate([`/wholesaler/trends/${route}`]);
   }
 }
