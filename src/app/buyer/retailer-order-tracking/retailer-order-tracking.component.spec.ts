@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { Screen2Component } from './screen2.component';
+import { RetailerOrderTrackingComponent } from './retailer-order-tracking.component';
 
-describe('Screen2Component', () => {
-  let component: Screen2Component;
-  let fixture: ComponentFixture<Screen2Component>;
+describe('RetailerOrderTrackingComponent', () => {
+  let component: RetailerOrderTrackingComponent;
+  let fixture: ComponentFixture<RetailerOrderTrackingComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ Screen2Component ],
+      declarations: [ RetailerOrderTrackingComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Screen2Component);
+    fixture = TestBed.createComponent(RetailerOrderTrackingComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

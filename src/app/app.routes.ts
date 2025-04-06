@@ -154,7 +154,11 @@ export const routes: Routes = [
       {
         path: 'ride',
         loadComponent: () => import('./buyer/ride/ride.component').then((m) => m.RideComponent),
-      }
+      },
+      {
+        path: 'retailer-order-tracking',
+        loadComponent: () => import('./buyer/retailer-order-tracking/retailer-order-tracking.component').then((m) => m.RetailerOrderTrackingComponent),
+      },
     ]
   },
   {

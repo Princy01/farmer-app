@@ -1,7 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, IonContent, MenuController } from '@ionic/angular';
+import { IonicModule, IonContent, ActionSheetController } from '@ionic/angular';
 import { RouterModule, Router } from '@angular/router';
+import { BuyerApiService } from '../services/buyer-api.service';
 import { addIcons } from 'ionicons';
 import {
   personCircleOutline,
@@ -12,8 +13,10 @@ import {
   personOutline,
   archiveOutline,
   linkOutline,
-  settingsOutline
+  settingsOutline,
+  closeOutline
 } from 'ionicons/icons';
+
 interface Category {
   name: string;
   image: string;
@@ -40,10 +43,14 @@ export class BuyerHomeComponent {
   ];
 
   hideHeader = false;
+  loadingCategories = false;
+  errorLoadingCategories = false;
+  categoriesList: any[] = [];
 
   constructor(
     private router: Router,
-    private menuController: MenuController
+    private actionSheetController: ActionSheetController,
+    private buyerApiService: BuyerApiService
   ) {
     addIcons({
       personCircleOutline,
@@ -54,15 +61,83 @@ export class BuyerHomeComponent {
       personOutline,
       archiveOutline,
       linkOutline,
-      settingsOutline
+      settingsOutline,
+      closeOutline
     });
   }
 
-  async openMenu() {
-    await this.menuController.open();
+fetchCategories() {
+    this.loadingCategories = true;
+    this.buyerApiService.getCategories().subscribe(
+      {
+        next: (response) => {
+          this.categoriesList = response;
+          this.loadingCategories = false;
+          console.log('Categories:', this.categoriesList);
+        },
+        error: (error) => {
+          this.errorLoadingCategories = true;
+          this.loadingCategories = false;
+          console.error('Error fetching categories:', error);
+        }
+      });
+  }
+
+  ngOnInit() {
+
+    this.fetchCategories();
   }
 
   onScroll(event: any) {
     this.hideHeader = event.detail.scrollTop > 100;
+  }
+
+  async presentActionSheet() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Account Options',
+      buttons: [
+        {
+          text: 'Profile',
+          icon: 'person-outline',
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.router.navigate(['/buyer/profile']);
+          }
+        },
+        {
+          text: 'Track Orders',
+          icon: 'archive-outline',
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.router.navigate(['/buyer/retailer-order-tracking'],{
+              queryParams: { id: 'ORD123456' } // Dummy ID or dynamically set
+            });
+          }
+        },
+        {
+          text: 'Linked Accounts',
+          icon: 'link-outline',
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.router.navigate(['/buyer/linked-accounts']);
+          }
+        },
+        {
+          text: 'Settings',
+          icon: 'settings-outline',
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.router.navigate(['/buyer/settings']);
+          }
+        },
+        {
+          text: 'Cancel',
+          icon: 'close-outline',
+          role: 'cancel',
+          cssClass: 'custom-action-sheet-btn'
+        }
+      ]
+    });
+    await actionSheet.present();
   }
 }

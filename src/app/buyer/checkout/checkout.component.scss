@@ -109,3 +109,37 @@ ion-icon {
   background: var(--ion-color-success-light);
   border-radius: 8px;
 }
+
+.radio-item {
+  display: flex;
+  justify-content: space-between; /* Push label to left, radio to right */
+  align-items: center;
+}
+
+/* Ensures radio buttons are always visible */
+ion-radio::part(container) {
+border: 2px solid rgb(136, 172, 140); /* Outline for unselected radio */
+border-radius: 50%; /* Circular shape */
+width: 18px;
+height: 18px;
+background: white; /* Keep the background white when unselected */
+}
+
+/* When selected, show filled color */
+ion-radio[aria-checked="true"]::part(container) {
+background: rgb(136, 172, 140); /* Green fill for selected radio */
+border: 2px solid rgb(136, 172, 140);
+}
+
+ion-radio[aria-checked="true"]::part(mark) {
+display: none; /* Hide the inner dot */
+
+}
+
+.confirm-order-btn {
+  --background: rgb(136, 172, 140);
+  width: 60%;
+  margin: 16px auto; // centers it
+  display: block;    // makes margin:auto work
+  text-align: center;
+}

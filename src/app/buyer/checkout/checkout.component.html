@@ -114,11 +114,50 @@
     </ion-card-content>
   </ion-card>
 
+  <ion-card *ngIf="!loadingPaymentMethods && paymentMethods.length">
+    <ion-card-header>
+      <ion-card-title>Select Payment Method</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-radio-group [(ngModel)]="selectedPaymentMethod">
+        <ion-list>
+          <ion-item lines="none" class="radio-item" *ngFor="let method of paymentMethods">
+            <ion-label>{{ method.payment_mode }}</ion-label>
+            <ion-radio slot="end" [value]="method.payment_mode"></ion-radio>
+          </ion-item>
+        </ion-list>
+      </ion-radio-group>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="loadingPaymentMethods">
+    <ion-card-content>
+      <ion-spinner name="dots"></ion-spinner>
+      <p>Loading payment methods...</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorLoadingPaymentMethods">
+    <ion-card-content>
+      <ion-text color="danger">
+        ⚠️ Failed to load payment methods. Please try again later.
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
+
+
   <!-- <ion-button expand="full" (click)="findDriver()" *ngIf="rideRequested">Find Driver</ion-button> -->
 
   <!-- <ion-spinner *ngIf="findingDriver"></ion-spinner>
   <ion-text color="success" *ngIf="driverFound">✅ Driver Found! Ride is being arranged.</ion-text>
   <ion-text color="danger" *ngIf="driverNotAvailable">❌ No drivers available.</ion-text> -->
 
-  <ion-button expand="full" (click)="confirmOrder()" [disabled]="orderPlaced || !selectedPaymentMethod">Confirm Order</ion-button>
+  <ion-button
+  (click)="confirmOrder()"
+  [disabled]="orderPlaced || !selectedPaymentMethod"
+  class="confirm-order-btn">
+  Confirm Order
+</ion-button>
+
+
 </ion-content>

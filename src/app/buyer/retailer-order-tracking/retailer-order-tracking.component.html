@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/buyer/buyer-home" color="dark"></ion-back-button>
+    </ion-buttons>
+    <ion-title>My Orders</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list *ngIf="orders.length > 0">
+    <ion-card *ngFor="let order of orders" class="order-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="receipt-outline" class="icon-start"></ion-icon>
+          Order ID: {{ order.orderId }}
+        </ion-card-title>
+        <ion-card-subtitle>
+          <ion-icon name="calendar-outline" class="icon-start"></ion-icon>
+          Placed on: {{ order.placedAt | date: 'medium' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p>
+          <ion-icon name="cube-outline" class="icon-start"></ion-icon>
+          Status:
+          <strong [ngStyle]="{
+            color: getStatusColor(order.status)
+          }">
+            {{ order.status }}
+          </strong>
+        </p>
+
+        <ng-container *ngIf="order.status === 'In Transit' && order.location">
+          <p class="location">
+            <ion-icon name="location-outline" class="icon-start"></ion-icon>
+            <strong>Current Location:</strong>
+            {{ order.location.address }}
+          </p>
+        </ng-container>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+
+  <ion-text *ngIf="orders.length === 0" color="medium">
+    <p>No orders found.</p>
+  </ion-text>
+</ion-content>

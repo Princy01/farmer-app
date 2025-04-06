@@ -4,8 +4,6 @@ ion-header ion-toolbar {
         --background: white;
         --color: rgb(154, 192, 159);
 }
-ion-menu {
-  --width: 280px;
 
   ion-toolbar {
     --background: rgb(154, 192, 159);
@@ -31,7 +29,10 @@ ion-menu {
       color: rgb(117, 116, 116);
     }
   }
-}
+  ::ng-deep .custom-action-sheet-btn {
+    color: rgb(154, 192, 159) !important;
+  }
+
 ion-icon{
   color: rgb(154, 192, 159);
 }

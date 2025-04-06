@@ -3,13 +3,17 @@ ion-toolbar:first-child {
   --border-width: 0;
 }
 
-.custom-title {
-  font-size: 1rem;
+ion-title {
   font-weight: 700;
-  color: black;
+  font-size: 1rem;
   font-family: 'Georgia', 'Times', serif;
-  margin-bottom: 1.5rem;
 }
+
+// .custom-title {
+//   font-weight: 700;
+//       font-size: 1rem;
+//       font-family: 'Georgia', 'Times', serif;
+// }
 
 .custom-badge {
     --background: rgb(150, 235, 85);

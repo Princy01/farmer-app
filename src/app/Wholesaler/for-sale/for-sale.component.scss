@@ -7,14 +7,18 @@
         --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
         --border-width: 0;
       }
-
-      .custom-title {
-        font-size: 1.8rem;
+      ion-title {
         font-weight: 700;
-        color: black;
+        font-size: 1rem;
         font-family: 'Georgia', 'Times', serif;
-        margin-bottom: 1.5rem;
       }
+      // .custom-title {
+      //   font-size: 1rem;
+      //   font-weight: 700;
+      //   color: black;
+      //   font-family: 'Georgia', 'Times', serif;
+      //   margin-bottom: 1.5rem;
+      // }
 
       .form-container {
         max-width: 800px;

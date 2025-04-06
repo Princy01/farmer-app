@@ -6,6 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { chevronBack, chevronForward } from 'ionicons/icons';
 import { DatabaseService } from '../../services/database.service';
+import { BuyerApiService } from '../services/buyer-api.service';
 
 interface CartItem {
   id: number;
@@ -89,7 +90,8 @@ export class CheckoutComponent {
     private router: Router,
     private route: ActivatedRoute,
     private databaseService: DatabaseService,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private buyerApiService: BuyerApiService
   ) {
     addIcons({ chevronBack, chevronForward });
     this.loadTransporters();
@@ -116,6 +118,43 @@ export class CheckoutComponent {
 
     });
   }
+
+  loadingPaymentMethods = false;
+  errorLoadingPaymentMethods = false;
+  paymentMethods: any[] = [];
+  ngOnInit() {
+    // Uncomment this when ready to use real API
+    // this.fetchPaymentMethods();
+
+    // Dummy data for development
+    this.paymentMethods = [
+      { id: 1, payment_mode: 'UPI' },
+      { id: 2, payment_mode: 'Cash on Delivery' },
+      { id: 3, payment_mode: 'Credit/Debit Card' },
+      { id: 4, payment_mode: 'Net Banking' },
+      { id: 5, payment_mode: 'Wallet (e.g., Paytm, PhonePe)' },
+    ];
+  }
+
+  // Real API call (currently commented)
+  /*
+  fetchPaymentMethods() {
+    this.loadingPaymentMethods = true;
+    this.errorLoadingPaymentMethods = false;
+    this.buyerApiService.getModeOfPayments().subscribe({
+      next: (response) => {
+        this.paymentMethods = response;
+        this.loadingPaymentMethods = false;
+        console.log('Payment Methods:', this.paymentMethods);
+      },
+      error: (error) => {
+        this.errorLoadingPaymentMethods = true;
+        this.loadingPaymentMethods = false;
+        console.error('Error fetching payment methods:', error);
+      }
+    });
+  }
+  */
 
   private loadTransporters() {
     this.availableTransporters = this.databaseService.getAvailableTransporters();

@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { chevronBack, search, funnelOutline, swapVerticalOutline, heartOutline, cartOutline} from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
+import { BuyerApiService } from '../services/buyer-api.service';
+import { catchError, of, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-category-page',
@@ -268,15 +270,84 @@ export class CategoryPageComponent {
     ]}
   ];
 
-  constructor(private route: ActivatedRoute, private router: Router) {
-    addIcons({ chevronBack, search, funnelOutline, swapVerticalOutline, heartOutline, cartOutline });
+loadingCategories = false;
+errorLoadingCategories = false;
+loadingProducts = false;
+errorLoadingProducts = false;
+  category: any;
+  productsList: any[] = [];
+  categoryId: number = -1;
 
+  constructor(private route: ActivatedRoute, private router: Router, private buyerApiService: BuyerApiService) {
+    addIcons({ chevronBack, search, funnelOutline, swapVerticalOutline, heartOutline, cartOutline });
+  }
+
+  ngOnInit() {
     this.route.params.subscribe(params => {
       this.categoryName = params['categoryName'];
       this.selectSubcategory('All', this.getCategorySubcategories());
       this.applyFilters();
+
+      // params return string, by adding '+' we convert it to number
+      this.categoryId = +params['categoryId'] || -1;
+      if (this.categoryId === -1) return;
+
+      this.fetchCategoriesByID(this.categoryId).pipe(
+        switchMap((category) => {
+          this.category = category;
+          return this.fetchProductsByCategoryID(this.categoryId);
+        })
+      ).subscribe({
+        next: (products) => {
+          this.productsList = products;
+          this.loadingProducts = false;
+          console.log('Products:', this.productsList);
+        },
+        error: (error) => {
+          this.errorLoadingProducts = true;
+          this.loadingProducts = false;
+          console.error('Error fetching products:', error);
+        }
+      });
     });
   }
+
+
+fetchCategoriesByID(categoryId: number) {
+  this.loadingCategories = true;
+  this.errorLoadingCategories = false;
+  return this.buyerApiService.getCategoryById(categoryId).pipe(
+    tap(() => {
+      this.loadingCategories = false;
+    }),
+    catchError((error) => {
+      this.errorLoadingCategories = true;
+      this.loadingCategories = false;
+      console.error('Error fetching categories:', error);
+      return of([]);
+    })
+  )
+}
+
+fetchProductsByCategoryID(categoryId: number) {
+  this.loadingProducts = true;
+  this.errorLoadingProducts = false;
+  return this.buyerApiService.getProductsByCategoryId(categoryId).pipe(
+    tap(() => {
+      this.loadingProducts = false;
+    }
+    ),
+    catchError((error) => {
+      this.errorLoadingProducts = true;
+      this.loadingProducts = false;
+      console.error('Error fetching products:', error);
+      return of([]);
+    }
+    )
+  )
+}
+
+
 
   getCategorySubcategories() {
     switch (this.categoryName) {
