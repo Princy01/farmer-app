@@ -54,9 +54,21 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'driver',
+        redirectTo: 'admin-orders',
         pathMatch: 'full',
       },
+      {
+        path: 'admin-orders',
+        loadComponent: () =>
+          import('./admin/admin-orders.page').then((m) => m.AdminOrdersPage),
+      },
+      {
+        path: 'admin-order-detail',
+        loadComponent: () =>
+          import('./admin/admin-order-detail.page').then((m) => m.AdminOrderDetailPage),
+      },
+
+
       {
         path: 'driver',
         loadComponent: () => import('./forms/driver/driver.component').then((m) => m.DriverComponent),
@@ -132,7 +144,7 @@ export const routes: Routes = [
         loadComponent: () => import('./buyer/buyer-home/buyer-home.component').then((m) => m.BuyerHomeComponent),
       },
       {
-        path: 'category/:categoryName',
+        path: 'category/:categoryId',
         loadComponent: () => import('./buyer/category/category.component').then((m) => m.CategoryPageComponent),
       },
       // {
@@ -159,6 +171,10 @@ export const routes: Routes = [
         path: 'retailer-order-tracking',
         loadComponent: () => import('./buyer/retailer-order-tracking/retailer-order-tracking.component').then((m) => m.RetailerOrderTrackingComponent),
       },
+      {
+      path: 'RetailerTrends',
+      loadComponent: () => import('./buyer/retailer-trends/retailer-trends.component').then((m) => m.RetailerTrendsComponent),
+      }
     ]
   },
   {

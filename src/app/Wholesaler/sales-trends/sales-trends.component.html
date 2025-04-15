@@ -1,7 +1,7 @@
 <ion-content>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button  color="dark" (click)="goToTrends()">
+      <ion-button color="dark" (click)="goToTrends()">
         <ion-icon name="chevron-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -19,17 +19,29 @@
     </ion-segment>
 
     <ion-select
-  [(ngModel)]="selectedPeriod"
-  (ionChange)="onPeriodChange()"
-  interface="popover"
-  class="period-selector"
->
-  <ion-select-option value="weekly">Weekly</ion-select-option>
-  <ion-select-option value="monthly">Monthly</ion-select-option>
-  <ion-select-option value="quarterly">Quarterly</ion-select-option>
-  <ion-select-option value="yearly">Yearly</ion-select-option>
-</ion-select>
+      [(ngModel)]="selectedPeriod"
+      (ionChange)="onPeriodChange()"
+      interface="popover"
+      class="period-selector"
+      label="Select Period"
+    >
+      <ion-select-option value="weekly">Weekly</ion-select-option>
+      <ion-select-option value="monthly">Monthly</ion-select-option>
+      <ion-select-option value="quarterly">Quarterly</ion-select-option>
+      <ion-select-option value="yearly">Yearly</ion-select-option>
+    </ion-select>
 
+    <ion-select
+      *ngIf="selectedView === 'products'"
+      [(ngModel)]="selectedMetric"
+      (ionChange)="onMetricChange()"
+      interface="popover"
+      class="period-selector metric-selector"
+      label="View By"
+    >
+      <ion-select-option value="volume">By Volume (kg)</ion-select-option>
+      <ion-select-option value="price">By Revenue (₹)</ion-select-option>
+    </ion-select>
   </div>
 
   <div class="chart-container">
@@ -55,6 +67,7 @@
         [colors]="topProductsOptions.colors"
         [title]="topProductsOptions.title"
         [grid]="topProductsOptions.grid"
+        [tooltip]="topProductsOptions.tooltip"
       ></apx-chart>
     </ng-container>
   </div>

@@ -40,7 +40,16 @@ export interface CategoryRegionalLanguage {
   regional_name: string;
 }
 
-@Injectable({
+export interface CategoryWithSubCategories {
+  subcategories: Category[];
+  category_id: number;
+  category_name: string;
+  super_cat_id?: number;
+  img_path?: string;
+  active_status?: number;
+  category_regional_id?: number;
+}
+  @Injectable({
   providedIn: 'root'
 })
 export class BuyerApiService {
@@ -50,8 +59,8 @@ export class BuyerApiService {
     return this.api.get<Category[]>('getCategories');
   }
 
-  getCategoryById(categoryId: number): Observable<Category> {
-    return this.api.get<Category>(`getCategories/${categoryId}`);
+  getCategoryById(categoryId: number): Observable<CategoryWithSubCategories> {
+    return this.api.get<CategoryWithSubCategories>(`getCategories/${categoryId}`);
   }
 
   getProductRegionalNameById(id: number): Observable<ProductRegional> {
@@ -76,5 +85,13 @@ export class BuyerApiService {
 
   getModeOfPayments(): Observable<PaymentMode[]> {
     return this.api.get<PaymentMode[]>('getModeOfPayments');
+  }
+
+  getSuperCategories(): Observable<Category[]> {
+    return this.api.get<Category[]>('getSuperCategories');
+  }
+
+  getCategoryBySuperCategoryId(superCatId: number): Observable<Category> {
+    return this.api.get<Category>(`getCategoriesBySupID/${superCatId}`);
   }
 }

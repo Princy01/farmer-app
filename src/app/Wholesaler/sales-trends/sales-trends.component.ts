@@ -6,6 +6,12 @@ import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
 
+interface ProductData {
+  name: string;
+  volume: number;
+  price: number;
+}
+
 @Component({
   selector: 'app-sales-trends',
   templateUrl: './sales-trends.component.html',
@@ -16,6 +22,7 @@ import { chevronBackOutline } from 'ionicons/icons';
 export class SalesTrendsComponent implements OnInit {
   selectedView: string = 'trends';
   selectedPeriod: string = 'monthly';
+  selectedMetric: string = 'volume';
   chartOptions: any;
   topProductsOptions: any;
 
@@ -43,6 +50,12 @@ export class SalesTrendsComponent implements OnInit {
     if (this.selectedView === 'trends') {
       this.updateTrendsChart();
     } else {
+      this.updateTopProductsChart();
+    }
+  }
+
+  onMetricChange() {
+    if (this.selectedView === 'products') {
       this.updateTopProductsChart();
     }
   }
@@ -92,11 +105,16 @@ export class SalesTrendsComponent implements OnInit {
 
   private updateTopProductsChart() {
     const productData = this.getTopProductsForPeriod(this.selectedPeriod);
+    const isVolume = this.selectedMetric === 'volume';
+
+    const values = productData.map(item => isVolume ? item.volume : item.price);
+    const sortedData = [...productData]
+      .sort((a, b) => (isVolume ? b.volume - a.volume : b.price - a.price));
 
     this.topProductsOptions = {
       series: [{
-        name: 'Sales Volume',
-        data: productData.map(item => item.value)
+        name: isVolume ? 'Sales Volume' : 'Sales Revenue',
+        data: sortedData.map(item => isVolume ? item.volume : item.price)
       }],
       chart: {
         type: 'bar',
@@ -130,14 +148,16 @@ export class SalesTrendsComponent implements OnInit {
       },
       dataLabels: {
         enabled: true,
-        formatter: (value: number) => `${value}`,
+        formatter: (value: number) => isVolume ?
+          `${value}kg` :
+          `₹${(value/1000).toFixed(0)}K`,
         style: {
           fontSize: '7px',
           colors: ['#000']
         }
       },
       xaxis: {
-        categories: productData.map(item => item.name),
+        categories: sortedData.map(item => item.name),
         title: {
           text: 'Products & Mandi Location',
           offsetY: 70,
@@ -155,10 +175,12 @@ export class SalesTrendsComponent implements OnInit {
       },
       yaxis: {
         title: {
-          text: 'Sales Volume (kg)'
+          text: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)'
         },
         labels: {
-          formatter: (value: number) => `${value} kg`
+          formatter: (value: number) => isVolume ?
+            `${value} kg` :
+            `₹${(value/1000).toFixed(0)}K`
         }
       },
       colors: [
@@ -166,7 +188,7 @@ export class SalesTrendsComponent implements OnInit {
         '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
       ],
       title: {
-        text: `Top Products - ${this.capitalize(this.selectedPeriod)}`,
+        text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
         align: 'center',
         style: {
           fontSize: '16px'
@@ -175,13 +197,15 @@ export class SalesTrendsComponent implements OnInit {
       },
       tooltip: {
         y: {
-          formatter: (value: number) => `${value} kg`
+          formatter: (value: number) => isVolume ?
+            `${value} kg` :
+            `₹${value.toLocaleString()}`
         }
       }
     };
   }
 
-  private getTopProductsForPeriod(period: string): { name: string, value: number }[] {
+  private getTopProductsForPeriod(period: string): ProductData[] {
     const base = {
       weekly: 1000,
       monthly: 4000,
@@ -189,17 +213,30 @@ export class SalesTrendsComponent implements OnInit {
       yearly: 50000
     }[period] || 1000;
 
+    const priceFactors = {
+      'Onion': 20,
+      'Potato': 15,
+      'Tomato': 25,
+      'Cabbage': 12,
+      'Cauliflower': 30,
+      'Green Peas': 40,
+      'Carrot': 18,
+      'Bitter Gourd': 35,
+      'Lady Finger': 22,
+      'Brinjal': 16
+    };
+
     return [
-      { name: 'Onion (Lasalgaon Mandi)', value: base + 500 },
-      { name: 'Potato (Agra Mandi)', value: base + 300 },
-      { name: 'Tomato (Kolar Mandi)', value: base + 200 },
-      { name: 'Cabbage (Pune Mandi)', value: base - 100 },
-      { name: 'Cauliflower (Delhi Mandi)', value: base - 300 },
-      { name: 'Green Peas (Indore Mandi)', value: base - 500 },
-      { name: 'Carrot (Bangalore Mandi)', value: base - 800 },
-      { name: 'Bitter Gourd (Chennai Mandi)', value: base - 900 },
-      { name: 'Lady Finger (Ahmedabad Mandi)', value: base - 1000 },
-      { name: 'Brinjal (Kolkata Mandi)', value: base - 1200 }
+      { name: 'Onion (Lasalgaon Mandi)', volume: base + 500, price: (base + 500) * priceFactors['Onion'] },
+      { name: 'Potato (Agra Mandi)', volume: base + 300, price: (base + 300) * priceFactors['Potato'] },
+      { name: 'Tomato (Kolar Mandi)', volume: base + 200, price: (base + 200) * priceFactors['Tomato'] },
+      { name: 'Cabbage (Pune Mandi)', volume: base - 100, price: (base - 100) * priceFactors['Cabbage'] },
+      { name: 'Cauliflower (Delhi Mandi)', volume: base - 300, price: (base - 300) * priceFactors['Cauliflower'] },
+      { name: 'Green Peas (Indore Mandi)', volume: base - 500, price: (base - 500) * priceFactors['Green Peas'] },
+      { name: 'Carrot (Bangalore Mandi)', volume: base - 800, price: (base - 800) * priceFactors['Carrot'] },
+      { name: 'Bitter Gourd (Chennai Mandi)', volume: base - 900, price: (base - 900) * priceFactors['Bitter Gourd'] },
+      { name: 'Lady Finger (Ahmedabad Mandi)', volume: base - 1000, price: (base - 1000) * priceFactors['Lady Finger'] },
+      { name: 'Brinjal (Kolkata Mandi)', volume: base - 1200, price: (base - 1200) * priceFactors['Brinjal'] }
     ];
   }
 

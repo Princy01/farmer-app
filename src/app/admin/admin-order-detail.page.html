@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button color="dark"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Order {{ order.id }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="summary-info">
+    <h2>Status: {{ order.status }}</h2>
+    <p><strong>Date:</strong> {{ order.date }}</p>
+    <p><strong>Total Price:</strong> ₹{{ order.totalPrice }}</p>
+    <p><strong>Payment:</strong> {{ order.paymentStatus }}</p>
+  </div>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Retailer Info</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Name: {{ order.retailer.name }}</p>
+      <p>Location: {{ order.retailer.location }}</p>
+      <p>Contact: {{ order.retailer.contact }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Wholesaler & Mandi</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Wholesaler: {{ order.wholesaler.name }}</p>
+      <p>Mandi: {{ order.wholesaler.mandi }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Products</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let product of order.products">
+          <ion-label>
+            {{ product.name }} ({{ product.category }}) — Qty: {{ product.qty }} × ₹{{ product.unitPrice }}
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="order.transportUsed">
+    <ion-card-header>
+      <ion-card-title>Transport Info</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Transporter: {{ order.transport.transporter }}</p>
+      <p>Driver: {{ order.transport.driver }}</p>
+      <p>Vehicle: {{ order.transport.vehicle }}</p>
+      <p>Pickup: {{ order.transport.pickup }}</p>
+      <p>Drop: {{ order.transport.drop }}</p>
+      <p>Distance: {{ order.transport.distance }} km</p>
+      <p>Time: {{ order.transport.time }}</p>
+      <p>Cost: ₹{{ order.transport.cost }}</p>
+      <p>Status: {{ order.transport.status }}</p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

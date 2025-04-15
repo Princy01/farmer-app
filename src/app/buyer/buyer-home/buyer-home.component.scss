@@ -3,12 +3,11 @@ ion-header ion-toolbar {
         // box-shadow: none;
         --background: white;
         --color: rgb(154, 192, 159);
-}
 
-  ion-toolbar {
-    --background: rgb(154, 192, 159);
-    --color: white;
-  }
+        ion-title{
+          font-size: 27px;
+          }
+}
 
   ion-content {
     --background: white;

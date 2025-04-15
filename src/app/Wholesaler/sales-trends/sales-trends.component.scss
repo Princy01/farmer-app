@@ -17,6 +17,10 @@
         max-width: 300px;
         --padding-start: 16px;
         --padding-end: 16px;
+
+        & + .period-selector {
+          margin-top: 8px;
+        }
       }
 
       .chart-container {

@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>All Orders</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-searchbar (ionInput)="search($event)" placeholder="Search by Order ID or Retailer"></ion-searchbar>
+
+  <ion-list>
+    <ion-item *ngFor="let order of filteredOrders" (click)="viewDetails(order)">
+      <ion-label>
+        <h2>{{ order.id }} - {{ order.status }}</h2>
+        <p>Retailer: {{ order.retailer.name }} | ₹{{ order.totalPrice }}</p>
+        <p>Mandi: {{ order.wholesaler.mandi }} | {{ order.date }}</p>
+      </ion-label>
+      <ion-badge [color]="
+  order.status === 'Delivered' ? 'success' :
+  order.status === 'Cancelled' ? 'danger' :
+  order.status === 'Pending' ? 'medium' :
+  order.status === 'In Transit' ? 'warning' :
+  'primary'
+">
+  {{ order.status }}
+</ion-badge>
+
+    </ion-item>
+  </ion-list>
+</ion-content>

@@ -14,10 +14,12 @@ import {
   archiveOutline,
   linkOutline,
   settingsOutline,
-  closeOutline
+  closeOutline,
+  statsChartOutline
 } from 'ionicons/icons';
 
 interface Category {
+  id: number;
   name: string;
   image: string;
 }
@@ -32,20 +34,17 @@ interface Category {
 export class BuyerHomeComponent {
   @ViewChild(IonContent, { static: false }) content!: IonContent;
 
-  categories: Category[] = [
-    { name: 'Vegetables', image: 'assets/img/vegetables.png' },
-    { name: 'Fruits', image: 'assets/img/fruits.png' },
-    { name: 'Grains', image: 'assets/img/grains.png' },
-    { name: 'Pulses', image: 'assets/img/pulses.png' },
-    { name: 'Dairy', image: 'assets/img/dairy.png' },
-    { name: 'Spices', image: 'assets/img/spices.png' },
-    { name: 'Others', image: 'assets/images/other.jpg' }
-  ];
+  // categories: Category[] = [
+  //   { id: 1, name: 'Vegetables', image: 'assets/img/vegetables.png' },
+  //   { id: 2, name: 'Fruits', image: 'assets/img/fruits.png' },
+  //   { id: 3, name: 'Grains', image: 'assets/img/grains.png' },
+  //   { id: 4, name: 'Pulses', image: 'assets/img/pulses.png' }
+  // ];
 
   hideHeader = false;
   loadingCategories = false;
   errorLoadingCategories = false;
-  categoriesList: any[] = [];
+  categories: any[] = [];
 
   constructor(
     private router: Router,
@@ -62,18 +61,21 @@ export class BuyerHomeComponent {
       archiveOutline,
       linkOutline,
       settingsOutline,
-      closeOutline
+      closeOutline,
+      statsChartOutline
     });
   }
 
+
+
 fetchCategories() {
     this.loadingCategories = true;
-    this.buyerApiService.getCategories().subscribe(
+    this.buyerApiService.getSuperCategories().subscribe(
       {
         next: (response) => {
-          this.categoriesList = response;
+          this.categories = response;
           this.loadingCategories = false;
-          console.log('Categories:', this.categoriesList);
+          console.log('Categories:', this.categories);
         },
         error: (error) => {
           this.errorLoadingCategories = true;
@@ -140,4 +142,8 @@ fetchCategories() {
     });
     await actionSheet.present();
   }
+
+  openTrends() {
+    this.router.navigate(['/buyer/RetailerTrends']);
+}
 }

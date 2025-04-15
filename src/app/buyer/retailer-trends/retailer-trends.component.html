@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" color="dark">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Price Comparison</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-md="3">
+        <ion-item>
+          <ion-label position="stacked">Select Products</ion-label>
+          <ion-select
+            [(ngModel)]="selectedProducts"
+            interface="popover"
+            multiple="true"
+            (ionChange)="onProductChange()">
+            <ion-select-option
+              *ngFor="let product of filteredProducts"
+              [value]="product">
+              {{ product }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-searchbar
+          placeholder="Search product"
+          [(ngModel)]="searchTerm"
+          (ionInput)="filterProductList()"
+          debounce="300">
+        </ion-searchbar>
+      </ion-col>
+
+      <ion-col size="12" size-md="9">
+        <apx-chart
+          [series]="chartOptions.series"
+          [chart]="chartOptions.chart"
+          [xaxis]="chartOptions.xaxis"
+          [yaxis]="chartOptions.yaxis"
+          [colors]="chartOptions.colors"
+          [plotOptions]="chartOptions.plotOptions"
+          [tooltip]="chartOptions.tooltip">
+        </apx-chart>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

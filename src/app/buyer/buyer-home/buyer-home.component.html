@@ -2,11 +2,16 @@
   <ion-toolbar>
     <ion-title slot="start">Farmer App</ion-title>
 
-    <ion-buttons slot="start">
+    <ion-buttons slot="start" mode="ios" slot="start">
       <!-- Profile Icon with Action Sheet -->
       <ion-button (click)="presentActionSheet()">
         <ion-icon name="person-circle-outline" size="large"></ion-icon>
       </ion-button>
+
+      <ion-button (click)="openTrends()">
+        <ion-icon name="stats-chart-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
     </ion-buttons>
 
     <ion-buttons slot="end">
@@ -45,10 +50,11 @@
     <ion-row>
       <h1>Explore Our Collections</h1>
       <ion-col size="6" *ngFor="let category of categories">
-        <ion-card [routerLink]="['/buyer/category', category.name]">
-          <img [src]="category.image" alt="{{ category.name }}">
+        <ion-card [routerLink]="['/buyer/category', category.category_id]">
+          <img [src]="category.img_path" alt="{{ category.category_name }}">
+
           <ion-card-content>
-            <h3><b>{{ category.name }}</b></h3>
+            <h3><b>{{ category.category_name }}</b></h3>
           </ion-card-content>
         </ion-card>
       </ion-col>
