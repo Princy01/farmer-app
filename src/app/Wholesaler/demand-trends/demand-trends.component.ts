@@ -35,10 +35,13 @@ interface ProductData {
                 <ion-select [(ngModel)]="selectedTimeRange"
                           (ionChange)="updateCharts()"
                           interface="popover">
-                  <ion-select-option value="3">3 Months</ion-select-option>
-                  <ion-select-option value="6">6 Months</ion-select-option>
-                  <ion-select-option value="12">12 Months</ion-select-option>
-                </ion-select>
+                          <ion-select-option value="3">3 Months</ion-select-option>
+<ion-select-option value="6">6 Months</ion-select-option>
+<ion-select-option value="12">12 Months</ion-select-option>
+<ion-select-option value="18">18 Months</ion-select-option>
+<ion-select-option value="24">24 Months</ion-select-option>
+<ion-select-option value="36">36 Months</ion-select-option>
+</ion-select>
               </ion-item>
 
               <ion-item>
@@ -287,9 +290,10 @@ export class DemandTrendsComponent implements OnInit {
 
   private loadInitialData() {
     this.products.forEach(product => {
-      product.data = Array.from({ length: 12 }, () =>
+      product.data = Array.from({ length: 36 }, () =>
         Math.floor(Math.random() * (100000 - 20000) + 20000)
       );
+
     });
   }
 

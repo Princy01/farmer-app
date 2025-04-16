@@ -10,7 +10,8 @@ import {
   personOutline, carOutline, pricetagsOutline, storefrontOutline,
   locationOutline, mapOutline, alertCircleOutline, cubeOutline,
   personCircleOutline, listOutline, cashOutline, businessOutline,
-  briefcaseOutline, cardOutline, addCircleOutline, layersOutline, basketOutline } from 'ionicons/icons';
+  briefcaseOutline, cardOutline, addCircleOutline, layersOutline,
+   basketOutline, checkmarkCircleOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-admin',
@@ -28,6 +29,8 @@ export class AdminPage implements OnInit {
 
   // Mapping of routes to titles
   titleMap: { [key: string]: string } = {
+    '/admin/admin-orders': 'All Orders',
+    '/admin/admin-order-detail': 'Order Details',
     '/admin/driver': 'Driver',
     '/admin/vehicle': 'Vehicle',
     '/admin/category': 'Category',
@@ -47,7 +50,7 @@ export class AdminPage implements OnInit {
   };
 
   constructor(private router: Router) {
-    addIcons({personOutline,carOutline,pricetagsOutline,basketOutline,locationOutline,mapOutline,alertCircleOutline,cubeOutline,personCircleOutline,listOutline,cashOutline,businessOutline,storefrontOutline,layersOutline,briefcaseOutline,cardOutline,addCircleOutline});
+    addIcons({listOutline,personOutline,carOutline,pricetagsOutline,basketOutline,locationOutline,mapOutline,alertCircleOutline,cubeOutline,personCircleOutline,checkmarkCircleOutline,cashOutline,businessOutline,storefrontOutline,layersOutline,briefcaseOutline,cardOutline,addCircleOutline});
 
     // Listen for route changes
     this.router.events.subscribe((event) => {
