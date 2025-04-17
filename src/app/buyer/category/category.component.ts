@@ -12,7 +12,7 @@ import { catchError, delay, of, switchMap, tap } from 'rxjs';
     selector: 'app-category-page',
     standalone: true,
     imports: [CommonModule, IonicModule, FormsModule],
-templateUrl: './category.component.html',
+    templateUrl: './category.component.html',
     styleUrls: ['./category.component.scss'],
 })
 export class CategoryPageComponent {
@@ -447,8 +447,6 @@ export class CategoryPageComponent {
             if (this.categoryId === -1) return;
             console.log('Category ID:', this.categoryId);
 
-
-
             // API calls with dummy data provisions
             this.fetchCategoriesByID(this.categoryId).pipe(
                 switchMap((categoryData) => {
@@ -456,19 +454,19 @@ export class CategoryPageComponent {
                     this.categories = categoryData!.subcategories;
                     this.category = categoryData;
                     // Get category info
-            if (this.category) {
-                this.categoryName = this.category.category_name;
-                this.selectedCategoryId = this.category.category_id;
+                    if (this.category) {
+                        this.categoryName = this.category.category_name;
+                        this.selectedCategoryId = this.category.category_id;
 
-                // Select default "All" subcategory
-                const subcategories = this.category!.subcategories;
-                // const allSubcategory = subcategories.find(sub => sub.name === 'All');
-                // if (allSubcategory) {
-                //     this.selectSubcategory(allSubcategory.id);
-                // }
-            }
+                        // Select default "All" subcategory
+                        const subcategories = this.category!.subcategories;
+                        // const allSubcategory = subcategories.find(sub => sub.name === 'All');
+                        // if (allSubcategory) {
+                        //     this.selectSubcategory(allSubcategory.id);
+                        // }
+                    }
 
-            this.applyFilters();
+                    this.applyFilters();
                     console.log('Category data:', this.category);
                     return this.fetchProductsByCategoryID(this.categoryId);
                 })
@@ -537,9 +535,10 @@ export class CategoryPageComponent {
         }
 
         // Original API call
+        console.log(categoryId);
         return this.buyerApiService.getProductsByCategoryId(categoryId).pipe(
-            tap(() => {
-                this.loadingProducts = false;
+            tap((data) => {
+                this.loadingProducts = false; console.log('Products data:', data);
             }),
             catchError((error) => {
                 this.errorLoadingProducts = true;
@@ -648,45 +647,45 @@ export class CategoryPageComponent {
 
     getFilteredAndSortedItems() {
         let items = [...this.selectedSubcategoryItems];
-
+console.log(items);
         // Filtering logic
         if (this.filterQuery) {
             items = items.filter((item) =>
                 item.name.toLowerCase().includes(this.filterQuery.toLowerCase())
             );
         }
-
+        console.log(items);
         items = items.filter(
             (item) =>
                 item.price >= this.priceRangeValues.lower &&
                 item.price <= this.priceRangeValues.upper
         );
-
+        console.log(items);
         // Apply availability filter
         if (this.availability) {
             items = items.filter((item) => item.inStock);
         }
-
+        console.log(items);
         // Apply quantity discount filter
         if (this.quantityDiscount) {
             items = items.filter((item) => item.discount > 0);
         }
-
+        console.log(items);
         // Apply delivery time filter
         if (this.deliveryTime !== 'any') {
             items = items.filter((item) => item.deliveryTime === this.deliveryTime);
         }
-
+        console.log(items);
         // Apply organic filter
         if (this.organic !== null) {
             items = items.filter((item) => item.organic === this.organic);
         }
-
+        console.log(items);
         // Apply seller ratings filter
         items = items.filter((item) => item.rating >= this.sellerRatings);
-
+        console.log(items);
         items = items.filter((item) => item.minOrderQty >= this.minimumOrderQuantity);
-
+        console.log(items);
         // Sorting
         switch (this.sortOption) {
             case 'price-asc':
@@ -702,7 +701,7 @@ export class CategoryPageComponent {
                 items.sort((a, b) => b.rating - a.rating);
                 break;
         }
-
+        console.log(items);
         return items;
     }
 

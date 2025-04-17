@@ -66,7 +66,7 @@ export class AdminPage implements OnInit {
   // Function to get the page title
   getPageTitle(url: string): string {
     for (const route in this.titleMap) {
-      if (url.startsWith(route)) {
+      if (url===(route)) {
         return this.titleMap[route];
       }
     }

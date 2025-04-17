@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Market Opportunities</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-card *ngIf="!isPremium" color="light">
+    <ion-card-header>
+      <ion-card-title>Upgrade to Premium</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Get access to bulk order insights and competitive tools to grow your sales.
+    </ion-card-content>
+  </ion-card>
+
+  <ng-container *ngIf="isPremium">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Bulk Orders Placed</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let order of bulkOrders">
+            <ion-label>
+              <h3>{{ order.retailer }} ordered {{ order.product }}</h3>
+              <p>From {{ order.wholesaler }} • ₹{{ order.price }} • Qty: {{ order.quantity }}</p>
+            </ion-label>
+            <ion-button fill="outline" slot="end" (click)="openOfferModal(order)">Make Offer</ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Top Bulk Retailers Nearby</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let retailer of topRetailers">
+            <ion-label>
+              <h3>{{ retailer.name }}</h3>
+              <p>Total Orders: ₹{{ retailer.total }}</p>
+            </ion-label>
+            <ion-button fill="outline" slot="end">View Products</ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+</ion-content>

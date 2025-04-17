@@ -1,0 +1,24 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Make Offer</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-item>
+    <ion-label position="floating">Offer Price (₹)</ion-label>
+    <ion-input type="number" [(ngModel)]="offerPrice"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Message (Optional)</ion-label>
+    <ion-textarea [(ngModel)]="message"></ion-textarea>
+  </ion-item>
+
+  <ion-button expand="block" class="ion-margin-top" (click)="submitOffer()">
+    Submit Offer
+  </ion-button>
+</ion-content>

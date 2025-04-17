@@ -46,6 +46,14 @@ export const routes: Routes = [
     path: 'wholesaler/trends/market-comparison',
     loadComponent: () => import('./Wholesaler/market-comparison/market-comparison.component').then((m) => m. MarketComparisonComponent),
   },
+  {
+    path: 'wholesaler/market-opportunities',
+    loadComponent: () => import('./Wholesaler/market-opportunities/market-opportunities.component').then((m) => m.MarketOpportunitiesComponent),
+  },
+  {
+    path: 'wholesaler/market-opportunities/offer-modal',
+    loadComponent: () => import('./Wholesaler/offer-modal/offer-modal.component').then((m) => m.OfferModalComponent),
+  },
 
   {
     path: 'admin',
@@ -67,7 +75,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/admin-order-detail.page').then((m) => m.AdminOrderDetailPage),
       },
-
 
       {
         path: 'driver',
