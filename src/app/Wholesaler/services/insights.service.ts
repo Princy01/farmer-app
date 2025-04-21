@@ -25,7 +25,7 @@ export class InsightsService {
   ];
 
   topRetailers = [
-    { name: 'Raghav Traders', total: 92000 },
+    { name: 'ABC Traders', total: 92000 },
     { name: 'CityMart Retail', total: 88500 },
     { name: 'FreshBite', total: 70000 },
     { name: 'RetailPro', total: 67200 },

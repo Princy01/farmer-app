@@ -7,7 +7,12 @@
     </ion-buttons>
     <ion-title>Trends</ion-title>
   </ion-toolbar>
-  
+
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner></ion-spinner>
+    <p>Loading data...</p>
+  </div>
+
   <ion-segment [(ngModel)]="selectedView" mode="ios">
     <ion-segment-button value="chart">
       <ion-label>Stock Levels</ion-label>

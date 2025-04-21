@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IonicModule, NavController } from '@ionic/angular';
+import { IonicModule, NavController, LoadingController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
+import { SalesTrendsService } from './sales-trends.service';
+import { catchError, finalize, of } from 'rxjs';
 
 interface ProductData {
   name: string;
@@ -25,13 +27,30 @@ export class SalesTrendsComponent implements OnInit {
   selectedMetric: string = 'volume';
   chartOptions: any;
   topProductsOptions: any;
+  useRealData: boolean = true;
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
-  constructor(private navController: NavController) {
+  constructor(
+    private navController: NavController,
+    private salesTrendsService: SalesTrendsService,
+    private loadingController: LoadingController
+  ) {
     addIcons({ chevronBackOutline });
   }
 
   ngOnInit() {
     this.initializeCharts();
+  }
+
+  async showLoading() {
+    this.isLoading = true;
+    const loading = await this.loadingController.create({
+      message: 'Loading data...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+    return loading;
   }
 
   goToTrends() {
@@ -48,6 +67,7 @@ export class SalesTrendsComponent implements OnInit {
 
   onPeriodChange() {
     if (this.selectedView === 'trends') {
+      this.useRealData = true;
       this.updateTrendsChart();
     } else {
       this.updateTopProductsChart();
@@ -60,17 +80,67 @@ export class SalesTrendsComponent implements OnInit {
     }
   }
 
+  toggleDataSource() {
+    this.useRealData = !this.useRealData;
+    this.errorMessage = '';
+    this.initializeCharts();
+  }
+
   private initializeCharts() {
     this.updateTrendsChart();
     this.updateTopProductsChart();
   }
 
-  private updateTrendsChart() {
-    const data = this.getDataForPeriod(this.selectedPeriod);
+  private async updateTrendsChart() {
+    let loading: any;
+    if (this.useRealData) {
+      loading = await this.showLoading();
+      let dataObservable;
+      switch (this.selectedPeriod) {
+        case 'weekly':
+          dataObservable = this.salesTrendsService.getWeeklySales();
+          break;
+        case 'monthly':
+          dataObservable = this.salesTrendsService.getMonthlySales();
+          break;
+        case 'yearly':
+          dataObservable = this.salesTrendsService.getYearlySales();
+          break;
+        default:
+          dataObservable = this.salesTrendsService.getMonthlySales();
+      }
+
+      dataObservable.pipe(
+        catchError(error => {
+          this.errorMessage = 'Failed to fetch real data. Falling back to dummy data.';
+          this.useRealData = false;
+          const dummyData = this.getDataForPeriod(this.selectedPeriod);
+          return of(dummyData.values.map((value, index) => ({
+            date: dummyData.categories[index],
+            total_sales: value
+          })));
+        }),
+        finalize(() => {
+          loading?.dismiss();
+          this.isLoading = false;
+        })
+      ).subscribe(data => {
+        this.updateTrendsChartOptions(data);
+      });
+    } else {
+      const dummyData = this.getDataForPeriod(this.selectedPeriod);
+      this.updateTrendsChartOptions(dummyData.values.map((value, index) => ({
+        date: dummyData.categories[index],
+        total_sales: value
+      })));
+    }
+  }
+
+  private updateTrendsChartOptions(data: any[]) {
     this.chartOptions = {
       series: [{
         name: 'Sales',
-        data: data.values
+        data: data.map(item => item.total_sales)
       }],
       chart: {
         height: 350,
@@ -82,7 +152,7 @@ export class SalesTrendsComponent implements OnInit {
       },
       colors: ['#2E93fA'],
       xaxis: {
-        categories: data.categories
+        categories: data.map(item => typeof item.date === 'string' ? item.date : item.date.toString())
       },
       yaxis: {
         title: {
@@ -103,103 +173,239 @@ export class SalesTrendsComponent implements OnInit {
     };
   }
 
-  private updateTopProductsChart() {
-    const productData = this.getTopProductsForPeriod(this.selectedPeriod);
-    const isVolume = this.selectedMetric === 'volume';
+  private async updateTopProductsChart() {
+    let loading: any;
+    if (this.useRealData) {
+      loading = await this.showLoading();
+      let dataObservable;
+      switch (this.selectedPeriod) {
+        case 'daily':
+          dataObservable = this.salesTrendsService.getTopSellingDaily();
+          break;
+        case 'weekly':
+          dataObservable = this.salesTrendsService.getTopSellingWeekly();
+          break;
+        case 'monthly':
+          dataObservable = this.salesTrendsService.getTopSellingMonthly();
+          break;
+        case 'yearly':
+          dataObservable = this.salesTrendsService.getTopSellingYearly();
+          break;
+        default:
+          dataObservable = this.salesTrendsService.getTopSellingMonthly();
+      }
 
-    const values = productData.map(item => isVolume ? item.volume : item.price);
-    const sortedData = [...productData]
-      .sort((a, b) => (isVolume ? b.volume - a.volume : b.price - a.price));
+      dataObservable.pipe(
+        catchError(error => {
+          this.errorMessage = 'Failed to fetch top products data. Falling back to dummy data.';
+          this.useRealData = false;
+          return of(this.getTopProductsForPeriod(this.selectedPeriod).map(item => ({
+            product_id: 0,
+            product_name: item.name,
+            total_quantity_sold: item.volume
+          })));
+        }),
+        finalize(() => {
+          loading?.dismiss();
+          this.isLoading = false;
+        })
+      ).subscribe(products => {
+        const isVolume = this.selectedMetric === 'volume';
+        const sortedData = [...products].sort((a, b) =>
+          b.total_quantity_sold - a.total_quantity_sold
+        );
 
-    this.topProductsOptions = {
-      series: [{
-        name: isVolume ? 'Sales Volume' : 'Sales Revenue',
-        data: sortedData.map(item => isVolume ? item.volume : item.price)
-      }],
-      chart: {
-        type: 'bar',
-        height: 450,
-        background: '#ffffff',
-        toolbar: {
-          show: false
+        this.topProductsOptions = {
+          series: [{
+            name: isVolume ? 'Sales Volume' : 'Sales Revenue',
+            data: sortedData.map(item => item.total_quantity_sold)
+          }],
+          chart: {
+            type: 'bar',
+            height: 450,
+            background: '#ffffff',
+            toolbar: {
+              show: false
+            },
+            animations: {
+              enabled: true
+            },
+            foreColor: '#333',
+            fontFamily: 'inherit'
+          },
+          grid: {
+            padding: {
+              bottom: 70
+            },
+            xaxis: {
+              lines: {
+                show: true
+              }
+            }
+          },
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              borderRadius: 4,
+              columnWidth: '60%'
+            }
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: (value: number) => isVolume ?
+              `${value}kg` :
+              `₹${(value / 1000).toFixed(0)}K`,
+            style: {
+              fontSize: '7px',
+              colors: ['#000']
+            }
+          },
+          xaxis: {
+            categories: sortedData.map(item => item.product_name),
+            title: {
+              text: 'Products',
+              offsetY: 70,
+              style: {
+                fontSize: '14px'
+              },
+              floating: false
+            },
+            labels: {
+              rotate: -90,
+              style: {
+                fontSize: '11px'
+              }
+            }
+          },
+          yaxis: {
+            title: {
+              text: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)'
+            },
+            labels: {
+              formatter: (value: number) => isVolume ?
+                `${value} kg` :
+                `₹${(value / 1000).toFixed(0)}K`
+            }
+          },
+          colors: [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
+            '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
+          ],
+          title: {
+            text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
+            align: 'center',
+            style: {
+              fontSize: '16px'
+            },
+            margin: 20
+          },
+          tooltip: {
+            y: {
+              formatter: (value: number) => isVolume ?
+                `${value} kg` :
+                `₹${value.toLocaleString()}`
+            }
+          }
+        };
+      });
+    } else {
+      const productData = this.getTopProductsForPeriod(this.selectedPeriod);
+      const isVolume = this.selectedMetric === 'volume';
+
+      const values = productData.map(item => isVolume ? item.volume : item.price);
+      const sortedData = [...productData]
+        .sort((a, b) => (isVolume ? b.volume - a.volume : b.price - a.price));
+
+      this.topProductsOptions = {
+        series: [{
+          name: isVolume ? 'Sales Volume' : 'Sales Revenue',
+          data: sortedData.map(item => isVolume ? item.volume : item.price)
+        }],
+        chart: {
+          type: 'bar',
+          height: 450,
+          background: '#ffffff',
+          toolbar: {
+            show: false
+          },
+          animations: {
+            enabled: true
+          },
+          foreColor: '#333',
+          fontFamily: 'inherit'
         },
-        animations: {
-          enabled: true
+        grid: {
+          padding: {
+            bottom: 70
+          },
+          xaxis: {
+            lines: {
+              show: true
+            }
+          }
         },
-        foreColor: '#333',
-        fontFamily: 'inherit'
-      },
-      grid: {
-        padding: {
-          bottom: 70
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            borderRadius: 4,
+            columnWidth: '60%'
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: (value: number) => isVolume ?
+            `${value}kg` :
+            `₹${(value / 1000).toFixed(0)}K`,
+          style: {
+            fontSize: '7px',
+            colors: ['#000']
+          }
         },
         xaxis: {
-          lines: {
-            show: true
-          }
-        }
-      },
-      plotOptions: {
-        bar: {
-          horizontal: false,
-          borderRadius: 4,
-          columnWidth: '60%'
-        }
-      },
-      dataLabels: {
-        enabled: true,
-        formatter: (value: number) => isVolume ?
-          `${value}kg` :
-          `₹${(value/1000).toFixed(0)}K`,
-        style: {
-          fontSize: '7px',
-          colors: ['#000']
-        }
-      },
-      xaxis: {
-        categories: sortedData.map(item => item.name),
-        title: {
-          text: 'Products & Mandi Location',
-          offsetY: 70,
-          style: {
-            fontSize: '14px'
+          categories: sortedData.map(item => item.name),
+          title: {
+            text: 'Products & Mandi Location',
+            offsetY: 70,
+            style: {
+              fontSize: '14px'
+            },
+            floating: false
           },
-          floating: false
-        },
-        labels: {
-          rotate: -90,
-          style: {
-            fontSize: '11px'
+          labels: {
+            rotate: -90,
+            style: {
+              fontSize: '11px'
+            }
           }
-        }
-      },
-      yaxis: {
+        },
+        yaxis: {
+          title: {
+            text: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)'
+          },
+          labels: {
+            formatter: (value: number) => isVolume ?
+              `${value} kg` :
+              `₹${(value / 1000).toFixed(0)}K`
+          }
+        },
+        colors: [
+          '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
+          '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
+        ],
         title: {
-          text: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)'
+          text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
+          align: 'center',
+          style: {
+            fontSize: '16px'
+          },
+          margin: 20
         },
-        labels: {
-          formatter: (value: number) => isVolume ?
-            `${value} kg` :
-            `₹${(value/1000).toFixed(0)}K`
-        }
-      },
-      colors: [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
-        '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
-      ],
-      title: {
-        text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
-        align: 'center',
-        style: {
-          fontSize: '16px'
-        },
-        margin: 20
-      },
-      tooltip: {
-        y: {
-          formatter: (value: number) => isVolume ?
-            `${value} kg` :
-            `₹${value.toLocaleString()}`
+        tooltip: {
+          y: {
+            formatter: (value: number) => isVolume ?
+              `${value} kg` :
+              `₹${value.toLocaleString()}`
+          }
         }
       }
     };

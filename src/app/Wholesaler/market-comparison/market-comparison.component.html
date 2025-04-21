@@ -12,7 +12,7 @@
     <ion-list>
       <ion-item>
         <ion-label>Select Mandis</ion-label>
-        <ion-select multiple="true" [(ngModel)]="selectedMandis" (ionChange)="updateChart()">
+        <ion-select multiple="true" [(ngModel)]="selectedMandis" (ionChange)="onMandiChange($event)">
           <ion-select-option *ngFor="let mandi of availableMandis" [value]="mandi">
             {{mandi}}
           </ion-select-option>
@@ -20,7 +20,7 @@
       </ion-item>
       <ion-item>
         <ion-label>Select Products</ion-label>
-        <ion-select multiple="true" [(ngModel)]="selectedProducts" (ionChange)="updateChart()">
+        <ion-select multiple="true" [(ngModel)]="selectedProducts" (ionChange)="onProductChange($event)">
           <ion-select-option *ngFor="let product of availableProducts" [value]="product">
             {{product}}
           </ion-select-option>
