@@ -66,8 +66,6 @@ export class BuyerHomeComponent {
     });
   }
 
-
-
 fetchCategories() {
     this.loadingCategories = true;
     this.buyerApiService.getSuperCategories().subscribe(

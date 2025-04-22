@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Restocking Recommendations</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Summary -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Summary</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Total Products Tracked: <strong>{{ totalStockSummary.totalProducts }}</strong></p>
+      <p>Total Stock Across Mandis: <strong>{{ totalStockSummary.totalStock }} kg</strong></p>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Top Products to Restock -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Top Products to Restock</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let product of sortedProducts()">
+          <ion-label>
+            <h2>{{ product.name }}</h2>
+            <p>Total Stock: {{ product.stock }} kg</p>
+            <p>Stock-to-Sales Ratio: {{ getStockToSalesRatio(product) | number: '1.1-1' }}</p>
+            <p><strong>Mandis:</strong></p>
+            <ul>
+              <li *ngFor="let mandi of product.mandis">{{ mandi.name }}: {{ mandi.stock }} kg</li>
+            </ul>
+          </ion-label>
+          <ion-badge slot="end" [color]="getBadgeColor(product)">
+            {{ getBadge(product) }}
+          </ion-badge>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

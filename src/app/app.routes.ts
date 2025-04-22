@@ -54,6 +54,10 @@ export const routes: Routes = [
     path: 'wholesaler/market-opportunities/offer-modal',
     loadComponent: () => import('./Wholesaler/offer-modal/offer-modal.component').then((m) => m.OfferModalComponent),
   },
+  {
+    path: 'wholesaler/restocking-recommendations',
+    loadComponent: () => import('./Wholesaler/restocking-recommendations/restocking-recommendations.component').then((m) => m.RestockingRecommendationsComponent),
+  },
 
   {
     path: 'admin',

@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
-import { SalesTrendsService } from './sales-trends.service';
+import { SalesTrendsService, SalesTrend, TopSellingProduct } from './sales-trends.service';
 import { catchError, finalize, of } from 'rxjs';
 
 interface ProductData {
@@ -138,10 +138,16 @@ export class SalesTrendsComponent implements OnInit {
 
   private updateTrendsChartOptions(data: any[]) {
     this.chartOptions = {
-      series: [{
-        name: 'Sales',
-        data: data.map(item => item.total_sales)
-      }],
+      series: [
+        {
+          name: 'Total Revenue',
+          data: data.map(item => item.total_revenue)
+        },
+        {
+          name: 'Total Orders',
+          data: data.map(item => item.total_orders)
+        }
+      ],
       chart: {
         height: 350,
         type: 'line',
@@ -150,18 +156,29 @@ export class SalesTrendsComponent implements OnInit {
           show: true
         }
       },
-      colors: ['#2E93fA'],
+      colors: ['#2E93fA', '#66DA26'],
       xaxis: {
-        categories: data.map(item => typeof item.date === 'string' ? item.date : item.date.toString())
+        categories: data.map(item => item.month_year)
       },
-      yaxis: {
-        title: {
-          text: 'Sales (₹)'
+      yaxis: [
+        {
+          title: {
+            text: 'Revenue (₹)'
+          },
+          labels: {
+            formatter: (value: number) => `₹${(value / 1000).toFixed(0)}K`
+          }
         },
-        labels: {
-          formatter: (value: number) => `₹${(value / 1000).toFixed(0)}K`
+        {
+          opposite: true,
+          title: {
+            text: 'Orders'
+          },
+          labels: {
+            formatter: (value: number) => `${Math.round(value)}`
+          }
         }
-      },
+      ],
       title: {
         text: `${this.capitalize(this.selectedPeriod)} Sales Trends`,
         align: 'center',
@@ -200,113 +217,17 @@ export class SalesTrendsComponent implements OnInit {
           this.errorMessage = 'Failed to fetch top products data. Falling back to dummy data.';
           this.useRealData = false;
           return of(this.getTopProductsForPeriod(this.selectedPeriod).map(item => ({
-            product_id: 0,
-            product_name: item.name,
-            total_quantity_sold: item.volume
-          })));
+            month_year: item.name,
+            total_orders: item.volume,
+            total_revenue: item.price
+          } as TopSellingProduct)));
         }),
         finalize(() => {
           loading?.dismiss();
           this.isLoading = false;
         })
       ).subscribe(products => {
-        const isVolume = this.selectedMetric === 'volume';
-        const sortedData = [...products].sort((a, b) =>
-          b.total_quantity_sold - a.total_quantity_sold
-        );
-
-        this.topProductsOptions = {
-          series: [{
-            name: isVolume ? 'Sales Volume' : 'Sales Revenue',
-            data: sortedData.map(item => item.total_quantity_sold)
-          }],
-          chart: {
-            type: 'bar',
-            height: 450,
-            background: '#ffffff',
-            toolbar: {
-              show: false
-            },
-            animations: {
-              enabled: true
-            },
-            foreColor: '#333',
-            fontFamily: 'inherit'
-          },
-          grid: {
-            padding: {
-              bottom: 70
-            },
-            xaxis: {
-              lines: {
-                show: true
-              }
-            }
-          },
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              borderRadius: 4,
-              columnWidth: '60%'
-            }
-          },
-          dataLabels: {
-            enabled: true,
-            formatter: (value: number) => isVolume ?
-              `${value}kg` :
-              `₹${(value / 1000).toFixed(0)}K`,
-            style: {
-              fontSize: '7px',
-              colors: ['#000']
-            }
-          },
-          xaxis: {
-            categories: sortedData.map(item => item.product_name),
-            title: {
-              text: 'Products',
-              offsetY: 70,
-              style: {
-                fontSize: '14px'
-              },
-              floating: false
-            },
-            labels: {
-              rotate: -90,
-              style: {
-                fontSize: '11px'
-              }
-            }
-          },
-          yaxis: {
-            title: {
-              text: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)'
-            },
-            labels: {
-              formatter: (value: number) => isVolume ?
-                `${value} kg` :
-                `₹${(value / 1000).toFixed(0)}K`
-            }
-          },
-          colors: [
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
-            '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
-          ],
-          title: {
-            text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
-            align: 'center',
-            style: {
-              fontSize: '16px'
-            },
-            margin: 20
-          },
-          tooltip: {
-            y: {
-              formatter: (value: number) => isVolume ?
-                `${value} kg` :
-                `₹${value.toLocaleString()}`
-            }
-          }
-        };
+        this.updateTopProductsChartOptions(products);
       });
     } else {
       const productData = this.getTopProductsForPeriod(this.selectedPeriod);
@@ -410,6 +331,110 @@ export class SalesTrendsComponent implements OnInit {
       }
     };
   }
+
+  private updateTopProductsChartOptions(products: TopSellingProduct[]) {
+    const isVolume = this.selectedMetric === 'volume';
+    const sortedData = [...products].sort((a, b) =>
+      isVolume ?
+        b.total_orders - a.total_orders :
+        b.total_revenue - a.total_revenue
+    );
+
+    this.topProductsOptions = {
+      series: [{
+        name: isVolume ? 'Total Orders' : 'Total Revenue',
+        data: sortedData.map(item =>
+          isVolume ? item.total_orders : item.total_revenue
+        )
+      }],
+          chart: {
+            type: 'bar',
+            height: 450,
+            background: '#ffffff',
+            toolbar: {
+              show: false
+            },
+            animations: {
+              enabled: true
+            },
+            foreColor: '#333',
+            fontFamily: 'inherit'
+          },
+          grid: {
+            padding: {
+              bottom: 70
+            },
+            xaxis: {
+              lines: {
+                show: true
+              }
+            }
+          },
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              borderRadius: 4,
+              columnWidth: '60%'
+            }
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: (value: number) => isVolume ?
+              `${value}kg` :
+              `₹${(value / 1000).toFixed(0)}K`,
+            style: {
+              fontSize: '7px',
+              colors: ['#000']
+            }
+          },
+          xaxis: {
+            categories: sortedData.map(item => item.month_year),
+            title: {
+              text: 'Products',
+              offsetY: 70,
+              style: {
+                fontSize: '14px'
+              },
+              floating: false
+            },
+            labels: {
+              rotate: -90,
+              style: {
+                fontSize: '11px'
+              }
+            }
+          },
+          yaxis: {
+            title: {
+              text: isVolume ? 'Total Orders' : 'Revenue (₹)'
+            },
+            labels: {
+              formatter: (value: number) => isVolume ?
+                `${Math.round(value)}` :
+                `₹${(value / 1000).toFixed(0)}K`
+            }
+          },
+          colors: [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
+            '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
+          ],
+          title: {
+            text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
+            align: 'center',
+            style: {
+              fontSize: '16px'
+            },
+            margin: 20
+          },
+          tooltip: {
+            y: {
+              formatter: (value: number) => isVolume ?
+                `${value} kg` :
+                `₹${value.toLocaleString()}`
+            }
+          }
+        };
+      }
 
   private getTopProductsForPeriod(period: string): ProductData[] {
     const base = {

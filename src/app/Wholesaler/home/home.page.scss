@@ -121,3 +121,7 @@ ion-searchbar {
     margin-bottom: 3px;
   }
 }
+
+::ng-deep .custom-action-sheet-btn {
+  color: rgb(154, 192, 159) !important;
+}

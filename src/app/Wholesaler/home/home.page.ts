@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { IonicModule, NavController, MenuController } from '@ionic/angular';
+import { IonicModule, NavController, MenuController, ActionSheetController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import {addIcons} from 'ionicons';
 import { chatbubblesSharp, notificationsCircleSharp,logoAndroid, personCircleSharp, arrowForwardCircleSharp,
-   chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline } from 'ionicons/icons';
+   chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline,personOutline,
+   trendingUpOutline, reloadOutline, settingsOutline, closeOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 
 @Component({
@@ -25,10 +26,59 @@ export class HomePage {
   messages = 3;       // Example message count
 
 
-  constructor(private navCtrl: NavController, private router: Router, private menuCtrl: MenuController
+  constructor(private navCtrl: NavController, private router: Router, private menuCtrl: MenuController,     private actionSheetController: ActionSheetController
+
   ) {
     addIcons({chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
-       chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline});
+       chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline,personOutline,
+       trendingUpOutline, reloadOutline, settingsOutline, closeOutline});
+  }
+
+  async presentActionSheet() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Account Options',
+      buttons: [
+        {
+          text: 'Profile',
+          icon: 'person-outline',
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.router.navigate(['/wholesaler/profile']);
+          }
+        },
+        {
+          text: 'Market Opportunities',
+          icon: 'trending-up-outline',
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.router.navigate(['/wholesaler/market-opportunities']);
+          }
+        },
+        {
+          text: 'Restocking Recommendations',
+          icon: 'reload-outline',
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.router.navigate(['/wholesaler/restocking-recommendations']);
+          }
+        },
+        {
+          text: 'Settings',
+          icon: 'settings-outline',
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.router.navigate(['/wholesaler/settings']);
+          }
+        },
+        {
+          text: 'Cancel',
+          icon: 'close-outline',
+          role: 'cancel',
+          cssClass: 'custom-action-sheet-btn'
+        }
+      ]
+    });
+    await actionSheet.present();
   }
   createOrder() {
     this.router.navigate(['/wholesaler/for-sale']);
