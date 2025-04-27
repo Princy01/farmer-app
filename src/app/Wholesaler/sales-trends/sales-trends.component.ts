@@ -217,9 +217,16 @@ export class SalesTrendsComponent implements OnInit {
           this.errorMessage = 'Failed to fetch top products data. Falling back to dummy data.';
           this.useRealData = false;
           return of(this.getTopProductsForPeriod(this.selectedPeriod).map(item => ({
-            month_year: item.name,
-            total_orders: item.volume,
-            total_revenue: item.price
+            product_id: 0,
+            product_name: item.name,
+            mandi_id: 0,
+            mandi_name: null,
+            unit_id: 1,
+            quantity: item.volume,
+            price: item.price,
+            total_quantity_kg: item.volume,
+            actual_delivery_date: new Date().toISOString(),
+            total_price: item.price
           } as TopSellingProduct)));
         }),
         finalize(() => {
@@ -334,20 +341,25 @@ export class SalesTrendsComponent implements OnInit {
 
   private updateTopProductsChartOptions(products: TopSellingProduct[]) {
     const isVolume = this.selectedMetric === 'volume';
-    const sortedData = [...products].sort((a, b) =>
-      isVolume ?
-        b.total_orders - a.total_orders :
-        b.total_revenue - a.total_revenue
-    );
 
-    this.topProductsOptions = {
-      series: [{
-        name: isVolume ? 'Total Orders' : 'Total Revenue',
-        data: sortedData.map(item =>
-          isVolume ? item.total_orders : item.total_revenue
-        )
-      }],
-          chart: {
+     // Sort products by volume or revenue
+  const sortedData = [...products].sort((a, b) =>
+    isVolume ?
+      (b.total_quantity_kg || 0) - (a.total_quantity_kg || 0) :
+      (b.total_price || 0) - (a.total_price || 0)
+  );
+
+  // Take top 10 products
+  const top10Products = sortedData.slice(0, 10);
+
+  this.topProductsOptions = {
+    series: [{
+      name: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)',
+      data: top10Products.map(item =>
+        isVolume ? item.total_quantity_kg : item.total_price
+      )
+    }],
+    chart: {
             type: 'bar',
             height: 450,
             background: '#ffffff',
@@ -388,7 +400,9 @@ export class SalesTrendsComponent implements OnInit {
             }
           },
           xaxis: {
-            categories: sortedData.map(item => item.month_year),
+            categories: top10Products.map(item =>
+              `${item.product_name || 'Unknown'} (${item.mandi_name || 'Unknown Mandi'})`
+            ),
             title: {
               text: 'Products',
               offsetY: 70,
@@ -406,13 +420,13 @@ export class SalesTrendsComponent implements OnInit {
           },
           yaxis: {
             title: {
-              text: isVolume ? 'Total Orders' : 'Revenue (₹)'
+              text: isVolume ? 'Sales Volume (kg)' : 'Revenue (₹)'
             },
             labels: {
               formatter: (value: number) => isVolume ?
-                `${Math.round(value)}` :
-                `₹${(value / 1000).toFixed(0)}K`
-            }
+              `${value?.toFixed(2)} kg` :
+              `₹${(value / 1000).toFixed(0)}K`
+          }
           },
           colors: [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',

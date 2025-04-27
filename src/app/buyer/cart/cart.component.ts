@@ -4,9 +4,28 @@ import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { trashOutline, cartOutline, chevronBack } from 'ionicons/icons';
-// import { CartService } from '../services/cart.service';
+import { trashOutline, cartOutline, chevronBack,removeOutline, addOutline } from 'ionicons/icons';
+import { CartService } from './cart.service';
 
+interface DummyProduct {
+  product_id: number;
+  product_name: string;
+  quantity: number;
+  unit_id: number;
+  unit_name: string;
+  price_while_added: number;
+  latest_wholesaler_price: number;
+  is_active: boolean;
+}
+
+interface DummyCartDetails {
+  cart_id: number;
+  retailer_id: number;
+  retailer_name: string;
+  wholeseller_id: number;
+  wholeseller_name: string;
+  cart_status: number;
+}
 @Component({
   selector: 'app-cart',
   standalone: true,
@@ -16,18 +35,18 @@ import { trashOutline, cartOutline, chevronBack } from 'ionicons/icons';
 })
 export class CartComponent implements OnInit {
   cartForm: FormGroup;
-  cartItems = [
-    { id: '1', name: 'Spinach', hindiName: 'पालक', image: 'assets/img/Spinach2.png', price: 40, quantity: 100, discount: 5 },
-    { id: '2', name: 'Tomato', hindiName: 'टमाटर', image: 'assets/img/Tomato1.png', price: 30, quantity: 250, discount: 3 }
-  ];
+  cartDetails: any;
+  cartProducts: any[] = [];
   discount = 0;
+
+  useRealData: boolean = false;
 
   constructor(
     private router: Router,
     private fb: FormBuilder,
-    // private cartService: CartService
+    private cartService: CartService
   ) {
-    addIcons({ trashOutline, cartOutline, chevronBack });
+    addIcons({ trashOutline, cartOutline, chevronBack, removeOutline, addOutline });
 
     this.cartForm = this.fb.group({
       discountCode: [''],
@@ -35,44 +54,138 @@ export class CartComponent implements OnInit {
     });
   }
 
+  private getDummyData() {
+    const dummyCartDetails: DummyCartDetails = {
+      cart_id: 1001,
+      retailer_id: 2001,
+      retailer_name: "Sample Retail Store",
+      wholeseller_id: 3001,
+      wholeseller_name: "Fresh Produce Wholesale",
+      cart_status: 1
+    };
+
+    const dummyProducts: DummyProduct[] = [
+      {
+        product_id: 1,
+        product_name: "Tomatoes",
+        quantity: 5,
+        unit_id: 1,
+        unit_name: "kg",
+        price_while_added: 40,
+        latest_wholesaler_price: 45,
+        is_active: true
+      },
+      {
+        product_id: 2,
+        product_name: "Potatoes",
+        quantity: 10,
+        unit_id: 1,
+        unit_name: "kg",
+        price_while_added: 25,
+        latest_wholesaler_price: 25,
+        is_active: true
+      },
+      {
+        product_id: 3,
+        product_name: "Onions",
+        quantity: 8,
+        unit_id: 1,
+        unit_name: "kg",
+        price_while_added: 30,
+        latest_wholesaler_price: 28,
+        is_active: true
+      }
+    ];
+
+    return { cart_details: dummyCartDetails, products: dummyProducts };
+  }
+
   ngOnInit() {
-    // Load cart from API if needed
-    // this.cartService.getCartItems().subscribe(items => {
-    //   this.cartItems = items;
-    // });
+    if (this.useRealData) {
+      const cartId = localStorage.getItem('cartId');
+      if (cartId) {
+        this.loadCart(Number(cartId));
+      } else {
+        console.warn('No cart ID found in localStorage');
+        // Maybe redirect to home or show empty cart message
+      }
+    } else {
+      // When using dummy data, just load it directly
+      this.loadCart();
+    }
   }
 
   goBack() {
     this.router.navigate(['/buyer/buyer-home']);
   }
 
+  loadCart(cartId?: number) {
+    if (this.useRealData && cartId) {
+      this.cartService.getCart(cartId).subscribe({
+        next: (response) => {
+          this.cartDetails = response.cart_details;
+          this.cartProducts = response.products;
+        },
+        error: (error) => {
+          console.error('Error loading cart:', error);
+          // Fallback to dummy data on error
+          const dummyData = this.getDummyData();
+          this.cartDetails = dummyData.cart_details;
+          this.cartProducts = dummyData.products;
+        }
+      });
+    } else {
+      // Load dummy data without requiring cartId
+      const dummyData = this.getDummyData();
+      this.cartDetails = dummyData.cart_details;
+      this.cartProducts = dummyData.products;
+    }
+  }
+
   getTotalPrice(): number {
-    return this.cartItems.reduce((total, item) =>
-      total + (item.price - item.discount) * item.quantity, 0
+    return this.cartProducts.reduce((total, item) =>
+      total + (item.latest_wholesaler_price * item.quantity), 0
     );
   }
 
   increaseQuantity(index: number) {
-    this.cartItems[index].quantity++;
-
-    // API request to update quantity
-    // this.cartService.updateQuantity(this.cartItems[index].id, this.cartItems[index].quantity);
+    this.cartProducts[index].quantity++;
+    if (this.useRealData) {
+      // Here you would make the API call when implemented
+      console.log('Quantity updated (simulated API call)');
+    }
   }
 
   decreaseQuantity(index: number) {
-    if (this.cartItems[index].quantity > 1) {
-      this.cartItems[index].quantity--;
-
-      // API request to update quantity
-      // this.cartService.updateQuantity(this.cartItems[index].id, this.cartItems[index].quantity);
+    if (this.cartProducts[index].quantity > 1) {
+      this.cartProducts[index].quantity--;
+      if (this.useRealData) {
+        // Here you would make the API call when implemented
+        console.log('Quantity updated (simulated API call)');
+      }
     }
   }
 
   removeItem(index: number) {
-    this.cartItems.splice(index, 1);
-
-    // API request to remove item
-    // this.cartService.removeFromCart(this.cartItems[index].id);
+    const product = this.cartProducts[index];
+    if (this.useRealData) {
+      this.cartService.removeCartItem(
+        this.cartDetails.cart_id,
+        product.product_id,
+        this.cartDetails.wholeseller_id
+      ).subscribe({
+        next: (response) => {
+          this.cartProducts = response.products;
+          this.cartDetails = response.cart_details;
+        },
+        error: (error) => {
+          console.error('Error removing item:', error);
+        }
+      });
+    } else {
+      // Handle dummy data removal
+      this.cartProducts.splice(index, 1);
+    }
   }
 
   applyDiscount() {
@@ -93,7 +206,7 @@ export class CartComponent implements OnInit {
   checkout() {
     this.router.navigate(['/buyer/checkout'], {
       state: {
-        cartItems: this.cartItems,
+        cartItems: this.cartProducts,
         totalPrice: this.getTotalPrice() - this.discount,
         deliveryDate: this.cartForm.get('deliveryDate')?.value
       }
@@ -105,4 +218,6 @@ export class CartComponent implements OnInit {
     //     console.log("Order placed successfully", response);
     //   });
   }
+
+
 }

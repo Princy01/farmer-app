@@ -104,3 +104,68 @@ ion-button {
   color: #ccc;
   margin-bottom: 10px;
 }
+
+.product-container {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+
+.product-info {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+
+  ion-thumbnail {
+    margin-right: 16px;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
+
+.unit-price {
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+  margin: 4px 0;
+}
+
+.price-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #bf6c07;
+  margin-left: 8px;
+
+  ion-icon {
+    font-size: 16px;
+  }
+}
+
+.quantity-section {
+  justify-content: flex-start;
+  margin-top: 8px;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.qty-btn {
+  height: 32px;
+
+  ion-icon {
+    font-size: 1.2rem;
+  }
+}
+
+// Override existing styles to match new layout
+.item-price {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.trash-container {
+  top: 8px;
+  right: 8px;
+}

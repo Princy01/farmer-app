@@ -8,9 +8,18 @@ export interface SalesTrend {
     total_revenue: number;
 }
 
-export interface TopSellingProduct extends SalesTrend {
-    // Inherits all properties from SalesTrend
-}
+export interface TopSellingProduct {
+    product_id: number;
+    product_name: string | null;
+    mandi_id: number;
+    mandi_name: string | null;
+    unit_id: number;
+    quantity: number;
+    price: number | null;
+    total_quantity_kg: number | null;
+    actual_delivery_date: string | null;
+    total_price: number | null;
+  }
 
 const API_BASE_URL = 'http://127.0.0.1:3000';
 
