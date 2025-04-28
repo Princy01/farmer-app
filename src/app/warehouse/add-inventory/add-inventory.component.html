@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Add Inventory</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label position="floating">Product Name</ion-label>
+      <ion-input [(ngModel)]="batch.name"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Grade</ion-label>
+      <ion-input [(ngModel)]="batch.grade"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Quantity</ion-label>
+      <ion-input type="number" [(ngModel)]="batch.quantity"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Arrival Date</ion-label>
+      <ion-datetime-button datetime="arrivalDate"></ion-datetime-button>
+      <ion-modal>
+        <ion-datetime id="arrivalDate" [(ngModel)]="batch.arrivalDate"></ion-datetime>
+      </ion-modal>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Expiry Date</ion-label>
+      <ion-datetime-button datetime="expiryDate"></ion-datetime-button>
+      <ion-modal>
+        <ion-datetime id="expiryDate" [(ngModel)]="batch.expiryDate"></ion-datetime>
+      </ion-modal>
+    </ion-item>
+  </ion-list>
+  <ion-button expand="full" (click)="addBatch()">Add Batch</ion-button>
+</ion-content>

@@ -146,6 +146,7 @@ export const routes: Routes = [
       },
     ]
   },
+
   {
     path: 'buyer',
     loadComponent: () => import('./buyer/buyer.page').then((m) => m.BuyerPage),
@@ -185,6 +186,36 @@ export const routes: Routes = [
       {
       path: 'RetailerTrends',
       loadComponent: () => import('./buyer/retailer-trends/retailer-trends.component').then((m) => m.RetailerTrendsComponent),
+      }
+    ]
+  },
+  {
+    path: 'warehouse',
+    children: [
+      {
+        path: '',
+        redirectTo: 'inventory-list',
+        pathMatch: 'full'
+      },
+      {
+        path: 'inventory-list',
+        loadComponent: () =>
+          import('./warehouse/inventory-list/inventory-list.component').then((m) => m.InventoryListComponent)
+      },
+      {
+        path: 'add-inventory',
+        loadComponent: () =>
+          import('./warehouse/add-inventory/add-inventory.component').then((m) => m.AddInventoryComponent)
+      },
+      {
+        path: 'inventory-detail/:batchNo',
+        loadComponent: () =>
+          import('./warehouse/inventory-detail/inventory-detail.component').then((m) => m.InventoryDetailComponent)
+      },
+      {
+        path: 'edit-inventory/:batchNo',
+        loadComponent: () =>
+          import('./warehouse/edit-inventory/edit-inventory.component').then((m) => m.EditInventoryComponent)
       }
     ]
   },

@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Batch Detail</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card *ngIf="batch">
+    <ion-card-header>
+      <ion-card-title>{{ batch.name }}</ion-card-title>
+      <ion-card-subtitle>Batch No: {{ batch.batchNo }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Quantity: {{ batch.quantity }}</p>
+      <p>Grade: {{ batch.grade }}</p>
+      <p>Arrival Date: {{ batch.arrivalDate }}</p>
+      <p>Expiry Date: {{ batch.expiryDate }}</p>
+      <p>Source: {{ batch.source }}</p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
