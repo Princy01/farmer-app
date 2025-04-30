@@ -10,8 +10,8 @@
       (ionInput)="handleSearch($event)"
       animated="true"
       placeholder="Search orders..."
-      show-clear-button="always"
-    ></ion-searchbar>
+      show-clear-button="always">
+    </ion-searchbar>
 
     <ion-buttons slot="end">
       <ion-button (click)="toggleSearch()">
@@ -33,7 +33,6 @@
 </ion-header>
 
 <ion-content>
-
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content
       pullingIcon="chevron-down-circle-outline"
@@ -63,12 +62,23 @@
               <span class="label">Total Amount</span>
               <span class="amount">₹{{order.total}}</span>
             </div>
-            <ion-button fill="solid" size="small" class="custom-button">
+            <ion-button fill="solid"
+                      size="small"
+                      class="custom-button"
+                      (click)="viewDetails(order)">
               View Details
+              <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
             </ion-button>
           </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- No Orders Message -->
+  <div class="no-orders" *ngIf="filteredOrders.length === 0">
+    <ion-icon name="receipt-outline" size="large"></ion-icon>
+    <h2>No Orders Found</h2>
+    <p>There are no orders matching your criteria</p>
   </div>
 </ion-content>

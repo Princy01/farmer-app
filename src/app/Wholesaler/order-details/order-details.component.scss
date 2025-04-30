@@ -1,0 +1,45 @@
+.order-details-container {
+        padding: 16px;
+
+        ion-card {
+          margin: 12px 0;
+          border-radius: 12px;
+        }
+      }
+
+      .status-chip {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-weight: 500;
+        text-transform: capitalize;
+
+        &.pending { background: #fff9c4; }
+        &.processing { background: #b3e5fc; }
+        &.completed { background: #c8e6c9; }
+        &.cancelled { background: #ffcdd2; }
+      }
+
+      .payment-status {
+        margin-top: 8px;
+        font-size: 0.9em;
+
+        &.pending { color: #f57c00; }
+        &.completed { color: #388e3c; }
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin: 8px 0;
+
+        span:first-child {
+          color: var(--ion-color-medium);
+        }
+      }
+
+      .error-message {
+        text-align: center;
+        margin-bottom: 16px;
+        color: var(--ion-color-danger);
+      }

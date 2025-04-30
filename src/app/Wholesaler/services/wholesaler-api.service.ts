@@ -29,6 +29,19 @@ interface OrderItemDetails {
   order_items: OrderItem[];
 }
 
+//for Order Details screen
+interface OrderDetailedView extends OrderItemDetails {
+  mandi_name: string;
+  mandi_location: string;
+  retailer_name: string;
+  retailer_contact: string;
+  order_date: string;
+  order_status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  payment_status: 'pending' | 'completed';
+  delivery_date?: string;
+  special_instructions?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -43,5 +56,9 @@ export class WholesalerApiService {
 
   getOrderItemDetails(): Observable<OrderItemDetails[]> {
     return this.http.get<OrderItemDetails[]>(`${this.API_URL}/getOrderItemDetails`);
+  }
+
+  getOrderDetails(orderId: number): Observable<OrderDetailedView> {
+    return this.http.get<OrderDetailedView>(`${this.API_URL}/getOrderDetails/${orderId}`);
   }
 }

@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { searchOutline, ellipsisVertical, menuOutline } from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
+import { Router } from '@angular/router';
 
 enum OrderFilter {
   DATE = 'date',
@@ -51,7 +52,8 @@ export class OrdersComponent {
     private wholesalerService: WholesalerApiService,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private router: Router
   ) {
     addIcons({
       searchOutline,
@@ -190,5 +192,9 @@ export class OrdersComponent {
     } finally {
       event.target.complete();
     }
+  }
+
+  viewDetails(order: any) {
+    this.router.navigate(['/wholesaler/order-details', order.id]);
   }
 }

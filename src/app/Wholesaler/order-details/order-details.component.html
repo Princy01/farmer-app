@@ -1,0 +1,110 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/wholesaler/orders"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Order #{{orderId}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-progress-bar *ngIf="loading" type="indeterminate"></ion-progress-bar>
+
+  <div *ngIf="!loading && !error" class="order-details-container">
+    <!-- Order Status -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>Status</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="status-chip" [class]="orderDetails.order_status">
+          {{orderDetails.order_status | titlecase}}
+        </div>
+        <div class="payment-status" [class]="orderDetails.payment_status">
+          Payment: {{orderDetails.payment_status | titlecase}}
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Retailer Info -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>Retailer Information</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-label>
+            <h2>{{orderDetails.retailer_name}}</h2>
+            <p>Contact: {{orderDetails.retailer_contact}}</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Mandi Info -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>Mandi Details</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-label>
+            <h2>{{orderDetails.mandi_name}}</h2>
+            <p>{{orderDetails.mandi_location}}</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Order Items -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>Order Items</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let item of orderDetails.order_items">
+            <ion-label>
+              <h2>{{item.product_name}}</h2>
+              <p>Quantity: {{item.quantity}} {{item.unit_name}}</p>
+              <p>Price: ₹{{item.max_item_price}}/{{item.unit_name}}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Order Summary -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>Order Summary</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="summary-item">
+          <span>Order Date</span>
+          <span>{{orderDetails.order_date | date:'medium'}}</span>
+        </div>
+        <div class="summary-item">
+          <span>Total Amount</span>
+          <span>₹{{orderDetails.total_order_amount}}</span>
+        </div>
+        <div *ngIf="orderDetails.delivery_date" class="summary-item">
+          <span>Expected Delivery</span>
+          <span>{{orderDetails.delivery_date | date:'medium'}}</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Error State -->
+  <ion-card *ngIf="error">
+    <ion-card-content>
+      <div class="error-message">
+        Failed to load order details. Please try again.
+      </div>
+      <ion-button expand="block" (click)="loadOrderDetails()">
+        Retry
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
