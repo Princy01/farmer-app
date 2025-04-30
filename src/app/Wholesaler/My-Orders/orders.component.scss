@@ -10,6 +10,26 @@ ion-header {
     }
   }
 
+  ion-searchbar {
+    padding: 0 8px;
+    --border-radius: 20px;
+    --box-shadow: none;
+    --background: #f4f5f8;
+  }
+
+  .animated-searchbar {
+    animation: slideIn 0.2s ease-in-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
   .filter-toolbar {
     --background: #f8f9fa;
     padding: 0 8px;

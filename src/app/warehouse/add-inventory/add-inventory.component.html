@@ -1,11 +1,11 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Add Inventory</ion-title>
+  <ion-toolbar color="light">
+    <ion-title class="ion-text-center">Add Inventory</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-list>
+<ion-content class="ion-padding">
+  <ion-list lines="full" class="form-list">
     <ion-item>
       <ion-label position="floating">Product Name</ion-label>
       <ion-input [(ngModel)]="batch.name"></ion-input>
@@ -18,11 +18,11 @@
 
     <ion-item>
       <ion-label position="floating">Quantity</ion-label>
-      <ion-input type="number" [(ngModel)]="batch.quantity"></ion-input>
+      <ion-input type="number" [(ngModel)]="batch.quantity" placeholder="Enter quantity"></ion-input>
     </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">Arrival Date</ion-label>
+    <!-- <ion-item>
+      <ion-label>Arrival Date</ion-label>
       <ion-datetime-button datetime="arrivalDate"></ion-datetime-button>
       <ion-modal>
         <ion-datetime id="arrivalDate" [(ngModel)]="batch.arrivalDate"></ion-datetime>
@@ -30,12 +30,31 @@
     </ion-item>
 
     <ion-item>
-      <ion-label position="floating">Expiry Date</ion-label>
+      <ion-label>Expiry Date</ion-label>
       <ion-datetime-button datetime="expiryDate"></ion-datetime-button>
       <ion-modal>
         <ion-datetime id="expiryDate" [(ngModel)]="batch.expiryDate"></ion-datetime>
       </ion-modal>
     </ion-item>
+  </ion-list> -->
+
+  <ion-item class="custom-item">
+    <ion-label position="stacked">
+      Arrival Date
+    </ion-label>
+    <ion-input type="datetime-local" [(ngModel)]="batch.arrivalDate"></ion-input>
+  </ion-item>
+
+  <ion-item class="custom-item">
+    <ion-label position="stacked">
+      Expiry Date
+    </ion-label>
+    <ion-input type="datetime-local" [(ngModel)]="batch.expiryDate"></ion-input>
+  </ion-item>
   </ion-list>
-  <ion-button expand="full" (click)="addBatch()">Add Batch</ion-button>
+  <div class="btn-wrapper">
+    <ion-button expand="block" (click)="addBatch()" class="custom-btn">
+      Add Batch
+    </ion-button>
+  </div>
 </ion-content>

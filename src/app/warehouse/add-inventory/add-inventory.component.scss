@@ -1,0 +1,29 @@
+ion-content {
+        --background: #f8f9fa;
+      }
+
+      .form-list {
+        margin-top: 20px;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 10px;
+      }
+
+      ion-item {
+        margin-bottom: 10px;
+      }
+
+      .btn-wrapper {
+        margin-top: 30px;
+        padding: 0 16px;
+      }
+
+      .custom-btn {
+        --background: rgb(136, 172, 140);
+        --background-hover: rgb(126, 162, 130);
+        --background-activated: rgb(116, 152, 120);
+        --color: #ffffff;
+        font-weight: bold;
+        border-radius: 8px;
+      }

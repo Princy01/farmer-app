@@ -16,7 +16,7 @@ export const routes: Routes = [
   },
   {
     path: 'wholesaler/orders',
-    loadComponent: () => import('./Wholesaler/orders/orders.component').then((m) => m.OrdersComponent),
+    loadComponent: () => import('./Wholesaler/My-Orders/orders.component').then((m) => m.OrdersComponent),
   },
   {
     path: 'wholesaler/for-sale',
