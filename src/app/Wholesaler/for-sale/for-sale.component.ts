@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { addIcons } from 'ionicons';
 import {
   leafOutline,
@@ -19,10 +19,14 @@ import {
   templateUrl: './for-sale.component.html',
   styleUrls: ['./for-sale.component.scss'],
   standalone: true,
-  imports: [IonicModule, FormsModule, CommonModule]
+  imports: [IonicModule, ReactiveFormsModule, CommonModule]
 })
-export class ForSaleComponent {
-  constructor() {
+export class ForSaleComponent implements OnInit {
+  orderForm: FormGroup | null = null;
+  qualities = ['High', 'Medium', 'Low'];
+  wastages = ['None', 'Minimal', 'High'];
+
+  constructor(private fb: FormBuilder) {
     addIcons({
       leafOutline,
       starOutline,
@@ -34,21 +38,25 @@ export class ForSaleComponent {
       addCircleOutline
     });
   }
-  order = {
-    item: '',
-    quality: '',
-    wastage: '',
-    quantity: '',
-    price: '',
-    dateTime: '',
-    location: ''
-  };
 
-  qualities = ['High', 'Medium', 'Low'];
-  wastages = ['None', 'Minimal', 'High'];
+  ngOnInit() {
+    this.orderForm = this.fb.group({
+      item: ['', Validators.required],
+      quality: ['', Validators.required],
+      wastage: ['', Validators.required],
+      quantity: ['', [Validators.required, Validators.min(0)]],
+      price: ['', [Validators.required, Validators.min(0)]],
+      dateTime: ['', Validators.required],
+      location: ['', Validators.required]
+    });
+  }
 
   createOrder() {
-    console.log('Order Created:', this.order);
-    alert('Order created successfully!');
+    if (this.orderForm!.valid) {
+      console.log('Order Created:', this.orderForm!.value);
+      alert('Order created successfully!');
+    } else {
+      alert('Please fill all required fields correctly.');
+    }
   }
 }

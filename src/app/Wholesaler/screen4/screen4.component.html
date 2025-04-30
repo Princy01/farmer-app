@@ -3,48 +3,81 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
     </ion-buttons>
-
     <ion-title class="ion-text-center custom-title">Orders Completed</ion-title>
-        </ion-toolbar>
+  </ion-toolbar>
 </ion-header>
 
-    <ion-content [scrollEvents]="true">
-    <!-- Filter Dropdown -->
-    <ion-row>
-      <ion-col size="12" class="filters">
-        <ion-item>
-          <ion-label>Filter Orders</ion-label>
-          <ion-select [(ngModel)]="selectedFilter" (ionChange)="applyFilter($event.detail.value)">
-            <ion-select-option *ngFor="let filter of filters" [value]="filter">
-              {{ filter }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-col>
-    </ion-row>
+<ion-content [scrollEvents]="true">
+  <!-- Filter Dropdown -->
+  <ion-row>
+    <ion-col size="12" class="filters">
+      <ion-item>
+        <ion-label>Filter Orders</ion-label>
+        <ion-select [(ngModel)]="selectedFilter" (ionChange)="applyFilter($event.detail.value)" [disabled]="isLoading">
+          <ion-select-option *ngFor="let filter of filters" [value]="filter">
+            {{ filter }}
+          </ion-select-option>
+        </ion-select>
+        <ion-button fill="clear" slot="end" (click)="applyFilter('All Orders')"
+                    *ngIf="selectedFilter && selectedFilter !== 'All Orders'">
+          <ion-icon name="close-circle-outline"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ion-col>
+  </ion-row>
 
-    <!-- Orders Grid -->
-    <ion-row>
-      <ion-col size="12">
-        <ion-grid>
-          <ion-row>
-            <ion-col size="6" *ngFor="let order of orders; trackBy: trackById">
-              <ion-card (click)="viewOrderDetails(order)">
-                <ion-card-header>
-                  <ion-card-title>{{ order.item }}</ion-card-title>
-                </ion-card-header>
+  <!-- Loading State -->
+  <ion-row *ngIf="isLoading">
+    <ion-col class="ion-text-center">
+      <ion-spinner name="circular"></ion-spinner>
+      <p>Loading orders...</p>
+    </ion-col>
+  </ion-row>
 
-                <!-- Order Details (Only shown if selected) -->
-                <ion-card-content *ngIf="selectedOrderId === order.id">
-                  <p>Qty: {{ order.qty }}</p>
-                  <p>Price: ₹{{ order.price }}</p>
-                  <p>Location: {{ order.location }}</p>
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-col>
-    </ion-row>
+  <!-- Error State -->
+  <ion-row *ngIf="hasError">
+    <ion-col class="ion-text-center">
+      <ion-icon name="alert-circle-outline" color="danger" size="large"></ion-icon>
+      <p>Failed to load orders</p>
+      <ion-button (click)="loadCompletedOrders()" fill="clear">
+        Try Again
+      </ion-button>
+    </ion-col>
+  </ion-row>
 
+  <!-- Orders Grid -->
+  <ion-row *ngIf="!isLoading && !hasError">
+    <ion-col size="12">
+      <ion-grid>
+        <ion-row>
+          <!-- No Orders Message -->
+          <ion-col size="12" *ngIf="completedOrders.length === 0" class="ion-text-center">
+            <p>No completed orders found</p>
+          </ion-col>
+
+          <ion-col size="12" *ngFor="let order of completedOrders; trackBy: trackById">
+            <ion-card (click)="viewOrderDetails(order)">
+              <ion-card-header>
+                <ion-card-title>Order #{{ order.order_id }}</ion-card-title>
+                <ion-card-subtitle>Total: ₹{{ order.total_order_amount }}</ion-card-subtitle>
+              </ion-card-header>
+
+              <!-- Order Details (Only shown if selected) -->
+              <ion-card-content *ngIf="selectedOrderId === order.order_id">
+                <ion-list>
+                  <ion-item *ngFor="let item of order.order_items">
+                    <ion-label>
+                      <h3>{{ item.product_name }}</h3>
+                      <p>Quantity: {{ item.quantity }} {{ item.unit_name }}</p>
+                      <p>Max Price: ₹{{ item.max_item_price }}</p>
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-col>
+  </ion-row>
 </ion-content>
