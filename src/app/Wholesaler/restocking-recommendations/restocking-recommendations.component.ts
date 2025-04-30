@@ -10,11 +10,6 @@ import { IonicModule } from '@ionic/angular';
   styleUrls: ['./restocking-recommendations.component.scss']
 })
 export class RestockingRecommendationsComponent {
-  totalStockSummary = {
-    totalProducts: 8,
-    totalStock: 1380
-  };
-
   products = [
     {
       name: 'Tomatoes',
@@ -63,7 +58,9 @@ export class RestockingRecommendationsComponent {
     return 'success';
   }
 
-  sortedProducts() {
-    return this.products.sort((a, b) => a.stock - b.stock);
+  filteredProducts() {
+    return this.products
+      .filter(product => this.getStockToSalesRatio(product) < 4)
+      .sort((a, b) => a.stock - b.stock);
   }
 }
