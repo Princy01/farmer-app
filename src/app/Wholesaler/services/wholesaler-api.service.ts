@@ -89,6 +89,21 @@ interface OrderFullDetails {
   }[];
 }
 
+//for restocking recommendations screen
+interface MandiStock {
+  mandi_id: number;
+  mandi_name: string;
+  mandi_stock: number;
+}
+
+export interface RestockProduct {
+  product_id: number;
+  product_name: string;
+  stock_to_sales_ratio: number;
+  stock_status: string;
+  mandi: MandiStock[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -138,6 +153,12 @@ export class WholesalerApiService {
         }
         return orders;
       })
+    );
+  }
+
+  getRestockingRecommendations(): Observable<RestockProduct[]> {
+    return this.http.get<RestockProduct[]>(
+      `${this.API_URL}/getReStockProductsHandler`
     );
   }
 }
