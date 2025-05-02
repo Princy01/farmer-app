@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { searchOutline, ellipsisVertical, menuOutline } from 'ionicons/icons';
+import { searchOutline, ellipsisVertical, menuOutline, closeOutline, chevronDownCircleOutline,
+  chevronForwardOutline, receiptOutline
+ } from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
 
@@ -56,9 +58,8 @@ export class OrdersComponent {
     private router: Router
   ) {
     addIcons({
-      searchOutline,
-      ellipsisVertical,
-      menuOutline
+      searchOutline, ellipsisVertical, menuOutline, closeOutline,
+      chevronDownCircleOutline, chevronForwardOutline, receiptOutline
     });
   }
 

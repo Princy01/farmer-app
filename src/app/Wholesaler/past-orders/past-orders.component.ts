@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowBackCircleSharp } from 'ionicons/icons';
+import { alertCircleOutline, closeCircleOutline } from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 
 interface OrderItem {
@@ -25,13 +25,13 @@ interface OrderItemDetails {
 }
 
 @Component({
-  selector: 'app-screen4',
-  templateUrl: './screen4.component.html',
-  styleUrls: ['./screen4.component.scss'],
+  selector: 'app-past-orders',
+  templateUrl: './past-orders.component.html',
+  styleUrls: ['./past-orders.component.scss'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
-export class Screen4Component implements AfterViewInit {
+export class PastOrdersComponent implements AfterViewInit {
   @ViewChild(IonContent) content!: IonContent;
 
   completedOrders: OrderItemDetails[] = [];
@@ -56,13 +56,7 @@ export class Screen4Component implements AfterViewInit {
     private toastCtrl: ToastController,
     private alertCtrl: AlertController
   ) {
-    addIcons({
-      chatbubblesSharp,
-      notificationsCircleSharp,
-      logoAndroid,
-      personCircleSharp,
-      arrowBackCircleSharp
-    });
+    addIcons({ alertCircleOutline, closeCircleOutline });
     this.loadCompletedOrders();
   }
 

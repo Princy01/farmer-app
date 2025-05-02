@@ -104,6 +104,42 @@ export interface RestockProduct {
   mandi: MandiStock[];
 }
 
+//for market opportunities screen
+interface BulkOrderItem {
+  product_id: number;
+  product_name: string;
+  quantity: number;
+  price_of_product: number;
+}
+
+export interface BulkOrder {
+  order_id: number;
+  date_of_order: string;
+  total_order_amount: number;
+  retailer_name: string;
+  wholeseller_name: string;
+  items: BulkOrderItem[];
+}
+
+export interface TopRetailer {
+  retailer_id: number;
+  retailer_name: string;
+  total_quantity: number;
+  total_order_value: number;
+}
+
+export interface CreateOfferRequest {
+  order_id: number;
+  wholeseller_id: number;
+  offered_price: number;
+  proposed_delivery_date: string;
+  message?: string;
+}
+
+export interface CreateOfferResponse {
+  offer_id: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -159,6 +195,21 @@ export class WholesalerApiService {
   getRestockingRecommendations(): Observable<RestockProduct[]> {
     return this.http.get<RestockProduct[]>(
       `${this.API_URL}/getReStockProductsHandler`
+    );
+  }
+
+  getBulkOrders(): Observable<BulkOrder[]> {
+    return this.http.get<BulkOrder[]>(`${this.API_URL}/api/orders/bulk`);
+  }
+
+  getTopRetailers(): Observable<TopRetailer[]> {
+    return this.http.get<TopRetailer[]>(`${this.API_URL}/api/top-retailers`);
+  }
+
+  createOffer(offer: CreateOfferRequest): Observable<CreateOfferResponse> {
+    return this.http.post<CreateOfferResponse>(
+      `${this.API_URL}/api/wholeseller/offer`,
+      offer
     );
   }
 }

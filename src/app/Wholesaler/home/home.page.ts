@@ -162,7 +162,7 @@ async handleRefresh(event: any) {
   }
 
   viewPastOrders() {
-    this.router.navigate(['/wholesaler/screen4']);
+    this.router.navigate(['/wholesaler/past-orders']);
   }
 
   searchItems(event: any) {

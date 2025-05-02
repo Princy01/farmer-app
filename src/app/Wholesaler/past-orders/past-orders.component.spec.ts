@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { Screen4Component } from './screen4.component';
+import { Screen4Component } from './past-orders.component';
 
 describe('Screen4Component', () => {
   let component: Screen4Component;

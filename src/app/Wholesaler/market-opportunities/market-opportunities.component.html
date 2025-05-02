@@ -1,54 +1,77 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/wholesaler/home"></ion-back-button>
+    </ion-buttons>
     <ion-title>Market Opportunities</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="ion-text-center">
+    <ion-spinner></ion-spinner>
+    <p>Loading market opportunities...</p>
+  </div>
 
-  <ion-card *ngIf="!isPremium" color="light">
-    <ion-card-header>
-      <ion-card-title>Upgrade to Premium</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      Get access to bulk order insights and competitive tools to grow your sales.
+  <!-- Error State -->
+  <ion-card *ngIf="error">
+    <ion-card-content class="ion-text-center">
+      <ion-icon name="alert-circle" color="danger" size="large"></ion-icon>
+      <p>{{ error }}</p>
+      <ion-button (click)="loadData()" fill="clear">
+        Try Again
+      </ion-button>
     </ion-card-content>
   </ion-card>
 
-  <ng-container *ngIf="isPremium">
+  <div *ngIf="!isLoading && !error">
+    <!-- Top Retailers -->
     <ion-card>
       <ion-card-header>
-        <ion-card-title>Bulk Orders Placed</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-list>
-          <ion-item *ngFor="let order of bulkOrders">
-            <ion-label>
-              <h3>{{ order.retailer }} ordered {{ order.product }}</h3>
-              <p>From {{ order.wholesaler }} • ₹{{ order.price }} • Qty: {{ order.quantity }}</p>
-            </ion-label>
-            <ion-button fill="outline" slot="end" (click)="openOfferModal(order)">Make Offer</ion-button>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Top Bulk Retailers Nearby</ion-card-title>
+        <ion-card-title>{{ getTopRetailersTitle() }}</ion-card-title>
+        <ion-card-subtitle>Based on order volume</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <ion-list>
           <ion-item *ngFor="let retailer of topRetailers">
             <ion-label>
-              <h3>{{ retailer.name }}</h3>
-              <p>Total Orders: ₹{{ retailer.total }}</p>
+              <h2>{{ retailer.retailer_name }}</h2>
+              <p>Total Quantity: {{ retailer.total_quantity | number:'1.0-2' }}kg</p>
+              <p>Order Value: ₹{{ retailer.total_order_value | number:'1.2-2' }}</p>
             </ion-label>
-            <ion-button fill="outline" slot="end">View Products</ion-button>
           </ion-item>
         </ion-list>
       </ion-card-content>
     </ion-card>
-  </ng-container>
 
+    <!-- Bulk Orders List -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Recent Bulk Orders</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let order of bulkOrders">
+            <ion-label>
+              <h2>{{ order.retailer_name }}</h2>
+              <p>Order #{{ order.order_id }} • {{ order.date_of_order | date:'medium' }}</p>
+              <p>Total Amount: ₹{{ order.total_order_amount | number:'1.2-2' }}</p>
+              <ion-text color="medium">
+                <p>Items:</p>
+                <ul>
+                  <li *ngFor="let item of order.items">
+                    {{ item.product_name }} - {{ item.quantity }}kg at ₹{{ item.price_of_product }}/kg
+                  </li>
+                </ul>
+              </ion-text>
+            </ion-label>
+            <ion-button fill="outline" slot="end" (click)="openOfferModal(order)">
+              Make Offer
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>
