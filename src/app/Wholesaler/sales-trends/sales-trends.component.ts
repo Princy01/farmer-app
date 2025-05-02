@@ -25,9 +25,74 @@ export class SalesTrendsComponent implements OnInit {
   selectedView: string = 'trends';
   selectedPeriod: string = 'monthly';
   selectedMetric: string = 'volume';
-  chartOptions: any;
-  topProductsOptions: any;
-  useRealData: boolean = true;
+  chartOptions: any
+  // = {
+  //   series: [],
+  //   chart: {
+  //     height: 350,
+  //     type: 'line',
+  //     background: '#ffffff',
+  //     toolbar: { show: true }
+  //   },
+  //   colors: ['#2E93fA', '#66DA26'],
+  //   xaxis: { categories: [] },
+  //   yaxis: [
+  //     {
+  //       title: { text: 'Revenue (₹)' },
+  //       labels: { formatter: (value: number) => `₹${(value / 1000).toFixed(0)}K` }
+  //     },
+  //     {
+  //       opposite: true,
+  //       title: { text: 'Orders' },
+  //       labels: { formatter: (value: number) => `${Math.round(value)}` }
+  //     }
+  //   ],
+  //   title: {
+  //     text: 'Sales Trends',
+  //     align: 'center',
+  //     style: { fontSize: '16px' },
+  //     margin: 40
+  //   }
+  // };
+  topProductsOptions: any
+  // = {
+  //   series: [{
+  //     name: 'Sales Volume',
+  //     data: []
+  //   }],
+  //   chart: {
+  //     type: 'bar',
+  //     height: 450,
+  //     background: '#ffffff',
+  //     toolbar: { show: false }
+  //   },
+  //   xaxis: {
+  //     categories: []
+  //   },
+  //   yaxis: {
+  //     title: {
+  //       text: 'Revenue (₹)'
+  //     },
+  //     labels: {
+  //       formatter: (value: number) =>
+  //       `₹${(value / 1000).toFixed(0)}K`
+  //   }
+  //   },
+  //   colors: [
+  //     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
+  //     '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
+  //   ],
+  //   title: {
+  //     text: `Top Products by Revenue - ${this.capitalize(this.selectedPeriod)}`,
+  //     align: 'center',
+  //     style: {
+  //       fontSize: '16px'
+  //     },
+  //     margin: 20
+  //   },
+  // };
+
+    useRealData: boolean = true;
   isLoading: boolean = false;
   errorMessage: string = '';
 
@@ -40,7 +105,15 @@ export class SalesTrendsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.initializeCharts();
+    // Set initial data
+    this.selectedView = 'trends';
+    this.selectedPeriod = 'monthly';
+    this.selectedMetric = 'volume';
+
+    // Initialize charts after a brief delay to ensure template is ready
+    setTimeout(() => {
+      this.initializeCharts();
+    }, 0);
   }
 
   async showLoading() {
@@ -92,9 +165,16 @@ export class SalesTrendsComponent implements OnInit {
   }
 
   private async updateTrendsChart() {
-    let loading: any;
-    if (this.useRealData) {
-      loading = await this.showLoading();
+    if (!this.useRealData) {
+      const dummyData = this.getDataForPeriod(this.selectedPeriod);
+      this.updateTrendsChartOptions(dummyData.values.map((value, index) => ({
+        date: dummyData.categories[index],
+        total_sales: value
+      })));
+      return;
+    }
+    const loading = await this.showLoading();
+    try{
       let dataObservable;
       switch (this.selectedPeriod) {
         case 'weekly':
@@ -121,20 +201,27 @@ export class SalesTrendsComponent implements OnInit {
           })));
         }),
         finalize(() => {
-          loading?.dismiss();
+          loading.dismiss();
           this.isLoading = false;
         })
-      ).subscribe(data => {
-        this.updateTrendsChartOptions(data);
+      ).subscribe({
+        next: (data) => {
+          console.log('Fetched data:', data);
+          if (data && Array.isArray(data)) {
+            this.updateTrendsChartOptions(data);
+          }
+        },
+        error: (error) => {
+          console.error('Error updating trends chart:', error);
+        }
       });
-    } else {
-      const dummyData = this.getDataForPeriod(this.selectedPeriod);
-      this.updateTrendsChartOptions(dummyData.values.map((value, index) => ({
-        date: dummyData.categories[index],
-        total_sales: value
-      })));
+    } catch (error) {
+      loading.dismiss();
+      this.isLoading = false;
+      console.error('Error in updateTrendsChart:', error);
     }
   }
+
 
   private updateTrendsChartOptions(data: any[]) {
     this.chartOptions = {
@@ -341,7 +428,7 @@ export class SalesTrendsComponent implements OnInit {
 
   private updateTopProductsChartOptions(products: TopSellingProduct[]) {
     const isVolume = this.selectedMetric === 'volume';
-
+console.log('Top Products:', products);
      // Sort products by volume or revenue
   const sortedData = [...products].sort((a, b) =>
     isVolume ?

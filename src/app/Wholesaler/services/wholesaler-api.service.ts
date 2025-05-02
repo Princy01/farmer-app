@@ -199,16 +199,16 @@ export class WholesalerApiService {
   }
 
   getBulkOrders(): Observable<BulkOrder[]> {
-    return this.http.get<BulkOrder[]>(`${this.API_URL}/api/orders/bulk`);
+    return this.http.get<BulkOrder[]>(`${this.API_URL}/getAllBulkOrderDetails`);
   }
 
   getTopRetailers(): Observable<TopRetailer[]> {
-    return this.http.get<TopRetailer[]>(`${this.API_URL}/api/top-retailers`);
+    return this.http.get<TopRetailer[]>(`${this.API_URL}/getTopRetailerDetails`);
   }
 
   createOffer(offer: CreateOfferRequest): Observable<CreateOfferResponse> {
     return this.http.post<CreateOfferResponse>(
-      `${this.API_URL}/api/wholeseller/offer`,
+      `${this.API_URL}/InsertWholesellerOffers`,
       offer
     );
   }

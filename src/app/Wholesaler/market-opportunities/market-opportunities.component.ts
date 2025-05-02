@@ -63,21 +63,32 @@ export class MarketOpportunitiesComponent implements OnInit {
   }
 
   async openOfferModal(order: BulkOrder) {
-    const modal = await this.modalCtrl.create({
-      component: OfferModalComponent,
-      componentProps: { order }
-    });
+    try {
+      console.log('Opening modal for order:', order);
 
-    const { data } = await modal.onWillDismiss();
-
-    if (data?.success) {
-      const toast = await this.toastCtrl.create({
-        message: `Offer #${data.offer_id} submitted successfully!`,
-        duration: 2000,
-        color: 'success',
-        position: 'bottom'
+      const modal = await this.modalCtrl.create({
+        component: OfferModalComponent,
+        componentProps: { order },
+        breakpoints: [0, 0.5, 0.8],
+        initialBreakpoint: 0.8
       });
-      await toast.present();
+
+      await modal.present();
+
+      const { data } = await modal.onWillDismiss();
+      console.log('Modal dismissed with data:', data);
+
+      if (data?.success) {
+        const toast = await this.toastCtrl.create({
+          message: `Offer #${data.offer_id} submitted successfully!`,
+          duration: 2000,
+          color: 'success',
+          position: 'bottom'
+        });
+        await toast.present();
+      }
+    } catch (error) {
+      console.error('Error presenting modal:', error);
     }
   }
 

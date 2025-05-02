@@ -144,7 +144,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
-import { StockInsightsService } from './stock-insights.service';
+import { CurrentStockData, LeastStockedData, MandiBasicInfo, StockInsightsService } from './stock-insights.service';
 import { catchError, finalize, of } from 'rxjs';
 
 interface SlowMovingProduct {
@@ -171,27 +171,42 @@ interface StockData {
   standalone: true,
   imports: [IonicModule, NgApexchartsModule, CommonModule, FormsModule],
 })
+
 export class StockInsightsComponent implements OnInit {
   selectedView: string = 'chart';
-  selectedWarehouse: string = 'Azadpur Mandi';
-  slowMovingProducts: SlowMovingProduct[] = [];
-  warehouses: string[] = ['Azadpur Mandi', 'Ghazipur Mandi'];
-  stockLevelsOptions: any;
-  lowStockAlerts: any[] = [];
-  isLoading: boolean = false;
-  useRealData: boolean = true;
-
-  // Dummy data
-  stockData: StockData = {
-    'Azadpur Mandi': {
-      products: ['Potato', 'Onion', 'Tomato', 'Cauliflower', 'Green Peas', 'Cabbage'],
-      stock: [6500, 8000, 4800, 4500, 5200, 3500]
+  selectedWarehouse: MandiBasicInfo | null = null;
+  slowMovingProducts: LeastStockedData[] = [];
+  warehouses: MandiBasicInfo[] = [];
+  stockLevelsOptions: any = {
+    series: [{ name: 'Current Stock', data: [] }],
+    chart: {
+      type: 'bar',
+      height: 350,
+      background: '#ffffff'
     },
-    'Ghazipur Mandi': {
-      products: ['Potato', 'Onion', 'Tomato', 'Cauliflower', 'Green Peas', 'Cabbage'],
-      stock: [8500, 12000, 6800, 4500, 7200, 5500]
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        barHeight: '50%',
+        distributed: true
+      }
+    },
+    colors: ['#33b2df', '#546E7A', '#d4526e', '#13d8aa', '#A5978B', '#2b908f'],
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => val.toLocaleString() + ' kg'
+    },
+    xaxis: { categories: [] },
+    yaxis: { labels: { show: true } },
+    tooltip: {
+      y: {
+        formatter: (val: number) => val.toLocaleString() + ' kg'
+      }
     }
   };
+    lowStockAlerts: any[] = [];
+  isLoading: boolean = false;
+  error: string | null = null;
 
   constructor(
     private navController: NavController,
@@ -203,7 +218,42 @@ export class StockInsightsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.initializeData();
+    this.loadMandis();
+  }
+
+  private async loadMandis() {
+    this.isLoading = true;
+    this.error = null;
+
+    const loading = await this.showLoading();
+
+    try {
+      this.stockInsightsService.getMandiList().subscribe({
+        next: (mandis) => {
+          this.warehouses = mandis;
+          if (mandis.length > 0) {
+            this.selectedWarehouse = mandis[0];
+            this.initializeData();
+          } else {
+            this.error = 'No mandis available';
+          }
+        },
+        error: (error) => {
+          console.error('Failed to load mandis:', error);
+          this.error = 'Failed to load mandi list. Please try again.';
+          this.showErrorToast(this.error);
+        },
+        complete: () => {
+          loading.dismiss();
+          this.isLoading = false;
+        }
+      });
+    } catch (error) {
+      loading.dismiss();
+      this.isLoading = false;
+      this.error = 'An unexpected error occurred';
+      this.showErrorToast(this.error);
+    }
   }
 
   private async showErrorToast(message: string) {
@@ -236,11 +286,6 @@ export class StockInsightsComponent implements OnInit {
     this.navController.navigateBack('/wholesaler/trends');
   }
 
-  toggleDataSource() {
-    this.useRealData = !this.useRealData;
-    this.initializeData();
-  }
-
   private async initializeData() {
     await this.initializeCharts();
     await this.initializeAlerts();
@@ -248,128 +293,31 @@ export class StockInsightsComponent implements OnInit {
   }
 
   private async initializeCharts() {
-    this.setupChartOptions();
-    if (this.useRealData) {
-      const loading = await this.showLoading();
-      try {
-        const mandiId = this.selectedWarehouse === 'Azadpur Mandi' ? 1 : 2;
-        this.stockInsightsService.getCurrentStockByMandi(mandiId)
-          .pipe(
-            catchError(error => {
-              console.error('API Error:', error);
-              this.showErrorToast('Failed to fetch stock data. Using fallback data.');
-              return of(null);
-            }),
-            finalize(() => {
-              loading.dismiss();
-              this.isLoading = false;
-            })
-          )
-          .subscribe(data => {
-            if (data) {
-              this.updateChartWithRealData(data);
-            } else {
-              this.useDummyChartData();
-            }
-          });
-      } catch (error) {
-        this.useDummyChartData();
-        loading.dismiss();
-        this.showErrorToast('An error occurred. Using fallback data.');
-      }
-    } else {
-      this.useDummyChartData();
-    }
-  }
-
-  private setupChartOptions() {
-    this.stockLevelsOptions = {
-      series: [{ name: 'Current Stock', data: [] }],
-      chart: { type: 'bar', height: 350, background: '#ffffff' },
-      plotOptions: {
-        bar: {
-          horizontal: true,
-          barHeight: '50%',
-          distributed: true
-        }
-      },
-      colors: ['#33b2df', '#546E7A', '#d4526e', '#13d8aa', '#A5978B', '#2b908f'],
-      dataLabels: {
-        enabled: true,
-        formatter: (val: number) => val.toLocaleString() + ' kg'
-      },
-      xaxis: { categories: [] },
-      yaxis: { labels: { show: true } },
-      tooltip: {
-        y: {
-          formatter: (val: number) => val.toLocaleString() + ' kg'
-        }
-      }
-    };
-  }
-
-  private updateChartWithRealData(data: any[]) {
-    this.stockLevelsOptions = {
-      ...this.stockLevelsOptions,
-      series: [{
-        name: 'Current Stock',
-        data: data.map(item => item.current_stock)
-      }],
-      xaxis: {
-        categories: data.map(item => item.product_name)
-      }
-    };
-  }
-
-  private useDummyChartData() {
-    const warehouseData = this.stockData[this.selectedWarehouse];
-    this.stockLevelsOptions = {
-      ...this.stockLevelsOptions,
-      series: [{
-        name: 'Current Stock',
-        data: warehouseData.stock
-      }],
-      xaxis: {
-        categories: warehouseData.products
-      }
-    };
+    await this.updateChartData();
   }
 
   private async initializeAlerts() {
-    if (this.useRealData) {
-      const loading = await this.showLoading();
-      try {
-        this.stockInsightsService.getLowStockItems()
-          .pipe(
-            catchError(error => {
-              console.error('API Error:', error);
-              this.showErrorToast('Failed to fetch stock data. Using fallback data.');
-              return of(null);
-            }),
-            finalize(() => {
-              loading.dismiss();
-              this.isLoading = false;
-            })
-          )
-          .subscribe(data => {
-            if (data) {
-              this.lowStockAlerts = data.map(item => ({
-                product: item.product_name,
-                currentStock: item.stock_left,
-                threshold: item.minimum_stock_level,
-                warehouse: item.mandi_name
-              }));
-            } else {
-              this.useDummyAlerts();
-            }
-          });
-      } catch (error) {
-        this.useDummyAlerts();
-        loading.dismiss();
-        this.showErrorToast('An error occurred. Using fallback data.');
-      }
-    } else {
-      this.useDummyAlerts();
+    const loading = await this.showLoading();
+    try {
+      this.stockInsightsService.getLowStockItems()
+        .pipe(
+          finalize(() => {
+            loading.dismiss();
+            this.isLoading = false;
+          })
+        )
+        .subscribe({
+          next: (data) => {
+            this.lowStockAlerts = data;
+          },
+          error: (error) => {
+            console.error('Failed to fetch low stock items:', error);
+            this.showErrorToast('Failed to fetch low stock alerts');
+          }
+        });
+    } catch (error) {
+      loading.dismiss();
+      this.showErrorToast('An error occurred while fetching alerts');
     }
   }
 
@@ -382,69 +330,67 @@ export class StockInsightsComponent implements OnInit {
   }
 
   private async initializeSlowMoving() {
-    if (this.useRealData) {
-      const loading = await this.showLoading();
-      try {
-        this.stockInsightsService.getLeastStockedProducts()
-          .pipe(
-            catchError(error => {
-              console.error('API Error:', error);
-              this.showErrorToast('Failed to fetch stock data. Using fallback data.');
-              return of(null);
-            }),
-            finalize(() => {
-              loading.dismiss();
-              this.isLoading = false;
-            })
-          )
-          .subscribe(data => {
-            if (data) {
-              this.slowMovingProducts = data.map(item => ({
-                product: item.product_name,
-                warehouse: item.mandi_name,
-                currentStock: item.stock_left,
-                weeklySales: 250, // Default value
-                daysInStock: 15 // Default value
-              }));
-            } else {
-              this.useDummySlowMoving();
-            }
-          });
-      } catch (error) {
-        this.useDummySlowMoving();
-        loading.dismiss();
-        this.showErrorToast('An error occurred. Using fallback data.');
-      }
-    } else {
-      this.useDummySlowMoving();
+    const loading = await this.showLoading();
+    try {
+      this.stockInsightsService.getLeastStockedProducts()
+        .pipe(
+          finalize(() => {
+            loading.dismiss();
+            this.isLoading = false;
+          })
+        )
+        .subscribe({
+          next: (data) => {
+            this.slowMovingProducts = data;
+          },
+          error: (error) => {
+            console.error('Failed to fetch slow moving products:', error);
+            this.showErrorToast('Failed to fetch slow moving products');
+          }
+        });
+    } catch (error) {
+      loading.dismiss();
+      this.showErrorToast('An error occurred while fetching slow moving products');
     }
   }
 
-  private useDummySlowMoving() {
-    const slowMovingData: SlowMovingProduct[] = [
-      {
-        product: 'Cabbage',
-        warehouse: 'Azadpur Mandi',
-        currentStock: 3500,
-        weeklySales: 250,
-        daysInStock: 15
-      },
-      {
-        product: 'Green Peas',
-        warehouse: 'Ghazipur Mandi',
-        currentStock: 7200,
-        weeklySales: 400,
-        daysInStock: 12
-      }
-    ];
-    this.slowMovingProducts = slowMovingData.filter(item =>
-      item.daysInStock > 10 && item.weeklySales < 500
-    );
+  async updateChartData() {
+    if (!this.selectedWarehouse) return;
+
+    const loading = await this.showLoading();
+    try {
+      this.stockInsightsService.getCurrentStockByMandi(this.selectedWarehouse.mandi_id)
+        .pipe(
+          finalize(() => {
+            loading.dismiss();
+            this.isLoading = false;
+          })
+        )
+        .subscribe({
+          next: (data) => {
+            this.updateChartWithData(data);
+          },
+          error: (error) => {
+            console.error('Failed to fetch stock data:', error);
+            this.showErrorToast('Failed to fetch stock data');
+          }
+        });
+    } catch (error) {
+      loading.dismiss();
+      this.showErrorToast('An error occurred while fetching stock data');
+    }
   }
 
-  updateChartData() {
-    if (!this.useRealData) {
-      this.useDummyChartData();
-    }
+  private updateChartWithData(data: CurrentStockData[]) {
+    this.stockLevelsOptions = {
+      ...this.stockLevelsOptions,
+      series: [{
+        name: 'Current Stock',
+        data: data.map(item => item.current_stock)
+      }],
+      xaxis: {
+        categories: data.map(item => item.product_name)
+      }
+    };
   }
 }

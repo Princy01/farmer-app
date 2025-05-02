@@ -1,7 +1,7 @@
 <ion-content>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button  color="dark" (click)="goToTrends()">
+      <ion-button color="dark" (click)="goToTrends()">
         <ion-icon name="chevron-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -30,24 +30,32 @@
     <div *ngSwitchCase="'chart'" class="chart-container">
       <ion-item class="warehouse-select">
         <ion-label>Select Warehouse/Mandi</ion-label>
-        <ion-select [(ngModel)]="selectedWarehouse" (ionChange)="updateChartData()">
-          <ion-select-option *ngFor="let warehouse of warehouses" [value]="warehouse">
-            {{ warehouse }}
+        <ion-select
+          [(ngModel)]="selectedWarehouse"
+          (ionChange)="updateChartData()"
+        >
+          <ion-select-option
+            *ngFor="let warehouse of warehouses"
+            [value]="warehouse"
+          >
+            {{ warehouse.mandi_name }}
           </ion-select-option>
         </ion-select>
       </ion-item>
 
-      <h3>Stock Levels - {{ selectedWarehouse }}</h3>
+      <h3>Stock Levels - {{ selectedWarehouse?.mandi_name }}</h3>
       <apx-chart
-        [series]="stockLevelsOptions.series"
-        [chart]="stockLevelsOptions.chart"
-        [xaxis]="stockLevelsOptions.xaxis"
-        [yaxis]="stockLevelsOptions.yaxis"
-        [colors]="stockLevelsOptions.colors"
-        [plotOptions]="stockLevelsOptions.plotOptions"
-        [dataLabels]="stockLevelsOptions.dataLabels"
-        [tooltip]="stockLevelsOptions.tooltip">
-      </apx-chart>
+    *ngIf="stockLevelsOptions"
+    [series]="stockLevelsOptions.series"
+    [chart]="stockLevelsOptions.chart"
+    [xaxis]="stockLevelsOptions.xaxis"
+    [yaxis]="stockLevelsOptions.yaxis"
+    [colors]="stockLevelsOptions.colors"
+    [plotOptions]="stockLevelsOptions.plotOptions"
+    [dataLabels]="stockLevelsOptions.dataLabels"
+    [tooltip]="stockLevelsOptions.tooltip"
+  >
+  </apx-chart>
     </div>
 
     <!-- Low Stock Alerts -->
@@ -56,10 +64,10 @@
       <ion-list class="alerts-container">
         <ion-item *ngFor="let alert of lowStockAlerts" class="critical">
           <ion-label>
-            <h2>{{ alert.product }}</h2>
-            <p>Location: {{ alert.warehouse }}</p>
-            <p>Current Stock: {{ alert.currentStock | number }} kg</p>
-            <p>Required: {{ alert.threshold | number }} kg</p>
+            <h2>{{ alert.product_name }}</h2>
+            <p>Location: {{ alert.mandi_name }}</p>
+            <p>Current Stock: {{ alert.stock_left | number }} kg</p>
+            <p>Minimum Required: {{ alert.minimum_stock_level | number }} kg</p>
           </ion-label>
         </ion-item>
       </ion-list>
@@ -71,11 +79,9 @@
       <ion-list class="alerts-container">
         <ion-item *ngFor="let item of slowMovingProducts" class="slow-moving">
           <ion-label>
-            <h2>{{item.product}}</h2>
-            <p>Location: {{item.warehouse}}</p>
-            <p>Current Stock: {{item.currentStock | number}} kg</p>
-            <p>Weekly Sales: {{item.weeklySales | number}} kg</p>
-            <p>Days in Stock: {{item.daysInStock}} days</p>
+            <h2>{{ item.product_name }}</h2>
+            <p>Location: {{ item.mandi_name }}</p>
+            <p>Current Stock: {{ item.stock_left | number }} kg</p>
           </ion-label>
         </ion-item>
       </ion-list>

@@ -1,7 +1,10 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/buyer/buyer-home" text=""></ion-back-button>
+      <ion-back-button
+        defaultHref="/buyer/buyer-home"
+        text=""
+      ></ion-back-button>
       <ion-text class="custom-title" *ngIf="!isSearchActive">
         {{ categoryName }}
       </ion-text>
@@ -16,27 +19,85 @@
 
   <!-- Search Bar -->
   <ion-toolbar *ngIf="isSearchActive">
-    <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="onSearch()" placeholder="Search..."></ion-searchbar>
+    <ion-searchbar
+      [(ngModel)]="searchQuery"
+      (ionInput)="onSearch()"
+      placeholder="Search..."
+    ></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-grid class="full-height">
     <ion-row class="full-height">
-
       <!-- Left Sidebar (Subcategories) -->
       <ion-col size="3.5" class="category-sidebar">
-        <div class="scrollable-list">
+        <!-- Loading State for Categories -->
+        <div *ngIf="loadingCategories" class="ion-text-center ion-padding">
+          <ion-spinner></ion-spinner>
+          <p>Loading categories...</p>
+        </div>
+
+        <!-- Error State for Categories -->
+        <div *ngIf="errorLoadingCategories" class="ion-padding">
+          <ion-text color="danger">
+            <p>Failed to load categories</p>
+          </ion-text>
+          <ion-button (click)="ngOnInit()">Retry</ion-button>
+        </div>
+
+        <!-- Categories List -->
+        <div
+          class="scrollable-list"
+          *ngIf="!loadingCategories && !errorLoadingCategories"
+        >
           <ion-list>
+            <!-- Main Category -->
+            <ion-item
+              [class.selected]="selectedSubcategoryId === categoryId"
+              (click)="
+                selectSubcategory({
+                  category_id: categoryId,
+                  category_name: categoryName
+                })
+              "
+              class="subcategory-item"
+            >
+              <div class="subcategory-content">
+                <img
+                  class="subcategory-image"
+                  [src]="category?.img_path || 'assets/default-category.jpg'"
+                  [alt]="categoryName"
+                />
+                <div class="subcategory-name">
+                  <b>All {{ categoryName }}</b>
+                </div>
+              </div>
+            </ion-item>
+
+            <!-- Subcategories -->
             <ion-item
               *ngFor="let subcategory of categories"
+              [class.selected]="
+                selectedSubcategoryId === subcategory.category_id
+              "
+              (click)="selectSubcategory(subcategory)"
               class="subcategory-item"
-            > 
+            >
               <div class="subcategory-content">
-                <img class="subcategory-image" [src]="subcategory.img_path || 'default-image.jpg'" alt="{{ subcategory.category_name }}" />
+                <img
+                  class="subcategory-image"
+                  [src]="subcategory.img_path || 'assets/default-category.jpg'"
+                  [alt]="subcategory.category_name"
+                />
                 <div class="subcategory-name">
                   <b>{{ subcategory.category_name }}</b>
-                  <p class="hindi-name">{{ subcategory.category_regional_id }}</p>
+                  <p
+                    class="hindi-name"
+                    *ngIf="subcategory.category_regional_id"
+                  >
+                    {{ subcategory.category_regional_id }}
+                  </p>
                 </div>
               </div>
             </ion-item>
@@ -54,24 +115,46 @@
 
         <!-- Error message -->
         <div class="error-container" *ngIf="errorLoadingProducts">
-          <ion-icon name="alert-circle-outline" color="danger" size="large"></ion-icon>
+          <ion-icon
+            name="alert-circle-outline"
+            color="danger"
+            size="large"
+          ></ion-icon>
           <p>Failed to load products. Please try again.</p>
-          <ion-button (click)="fetchProductsByCategoryID(categoryId)">Retry</ion-button>
+          <ion-button
+            (click)="
+              selectSubcategory({
+                category_id: selectedSubcategoryId || categoryId,
+                category_name: selectedSubcategory || categoryName
+              })
+            "
+          >
+            Retry
+          </ion-button>
         </div>
 
-        <div class="scrollable-content" *ngIf="!loadingProducts && !errorLoadingProducts">
+        <!-- Products List -->
+        <div
+          class="scrollable-content"
+          *ngIf="!loadingProducts && !errorLoadingProducts"
+        >
           <ion-list lines="none" class="custom-product-list">
-            <ng-container *ngIf="filteredAndSortedItems.length > 0; else noItems">
-              <ion-item *ngFor="let item of filteredAndSortedItems" class="product-item"
-              (click)="openProductModal(item)">
+            <ng-container
+              *ngIf="filteredAndSortedItems.length > 0; else noItems"
+            >
+              <ion-item
+                *ngFor="let item of filteredAndSortedItems"
+                class="product-item"
+                (click)="openProductModal(item)"
+              >
                 <div class="large-thumbnail">
-                  <img [src]="item.image" alt="{{ item.name }}" />
+                  <img [src]="item.image_path" [alt]="item.product_name" />
                 </div>
                 <ion-label>
-                  <h2 class="product-title">{{ item.name }}</h2>
-                  <p class="hindi-name">({{ item.hindiName }})</p>
-                  <p class="price-tag">₹{{ item.price }} <span *ngIf="item.discount > 0" class="discount-badge">-{{ item.discount }}%</span></p>
-                  <p class="product-quantity">{{ item.quantity }}</p>
+                  <h2 class="product-title">{{ item.product_name }}</h2>
+                  <p class="hindi-name" *ngIf="item.product_regional_name">
+                    ({{ item.product_regional_name }})
+                  </p>
                 </ion-label>
               </ion-item>
             </ng-container>
@@ -86,7 +169,9 @@
     <div class="no-items">
       <ion-icon name="alert-circle-outline"></ion-icon>
       <p>No items found matching your filters.</p>
-      <ion-button color="light" (click)="clearFilters()">Clear Filters</ion-button>
+      <ion-button color="light" (click)="clearFilters()"
+        >Clear Filters</ion-button
+      >
     </div>
   </ng-template>
 </ion-content>
@@ -106,139 +191,14 @@
 </ion-footer>
 
 <!-- Product Details Modal -->
-<ion-modal #productModal breakpoints="[0, 1]" initialBreakpoint="1" class="product-modal">
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>{{ selectedProduct?.name }} ({{ selectedProduct?.hindiName }})</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="closeProductModal()">Close</ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content>
-      <ion-grid>
-        <!-- Image, Rating, and Organic Tag -->
-        <ion-row class="center-content">
-          <ion-col size="12" class="image-container">
-            <div class="product-image-container">
-              <img [src]="selectedProduct?.image" alt="{{ selectedProduct?.name }}" class="product-image" />
-              <span class="product-rating">⭐ {{ selectedProduct?.rating }}</span>
-              <ion-badge color="success" *ngIf="selectedProduct?.organic">Organic</ion-badge>
-            </div>
-          </ion-col>
-        </ion-row>
-
-        <!-- Price, Quantity, Discount -->
-        <ion-row class="details-container">
-          <ion-col size="4">
-            <p><strong>Price</strong></p>
-            <p class="detail-value">₹{{ selectedProduct?.price }}</p>
-          </ion-col>
-          <ion-col size="4">
-            <p><strong>Quantity</strong></p>
-            <p class="detail-value">{{ selectedProduct?.quantity }}</p>
-          </ion-col>
-          <ion-col size="4">
-            <p><strong>Discount</strong></p>
-            <p class="detail-value">{{ selectedProduct?.discount }}%</p>
-          </ion-col>
-        </ion-row>
-
-        <!-- Mandi Info -->
-        <ion-row class="details-container">
-          <ion-col size="6">
-            <p><strong>Mandi Name</strong></p>
-            <p class="detail-value">{{ selectedProduct?.mandi?.name }}</p>
-          </ion-col>
-          <ion-col size="6">
-            <p><strong>Location</strong></p>
-            <p class="detail-value">{{ selectedProduct?.mandi?.location }}</p>
-          </ion-col>
-        </ion-row>
-
-        <!-- Quantity, In Stock, Min Order Quantity -->
-        <ion-row class="details-container">
-          <ion-col size="4">
-            <p><strong>In Stock</strong></p>
-            <p class="detail-value">{{ selectedProduct?.inStock ? 'Yes' : 'No' }}</p>
-          </ion-col>
-          <ion-col size="4">
-            <p><strong>Delivery</strong></p>
-            <p class="detail-value">{{ selectedProduct?.deliveryTime }}</p>
-          </ion-col>
-          <ion-col size="4">
-            <p><strong>Min Order Qty</strong></p>
-            <p class="detail-value">{{ selectedProduct?.minOrderQty }}</p>
-          </ion-col>
-        </ion-row>
-
-        <!-- Ion Segment for Nutrition & Additional Info -->
-        <ion-segment [(ngModel)]="selectedSegment">
-          <ion-segment-button value="nutrition">
-            Nutrition
-          </ion-segment-button>
-          <ion-segment-button value="info">
-            Additional Info
-          </ion-segment-button>
-        </ion-segment>
-
-        <div [ngSwitch]="selectedSegment">
-          <ion-row *ngSwitchCase="'nutrition'">
-            <ion-col size="12" class="info-section">
-              <h3>Nutrition Content</h3>
-              <p>{{ selectedProduct?.nutrition || 'No nutrition information available.' }}</p>
-            </ion-col>
-          </ion-row>
-
-          <ion-row *ngSwitchCase="'info'">
-            <ion-col size="12" class="info-section">
-              <h3>Additional Information</h3>
-              <p><strong>Category:</strong> {{ getCategoryById(selectedProduct?.categoryId)?.name || 'Unknown' }}</p>
-              <p><strong>Source:</strong> {{ selectedProduct?.source || 'Information not available' }}</p>
-            </ion-col>
-          </ion-row>
-        </div>
-
-        <!-- Wholesaler Details -->
-        <ion-row>
-          <ion-col size="12" class="info-section">
-            <h3>Wholesalers Selling This Product</h3>
-            <ion-list>
-              <ion-item *ngFor="let wholesaler of selectedProduct?.wholesalers">
-                <ion-label>
-                  <h4>{{ wholesaler.name }}</h4>
-                  <p><strong>Price:</strong> ₹{{ wholesaler.price }}</p>
-                  <p><strong>Earliest Delivery:</strong> {{ wholesaler.earliestDelivery }}</p>
-                  <p><strong>Wastage:</strong> {{ wholesaler.wastage }}%</p>
-                  <p><strong>Rating:</strong> ⭐{{ wholesaler.rating }}</p>
-                </ion-label>
-              </ion-item>
-            </ion-list>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-content>
-
-    <!-- Footer: Wishlist & Add to Cart -->
-    <ion-footer class="modal-footer">
-      <ion-toolbar class="toolbar-container">
-        <ion-buttons class="button-group" slot="start">
-          <ion-button class="wishlist-button" (click)="addToWishlist(selectedProduct)">
-            <ion-icon name="heart-outline"></ion-icon> Add to Wishlist
-          </ion-button>
-          <ion-button class="cart-button" (click)="addToCart(selectedProduct)">
-            <ion-icon name="cart-outline"></ion-icon> Add to Cart
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-footer>
-  </ng-template>
-</ion-modal>
 
 <!-- Filter Modal -->
-<ion-modal #filterModal class="filter-modal" breakpoints="[0, 0.8]" initialBreakpoint="0.8">
+<ion-modal
+  #filterModal
+  class="filter-modal"
+  breakpoints="[0, 0.8]"
+  initialBreakpoint="0.8"
+>
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -251,11 +211,11 @@
     <ion-content>
       <ion-list>
         <!-- Price Range Filter -->
-        <ion-item>
+        <!-- <ion-item>
           <ion-label>Price Range:<br> ₹{{ priceRangeMin }} - ₹{{ priceRangeMax }}</ion-label>
           <ion-range [dualKnobs]="true" [(ngModel)]="priceRangeValues" min="0" max="150" step="5" (ionChange)="updatePriceRange($event)">
           </ion-range>
-        </ion-item>
+        </ion-item> -->
 
         <!-- Availability -->
         <ion-item>
@@ -293,24 +253,40 @@
         <!-- Seller Ratings -->
         <ion-item>
           <ion-label>Seller Rating: {{ sellerRatings }}⭐</ion-label>
-          <ion-range [(ngModel)]="sellerRatings" min="0" max="5" step="0.5"></ion-range>
+          <ion-range
+            [(ngModel)]="sellerRatings"
+            min="0"
+            max="5"
+            step="0.5"
+          ></ion-range>
         </ion-item>
 
         <!-- Minimum Order Quantity -->
         <ion-item class="min-order-item">
           <ion-label>Min. Order Quantity</ion-label>
-          <ion-input type="number" [(ngModel)]="minimumOrderQuantity" class="min-order-input"></ion-input>
+          <ion-input
+            type="number"
+            [(ngModel)]="minimumOrderQuantity"
+            class="min-order-input"
+          ></ion-input>
         </ion-item>
       </ion-list>
       <ion-footer>
-        <ion-button expand="full" (click)="applyFilters(); closeFilterModal()">Apply</ion-button>
+        <ion-button expand="full" (click)="applyFilters(); closeFilterModal()"
+          >Apply</ion-button
+        >
       </ion-footer>
     </ion-content>
   </ng-template>
 </ion-modal>
 
 <!-- Sort Modal -->
-<ion-modal #sortModal breakpoints="[0, 0.4]" initialBreakpoint="0.4" class="sort-modal">
+<ion-modal
+  #sortModal
+  breakpoints="[0, 0.4]"
+  initialBreakpoint="0.4"
+  class="sort-modal"
+>
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -322,14 +298,26 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-radio-group [allowEmptySelection]="true" [(ngModel)]="sortOption" (ionChange)="applySort()">
-          <ion-item lines="none" class="radio-item">
+        <ion-radio-group
+          [allowEmptySelection]="true"
+          [(ngModel)]="sortOption"
+          (ionChange)="applySort()"
+        >
+          <!-- <ion-item lines="none" class="radio-item">
             <ion-label>Price - Low to High</ion-label>
             <ion-radio slot="end" value="price-asc"></ion-radio>
           </ion-item>
           <ion-item lines="none" class="radio-item">
             <ion-label>Price - High to Low</ion-label>
             <ion-radio slot="end" value="price-desc"></ion-radio>
+          </ion-item> -->
+          <ion-item lines="none" class="radio-item">
+            <ion-label>Name (A to Z)</ion-label>
+            <ion-radio slot="end" value="name-asc"></ion-radio>
+          </ion-item>
+          <ion-item lines="none" class="radio-item">
+            <ion-label>Name (Z to A)</ion-label>
+            <ion-radio slot="end" value="name-desc"></ion-radio>
           </ion-item>
           <ion-item lines="none" class="radio-item">
             <ion-label>Discount</ion-label>

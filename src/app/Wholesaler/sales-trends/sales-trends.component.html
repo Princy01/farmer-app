@@ -47,6 +47,7 @@
   <div class="chart-container">
     <ng-container *ngIf="selectedView === 'trends'">
       <apx-chart
+        *ngIf="chartOptions?.series"
         [series]="chartOptions.series"
         [chart]="chartOptions.chart"
         [xaxis]="chartOptions.xaxis"
@@ -58,6 +59,7 @@
 
     <ng-container *ngIf="selectedView === 'products'">
       <apx-chart
+        *ngIf="topProductsOptions?.series"
         [series]="topProductsOptions.series"
         [chart]="topProductsOptions.chart"
         [xaxis]="topProductsOptions.xaxis"
