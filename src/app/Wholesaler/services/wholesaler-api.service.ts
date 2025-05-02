@@ -43,22 +43,6 @@ interface OrderDetailedView extends OrderItemDetails {
   special_instructions?: string;
 }
 
-//for for-sale screen
-interface CreateOrderRequest {
-  retailer_id: number;
-  retailer_contact: string;
-  pincode: string;
-  address: string;
-  max_price_limit: number;
-  desired_delivery_date: string;
-  delivery_deadline: string;
-  product_ids: number[];
-  quantities: number[];
-  unit_ids: number[];
-  max_item_prices: number[];
-  wholeseller_ids: number[];
-}
-
 interface CreateOrderResponse {
   order_id: number;
   status: string;
@@ -140,6 +124,25 @@ export interface CreateOfferResponse {
   offer_id: number;
 }
 
+//for-sale screen
+export interface WholesellerEntry {
+  product_id: number;
+  quality: string;
+  wastage: string;
+  quantity: number;
+  price: number;
+  datetime: string;
+  wholeseller_id: number;
+  mandi_id: number;
+  warehouse_id: number;
+  unit_id: number;
+}
+
+export interface WholesellerEntryResponse {
+  message: string;
+  entry_id: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -158,13 +161,6 @@ export class WholesalerApiService {
 
   getOrderDetails(orderId: number): Observable<OrderDetailedView> {
     return this.http.get<OrderDetailedView>(`${this.API_URL}/getOrderDetails/${orderId}`);
-  }
-
-  createOrder(orderData: CreateOrderRequest): Observable<CreateOrderResponse> {
-    return this.http.post<CreateOrderResponse>(
-      `${this.API_URL}/InsertOrderByRetailer`,
-      orderData
-    );
   }
 
   getOrderFullDetails(orderId: number): Observable<OrderFullDetails> {
@@ -212,4 +208,12 @@ export class WholesalerApiService {
       offer
     );
   }
+
+  createWholesellerEntry(entry: WholesellerEntry): Observable<WholesellerEntryResponse> {
+    return this.http.post<WholesellerEntryResponse>(
+      `${this.API_URL}/InsertWholesellerOrder`,
+      entry
+    );
+  }
+
 }

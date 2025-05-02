@@ -9,22 +9,30 @@
 </ion-header>
 
 
+<!-- ...existing header... -->
+
 <ion-content class="ion-padding">
   <div class="form-container">
     <h2 class="section-title">Create New Order</h2>
 
     <ion-card mode="md">
       <ion-card-content>
-        <form [formGroup]="orderForm!">
+        <form [formGroup]="orderForm">
           <ion-list lines="full">
+            <!-- Product Selection -->
             <ion-item class="custom-item">
               <ion-label position="floating">
                 <ion-icon name="leaf-outline" class="input-icon"></ion-icon>
-                Enter Item Name
+                Select Product
               </ion-label>
-              <ion-input formControlName="item"></ion-input>
+              <ion-select formControlName="product_id">
+                <!-- TODO: Add product list -->
+                <ion-select-option value="1">Product 1</ion-select-option>
+                <ion-select-option value="2">Product 2</ion-select-option>
+              </ion-select>
             </ion-item>
 
+            <!-- Quality -->
             <ion-item class="custom-item">
               <ion-label position="floating">
                 <ion-icon name="star-outline" class="input-icon"></ion-icon>
@@ -37,6 +45,7 @@
               </ion-select>
             </ion-item>
 
+            <!-- Wastage -->
             <ion-item class="custom-item">
               <ion-label position="floating">
                 <ion-icon name="warning-outline" class="input-icon"></ion-icon>
@@ -49,6 +58,7 @@
               </ion-select>
             </ion-item>
 
+            <!-- Quantity -->
             <ion-item class="custom-item">
               <ion-label position="floating">
                 <ion-icon name="cube-outline" class="input-icon"></ion-icon>
@@ -57,6 +67,7 @@
               <ion-input type="number" formControlName="quantity"></ion-input>
             </ion-item>
 
+            <!-- Price -->
             <ion-item class="custom-item">
               <ion-label position="floating">
                 <ion-icon name="cash-outline" class="input-icon"></ion-icon>
@@ -65,20 +76,39 @@
               <ion-input type="number" formControlName="price"></ion-input>
             </ion-item>
 
+            <!-- Date & Time -->
             <ion-item class="custom-item">
               <ion-label position="stacked">
                 <ion-icon name="calendar-outline" class="input-icon"></ion-icon>
                 Select Pickup Date & Time
               </ion-label>
-              <ion-input type="datetime-local" formControlName="dateTime"></ion-input>
+              <ion-input type="datetime-local" formControlName="datetime"></ion-input>
             </ion-item>
 
+            <!-- Mandi Selection -->
             <ion-item class="custom-item">
               <ion-label position="floating">
                 <ion-icon name="location-outline" class="input-icon"></ion-icon>
-                Enter Pickup Location
+                Select Mandi
               </ion-label>
-              <ion-input formControlName="location"></ion-input>
+              <ion-select formControlName="mandi_id">
+                <!-- TODO: Add mandi list -->
+                <ion-select-option value="1">Mandi 1</ion-select-option>
+                <ion-select-option value="2">Mandi 2</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <!-- Warehouse Selection -->
+            <ion-item class="custom-item">
+              <ion-label position="floating">
+                <ion-icon name="home-outline" class="input-icon"></ion-icon>
+                Select Warehouse
+              </ion-label>
+              <ion-select formControlName="warehouse_id">
+                <!-- TODO: Add warehouse list -->
+                <ion-select-option value="1">Warehouse 1</ion-select-option>
+                <ion-select-option value="2">Warehouse 2</ion-select-option>
+              </ion-select>
             </ion-item>
           </ion-list>
         </form>
@@ -86,9 +116,15 @@
     </ion-card>
 
     <div class="ion-padding-top ion-text-center">
-      <ion-button class="custom-button" expand="block" shape="round" (click)="createOrder()" [disabled]="!orderForm!.valid">
+      <ion-button
+        class="custom-button"
+        expand="block"
+        shape="round"
+        (click)="createOrder()"
+        [disabled]="!orderForm.valid || isSubmitting"
+      >
         <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-        Create Order
+        {{ isSubmitting ? 'Creating...' : 'Create Order' }}
       </ion-button>
     </div>
   </div>
