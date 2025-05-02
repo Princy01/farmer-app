@@ -1,0 +1,80 @@
+.loading-state {
+        margin-top: 40%;
+        ion-spinner {
+          margin-bottom: 10px;
+        }
+      }
+
+      .error-card {
+        margin-top: 40%;
+        ion-icon {
+          font-size: 40px;
+          margin-bottom: 10px;
+        }
+      }
+
+      .opportunities-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      ion-card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #222;
+      }
+
+      ion-card-subtitle {
+        font-size: 0.9rem;
+        color: var(--ion-color-medium);
+      }
+
+      .bulk-orders-card,
+      .top-retailers-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      }
+
+      .custom-item {
+        align-items: flex-start;
+        padding-top: 12px;
+        padding-bottom: 12px;
+
+        ion-label {
+          margin-right: 10px;
+        }
+
+        ion-button {
+          margin-top: 8px;
+        }
+      }
+
+      .item-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+
+      .order-id {
+        color: var(--ion-color-medium);
+        font-size: 0.9rem;
+      }
+
+      .order-value {
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+
+      .items-list {
+        font-size: 0.9rem;
+        color: var(--ion-color-medium);
+        ul {
+          padding-left: 16px;
+          margin-top: 4px;
+          margin-bottom: 0;
+          li {
+            margin-bottom: 2px;
+          }
+        }
+      }

@@ -105,9 +105,28 @@ export interface BulkOrder {
   items: BulkOrderItem[];
 }
 
+export interface RetailerProductResponse {
+  retailer_id: number;
+  retailer_name: string;
+  product_id: number;
+  product_name: string;
+  unit_id: number;
+  quantity: number;
+  order_value: number;
+}
+
+export interface RetailerProduct {
+  product_id: number;
+  product_name: string;
+  unit_id: number;
+  quantity: number;
+  order_value: number;
+}
+
 export interface TopRetailer {
   retailer_id: number;
   retailer_name: string;
+  products: RetailerProduct[];
   total_quantity: number;
   total_order_value: number;
 }
@@ -123,6 +142,8 @@ export interface CreateOfferRequest {
 export interface CreateOfferResponse {
   offer_id: number;
 }
+
+
 
 //for-sale screen
 export interface WholesellerEntry {
@@ -199,8 +220,41 @@ export class WholesalerApiService {
   }
 
   getTopRetailers(): Observable<TopRetailer[]> {
-    return this.http.get<TopRetailer[]>(`${this.API_URL}/getTopRetailerDetails`);
+    return this.http.get<RetailerProductResponse[]>(`${this.API_URL}/getTopRetailerDetails`).pipe(
+      map(products => {
+        const retailerMap = new Map<number, TopRetailer>();
+
+        products.forEach(product => {
+          if (!retailerMap.has(product.retailer_id)) {
+            retailerMap.set(product.retailer_id, {
+              retailer_id: product.retailer_id,
+              retailer_name: product.retailer_name,
+              products: [],
+              total_quantity: 0,
+              total_order_value: 0
+            });
+          }
+
+          const retailer = retailerMap.get(product.retailer_id)!;
+          // Create a RetailerProduct object from the response
+          const productDetails: RetailerProduct = {
+            product_id: product.product_id,
+            product_name: product.product_name,
+            unit_id: product.unit_id,
+            quantity: product.quantity,
+            order_value: product.order_value
+          };
+
+          retailer.products.push(productDetails);
+          retailer.total_quantity += product.quantity;
+          retailer.total_order_value += product.order_value;
+        });
+
+        return Array.from(retailerMap.values());
+      })
+    );
   }
+
 
   createOffer(offer: CreateOfferRequest): Observable<CreateOfferResponse> {
     return this.http.post<CreateOfferResponse>(

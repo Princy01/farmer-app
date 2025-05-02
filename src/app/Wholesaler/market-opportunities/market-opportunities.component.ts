@@ -4,7 +4,9 @@ import { ModalController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { WholesalerApiService, BulkOrder, TopRetailer } from '../services/wholesaler-api.service';
 import { OfferModalComponent } from '../offer-modal/offer-modal.component';
-
+import { RetailerProductsModalComponent } from '../market-opportunities/retailer-products-modal/retailer-products-modal.component';
+import { addIcons } from 'ionicons';
+import { add, listOutline } from 'ionicons/icons';
 @Component({
   selector: 'app-market-opportunities',
   templateUrl: './market-opportunities.component.html',
@@ -22,7 +24,9 @@ export class MarketOpportunitiesComponent implements OnInit {
     private wholesalerService: WholesalerApiService,
     private modalCtrl: ModalController,
     private toastCtrl: ToastController
-  ) { }
+  ) {
+    addIcons({listOutline});
+  }
 
   ngOnInit() {
     this.loadData();
@@ -64,7 +68,6 @@ export class MarketOpportunitiesComponent implements OnInit {
 
   async openOfferModal(order: BulkOrder) {
     try {
-      console.log('Opening modal for order:', order);
 
       const modal = await this.modalCtrl.create({
         component: OfferModalComponent,
@@ -94,5 +97,20 @@ export class MarketOpportunitiesComponent implements OnInit {
 
   getTopRetailersTitle(): string {
     return `Top ${this.topRetailers.length} Retailers`;
+  }
+
+  async viewRetailerProducts(retailer: TopRetailer) {
+    try {
+      const modal = await this.modalCtrl.create({
+        component: RetailerProductsModalComponent,
+        componentProps: { retailer },
+        breakpoints: [0, 0.5, 0.8],
+        initialBreakpoint: 0.8
+      });
+
+      await modal.present();
+    } catch (error) {
+      console.error('Error presenting modal:', error);
+    }
   }
 }
