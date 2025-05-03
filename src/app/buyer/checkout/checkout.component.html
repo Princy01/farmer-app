@@ -10,6 +10,27 @@
 </ion-header>
 
 <ion-content>
+  <!-- Order Details Section -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Order Details</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-label>
+          <h2>Buyer</h2>
+          <p>{{ getRetailerInfo() }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item lines="none">
+        <ion-label>
+          <h2>Seller</h2>
+          <p>{{ getWholesellerInfo() }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
   <!-- Delivery Address Section -->
   <ion-card>
     <ion-card-header>
@@ -17,57 +38,39 @@
     </ion-card-header>
     <ion-card-content>
       <p *ngIf="selectedAddress">
-        <strong>{{ selectedAddress.name }}</strong> <br />
-        {{ selectedAddress.street }}, {{ selectedAddress.city }},
+        <strong>{{ selectedAddress.name }}</strong><br />
+        {{ selectedAddress.street }}, {{ selectedAddress.city }},<br />
         {{ selectedAddress.state }} - {{ selectedAddress.zip }}
       </p>
       <ion-button class="change-address-btn" (click)="changeAddress()">Change Address</ion-button>
     </ion-card-content>
   </ion-card>
 
-   <!-- Cart Items List -->
-   <ion-list>
-    <ion-item *ngFor="let item of cartItems">
-      <ion-thumbnail slot="start">
-        <img [src]="item.image" alt="{{ item.name }}" />
-      </ion-thumbnail>
-      <ion-label>
-        <h2>{{ item.name }} <span class="hindi-name">({{ item.hindiName }})</span></h2>
-        <p>₹{{ item.price }} x {{ item.quantity }}kg </p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+  <!-- Cart Items List -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Order Items</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let item of cartItems">
+          <ion-label>
+            <h2>{{ item.product_name }}</h2>
+            <p>₹{{ item.latest_wholesaler_price }} x {{ item.quantity }} {{ item.unit_name }}</p>
+          </ion-label>
+          <ion-note slot="end" color="medium">
+            ₹{{ item.latest_wholesaler_price * item.quantity }}
+          </ion-note>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
 
   <!-- Ride Selection -->
-  <!-- <ion-card class="ride-selection">
-    <ion-card-content>
-      <ion-label>
-        <p><a (click)="arrangeRide()" class="ride-link">Do you want us to arrange a ride for you?</a></p>
-      </ion-label>
-
-      <div *ngIf="rideRequested">
-        <ion-item>
-          <ion-label>Delivery Type</ion-label>
-          <ion-select [(ngModel)]="selectedDeliveryType" (ionChange)="calculateRidePrice()">
-            <ion-select-option value="single">Single Delivery</ion-select-option>
-            <ion-select-option value="shared">Shared Delivery</ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item>
-          <ion-label>Delivery Urgency</ion-label>
-          <ion-select [(ngModel)]="selectedUrgency" (ionChange)="calculateRidePrice()">
-            <ion-select-option value="priority">Priority</ion-select-option>
-            <ion-select-option value="delayed">Delayed</ion-select-option>
-          </ion-select>
-        </ion-item>
-      </div>
-
-      <p *ngIf="selectedDeliveryType"><strong>Estimated Ride Price:</strong> ₹{{ estimatedRidePrice }}</p>
-    </ion-card-content>
-  </ion-card> -->
-
   <ion-card class="ride-selection">
+    <ion-card-header>
+      <ion-card-title>Transport Options</ion-card-title>
+    </ion-card-header>
     <ion-card-content>
       <ion-label *ngIf="!hasRideRequest">
         <p><a (click)="arrangeRide()" class="ride-link">Do you want us to arrange a ride for you?</a></p>
@@ -75,9 +78,24 @@
 
       <div *ngIf="hasRideRequest">
         <div class="delivery-info">
-          <p><strong>Delivery Type:</strong> {{ selectedDeliveryType }}</p>
-          <p><strong>Urgency:</strong> {{ selectedUrgency }}</p>
-          <p><strong>Estimated Cost:</strong> ₹{{ estimatedRidePrice }}</p>
+          <ion-item lines="none">
+            <ion-label>
+              <h3>Delivery Type</h3>
+              <p>{{ selectedDeliveryType }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label>
+              <h3>Urgency</h3>
+              <p>{{ selectedUrgency }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label>
+              <h3>Estimated Cost</h3>
+              <p>₹{{ estimatedRidePrice }}</p>
+            </ion-label>
+          </ion-item>
         </div>
 
         <div class="search-status" *ngIf="isSearchingDriver">
@@ -86,7 +104,12 @@
         </div>
 
         <div class="driver-info" *ngIf="selectedTransporter">
-          <p><strong>Assigned Driver:</strong> {{ getAvailableTransporterName() }}</p>
+          <ion-item lines="none">
+            <ion-label>
+              <h3>Assigned Driver</h3>
+              <p>{{ getAvailableTransporterName() }}</p>
+            </ion-label>
+          </ion-item>
         </div>
 
         <div *ngIf="!isSearchingDriver && !selectedTransporter" class="action-buttons">
@@ -101,19 +124,34 @@
     </ion-card-content>
   </ion-card>
 
+  <!-- Order Summary -->
   <ion-card>
     <ion-card-header>
       <ion-card-title>Order Summary</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p><strong>Order Items Total:</strong> ₹{{ totalPrice }}</p>
-      <p *ngIf="hasRideRequest">
-        <strong>Transport Cost:</strong> ₹{{ estimatedRidePrice }}
-      </p>
-      <h2><strong>Grand Total:</strong> ₹{{ grandTotal }}</h2>
+      <ion-list>
+        <ion-item lines="none">
+          <ion-label>Items Total</ion-label>
+          <ion-note slot="end" color="medium">₹{{ totalPrice }}</ion-note>
+        </ion-item>
+        <ion-item lines="none" *ngIf="hasRideRequest">
+          <ion-label>Transport Cost</ion-label>
+          <ion-note slot="end" color="medium">₹{{ estimatedRidePrice }}</ion-note>
+        </ion-item>
+        <ion-item lines="none" class="grand-total">
+          <ion-label>
+            <strong>Grand Total</strong>
+          </ion-label>
+          <ion-note slot="end" color="dark">
+            <strong>₹{{ grandTotal }}</strong>
+          </ion-note>
+        </ion-item>
+      </ion-list>
     </ion-card-content>
   </ion-card>
 
+  <!-- Payment Methods -->
   <ion-card *ngIf="!loadingPaymentMethods && paymentMethods.length">
     <ion-card-header>
       <ion-card-title>Select Payment Method</ion-card-title>
@@ -132,8 +170,10 @@
 
   <ion-card *ngIf="loadingPaymentMethods">
     <ion-card-content>
-      <ion-spinner name="dots"></ion-spinner>
-      <p>Loading payment methods...</p>
+      <div class="loading-container">
+        <ion-spinner name="dots"></ion-spinner>
+        <p>Loading payment methods...</p>
+      </div>
     </ion-card-content>
   </ion-card>
 
@@ -145,19 +185,12 @@
     </ion-card-content>
   </ion-card>
 
-
-  <!-- <ion-button expand="full" (click)="findDriver()" *ngIf="rideRequested">Find Driver</ion-button> -->
-
-  <!-- <ion-spinner *ngIf="findingDriver"></ion-spinner>
-  <ion-text color="success" *ngIf="driverFound">✅ Driver Found! Ride is being arranged.</ion-text>
-  <ion-text color="danger" *ngIf="driverNotAvailable">❌ No drivers available.</ion-text> -->
-
+  <!-- Confirm Order Button -->
   <ion-button
-  (click)="confirmOrder()"
-  [disabled]="orderPlaced || !selectedPaymentMethod"
-  class="confirm-order-btn">
-  Confirm Order
-</ion-button>
-
-
+    expand="block"
+    (click)="confirmOrder()"
+    [disabled]="orderPlaced || !selectedPaymentMethod"
+    class="confirm-order-btn">
+    Confirm Order
+  </ion-button>
 </ion-content>

@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/wholesaler/orders"></ion-back-button>
+      <ion-back-button color="dark" defaultHref="/wholesaler/orders"></ion-back-button>
     </ion-buttons>
     <ion-title>Order #{{orderId}}</ion-title>
   </ion-toolbar>
@@ -10,18 +10,15 @@
 <ion-content>
   <ion-progress-bar *ngIf="loading" type="indeterminate"></ion-progress-bar>
 
-  <div *ngIf="!loading && !error" class="order-details-container">
+  <div *ngIf="!loading && !error && orderDetails" class="order-details-container">
     <!-- Order Status -->
     <ion-card>
       <ion-card-header>
         <ion-card-subtitle>Status</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
-        <div class="status-chip" [class]="orderDetails.order_status">
-          {{orderDetails.order_status | titlecase}}
-        </div>
-        <div class="payment-status" [class]="orderDetails.payment_status">
-          Payment: {{orderDetails.payment_status | titlecase}}
+        <div class="status-chip" [class]="getStatusLabel(orderDetails.order_status).toLowerCase()">
+          {{ getStatusLabel(orderDetails.order_status) }}
         </div>
       </ion-card-content>
     </ion-card>
@@ -34,23 +31,8 @@
       <ion-card-content>
         <ion-item lines="none">
           <ion-label>
-            <h2>{{orderDetails.retailer_name}}</h2>
-            <p>Contact: {{orderDetails.retailer_contact}}</p>
-          </ion-label>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Mandi Info -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-subtitle>Mandi Details</ion-card-subtitle>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item lines="none">
-          <ion-label>
-            <h2>{{orderDetails.mandi_name}}</h2>
-            <p>{{orderDetails.mandi_location}}</p>
+            <h2>{{orderDetails.shop_name}}</h2>
+            <p>Retailer ID: {{orderDetails.retailer_id}}</p>
           </ion-label>
         </ion-item>
       </ion-card-content>
@@ -63,11 +45,12 @@
       </ion-card-header>
       <ion-card-content>
         <ion-list>
-          <ion-item *ngFor="let item of orderDetails.order_items">
+          <ion-item *ngFor="let item of orderDetails.products">
             <ion-label>
               <h2>{{item.product_name}}</h2>
+              <p>Category: {{item.category_name}}</p>
               <p>Quantity: {{item.quantity}} {{item.unit_name}}</p>
-              <p>Price: ₹{{item.max_item_price}}/{{item.unit_name}}</p>
+              <p>Price: ₹{{item.max_price}}/{{item.unit_name}}</p>
             </ion-label>
           </ion-item>
         </ion-list>
@@ -82,15 +65,27 @@
       <ion-card-content>
         <div class="summary-item">
           <span>Order Date</span>
-          <span>{{orderDetails.order_date | date:'medium'}}</span>
+          <span>{{orderDetails.date_of_order | date:'medium'}}</span>
+        </div>
+        <div class="summary-item" *ngIf="orderDetails.actual_delivery_date">
+          <span>Delivery Date</span>
+          <span>{{orderDetails.actual_delivery_date | date:'medium'}}</span>
         </div>
         <div class="summary-item">
           <span>Total Amount</span>
-          <span>₹{{orderDetails.total_order_amount}}</span>
+          <span>₹{{orderDetails.total_order_amount | number:'1.2-2'}}</span>
         </div>
-        <div *ngIf="orderDetails.delivery_date" class="summary-item">
-          <span>Expected Delivery</span>
-          <span>{{orderDetails.delivery_date | date:'medium'}}</span>
+        <div class="summary-item">
+          <span>Discount</span>
+          <span>₹{{orderDetails.discount_amount | number:'1.2-2'}}</span>
+        </div>
+        <div class="summary-item">
+          <span>Tax Amount</span>
+          <span>₹{{orderDetails.tax_amount | number:'1.2-2'}}</span>
+        </div>
+        <div class="summary-item final-amount">
+          <span>Final Amount</span>
+          <span>₹{{orderDetails.final_amount | number:'1.2-2'}}</span>
         </div>
       </ion-card-content>
     </ion-card>

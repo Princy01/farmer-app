@@ -1,45 +1,101 @@
 .order-details-container {
-        padding: 16px;
+  padding: 16px;
 
-        ion-card {
-          margin: 12px 0;
-          border-radius: 12px;
-        }
-      }
+  ion-card {
+    margin: 12px 0;
+    border-radius: 12px;
+  }
+}
 
-      .status-chip {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 16px;
-        font-weight: 500;
-        text-transform: capitalize;
+.status-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-weight: 500;
+  text-transform: capitalize;
 
-        &.pending { background: #fff9c4; }
-        &.processing { background: #b3e5fc; }
-        &.completed { background: #c8e6c9; }
-        &.cancelled { background: #ffcdd2; }
-      }
+  &.processing {
+    background: #b3e5fc;
+    color: var(--ion-color-primary);
+  }
 
-      .payment-status {
-        margin-top: 8px;
-        font-size: 0.9em;
+  &.confirmed {
+    background: #c8e6c9;
+    color: #388e3c;
+  }
 
-        &.pending { color: #f57c00; }
-        &.completed { color: #388e3c; }
-      }
+  &.payment-pending {
+    background: #fff9c4;
+    color: #f57c00;
+  }
 
-      .summary-item {
-        display: flex;
-        justify-content: space-between;
-        margin: 8px 0;
+  &.rejected {
+    background: #ffcdd2;
+    color: var(--ion-color-danger);
+  }
 
-        span:first-child {
-          color: var(--ion-color-medium);
-        }
-      }
+  &.successful {
+    background: #c8e6c9;
+    color: #388e3c;
+  }
 
-      .error-message {
-        text-align: center;
-        margin-bottom: 16px;
-        color: var(--ion-color-danger);
-      }
+  &.cancelled {
+    background: #ffcdd2;
+    color: var(--ion-color-danger);
+  }
+
+  &.returned {
+    background: #e1bee7;
+    color: #7b1fa2;
+  }
+
+  &.return-requested {
+    background: #e1bee7;
+    color: #7b1fa2;
+  }
+}
+
+.payment-status {
+  margin-top: 8px;
+  font-size: 0.9em;
+
+  &.pending { color: #f57c00; }
+  &.completed { color: #388e3c; }
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ion-color-light);
+
+  span:first-child {
+    color: var(--ion-color-medium);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.final-amount {
+    font-weight: bold;
+    color: var(--ion-color-primary);
+    font-size: 1.1em;
+    margin-top: 16px;
+    border-top: 2px solid var(--ion-color-light);
+  }
+}
+
+.error-message {
+  text-align: center;
+  margin-bottom: 16px;
+  color: var(--ion-color-danger);
+}
+
+@media (min-width: 768px) {
+  .order-details-container {
+    max-width: 768px;
+    margin: 0 auto;
+  }
+}

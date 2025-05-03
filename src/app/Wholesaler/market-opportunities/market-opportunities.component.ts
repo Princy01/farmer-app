@@ -4,7 +4,7 @@ import { ModalController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { WholesalerApiService, BulkOrder, TopRetailer } from '../services/wholesaler-api.service';
 import { OfferModalComponent } from '../offer-modal/offer-modal.component';
-import { RetailerProductsModalComponent } from '../market-opportunities/retailer-products-modal/retailer-products-modal.component';
+// import { RetailerProductsModalComponent } from '../market-opportunities/retailer-products-modal/retailer-products-modal.component';
 import { addIcons } from 'ionicons';
 import { add, listOutline } from 'ionicons/icons';
 @Component({
@@ -37,27 +37,28 @@ export class MarketOpportunitiesComponent implements OnInit {
     this.error = null;
 
     try {
-      // Use firstValueFrom instead of deprecated toPromise
-      const orders = await this.wholesalerService.getBulkOrders().subscribe({
+      // Load bulk orders
+      this.wholesalerService.getBulkOrders().subscribe({
         next: (data) => {
           this.bulkOrders = data;
         },
         error: (error) => {
           console.error('Failed to load bulk orders:', error);
-          this.error = 'Failed to load market opportunities. Please try again.';
+          this.error = 'Failed to load bulk orders. Please try again.';
         }
       });
 
-      const retailers = await this.wholesalerService.getTopRetailers().subscribe({
+      // Load top retailers
+      this.wholesalerService.getTopRetailers().subscribe({
         next: (data) => {
           this.topRetailers = data;
+          console.log('Top retailers:', this.topRetailers);
         },
         error: (error) => {
           console.error('Failed to load top retailers:', error);
-          this.error = 'Failed to load market opportunities. Please try again.';
+          this.error = 'Failed to load top retailers. Please try again.';
         }
       });
-
     } catch (err) {
       console.error('Failed to load data:', err);
       this.error = 'Failed to load market opportunities. Please try again.';
@@ -96,21 +97,7 @@ export class MarketOpportunitiesComponent implements OnInit {
   }
 
   getTopRetailersTitle(): string {
-    return `Top ${this.topRetailers.length} Retailers`;
+    return 'Top 5 Retailers by Order Volume';
   }
 
-  async viewRetailerProducts(retailer: TopRetailer) {
-    try {
-      const modal = await this.modalCtrl.create({
-        component: RetailerProductsModalComponent,
-        componentProps: { retailer },
-        breakpoints: [0, 0.5, 0.8],
-        initialBreakpoint: 0.8
-      });
-
-      await modal.present();
-    } catch (error) {
-      console.error('Error presenting modal:', error);
-    }
-  }
 }

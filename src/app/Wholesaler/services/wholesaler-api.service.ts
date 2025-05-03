@@ -23,11 +23,18 @@ interface OrderItem {
   max_item_price: number;
 }
 
-interface OrderItemDetails {
+export interface OrderItemDetails {
   order_id: number;
+  retailer_id: number;
+  retailer_name: string;
+  retailer_address: string;
+  retailer_mobile: string;
+  actual_delivery_date: string;
+  order_status_id: number;
+  order_status: string;
   total_order_amount: number;
   order_items: OrderItem[];
-  created_at?: string;
+  created_at: string;
 }
 
 //for Order Details screen
@@ -49,7 +56,7 @@ interface CreateOrderResponse {
   message: string;
 }
 
-interface OrderFullDetails {
+export interface OrderFullDetails {
   order_id: number;
   date_of_order: string;
   order_status: number;
@@ -126,7 +133,6 @@ export interface RetailerProduct {
 export interface TopRetailer {
   retailer_id: number;
   retailer_name: string;
-  products: RetailerProduct[];
   total_quantity: number;
   total_order_value: number;
 }
@@ -199,8 +205,7 @@ export class WholesalerApiService {
           const filterDate = new Date();
           filterDate.setDate(filterDate.getDate() - daysAgo);
           return orders.filter(order => {
-            // Assuming each order has a created_at or date field
-            const orderDate = new Date(order.created_at || '');
+            const orderDate = new Date(order.actual_delivery_date);
             return orderDate >= filterDate;
           });
         }
@@ -220,39 +225,7 @@ export class WholesalerApiService {
   }
 
   getTopRetailers(): Observable<TopRetailer[]> {
-    return this.http.get<RetailerProductResponse[]>(`${this.API_URL}/getTopRetailerDetails`).pipe(
-      map(products => {
-        const retailerMap = new Map<number, TopRetailer>();
-
-        products.forEach(product => {
-          if (!retailerMap.has(product.retailer_id)) {
-            retailerMap.set(product.retailer_id, {
-              retailer_id: product.retailer_id,
-              retailer_name: product.retailer_name,
-              products: [],
-              total_quantity: 0,
-              total_order_value: 0
-            });
-          }
-
-          const retailer = retailerMap.get(product.retailer_id)!;
-          // Create a RetailerProduct object from the response
-          const productDetails: RetailerProduct = {
-            product_id: product.product_id,
-            product_name: product.product_name,
-            unit_id: product.unit_id,
-            quantity: product.quantity,
-            order_value: product.order_value
-          };
-
-          retailer.products.push(productDetails);
-          retailer.total_quantity += product.quantity;
-          retailer.total_order_value += product.order_value;
-        });
-
-        return Array.from(retailerMap.values());
-      })
-    );
+    return this.http.get<TopRetailer[]>(`${this.API_URL}/getTopRetailerDetails`);
   }
 
 

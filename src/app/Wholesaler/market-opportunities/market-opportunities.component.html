@@ -32,7 +32,6 @@
     <ion-card class="bulk-orders-card">
       <ion-card-header>
         <ion-card-title>📦 Recent Bulk Orders</ion-card-title>
-        <ion-card-subtitle>Opportunities to fulfill large demands</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <ion-list>
@@ -62,20 +61,16 @@
     <ion-card class="top-retailers-card">
       <ion-card-header>
         <ion-card-title>🏆 {{ getTopRetailersTitle() }}</ion-card-title>
-        <ion-card-subtitle>Based on total order volume</ion-card-subtitle>
+        <ion-card-subtitle>Based on bulk order volume</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <ion-list>
           <ion-item *ngFor="let retailer of topRetailers" class="custom-item">
             <ion-label>
               <h2 class="item-title">{{ retailer.retailer_name }}</h2>
-              <p>Products: <strong>{{ retailer.products.length }}</strong></p>
-              <p>Quantity: <strong>{{ retailer.total_quantity | number:'1.0-2' }} kg</strong></p>
-              <p>Value: <strong>₹{{ retailer.total_order_value | number:'1.2-2' }}</strong></p>
+              <p>Total Quantity: <strong>{{ retailer.total_quantity | number:'1.0-2' }} kg</strong></p>
+              <p>Total Order Value: <strong>₹{{ retailer.total_order_value | number:'1.2-2' }}</strong></p>
             </ion-label>
-            <ion-button fill="outline" size="small" slot="end" (click)="viewRetailerProducts(retailer)">
-              <ion-icon name="list-outline" slot="icon-only"></ion-icon>
-            </ion-button>
           </ion-item>
         </ion-list>
       </ion-card-content>

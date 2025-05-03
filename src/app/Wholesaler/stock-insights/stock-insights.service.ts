@@ -25,19 +25,31 @@ export interface StockAvailabilityData {
         stock_availability_percentage: number;
 }
 
+export interface MandiStockInfo {
+        mandi_id: number;
+        mandi_name: string;
+        mandi_stock: number;
+}
+
 export interface LowStockItemData {
         product_id: number;
         product_name: string;
-        mandi_id: number;
-        mandi_name: string;
-        stock_left: number;
-        minimum_stock_level: number;
+        current_stock: number;
+        mandis: MandiStockInfo[];
 }
 
 export interface MandiBasicInfo {
         mandi_id: number;
         mandi_name: string;
-      }
+}
+
+export interface SlowMovingProductData {
+        product_name: string;
+        mandi_name: string;
+        stock_left: number;
+        weekly_sales: number;
+        days_in_stock: number;
+}
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -70,11 +82,15 @@ export class StockInsightsService {
 
         getMandiList(): Observable<MandiBasicInfo[]> {
                 return this.http.get<MandiBasicInfo[]>(`${API_BASE_URL}/getMandiDetails`)
-                  .pipe(
-                    map(mandis => mandis.map(mandi => ({
-                      mandi_id: mandi.mandi_id,
-                      mandi_name: mandi.mandi_name
-                    })))
-                  );
-              }
+                        .pipe(
+                                map(mandis => mandis.map(mandi => ({
+                                        mandi_id: mandi.mandi_id,
+                                        mandi_name: mandi.mandi_name
+                                })))
+                        );
+        }
+
+        getSlowMovingProducts(): Observable<SlowMovingProductData[]> {
+                return this.http.get<SlowMovingProductData[]>(`${API_BASE_URL}/getSlowMovingProducts`);
+        }
 }

@@ -59,32 +59,84 @@
     </div>
 
     <!-- Low Stock Alerts -->
-    <div *ngSwitchCase="'alerts'" class="chart-container">
-      <h3>Low Stock Items</h3>
-      <ion-list class="alerts-container">
-        <ion-item *ngFor="let alert of lowStockAlerts" class="critical">
-          <ion-label>
-            <h2>{{ alert.product_name }}</h2>
-            <p>Location: {{ alert.mandi_name }}</p>
-            <p>Current Stock: {{ alert.stock_left | number }} kg</p>
-            <p>Minimum Required: {{ alert.minimum_stock_level | number }} kg</p>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-    </div>
+<div *ngSwitchCase="'alerts'" class="insights-container">
+  <div class="header-section">
+    <ion-icon name="warning-outline" color="danger"></ion-icon>
+    <h2>Low Stock Alerts</h2>
+  </div>
 
-    <!-- Slow Moving Products -->
-    <div *ngSwitchCase="'slow'" class="chart-container">
-      <h3>Slow Moving Products</h3>
-      <ion-list class="alerts-container">
-        <ion-item *ngFor="let item of slowMovingProducts" class="slow-moving">
-          <ion-label>
-            <h2>{{ item.product_name }}</h2>
-            <p>Location: {{ item.mandi_name }}</p>
-            <p>Current Stock: {{ item.stock_left | number }} kg</p>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-    </div>
+  <ion-list class="insights-list">
+    <ion-item *ngFor="let alert of lowStockAlerts" class="insight-card low-stock">
+      <ion-label>
+        <div class="card-header">
+          <h3>{{ alert.product_name }}</h3>
+          <ion-chip color="danger" outline="true">
+            <ion-label>Total: {{ alert.current_stock | number }} kg</ion-label>
+          </ion-chip>
+        </div>
+
+        <div class="locations-grid">
+          <div *ngFor="let mandi of alert.mandis" class="location-card">
+            <div class="location-header">
+              <ion-icon name="business-outline"></ion-icon>
+              <span>{{ mandi.mandi_name }}</span>
+            </div>
+            <div class="stock-details">
+              <div class="stock-value">
+                <span class="label">Current Stock:</span>
+                <span class="value">{{ mandi.mandi_stock | number }} kg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</div>
+
+<!-- Slow Moving Products -->
+<div *ngSwitchCase="'slow'" class="insights-container">
+  <div class="header-section">
+    <ion-icon name="timer-outline" color="warning"></ion-icon>
+    <h2>Slow Moving Products</h2>
+  </div>
+
+  <ion-list class="insights-list">
+    <ion-item *ngFor="let item of slowMovingProducts" class="insight-card slow-moving">
+      <ion-label>
+        <div class="card-header">
+          <h3>{{ item.product_name }}</h3>
+          <ion-chip [color]="item.weekly_sales < (item.stock_left * 0.1) ? 'warning' : 'medium'" outline="true">
+            <ion-label>{{ item.days_in_stock }} days in stock</ion-label>
+          </ion-chip>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <ion-icon name="location-outline"></ion-icon>
+            <div class="stat-details">
+              <span class="label">Location</span>
+              <span class="value">{{ item.mandi_name }}</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <ion-icon name="cube-outline"></ion-icon>
+            <div class="stat-details">
+              <span class="label">Current Stock</span>
+              <span class="value">{{ item.stock_left | number }} kg</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <ion-icon name="trending-down-outline"></ion-icon>
+            <div class="stat-details">
+              <span class="label">Weekly Sales</span>
+              <span class="value">{{ item.weekly_sales | number }} kg</span>
+            </div>
+          </div>
+        </div>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</div>
   </div>
 </ion-content>

@@ -9,13 +9,28 @@ import { DatabaseService } from '../../services/database.service';
 import { BuyerApiService } from '../services/buyer-api.service';
 
 interface CartItem {
-  id: number;
-  name: string;
-  image: string;
-  hindiName: string;
+  product_id: number;
+  product_name: string;
   quantity: number;
-  price: number;
-  weight: number;
+  unit_id: number;
+  unit_name: string;
+  price_while_added: number;
+  latest_wholesaler_price: number;
+  price_updated_at?: string;
+  is_active: boolean;
+}
+
+interface RetailerInfo {
+  id: number;
+  name?: string;
+  address?: string;
+  state?: string;
+  location?: string;
+}
+
+interface WholeSeller {
+  id: number;
+  name?: string;
 }
 interface DirectOrder {
   id: number;
@@ -61,6 +76,8 @@ interface Order {
 })
 export class CheckoutComponent {
   cartItems: CartItem[] = [];
+  retailerInfo: RetailerInfo | null = null;
+  wholeSeller: WholeSeller | null = null;
   totalPrice: number = 0;
   selectedPaymentMethod: string = 'upi';
   estimatedDelivery: string = '3-5 Business Days';
@@ -100,6 +117,9 @@ export class CheckoutComponent {
     if (navData) {
       this.cartItems = navData['cartItems'] || [];
       this.totalPrice = navData['totalPrice'] || 0;
+      this.retailerInfo = navData['retailer'] || null;
+      this.wholeSeller = navData['wholeseller'] || null;
+
     }
 
     this.route.queryParams.subscribe((params) => {
@@ -355,12 +375,17 @@ export class CheckoutComponent {
     try {
       const directOrder: DirectOrder = {
         id: Date.now(),
-        buyerId: 'currentUserId', // Replace with actual user ID
-        sellerId: 'sellerId', // Get this from your cart items or store
-        items: this.cartItems,
-        totalAmount: this.totalPrice, // Using only item price, no transport cost
-        pickupLocation: this.selectedAddress.city,
-        dropoffLocation: 'Destination',
+        buyerId: this.retailerInfo?.id.toString() || 'unknown',
+        sellerId: this.wholeSeller?.id.toString() || 'unknown',
+        items: this.cartItems.map(item => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price: item.latest_wholesaler_price,
+          unit_id: item.unit_id
+        })),
+        totalAmount: this.totalPrice,
+        pickupLocation: this.wholeSeller?.name || 'Unknown Location',
+        dropoffLocation: this.retailerInfo?.address || 'Unknown Address',
         weight: this.calculateTotalWeight(),
         status: 'pending',
         createdAt: new Date(),
@@ -408,8 +433,8 @@ export class CheckoutComponent {
         deliveryType: this.selectedDeliveryType,
         urgency: this.selectedUrgency,
         transporterId: this.selectedTransporter,
-        pickupLocation: this.selectedAddress.city,
-        dropoffLocation: 'XYZ Street',
+        pickupLocation: this.wholeSeller?.name || 'Unknown Location',
+        dropoffLocation: this.retailerInfo?.address || 'Unknown Address',
         weight: this.calculateTotalWeight()
       };
 
@@ -452,5 +477,15 @@ export class CheckoutComponent {
     if (!this.selectedTransporter) return '';
     const transporter = this.availableTransporters.find(t => t.id === this.selectedTransporter);
     return transporter?.name || '';
+  }
+
+  getRetailerInfo(): string {
+    if (!this.retailerInfo) return 'Unknown Retailer';
+    return `${this.retailerInfo.name || 'Unknown'} - ${this.retailerInfo.location || 'Unknown Location'}`;
+  }
+
+  getWholesellerInfo(): string {
+    if (!this.wholeSeller) return 'Direct Order';
+    return `${this.wholeSeller.name || 'Unknown Wholeseller'}`;
   }
 }
