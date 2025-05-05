@@ -4,6 +4,8 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { StateService } from '../../services/state.service';
+import { addIcons } from 'ionicons';
+import { add, trashOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-state',
@@ -17,6 +19,8 @@ export class StateComponent implements OnInit {
   states: any[] = [];
 
   constructor(private fb: FormBuilder, private stateService: StateService) {
+
+    addIcons({trashOutline});
     this.stateForm = this.fb.group({
       state: ['', [Validators.required, Validators.maxLength(50)]],
       stateShortNames: ['', [Validators.required, Validators.maxLength(10)]],

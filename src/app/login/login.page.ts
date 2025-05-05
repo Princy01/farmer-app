@@ -5,7 +5,13 @@ import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { eye, eyeOff } from 'ionicons/icons';
+import { AuthService, UserRegistration, LoginCredentials, UserResponse } from '../services/auth.service';
 
+enum UserRole {
+  Admin = 1,
+  Wholesaler = 2,
+  Retailer = 3
+}
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -20,18 +26,28 @@ export class LoginPage {
   showLoginPassword: boolean = false;
   showRegisterPassword: boolean = false;
 
-  constructor(private fb: FormBuilder, private router: Router) {
-    addIcons({ eye, eyeOff });
+  userRoles = [
+    { id: UserRole.Wholesaler, name: 'Wholesaler' },
+    { id: UserRole.Retailer, name: 'Retailer' }
+  ];
 
-    this.loginForm = this.fb.group({
-      emailOrPhone: ['', [Validators.required, this.emailOrPhoneValidator]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-    });
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private authService: AuthService
+  ) {    addIcons({ eye, eyeOff });
+
+
+  this.loginForm = this.fb.group({
+    emailOrPhone: ['', [Validators.required, this.emailValidator]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+  });
 
     this.registerForm = this.fb.group({
-      name: ['', Validators.required],
-      emailOrPhone: ['', [Validators.required, this.emailOrPhoneValidator]],
+      name: ['', [Validators.required]],
+      emailOrPhone: ['', [Validators.required, this.emailValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      role: ['', [Validators.required]] // Add role field
     });
   }
 
@@ -43,17 +59,12 @@ export class LoginPage {
     this.showRegisterPassword = !this.showRegisterPassword;
   }
 
-  emailOrPhoneValidator(control: AbstractControl) {
+  emailValidator(control: AbstractControl) {
     const value = control.value;
     if (!value) return { required: true };
 
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    const phonePattern = /^[0-9]{10}$/;
-
-    if (emailPattern.test(value) || phonePattern.test(value)) {
-      return null;
-    }
-    return { invalidFormat: true };
+    return emailPattern.test(value) ? null : { invalidFormat: true };
   }
 
   onLogin() {
@@ -62,41 +73,35 @@ export class LoginPage {
       return;
     }
 
-    const { emailOrPhone } = this.loginForm.value;
+    const credentials: LoginCredentials = {
+      email: this.loginForm.value.emailOrPhone,
+      password: this.loginForm.value.password
+    };
 
-    let userRole: string;
-    switch (emailOrPhone) {
-      case 'admin@example.com':
-        userRole = 'admin';
-        break;
-      case 'wholesaler@example.com':
-        userRole = 'wholesaler';
-        break;
-      case 'retailer@example.com':
-        userRole = 'retailer';
-        break;
-      case 'transporter@example.com':
-        userRole = 'transporter';
-        break;
-      default:
-        console.error('Invalid login credentials');
-        return;
-    }
-
-    switch (userRole) {
-      case 'admin':
-        this.router.navigate(['/admin/driver']);
-        break;
-      case 'wholesaler':
-        this.router.navigate(['/wholesaler/home']);
-        break;
-      case 'retailer':
-        this.router.navigate(['/buyer/buyer-home']);
-        break;
-      case 'transporter':
-        this.router.navigate(['/transport/transport-requests']);
-        break;
-    }
+    this.authService.login(credentials).subscribe({
+      next: (response: UserResponse) => {
+        // Navigate based on role_id
+        switch (response.role_id) {
+          case UserRole.Admin:
+            this.router.navigate(['/admin/driver']);
+            break;
+          case UserRole.Wholesaler:
+            this.router.navigate(['/wholesaler/home']);
+            break;
+          case UserRole.Retailer:
+            this.router.navigate(['/buyer/buyer-home']);
+            break;
+          default:
+            console.error('Unknown role');
+            break;
+        }
+      },
+      error: (error) => {
+        console.error('Login failed:', error);
+        // Show error message to user
+        // You can implement showToast method for this
+      }
+    });
   }
 
   onRegisterSubmit() {
@@ -104,7 +109,31 @@ export class LoginPage {
       this.registerForm.markAllAsTouched();
       return;
     }
-    console.log('User Registered:', this.registerForm.value);
-    this.authMode = 'login';
+    const formValue = this.registerForm.value;
+
+
+    const userData: UserRegistration = {
+      name: formValue.name,
+      mobile_num: formValue.emailOrPhone,
+      email: formValue.emailOrPhone.includes('@') ? formValue.emailOrPhone : '',
+      address: 'Default Address',
+      pincode: '000000',
+      location: 1,
+      state: 1,
+      active_status: 1,
+      role_id: formValue.role // Using selected role
+    };
+
+    this.authService.registerUser(userData).subscribe({
+      next: (response) => {
+        console.log('Registration successful:', response);
+        this.authMode = 'login';
+        // Optional: Show success message using Ionic Toast
+      },
+      error: (error) => {
+        console.error('Registration failed:', error);
+        // Optional: Show error message using Ionic Toast
+      }
+    });
   }
 }

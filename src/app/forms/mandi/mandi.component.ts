@@ -1,9 +1,11 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonicModule, NavController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MandiService } from '../../services/mandi.service';
+import { addIcons } from 'ionicons';
+import { chevronDown, chevronUp, trashOutline, locationOutline } from 'ionicons/icons';
+import { Mandi, MandiService } from '../../services/mandi.service';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -13,8 +15,10 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './mandi.component.html',
   styleUrls: ['./mandi.component.scss']
 })
-export class MandiComponent {
+export class MandiComponent implements OnInit {
   mandi: FormGroup;
+  mandis: Mandi[] = [];
+  isMandiListExpanded = false;
 
   constructor(
     private fb: FormBuilder,
@@ -23,6 +27,8 @@ export class MandiComponent {
     private navCtrl: NavController,
     private route: ActivatedRoute
   ) {
+    addIcons({ chevronDown, chevronUp, trashOutline, locationOutline });
+
     this.mandi = this.fb.group({
       mandi_location: ['', [Validators.required, Validators.maxLength(255)]],
       mandi_number: ['', [Validators.required, Validators.maxLength(50)]],
@@ -41,6 +47,24 @@ export class MandiComponent {
       }
     });
   }
+  ngOnInit() {
+    this.fetchMandis();
+  }
+
+  fetchMandis() {
+    this.mandiService.getAllMandis().subscribe({
+      next: (data) => {
+        this.mandis = data;
+      },
+      error: (error) => {
+        console.error('Error fetching mandis:', error);
+      }
+    });
+  }
+
+  toggleMandiList() {
+    this.isMandiListExpanded = !this.isMandiListExpanded;
+  }
 
   isFieldInvalid(field: string): boolean {
     const control = this.mandi.get(field);
@@ -49,19 +73,15 @@ export class MandiComponent {
 
   submitForm() {
     if (this.mandi.valid) {
-      console.log('Form Submitted:', this.mandi.value);
       this.mandiService.createMandi(this.mandi.value).subscribe({
-        next: data => {
-          console.log('Mandi Created:', data);
+        next: () => {
+          this.fetchMandis(); // Refresh list after creating
           this.mandi.reset();
         },
-        error: error => {
+        error: (error:any) => {
           console.error('Error:', error);
         }
       });
-    } else {
-      const firstInvalid = this.el.nativeElement.querySelector('.invalid');
-      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth' });
     }
   }
 }

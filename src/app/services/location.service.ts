@@ -6,9 +6,12 @@ import { catchError } from 'rxjs/operators';
 // location.model.ts
 export interface Location {
   id: number;
-  location: string;
+  location: string | null;
+  city_id: number;
+  city_name: string | null;
+  state_id: number;
+  state_name: string | null;
 }
-
 @Injectable({
   providedIn: 'root'
 })

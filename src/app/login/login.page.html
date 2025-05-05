@@ -11,12 +11,16 @@
     <form [formGroup]="loginForm" *ngIf="authMode === 'login'" (ngSubmit)="onLogin()">
       <ion-list>
         <ion-item>
-          <ion-label position="floating">Email / Phone</ion-label>
-          <ion-input formControlName="emailOrPhone" type="text" autocapitalize="none"></ion-input>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input
+            formControlName="emailOrPhone"
+            type="email"
+            autocapitalize="none">
+          </ion-input>
         </ion-item>
         <ion-text color="danger" *ngIf="loginForm.get('emailOrPhone')?.invalid && loginForm.get('emailOrPhone')?.touched">
-          <p *ngIf="loginForm.get('emailOrPhone')?.errors?.['required']">Email or Phone is required</p>
-          <p *ngIf="loginForm.get('emailOrPhone')?.errors?.['invalidFormat']">Enter a valid Email or Phone</p>
+          <p *ngIf="loginForm.get('emailOrPhone')?.errors?.['required']">Email is required</p>
+          <p *ngIf="loginForm.get('emailOrPhone')?.errors?.['invalidFormat']">Enter a valid email</p>
         </ion-text>
 
         <ion-item>
@@ -91,8 +95,23 @@
           <p *ngIf="registerForm.get('password')?.errors?.['minlength']">Minimum 6 characters required</p>
         </ion-text>
 
+        <!-- New Role Selection -->
+        <ion-item>
+          <ion-label position="floating">Select Role</ion-label>
+          <ion-select formControlName="role" interface="action-sheet">
+            <ion-select-option *ngFor="let role of userRoles" [value]="role.id">
+              {{ role.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-text color="danger" *ngIf="registerForm.get('role')?.invalid && registerForm.get('role')?.touched">
+          <p *ngIf="registerForm.get('role')?.errors?.['required']">Please select a role</p>
+        </ion-text>
+
         <div class="center-button">
-          <ion-button class="custom-button" expand="full" type="submit" [disabled]="registerForm.invalid">Register</ion-button>
+          <ion-button class="custom-button" expand="full" type="submit" [disabled]="registerForm.invalid">
+            Register
+          </ion-button>
         </div>
       </ion-list>
     </form>

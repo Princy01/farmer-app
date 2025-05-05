@@ -51,4 +51,27 @@
       </div>
     </ion-list>
   </form>
+
+  <ion-list>
+    <ion-label class="center-label">AVAILABLE MANDIS</ion-label>
+    <ion-item-group>
+
+      <ion-list>
+        <ion-item *ngFor="let mandi of mandis">
+          <ion-label>
+            <h2>{{ mandi.mandi_location }}</h2>
+            <p>
+              <ion-icon name="location-outline"></ion-icon>
+              {{ mandi.city_name }}, {{ mandi.state_name }}
+            </p>
+            <p>Incharge: {{ mandi.mandi_incharge }}</p>
+            <p>Contact: {{ mandi.mandi_incharge_num }}</p>
+          </ion-label>
+          <ion-note slot="end" color="medium">
+            PIN: {{ mandi.mandi_pincode }}
+          </ion-note>
+        </ion-item>
+      </ion-list>
+    </ion-item-group>
+  </ion-list>
 </ion-content>

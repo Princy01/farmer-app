@@ -5,16 +5,20 @@ import { catchError } from 'rxjs/operators';
 
 // mandi.model.ts
 export interface Mandi {
-  id: number;
+  mandi_id: number;
   mandi_location: string;
-  mandi_number: string;
   mandi_incharge: string;
   mandi_incharge_num: string;
   mandi_pincode: string;
   mandi_address: string;
-  remarks: string;
-  mandi_city: number;
-  mandi_state: number;
+  mandi_state_id: number;
+  state_name: string;
+  state_shortnames: string;
+  mandi_name: string;
+  mandi_shortnames: string;
+  mandi_city_id: number;
+  city_name: string;
+  city_shortnames: string;
 }
 
 
@@ -36,9 +40,13 @@ export class MandiService {
       .pipe(catchError(this.handleError));
   }
 
-  deleteMandi(id: number): Observable<any> { 
+  deleteMandi(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/mandiDelete/${id}`)
       .pipe(catchError(this.handleError));
+  }
+
+  getAllMandis(): Observable<Mandi[]> {
+    return this.http.get<Mandi[]>(`${this.apiUrl}/getMandiDetails`);
   }
 
   private handleError(error: HttpErrorResponse) {

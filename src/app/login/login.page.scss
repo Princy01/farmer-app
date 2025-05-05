@@ -88,3 +88,27 @@ ion-input {
     opacity: 1;
   }
 }
+
+ion-select {
+  width: 100%;
+  max-width: 100%;
+  padding: 3px 90px;
+}
+
+ion-select::part(placeholder) {
+  color: var(--ion-color-medium);
+}
+
+ion-select-option {
+  font-size: 16px;
+}
+
+.center-button {
+  margin-top: 24px;
+}
+
+.custom-button {
+  --border-radius: 8px;
+  margin: 0 auto;
+  width: 100%;
+}

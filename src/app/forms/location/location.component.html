@@ -19,4 +19,23 @@
 
   </ion-list>
   </form>
+
+  <ion-list>
+    <ion-label class="center-label">AVAILABLE LOCATIONS</ion-label>
+    <ion-item-group>
+
+      <ion-list>
+        <ion-item *ngFor="let loc of locations">
+          <ion-icon name="location-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h2>{{ loc.location || 'N/A' }}</h2>
+            <p>{{ loc.city_name || 'N/A' }}, {{ loc.state_name || 'N/A' }}</p>
+          </ion-label>
+          <ion-button slot="end" color="danger" (click)="deleteLocation(loc.id)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-item-group>
+  </ion-list>
 </ion-content>

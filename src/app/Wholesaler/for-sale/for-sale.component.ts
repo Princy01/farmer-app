@@ -59,6 +59,15 @@ export class ForSaleComponent implements OnInit {
         const formData = this.orderForm.value;
         const entry: WholesellerEntry = {
           ...formData,
+          // Convert all IDs to integers
+          product_id: parseInt(formData.product_id, 10),
+          mandi_id: parseInt(formData.mandi_id, 10),
+          warehouse_id: parseInt(formData.warehouse_id, 10),
+          unit_id: parseInt(formData.unit_id, 10),
+          wholeseller_id: parseInt(formData.wholeseller_id, 10),
+          // Keep other conversions
+          quantity: parseFloat(formData.quantity),
+          price: parseFloat(formData.price),
           datetime: new Date(formData.datetime).toISOString()
         };
 

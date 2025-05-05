@@ -17,14 +17,19 @@
     </ion-list>
   </form>
 
-  <!-- a DeleteState function in Go is needed for this-->
   <ion-list>
+    <ion-label class="center-label">AVAILABLE STATES</ion-label>
+  <!-- a DeleteState function in Go is needed for this-->
+  <ion-item-group>
     <ion-item *ngFor="let state of states">
       <ion-label>
-        <h2>{{ state.state }}</h2>
+        <h2>{{ state.state | titlecase }}</h2>
         <p>{{ state.stateShortNames }}</p>
       </ion-label>
-      <ion-button color="danger" (click)="deleteState(state.id)">Delete</ion-button>
+      <ion-button slot="end" color="danger" (click)="deleteState(state.id)">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
     </ion-item>
-  </ion-list>
+</ion-item-group>
+</ion-list>
 </ion-content>

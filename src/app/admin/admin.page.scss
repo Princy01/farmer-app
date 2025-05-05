@@ -110,3 +110,11 @@ ion-content {
     border: 1px solid red;
   }
 }
+
+.center-label {
+  display: block;
+  text-align: center;
+  margin: 20px 0;
+  font-weight: bold;
+  color: var(--ion-color-medium);
+}
