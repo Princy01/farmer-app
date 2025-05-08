@@ -8,6 +8,7 @@ export interface InventoryBatch {
   arrivalDate: string;
   expiryDate: string;
   source: string;
+  warehouseId: string;
 }
 
 @Injectable({
@@ -23,6 +24,7 @@ export class InventoryService {
       arrivalDate: '2025-04-01',
       expiryDate: '2025-04-10',
       source: 'Farmer A',
+      warehouseId: '1', // Associated warehouse
     },
     {
       batchNo: 'B002',
@@ -32,6 +34,7 @@ export class InventoryService {
       arrivalDate: '2025-04-02',
       expiryDate: '2025-04-12',
       source: 'Farmer B',
+      warehouseId: '1',
     },
     {
       batchNo: 'B003',
@@ -41,6 +44,7 @@ export class InventoryService {
       arrivalDate: '2025-04-05',
       expiryDate: '2025-04-15',
       source: 'Farmer C',
+      warehouseId: '2',
     },
     {
       batchNo: 'B004',
@@ -50,6 +54,7 @@ export class InventoryService {
       arrivalDate: '2025-04-07',
       expiryDate: '2025-04-17',
       source: 'Farmer D',
+      warehouseId: '2',
     },
     {
       batchNo: 'B005',
@@ -59,6 +64,7 @@ export class InventoryService {
       arrivalDate: '2025-04-10',
       expiryDate: '2025-04-14',
       source: 'Organic Farms',
+      warehouseId: '3',
     },
     {
       batchNo: 'B006',
@@ -68,6 +74,7 @@ export class InventoryService {
       arrivalDate: '2025-04-08',
       expiryDate: '2025-04-18',
       source: 'Farm Fresh',
+      warehouseId: '3',
     },
     {
       batchNo: 'B007',
@@ -77,6 +84,7 @@ export class InventoryService {
       arrivalDate: '2025-04-09',
       expiryDate: '2025-04-19',
       source: 'Green Valley',
+      warehouseId: '1',
     },
     {
       batchNo: 'B008',
@@ -86,7 +94,8 @@ export class InventoryService {
       arrivalDate: '2025-04-11',
       expiryDate: '2025-04-20',
       source: 'Redfield Farms',
-    }
+      warehouseId: '2',
+    },
   ];
 
   /** Return a copy of the full inventory array */
@@ -97,6 +106,11 @@ export class InventoryService {
   /** Find a single batch by its batchNo */
   getInventoryByBatch(batchNo: string): InventoryBatch | undefined {
     return this.inventory.find(b => b.batchNo === batchNo);
+  }
+
+  /** Fetch inventory for a specific warehouse */
+  getInventoryByWarehouse(warehouseId: string): InventoryBatch[] {
+    return this.inventory.filter(batch => batch.warehouseId === warehouseId);
   }
 
   /** Add a new batch (automatically assigns next batchNo and marks source as Manual Entry) */

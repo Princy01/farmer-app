@@ -198,16 +198,21 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'inventory-list',
+        redirectTo: 'warehouse-list',
         pathMatch: 'full'
       },
       {
-        path: 'inventory-list',
+        path: 'warehouse-list',
+        loadComponent: () =>
+          import('./warehouse/warehouse-list/warehouse-list.component').then((m) => m.WarehouseListComponent)
+      },
+      {
+        path: 'warehouse-list/:warehouseId/inventory',
         loadComponent: () =>
           import('./warehouse/inventory-list/inventory-list.component').then((m) => m.InventoryListComponent)
       },
       {
-        path: 'add-inventory',
+        path: 'warehouse-list/:warehouseId/inventory/add',
         loadComponent: () =>
           import('./warehouse/add-inventory/add-inventory.component').then((m) => m.AddInventoryComponent)
       },

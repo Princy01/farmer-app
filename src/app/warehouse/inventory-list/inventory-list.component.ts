@@ -5,6 +5,7 @@ import { InventoryService, InventoryBatch } from '../services/inventory.service'
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { addCircleOutline, createOutline } from 'ionicons/icons';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-inventory-list',
@@ -15,17 +16,23 @@ import { addCircleOutline, createOutline } from 'ionicons/icons';
 })
 export class InventoryListComponent implements OnInit {
   inventory: InventoryBatch[] = [];
+  warehouseId: string = '';
 
   constructor(
     private inventoryService: InventoryService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
+
   ) {
     addIcons({ addCircleOutline, createOutline });
   }
 
   ngOnInit() {
-    // Fetch the mock data from your service
-    this.inventory = this.inventoryService.getInventory();
+    // Get the warehouseId from the route parameters
+    this.warehouseId = this.route.snapshot.paramMap.get('warehouseId') || '';
+
+    // Fetch inventory for the selected warehouse
+    this.inventory = this.inventoryService.getInventoryByWarehouse(this.warehouseId);
   }
 
   goToDetail(batch: InventoryBatch) {
@@ -33,7 +40,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   goToAddInventory() {
-    this.router.navigate(['/warehouse/add-inventory']);
+    this.router.navigate([`warehouse/warehouse-list/${this.warehouseId}/inventory/add`]);
   }
 
   // Prevent event propagation when clicking on the edit button

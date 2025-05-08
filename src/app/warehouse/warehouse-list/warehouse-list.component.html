@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Warehouses</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="warehouse-content">
+  <ion-list lines="none">
+    <ion-card
+      *ngFor="let warehouse of warehouses"
+      class="warehouse-card"
+      (click)="goToInventory(warehouse.id)"
+    >
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="business-outline" class="card-icon"></ion-icon>
+          {{ warehouse.name }}
+        </ion-card-title>
+      </ion-card-header>
+    </ion-card>
+  </ion-list>
+</ion-content>

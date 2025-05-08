@@ -1,6 +1,9 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Inventory List</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/warehouse/warehouse-list" color="dark"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Inventory</ion-title>
     <!-- Add Icon Button -->
     <ion-buttons slot="end">
       <ion-button (click)="goToAddInventory()">
