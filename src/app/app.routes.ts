@@ -225,6 +225,11 @@ export const routes: Routes = [
         path: 'edit-inventory/:batchNo',
         loadComponent: () =>
           import('./warehouse/edit-inventory/edit-inventory.component').then((m) => m.EditInventoryComponent)
+      },
+      {
+        path: 'receiving-inspection',
+        loadComponent: () =>
+          import('./warehouse/receiving-inspection/receiving-inspection.component').then((m) => m.ReceivingInspectionPage)
       }
     ]
   },

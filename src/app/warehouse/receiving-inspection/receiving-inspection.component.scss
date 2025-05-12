@@ -1,0 +1,59 @@
+ion-toolbar{
+  --background: rgb(136, 172, 140);
+    --color: white;  /* Text color inside the badge */
+
+}
+
+.spaced-item {
+  margin-bottom: 16px; /* Adjust the value as needed */
+}
+.form-container {
+  padding-bottom: 20px; /* Adjust the value as needed */
+}
+.custom-green {
+  color: rgb(136, 172, 140) !important;
+}
+
+ion-button {
+        margin: 2rem 0;
+        --border-radius: 16px;
+        height: 56px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        --box-shadow: 0 8px 16px rgba(var(--ion-color-primary-rgb), 0.24);
+        transition: var(--transition);
+
+        &:hover {
+          --box-shadow: 0 12px 24px rgba(var(--ion-color-primary-rgb), 0.32);
+          transform: translateY(-2px);
+        }
+      }
+
+      .custom-button {
+        --background: rgb(136, 172, 140);
+        --background-hover: rgb(116, 152, 120);
+        --background-activated: rgb(116, 152, 120);
+        --background-focused: rgb(116, 152, 120);
+
+        --color: white;
+        --box-shadow: 0 2px 6px rgba(136, 172, 140, 0.3);
+
+        --ripple-color: rgb(116, 152, 120);
+        --border-radius: 6px;
+      }
+
+      @media (max-width: 576px) {
+        .custom-title {
+          font-size: 1.5rem;
+        }
+
+        .section-title {
+          font-size: 1.2rem;
+        }
+
+        ion-button {
+          height: 48px;
+          font-size: 1rem;
+        }
+      }

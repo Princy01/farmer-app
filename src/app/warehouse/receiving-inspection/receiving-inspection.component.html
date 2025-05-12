@@ -1,0 +1,139 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Receiving & Inspection</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Shipment Info</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item class="spaced-item">
+          <ion-label position="floating">Shipment ID</ion-label>
+          <ion-input formControlName="shipmentId"></ion-input>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label position="floating">Supplier</ion-label>
+          <ion-input formControlName="supplier"></ion-input>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label position="stacked">Arrival Time</ion-label>
+          <ion-input
+            type="datetime-local"
+            formControlName="datetime"
+          ></ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Items</ion-card-title>
+<ion-button fill="clear" size="small" class="custom-green" (click)="addItem()">
+  Add Item
+</ion-button>
+      </ion-card-header>
+      <ion-card-content
+        *ngFor="let item of items.controls; let i = index"
+        [formGroupName]="i"
+      >
+        <ion-item class="spaced-item">
+          <ion-label position="floating">Item Name</ion-label>
+          <ion-input formControlName="name"></ion-input>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label position="floating">Quantity</ion-label>
+          <ion-input type="number" formControlName="quantity"></ion-input>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label position="floating">Weight (kg)</ion-label>
+          <ion-input type="number" formControlName="weight"></ion-input>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label>Grade</ion-label>
+          <ion-select formControlName="grade">
+            <ion-select-option value="A">A</ion-select-option>
+            <ion-select-option value="B">B</ion-select-option>
+            <ion-select-option value="C">C</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item class="spaced-item" lines="none">
+          <ion-label>Damage</ion-label>
+          <ion-checkbox formControlName="damage"></ion-checkbox>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label position="floating">Comments</ion-label>
+          <ion-textarea formControlName="comments"></ion-textarea>
+        </ion-item>
+        <ion-button
+          fill="clear"
+          color="danger"
+          size="small"
+          (click)="removeItem(i)"
+          >Remove</ion-button
+        >
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Key Checks</ion-card-title>
+      </ion-card-header>
+      <ion-card-content formGroupName="checks">
+        <ion-item class="spaced-item">
+          <ion-label>Temperature</ion-label>
+          <ion-select formControlName="temperature">
+            <ion-select-option value="Cold">Cold</ion-select-option>
+            <ion-select-option value="Dry">Dry</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label>Spoilage</ion-label>
+          <ion-checkbox formControlName="spoilage"></ion-checkbox>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label>Insect Damage</ion-label>
+          <ion-checkbox formControlName="insectDamage"></ion-checkbox>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label position="floating">Cleanliness</ion-label>
+          <ion-input formControlName="cleanliness"></ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Storage Assignment</ion-card-title>
+        <ion-button fill="clear" size="small" class="custom-green" (click)="addStorageAssignment()">Add</ion-button>
+      </ion-card-header>
+      <ion-card-content
+        *ngFor="let assign of storageAssignments.controls; let i = index"
+        [formGroupName]="i"
+      >
+        <ion-item class="spaced-item">
+          <ion-label>Grade</ion-label>
+          <ion-select formControlName="grade">
+            <ion-select-option value="A">A</ion-select-option>
+            <ion-select-option value="B">B</ion-select-option>
+            <ion-select-option value="C">C</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item class="spaced-item">
+          <ion-label position="floating">Storage Zone</ion-label>
+          <ion-input formControlName="zone"></ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="ion-padding-top ion-text-center">
+      <ion-button
+        class="custom-button"
+        expand="block"
+        shape="round" type="submit">Record in WMS</ion-button>
+</div>
+  </form>
+</ion-content>
