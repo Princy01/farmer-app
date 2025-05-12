@@ -24,36 +24,30 @@
       <ion-input type="number" [(ngModel)]="batch.quantity" placeholder="Enter quantity"></ion-input>
     </ion-item>
 
-    <!-- <ion-item>
-      <ion-label>Arrival Date</ion-label>
-      <ion-datetime-button datetime="arrivalDate"></ion-datetime-button>
-      <ion-modal>
-        <ion-datetime id="arrivalDate" [(ngModel)]="batch.arrivalDate"></ion-datetime>
-      </ion-modal>
+    <ion-item class="custom-item">
+      <ion-label position="stacked">
+        Arrival Date
+      </ion-label>
+      <ion-input type="datetime-local" [(ngModel)]="batch.arrivalDate"></ion-input>
+    </ion-item>
+
+    <ion-item class="custom-item">
+      <ion-label position="stacked">
+        Expiry Date
+      </ion-label>
+      <ion-input type="datetime-local" [(ngModel)]="batch.expiryDate"></ion-input>
+    </ion-item>
+
+    <!-- New fields for Supplier Name and Location -->
+    <ion-item>
+      <ion-label position="floating">Supplier Name</ion-label>
+      <ion-input [(ngModel)]="batch.supplierName"></ion-input>
     </ion-item>
 
     <ion-item>
-      <ion-label>Expiry Date</ion-label>
-      <ion-datetime-button datetime="expiryDate"></ion-datetime-button>
-      <ion-modal>
-        <ion-datetime id="expiryDate" [(ngModel)]="batch.expiryDate"></ion-datetime>
-      </ion-modal>
+      <ion-label position="floating">Supplier Location</ion-label>
+      <ion-input [(ngModel)]="batch.supplierLocation"></ion-input>
     </ion-item>
-  </ion-list> -->
-
-  <ion-item class="custom-item">
-    <ion-label position="stacked">
-      Arrival Date
-    </ion-label>
-    <ion-input type="datetime-local" [(ngModel)]="batch.arrivalDate"></ion-input>
-  </ion-item>
-
-  <ion-item class="custom-item">
-    <ion-label position="stacked">
-      Expiry Date
-    </ion-label>
-    <ion-input type="datetime-local" [(ngModel)]="batch.expiryDate"></ion-input>
-  </ion-item>
   </ion-list>
   <div class="btn-wrapper">
     <ion-button expand="block" (click)="addBatch()" class="custom-btn">

@@ -19,10 +19,12 @@ export class AddInventoryComponent implements OnInit {
     quantity: 0,
     arrivalDate: '',
     expiryDate: '',
-    warehouseId: ''
+    warehouseId: '',
+    supplierName: '',  // Added supplierName
+    supplierLocation: ''  // Added supplierLocation
   };
   warehouseId: string = '';
-inventoryLink: string = '/warehouse/warehouse-list';
+  inventoryLink: string = '/warehouse/warehouse-list';
 
   constructor(private inventoryService: InventoryService, private router: Router, private route: ActivatedRoute) {}
 
@@ -34,6 +36,7 @@ inventoryLink: string = '/warehouse/warehouse-list';
   }
 
   addBatch() {
+    // Send the batch with supplier name and location to the inventory service
     this.inventoryService.addInventory(this.batch);
     this.router.navigate([this.inventoryLink]);
   }

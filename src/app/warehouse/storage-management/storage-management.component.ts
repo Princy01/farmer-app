@@ -14,7 +14,7 @@ export class StorageManagementComponent {
   storageZones = [
     { name: 'Cold Storage', produce: 'Leafy greens, tomatoes', conditions: '2–8°C' },
     { name: 'Dry Storage', produce: 'Potatoes, onions', conditions: 'Room temperature' },
-    { name: 'Dispatch Area', produce: 'High-turnover items', conditions: 'Easily accessible' },
+    { name: 'Dispatch Area', produce: 'Fast-moving items', conditions: 'Easily accessible' },
     { name: 'Spoilage Zone', produce: 'Damaged goods', conditions: 'For waste tracking' },
   ];
 
