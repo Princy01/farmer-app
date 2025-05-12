@@ -1,14 +1,13 @@
 ion-toolbar{
   --background: rgb(136, 172, 140);
-    --color: white;  /* Text color inside the badge */
-
+    --color: white;
 }
 
 .spaced-item {
-  margin-bottom: 16px; /* Adjust the value as needed */
+  margin-bottom: 16px;
 }
 .form-container {
-  padding-bottom: 20px; /* Adjust the value as needed */
+  padding-bottom: 20px;
 }
 .custom-green {
   color: rgb(136, 172, 140) !important;

@@ -32,9 +32,14 @@
     <ion-card>
       <ion-card-header>
         <ion-card-title>Items</ion-card-title>
-<ion-button fill="clear" size="small" class="custom-green" (click)="addItem()">
-  Add Item
-</ion-button>
+        <ion-button
+          fill="clear"
+          size="small"
+          class="custom-green"
+          (click)="addItem()"
+        >
+          Add Item
+        </ion-button>
       </ion-card-header>
       <ion-card-content
         *ngFor="let item of items.controls; let i = index"
@@ -42,8 +47,19 @@
       >
         <ion-item class="spaced-item">
           <ion-label position="floating">Item Name</ion-label>
-          <ion-input formControlName="name"></ion-input>
+          <ion-input
+            formControlName="name"
+            (ionChange)="fetchItemSuggestions($event)"
+          ></ion-input>
         </ion-item>
+        <ion-list *ngIf="itemSuggestions.length > 0">
+          <ion-item
+            *ngFor="let suggestion of itemSuggestions"
+            (click)="selectItemName(suggestion)"
+          >
+            {{ suggestion }}
+          </ion-item>
+        </ion-list>
         <ion-item class="spaced-item">
           <ion-label position="floating">Quantity</ion-label>
           <ion-input type="number" formControlName="quantity"></ion-input>
@@ -108,7 +124,13 @@
     <ion-card>
       <ion-card-header>
         <ion-card-title>Storage Assignment</ion-card-title>
-        <ion-button fill="clear" size="small" class="custom-green" (click)="addStorageAssignment()">Add</ion-button>
+        <ion-button
+          fill="clear"
+          size="small"
+          class="custom-green"
+          (click)="addStorageAssignment()"
+          >Add</ion-button
+        >
       </ion-card-header>
       <ion-card-content
         *ngFor="let assign of storageAssignments.controls; let i = index"
@@ -133,7 +155,10 @@
       <ion-button
         class="custom-button"
         expand="block"
-        shape="round" type="submit">Record in WMS</ion-button>
-</div>
+        shape="round"
+        type="submit"
+        >Record in WMS</ion-button
+      >
+    </div>
   </form>
 </ion-content>

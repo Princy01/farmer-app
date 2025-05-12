@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Storage Management</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Storage Zones -->
+  <ion-card *ngFor="let zone of storageZones">
+    <ion-card-header>
+      <ion-card-title>{{ zone.name }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Type of Produce:</strong> {{ zone.produce }}</p>
+      <p><strong>Conditions:</strong> {{ zone.conditions }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-item-divider class="ion-margin-top"></ion-item-divider>
+
+  <!-- Storage Tracking -->
+  <ion-list>
+    <ion-list-header>
+      <ion-label>
+        <h2>Batch Storage Tracking</h2>
+      </ion-label>
+    </ion-list-header>
+
+    <ion-item *ngFor="let item of storageItems">
+      <ion-label>
+        <h3>{{ item.product }}</h3>
+        <p>Zone: {{ item.zone }} | Rack: {{ item.rack }} | Shelf: {{ item.shelf }}</p>
+        <p>Quantity: {{ item.quantity }} | Last Updated: {{ item.updatedAt | date:'short' }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+</ion-content>

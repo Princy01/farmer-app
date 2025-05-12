@@ -229,7 +229,12 @@ export const routes: Routes = [
       {
         path: 'receiving-inspection',
         loadComponent: () =>
-          import('./warehouse/receiving-inspection/receiving-inspection.component').then((m) => m.ReceivingInspectionPage)
+          import('./warehouse/receiving-inspection/receiving-inspection.component').then((m) => m.ReceivingInspectionComponent)
+      },
+      {
+        path: 'storage-management',
+        loadComponent: () =>
+          import('./warehouse/storage-management/storage-management.component').then((m) => m.StorageManagementComponent)
       }
     ]
   },
