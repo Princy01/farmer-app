@@ -235,6 +235,11 @@ export const routes: Routes = [
         path: 'storage-management',
         loadComponent: () =>
           import('./warehouse/storage-management/storage-management.component').then((m) => m.StorageManagementComponent)
+      },
+      {
+        path: 'dispatch-order-management',
+        loadComponent: () =>
+          import('./warehouse/dispatch-order-management/dispatch-order-management.component').then((m) => m.DispatchOrderManagementComponent)
       }
     ]
   },

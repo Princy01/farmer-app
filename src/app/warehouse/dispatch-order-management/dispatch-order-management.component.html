@@ -1,0 +1,104 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Dispatch & Order Management</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card *ngFor="let order of orders">
+    <ion-card-header>
+      <ion-card-title
+        >{{ order.orderId }} - {{ order.retailerName }}</ion-card-title
+      >
+      <ion-note>Status: {{ order.status }}</ion-note>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-button fill="outline" size="small" (click)="viewDetails(order)">
+        View Details
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Modal -->
+  <ion-modal [isOpen]="!!selectedOrder" (didDismiss)="closeDetails()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Order Details - {{ selectedOrder?.orderId }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeDetails()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <h3>Picklist</h3>
+        <ion-list>
+          <ion-item *ngFor="let item of selectedOrder?.picklist">
+            <ion-label>
+              {{ item.productName }} - {{ item.quantityKg }}kg
+              <div *ngIf="item.batchConfirmed">
+                <ion-note>Batch: {{ item.batchConfirmed }}</ion-note>
+              </div>
+              <div *ngIf="item.crateId">
+                <ion-note>Crate ID: {{ item.crateId }}</ion-note>
+              </div>
+            </ion-label>
+            <ion-icon
+              name="checkmark-circle"
+              color="success"
+              *ngIf="item.packed"
+            ></ion-icon>
+          </ion-item>
+        </ion-list>
+
+        <ion-button
+          expand="block"
+          color="medium"
+          *ngIf="selectedOrder?.status === 'Pending'"
+          (click)="generatePicklist(selectedOrder!)"
+        >
+          Generate Picklist
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          color="tertiary"
+          *ngIf="selectedOrder?.status === 'Picklist Ready'"
+          (click)="markAsPicked(selectedOrder!)"
+        >
+          Mark as Picked
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          color="success"
+          *ngIf="selectedOrder?.status === 'Packing'"
+          (click)="markAsPacked(selectedOrder!)"
+        >
+          Mark as Packed
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          color="primary"
+          *ngIf="selectedOrder?.status === 'Packed'"
+          (click)="assignTransport(selectedOrder!)"
+        >
+          Assign Transport & Dispatch
+        </ion-button>
+
+        <ion-card *ngIf="selectedOrder?.transportInfo">
+          <ion-card-header>
+            <ion-card-title>Transport Info</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            Driver ID: {{ selectedOrder?.transportInfo?.driverId }}<br />
+            Vehicle ID: {{ selectedOrder?.transportInfo?.vehicleId }}<br />
+            ETA: {{ selectedOrder?.transportInfo?.estimatedDeliveryTime }}
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
