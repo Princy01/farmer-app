@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Stock Movement & Audit</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="segmentValue">
+      <ion-segment-button value="movements">Movements</ion-segment-button>
+      <ion-segment-button value="audits">Audits</ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <app-stock-movements *ngIf="segmentValue === 'movements'"></app-stock-movements>
+  <app-stock-audits *ngIf="segmentValue === 'audits'"></app-stock-audits>
+</ion-content>

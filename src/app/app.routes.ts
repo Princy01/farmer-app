@@ -240,6 +240,21 @@ export const routes: Routes = [
         path: 'dispatch-order-management',
         loadComponent: () =>
           import('./warehouse/dispatch-order-management/dispatch-order-management.component').then((m) => m.DispatchOrderManagementComponent)
+      },
+      {
+        path: 'stock-movement-audit',
+        loadComponent: () =>
+          import('./warehouse/stock-movement-audit/stock-movement-audit.component').then((m) => m.StockMovementAuditComponent)
+      },
+      {
+        path: 'stock-movements',
+        loadComponent: () =>
+          import('./warehouse/stock-movement-audit/stock-movements/stock-movements.component').then((m) => m.StockMovementsComponent)
+      },
+      {
+        path: 'stock-audits',
+        loadComponent: () =>
+          import('./warehouse/stock-movement-audit/stock-audits/stock-audits.component').then((m) => m.StockAuditsComponent)
       }
     ]
   },

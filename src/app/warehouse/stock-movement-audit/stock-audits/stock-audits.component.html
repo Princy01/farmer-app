@@ -1,0 +1,19 @@
+<ion-card *ngFor="let audit of audits">
+  <ion-card-header>
+    <ion-card-title>{{ audit.itemName }}</ion-card-title>
+    <ion-note>{{ audit.auditDate | date:'shortDate' }}</ion-note>
+  </ion-card-header>
+  <ion-card-content>
+    <p><strong>System Count:</strong> {{ audit.systemCount }}</p>
+    <p><strong>Physical Count:</strong> {{ audit.physicalCount }}</p>
+    <p><strong>Audited By:</strong> {{ audit.auditedBy }}</p>
+
+    <ion-chip [color]="audit.status === 'Mismatch' ? 'danger' : 'success'">
+      {{ audit.status }}
+    </ion-chip>
+
+    <ion-badge *ngIf="audit.manualOverride" color="warning">
+      Manual Override
+    </ion-badge>
+  </ion-card-content>
+</ion-card>

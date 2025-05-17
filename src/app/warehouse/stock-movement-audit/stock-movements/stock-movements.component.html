@@ -1,0 +1,15 @@
+<ion-card *ngFor="let move of movements">
+  <ion-card-header>
+    <ion-card-title>{{ move.itemName }}</ion-card-title>
+    <ion-note>{{ move.timestamp | date:'short' }}</ion-note>
+  </ion-card-header>
+  <ion-card-content>
+    <p><strong>From:</strong> {{ move.fromLocation }}</p>
+    <p><strong>To:</strong> {{ move.toLocation }}</p>
+    <p><strong>Quantity:</strong> {{ move.quantity }}</p>
+    <p><strong>Moved By:</strong> {{ move.movedBy }}</p>
+    <ion-chip color="primary" *ngIf="move.movementType === 'Receiving'">Receiving</ion-chip>
+    <ion-chip color="warning" *ngIf="move.movementType === 'Dispatch'">Dispatch</ion-chip>
+    <ion-chip color="tertiary" *ngIf="move.movementType === 'Internal'">Internal</ion-chip>
+  </ion-card-content>
+</ion-card>
