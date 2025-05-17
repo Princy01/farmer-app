@@ -1,0 +1,42 @@
+ion-header {
+  ion-toolbar {
+    --background: #f4f5f8;
+    --color: #222;
+    ion-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+  }
+
+  ion-segment {
+    --background: #fff;
+    --indicator-color: #3880ff;
+    --color-checked: #3880ff;
+    --color: #666;
+    font-weight: 500;
+
+    ion-segment-button {
+      padding: 8px 12px;
+      font-size: 0.95rem;
+
+      &.segment-button-checked {
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+ion-content {
+  --padding-top: 0;
+
+  app-stock-movements,
+  app-stock-audits {
+    display: block;
+    padding: 16px;
+
+    // Optional: Add a background for contrast
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  }
+}

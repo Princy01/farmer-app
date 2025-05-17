@@ -5,6 +5,7 @@ import { CommonModule } from "@angular/common";
 @Component({
   selector: 'app-stock-audits',
   templateUrl: './stock-audits.component.html',
+  styleUrls: ['./stock-audits.component.scss'],
   standalone: true,
   imports: [IonicModule, CommonModule],
 })

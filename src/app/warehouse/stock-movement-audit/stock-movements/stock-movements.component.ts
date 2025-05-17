@@ -5,6 +5,7 @@ import { IonicModule } from '@ionic/angular';
 @Component({
   selector: 'app-stock-movements',
   templateUrl: './stock-movements.component.html',
+  styleUrls: ['./stock-movements.component.scss'],
   standalone: true,
   imports: [IonicModule, CommonModule],
 })
