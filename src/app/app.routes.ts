@@ -255,6 +255,11 @@ export const routes: Routes = [
         path: 'stock-audits',
         loadComponent: () =>
           import('./warehouse/stock-movement-audit/stock-audits/stock-audits.component').then((m) => m.StockAuditsComponent)
+      },
+      {
+        path: 'wastage-spoilage',
+        loadComponent: () =>
+          import('./warehouse/wastage-spoilage/wastage-spoilage.component').then((m) => m.WastageSpoilageComponent)
       }
     ]
   },

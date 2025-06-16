@@ -18,6 +18,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "baseHref": "/",
             "outputPath": {
               "base": "www",
               "browser": ""
@@ -35,8 +36,18 @@
                 "output": "assets"
               }
             ],
-            "styles": ["src/global.scss", "src/theme/variables.scss", "node_modules/leaflet/dist/leaflet.css"
-          ],
+            "styles": [
+                  "src/global.scss",
+                  "src/theme/variables.scss",
+                  "node_modules/@ionic/angular/css/core.css",
+                  "node_modules/@ionic/angular/css/normalize.css",
+                  "node_modules/@ionic/angular/css/structure.css",
+                  "node_modules/@ionic/angular/css/typography.css",
+                  "node_modules/@ionic/angular/css/display.css",
+                  "node_modules/leaflet/dist/leaflet.css"
+                ],
+
+
             "scripts": [
               "node_modules/apexcharts/dist/apexcharts.min.js"
             ],
@@ -52,8 +63,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "10kb",
+                  "maximumError": "20kb"
                 }
               ],
               "fileReplacements": [

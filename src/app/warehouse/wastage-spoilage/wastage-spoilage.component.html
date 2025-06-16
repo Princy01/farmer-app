@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Wastage Tracking</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Record Spoilage</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Date of Spoilage</ion-label>
+        <ion-datetime [(ngModel)]="newSpoilage.date"></ion-datetime>
+      </ion-item>
+      <ion-item>
+        <ion-label>Quantity Spoiled (kg)</ion-label>
+        <ion-input type="number" [(ngModel)]="newSpoilage.quantity"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label>Reason</ion-label>
+        <ion-select [(ngModel)]="newSpoilage.reason">
+          <ion-select-option value="Expiry">Expiry</ion-select-option>
+          <ion-select-option value="Mishandling">Mishandling</ion-select-option>
+          <ion-select-option value="Temperature Issues">Temperature Issues</ion-select-option>
+          <ion-select-option value="Delayed Dispatch">Delayed Dispatch</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label>Inspected By</ion-label>
+        <ion-input [(ngModel)]="newSpoilage.inspector"></ion-input>
+      </ion-item>
+      <ion-button expand="full" (click)="addSpoilage()">Add Spoilage</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-list>
+    <ion-item *ngFor="let record of spoilageRecords">
+      <ion-label>
+        Date: {{ record.date }}<br />
+        Quantity: {{ record.quantity }} kg<br />
+        Reason: {{ record.reason }}<br />
+        Inspected By: {{ record.inspector }}
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+<ion-button expand="full" (click)="generateReport()" class="bottom-action-btn">Generate Report</ion-button></ion-content>

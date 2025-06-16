@@ -1,119 +1,54 @@
-<ion-content class="ion-padding">
+<ion-content>
   <div class="login-container">
-    <h1 class="app-title">Farmer-App</h1>
 
-    <ion-segment [(ngModel)]="authMode" mode="ios">
-      <ion-segment-button value="login" class="btn">Login</ion-segment-button>
-      <ion-segment-button value="register" class="btn">Register</ion-segment-button>
+    <div class="app-title">MyApp</div>
+
+    <ion-segment [(ngModel)]="authMode" value="login">
+      <ion-segment-button value="login">Login</ion-segment-button>
+      <ion-segment-button value="register">Register</ion-segment-button>
     </ion-segment>
 
-    <!-- Login Form -->
     <form [formGroup]="loginForm" *ngIf="authMode === 'login'" (ngSubmit)="onLogin()">
-      <ion-list>
-        <ion-item>
-          <ion-label position="floating">Email</ion-label>
-          <ion-input
-            formControlName="emailOrPhone"
-            type="email"
-            autocapitalize="none">
-          </ion-input>
-        </ion-item>
-        <ion-text color="danger" *ngIf="loginForm.get('emailOrPhone')?.invalid && loginForm.get('emailOrPhone')?.touched">
-          <p *ngIf="loginForm.get('emailOrPhone')?.errors?.['required']">Email is required</p>
-          <p *ngIf="loginForm.get('emailOrPhone')?.errors?.['invalidFormat']">Enter a valid email</p>
-        </ion-text>
+      <ion-item>
+        <ion-input placeholder="Email or Phone" formControlName="emailOrPhone"></ion-input>
+      </ion-item>
 
-        <ion-item>
-          <ion-label position="floating">Password</ion-label>
-          <ion-input
-            formControlName="password"
-            [type]="showLoginPassword ? 'text' : 'password'"
-            autocomplete="current-password">
-          </ion-input>
-          <ion-icon
-            [name]="showLoginPassword ? 'eye-off' : 'eye'"
-            slot="end"
-            class="password-toggle"
-            (click)="toggleLoginPasswordVisibility()"
-            style="cursor: pointer; margin-top: 35px;">
-          </ion-icon>
-        </ion-item>
-        <ion-text color="danger" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-          <p *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</p>
-          <p *ngIf="loginForm.get('password')?.errors?.['minlength']">Minimum 6 characters required</p>
-        </ion-text>
+      <ion-item>
+        <ion-input [type]="showLoginPassword ? 'text' : 'password'" placeholder="Password" formControlName="password"></ion-input>
+        <ion-icon [name]="showLoginPassword ? 'eye-off' : 'eye'" slot="end" class="password-toggle" (click)="toggleLoginPasswordVisibility()"></ion-icon>
+      </ion-item>
 
-        <div class="center-button">
-          <ion-button class="custom-button" expand="full" type="submit" [disabled]="loginForm.invalid">Login</ion-button>
-        </div>
+      <div class="center-button">
+        <ion-button type="submit" expand="block" class="custom-button">Login</ion-button>
+      </div>
 
-        <div class="or-divider">
-          <span>OR</span>
-        </div>
-
-        <p class="forgot-password">Forgot Password?</p>
-      </ion-list>
+      <div class="forgot-password">Forgot Password?</div>
     </form>
 
-    <!-- Registration Form -->
     <form [formGroup]="registerForm" *ngIf="authMode === 'register'" (ngSubmit)="onRegisterSubmit()">
-      <ion-list>
-        <ion-item>
-          <ion-label position="floating">Name</ion-label>
-          <ion-input formControlName="name"></ion-input>
-        </ion-item>
-        <ion-text color="danger" *ngIf="registerForm.get('name')?.invalid && registerForm.get('name')?.touched">
-          <p *ngIf="registerForm.get('name')?.errors?.['required']">Name is required</p>
-        </ion-text>
+      <ion-item>
+        <ion-input placeholder="Full Name" formControlName="name"></ion-input>
+      </ion-item>
 
-        <ion-item>
-          <ion-label position="floating">Email / Phone</ion-label>
-          <ion-input formControlName="emailOrPhone" type="text" autocapitalize="none"></ion-input>
-        </ion-item>
-        <ion-text color="danger" *ngIf="registerForm.get('emailOrPhone')?.invalid && registerForm.get('emailOrPhone')?.touched">
-          <p *ngIf="registerForm.get('emailOrPhone')?.errors?.['required']">Email or Phone is required</p>
-          <p *ngIf="registerForm.get('emailOrPhone')?.errors?.['invalidFormat']">Enter a valid Email or Phone</p>
-        </ion-text>
+      <ion-item>
+        <ion-input placeholder="Email or Phone" formControlName="emailOrPhone"></ion-input>
+      </ion-item>
 
-        <ion-item>
-          <ion-label position="floating">Password</ion-label>
-          <ion-input
-            formControlName="password"
-            [type]="showRegisterPassword ? 'text' : 'password'"
-            autocomplete="new-password">
-          </ion-input>
-          <ion-icon
-            [name]="showRegisterPassword ? 'eye-off' : 'eye'"
-            slot="end"
-            class="password-toggle"
-            (click)="toggleRegisterPasswordVisibility()"
-            style="cursor: pointer; margin-top: 35px;">
-          </ion-icon>
-        </ion-item>
-        <ion-text color="danger" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-          <p *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</p>
-          <p *ngIf="registerForm.get('password')?.errors?.['minlength']">Minimum 6 characters required</p>
-        </ion-text>
+      <ion-item>
+        <ion-input [type]="showRegisterPassword ? 'text' : 'password'" placeholder="Password" formControlName="password"></ion-input>
+        <ion-icon [name]="showRegisterPassword ? 'eye-off' : 'eye'" slot="end" class="password-toggle" (click)="toggleRegisterPasswordVisibility()"></ion-icon>
+      </ion-item>
 
-        <!-- New Role Selection -->
-        <ion-item>
-          <ion-label position="floating">Select Role</ion-label>
-          <ion-select formControlName="role" interface="action-sheet">
-            <ion-select-option *ngFor="let role of userRoles" [value]="role.id">
-              {{ role.name }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-        <ion-text color="danger" *ngIf="registerForm.get('role')?.invalid && registerForm.get('role')?.touched">
-          <p *ngIf="registerForm.get('role')?.errors?.['required']">Please select a role</p>
-        </ion-text>
+      <ion-item>
+        <ion-select placeholder="Select Role" formControlName="role">
+          <ion-select-option *ngFor="let role of userRoles" [value]="role.id">{{ role.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
 
-        <div class="center-button">
-          <ion-button class="custom-button" expand="full" type="submit" [disabled]="registerForm.invalid">
-            Register
-          </ion-button>
-        </div>
-      </ion-list>
+      <div class="center-button">
+        <ion-button type="submit" expand="block" class="custom-button">Register</ion-button>
+      </div>
     </form>
+
   </div>
 </ion-content>

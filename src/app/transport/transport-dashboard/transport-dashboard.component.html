@@ -5,71 +5,48 @@
     <ion-segment-button value="completed">Completed</ion-segment-button>
   </ion-segment>
 
-  <div *ngIf="selectedTab === 'active'">
+  <ng-container *ngIf="selectedTab === 'active'">
     <ion-list>
       <ion-item *ngFor="let order of activeDeliveries">
         <ion-label>
-          <!-- <h2><strong>{{ order.id }} - From {{ order.wholesaler }} to {{ order.buyer }}</strong></h2> -->
-          <h2><strong>{{ order.id }} - From Wholesaler to Buyer</strong></h2>
-
-
+          <h2><strong>{{ order.job_id }} - From Wholesaler to Buyer</strong></h2>
           <div class="order-locations">
-            <div class="half-width"><strong>Pickup:</strong> {{ order.pickupLocation }}</div>
-            <div class="half-width"><strong>Delivery:</strong> {{ order.dropoffLocation }}</div>
+            <div class="half-width"><strong>Pickup:</strong> {{ order.pickup_address }}</div>
+            <div class="half-width"><strong>Delivery:</strong> {{ order.drop_address }}</div>
           </div>
-
-          <div class="order-status">
-            <ion-chip [color]="getStatusColor(order.status)">{{ order.status }}</ion-chip>
-            <ion-buttons slot="end">
-              <ion-button class="track-btn" fill="clear">📍 Track</ion-button>
-              <ion-button class="details-btn" fill="clear">📋 Details</ion-button>
-              <ion-button class="modify-btn" fill="clear">🛠 Modify</ion-button>
-            </ion-buttons>
-          </div>
+          <ion-chip color="success">On the way</ion-chip>
         </ion-label>
       </ion-item>
     </ion-list>
-  </div>
+  </ng-container>
 
-  <div *ngIf="selectedTab === 'upcoming'">
+  <ng-container *ngIf="selectedTab === 'upcoming'">
     <ion-list>
       <ion-item *ngFor="let order of upcomingDeliveries">
         <ion-label>
-          <!-- <h2><strong>{{ order.id }} - From {{ order.wholesaler }} to {{ order.buyer }}</strong></h2> -->
-          <h2><strong>{{ order.id }} - From Wholesaler to Buyer</strong></h2>
-
-
+          <h2><strong>{{ order.job_id }} - From Wholesaler to Buyer</strong></h2>
           <div class="order-locations">
-            <div class="half-width"><strong>Pickup:</strong> {{ order.pickupLocation }}</div>
-            <div class="half-width"><strong>Delivery:</strong> {{ order.dropoffLocation }}</div>
+            <div class="half-width"><strong>Pickup:</strong> {{ order.pickup_address }}</div>
+            <div class="half-width"><strong>Delivery:</strong> {{ order.drop_address }}</div>
           </div>
-
-          <div class="order-status">
-            <ion-chip [color]="getStatusColor(order.status)">{{ order.status }}</ion-chip>
-          </div>
+          <ion-chip color="primary">Scheduled</ion-chip>
         </ion-label>
       </ion-item>
     </ion-list>
-  </div>
+  </ng-container>
 
-  <div *ngIf="selectedTab === 'completed'">
+  <ng-container *ngIf="selectedTab === 'completed'">
     <ion-list>
       <ion-item *ngFor="let order of completedDeliveries">
         <ion-label>
-          <!-- <h2><strong>{{ order.id }} - From {{ order.wholesaler }} to {{ order.buyer }}</strong></h2> -->
-          <h2><strong>{{ order.id }} - From Wholesaler to Buyer</strong></h2>
-
-
+          <h2><strong>{{ order.job_id }} - From Wholesaler to Buyer</strong></h2>
           <div class="order-locations">
-            <div class="half-width"><strong>Pickup:</strong> {{ order.pickupLocation }}</div>
-            <div class="half-width"><strong>Delivery:</strong> {{ order.dropoffLocation }}</div>
+            <div class="half-width"><strong>Pickup:</strong> {{ order.pickup_address }}</div>
+            <div class="half-width"><strong>Delivery:</strong> {{ order.drop_address }}</div>
           </div>
-
-          <div class="order-status">
-            <ion-chip [color]="getStatusColor(order.status)">{{ order.status }}</ion-chip>
-          </div>
+          <ion-chip color="tertiary">Delivered</ion-chip>
         </ion-label>
       </ion-item>
     </ion-list>
-  </div>
+  </ng-container>
 </ion-content>

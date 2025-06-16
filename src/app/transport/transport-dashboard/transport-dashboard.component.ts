@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { UpcomingDeliveriesService } from 'src/app//services/upcoming-deliveries.service';
+import { DeliveryService } from './delivery.service';
 
 @Component({
   selector: 'app-transport-dashboard',
@@ -13,32 +14,39 @@ import { UpcomingDeliveriesService } from 'src/app//services/upcoming-deliveries
   imports: [IonicModule, CommonModule, FormsModule, RouterModule]
 })
 export class TransportDashboardComponent implements OnInit  {
-  selectedTab = 'active';
+   selectedTab = 'active';
 
-  activeDeliveries = [
-    { id: 'ORD12345', wholesaler: 'Wholesaler X', buyer: 'Retailer A', pickupLocation: 'Market X', dropoffLocation: '123 Main St, City A', status: 'On the way' },
-    { id: 'ORD67890', wholesaler: 'Wholesaler Y', buyer: 'Retailer B', pickupLocation: 'Market Y', dropoffLocation: '456 Elm St, City B', status: 'Delayed' },
-    { id: 'ORD54321', wholesaler: 'Wholesaler Z', buyer: 'Retailer C', pickupLocation: 'Market O', dropoffLocation: '789 Pine St, City C', status: 'On the way' },
-  ];
-
-
+  activeDeliveries: any[] = [];
   upcomingDeliveries: any[] = [];
+  completedDeliveries: any[] = [];
 
-  completedDeliveries = [
-    { id: 'ORD33445', wholesaler: 'Wholesaler B', buyer: 'Retailer E', pickupLocation: 'Market W', dropoffLocation: '202 Oak St, City E', status: 'Delivered' }
-  ];
-  constructor(private upcomingDeliveriesService: UpcomingDeliveriesService) {}
+  constructor(private deliveryService: DeliveryService) {}
 
   ngOnInit() {
-    this.loadUpcomingDeliveries();
-  }
-  loadUpcomingDeliveries() {
-    this.upcomingDeliveries = this.upcomingDeliveriesService.getAcceptedOrders();
+    this.loadDeliveries('active');
   }
 
   onTabChange() {
-    if (this.selectedTab === 'upcoming') {
-      this.loadUpcomingDeliveries(); // Reload upcoming deliveries
+    this.loadDeliveries(this.selectedTab);
+  }
+
+  loadDeliveries(tab: string) {
+    switch (tab) {
+      case 'active':
+        this.deliveryService.getActiveDeliveries().subscribe((res: any) => {
+          this.activeDeliveries = res.deliveries || [];
+        });
+        break;
+      case 'upcoming':
+        this.deliveryService.getUpcomingDeliveries().subscribe((res: any) => {
+          this.upcomingDeliveries = res.deliveries || [];
+        });
+        break;
+      case 'completed':
+        this.deliveryService.getCompletedDeliveries().subscribe((res: any) => {
+          this.completedDeliveries = res.deliveries || [];
+        });
+        break;
     }
   }
 

@@ -12,6 +12,7 @@ enum UserRole {
   Wholesaler = 2,
   Retailer = 3
 }
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -23,8 +24,8 @@ export class LoginPage {
   loginForm: FormGroup;
   registerForm: FormGroup;
   authMode: 'login' | 'register' = 'login';
-  showLoginPassword: boolean = false;
-  showRegisterPassword: boolean = false;
+  showLoginPassword = false;
+  showRegisterPassword = false;
 
   userRoles = [
     { id: UserRole.Wholesaler, name: 'Wholesaler' },
@@ -35,19 +36,19 @@ export class LoginPage {
     private fb: FormBuilder,
     private router: Router,
     private authService: AuthService
-  ) {    addIcons({ eye, eyeOff });
+  ) {
+    addIcons({ eye, eyeOff });
 
-
-  this.loginForm = this.fb.group({
-    emailOrPhone: ['', [Validators.required, this.emailValidator]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-  });
-
-    this.registerForm = this.fb.group({
-      name: ['', [Validators.required]],
+    this.loginForm = this.fb.group({
       emailOrPhone: ['', [Validators.required, this.emailValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      role: ['', [Validators.required]] // Add role field
+    });
+
+    this.registerForm = this.fb.group({
+      name: ['', Validators.required],
+      emailOrPhone: ['', [Validators.required, this.emailValidator]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      role: ['', Validators.required]
     });
   }
 
@@ -62,7 +63,6 @@ export class LoginPage {
   emailValidator(control: AbstractControl) {
     const value = control.value;
     if (!value) return { required: true };
-
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     return emailPattern.test(value) ? null : { invalidFormat: true };
   }
@@ -80,7 +80,6 @@ export class LoginPage {
 
     this.authService.login(credentials).subscribe({
       next: (response: UserResponse) => {
-        // Navigate based on role_id
         switch (response.role_id) {
           case UserRole.Admin:
             this.router.navigate(['/admin/driver']);
@@ -93,13 +92,10 @@ export class LoginPage {
             break;
           default:
             console.error('Unknown role');
-            break;
         }
       },
       error: (error) => {
         console.error('Login failed:', error);
-        // Show error message to user
-        // You can implement showToast method for this
       }
     });
   }
@@ -109,8 +105,8 @@ export class LoginPage {
       this.registerForm.markAllAsTouched();
       return;
     }
-    const formValue = this.registerForm.value;
 
+    const formValue = this.registerForm.value;
 
     const userData: UserRegistration = {
       name: formValue.name,
@@ -121,18 +117,16 @@ export class LoginPage {
       location: 1,
       state: 1,
       active_status: 1,
-      role_id: formValue.role // Using selected role
+      role_id: formValue.role
     };
 
     this.authService.registerUser(userData).subscribe({
       next: (response) => {
         console.log('Registration successful:', response);
         this.authMode = 'login';
-        // Optional: Show success message using Ionic Toast
       },
       error: (error) => {
         console.error('Registration failed:', error);
-        // Optional: Show error message using Ionic Toast
       }
     });
   }

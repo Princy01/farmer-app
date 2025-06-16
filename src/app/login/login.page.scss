@@ -1,114 +1,71 @@
 ion-content {
   --keyboard-offset: 0 !important;
-  --overflow: hidden;
+  --overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background: #f9f9f9;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  margin: auto;
+  box-sizing: border-box;
+}
+
+.app-title {
+  font-family: "Franklin Gothic Medium", sans-serif;
+  font-size: 36px;
+  color: rgb(136, 172, 140);
+  margin-bottom: 30px;
+  text-align: center;
 }
 
 ion-segment-button {
   --background: white !important;
   --color: black !important;
-  --indicator-color:  rgb(134, 175, 139) !important;
-}
-
-
-.login-container {
-  width: 100%;
-  max-width: 380px;
-  text-align: center;
-}
-
-.app-title {
-  font-family: "Franklin Gothic Medium", sans-serif;
-  // font-style: italic;
-  font-size: 38px;
-  color: rgb(136, 172, 140);
-  margin-top: 50px;
-  margin-bottom: 50px;
-  // background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+  --indicator-color: rgb(134, 175, 139) !important;
 }
 
 ion-item {
   --background: transparent;
   --inner-padding-end: 10px;
   --border-color: rgb(139, 167, 141);
-  border-radius: 3px;
-  margin: 10px 20px 10px 20px;
-}
-ion-input {
-  --padding-start: 10px;
-  font-size: 14px;
+  border-radius: 6px;
+  margin: 12px 0;
 }
 
-.center-button {
-  display: flex;
-  justify-content: center;  /* Horizontally centers the button */
-  align-items: center;      /* Vertically centers the button */
-  height: 20vh;            /* Makes the container take some viewport height */
-}
-
-.custom-button {
-  font-family: 'Georgia', 'Times', serif;
-  --background: rgb(136, 172, 140);
-  --color: white;
-  --border-radius: 8px;  /* round the button corners */
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  // margin-bottom: 0px;
-}
-
-.or-divider {
-  display: flex;
-  align-items: center;
-  margin: 20px 0;
-}
-
-.or-divider::before,
-.or-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #dbdbdb;
-}
-
-.or-divider span {
-  margin: 0 10px;
-  color: #8e8e8e;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.forgot-password {
-  font-size: 12px;
-  color: rgb(82, 104, 84);
-  margin-top: 10px;
-}
-
-.password-toggle {
-  font-size: 1.2rem;
-  opacity: 0.7;
-  &:hover {
-    opacity: 1;
-  }
-}
-
-ion-select {
-  width: 100%;
-  max-width: 100%;
-  padding: 3px 90px;
-}
-
-ion-select::part(placeholder) {
-  color: var(--ion-color-medium);
-}
-
-ion-select-option {
+ion-input, ion-select {
   font-size: 16px;
 }
 
 .center-button {
-  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .custom-button {
+  --background: rgb(136, 172, 140);
+  --color: white;
   --border-radius: 8px;
-  margin: 0 auto;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
+}
+
+.forgot-password {
+  text-align: center;
+  color: rgb(82, 104, 84);
+  font-size: 13px;
+  margin-top: 12px;
+  cursor: pointer;
+}
+
+.password-toggle {
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
 }
