@@ -1,63 +1,104 @@
-<ion-header mode = "ios" [class.hidden]="hideHeader" id="main-content">
-  <ion-toolbar>
-    <ion-title slot="start">Farmer App</ion-title>
+<ion-header mode="ios" [class.hidden]="hideHeader" id="main-content">
+  <ion-toolbar class="main-toolbar">
+    <ion-title slot="start" class="app-title">Farmer App</ion-title>
 
-    <ion-buttons slot="start" mode="ios" slot="start">
+    <ion-buttons slot="start" mode="ios">
       <!-- Profile Icon with Action Sheet -->
-      <ion-button (click)="presentActionSheet()">
+      <ion-button (click)="presentActionSheet()" class="header-btn">
         <ion-icon name="person-circle-outline" size="large"></ion-icon>
       </ion-button>
 
-      <ion-button (click)="openTrends()">
+      <ion-button (click)="openTrends()" class="header-btn">
         <ion-icon name="stats-chart-outline" slot="icon-only"></ion-icon>
       </ion-button>
-
     </ion-buttons>
 
     <ion-buttons slot="end">
-      <ion-button [routerLink]="'/buyer/wishlist'">
+      <ion-button [routerLink]="'/buyer/wishlist'" class="header-btn">
         <ion-icon name="heart-outline"></ion-icon>
       </ion-button>
-      <ion-button [routerLink]="'/buyer/cart'">
+      <ion-button [routerLink]="'/buyer/cart'" class="header-btn">
         <ion-icon name="cart-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 
   <div class="location-container">
-    <ion-icon name="location-outline"></ion-icon>
-    <h2>Deliver to</h2>
-    <span>Your Location</span>
-    <ion-icon name="chevron-forward-outline"></ion-icon>
+    <div class="location-content">
+      <ion-icon name="location-outline" class="location-icon"></ion-icon>
+      <div class="location-info">
+        <h2 class="location-title">Deliver to</h2>
+        <span class="location-address">Your Location</span>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="location-arrow"></ion-icon>
+    </div>
   </div>
 </ion-header>
 
 <!-- Sticky search bar when scrolling -->
 <ion-header class="sticky-searchbar" *ngIf="hideHeader">
-  <ion-toolbar>
-    <ion-searchbar placeholder="Search products..."></ion-searchbar>
+  <ion-toolbar class="sticky-toolbar">
+    <ion-searchbar placeholder="Search products..." class="sticky-search"></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content scrollEvents="true" (ionScroll)="onScroll($event)">
+<ion-content scrollEvents="true" (ionScroll)="onScroll($event)" class="main-content">
   <!-- Inline search bar -->
   <div class="search-container">
-    <ion-searchbar placeholder="Search products..."></ion-searchbar>
+    <ion-searchbar placeholder="Search products..." class="main-searchbar"></ion-searchbar>
   </div>
 
-  <!-- Categories grid -->
-  <ion-grid>
-    <ion-row>
-      <h1>Explore Our Collections</h1>
-      <ion-col size="6" *ngFor="let category of categories">
-        <ion-card [routerLink]="['/buyer/category', category.category_id]">
-          <img [src]="category.img_path" alt="{{ category.category_name }}">
+  <!-- Categories section -->
+  <div class="categories-section">
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="loadingCategories">
+      <ion-spinner name="crescent" color="success"></ion-spinner>
+      <p class="loading-text">Loading categories...</p>
+    </div>
 
-          <ion-card-content>
-            <h3><b>{{ category.category_name }}</b></h3>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+    <!-- Error State -->
+    <div class="error-container" *ngIf="errorLoadingCategories">
+      <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+      <h4>Unable to load categories</h4>
+      <p>Please check your connection and try again</p>
+      <ion-button fill="outline" size="small" (click)="fetchCategories()" class="retry-btn">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Retry
+      </ion-button>
+    </div>
+
+    <!-- Categories grid -->
+    <ion-grid class="categories-grid" *ngIf="!loadingCategories && !errorLoadingCategories">
+      <div class="section-header">
+        <h1 class="section-title">
+          <ion-icon name="grid-outline" class="title-icon"></ion-icon>
+          Explore Our Collections
+        </h1>
+      </div>
+
+      <ion-row>
+        <ion-col size="3" *ngFor="let category of categories" class="category-col">
+          <ion-card [routerLink]="['/buyer/category', category.category_id]" class="category-card">
+            <div class="card-image-container">
+              <img [src]="category.img_path"
+                   [alt]="category.category_name"
+                   class="category-image"
+                   (error)="onImageError($event)">
+              <div class="card-overlay"></div>
+              <div class="card-arrow">
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </div>
+            </div>
+
+            <ion-card-content class="category-content">
+              <h3 class="category-name"><b>{{ category.category_name }}</b></h3>
+              <div class="category-stats">
+                <span class="product-count">Fresh & Quality</span>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
 </ion-content>

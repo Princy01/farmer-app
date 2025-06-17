@@ -1,126 +1,226 @@
-<ion-header>
-  <ion-toolbar>
+<ion-header mode="ios">
+  <ion-toolbar class="cart-toolbar">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button (click)="goBack()" class="back-btn">
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>My Cart</ion-title>
+    <ion-title class="cart-title">My Cart</ion-title>
+    <ion-buttons slot="end">
+      <ion-badge color="success" class="cart-count" *ngIf="cartProducts.length > 0">
+        {{ cartProducts.length }}
+      </ion-badge>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="cart-content">
   <ng-container *ngIf="cartProducts.length > 0; else emptyCart">
-    <form [formGroup]="cartForm">
-      <ion-list>
-        <ion-card *ngFor="let item of cartProducts; let i = index">
-          <!-- Main Product Container -->
-          <div class="product-container">
-            <!-- Product Info -->
-            <ion-item lines="none" class="product-info">
-              <ion-thumbnail slot="start">
-                <img
-                  [src]="'assets/img/' + item.product_name + '.png'"
-                  alt="{{ item.product_name }}"
-                />
-              </ion-thumbnail>
-              <ion-label>
-                <h2 class="item-title">{{ item.product_name }}</h2>
-                <p class="unit-price">
-                  ₹{{ item.latest_wholesaler_price }}/{{ item.unit_name }}
-                </p>
-                <p class="item-price">
-                  ₹{{ item.latest_wholesaler_price * item.quantity }}
-                  <span
-                    class="price-note"
-                    *ngIf="
-                      item.price_while_added !== item.latest_wholesaler_price
-                    "
-                  >
-                    <ion-icon name="alert-circle-outline"></ion-icon>
-                    Price updated
-                  </span>
-                </p>
-              </ion-label>
-            </ion-item>
+    <!-- Cart Items Section -->
+    <div class="cart-items-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <ion-icon name="cart-outline" class="section-icon"></ion-icon>
+          Cart Items
+        </h2>
+        <span class="items-count">{{ cartProducts.length }} items</span>
+      </div>
 
-            <!-- Quantity Controls -->
-            <ion-item lines="none" class="quantity-section">
-              <ion-button
-                class="qty-btn"
-                fill="outline"
-                shape="round"
-                (click)="decreaseQuantity(i)"
-              >
-                <ion-icon name="remove-outline"></ion-icon>
-              </ion-button>
-              <p class="quantity-text">
-                {{ item.quantity }}{{ item.unit_name }}
-              </p>
-              <ion-button
-                class="qty-btn"
-                fill="outline"
-                shape="round"
-                (click)="increaseQuantity(i)"
-              >
-                <ion-icon name="add-outline"></ion-icon>
-              </ion-button>
-            </ion-item>
+      <form [formGroup]="cartForm">
+        <div class="cart-list">
+          <ion-card *ngFor="let item of cartProducts; let i = index" class="cart-item-card">
+            <div class="card-content-wrapper">
+              <!-- Product Info Section -->
+              <div class="product-info-section">
+                <div class="product-image-container">
+                  <img
+                    [src]="'assets/img/' + item.product_name + '.png'"
+                    [alt]="item.product_name"
+                    class="product-image"
+                  />
+                  <div class="image-overlay"></div>
+                </div>
+
+                <div class="product-details">
+                  <h3 class="product-name">{{ item.product_name }}</h3>
+                  <div class="price-info">
+                    <span class="unit-price">₹{{ item.latest_wholesaler_price }}/{{ item.unit_name }}</span>
+                    <span class="total-price">₹{{ item.latest_wholesaler_price * item.quantity }}</span>
+                  </div>
+
+                  <div class="price-alert" *ngIf="item.price_while_added !== item.latest_wholesaler_price">
+                    <ion-icon name="alert-circle-outline" class="alert-icon"></ion-icon>
+                    <span class="alert-text">Price updated</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quantity Controls Section -->
+              <div class="quantity-controls-section">
+                <div class="quantity-controls">
+                  <ion-button
+                    class="qty-btn decrease-btn"
+                    fill="clear"
+                    (click)="decreaseQuantity(i)"
+                    [disabled]="item.quantity <= 1"
+                  >
+                    <ion-icon name="remove-outline"></ion-icon>
+                  </ion-button>
+
+                  <div class="quantity-display">
+                    <span class="quantity-number">{{ item.quantity }}</span>
+                    <span class="quantity-unit">{{ item.unit_name }}</span>
+                  </div>
+
+                  <ion-button
+                    class="qty-btn increase-btn"
+                    fill="clear"
+                    (click)="increaseQuantity(i)"
+                  >
+                    <ion-icon name="add-outline"></ion-icon>
+                  </ion-button>
+                </div>
+
+                <!-- Remove Button -->
+                <ion-button
+                  fill="clear"
+                  class="remove-btn"
+                  (click)="removeItem(i)"
+                >
+                  <ion-icon name="trash-outline" class="trash-icon"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </ion-card>
+        </div>
+
+        <!-- Discount Section -->
+        <ion-card class="discount-card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <ion-icon name="pricetag-outline" class="card-icon"></ion-icon>
+              Apply Discount Code
+            </h3>
           </div>
 
-          <!-- Trash Icon -->
-          <div class="trash-container">
-            <ion-button fill="clear" (click)="removeItem(i)">
-              <ion-icon name="trash-outline" class="trash-icon"></ion-icon>
+          <div class="discount-input-section">
+            <ion-item class="discount-input" lines="none">
+              <ion-input
+                formControlName="discountCode"
+                placeholder="Enter discount code"
+                class="discount-field"
+              ></ion-input>
+            </ion-item>
+            <ion-button
+              class="apply-discount-btn"
+              (click)="applyDiscount()"
+            >
+              Apply
             </ion-button>
           </div>
+
+          <div class="discount-suggestions" *ngIf="!discount">
+            <p class="suggestions-text">Try: SAVE10, FRESH20</p>
+          </div>
+
+          <div class="discount-applied" *ngIf="discount > 0">
+            <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
+            <span class="discount-text">Discount applied: -₹{{ discount }}</span>
+          </div>
         </ion-card>
-      </ion-list>
 
-      <!-- Discount Code Input -->
-      <ion-card class="discount-card">
-        <ion-item>
-          <ion-label position="stacked">Apply Discount Code</ion-label>
-          <ion-input
-            formControlName="discountCode"
-            placeholder="Enter code"
-          ></ion-input>
-        </ion-item>
-        <ion-button color="light" (click)="applyDiscount()"
-          >Apply Discount</ion-button
-        >
-      </ion-card>
+        <!-- Delivery Date Section -->
+        <ion-card class="delivery-card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <ion-icon name="calendar-outline" class="card-icon"></ion-icon>
+              Delivery Date
+            </h3>
+          </div>
 
-      <!-- Delivery Date Selection -->
-      <ion-card class="delivery-card">
-        <ion-item>
-          <ion-label position="stacked">Delivery Date</ion-label>
-          <ion-input
-            formControlName="deliveryDate"
-            type="datetime-local"
-          ></ion-input>
-        </ion-item>
+          <ion-item class="delivery-input" lines="none">
+            <ion-input
+              formControlName="deliveryDate"
+              type="datetime-local"
+              placeholder="Select delivery date"
+              class="delivery-field"
+            ></ion-input>
+          </ion-item>
+        </ion-card>
+      </form>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="order-summary-section">
+      <ion-card class="summary-card">
+        <div class="summary-header">
+          <h3 class="summary-title">Order Summary</h3>
+        </div>
+
+        <div class="summary-details">
+          <div class="summary-row">
+            <span class="summary-label">Subtotal</span>
+            <span class="summary-value">₹{{ getTotalPrice() }}</span>
+          </div>
+
+          <div class="summary-row" *ngIf="discount > 0">
+            <span class="summary-label discount-label">Discount</span>
+            <span class="summary-value discount-value">-₹{{ discount }}</span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row total-row">
+            <span class="summary-label total-label">Total</span>
+            <span class="summary-value total-value">₹{{ getTotalPrice() - discount }}</span>
+          </div>
+        </div>
       </ion-card>
-    </form>
+    </div>
   </ng-container>
 
   <!-- Empty Cart Message -->
   <ng-template #emptyCart>
     <div class="empty-cart">
-      <ion-icon name="cart-outline" class="empty-icon"></ion-icon>
-      <p>Your cart is empty</p>
+      <div class="empty-cart-content">
+        <ion-icon name="cart-outline" class="empty-icon"></ion-icon>
+        <h3 class="empty-title">Your cart is empty</h3>
+        <p class="empty-subtitle">Add some products to get started</p>
+        <ion-button
+          class="continue-shopping-btn"
+          (click)="goBack()"
+        >
+          <ion-icon name="storefront-outline" slot="start"></ion-icon>
+          Continue Shopping
+        </ion-button>
+      </div>
     </div>
   </ng-template>
+
+  <!-- Bottom spacing for checkout button -->
+  <div class="bottom-spacing" *ngIf="cartProducts.length > 0"></div>
 </ion-content>
 
-<!-- Footer -->
-<ion-footer *ngIf="cartProducts.length > 0">
-  <ion-toolbar>
-    <ion-title>Total: ₹{{ getTotalPrice() - discount }}</ion-title>
-    <ion-buttons slot="end">
-      <ion-button color="success" expand="full" (click)="checkout()"
-        >Checkout</ion-button
-      >
-    </ion-buttons>
-  </ion-toolbar>
+<!-- Checkout Footer -->
+<ion-footer *ngIf="cartProducts.length > 0" class="checkout-footer">
+  <div class="checkout-container">
+    <div class="checkout-info">
+      <div class="total-info">
+        <span class="total-label">Total Amount</span>
+        <span class="total-amount">₹{{ getTotalPrice() - discount }}</span>
+      </div>
+      <div class="items-info">
+        <span class="items-count">{{ cartProducts.length }} items</span>
+      </div>
+    </div>
+
+    <ion-button
+      class="checkout-btn"
+      expand="block"
+      (click)="checkout()"
+    >
+      <ion-icon name="card-outline" slot="start"></ion-icon>
+      Proceed to Checkout
+    </ion-button>
+  </div>
 </ion-footer>

@@ -4,7 +4,13 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, A
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { eye, eyeOff } from 'ionicons/icons';
+import {
+  eye, eyeOff, eyeOutline, eyeOffOutline,
+  mailOutline, lockClosedOutline, personOutline,
+  businessOutline, storefrontOutline, storefront,
+  carOutline, shieldCheckmarkOutline, logInOutline,
+  personAddOutline
+} from 'ionicons/icons';
 import { AuthService, UserRegistration, LoginCredentials, UserResponse } from '../services/auth.service';
 
 enum UserRole {
@@ -37,7 +43,13 @@ export class LoginPage {
     private router: Router,
     private authService: AuthService
   ) {
-    addIcons({ eye, eyeOff });
+    addIcons({
+      eye, eyeOff, eyeOutline, eyeOffOutline,
+      mailOutline, lockClosedOutline, personOutline,
+      businessOutline, storefrontOutline, storefront,
+      carOutline, shieldCheckmarkOutline, logInOutline,
+      personAddOutline
+    });
 
     this.loginForm = this.fb.group({
       emailOrPhone: ['', [Validators.required, this.emailValidator]],

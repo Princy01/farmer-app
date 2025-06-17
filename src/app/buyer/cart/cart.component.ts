@@ -4,7 +4,19 @@ import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { trashOutline, cartOutline, chevronBack, removeOutline, addOutline } from 'ionicons/icons';
+import {
+  trashOutline,
+  cartOutline,
+  chevronBack,
+  removeOutline,
+  addOutline,
+  pricetagOutline,
+  calendarOutline,
+  checkmarkCircle,
+  alertCircleOutline,
+  storefrontOutline,
+  cardOutline
+} from 'ionicons/icons';
 import { CartService } from './cart.service';
 import { CartResponse } from './cart.service';
 
@@ -26,7 +38,19 @@ export class CartComponent implements OnInit {
     private fb: FormBuilder,
     private cartService: CartService
   ) {
-    addIcons({ trashOutline, cartOutline, chevronBack, removeOutline, addOutline });
+    addIcons({
+      trashOutline,
+      cartOutline,
+      chevronBack,
+      removeOutline,
+      addOutline,
+      pricetagOutline,
+      calendarOutline,
+      checkmarkCircle,
+      alertCircleOutline,
+      storefrontOutline,
+      cardOutline
+    });
 
     this.cartForm = this.fb.group({
       discountCode: [''],

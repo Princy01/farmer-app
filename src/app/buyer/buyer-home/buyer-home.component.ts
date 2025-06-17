@@ -1,3 +1,4 @@
+// filepath: c:\Users\princ\IONIC_PROJECTS\farmer-app-standalone-master\src\app\buyer\buyer-home\buyer-home.component.ts
 import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, IonContent, ActionSheetController } from '@ionic/angular';
@@ -15,7 +16,10 @@ import {
   linkOutline,
   settingsOutline,
   closeOutline,
-  statsChartOutline
+  statsChartOutline,
+  gridOutline,
+  alertCircleOutline,
+  refreshOutline
 } from 'ionicons/icons';
 
 interface Category {
@@ -33,13 +37,6 @@ interface Category {
 })
 export class BuyerHomeComponent {
   @ViewChild(IonContent, { static: false }) content!: IonContent;
-
-  // categories: Category[] = [
-  //   { id: 1, name: 'Vegetables', image: 'assets/img/vegetables.png' },
-  //   { id: 2, name: 'Fruits', image: 'assets/img/fruits.png' },
-  //   { id: 3, name: 'Grains', image: 'assets/img/grains.png' },
-  //   { id: 4, name: 'Pulses', image: 'assets/img/pulses.png' }
-  // ];
 
   hideHeader = false;
   loadingCategories = false;
@@ -62,29 +59,32 @@ export class BuyerHomeComponent {
       linkOutline,
       settingsOutline,
       closeOutline,
-      statsChartOutline
+      statsChartOutline,
+      gridOutline,
+      alertCircleOutline,
+      refreshOutline
     });
   }
 
-fetchCategories() {
+  fetchCategories() {
     this.loadingCategories = true;
-    this.buyerApiService.getSuperCategories().subscribe(
-      {
-        next: (response) => {
-          this.categories = response;
-          this.loadingCategories = false;
-          console.log('Categories:', this.categories);
-        },
-        error: (error) => {
-          this.errorLoadingCategories = true;
-          this.loadingCategories = false;
-          console.error('Error fetching categories:', error);
-        }
-      });
+    this.errorLoadingCategories = false;
+
+    this.buyerApiService.getSuperCategories().subscribe({
+      next: (response) => {
+        this.categories = response;
+        this.loadingCategories = false;
+        console.log('Categories:', this.categories);
+      },
+      error: (error) => {
+        this.errorLoadingCategories = true;
+        this.loadingCategories = false;
+        console.error('Error fetching categories:', error);
+      }
+    });
   }
 
   ngOnInit() {
-
     this.fetchCategories();
   }
 
@@ -92,9 +92,15 @@ fetchCategories() {
     this.hideHeader = event.detail.scrollTop > 100;
   }
 
+  onImageError(event: any) {
+    // Set a default image when category image fails to load
+    event.target.src = 'assets/img/default-category.png';
+  }
+
   async presentActionSheet() {
     const actionSheet = await this.actionSheetController.create({
       header: 'Account Options',
+      cssClass: 'custom-action-sheet',
       buttons: [
         {
           text: 'Profile',
@@ -109,8 +115,8 @@ fetchCategories() {
           icon: 'archive-outline',
           cssClass: 'custom-action-sheet-btn',
           handler: () => {
-            this.router.navigate(['/buyer/retailer-order-tracking'],{
-              queryParams: { id: 'ORD123456' } // Dummy ID or dynamically set
+            this.router.navigate(['/buyer/retailer-order-tracking'], {
+              queryParams: { id: 'ORD123456' }
             });
           }
         },
@@ -143,5 +149,5 @@ fetchCategories() {
 
   openTrends() {
     this.router.navigate(['/buyer/RetailerTrends']);
-}
+  }
 }

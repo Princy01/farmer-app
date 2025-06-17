@@ -1,114 +1,206 @@
-<ion-content>
+<ion-content class="transport-requests-content">
 
-  <ion-list *ngIf="unassignedOrders.length > 0">
-    <ion-list-header>
-      <ion-label>New Delivery Requests</ion-label>
-    </ion-list-header>
+  <!-- Urgent Requests Section -->
+  <div class="urgent-section" *ngIf="unassignedOrders.length > 0">
+    <div class="section-header">
+      <h2 class="section-title">
+        <ion-icon name="flash-outline" class="title-icon"></ion-icon>
+        Urgent Requests
+      </h2>
+      <ion-badge color="warning" class="count-badge">{{ unassignedOrders.length }}</ion-badge>
+    </div>
 
-    <ion-card *ngFor="let order of unassignedOrders">
-      <ion-card-content>
-        <ion-grid>
-          <ion-row>
-            <ion-col size="8">
-              <p><strong>From:</strong> {{ order.pickup }}</p>
-              <p><strong>To:</strong> {{ order.delivery }}</p>
-              <p><strong>Distance:</strong> {{ order.distance }} km</p>
-              <p><strong>Load:</strong> {{ order.load.weight }} kg {{ order.load.type }}</p>
-              <p><strong>Price:</strong> ₹{{ order.basePrice }}</p>
-              <p><strong>Date:</strong> {{ order.requestedDate }}</p>
-            </ion-col>
-            <ion-col size="4" class="ion-text-center">
-              <ion-button expand="block" (click)="acceptUnassignedOrder(order)">
-                Accept
-              </ion-button>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-card-content>
-    </ion-card>
-  </ion-list>
+    <div class="urgent-cards">
+      <div class="urgent-card" *ngFor="let order of unassignedOrders">
+        <div class="urgent-indicator">
+          <ion-icon name="flash" class="urgent-icon"></ion-icon>
+        </div>
 
-  <ion-grid>
-    <ion-row>
-      <!-- Left Column: Even Index Orders -->
-      <ion-col size="6" class="scroll-column">
-        <ion-list *ngIf="evenOrders.length > 0; else noOrders">
-          <ion-card *ngFor="let order of evenOrders">
-<ion-card-content>
-  <p><strong>Order ID:</strong> {{ order.id }}</p>
-  <p><strong>From:</strong> {{ order.pickupLocation }}</p>
-  <p><strong>To:</strong> {{ order.dropoffLocation }}</p>
-  <p><strong>Distance:</strong> {{ order.distance }} km</p>
-  <p><strong>Load:</strong> {{ order.weight }} kg</p>
-  <p><strong>Delivery Type:</strong> {{ order.deliveryType }}</p>
-  <p><strong>Urgency:</strong> {{ order.urgency }}</p>
-  <p><strong>Price:</strong> ₹{{ order.suggestedPrice }}</p>
-  <p><strong>Deliver by:</strong> {{ formatDate(order.deliveryDate) }}</p>
+        <div class="card-content">
+          <div class="route-info">
+            <div class="route-item">
+              <ion-icon name="location-outline" class="route-icon pickup-icon"></ion-icon>
+              <div class="route-details">
+                <span class="route-label">Pickup</span>
+                <p class="route-address">{{ order.pickup }}</p>
+              </div>
+            </div>
 
-  <div class="center-button">
-    <!-- <ion-button size="small" class="accept-button" *ngIf="!order.accepted" (click)="acceptOrder(order)">
-      Accept
-    </ion-button> -->
-    <ion-button size="small" class="assign-button" *ngIf="!order.assigned" (click)="openAssignDriverModal(order)">
-      Assign
-    </ion-button>
-    <ion-button size="small" class="assigned-button" *ngIf="order.assigned" disabled>
-      Assigned
-    </ion-button>
+            <div class="route-arrow">
+              <ion-icon name="arrow-forward-outline"></ion-icon>
+            </div>
+
+            <div class="route-item">
+              <ion-icon name="flag-outline" class="route-icon delivery-icon"></ion-icon>
+              <div class="route-details">
+                <span class="route-label">Delivery</span>
+                <p class="route-address">{{ order.delivery }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-details">
+            <div class="detail-item">
+              <ion-icon name="cube-outline" class="detail-icon"></ion-icon>
+              <span>{{ order.load.weight }} kg {{ order.load.type }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="navigate-outline" class="detail-icon"></ion-icon>
+              <span>{{ order.distance }} km</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="calendar-outline" class="detail-icon"></ion-icon>
+              <span>{{ order.requestedDate }}</span>
+            </div>
+          </div>
+
+          <div class="price-section">
+            <span class="price-label">Base Price</span>
+            <span class="price-amount">₹{{ order.basePrice }}</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <ion-button expand="block" class="accept-urgent-button" (click)="acceptUnassignedOrder(order)">
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            Accept Request
+          </ion-button>
+        </div>
+      </div>
+    </div>
   </div>
-</ion-card-content>
-          </ion-card>
-        </ion-list>
-      </ion-col>
 
-      <!-- Right Column: Odd Index Orders -->
-      <ion-col size="6" class="scroll-column">
-        <ion-list *ngIf="oddOrders.length > 0">
-          <ion-card *ngFor="let order of oddOrders">
-<ion-card-content>
-  <p><strong>Order ID:</strong> {{ order.id }}</p>
-  <p><strong>From:</strong> {{ order.pickupLocation }}</p>
-  <p><strong>To:</strong> {{ order.dropoffLocation }}</p>
-  <p><strong>Distance:</strong> {{ order.distance }} km</p>
-  <p><strong>Load:</strong> {{ order.weight }} kg</p>
-  <p><strong>Delivery Type:</strong> {{ order.deliveryType }}</p>
-  <p><strong>Urgency:</strong> {{ order.urgency }}</p>
-  <p><strong>Price:</strong> ₹{{ order.suggestedPrice }}</p>
-  <p><strong>Deliver by:</strong> {{ formatDate(order.deliveryDate) }}</p>
+  <!-- Regular Requests Section -->
+  <div class="regular-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        Available Requests
+      </h2>
+      <ion-badge color="primary" class="count-badge">{{ pendingDeliveries.length }}</ion-badge>
+    </div>
 
-  <div class="center-button">
-    <!-- <ion-button size="small" class="accept-button" *ngIf="!order.accepted" (click)="acceptOrder(order)">
-      Accept
-    </ion-button> -->
-    <ion-button size="small" class="assign-button" *ngIf="!order.assigned" (click)="openAssignDriverModal(order)">
-      Assign
-    </ion-button>
-    <ion-button size="small" class="assigned-button" *ngIf="order.assigned" disabled>
-      Assigned
-    </ion-button>
+    <div class="empty-state" *ngIf="pendingDeliveries.length === 0">
+      <ion-icon name="car-outline" class="empty-icon"></ion-icon>
+      <h3>No Requests Available</h3>
+      <p>New delivery requests will appear here when they match your capacity and location.</p>
+    </div>
+
+    <div class="requests-grid">
+      <div class="request-card" *ngFor="let order of pendingDeliveries">
+        <div class="card-header">
+          <div class="order-info">
+            <h3 class="order-id">Order #{{ order.id }}</h3>
+            <ion-chip class="urgency-chip" [color]="getUrgencyColor(order.urgency)">
+              <ion-icon [name]="getUrgencyIcon(order.urgency)" slot="start"></ion-icon>
+              {{ order.urgency }}
+            </ion-chip>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="route-section">
+            <div class="location-item">
+              <ion-icon name="location-outline" class="location-icon pickup-icon"></ion-icon>
+              <div class="location-info">
+                <span class="location-label">Pickup</span>
+                <p class="location-address">{{ order.pickupLocation }}</p>
+              </div>
+            </div>
+
+            <div class="route-line">
+              <div class="route-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+            </div>
+
+            <div class="location-item">
+              <ion-icon name="flag-outline" class="location-icon delivery-icon"></ion-icon>
+              <div class="location-info">
+                <span class="location-label">Delivery</span>
+                <p class="location-address">{{ order.dropoffLocation }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-specs">
+            <div class="spec-row">
+              <div class="spec-item">
+                <ion-icon name="cube-outline" class="spec-icon"></ion-icon>
+                <div class="spec-info">
+                  <span class="spec-label">Weight</span>
+                  <span class="spec-value">{{ order.weight }} kg</span>
+                </div>
+              </div>
+              <div class="spec-item">
+                <ion-icon name="navigate-outline" class="spec-icon"></ion-icon>
+                <div class="spec-info">
+                  <span class="spec-label">Distance</span>
+                  <span class="spec-value">{{ order.distance }} km</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="spec-row">
+              <div class="spec-item">
+                <ion-icon name="pricetag-outline" class="spec-icon"></ion-icon>
+                <div class="spec-info">
+                  <span class="spec-label">Type</span>
+                  <span class="spec-value">{{ order.deliveryType }}</span>
+                </div>
+              </div>
+              <div class="spec-item">
+                <ion-icon name="calendar-outline" class="spec-icon"></ion-icon>
+                <div class="spec-info">
+                  <span class="spec-label">Deliver by</span>
+                  <span class="spec-value">{{ formatDate(order.deliveryDate) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="price-section">
+            <span class="price-label">Suggested Price</span>
+            <span class="price-amount">₹{{ order.suggestedPrice }}</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <ion-button
+            expand="block"
+            class="accept-button"
+            *ngIf="!order.accepted"
+            (click)="acceptOrder(order)">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            Accept Order
+          </ion-button>
+          <ion-button
+            expand="block"
+            class="accepted-button"
+            *ngIf="order.accepted"
+            disabled>
+            <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+            Accepted
+          </ion-button>
+        </div>
+      </div>
+    </div>
   </div>
-</ion-card-content>
-          </ion-card>
-        </ion-list>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-
-  <!-- No Orders Message -->
-  <ng-template #noOrders>
-    <p class="no-orders-text">No pending deliveries available.</p>
-  </ng-template>
 </ion-content>
 
-<ion-footer class="filter-sort-toolbar">
-  <ion-toolbar class="toolbar-container">
-    <ion-buttons class="button-group">
-      <ion-button class="filter-button" (click)="openFilterModal()">
-        <ion-icon name="funnel-outline"></ion-icon> Filter
+<!-- Filter and Sort Footer -->
+<ion-footer class="filter-footer">
+  <ion-toolbar class="filter-toolbar">
+    <div class="filter-actions">
+      <ion-button fill="clear" class="filter-button" (click)="openFilterModal()">
+        <ion-icon name="funnel-outline" slot="start"></ion-icon>
+        Filter
       </ion-button>
-      <ion-button class="sort-button" (click)="openSortModal()">
-        <ion-icon name="swap-vertical-outline"></ion-icon> Sort
+      <ion-button fill="clear" class="sort-button" (click)="openSortModal()">
+        <ion-icon name="swap-vertical-outline" slot="start"></ion-icon>
+        Sort
       </ion-button>
-    </ion-buttons>
+    </div>
   </ion-toolbar>
 </ion-footer>
