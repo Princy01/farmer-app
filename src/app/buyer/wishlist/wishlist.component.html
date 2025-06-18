@@ -1,59 +1,165 @@
-<ion-header>
-  <ion-toolbar>
+<ion-header mode="ios">
+  <ion-toolbar class="wishlist-toolbar">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button (click)="goBack()" class="back-btn">
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Wishlist</ion-title>
+    <ion-title> My Wishlist </ion-title>
+    <ion-buttons slot="end" *ngIf="wishlistItems.length > 0">
+      <ion-button (click)="clearWishlist()" class="clear-btn">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-grid>
-    <ion-row *ngIf="wishlistItems.length > 0; else emptyWishlist">
-      <ion-col size="6" size-md="6" *ngFor="let item of wishlistItems">
-        <ion-card class="wishlist-card">
-          <ion-icon name="close-outline" class="close-icon" (click)="removeFromWishlist(item)"></ion-icon>
+<ion-content class="wishlist-content">
+  <!-- Wishlist Stats -->
+  <div class="stats-container" *ngIf="wishlistItems.length > 0">
+    <div class="stats-card">
+      <div class="stat-item">
+        <span class="stat-number">{{ wishlistItems.length }}</span>
+        <span class="stat-label">{{
+          wishlistItems.length === 1 ? "Item" : "Items"
+        }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">₹{{ getTotalValue() }}</span>
+        <span class="stat-label">Total Value</span>
+      </div>
+    </div>
+  </div>
 
-          <img [src]="item.image" alt="{{ item.name }}" class="wishlist-img" />
+  <!-- Wishlist Items Grid -->
+  <div
+    class="wishlist-container"
+    *ngIf="wishlistItems.length > 0; else emptyWishlist"
+  >
+    <ion-grid class="wishlist-grid">
+      <ion-row>
+        <ion-col
+          size="6"
+          size-md="4"
+          size-lg="3"
+          *ngFor="let item of wishlistItems; let i = index"
+        >
+          <div class="wishlist-card" [style.animation-delay]="i * 0.1 + 's'">
+            <!-- Remove Button -->
+            <ion-button
+              fill="clear"
+              class="remove-btn"
+              (click)="removeFromWishlist(item)"
+            >
+              <ion-icon name="close" class="remove-icon"></ion-icon>
+            </ion-button>
 
-          <ion-card-header>
-            <ion-card-title class="item-title">
-              {{ item.name }} <span class="hindi-name">({{ item.hindiName }})</span>
-            </ion-card-title>
-            <p class="price">₹{{ item.price }}</p>
-          </ion-card-header>
-
-          <!-- Add to Cart Button at the Bottom -->
-          <ion-card-content class="cart-section">
-            <div class="cart-container" (click)="addToCart(item)">
-              <ion-icon name="cart" class="cart-icon"></ion-icon>
-              <span class="cart-text">Add to Cart</span>
+            <!-- Product Image -->
+            <div class="image-container">
+              <img
+                [src]="item.image"
+                [alt]="item.name"
+                class="product-image"
+                (error)="onImageError($event)"
+                (load)="onImageLoad($event)"
+                loading="lazy"
+              />
+              <div class="image-overlay">
+                <ion-button
+                  fill="clear"
+                  class="quick-view-btn"
+                  (click)="quickView(item)"
+                >
+                  <ion-icon name="eye-outline"></ion-icon>
+                </ion-button>
+              </div>
             </div>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
 
-  <!-- Empty Wishlist Message -->
+            <!-- Product Info -->
+            <div class="product-info">
+              <h3 class="product-name">{{ item.name }}</h3>
+              <p class="product-hindi">{{ item.hindiName }}</p>
+              <div class="price-container">
+                <span class="current-price">₹{{ item.price }}</span>
+                <span class="price-unit">/kg</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+              <ion-button
+                expand="block"
+                class="add-to-cart-btn"
+                (click)="addToCart(item)"
+              >
+                <ion-icon name="cart-outline" slot="start"></ion-icon>
+                Add to Cart
+              </ion-button>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" *ngIf="wishlistItems.length > 1">
+      <ion-button expand="block" class="bulk-add-btn" (click)="addAllToCart()">
+        <ion-icon name="cart" slot="start"></ion-icon>
+        Add All to Cart ({{ wishlistItems.length }} items)
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Empty Wishlist State -->
   <ng-template #emptyWishlist>
-    <ion-item lines="none" class="empty-message">
-      <ion-label class="ion-text-center">
-        <h2>Your wishlist is empty!</h2>
-        <p>Start adding your favorite products.</p>
-      </ion-label>
-    </ion-item>
+    <div class="empty-state">
+      <div class="empty-icon-container">
+        <ion-icon name="heart-outline" class="empty-icon"></ion-icon>
+        <div class="empty-hearts">
+          <ion-icon
+            name="heart-outline"
+            class="floating-heart heart-1"
+          ></ion-icon>
+          <ion-icon
+            name="heart-outline"
+            class="floating-heart heart-2"
+          ></ion-icon>
+          <ion-icon
+            name="heart-outline"
+            class="floating-heart heart-3"
+          ></ion-icon>
+        </div>
+      </div>
+      <h2 class="empty-title">Your Wishlist is Empty</h2>
+      <p class="empty-subtitle">
+        Discover amazing products and add them to your wishlist
+      </p>
+      <ion-button class="browse-btn" expand="block" (click)="browseProducts()">
+        <ion-icon name="storefront-outline" slot="start"></ion-icon>
+        Browse Products
+      </ion-button>
+    </div>
   </ng-template>
 </ion-content>
 
-<ion-footer>
-  <ion-toolbar>
-    <ion-buttons slot="end">
-      <ion-button color="success" expand="full" (click)="goToCart()" [disabled]="cartItems.length === 0">
-        Go to Cart ({{ cartItems.length }})
+<!-- Enhanced Footer -->
+<ion-footer class="wishlist-footer" *ngIf="cartItems.length > 0">
+  <ion-toolbar class="footer-toolbar">
+    <div class="footer-content">
+      <div class="cart-info">
+        <ion-icon name="cart" class="cart-icon"></ion-icon>
+        <div class="cart-details">
+          <span class="cart-count"
+            >{{ cartItems.length }}
+            {{ cartItems.length === 1 ? "item" : "items" }}</span
+          >
+          <span class="cart-total">₹{{ getCartTotal() }}</span>
+        </div>
+      </div>
+      <ion-button class="go-to-cart-btn" (click)="goToCart()">
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
+        View Cart
       </ion-button>
-    </ion-buttons>
+    </div>
   </ion-toolbar>
 </ion-footer>

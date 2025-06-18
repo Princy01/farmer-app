@@ -1,46 +1,350 @@
-<ion-header>
-  <ion-toolbar>
+<ion-header mode="ios">
+  <ion-toolbar class="ride-toolbar">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button (click)="goBack()" class="back-btn">
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Arrange a Ride</ion-title>
+    <ion-title class="page-title">Transport Options</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="ride-content">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">Choose Your Delivery</h1>
+      <p class="hero-subtitle">
+        Select delivery method, timing, and preferences for your order
+      </p>
+    </div>
+  </div>
+
   <div class="ride-container">
+    <!-- Delivery Method Selection -->
+    <div class="section-container">
+      <div class="section-header">
+        <ion-icon name="car-outline" class="section-icon"></ion-icon>
+        <h2 class="section-title">Delivery Method</h2>
+      </div>
 
-    <h2>Select Delivery Urgency</h2>
-    <ion-grid>
-      <ion-row>
-        <ion-col size="6">
-          <div
-            class="option-card"
-            [ngClass]="{'selected': selectedUrgency === 'priority'}"
-            (click)="selectUrgency('priority')">
-            <ion-icon name="flash" size="large"></ion-icon>
-            <p>Priority Delivery</p>
-          </div>
-        </ion-col>
-        <ion-col size="6">
-          <div
-            class="option-card"
-            [ngClass]="{'selected': selectedUrgency === 'delayed'}"
-            (click)="selectUrgency('delayed')">
-            <ion-icon name="hourglass" size="large"></ion-icon>
-            <p>Normal Delivery</p>
-          </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+      <ion-grid class="options-grid">
+        <ion-row>
+          <ion-col size="12" size-md="4">
+            <div
+              class="transport-card"
+              [ngClass]="{ selected: selectedTransportType === 'standard' }"
+              (click)="selectTransportType('standard')"
+            >
+              <div class="card-header">
+                <div class="icon-container standard-icon">
+                  <ion-icon
+                    name="bicycle-outline"
+                    class="option-icon"
+                  ></ion-icon>
+                </div>
+                <div class="badge standard-badge">Economical</div>
+              </div>
+              <h3 class="card-title">Standard Delivery</h3>
+              <div class="transport-features">
+                <div class="feature-item">
+                  <ion-icon name="time-outline" class="feature-icon"></ion-icon>
+                  <span>3-5 business days</span>
+                </div>
+                <div class="feature-item">
+                  <ion-icon name="cash-outline" class="feature-icon"></ion-icon>
+                  <span>₹9/km</span>
+                </div>
+              </div>
+            </div>
+          </ion-col>
 
-    <div class="center-button">
-      <ion-button class="custom-button" (click)="confirmRide()" [disabled]="!selectedUrgency">
-        Confirm Ride
-      </ion-button>
+          <ion-col size="12" size-md="4">
+            <div
+              class="transport-card premium"
+              [ngClass]="{ selected: selectedTransportType === 'express' }"
+              (click)="selectTransportType('express')"
+            >
+              <div class="card-header">
+                <div class="icon-container express-icon">
+                  <ion-icon name="car-outline" class="option-icon"></ion-icon>
+                </div>
+                <div class="badge express-badge">Fast</div>
+              </div>
+              <h3 class="card-title">Express Delivery</h3>
+              <div class="transport-features">
+                <div class="feature-item">
+                  <ion-icon name="time-outline" class="feature-icon"></ion-icon>
+                  <span>1-2 business days</span>
+                </div>
+                <div class="feature-item">
+                  <ion-icon name="cash-outline" class="feature-icon"></ion-icon>
+                  <span>₹18/km</span>
+                </div>
+              </div>
+            </div>
+          </ion-col>
+
+          <ion-col size="12" size-md="4">
+            <div
+              class="transport-card premium-gold"
+              [ngClass]="{
+                selected: selectedTransportType === 'priority',
+                locked: !isPremiumUser
+              }"
+              (click)="selectTransportType('priority')"
+            >
+              <!-- Premium Badge -->
+              <div class="premium-overlay" *ngIf="!isPremiumUser">
+                <div class="premium-badge-top">
+                  <ion-icon name="star-outline" class="premium-star"></ion-icon>
+                  <span>FOR PREMIUM USERS</span>
+                </div>
+              </div>
+
+              <!-- Lock Overlay for Non-Premium Users -->
+              <!-- <div class="lock-overlay" *ngIf="!isPremiumUser">
+      <div class="lock-content">
+        <ion-icon name="lock-closed-outline" class="lock-icon"></ion-icon>
+        <span class="lock-text">Premium Only</span>
+      </div>
+    </div> -->
+
+              <div class="card-header">
+                <div class="icon-container priority-icon">
+                  <ion-icon
+                    name="rocket-outline"
+                    class="option-icon"
+                  ></ion-icon>
+                </div>
+                <div class="badge priority-badge">Premium</div>
+              </div>
+              <h3 class="card-title">Priority Delivery</h3>
+              <div class="transport-features">
+                <div class="feature-item">
+                  <ion-icon name="time-outline" class="feature-icon"></ion-icon>
+                  <span>Same day (4-6 hrs)</span>
+                </div>
+                <div class="feature-item">
+                  <ion-icon name="cash-outline" class="feature-icon"></ion-icon>
+                  <span>₹27/km</span>
+                </div>
+              </div>
+
+              <!-- Upgrade CTA for Non-Premium Users -->
+              <div class="upgrade-cta" *ngIf="!isPremiumUser">
+                <ion-button
+                  size="small"
+                  fill="solid"
+                  class="upgrade-button"
+                  (click)="upgradeToPremium($event)"
+                >
+                  <ion-icon name="star-outline" slot="start"></ion-icon>
+                  Upgrade to Premium
+                </ion-button>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </div>
 
+    <!-- Delivery Preferences -->
+    <div class="section-container" *ngIf="selectedTransportType">
+      <div class="section-header">
+        <ion-icon name="settings-outline" class="section-icon"></ion-icon>
+        <h2 class="section-title">Delivery Preferences</h2>
+      </div>
+
+      <div class="preferences-card">
+        <!-- Time Slot Selection -->
+        <div class="preference-group">
+          <h3 class="preference-title">Preferred Time Slot</h3>
+          <div class="time-slots">
+            <div
+              class="time-slot"
+              [ngClass]="{ selected: selectedTimeSlot === '9-12' }"
+              (click)="selectTimeSlot('9-12')"
+            >
+              <span>9 AM - 12 PM</span>
+            </div>
+            <div
+              class="time-slot"
+              [ngClass]="{ selected: selectedTimeSlot === '12-17' }"
+              (click)="selectTimeSlot('12-17')"
+            >
+              <span>12 PM - 5 PM</span>
+            </div>
+            <div
+              class="time-slot"
+              [ngClass]="{ selected: selectedTimeSlot === '17-20' }"
+              (click)="selectTimeSlot('17-20')"
+            >
+              <span>5 PM - 8 PM</span>
+            </div>
+            <div
+              class="time-slot"
+              [ngClass]="{ selected: selectedTimeSlot === 'flexible' }"
+              (click)="selectTimeSlot('flexible')"
+            >
+              <span>Flexible</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Special Instructions -->
+        <div class="preference-group">
+          <h3 class="preference-title">Special Instructions</h3>
+          <div class="special-options">
+            <ion-item class="instruction-item" lines="none">
+              <ion-checkbox
+                slot="start"
+                [(ngModel)]="specialInstructions.fragile"
+                color="success"
+              >
+              </ion-checkbox>
+              <ion-label>
+                <div class="instruction-info">
+                  <ion-icon
+                    name="warning-outline"
+                    class="instruction-icon fragile"
+                  ></ion-icon>
+                  <div>
+                    <span class="instruction-title">Handle with Care</span>
+                    <p class="instruction-desc">
+                      Fragile items requiring careful handling
+                    </p>
+                  </div>
+                </div>
+              </ion-label>
+            </ion-item>
+
+            <ion-item class="instruction-item" lines="none">
+              <ion-checkbox
+                slot="start"
+                [(ngModel)]="specialInstructions.coldChain"
+                color="success"
+              >
+              </ion-checkbox>
+              <ion-label>
+                <div class="instruction-info">
+                  <ion-icon
+                    name="snow-outline"
+                    class="instruction-icon cold"
+                  ></ion-icon>
+                  <div>
+                    <span class="instruction-title"
+                      >Temperature Controlled</span
+                    >
+                    <p class="instruction-desc">
+                      Maintain cold chain during transport
+                    </p>
+                  </div>
+                </div>
+              </ion-label>
+            </ion-item>
+
+            <ion-item class="instruction-item" lines="none">
+              <ion-checkbox
+                slot="start"
+                [(ngModel)]="specialInstructions.contactless"
+                color="success"
+              >
+              </ion-checkbox>
+              <ion-label>
+                <div class="instruction-info">
+                  <ion-icon
+                    name="hand-left-outline"
+                    class="instruction-icon contactless"
+                  ></ion-icon>
+                  <div>
+                    <span class="instruction-title">Contactless Delivery</span>
+                    <p class="instruction-desc">Leave at doorstep and notify</p>
+                  </div>
+                </div>
+              </ion-label>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- Additional Notes -->
+        <div class="preference-group">
+          <h3 class="preference-title">Additional Notes</h3>
+          <ion-textarea
+            [(ngModel)]="additionalNotes"
+            placeholder="Any specific delivery instructions, landmark details, or contact preferences..."
+            rows="3"
+            class="notes-textarea"
+          >
+          </ion-textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estimated Cost Summary -->
+    <div class="cost-summary-card" *ngIf="selectedTransportType">
+      <div class="summary-header">
+        <ion-icon name="calculator-outline" class="summary-icon"></ion-icon>
+        <h3 class="summary-title">Delivery Cost Breakdown</h3>
+      </div>
+
+      <div class="cost-breakdown">
+        <div class="cost-item">
+          <span class="cost-label">Base Delivery Charge</span>
+          <span class="cost-value">₹{{ getBaseDeliveryCharge() }}</span>
+        </div>
+
+        <div class="cost-item" *ngIf="specialInstructions.fragile">
+          <span class="cost-label">Special Handling</span>
+          <span class="cost-value">₹25</span>
+        </div>
+
+        <div class="cost-item" *ngIf="specialInstructions.coldChain">
+          <span class="cost-label">Temperature Control</span>
+          <span class="cost-value">₹50</span>
+        </div>
+
+        <div
+          class="cost-item"
+          *ngIf="selectedTimeSlot && selectedTimeSlot !== 'flexible'"
+        >
+          <span class="cost-label">Time Slot Preference</span>
+          <span class="cost-value">₹20</span>
+        </div>
+
+        <div class="cost-divider"></div>
+
+        <div class="cost-item total">
+          <span class="cost-label">Total Delivery Cost</span>
+          <span class="cost-value">₹{{ getTotalDeliveryCost() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Section -->
+    <div class="confirmation-section" *ngIf="selectedTransportType">
+      <div class="selected-summary">
+        <div class="summary-item">
+          <div class="summary-info">
+            <ion-icon name="checkmark-circle" class="summary-check"></ion-icon>
+            <div class="summary-details">
+              <span class="summary-main">{{ getTransportTypeName() }}</span>
+              <span class="summary-sub">{{ getEstimatedDeliveryTime() }}</span>
+            </div>
+          </div>
+          <div class="summary-cost">₹{{ getTotalDeliveryCost() }}</div>
+        </div>
+      </div>
+
+      <ion-button
+        class="confirm-button"
+        expand="block"
+        (click)="confirmTransportSelection()"
+        [disabled]="!selectedTransportType"
+      >
+        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+        Confirm Delivery Options
+      </ion-button>
+    </div>
   </div>
 </ion-content>

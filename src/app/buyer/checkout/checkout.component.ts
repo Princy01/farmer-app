@@ -4,7 +4,7 @@ import { IonicModule, AlertController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { chevronBack, chevronForward } from 'ionicons/icons';
+import { chevronBack, chevronForward, phonePortraitOutline, cashOutline, cardOutline, globeOutline, walletOutline } from 'ionicons/icons';
 import { DatabaseService } from '../../services/database.service';
 import { BuyerApiService } from '../services/buyer-api.service';
 
@@ -110,7 +110,7 @@ export class CheckoutComponent {
     private alertCtrl: AlertController,
     private buyerApiService: BuyerApiService
   ) {
-    addIcons({ chevronBack, chevronForward });
+    addIcons({ chevronBack, chevronForward, phonePortraitOutline, cashOutline, cardOutline, globeOutline, walletOutline });
     this.loadTransporters();
 
     const navData = this.router.getCurrentNavigation()?.extras.state;
@@ -488,4 +488,21 @@ export class CheckoutComponent {
     if (!this.wholeSeller) return 'Direct Order';
     return `${this.wholeSeller.name || 'Unknown Wholeseller'}`;
   }
+
+  getPaymentIcon(paymentMode: string): string {
+  switch (paymentMode.toLowerCase()) {
+    case 'upi':
+      return 'phone-portrait-outline';
+    case 'cash on delivery':
+      return 'cash-outline';
+    case 'credit/debit card':
+      return 'card-outline';
+    case 'net banking':
+      return 'globe-outline';
+    case 'wallet (e.g., paytm, phonepe)':
+      return 'wallet-outline';
+    default:
+      return 'card-outline';
+  }
+}
 }
