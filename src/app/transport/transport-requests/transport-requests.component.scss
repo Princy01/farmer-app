@@ -433,15 +433,43 @@
   padding-top: 1rem;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.accept-button,
+.reject-button {
+  flex: 1;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+  --border-radius: 15px;
+}
+
 .accept-button {
   --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
   --background-activated: linear-gradient(135deg, rgb(116, 152, 120), rgb(96, 132, 100));
   --color: #fff;
-  --border-radius: 15px;
   --box-shadow: 0 4px 15px rgba(136, 172, 140, 0.4);
-  height: 48px;
-  font-weight: 600;
-  text-transform: none;
+
+  &:hover {
+    transform: translateY(-2px);
+    --box-shadow: 0 6px 18px rgba(136, 172, 140, 0.5);
+  }
+}
+
+.reject-button {
+  --background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  --background-activated: linear-gradient(135deg, #ff5252, #e53935);
+  --color: #fff;
+  --box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+
+  &:hover {
+    transform: translateY(-2px);
+    --box-shadow: 0 6px 18px rgba(255, 107, 107, 0.5);
+  }
 }
 
 .accepted-button {
@@ -451,6 +479,135 @@
   height: 48px;
   font-weight: 600;
   text-transform: none;
+  border: 2px solid rgba(136, 172, 140, 0.2);
+}
+
+.rejected-button {
+  --background: #fdeaea;
+  --color: #ff6b6b;
+  --border-radius: 15px;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+  border: 2px solid rgba(255, 107, 107, 0.2);
+}
+
+/* Responsive adjustments */
+/* Update the responsive adjustments section in transport-requests.component.scss */
+
+/* Remove or modify the existing mobile responsive rule */
+@media (max-width: 480px) {
+  .action-buttons {
+    /* Remove this rule that was causing vertical stacking */
+    /* flex-direction: column; */
+    /* gap: 0.5rem; */
+
+    /* Keep them horizontal but adjust spacing */
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .accept-button,
+  .reject-button {
+    flex: 1; /* Each button takes equal width */
+    width: auto; /* Remove fixed width */
+    height: 48px; /* Keep consistent height */
+    font-size: 0.9rem; /* Slightly smaller text on mobile */
+    padding: 0 12px; /* Add horizontal padding */
+
+    /* Ensure text doesn't wrap */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Enhanced action buttons for better mobile experience */
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+
+  /* Ensure buttons stay horizontal on all screen sizes */
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.accept-button,
+.reject-button {
+  flex: 1;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+  --border-radius: 15px;
+  min-width: 0; /* Allow flex shrinking */
+
+  /* Ensure button content fits */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    margin-right: 6px;
+    font-size: 1rem;
+  }
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 768px) {
+  .action-buttons {
+    gap: 0.5rem; /* Slightly tighter gap on tablets */
+  }
+
+  .accept-button,
+  .reject-button {
+    font-size: 0.85rem;
+    height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-footer {
+    margin-top: 1rem; /* Reduce top margin */
+    padding-top: 0.75rem; /* Reduce top padding */
+  }
+
+  .action-buttons {
+    gap: 0.5rem; /* Tighter gap for small screens */
+  }
+
+  .accept-button,
+  .reject-button {
+    font-size: 0.8rem; /* Smaller text */
+    height: 42px; /* Slightly shorter buttons */
+    padding: 0 8px; /* Reduced horizontal padding */
+
+    /* More compact icon */
+    ion-icon {
+      margin-right: 4px;
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Adjust button text for very small screens */
+  .accept-button span,
+  .reject-button span {
+    font-size: 0.8rem;
+  }
+}
+
+/* For very small screens, consider abbreviated text */
+@media (max-width: 360px) {
+  .accept-button,
+  .reject-button {
+    font-size: 0.75rem;
+    padding: 0 6px;
+
+    /* Use shorter text on very small screens */
+    &::after {
+      content: attr(data-short-text);
+    }
+  }
 }
 
 /* Filter Footer */

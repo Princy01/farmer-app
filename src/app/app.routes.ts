@@ -319,6 +319,10 @@ export const routes: Routes = [
       {
         path: 'route-optimization',
         loadComponent: () => import('./transport/route-optimization/route-optimization.component').then((m) => m.RouteOptimizationComponent),
+      },
+      {
+        path: 'customer-chat',
+        loadComponent: () => import('./transport/customer-chat/customer-chat.component').then((m) => m.CustomerChatComponent),
       }
 ]
 }

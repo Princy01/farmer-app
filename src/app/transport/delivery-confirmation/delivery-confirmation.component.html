@@ -1,49 +1,298 @@
-<ion-content class="ion-padding">
-
-  <!-- Order Details -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>📦 Order ID: #123456</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p>🏪 <strong>Retailer:</strong> ABC Supermarket</p>
-      <p>📍 <strong>Delivery Location:</strong> XYZ City, Street 10</p>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Send OTP Button -->
-  <div class="center-button">
-    <ion-button class="custom-button" (click)="sendOtpToCustomer()" [disabled]="otpSent">
-      📩 {{ otpSent ? 'OTP Sent to Customer' : 'Send OTP to Customer' }}
-    </ion-button>
+<ion-content class="delivery-content">
+  <!-- Driver Status Bar -->
+  <div class="status-bar">
+    <div class="status-item active">
+      <ion-icon name="location" class="status-icon"></ion-icon>
+      <span class="status-text">Arrived at Location</span>
     </div>
-
-  <!-- OTP Verification -->
-  <ion-item>
-    <ion-label position="stacked">🔢 Enter OTP</ion-label>
-    <ion-input type="number" maxlength="4" [(ngModel)]="otp"></ion-input>
-  </ion-item>
-  <p class="resend-otp" (click)="resendOtp()">Resend OTP in {{ otpTimer }}s</p>
-
-  <!-- Notes -->
-  <ion-item>
-    <ion-label position="stacked">📜 Additional Notes (Optional)</ion-label>
-    <ion-textarea [(ngModel)]="notes"></ion-textarea>
-  </ion-item>
-
-  <!-- Submit Button -->
-  <div class="center-button">
-    <ion-button class="custom-button" (click)="submitDelivery()">
-      📮 Submit Delivery Report
-        </ion-button>
+    <div class="status-progress">
+      <div class="progress-line active"></div>
     </div>
-
-
-  <!-- Customer Feedback -->
-  <div class="center-button">
-    <ion-button class="custom-button" (click)="requestFeedback()">
-      ⭐ Request Customer Feedback
-    </ion-button>
+    <div class="status-item" [class.active]="otpSent">
+      <ion-icon name="mail" class="status-icon"></ion-icon>
+      <span class="status-text">OTP Sent</span>
+    </div>
+    <div class="status-progress">
+      <div class="progress-line" [class.active]="otp.length === 4"></div>
+    </div>
+    <div class="status-item" [class.active]="deliveryConfirmed">
+      <ion-icon name="checkmark-circle" class="status-icon"></ion-icon>
+      <span class="status-text">Confirmed</span>
+    </div>
   </div>
-  
+
+  <div class="content-container">
+    <!-- Order Details Card -->
+    <ion-card class="order-details-card">
+      <div class="card-header">
+        <div class="header-left">
+          <ion-icon name="receipt" class="header-icon"></ion-icon>
+          <div class="header-info">
+            <h2 class="order-id">Order #{{ orderId || "123456" }}</h2>
+          </div>
+        </div>
+        <div class="priority-badge">
+          <ion-icon name="flash"></ion-icon>
+          <span>Priority</span>
+        </div>
+      </div>
+
+      <div class="delivery-info">
+        <div class="info-row">
+          <ion-icon
+            name="storefront"
+            class="info-icon retailer-icon"
+          ></ion-icon>
+          <div class="info-details">
+            <span class="info-label">Retailer</span>
+            <span class="info-value">ABC Fresh Mart</span>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <ion-icon name="location" class="info-icon location-icon"></ion-icon>
+          <div class="info-details">
+            <span class="info-label">Delivery Address</span>
+            <span class="info-value"
+              >Shop No. 45, Main Market<br />Sector 18, Noida - 201301</span
+            >
+          </div>
+        </div>
+
+        <div class="info-row">
+          <ion-icon name="call" class="info-icon phone-icon"></ion-icon>
+          <div class="info-details">
+            <span class="info-label">Contact</span>
+            <div class="contact-actions">
+              <span class="info-value">+91 98765 43210</span>
+              <ion-button fill="clear" size="small" class="call-btn">
+                <ion-icon name="call"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <ion-icon name="cube" class="info-icon weight-icon"></ion-icon>
+          <div class="info-details">
+            <span class="info-label">Total Weight</span>
+            <span class="info-value">25.5 kg</span>
+          </div>
+        </div>
+      </div>
+    </ion-card>
+
+    <!-- OTP Verification Section -->
+    <ion-card class="otp-card">
+      <div class="card-header">
+        <ion-icon name="shield-checkmark" class="header-icon"></ion-icon>
+        <h3 class="card-title">Customer Verification</h3>
+      </div>
+
+      <!-- Send OTP Button -->
+      <div class="otp-send-section" *ngIf="!otpSent">
+        <p class="instruction-text">
+          Send verification code to customer for secure handover
+        </p>
+        <ion-button
+          expand="block"
+          class="send-otp-btn"
+          (click)="sendOtpToCustomer()"
+        >
+          <ion-icon name="mail" slot="start"></ion-icon>
+          Send OTP to Customer
+        </ion-button>
+      </div>
+
+      <!-- OTP Sent State -->
+      <div class="otp-sent-section" *ngIf="otpSent">
+        <div class="sent-confirmation">
+          <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
+          <span class="sent-text">OTP sent to customer's phone</span>
+        </div>
+
+        <!-- OTP Input -->
+        <div class="otp-input-section">
+          <ion-label class="otp-label"
+            >Enter 4-digit OTP from customer</ion-label
+          >
+          <div class="otp-inputs">
+            <ion-input
+              type="number"
+              maxlength="1"
+              class="otp-digit"
+              [(ngModel)]="otpDigits[0]"
+              (ionInput)="onOtpInput(0, $event)"
+            ></ion-input>
+            <ion-input
+              type="number"
+              maxlength="1"
+              class="otp-digit"
+              [(ngModel)]="otpDigits[1]"
+              (ionInput)="onOtpInput(1, $event)"
+            ></ion-input>
+            <ion-input
+              type="number"
+              maxlength="1"
+              class="otp-digit"
+              [(ngModel)]="otpDigits[2]"
+              (ionInput)="onOtpInput(2, $event)"
+            ></ion-input>
+            <ion-input
+              type="number"
+              maxlength="1"
+              class="otp-digit"
+              [(ngModel)]="otpDigits[3]"
+              (ionInput)="onOtpInput(3, $event)"
+            ></ion-input>
+          </div>
+        </div>
+
+        <!-- Resend OTP -->
+        <div class="resend-section">
+          <span class="timer-text" *ngIf="otpTimer > 0">
+            Resend OTP in {{ otpTimer }}s
+          </span>
+          <ion-button
+            fill="clear"
+            class="resend-btn"
+            (click)="resendOtp()"
+            [disabled]="otpTimer > 0"
+          >
+            <ion-icon name="refresh" slot="start"></ion-icon>
+            Resend OTP
+          </ion-button>
+        </div>
+      </div>
+    </ion-card>
+
+    <!-- Delivery Notes -->
+    <ion-card class="notes-card">
+      <div class="card-header">
+        <ion-icon name="document-text" class="header-icon"></ion-icon>
+        <h3 class="card-title">Delivery Notes</h3>
+      </div>
+
+      <div class="notes-section">
+        <ion-textarea
+          placeholder="Add any delivery notes or observations (optional)"
+          [(ngModel)]="notes"
+          class="notes-input"
+          rows="3"
+        >
+        </ion-textarea>
+
+        <div class="quick-notes">
+          <span class="quick-notes-label">Quick notes:</span>
+          <div class="quick-note-chips">
+            <ion-chip
+              (click)="addQuickNote('All items delivered')"
+              class="quick-chip"
+            >
+              <ion-label>All items delivered</ion-label>
+            </ion-chip>
+            <ion-chip
+              (click)="addQuickNote('Customer satisfied')"
+              class="quick-chip"
+            >
+              <ion-label>Customer satisfied</ion-label>
+            </ion-chip>
+            <ion-chip
+              (click)="addQuickNote('Fresh quality')"
+              class="quick-chip"
+            >
+              <ion-label>Fresh quality</ion-label>
+            </ion-chip>
+          </div>
+        </div>
+      </div>
+    </ion-card>
+
+    <!-- Action Buttons -->
+    <div class="action-section">
+      <ion-button
+        expand="block"
+        class="confirm-btn"
+        (click)="submitDelivery()"
+        [disabled]="!canConfirmDelivery()"
+      >
+        <ion-icon name="checkmark-done" slot="start"></ion-icon>
+        Confirm Delivery
+      </ion-button>
+
+      <div class="secondary-actions">
+        <ion-button
+          fill="outline"
+          class="feedback-btn"
+          (click)="requestFeedback()"
+        >
+          <ion-icon name="star" slot="start"></ion-icon>
+          Request Feedback
+        </ion-button>
+
+        <ion-button fill="outline" class="report-btn" (click)="reportIssue()">
+          <ion-icon name="warning" slot="start"></ion-icon>
+          Report Issue
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Emergency Actions -->
+    <!-- Update the emergency section in delivery-confirmation.component.html -->
+    <div class="emergency-section">
+      <p class="emergency-text">Having trouble with delivery?</p>
+      <div class="emergency-buttons">
+        <ion-button fill="clear" class="emergency-btn" (click)="callSupport()">
+          <ion-icon name="headset" slot="start"></ion-icon>
+          Call Support
+        </ion-button>
+        <ion-button
+          fill="clear"
+          class="emergency-btn"
+          (click)="openCustomerChat()"
+        >
+          <ion-icon name="chatbubbles" slot="start"></ion-icon>
+          Contact Customer
+        </ion-button>
+      </div>
+    </div>
+  </div>
 </ion-content>
+
+<!-- Success Modal - Updated Structure -->
+<ion-modal
+  [isOpen]="showSuccessModal"
+  (didDismiss)="showSuccessModal = false"
+  class="success-modal"
+>
+  <ng-template>
+    <div class="modal-wrapper">
+      <div class="modal-content">
+        <div class="success-animation">
+          <ion-icon
+            name="checkmark-circle"
+            class="success-icon-large"
+          ></ion-icon>
+        </div>
+        <h2 class="success-title">Delivery Confirmed!</h2>
+        <p class="success-message">
+          Great job! The delivery has been successfully confirmed and the
+          customer has been notified.
+        </p>
+        <div class="success-actions">
+          <ion-button
+            expand="block"
+            class="next-delivery-btn"
+            (click)="goToNextDelivery()"
+          >
+            <ion-icon name="arrow-forward" slot="end"></ion-icon>
+            Next Delivery
+          </ion-button>
+          <ion-button fill="clear" class="back-home-btn" (click)="goHome()">
+            Back to Dashboard
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

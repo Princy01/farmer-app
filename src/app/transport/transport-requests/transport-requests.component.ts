@@ -28,6 +28,7 @@ interface DeliveryOrder {
   distance: number;
   suggestedPrice: number;
   accepted?: boolean;
+  rejected?: boolean;
   assigned?: boolean;
   createdAt: string;
   deliveryDate: string;
@@ -369,6 +370,40 @@ export class TransportRequestsComponent implements OnInit {
     });
     await toast.present();
   }
+
+  async rejectOrder(order: DeliveryOrder) {
+  const alert = await this.alertCtrl.create({
+    header: 'Reject Order',
+    message: `Are you sure you want to reject Order #${order.id}?`,
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Reject',
+        role: 'destructive',
+        handler: async () => {
+          order.rejected = true;
+          this.databaseService.updateOrderForTransporterInLocalStorage(
+            this.transporterId,
+            order.id,
+            { rejected: true }
+          );
+          this.showRejectToast('Order rejected successfully!');
+        },
+      },
+    ]
+  });
+  await alert.present();
+}
+
+async showRejectToast(message: string) {
+  const toast = await this.toastCtrl.create({
+    message,
+    duration: 3000,
+    position: 'bottom',
+    color: 'warning'
+  });
+  await toast.present();
+}
 
   formatDate(dateString: string): string {
     return formatDate(dateString, 'dd MMM yyyy', 'en-US');

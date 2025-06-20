@@ -1,0 +1,195 @@
+<!-- customer-chat.component.html -->
+<ion-header mode="ios">
+  <ion-toolbar class="chat-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" class="back-btn">
+        <ion-icon name="chevron-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="chat-title">
+      <div class="customer-info">
+        <div class="customer-avatar">
+          <ion-icon name="storefront"></ion-icon>
+        </div>
+        <div class="customer-details">
+          <span class="customer-name">{{ customerName }}</span>
+          <span class="order-reference">Order #{{ orderId }}</span>
+        </div>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="makeCall()" class="call-btn">
+        <ion-icon name="call"></ion-icon>
+      </ion-button>
+      <ion-button (click)="showMoreOptions()" class="more-btn">
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="chat-content">
+  <!-- Delivery Status Banner -->
+  <div class="status-banner">
+    <div class="status-info">
+      <ion-icon name="truck" class="status-icon"></ion-icon>
+      <div class="status-text">
+        <span class="status-title">En Route to Delivery</span>
+        <span class="status-subtitle">ETA: 15 minutes</span>
+      </div>
+    </div>
+    <ion-button size="small" class="track-btn" (click)="shareLocation()">
+      <ion-icon name="location" slot="start"></ion-icon>
+      Share Location
+    </ion-button>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <ion-button
+      class="quick-action-btn"
+      (click)="sendQuickMessage('I have arrived at your location. Please come to collect your order.')">
+      <ion-icon name="location-outline"></ion-icon>
+      <span>Arrived</span>
+    </ion-button>
+    <ion-button
+      class="quick-action-btn"
+      (click)="sendQuickMessage('Running 10 minutes late due to traffic. Sorry for the delay!')">
+      <ion-icon name="time-outline"></ion-icon>
+      <span>Delayed</span>
+    </ion-button>
+    <ion-button
+      class="quick-action-btn"
+      (click)="sendQuickMessage('Your fresh products are ready for delivery. Quality checked!')">
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      <span>Ready</span>
+    </ion-button>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="chat-messages">
+    <div class="date-separator">
+      <span>Today</span>
+    </div>
+
+    <!-- System Messages -->
+    <div class="message system-message">
+      <div class="message-content">
+        <ion-icon name="information-circle" class="system-icon"></ion-icon>
+        <span>Delivery started for Order #{{ orderId }}</span>
+      </div>
+      <span class="message-time">{{ getCurrentTime() }}</span>
+    </div>
+
+    <!-- Chat Messages -->
+    <div
+      *ngFor="let message of messages; let i = index"
+      class="message"
+      [class.sent]="message.sender === 'driver'"
+      [class.received]="message.sender === 'customer'">
+
+      <div class="message-bubble">
+        <div class="message-content">
+          {{ message.content }}
+        </div>
+        <div class="message-meta">
+          <span class="message-time">{{ message.timestamp | date:'short' }}</span>
+          <ion-icon
+            *ngIf="message.sender === 'driver'"
+            [name]="message.delivered ? 'checkmark-done' : 'checkmark'"
+            [class.delivered]="message.delivered"
+            class="message-status"></ion-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="message received typing-indicator" *ngIf="isCustomerTyping">
+      <div class="message-bubble">
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<!-- Message Input Footer -->
+<ion-footer class="message-footer">
+  <div class="input-container">
+    <ion-button
+      fill="clear"
+      class="attachment-btn"
+      (click)="showAttachmentOptions()">
+      <ion-icon name="add-circle"></ion-icon>
+    </ion-button>
+
+    <div class="message-input-wrapper">
+      <ion-textarea
+        [(ngModel)]="newMessage"
+        placeholder="Type a message..."
+        class="message-input"
+        rows="1"
+        autoGrow="true"
+        maxlength="500"
+        (keydown.enter)="sendMessage($event)">
+      </ion-textarea>
+    </div>
+
+    <ion-button
+      fill="clear"
+      class="voice-btn"
+      (click)="startVoiceMessage()"
+      [class.recording]="isRecording">
+      <ion-icon [name]="isRecording ? 'stop-circle' : 'mic'"></ion-icon>
+    </ion-button>
+
+    <ion-button
+      class="send-btn"
+      (click)="sendMessage()"
+      [disabled]="!newMessage.trim()">
+      <ion-icon name="send"></ion-icon>
+    </ion-button>
+  </div>
+</ion-footer>
+
+<!-- Attachment Options Modal -->
+<ion-action-sheet
+  [isOpen]="showAttachmentSheet"
+  header="Share with Customer"
+  [buttons]="attachmentButtons"
+  (didDismiss)="showAttachmentSheet = false">
+</ion-action-sheet>
+
+<!-- Voice Recording Modal -->
+<ion-modal [isOpen]="showVoiceModal" class="voice-modal">
+  <div class="voice-recording-content">
+    <div class="recording-animation">
+      <div class="recording-circle" [class.pulse]="isRecording">
+        <ion-icon name="mic" class="mic-icon"></ion-icon>
+      </div>
+    </div>
+    <h3 class="recording-title">{{ isRecording ? 'Recording...' : 'Hold to Record' }}</h3>
+    <p class="recording-duration" *ngIf="recordingDuration > 0">
+      {{ formatDuration(recordingDuration) }}
+    </p>
+    <div class="recording-actions">
+      <ion-button
+        fill="clear"
+        class="cancel-btn"
+        (click)="cancelVoiceMessage()">
+        <ion-icon name="close"></ion-icon>
+        Cancel
+      </ion-button>
+      <ion-button
+        class="send-voice-btn"
+        (click)="sendVoiceMessage()"
+        [disabled]="recordingDuration < 1">
+        <ion-icon name="send"></ion-icon>
+        Send
+      </ion-button>
+    </div>
+  </div>
+</ion-modal>
