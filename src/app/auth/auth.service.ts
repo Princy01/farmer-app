@@ -39,6 +39,7 @@ export interface UserRegistration {
 
 export interface AuthResponse {
   message: string;
+  role_id: number;
   access_token: string;
   refresh_token: string;
 }
@@ -51,7 +52,7 @@ export class AuthService {
   private tokenKey = 'auth_token';
   private refreshTokenKey = 'refresh_token';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(credentials: LoginCredentials): Observable<any> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials)
@@ -68,32 +69,32 @@ export class AuthService {
   }
 
   refreshToken(): Observable<AuthResponse> {
-  const refreshToken = localStorage.getItem(this.refreshTokenKey);
+    const refreshToken = localStorage.getItem(this.refreshTokenKey);
 
-  if (!refreshToken) {
-    return throwError(() => new Error('No refresh token available'));
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/refresh-token`, { refresh_token: refreshToken })
+      .pipe(
+        tap(response => {
+          if (response.access_token) {
+            localStorage.setItem(this.tokenKey, response.access_token);
+          }
+          if (response.refresh_token) {
+            localStorage.setItem(this.refreshTokenKey, response.refresh_token);
+          }
+        }),
+        catchError(error => {
+          console.error('Token refresh failed:', error);
+          // If refresh fails, log the user out
+          this.logout();
+          return throwError(() => error);
+        })
+      );
   }
 
-  return this.http.post<AuthResponse>(`${this.apiUrl}/auth/refresh-token`, { refresh_token: refreshToken })
-    .pipe(
-      tap(response => {
-        if (response.access_token) {
-          localStorage.setItem(this.tokenKey, response.access_token);
-        }
-        if (response.refresh_token) {
-          localStorage.setItem(this.refreshTokenKey, response.refresh_token);
-        }
-      }),
-      catchError(error => {
-        console.error('Token refresh failed:', error);
-        // If refresh fails, log the user out
-        this.logout();
-        return throwError(() => error);
-      })
-    );
-}
-
-   registerUser(userData: UserRegistration): Observable<any> {
+  registerUser(userData: UserRegistration): Observable<any> {
     const url = `${this.apiUrl}/auth/register-user`;
     console.log('Sending registration request to:', url);
     console.log('Registration data:', userData);

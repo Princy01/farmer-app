@@ -107,123 +107,120 @@ export class LoginPage {
   }
 
   onActiveStatusChange(event: any) {
-  // Convert boolean to number (0 or 1)
-  const value = event.detail.checked ? 1 : 0;
-  this.registerForm.get('active_status')?.setValue(value);
-}
-
- onLogin() {
-  if (this.loginForm.invalid) {
-    this.loginForm.markAllAsTouched();
-    return;
+    // Convert boolean to number (0 or 1)
+    const value = event.detail.checked ? 1 : 0;
+    this.registerForm.get('active_status')?.setValue(value);
   }
 
-
-  this.isLoading = true;
-  const credentials: LoginCredentials = {
-    identifier: this.loginForm.value.identifier,
-    password: this.loginForm.value.password
-  };
-
-  this.authService.login(credentials).subscribe({
-    next: (response) => {
-      this.isLoading = false;
-      this.presentToast('Login successful', 'success');
-
-      // You may need to modify this based on how you're handling user roles
-      setTimeout(() => {
-        // For demonstration, using a fixed role
-        // In a real app, you would get this from the user's profile or JWT token
-        const userRole: number = UserRole.Wholesaler;
-
-        // Compare by number value
-        if (userRole === UserRole.Admin) {
-          this.router.navigate(['/admin/driver']);
-        } else if (userRole === UserRole.Wholesaler) {
-          this.router.navigate(['/wholesaler/home']);
-        } else if (userRole === UserRole.Retailer) {
-          this.router.navigate(['/buyer/buyer-home']);
-        } else {
-          console.error('Unknown role');
-        }
-      }, 1000);
-    },
-    error: (error) => {
-      this.isLoading = false;
-      console.error('Login failed:', error);
-      let errorMessage = 'Login failed. Please try again.';
-
-      if (error.error && error.error.error) {
-        errorMessage = error.error.error;
-      }
-
-      this.presentToast(errorMessage, 'danger');
+  onLogin() {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
     }
-  });
-}
+
+    this.isLoading = true;
+    const credentials: LoginCredentials = {
+      identifier: this.loginForm.value.identifier,
+      password: this.loginForm.value.password
+    };
+
+    this.authService.login(credentials).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.presentToast('Login successful', 'success');
+
+        const roleId = response.role_id;
+
+        // Navigate based on role
+        setTimeout(() => {
+          if (roleId === UserRole.Admin) {
+            this.router.navigate(['/admin/driver']);
+          } else if (roleId === UserRole.Wholesaler) {
+            this.router.navigate(['/wholesaler/home']);
+          } else if (roleId === UserRole.Retailer) {
+            this.router.navigate(['/buyer/buyer-home']);
+          } else {
+            console.error('Unknown role:', roleId);
+            this.presentToast('Unknown user role', 'danger');
+          }
+        }, 1000);
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Login failed:', error);
+        let errorMessage = 'Login failed. Please try again.';
+
+        if (error.error && error.error.error) {
+          errorMessage = error.error.error;
+        }
+
+        this.presentToast(errorMessage, 'danger');
+      }
+    });
+  }
 
   onRegisterSubmit() {
-  if (this.registerForm.invalid) {
-    this.registerForm.markAllAsTouched();
-    return;
-  }
-
-  this.isLoading = true;
-
-  // Create a copy of the form data
-  const formData = {...this.registerForm.value};
-
-  // IMPORTANT: The backend expects an "identifier" field, not email/mobile_num
-  // The backend will determine if it's an email or phone number
-  const userData = {
-    identifier: formData.identifier,   // This is the key field the backend expects
-    password: formData.password,
-    name: formData.name,
-    address: formData.address,
-    pincode: formData.pincode,
-    location: formData.location,
-    state: formData.state,
-    role_id: formData.role_id,
-    active_status: formData.active_status
-  };
-
-  console.log('Sending registration data:', userData);
-
-  this.authService.registerUser(userData).subscribe({
-    next: (response) => {
-      this.isLoading = false;
-      console.log('Registration successful:', response);
-      this.presentToast('Registration successful! Please login.', 'success');
-
-      // Reset the form and return to login mode
-      this.registerForm.reset({
-        // Set default values for non-required fields
-        address: 'Default Address',
-        location: 0,
-        state: 0,
-        pincode: '000000',
-        active_status: 1
-      });
-      this.authMode = 'login';
-    },
-    error: (error) => {
-      this.isLoading = false;
-      console.error('Registration failed:', error);
-      let errorMessage = 'Registration failed. Please try again.';
-
-      // Extract the most helpful error message
-      if (error.error && typeof error.error === 'object' && error.error.error) {
-        errorMessage = error.error.error;
-      } else if (error.status === 0) {
-        errorMessage = 'Cannot connect to server. Please check your internet connection.';
-      } else if (error.status === 400) {
-        errorMessage = 'Invalid registration data. Please check your inputs.';
-      } else if (error.status === 409) {
-        errorMessage = 'User with this email or phone already exists.';
-      }
-
-      this.presentToast(errorMessage, 'danger');
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
+      return;
     }
-  });
-}
+
+    this.isLoading = true;
+
+    // Create a copy of the form data
+    const formData = { ...this.registerForm.value };
+
+    // IMPORTANT: The backend expects an "identifier" field, not email/mobile_num
+    // The backend will determine if it's an email or phone number
+    const userData = {
+      identifier: formData.identifier,   // This is the key field the backend expects
+      password: formData.password,
+      name: formData.name,
+      address: formData.address,
+      pincode: formData.pincode,
+      location: formData.location,
+      state: formData.state,
+      role_id: formData.role_id,
+      active_status: formData.active_status
+    };
+
+    console.log('Sending registration data:', userData);
+
+    this.authService.registerUser(userData).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        console.log('Registration successful:', response);
+        this.presentToast('Registration successful! Please login.', 'success');
+
+        // Reset the form and return to login mode
+        this.registerForm.reset({
+          // Set default values for non-required fields
+          address: 'Default Address',
+          location: 0,
+          state: 0,
+          pincode: '000000',
+          active_status: 1
+        });
+        this.authMode = 'login';
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Registration failed:', error);
+        let errorMessage = 'Registration failed. Please try again.';
+
+        // Extract the most helpful error message
+        if (error.error && typeof error.error === 'object' && error.error.error) {
+          errorMessage = error.error.error;
+        } else if (error.status === 0) {
+          errorMessage = 'Cannot connect to server. Please check your internet connection.';
+        } else if (error.status === 400) {
+          errorMessage = 'Invalid registration data. Please check your inputs.';
+        } else if (error.status === 409) {
+          errorMessage = 'User with this email or phone already exists.';
+        }
+
+        this.presentToast(errorMessage, 'danger');
+      }
+    });
+  }
 }
