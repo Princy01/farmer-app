@@ -226,17 +226,33 @@
               slot="start"
               class="input-icon"
             ></ion-icon>
-            <ion-input
-              type="number"
-              placeholder="Location ID"
+            <ion-select
+              placeholder="Select Location"
               formControlName="location"
-              class="input-field"
+              class="role-select"
             >
-            </ion-input>
+              <ion-select-option
+                *ngFor="let location of locations"
+                [value]="location.id"
+              >
+                {{ location.location }}
+              </ion-select-option>
+            </ion-select>
+            <ion-spinner
+              *ngIf="isLoadingLocations"
+              name="dots"
+              slot="end"
+            ></ion-spinner>
           </ion-item>
+          <div
+            class="error-message"
+            *ngIf="registerForm.get('location')?.touched && registerForm.get('location')?.errors?.['required']"
+          >
+            Please select a location
+          </div>
         </div>
 
-        <!-- State field - ADDED -->
+        <!-- State field-->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
             <ion-icon
@@ -244,17 +260,33 @@
               slot="start"
               class="input-icon"
             ></ion-icon>
-            <ion-input
-              type="number"
-              placeholder="State ID"
+            <ion-select
+              placeholder="Select State"
               formControlName="state"
-              class="input-field"
+              class="role-select"
             >
-            </ion-input>
+              <ion-select-option
+                *ngFor="let state of states"
+                [value]="state.id"
+              >
+                {{ state.state }}
+              </ion-select-option>
+            </ion-select>
+            <ion-spinner
+              *ngIf="isLoadingStates"
+              name="dots"
+              slot="end"
+            ></ion-spinner>
           </ion-item>
+          <div
+            class="error-message"
+            *ngIf="registerForm.get('state')?.touched && registerForm.get('state')?.errors?.['required']"
+          >
+            Please select a state
+          </div>
         </div>
 
-        <!-- Pincode field - ADDED -->
+        <!-- Pincode field-->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
             <ion-icon
@@ -298,24 +330,6 @@
           >
             Please select your role
           </div>
-        </div>
-
-        <!-- Active status toggle - ADDED -->
-        <div class="input-group">
-          <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="checkmark-circle-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-label>Active Status</ion-label>
-            <ion-toggle
-              [checked]="registerForm.get('active_status')?.value === 1"
-              (ionChange)="onActiveStatusChange($event)"
-              slot="end"
-            >
-            </ion-toggle>
-          </ion-item>
         </div>
 
         <ion-button

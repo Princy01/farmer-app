@@ -44,6 +44,20 @@ export interface AuthResponse {
   refresh_token: string;
 }
 
+export interface Location {
+  id: number;
+  location: string;
+  city_id?: number;
+  city_name?: string;
+  state_id?: number;
+}
+
+export interface State {
+  id: number;
+  state: string;
+  state_shortnames?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -86,7 +100,6 @@ export class AuthService {
           }
         }),
         catchError(error => {
-          console.error('Token refresh failed:', error);
           // If refresh fails, log the user out
           this.logout();
           return throwError(() => error);
@@ -96,28 +109,14 @@ export class AuthService {
 
   registerUser(userData: UserRegistration): Observable<any> {
     const url = `${this.apiUrl}/auth/register-user`;
-    console.log('Sending registration request to:', url);
-    console.log('Registration data:', userData);
 
     return this.http.post(url, userData)
       .pipe(
-        tap(response => console.log('Registration response:', response)),
         catchError(error => {
-          console.error('Registration error:', error);
-
-          // If the server is running but returned an error
-          if (error.status) {
-            console.log(`Server returned status code ${error.status}`);
-          } else {
-            // If the server is not reachable
-            console.log('Could not connect to server - check if it is running');
-          }
-
           return throwError(() => error);
         })
       );
   }
-
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
@@ -130,5 +129,23 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  getLocations(): Observable<Location[]> {
+    return this.http.get<Location[]>(`${this.apiUrl}/getLocations`)
+      .pipe(
+        catchError(error => {
+          return throwError(() => error);
+        })
+      );
+  }
+
+  getStates(): Observable<State[]> {
+    return this.http.get<State[]>(`${this.apiUrl}/getStates`)
+      .pipe(
+        catchError(error => {
+          return throwError(() => error);
+        })
+      );
   }
 }

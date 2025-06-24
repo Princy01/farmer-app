@@ -11,7 +11,7 @@ import {
   carOutline, shieldCheckmarkOutline, logInOutline,
   personAddOutline, locationOutline, mapOutline
 } from 'ionicons/icons';
-import { AuthService, UserRegistration, LoginCredentials } from './auth.service';
+import { AuthService, UserRegistration, LoginCredentials, Location, State } from './auth.service';
 
 enum UserRole {
   Admin = 1,
@@ -33,6 +33,10 @@ export class LoginPage {
   showLoginPassword = false;
   showRegisterPassword = false;
   isLoading = false;
+  locations: Location[] = [];
+  states: State[] = [];
+  isLoadingLocations = false;
+  isLoadingStates = false;
 
   userRoles = [
     { id: UserRole.Wholesaler, name: 'Wholesaler' },
@@ -62,13 +66,15 @@ export class LoginPage {
       name: ['', Validators.required],
       identifier: ['', [Validators.required, this.emailOrPhoneValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      address: ['Default Address'],
-      location: [0],
-      state: [0],
-      pincode: ['000000'],
+      address: [''],
+      location: ['', Validators.required],
+      state: ['', Validators.required],
+      pincode: [''],
       role_id: ['', Validators.required],
       active_status: [1]
     });
+    this.loadLocations();
+    this.loadStates();
   }
 
   toggleLoginPasswordVisibility() {
@@ -106,12 +112,6 @@ export class LoginPage {
     toast.present();
   }
 
-  onActiveStatusChange(event: any) {
-    // Convert boolean to number (0 or 1)
-    const value = event.detail.checked ? 1 : 0;
-    this.registerForm.get('active_status')?.setValue(value);
-  }
-
   onLogin() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -140,18 +140,31 @@ export class LoginPage {
           } else if (roleId === UserRole.Retailer) {
             this.router.navigate(['/buyer/buyer-home']);
           } else {
+            // Log the technical error for developers
             console.error('Unknown role:', roleId);
-            this.presentToast('Unknown user role', 'danger');
+            // Show a user-friendly message
+            this.presentToast('Unable to access your account. Please contact support.', 'danger');
           }
         }, 1000);
       },
       error: (error) => {
         this.isLoading = false;
-        console.error('Login failed:', error);
-        let errorMessage = 'Login failed. Please try again.';
 
+        // Log the full error for developers
+        console.error('Login failed:', error);
+
+        // User-friendly error message
+        let errorMessage = 'Unable to log in. Please check your credentials and try again.';
+
+        // Extract specific error messages from the backend if available
         if (error.error && error.error.error) {
-          errorMessage = error.error.error;
+          // Check if it's a user-friendly message from the backend
+          if (error.error.error.includes('invalid credentials') ||
+            error.error.error.includes('Login failed')) {
+            errorMessage = 'Invalid email/phone or password.';
+          }
+        } else if (error.status === 0) {
+          errorMessage = 'Cannot connect to the server. Please check your internet connection.';
         }
 
         this.presentToast(errorMessage, 'danger');
@@ -184,42 +197,76 @@ export class LoginPage {
       active_status: formData.active_status
     };
 
-    console.log('Sending registration data:', userData);
-
     this.authService.registerUser(userData).subscribe({
       next: (response) => {
         this.isLoading = false;
-        console.log('Registration successful:', response);
         this.presentToast('Registration successful! Please login.', 'success');
 
         // Reset the form and return to login mode
         this.registerForm.reset({
-          // Set default values for non-required fields
-          address: 'Default Address',
-          location: 0,
-          state: 0,
-          pincode: '000000',
+          address: '',
+          location: '',
+          state: '',
+          pincode: '',
           active_status: 1
         });
         this.authMode = 'login';
       },
       error: (error) => {
         this.isLoading = false;
+
+        // Log full error details for developers
         console.error('Registration failed:', error);
-        let errorMessage = 'Registration failed. Please try again.';
+
+        // User-friendly error message
+        let errorMessage = 'Unable to create your account. Please try again later.';
 
         // Extract the most helpful error message
         if (error.error && typeof error.error === 'object' && error.error.error) {
-          errorMessage = error.error.error;
+          // Check if it contains user-friendly info
+          if (error.error.error.includes('already exists')) {
+            errorMessage = 'An account with this email or phone number already exists.';
+          } else if (error.error.error.includes('Invalid email')) {
+            errorMessage = 'Please enter a valid email address.';
+          }
         } else if (error.status === 0) {
-          errorMessage = 'Cannot connect to server. Please check your internet connection.';
+          errorMessage = 'Cannot connect to the server. Please check your internet connection.';
         } else if (error.status === 400) {
-          errorMessage = 'Invalid registration data. Please check your inputs.';
-        } else if (error.status === 409) {
-          errorMessage = 'User with this email or phone already exists.';
+          errorMessage = 'Please check your information and try again.';
         }
 
         this.presentToast(errorMessage, 'danger');
+      }
+    });
+  }
+  loadLocations() {
+    this.isLoadingLocations = true;
+    this.authService.getLocations().subscribe({
+      next: (locations) => {
+        console.log('Locations data received:', locations);
+        this.locations = locations;
+        this.isLoadingLocations = false;
+      },
+      error: (error) => {
+        console.error('Failed to load locations:', error);
+        this.isLoadingLocations = false;
+        this.presentToast('Failed to load locations. Please try again.', 'danger');
+      }
+    });
+  }
+
+  loadStates() {
+    this.isLoadingStates = true;
+    this.authService.getStates().subscribe({
+      next: (states) => {
+        console.log('States data received:', states);
+        this.states = states;
+        this.isLoadingStates = false;
+      },
+      error: (error) => {
+        console.error('Failed to load states:', error);
+        this.isLoadingStates = false;
+        this.presentToast('Failed to load states. Please try again.', 'danger');
       }
     });
   }
