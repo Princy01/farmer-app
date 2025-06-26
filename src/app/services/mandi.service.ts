@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
-// mandi.model.ts
 export interface Mandi {
   mandi_id: number;
   mandi_location: string;
@@ -26,7 +26,7 @@ export interface Mandi {
   providedIn: 'root'
 })
 export class MandiService {
-  private apiUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 

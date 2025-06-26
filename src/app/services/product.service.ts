@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
-// product.model.ts
 export interface Product {
   product_id: number;
   category_id: number;
@@ -15,11 +15,11 @@ export interface Product {
   providedIn: 'root'
 })
 export class ProductService {
-  private apiUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
-  createProduct(product: Product): Observable<any> { 
+  createProduct(product: Product): Observable<any> {
     return this.http.post(`${this.apiUrl}/productDetails`, product)
       .pipe(catchError(this.handleError));
   }

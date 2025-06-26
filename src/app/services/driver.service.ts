@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError, take } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
-// driver.model.ts
 export interface Driver {
   driver_id: number;
   driver_name: string;
-  driver_age: number | null; // Allow null values
+  driver_age: number | null;
   driver_license: string;
   driver_number: string;
   driver_address: string | null;
@@ -44,7 +44,7 @@ export interface DriverRead{
   providedIn: 'root'
 })
 export class DriverService {
-  private apiUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 

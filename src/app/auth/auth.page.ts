@@ -243,7 +243,6 @@ export class LoginPage {
     this.isLoadingLocations = true;
     this.authService.getLocations().subscribe({
       next: (locations) => {
-        console.log('Locations data received:', locations);
         this.locations = locations;
         this.isLoadingLocations = false;
       },
@@ -259,7 +258,6 @@ export class LoginPage {
     this.isLoadingStates = true;
     this.authService.getStates().subscribe({
       next: (states) => {
-        console.log('States data received:', states);
         this.states = states;
         this.isLoadingStates = false;
       },

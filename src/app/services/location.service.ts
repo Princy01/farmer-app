@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
-// location.model.ts
 export interface Location {
   id: number;
   location: string | null;
@@ -16,7 +16,7 @@ export interface Location {
   providedIn: 'root'
 })
 export class LocationService {
-  private apiUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 

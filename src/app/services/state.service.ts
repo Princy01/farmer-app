@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
-// state.model.ts
 export interface State {
   id: number;
   state: string;
@@ -13,7 +13,7 @@ export interface State {
   providedIn: 'root'
 })
 export class StateService {
-  private apiUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
@@ -34,7 +34,7 @@ export class StateService {
     return this.http.put(`${this.apiUrl}/statesUpdate`, state) // Corrected endpoint
       .pipe(catchError(this.handleError));
   }
-  // a DeleteState function in Go is needed 
+  // a DeleteState function in Go is needed
   deleteState(id: number): Observable<any> { // Or Observable<void>
     return this.http.delete(`${this.apiUrl}/stateDelete/${id}`)
       .pipe(catchError(this.handleError));

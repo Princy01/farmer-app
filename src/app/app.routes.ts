@@ -304,10 +304,10 @@ export const routes: Routes = [
         path: 'earnings-dashboard',
         loadComponent: () => import('./transport/earnings-dashboard/earnings-dashboard.component').then((m) => m.EarningsDashboardComponent),
       },
-      {
-        path: 'delivery-history',
-        loadComponent: () => import('./transport/delivery-history/delivery-history.component').then((m) => m.DeliveryHistoryComponent),
-      },
+      // {
+      //   path: 'delivery-history',
+      //   loadComponent: () => import('./transport/delivery-history/delivery-history.component').then((m) => m.DeliveryHistoryComponent),
+      // },
       {
         path: 'notifications',
         loadComponent: () => import('./transport/notifications/notifications.component').then((m) => m.NotificationsComponent),

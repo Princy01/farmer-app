@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, map, catchError } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 interface CartProduct {
   product_id: number;
@@ -57,14 +58,14 @@ interface CreateCartRequest {
   providedIn: 'root'
 })
 export class CartService {
-  private baseUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
   private cartSubject = new BehaviorSubject<CartResponse | null>(null);
   cart$ = this.cartSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
   getCart(cartId: number): Observable<CartResponse> {
-    return this.http.get<ApiResponse<CartResponse>>(`${this.baseUrl}/getCartitems/${cartId}`).pipe(
+    return this.http.get<ApiResponse<CartResponse>>(`${this.apiUrl}/getCartitems/${cartId}`).pipe(
       map(response => {
         if (response.status === 'error') {
           throw new Error(response.message);
@@ -80,7 +81,7 @@ export class CartService {
   }
 
   createCart(cartData: CreateCartRequest): Observable<CartResponse> {
-    return this.http.post<ApiResponse<CartResponse>>(`${this.baseUrl}/InsertCartDetails`, cartData).pipe(
+    return this.http.post<ApiResponse<CartResponse>>(`${this.apiUrl}/InsertCartDetails`, cartData).pipe(
       map(response => {
         if (response.status === 'error') {
           throw new Error(response.message);
@@ -97,8 +98,8 @@ export class CartService {
 
   removeCartItem(cartId: number, productId: number, wholesellerId?: number): Observable<CartResponse> {
     const url = wholesellerId ?
-      `${this.baseUrl}/cart/${cartId}/item/${productId}?wholeseller_id=${wholesellerId}` :
-      `${this.baseUrl}/cart/${cartId}/item/${productId}`;
+      `${this.apiUrl}/cart/${cartId}/item/${productId}?wholeseller_id=${wholesellerId}` :
+      `${this.apiUrl}/cart/${cartId}/item/${productId}`;
 
     return this.http.delete<ApiResponse<CartResponse>>(url).pipe(
       map(response => {

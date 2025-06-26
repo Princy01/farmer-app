@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 export interface BusinessBranch {
   b_branch_id?: number;
@@ -24,7 +25,7 @@ export interface BusinessBranch {
   providedIn: 'root'
 })
 export class BusinessBranchService {
-  private apiUrl = 'http://127.0.0.1:3000';  // Go Fiber backend URL
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

@@ -1,32 +1,43 @@
 <ion-content>
 
   <!-- Search Past Deliveries -->
-  <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="filterDeliveries()"></ion-searchbar>
+  <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="filterDeliveries()" placeholder="Search by location or order ID"></ion-searchbar>
+
+  <!-- Loading Indicator -->
+  <div class="ion-text-center" *ngIf="isLoading">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>Loading delivery history...</p>
+  </div>
+
+  <!-- Error Message -->
+  <ion-item *ngIf="error" color="danger">
+    <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+    <ion-label>{{ error }}</ion-label>
+    <ion-button slot="end" (click)="loadDeliveryHistory()">Retry</ion-button>
+  </ion-item>
+
+  <!-- Empty State -->
+  <ion-item *ngIf="!isLoading && filteredDeliveries.length === 0 && !error">
+    <ion-label class="ion-text-center">
+      <p>No delivery history found</p>
+    </ion-label>
+  </ion-item>
 
   <!-- Delivery History List -->
-  <ion-list>
-    <ion-item *ngFor="let order of filteredOrders">
+  <ion-list *ngIf="!isLoading && filteredDeliveries.length > 0">
+    <ion-item *ngFor="let delivery of filteredDeliveries">
       <ion-label>
-        <h3>Order ID: #{{ order.id }}</h3>
-        <p><strong>Pickup:</strong> {{ order.pickup }} → <strong>Drop:</strong> {{ order.drop }}</p>
-        <p><strong>Load:</strong> {{ order.load }} | <strong>Charges:</strong> ₹{{ order.charges }}</p>
-        <p><strong>Status:</strong> {{ order.status }}</p>
+        <h3>Order ID: #{{ delivery.order_id }}</h3>
+        <p><strong>Pickup:</strong> {{ delivery.pickup_address }} → <strong>Drop:</strong> {{ delivery.drop_address }}</p>
+        <p><strong>Load:</strong> {{ delivery.weight_kg }} kg | <strong>Charges:</strong> ₹{{ delivery.base_price }}</p>
+        <p><strong>Job ID:</strong> {{ delivery.job_id }}</p>
       </ion-label>
 
       <!-- Dispute Button (Visible only if needed) -->
-      <ion-button *ngIf="order.hasDispute" color="danger" (click)="resolveDispute(order.id)">
+      <ion-button *ngIf="delivery.hasDispute" color="danger" (click)="resolveDispute(delivery.job_id)">
         Resolve Dispute
       </ion-button>
     </ion-item>
   </ion-list>
 
 </ion-content>
-
-<!-- Footer Navigation -->
-<!-- <ion-footer>
-  <ion-toolbar>
-    <div class="center-button">
-      <ion-button class="custom-button" (click)="goToReports()">📊 Go to Reports</ion-button>
-</div>
-  </ion-toolbar>
-</ion-footer> -->

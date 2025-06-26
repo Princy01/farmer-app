@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, throwError } from 'rxjs';
-
+import { environment } from 'src/environments/environment';
 export interface LoginCredentials {
   identifier: string;
   password: string;
@@ -62,7 +62,7 @@ export interface State {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
   private tokenKey = 'auth_token';
   private refreshTokenKey = 'refresh_token';
 

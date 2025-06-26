@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 export interface OrderStatus {
   order_status_id: number;
@@ -11,7 +12,7 @@ export interface OrderStatus {
   providedIn: 'root'
 })
 export class OrderStatusService {
-  private apiUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

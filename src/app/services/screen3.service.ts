@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, take } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
 export interface ForSaleOrder {
   item: string;
@@ -17,7 +18,7 @@ export interface ForSaleOrder {
   providedIn: 'root'
 })
 export class Screen3Service {
-  private apiUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 

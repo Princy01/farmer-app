@@ -10,7 +10,6 @@ interface TransporterRate {
   lastUpdated: string;
 }
 
-// Add this interface to database.service.ts
 interface DriverAssignmentRequest {
   deliveryType: string;
   urgency: string;

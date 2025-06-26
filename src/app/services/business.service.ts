@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 export interface Business {
   b_typeid: number;
@@ -19,44 +20,44 @@ export interface Business {
   providedIn: 'root'
 })
 export class BusinessService {
-  private baseUrl = 'http://localhost:3000'; // Update with actual API URL
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
 
   getBusinesses(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/getBusinesses`);
+    return this.http.get(`${this.apiUrl}/getBusinesses`);
   }
 
   insertBusiness(business: Business): Observable<any> {
-    return this.http.post(`${this.baseUrl}/businessDetails`, business);
+    return this.http.post(`${this.apiUrl}/businessDetails`, business);
   }
 
   getBusinessById(bid: number): Observable<any> {
-    return this.http.get(`${this.baseUrl}/${bid}`);
+    return this.http.get(`${this.apiUrl}/${bid}`);
   }
 
   updateBusiness(business: Business): Observable<any> {
-    return this.http.put(`${this.baseUrl}/businessUpdate`, business);
+    return this.http.put(`${this.apiUrl}/businessUpdate`, business);
   }
 
   // deleteBusiness(bid: number): Observable<any> {
-  //   return this.http.delete(`${this.baseUrl}/delete/${bid}`);
+  //   return this.http.delete(`${this.apiUrl}/delete/${bid}`);
   // }
 
   getBusinessTypes(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/getBusinessStatus`);
+    return this.http.get<any[]>(`${this.apiUrl}/getBusinessStatus`);
   }
 
   getLocations(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/getLocations`);
+    return this.http.get<any[]>(`${this.apiUrl}/getLocations`);
   }
 
   getStates(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/getStates`);
+    return this.http.get<any[]>(`${this.apiUrl}/getStates`);
   }
 
   getMandis(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/getMandis`);
+    return this.http.get<any[]>(`${this.apiUrl}/getMandis`);
   }
 }

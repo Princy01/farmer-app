@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
-// vehicle.model.ts
 export interface Vehicle {
   vehicle_id: number;
   insurance_id: number;
@@ -23,7 +23,7 @@ export interface Vehicle {
   providedIn: 'root'
 })
 export class VehicleService {
-  private apiUrl = 'http://127.0.0.1:3000';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

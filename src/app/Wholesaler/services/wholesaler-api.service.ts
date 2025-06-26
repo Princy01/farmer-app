@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 //for home screen
 interface OrderSummary {
@@ -174,31 +175,31 @@ export interface WholesellerEntryResponse {
   providedIn: 'root'
 })
 export class WholesalerApiService {
-  private readonly API_URL = 'http://localhost:3000';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
   getOrderSummary(): Observable<OrderSummary[]> {
-    return this.http.get<OrderSummary[]>(`${this.API_URL}/getOrderSummary`);
+    return this.http.get<OrderSummary[]>(`${this.apiUrl}/getOrderSummary`);
   }
 
   getOrderItemDetails(): Observable<OrderItemDetails[]> {
-    return this.http.get<OrderItemDetails[]>(`${this.API_URL}/getOrderItemDetails`);
+    return this.http.get<OrderItemDetails[]>(`${this.apiUrl}/getOrderItemDetails`);
   }
 
   getOrderDetails(orderId: number): Observable<OrderDetailedView> {
-    return this.http.get<OrderDetailedView>(`${this.API_URL}/getOrderDetails/${orderId}`);
+    return this.http.get<OrderDetailedView>(`${this.apiUrl}/getOrderDetails/${orderId}`);
   }
 
   getOrderFullDetails(orderId: number): Observable<OrderFullDetails> {
     return this.http.get<OrderFullDetails>(
-      `${this.API_URL}/getAllOrderDetails/${orderId}`
+      `${this.apiUrl}/getAllOrderDetails/${orderId}`
     );
   }
 
   getCompletedOrders(daysAgo?: number): Observable<OrderItemDetails[]> {
     return this.http.get<OrderItemDetails[]>(
-      `${this.API_URL}/getCompletedOrderSummary`
+      `${this.apiUrl}/getCompletedOrderSummary`
     ).pipe(
       map(orders => {
         if (daysAgo) {
@@ -216,29 +217,29 @@ export class WholesalerApiService {
 
   getRestockingRecommendations(): Observable<RestockProduct[]> {
     return this.http.get<RestockProduct[]>(
-      `${this.API_URL}/getReStockProductsHandler`
+      `${this.apiUrl}/getReStockProductsHandler`
     );
   }
 
   getBulkOrders(): Observable<BulkOrder[]> {
-    return this.http.get<BulkOrder[]>(`${this.API_URL}/getAllBulkOrderDetails`);
+    return this.http.get<BulkOrder[]>(`${this.apiUrl}/getAllBulkOrderDetails`);
   }
 
   getTopRetailers(): Observable<TopRetailer[]> {
-    return this.http.get<TopRetailer[]>(`${this.API_URL}/getTopRetailerDetails`);
+    return this.http.get<TopRetailer[]>(`${this.apiUrl}/getTopRetailerDetails`);
   }
 
 
   createOffer(offer: CreateOfferRequest): Observable<CreateOfferResponse> {
     return this.http.post<CreateOfferResponse>(
-      `${this.API_URL}/InsertWholesellerOffers`,
+      `${this.apiUrl}/InsertWholesellerOffers`,
       offer
     );
   }
 
   createWholesellerEntry(entry: WholesellerEntry): Observable<WholesellerEntryResponse> {
     return this.http.post<WholesellerEntryResponse>(
-      `${this.API_URL}/InsertWholesellerOrder`,
+      `${this.apiUrl}/InsertWholesellerOrder`,
       entry
     );
   }
