@@ -7,6 +7,7 @@ import { chevronBack, search, funnelOutline, swapVerticalOutline, heartOutline, 
 import { FormsModule } from '@angular/forms';
 import { BuyerApiService, Product, Category, CategoryWithSubCategories } from '../services/buyer-api.service';
 import { catchError, finalize, switchMap, tap } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 
 @Component({
   selector: 'app-category-page',
@@ -100,12 +101,18 @@ export class CategoryPageComponent implements OnInit {
         this.selectedCategoryId = categoryData.category_id;
         this.loadingCategories = false;
 
+        // Set default selection to "All"
+        this.selectedSubcategoryId = this.categoryId;
+        this.selectedSubcategory = this.categoryName;
+
         return this.fetchProductsByCategoryID(this.categoryId);
       })
     ).subscribe({
       next: (products) => {
-        this.productsList = products;
-        this.selectedSubcategoryItems = products;
+        // Filter out null or undefined products
+        const validProducts = (products || []).filter(p => p && typeof p === 'object');
+        this.productsList = validProducts;
+        this.selectedSubcategoryItems = validProducts;
         this.applyFilters();
         this.loadingProducts = false;
       },
@@ -123,7 +130,10 @@ export class CategoryPageComponent implements OnInit {
     this.selectedSubcategory = subcategory.category_name;
     this.selectedSubcategoryId = subcategory.category_id;
 
-    this.fetchProductsByCategoryID(subcategory.category_id).subscribe({
+    // If "All", fetch all products for the main category
+    const isMainCategory = subcategory.category_id === this.categoryId;
+
+    this.fetchProductsByCategoryID(isMainCategory ? this.categoryId : subcategory.category_id).subscribe({
       next: (products) => {
         this.productsList = products;
         this.selectedSubcategoryItems = products;
@@ -139,14 +149,32 @@ export class CategoryPageComponent implements OnInit {
   }
 
   private fetchProductsByCategoryID(categoryId: number) {
-    return this.buyerApiService.getProductsByCategoryId(categoryId).pipe(
-      catchError(error => {
-        console.error('Error fetching products:', error);
-        this.errorLoadingProducts = true;
-        this.loadingProducts = false;
-        throw error;
-      })
-    );
+    // If fetching for the main category, get products for all subcategories too
+    if (categoryId === this.categoryId && this.categories.length > 0) {
+      // Fetch products for all subcategories and main category, then flatten
+      const allCategoryIds = [this.categoryId, ...this.categories.map(cat => cat.category_id)];
+      return forkJoin(
+        allCategoryIds.map(id =>
+          this.buyerApiService.getProductsByCategoryId(id).pipe(
+            catchError(() => of([])) // Ignore errors for individual subcategories
+          )
+        )
+      ).pipe(
+        // Flatten the array of arrays into a single array
+        // @ts-ignore
+        switchMap((results: Product[][]) => of([].concat(...results)))
+      );
+    } else {
+      // Normal fetch for a single category
+      return this.buyerApiService.getProductsByCategoryId(categoryId).pipe(
+        catchError(error => {
+          console.error('Error fetching products:', error);
+          this.errorLoadingProducts = true;
+          this.loadingProducts = false;
+          throw error;
+        })
+      );
+    }
   }
 
   toggleSearch() {
@@ -181,15 +209,15 @@ export class CategoryPageComponent implements OnInit {
 
     // Update sort options to remove price-based sorting
     switch (this.sortOption) {
-        case 'name-asc':
-          items.sort((a, b) => a.product_name.localeCompare(b.product_name));
-          break;
-        case 'name-desc':
-          items.sort((a, b) => b.product_name.localeCompare(a.product_name));
-          break;
-    //   case 'rating':
-    //     items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    //     break;
+      case 'name-asc':
+        items.sort((a, b) => a.product_name.localeCompare(b.product_name));
+        break;
+      case 'name-desc':
+        items.sort((a, b) => b.product_name.localeCompare(a.product_name));
+        break;
+      //   case 'rating':
+      //     items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      //     break;
     }
 
     return items;

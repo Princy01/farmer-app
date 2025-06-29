@@ -7,6 +7,7 @@ import { chatbubblesSharp, notificationsCircleSharp,logoAndroid, personCircleSha
    trendingUpOutline, reloadOutline, settingsOutline, closeOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
+import { AuthService } from '@/auth/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -36,7 +37,8 @@ export class HomePage {
     private actionSheetController: ActionSheetController,
     private wholesalerService: WholesalerApiService,
     private loadingCtrl: LoadingController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private authService: AuthService
   ) {
 
     addIcons({chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
@@ -139,11 +141,14 @@ async handleRefresh(event: any) {
           }
         },
         {
-          text: 'Cancel',
+          text: 'Logout',
           icon: 'close-outline',
-          role: 'cancel',
-          cssClass: 'custom-action-sheet-btn'
-        }
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.authService.logout(); // <-- Call logout logic
+            this.router.navigate(['/login']);
+          }
+        },
       ]
     });
     await actionSheet.present();

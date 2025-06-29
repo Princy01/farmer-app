@@ -94,7 +94,7 @@ export class BuyerHomeComponent {
 
   onImageError(event: any) {
     // Set a default image when category image fails to load
-    event.target.src = 'assets/img/default-category.png';
+    event.target.src = '';
   }
 
   async presentActionSheet() {
