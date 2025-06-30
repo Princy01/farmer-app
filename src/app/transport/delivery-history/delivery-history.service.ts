@@ -22,7 +22,7 @@ export class DeliveryService {
   constructor(private http: HttpClient) { }
 
   getDeliveryHistory(): Observable<{ deliveries: Delivery[] }> {
-    return this.http.get<{ deliveries: Delivery[] }>(`${this.apiUrl}/delivery-history`);
+    return this.http.get<{ deliveries: Delivery[] }>(`${this.apiUrl}/transportation/delivery/delivery-history`);
   }
 
   resolveDispute(jobId: string): Observable<any> {

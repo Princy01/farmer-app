@@ -25,25 +25,31 @@ export class DeliveryHistoryComponent implements OnInit {
   }
 
   loadDeliveryHistory() {
-    this.isLoading = true;
-    this.error = null;
+  this.isLoading = true;
+  this.error = null;
 
-    this.deliveryService.getDeliveryHistory().subscribe({
-      next: (response) => {
+  this.deliveryService.getDeliveryHistory().subscribe({
+    next: (response) => {
+      if (response && Array.isArray(response.deliveries)) {
         this.deliveries = response.deliveries;
         this.deliveries.forEach(delivery => {
           delivery.hasDispute = Math.random() < 0.3;
         });
         this.filteredDeliveries = [...this.deliveries];
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Failed to load delivery history', err);
-        this.error = 'Failed to load delivery history. Please try again.';
-        this.isLoading = false;
+      } else {
+        this.deliveries = [];
+        this.filteredDeliveries = [];
+        this.error = 'No delivery history found or invalid response.';
       }
-    });
-  }
+      this.isLoading = false;
+    },
+    error: (err) => {
+      console.error('Failed to load delivery history', err);
+      this.error = 'Failed to load delivery history. Please try again.';
+      this.isLoading = false;
+    }
+  });
+}
 
   filterDeliveries() {
     if (!this.searchQuery.trim()) {
