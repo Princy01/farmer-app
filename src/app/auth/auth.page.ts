@@ -16,7 +16,8 @@ import { AuthService, UserRegistration, LoginCredentials, Location, State } from
 enum UserRole {
   Admin = 1,
   Wholesaler = 2,
-  Retailer = 3
+  Retailer = 3,
+  Driver = 4
 }
 
 @Component({
@@ -40,7 +41,8 @@ export class LoginPage {
 
   userRoles = [
     { id: UserRole.Wholesaler, name: 'Wholesaler' },
-    { id: UserRole.Retailer, name: 'Retailer' }
+    { id: UserRole.Retailer, name: 'Retailer' },
+    { id: UserRole.Driver, name: 'Driver' }
   ];
 
   constructor(
@@ -139,10 +141,10 @@ export class LoginPage {
             this.router.navigate(['/wholesaler/home']);
           } else if (roleId === UserRole.Retailer) {
             this.router.navigate(['/buyer/buyer-home']);
+          } else if (roleId === UserRole.Driver) {
+            this.router.navigate(['/transport/transport-dashboard']);
           } else {
-            // Log the technical error for developers
             console.error('Unknown role:', roleId);
-            // Show a user-friendly message
             this.presentToast('Unable to access your account. Please contact support.', 'danger');
           }
         }, 1000);
