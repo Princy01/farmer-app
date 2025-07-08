@@ -151,8 +151,6 @@ export interface CreateOfferResponse {
   offer_id: number;
 }
 
-
-
 //for-sale screen
 export interface WholesellerEntry {
   product_id: number;
@@ -189,23 +187,17 @@ export class WholesalerApiService {
     });
   }
   getOrderSummary(): Observable<OrderSummary[]> {
-  const headers = this.getAuthHeaders();
-  return this.http.get<OrderSummary[]>(
-    `${this.apiUrl}/getOrderSummary`,
-    { headers }
-  );
-}
-
-  getOrderItemDetails(wholesalerId?: number): Observable<OrderItemDetails[]> {
     const headers = this.getAuthHeaders();
-    const id = wholesalerId || this.authService.getUserId();
+    return this.http.get<OrderSummary[]>(
+      `${this.apiUrl}/getOrderSummary`,
+      { headers }
+    );
+  }
 
-    if (!id) {
-      throw new Error('No wholesaler ID available');
-    }
-
+  getOrderItemDetails(): Observable<OrderItemDetails[]> {
+    const headers = this.getAuthHeaders();
     return this.http.get<OrderItemDetails[]>(
-      `${this.apiUrl}/getOrderItemDetails/${id}`,
+      `${this.apiUrl}/getOrderItemDetails`,
       { headers }
     );
   }
@@ -333,7 +325,7 @@ export class WholesalerApiService {
     );
   }
 
-  getProducts(wholesalerId?: number): Observable<{product_id: number, product_name: string}[]> {
+  getProducts(wholesalerId?: number): Observable<{ product_id: number, product_name: string }[]> {
     const headers = this.getAuthHeaders();
     const id = wholesalerId || this.authService.getUserId();
 
@@ -341,13 +333,13 @@ export class WholesalerApiService {
       throw new Error('No wholesaler ID available');
     }
 
-    return this.http.get<{product_id: number, product_name: string}[]>(
+    return this.http.get<{ product_id: number, product_name: string }[]>(
       `${this.apiUrl}/getProducts/${id}`,
       { headers }
     );
   }
 
-  getMandis(wholesalerId?: number): Observable<{mandi_id: number, mandi_name: string}[]> {
+  getMandis(wholesalerId?: number): Observable<{ mandi_id: number, mandi_name: string }[]> {
     const headers = this.getAuthHeaders();
     const id = wholesalerId || this.authService.getUserId();
 
@@ -355,13 +347,13 @@ export class WholesalerApiService {
       throw new Error('No wholesaler ID available');
     }
 
-    return this.http.get<{mandi_id: number, mandi_name: string}[]>(
+    return this.http.get<{ mandi_id: number, mandi_name: string }[]>(
       `${this.apiUrl}/getMandis/${id}`,
       { headers }
     );
   }
 
-  getWarehouses(wholesalerId?: number): Observable<{warehouse_id: number, warehouse_name: string}[]> {
+  getWarehouses(wholesalerId?: number): Observable<{ warehouse_id: number, warehouse_name: string }[]> {
     const headers = this.getAuthHeaders();
     const id = wholesalerId || this.authService.getUserId();
 
@@ -369,15 +361,15 @@ export class WholesalerApiService {
       throw new Error('No wholesaler ID available');
     }
 
-    return this.http.get<{warehouse_id: number, warehouse_name: string}[]>(
+    return this.http.get<{ warehouse_id: number, warehouse_name: string }[]>(
       `${this.apiUrl}/getWarehouses/${id}`,
       { headers }
     );
   }
 
-  getUnits(): Observable<{unit_id: number, unit_name: string}[]> {
+  getUnits(): Observable<{ unit_id: number, unit_name: string }[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<{unit_id: number, unit_name: string}[]>(
+    return this.http.get<{ unit_id: number, unit_name: string }[]>(
       `${this.apiUrl}/getUnits`,
       { headers }
     );

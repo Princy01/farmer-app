@@ -156,7 +156,7 @@ export class HomePage {
         {
           text: 'OK',
           handler: () => {
-            this.router.navigate(['/dashboard']); // Or appropriate page
+            this.router.navigate(['/login']); // Or appropriate page
           }
         }
       ]

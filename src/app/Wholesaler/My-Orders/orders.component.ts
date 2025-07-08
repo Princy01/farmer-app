@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { searchOutline, ellipsisVertical, menuOutline, closeOutline, chevronDownCircleOutline,
+import {
+  searchOutline, ellipsisVertical, menuOutline, closeOutline, chevronDownCircleOutline,
   chevronForwardOutline, receiptOutline
- } from 'ionicons/icons';
+} from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/auth.service';
 
 enum OrderFilter {
   DATE = 'date',
@@ -42,14 +44,14 @@ export class OrdersComponent {
   orders: any[] = [];
   filteredOrders: any[] = [];
 
-  private wholesalerId: number | null = null;
-
   constructor(
     private wholesalerService: WholesalerApiService,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private modalCtrl: ModalController,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
+
   ) {
     addIcons({
       searchOutline, ellipsisVertical, menuOutline, closeOutline,
@@ -58,30 +60,52 @@ export class OrdersComponent {
   }
 
   ngOnInit() {
-    this.initializeWholesaler();
+    this.checkAuthAndLoadData();
+  }
+
+  // authentication check
+  private checkAuthAndLoadData() {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    // Check if user has wholesaler role
+    const userRole = this.authService.getUserRole();
+    if (!this.authService.hasRole('wholesaler')) {
+      this.showUnauthorizedError();
+      return;
+    }
+
     this.loadOrders();
   }
 
-  private initializeWholesaler() {
-    const storedWholesalerId = localStorage.getItem('wholesalerId');
-    if (storedWholesalerId) {
-      this.wholesalerId = Number(storedWholesalerId);
-      this.loadOrders();
-    } else {
-      // Redirect to login if no wholesaler ID found
-      this.showAuthError();
-    }
-  }
-
-  private async showAuthError() {
+   private async showAuthError() {
     const alert = await this.alertCtrl.create({
       header: 'Authentication Error',
-      message: 'Please login again.',
+      message: 'Your session has expired. Please login again.',
       buttons: [
         {
           text: 'OK',
           handler: () => {
+            this.authService.logout();
             this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']); // Or appropriate page
           }
         }
       ]
@@ -116,6 +140,11 @@ export class OrdersComponent {
   }
 
   async loadOrders() {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
     const loading = await this.loadingCtrl.create({
       message: 'Loading orders...',
       spinner: 'circular'
@@ -124,42 +153,45 @@ export class OrdersComponent {
     try {
       await loading.present();
 
-      if (this.wholesalerId !== null) {
-        this.wholesalerService.getOrderItemDetails(this.wholesalerId).subscribe({
-          next: (data) => {
-            this.orders = data.map(order => ({
-              id: order.order_id,
-              items: this.formatOrderItems(order.order_items),
-              total: order.total_order_amount
-            }));
-            this.filteredOrders = [...this.orders];
-            loading.dismiss();
-          },
-          error: async (error) => {
-            loading.dismiss();
-            const alert = await this.alertCtrl.create({
-              header: 'Error',
-              message: 'Failed to load orders. Please try again.',
-              buttons: [
-                {
-                  text: 'Dismiss',
-                  role: 'cancel'
-                },
-                {
-                  text: 'Retry',
-                  handler: () => {
-                    this.loadOrders();
-                  }
-                }
-              ]
-            });
-            await alert.present();
+      // Call service without wholesaler ID - backend will get user_id from JWT
+      this.wholesalerService.getOrderItemDetails().subscribe({
+        next: (data) => {
+          this.orders = data.map(order => ({
+            id: order.order_id,
+            items: this.formatOrderItems(order.order_items),
+            total: order.total_order_amount
+          }));
+          this.filteredOrders = [...this.orders];
+          loading.dismiss();
+        },
+        error: async (error) => {
+          loading.dismiss();
+
+          // Handle authentication errors
+          if (error.status === 401) {
+            this.showAuthError();
+            return;
           }
-        });
-      } else {
-        loading.dismiss();
-        this.showAuthError();
-      }
+
+          const alert = await this.alertCtrl.create({
+            header: 'Error',
+            message: 'Failed to load orders. Please try again later.',
+            buttons: [
+              {
+                text: 'Dismiss',
+                role: 'cancel'
+              },
+              {
+                text: 'Retry',
+                handler: () => {
+                  this.loadOrders();
+                }
+              }
+            ]
+          });
+          await alert.present();
+        }
+      });
     } catch (err) {
       loading.dismiss();
       const alert = await this.alertCtrl.create({
