@@ -21,7 +21,7 @@ interface OrderItemDetails {
   order_id: number;
   total_order_amount: number;
   order_items: OrderItem[];
-  created_at?: string; // Add this field
+  created_at?: string;
 }
 
 @Component({
@@ -42,6 +42,7 @@ export class PastOrdersComponent implements AfterViewInit {
   hasError = false;
 
   private originalOrders: OrderItemDetails[] = [];
+  private wholesalerId: number | null = null;
   customStartDate: string = '';
   customEndDate: string = '';
 
@@ -57,7 +58,20 @@ export class PastOrdersComponent implements AfterViewInit {
     private alertCtrl: AlertController
   ) {
     addIcons({ alertCircleOutline, closeCircleOutline });
-    this.loadCompletedOrders();
+    this.initializeComponent();
+  }
+
+  private initializeComponent() {
+    // Get wholesaler ID from localStorage (same pattern as retailer cart)
+    const storedWholesalerId = localStorage.getItem('wholesalerId');
+    if (storedWholesalerId) {
+      this.wholesalerId = Number(storedWholesalerId);
+      this.loadCompletedOrders();
+    } else {
+      // Redirect to login if no wholesaler ID found
+      this.showError('Authentication Error', 'Please login again.');
+      this.router.navigate(['/wholesaler/login']); // Adjust path as needed
+    }
   }
 
   ngAfterViewInit() {
@@ -65,6 +79,11 @@ export class PastOrdersComponent implements AfterViewInit {
   }
 
   async loadCompletedOrders(daysAgo?: number) {
+    if (!this.wholesalerId) {
+      this.showError('Authentication Error', 'Wholesaler not found. Please login again.');
+      return;
+    }
+
     const loading = await this.loadingCtrl.create({
       message: 'Loading orders...',
       spinner: 'circular'
@@ -75,7 +94,7 @@ export class PastOrdersComponent implements AfterViewInit {
       this.isLoading = true;
       this.hasError = false;
 
-      this.wholesalerApiService.getCompletedOrders(daysAgo).subscribe({
+      this.wholesalerApiService.getCompletedOrders(this.wholesalerId, daysAgo).subscribe({
         next: async (orders) => {
           this.originalOrders = orders;
           this.completedOrders = orders;
@@ -124,7 +143,11 @@ export class PastOrdersComponent implements AfterViewInit {
         {
           text: 'Retry',
           handler: () => {
-            this.loadCompletedOrders();
+            if (this.wholesalerId) {
+              this.loadCompletedOrders();
+            } else {
+              this.initializeComponent();
+            }
           }
         }
       ]

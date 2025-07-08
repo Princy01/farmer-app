@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { WholesalerApiService, OrderFullDetails } from '../services/wholesaler-api.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -19,14 +19,45 @@ export class OrderDetailsComponent implements OnInit {
   loading = true;
   error = false;
 
+  private wholesalerId: number | null = null;
+
   constructor(
     private route: ActivatedRoute,
-    private wholesalerService: WholesalerApiService
-  ) {}
+    private router: Router,
+    private wholesalerService: WholesalerApiService,
+    private alertCtrl: AlertController) { }
 
   ngOnInit() {
     this.orderId = Number(this.route.snapshot.paramMap.get('id'));
+    this.initializeWholesaler();
     this.loadOrderDetails();
+  }
+
+  private initializeWholesaler() {
+    const storedWholesalerId = localStorage.getItem('wholesalerId');
+    if (storedWholesalerId) {
+      this.wholesalerId = Number(storedWholesalerId);
+      this.loadOrderDetails();
+    } else {
+      // Redirect to login if no wholesaler ID found
+      this.showAuthError();
+    }
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Authentication Error',
+      message: 'Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   getStatusLabel(statusId: number): string {
@@ -46,14 +77,22 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   loadOrderDetails() {
+    if (!this.wholesalerId) {
+      this.showAuthError();
+      return;
+    }
+
     this.loading = true;
     this.error = false;
 
-    this.wholesalerService.getOrderFullDetails(this.orderId)
+    this.wholesalerService.getOrderFullDetails(this.orderId, this.wholesalerId)
       .pipe(
         catchError(error => {
           console.error('Error loading order details:', error);
           this.error = true;
+          if (error.status === 403 || error.status === 401) {
+            this.showUnauthorizedError();
+          }
           return of(null);
         }),
         finalize(() => {
@@ -66,4 +105,24 @@ export class OrderDetailsComponent implements OnInit {
         }
       });
   }
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You are not authorized to view this order.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/wholesaler/orders']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  goBack() {
+    this.router.navigate(['/wholesaler/orders']);
+  }
+
 }

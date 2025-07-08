@@ -54,34 +54,34 @@ export interface SlowMovingProductData {
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-
-const API_BASE_URL = 'http://127.0.0.1:3000';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
         providedIn: 'root'
 })
 export class StockInsightsService {
+        private apiUrl = environment.apiUrl;
 
         constructor(private http: HttpClient) { }
 
-        getCurrentStockByMandi(mandiId: number): Observable<CurrentStockData[]> {
-                return this.http.get<CurrentStockData[]>(`${API_BASE_URL}/getCurrentStockByMandi/${mandiId}`);
+        getCurrentStockByMandi(mandiId: number, wholesalerId: number): Observable<CurrentStockData[]> {
+                return this.http.get<CurrentStockData[]>(`${this.apiUrl}/getCurrentStockByMandi/${mandiId}/${wholesalerId}`);
         }
 
-        getLeastStockedProducts(): Observable<LeastStockedData[]> {
-                return this.http.get<LeastStockedData[]>(`${API_BASE_URL}/getMandiStockedProduct`);
+        getLeastStockedProducts(wholesalerId: number): Observable<LeastStockedData[]> {
+                return this.http.get<LeastStockedData[]>(`${this.apiUrl}/getMandiStockedProduct/${wholesalerId}`);
         }
 
-        getLowStockItems(): Observable<LowStockItemData[]> {
-                return this.http.get<LowStockItemData[]>(`${API_BASE_URL}/getLowStockItems`);
+        getLowStockItems(wholesalerId: number): Observable<LowStockItemData[]> {
+                return this.http.get<LowStockItemData[]>(`${this.apiUrl}/getLowStockItems/${wholesalerId}`);
         }
 
-        getStockAvailabilityPercentage(): Observable<StockAvailabilityData[]> {
-                return this.http.get<StockAvailabilityData[]>(`${API_BASE_URL}/getStockAvailabilityPercentage`);
+        getStockAvailabilityPercentage(wholesalerId: number): Observable<StockAvailabilityData[]> {
+                return this.http.get<StockAvailabilityData[]>(`${this.apiUrl}/getStockAvailabilityPercentage/${wholesalerId}`);
         }
 
-        getMandiList(): Observable<MandiBasicInfo[]> {
-                return this.http.get<MandiBasicInfo[]>(`${API_BASE_URL}/getMandiDetails`)
+        getMandiList(wholesalerId: number): Observable<MandiBasicInfo[]> {
+                return this.http.get<MandiBasicInfo[]>(`${this.apiUrl}/getMandiDetails/${wholesalerId}`)
                         .pipe(
                                 map(mandis => mandis.map(mandi => ({
                                         mandi_id: mandi.mandi_id,
@@ -90,7 +90,7 @@ export class StockInsightsService {
                         );
         }
 
-        getSlowMovingProducts(): Observable<SlowMovingProductData[]> {
-                return this.http.get<SlowMovingProductData[]>(`${API_BASE_URL}/getSlowMovingProducts`);
+        getSlowMovingProducts(wholesalerId: number): Observable<SlowMovingProductData[]> {
+                return this.http.get<SlowMovingProductData[]>(`${this.apiUrl}/getSlowMovingProducts/${wholesalerId}`);
         }
 }

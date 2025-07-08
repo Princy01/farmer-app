@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IonicModule, NavController, LoadingController, ToastController } from '@ionic/angular';
+import { IonicModule, NavController, LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CurrentStockData, LeastStockedData, MandiBasicInfo, StockInsightsService } from './stock-insights.service';
@@ -16,6 +16,7 @@ import {
   trendingDownOutline,
   chevronBackOutline
 } from 'ionicons/icons';
+import { Router } from '@angular/router';
 
 interface WarehouseData {
   products: string[];
@@ -70,11 +71,15 @@ export class StockInsightsComponent implements OnInit {
   isLoading: boolean = false;
   error: string | null = null;
 
+  private wholesalerId: number | null = null;
+
   constructor(
     private navController: NavController,
     private stockInsightsService: StockInsightsService,
     private loadingController: LoadingController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private alertCtrl: AlertController,
+    private router: Router
   ) {
     addIcons({
       warningOutline,
@@ -84,27 +89,59 @@ export class StockInsightsComponent implements OnInit {
       cubeOutline,
       trendingDownOutline,
       chevronBackOutline
-    });  }
+    });
+  }
 
   ngOnInit() {
+    this.initializeWholesaler();
     this.loadMandis();
   }
 
+  private initializeWholesaler() {
+    const storedWholesalerId = localStorage.getItem('wholesalerId');
+    if (storedWholesalerId) {
+      this.wholesalerId = Number(storedWholesalerId);
+      this.loadMandis();
+    } else {
+      // Redirect to login if no wholesaler ID found
+      this.showAuthError();
+    }
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Authentication Error',
+      message: 'Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
   private async loadMandis() {
+    if (!this.wholesalerId) {
+      this.showAuthError();
+      return;
+    }
     this.isLoading = true;
     this.error = null;
 
     const loading = await this.showLoading();
 
     try {
-      this.stockInsightsService.getMandiList().subscribe({
+      this.stockInsightsService.getMandiList(this.wholesalerId).subscribe({
         next: (mandis) => {
           this.warehouses = mandis;
           if (mandis.length > 0) {
             this.selectedWarehouse = mandis[0];
             this.initializeData();
           } else {
-            this.error = 'No mandis available';
+            this.error = 'No mandis available for your account';
           }
         },
         error: (error) => {
@@ -166,9 +203,13 @@ export class StockInsightsComponent implements OnInit {
   }
 
   private async initializeAlerts() {
+    if (!this.wholesalerId) {
+      this.showAuthError();
+      return;
+    }
     const loading = await this.showLoading();
     try {
-      this.stockInsightsService.getLowStockItems()
+      this.stockInsightsService.getLowStockItems(this.wholesalerId)
         .pipe(
           finalize(() => {
             loading.dismiss();
@@ -191,9 +232,13 @@ export class StockInsightsComponent implements OnInit {
   }
 
   private async initializeSlowMoving() {
+    if (!this.wholesalerId) {
+      this.showAuthError();
+      return;
+    }
     const loading = await this.showLoading();
     try {
-      this.stockInsightsService.getSlowMovingProducts()
+      this.stockInsightsService.getSlowMovingProducts(this.wholesalerId)
         .pipe(
           finalize(() => {
             loading.dismiss();
@@ -216,11 +261,14 @@ export class StockInsightsComponent implements OnInit {
   }
 
   async updateChartData() {
-    if (!this.selectedWarehouse) return;
+    if (!this.selectedWarehouse || !this.wholesalerId) {
+      this.showAuthError();
+      return;
+    }
 
-    const loading = await this.showLoading();
+      const loading = await this.showLoading();
     try {
-      this.stockInsightsService.getCurrentStockByMandi(this.selectedWarehouse.mandi_id)
+      this.stockInsightsService.getCurrentStockByMandi(this.selectedWarehouse.mandi_id, this.wholesalerId)
         .pipe(
           finalize(() => {
             loading.dismiss();
@@ -253,5 +301,23 @@ export class StockInsightsComponent implements OnInit {
         categories: data.map(item => item.product_name)
       }
     };
+  }
+
+  async handleRefresh(event: any) {
+    try {
+      await this.initializeData();
+    } finally {
+      event.target.complete();
+    }
+  }
+
+  onWarehouseChange() {
+    if (this.selectedWarehouse) {
+      this.updateChartData();
+    }
+  }
+
+  goBack() {
+    this.router.navigate(['/wholesaler/home']);
   }
 }

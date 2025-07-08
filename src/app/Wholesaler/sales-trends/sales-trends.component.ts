@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IonicModule, NavController, LoadingController } from '@ionic/angular';
+import { IonicModule, NavController, LoadingController, AlertController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
 import { SalesTrendsService, SalesTrend, TopSellingProduct } from './sales-trends.service';
 import { catchError, finalize, of } from 'rxjs';
+import { Router } from '@angular/router';
 
 interface ProductData {
   name: string;
@@ -92,19 +93,25 @@ export class SalesTrendsComponent implements OnInit {
   //   },
   // };
 
-    useRealData: boolean = true;
+  useRealData: boolean = true;
   isLoading: boolean = false;
   errorMessage: string = '';
+
+  private wholesalerId: number | null = null;
 
   constructor(
     private navController: NavController,
     private salesTrendsService: SalesTrendsService,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private alertCtrl: AlertController,
+    private router: Router
   ) {
     addIcons({ chevronBackOutline });
   }
 
   ngOnInit() {
+    this.initializeWholesaler();
+
     // Set initial data
     this.selectedView = 'trends';
     this.selectedPeriod = 'monthly';
@@ -114,6 +121,42 @@ export class SalesTrendsComponent implements OnInit {
     setTimeout(() => {
       this.initializeCharts();
     }, 0);
+  }
+
+  private initializeWholesaler() {
+    // Get wholesaler ID from localStorage (same pattern as retailer cart)
+    const storedWholesalerId = localStorage.getItem('wholesalerId');
+    if (storedWholesalerId) {
+      this.wholesalerId = Number(storedWholesalerId);
+      // Set initial data
+      this.selectedView = 'trends';
+      this.selectedPeriod = 'monthly';
+      this.selectedMetric = 'volume';
+
+      // Initialize charts after a brief delay to ensure template is ready
+      setTimeout(() => {
+        this.initializeCharts();
+      }, 0);
+    } else {
+      // Redirect to login if no wholesaler ID found
+      this.showAuthError();
+    }
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Authentication Error',
+      message: 'Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   async showLoading() {
@@ -165,6 +208,11 @@ export class SalesTrendsComponent implements OnInit {
   }
 
   private async updateTrendsChart() {
+    if (!this.wholesalerId) {
+      this.showAuthError();
+      return;
+    }
+
     if (!this.useRealData) {
       const dummyData = this.getDataForPeriod(this.selectedPeriod);
       this.updateTrendsChartOptions(dummyData.values.map((value, index) => ({
@@ -173,21 +221,22 @@ export class SalesTrendsComponent implements OnInit {
       })));
       return;
     }
+
     const loading = await this.showLoading();
-    try{
+    try {
       let dataObservable;
       switch (this.selectedPeriod) {
         case 'weekly':
-          dataObservable = this.salesTrendsService.getWeeklySales();
+          dataObservable = this.salesTrendsService.getWeeklySales(this.wholesalerId);
           break;
         case 'monthly':
-          dataObservable = this.salesTrendsService.getMonthlySales();
+          dataObservable = this.salesTrendsService.getMonthlySales(this.wholesalerId);
           break;
         case 'yearly':
-          dataObservable = this.salesTrendsService.getYearlySales();
+          dataObservable = this.salesTrendsService.getYearlySales(this.wholesalerId);
           break;
         default:
-          dataObservable = this.salesTrendsService.getMonthlySales();
+          dataObservable = this.salesTrendsService.getMonthlySales(this.wholesalerId);
       }
 
       dataObservable.pipe(
@@ -221,7 +270,6 @@ export class SalesTrendsComponent implements OnInit {
       console.error('Error in updateTrendsChart:', error);
     }
   }
-
 
   private updateTrendsChartOptions(data: any[]) {
     this.chartOptions = {
@@ -278,25 +326,30 @@ export class SalesTrendsComponent implements OnInit {
   }
 
   private async updateTopProductsChart() {
+    if (!this.wholesalerId) {
+      this.showAuthError();
+      return;
+    }
+
     let loading: any;
     if (this.useRealData) {
       loading = await this.showLoading();
       let dataObservable;
       switch (this.selectedPeriod) {
         case 'daily':
-          dataObservable = this.salesTrendsService.getTopSellingDaily();
+          dataObservable = this.salesTrendsService.getTopSellingDaily(this.wholesalerId);
           break;
         case 'weekly':
-          dataObservable = this.salesTrendsService.getTopSellingWeekly();
+          dataObservable = this.salesTrendsService.getTopSellingWeekly(this.wholesalerId);
           break;
         case 'monthly':
-          dataObservable = this.salesTrendsService.getTopSellingMonthly();
+          dataObservable = this.salesTrendsService.getTopSellingMonthly(this.wholesalerId);
           break;
         case 'yearly':
-          dataObservable = this.salesTrendsService.getTopSellingYearly();
+          dataObservable = this.salesTrendsService.getTopSellingYearly(this.wholesalerId);
           break;
         default:
-          dataObservable = this.salesTrendsService.getTopSellingMonthly();
+          dataObservable = this.salesTrendsService.getTopSellingMonthly(this.wholesalerId);
       }
 
       dataObservable.pipe(
@@ -422,120 +475,121 @@ export class SalesTrendsComponent implements OnInit {
               `₹${value.toLocaleString()}`
           }
         }
-      }
-    };
+      };
+    }
   }
 
   private updateTopProductsChartOptions(products: TopSellingProduct[]) {
     const isVolume = this.selectedMetric === 'volume';
-console.log('Top Products:', products);
-     // Sort products by volume or revenue
-  const sortedData = [...products].sort((a, b) =>
-    isVolume ?
-      (b.total_quantity_kg || 0) - (a.total_quantity_kg || 0) :
-      (b.total_price || 0) - (a.total_price || 0)
-  );
+    console.log('Top Products:', products);
 
-  // Take top 10 products
-  const top10Products = sortedData.slice(0, 10);
+    // Sort products by volume or revenue
+    const sortedData = [...products].sort((a, b) =>
+      isVolume ?
+        (b.total_quantity_kg || 0) - (a.total_quantity_kg || 0) :
+        (b.total_price || 0) - (a.total_price || 0)
+    );
 
-  this.topProductsOptions = {
-    series: [{
-      name: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)',
-      data: top10Products.map(item =>
-        isVolume ? item.total_quantity_kg : item.total_price
-      )
-    }],
-    chart: {
-            type: 'bar',
-            height: 450,
-            background: '#ffffff',
-            toolbar: {
-              show: false
-            },
-            animations: {
-              enabled: true
-            },
-            foreColor: '#333',
-            fontFamily: 'inherit'
-          },
-          grid: {
-            padding: {
-              bottom: 70
-            },
-            xaxis: {
-              lines: {
-                show: true
-              }
-            }
-          },
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              borderRadius: 4,
-              columnWidth: '60%'
-            }
-          },
-          dataLabels: {
-            enabled: true,
-            formatter: (value: number) => isVolume ?
-              `${value}kg` :
-              `₹${(value / 1000).toFixed(0)}K`,
-            style: {
-              fontSize: '7px',
-              colors: ['#000']
-            }
-          },
-          xaxis: {
-            categories: top10Products.map(item =>
-              `${item.product_name || 'Unknown'} (${item.mandi_name || 'Unknown Mandi'})`
-            ),
-            title: {
-              text: 'Products',
-              offsetY: 70,
-              style: {
-                fontSize: '14px'
-              },
-              floating: false
-            },
-            labels: {
-              rotate: -90,
-              style: {
-                fontSize: '11px'
-              }
-            }
-          },
-          yaxis: {
-            title: {
-              text: isVolume ? 'Sales Volume (kg)' : 'Revenue (₹)'
-            },
-            labels: {
-              formatter: (value: number) => isVolume ?
-              `${value?.toFixed(2)} kg` :
-              `₹${(value / 1000).toFixed(0)}K`
+    // Take top 10 products
+    const top10Products = sortedData.slice(0, 10);
+
+    this.topProductsOptions = {
+      series: [{
+        name: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)',
+        data: top10Products.map(item =>
+          isVolume ? item.total_quantity_kg : item.total_price
+        )
+      }],
+      chart: {
+        type: 'bar',
+        height: 450,
+        background: '#ffffff',
+        toolbar: {
+          show: false
+        },
+        animations: {
+          enabled: true
+        },
+        foreColor: '#333',
+        fontFamily: 'inherit'
+      },
+      grid: {
+        padding: {
+          bottom: 70
+        },
+        xaxis: {
+          lines: {
+            show: true
           }
+        }
+      },
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          borderRadius: 4,
+          columnWidth: '60%'
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (value: number) => isVolume ?
+          `${value}kg` :
+          `₹${(value / 1000).toFixed(0)}K`,
+        style: {
+          fontSize: '7px',
+          colors: ['#000']
+        }
+      },
+      xaxis: {
+        categories: top10Products.map(item =>
+          `${item.product_name || 'Unknown'} (${item.mandi_name || 'Unknown Mandi'})`
+        ),
+        title: {
+          text: 'Products',
+          offsetY: 70,
+          style: {
+            fontSize: '14px'
           },
-          colors: [
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
-            '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
-          ],
-          title: {
-            text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
-            align: 'center',
-            style: {
-              fontSize: '16px'
-            },
-            margin: 20
-          },
-          tooltip: {
-            y: {
-              formatter: (value: number) => isVolume ?
-                `${value} kg` :
-                `₹${value.toLocaleString()}`
-            }
+          floating: false
+        },
+        labels: {
+          rotate: -90,
+          style: {
+            fontSize: '11px'
           }
-        };
+        }
+      },
+      yaxis: {
+        title: {
+          text: isVolume ? 'Sales Volume (kg)' : 'Revenue (₹)'
+        },
+        labels: {
+          formatter: (value: number) => isVolume ?
+            `${value?.toFixed(2)} kg` :
+            `₹${(value / 1000).toFixed(0)}K`
+        }
+      },
+      colors: [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
+        '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
+      ],
+      title: {
+        text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
+        align: 'center',
+        style: {
+          fontSize: '16px'
+        },
+        margin: 20
+      },
+      tooltip: {
+        y: {
+          formatter: (value: number) => isVolume ?
+            `${value} kg` :
+            `₹${value.toLocaleString()}`
+        }
       }
+    };
+  }
 
   private getTopProductsForPeriod(period: string): ProductData[] {
     const base = {

@@ -60,8 +60,9 @@ export class CartComponent implements OnInit {
 
   ngOnInit() {
     const cartId = localStorage.getItem('cartId');
+    const retailerId = localStorage.getItem('retailerId');
     if (cartId) {
-      this.loadCart(Number(cartId));
+      this.loadCart(Number(cartId), Number(retailerId));
     } else {
       this.router.navigate(['/buyer/buyer-home']);
     }
@@ -71,8 +72,8 @@ export class CartComponent implements OnInit {
     this.router.navigate(['/buyer/buyer-home']);
   }
 
-  loadCart(cartId: number) {
-    this.cartService.getCart(cartId).subscribe({
+  loadCart(cartId: number, retailerId: number) {
+    this.cartService.getCart(cartId, retailerId).subscribe({
       next: (response) => {
         this.cartDetails = response.cart_details;
         this.cartProducts = response.products;

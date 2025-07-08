@@ -131,36 +131,36 @@ export class LoginPage {
         this.isLoading = false;
         this.presentToast('Login successful', 'success');
 
-        const roleId = response.role_id;
+        const userRole = this.authService.getUserRole();
 
         // Navigate based on role
         setTimeout(() => {
-          if (roleId === UserRole.Admin) {
-            this.router.navigate(['/admin/driver']);
-          } else if (roleId === UserRole.Wholesaler) {
-            this.router.navigate(['/wholesaler/home']);
-          } else if (roleId === UserRole.Retailer) {
-            this.router.navigate(['/buyer/buyer-home']);
-          } else if (roleId === UserRole.Driver) {
-            this.router.navigate(['/transport/transport-dashboard']);
-          } else {
-            console.error('Unknown role:', roleId);
-            this.presentToast('Unable to access your account. Please contact support.', 'danger');
+          switch (userRole) {
+            case 'admin':
+              this.router.navigate(['/admin/driver']);
+              break;
+            case 'wholesaler':
+              this.router.navigate(['/wholesaler/home']);
+              break;
+            case 'retailer':
+              this.router.navigate(['/buyer/buyer-home']);
+              break;
+            case 'driver':
+              this.router.navigate(['/transport/transport-dashboard']);
+              break;
+            default:
+              console.error('Unknown role:', userRole);
+              this.presentToast('Unable to access your account. Please contact support.', 'danger');
           }
         }, 1000);
       },
       error: (error) => {
         this.isLoading = false;
-
-        // Log the full error for developers
         console.error('Login failed:', error);
 
-        // User-friendly error message
         let errorMessage = 'Unable to log in. Please check your credentials and try again.';
 
-        // Extract specific error messages from the backend if available
         if (error.error && error.error.error) {
-          // Check if it's a user-friendly message from the backend
           if (error.error.error.includes('invalid credentials') ||
             error.error.error.includes('Login failed')) {
             errorMessage = 'Invalid email/phone or password.';

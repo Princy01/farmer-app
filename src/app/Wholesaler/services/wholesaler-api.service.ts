@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/auth/auth.service';
 
 //for home screen
 interface OrderSummary {
@@ -177,29 +178,68 @@ export interface WholesellerEntryResponse {
 export class WholesalerApiService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private authService: AuthService
+  ) { }
 
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
   getOrderSummary(): Observable<OrderSummary[]> {
-    return this.http.get<OrderSummary[]>(`${this.apiUrl}/getOrderSummary`);
-  }
+  const headers = this.getAuthHeaders();
+  return this.http.get<OrderSummary[]>(
+    `${this.apiUrl}/getOrderSummary`,
+    { headers }
+  );
+}
 
-  getOrderItemDetails(): Observable<OrderItemDetails[]> {
-    return this.http.get<OrderItemDetails[]>(`${this.apiUrl}/getOrderItemDetails`);
-  }
+  getOrderItemDetails(wholesalerId?: number): Observable<OrderItemDetails[]> {
+    const headers = this.getAuthHeaders();
+    const id = wholesalerId || this.authService.getUserId();
 
-  getOrderDetails(orderId: number): Observable<OrderDetailedView> {
-    return this.http.get<OrderDetailedView>(`${this.apiUrl}/getOrderDetails/${orderId}`);
-  }
+    if (!id) {
+      throw new Error('No wholesaler ID available');
+    }
 
-  getOrderFullDetails(orderId: number): Observable<OrderFullDetails> {
-    return this.http.get<OrderFullDetails>(
-      `${this.apiUrl}/getAllOrderDetails/${orderId}`
+    return this.http.get<OrderItemDetails[]>(
+      `${this.apiUrl}/getOrderItemDetails/${id}`,
+      { headers }
     );
   }
 
-  getCompletedOrders(daysAgo?: number): Observable<OrderItemDetails[]> {
+  getOrderDetails(orderId: number): Observable<OrderDetailedView> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<OrderDetailedView>(
+      `${this.apiUrl}/getOrderDetails/${orderId}`,
+      { headers }
+    );
+  }
+
+  getOrderFullDetails(orderId: number, wholesalerId?: number): Observable<OrderFullDetails> {
+    const headers = this.getAuthHeaders();
+    const id = wholesalerId || this.authService.getUserId();
+
+    const url = id ?
+      `${this.apiUrl}/getAllOrderDetails/${orderId}?wholesaler_id=${id}` :
+      `${this.apiUrl}/getAllOrderDetails/${orderId}`;
+
+    return this.http.get<OrderFullDetails>(url, { headers });
+  }
+
+  getCompletedOrders(wholesalerId?: number, daysAgo?: number): Observable<OrderItemDetails[]> {
+    const headers = this.getAuthHeaders();
+    const id = wholesalerId || this.authService.getUserId();
+
+    if (!id) {
+      throw new Error('No wholesaler ID available');
+    }
+
     return this.http.get<OrderItemDetails[]>(
-      `${this.apiUrl}/getCompletedOrderSummary`
+      `${this.apiUrl}/getCompletedOrderSummary/${id}`,
+      { headers }
     ).pipe(
       map(orders => {
         if (daysAgo) {
@@ -215,33 +255,131 @@ export class WholesalerApiService {
     );
   }
 
-  getRestockingRecommendations(): Observable<RestockProduct[]> {
+  getRestockingRecommendations(wholesalerId?: number): Observable<RestockProduct[]> {
+    const headers = this.getAuthHeaders();
+    const id = wholesalerId || this.authService.getUserId();
+
+    if (!id) {
+      throw new Error('No wholesaler ID available');
+    }
+
     return this.http.get<RestockProduct[]>(
-      `${this.apiUrl}/getReStockProductsHandler`
+      `${this.apiUrl}/getReStockProductsHandler/${id}`,
+      { headers }
     );
   }
 
-  getBulkOrders(): Observable<BulkOrder[]> {
-    return this.http.get<BulkOrder[]>(`${this.apiUrl}/getAllBulkOrderDetails`);
+  getBulkOrders(wholesalerId?: number): Observable<BulkOrder[]> {
+    const headers = this.getAuthHeaders();
+    const id = wholesalerId || this.authService.getUserId();
+
+    if (!id) {
+      throw new Error('No wholesaler ID available');
+    }
+
+    return this.http.get<BulkOrder[]>(
+      `${this.apiUrl}/getAllBulkOrderDetails/${id}`,
+      { headers }
+    );
   }
 
-  getTopRetailers(): Observable<TopRetailer[]> {
-    return this.http.get<TopRetailer[]>(`${this.apiUrl}/getTopRetailerDetails`);
+  getTopRetailers(wholesalerId?: number): Observable<TopRetailer[]> {
+    const headers = this.getAuthHeaders();
+    const id = wholesalerId || this.authService.getUserId();
+
+    if (!id) {
+      throw new Error('No wholesaler ID available');
+    }
+
+    return this.http.get<TopRetailer[]>(
+      `${this.apiUrl}/getTopRetailerDetails/${id}`,
+      { headers }
+    );
   }
 
 
   createOffer(offer: CreateOfferRequest): Observable<CreateOfferResponse> {
+    const headers = this.getAuthHeaders();
+
+    const offerData = {
+      ...offer,
+      wholeseller_id: offer.wholeseller_id || this.authService.getUserId()
+    };
+
     return this.http.post<CreateOfferResponse>(
       `${this.apiUrl}/InsertWholesellerOffers`,
-      offer
+      offerData,
+      { headers }
     );
   }
 
   createWholesellerEntry(entry: WholesellerEntry): Observable<WholesellerEntryResponse> {
+    const headers = this.getAuthHeaders();
+
+    const entryData = {
+      ...entry,
+      wholeseller_id: entry.wholeseller_id || this.authService.getUserId()
+    };
+
+    // Validate that entry has required fields
+    if (!entryData.wholeseller_id || !entryData.product_id || !entryData.mandi_id) {
+      throw new Error('Missing required fields for wholesaler entry');
+    }
+
     return this.http.post<WholesellerEntryResponse>(
       `${this.apiUrl}/InsertWholesellerOrder`,
-      entry
+      entryData,
+      { headers }
     );
   }
 
+  getProducts(wholesalerId?: number): Observable<{product_id: number, product_name: string}[]> {
+    const headers = this.getAuthHeaders();
+    const id = wholesalerId || this.authService.getUserId();
+
+    if (!id) {
+      throw new Error('No wholesaler ID available');
+    }
+
+    return this.http.get<{product_id: number, product_name: string}[]>(
+      `${this.apiUrl}/getProducts/${id}`,
+      { headers }
+    );
+  }
+
+  getMandis(wholesalerId?: number): Observable<{mandi_id: number, mandi_name: string}[]> {
+    const headers = this.getAuthHeaders();
+    const id = wholesalerId || this.authService.getUserId();
+
+    if (!id) {
+      throw new Error('No wholesaler ID available');
+    }
+
+    return this.http.get<{mandi_id: number, mandi_name: string}[]>(
+      `${this.apiUrl}/getMandis/${id}`,
+      { headers }
+    );
+  }
+
+  getWarehouses(wholesalerId?: number): Observable<{warehouse_id: number, warehouse_name: string}[]> {
+    const headers = this.getAuthHeaders();
+    const id = wholesalerId || this.authService.getUserId();
+
+    if (!id) {
+      throw new Error('No wholesaler ID available');
+    }
+
+    return this.http.get<{warehouse_id: number, warehouse_name: string}[]>(
+      `${this.apiUrl}/getWarehouses/${id}`,
+      { headers }
+    );
+  }
+
+  getUnits(): Observable<{unit_id: number, unit_name: string}[]> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<{unit_id: number, unit_name: string}[]>(
+      `${this.apiUrl}/getUnits`,
+      { headers }
+    );
+  }
 }

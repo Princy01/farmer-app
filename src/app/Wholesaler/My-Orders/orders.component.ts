@@ -39,16 +39,10 @@ export class OrdersComponent {
   searchTerm: string = '';
   isSearchVisible: boolean = false;
 
-  // Example data
-  // orders = [
-  //   {id: 1, items: 'Item 1: Carrot - 25 Kg (Rs. 10/Kg);<br>Item 2: Carrot2 - 10 Kg (Rs. 15/Kg)', total: 400},
-  //   { id: 2, items: 'Item 1: Spinach - 30 kg (Rs. 10/Kg);<br>Item 2: Carrot2 - 10Kg (Rs. 15/Kg)', total: 450 },
-  //   { id: 3, items: 'Item 1: Onion - 20 kg (Rs. 20/Kg);<br>Item 2: Potato - 15 kg(Rs. 10/Kg)', total: 550 },
-  //   { id: 4, items: 'Item 1: Tomato - 10 kg (Rs. 20/Kg)', total: 200 },
-  // ];
-
   orders: any[] = [];
   filteredOrders: any[] = [];
+
+  private wholesalerId: number | null = null;
 
   constructor(
     private wholesalerService: WholesalerApiService,
@@ -64,7 +58,35 @@ export class OrdersComponent {
   }
 
   ngOnInit() {
+    this.initializeWholesaler();
     this.loadOrders();
+  }
+
+  private initializeWholesaler() {
+    const storedWholesalerId = localStorage.getItem('wholesalerId');
+    if (storedWholesalerId) {
+      this.wholesalerId = Number(storedWholesalerId);
+      this.loadOrders();
+    } else {
+      // Redirect to login if no wholesaler ID found
+      this.showAuthError();
+    }
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Authentication Error',
+      message: 'Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   toggleSearch() {
@@ -102,37 +124,42 @@ export class OrdersComponent {
     try {
       await loading.present();
 
-      this.wholesalerService.getOrderItemDetails().subscribe({
-        next: (data) => {
-          this.orders = data.map(order => ({
-            id: order.order_id,
-            items: this.formatOrderItems(order.order_items),
-            total: order.total_order_amount
-          }));
-          this.filteredOrders = [...this.orders];
-          loading.dismiss();
-        },
-        error: async (error) => {
-          loading.dismiss();
-          const alert = await this.alertCtrl.create({
-            header: 'Error',
-            message: 'Failed to load orders. Please try again.',
-            buttons: [
-              {
-                text: 'OK',
-                role: 'cancel'
-              },
-              {
-                text: 'Retry',
-                handler: () => {
-                  this.loadOrders();
+      if (this.wholesalerId !== null) {
+        this.wholesalerService.getOrderItemDetails(this.wholesalerId).subscribe({
+          next: (data) => {
+            this.orders = data.map(order => ({
+              id: order.order_id,
+              items: this.formatOrderItems(order.order_items),
+              total: order.total_order_amount
+            }));
+            this.filteredOrders = [...this.orders];
+            loading.dismiss();
+          },
+          error: async (error) => {
+            loading.dismiss();
+            const alert = await this.alertCtrl.create({
+              header: 'Error',
+              message: 'Failed to load orders. Please try again.',
+              buttons: [
+                {
+                  text: 'Dismiss',
+                  role: 'cancel'
+                },
+                {
+                  text: 'Retry',
+                  handler: () => {
+                    this.loadOrders();
+                  }
                 }
-              }
-            ]
-          });
-          await alert.present();
-        }
-      });
+              ]
+            });
+            await alert.present();
+          }
+        });
+      } else {
+        loading.dismiss();
+        this.showAuthError();
+      }
     } catch (err) {
       loading.dismiss();
       const alert = await this.alertCtrl.create({

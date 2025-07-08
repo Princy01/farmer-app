@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
 import { IonicModule, NavController, MenuController, ActionSheetController, LoadingController, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import {addIcons} from 'ionicons';
-import { chatbubblesSharp, notificationsCircleSharp,logoAndroid, personCircleSharp, arrowForwardCircleSharp,
-   chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline,personOutline,
-   trendingUpOutline, reloadOutline, settingsOutline, closeOutline } from 'ionicons/icons';
+import { addIcons } from 'ionicons';
+import {
+  chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
+  chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
+  trendingUpOutline, reloadOutline, settingsOutline, closeOutline
+} from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
-import { AuthService } from '@/auth/auth.service';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -17,18 +19,10 @@ import { AuthService } from '@/auth/auth.service';
   imports: [IonicModule, CommonModule]
 })
 export class HomePage {
-  // items = [
-  //   { name: 'Potato1', qty: 5000, orders: 200 },
-  //   { name: 'Potato2', qty: 500, orders: 200 },
-  //   { name: 'Tomato1', qty: 1000, orders: 150 },
-  //   { name: 'Tomato2', qty: 2000, orders: 500 },
-  // ];
-
   items: any[] = [];
-  filteredItems: any[] = [];  // Add this for search functionality
-
-  notifications = 5;  // Example notification count
-  messages = 3;       // Example message count
+  filteredItems: any[] = [];
+  notifications = 5;
+  messages = 3;
 
   constructor(
     private navCtrl: NavController,
@@ -40,69 +34,143 @@ export class HomePage {
     private alertCtrl: AlertController,
     private authService: AuthService
   ) {
-
-    addIcons({chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
-       chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline,personOutline,
-       trendingUpOutline, reloadOutline, settingsOutline, closeOutline});
-}
-
-async loadOrderSummary() {
-  const loading = await this.loadingCtrl.create({
-    message: 'Loading inventory...',
-    spinner: 'circular',
-  });
-
-  try {
-    await loading.present();
-
-    this.wholesalerService.getOrderSummary().subscribe({
-      next: (data) => {
-        this.items = data.map(item => ({
-          name: item.product_name,
-          qty: item.stock_left,
-          orders: item.stock_in
-        }));
-        this.filteredItems = [...this.items];
-        loading.dismiss();
-      },
-      error: async (error) => {
-        loading.dismiss();
-        const alert = await this.alertCtrl.create({
-          header: 'Error',
-          message: 'Failed to load inventory. Please try again later.',
-          buttons: [
-            {
-              text: 'Dismiss',
-              role: 'cancel'
-            },
-            {
-              text: 'Retry',
-              handler: () => {
-                this.loadOrderSummary();
-              }
-            }
-          ]
-        });
-        await alert.present();
-      }
+    addIcons({
+      chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
+      chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
+      trendingUpOutline, reloadOutline, settingsOutline, closeOutline
     });
-  } catch (err) {
-    loading.dismiss();
+  }
+
+  ngOnInit() {
+    this.checkAuthAndLoadData();
+  }
+
+  // authentication check
+  private checkAuthAndLoadData() {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    // Check if user has wholesaler role
+    const userRole = this.authService.getUserRole();
+    if (!this.authService.hasRole('wholesaler')) {
+      this.showUnauthorizedError();
+      return;
+    }
+
+    this.loadOrderSummary();
+  }
+
+  // use JWT token
+  async loadOrderSummary() {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Loading inventory...',
+      spinner: 'circular',
+    });
+
+    try {
+      await loading.present();
+
+      // Call service without wholesaler ID - backend will get user_id from JWT
+      this.wholesalerService.getOrderSummary().subscribe({
+        next: (data) => {
+          this.items = data.map(item => ({
+            name: item.product_name,
+            qty: item.stock_left,
+            orders: item.stock_in,
+            wholeseller_id: item.wholeseller_id,
+            mandi_id: item.mandi_id,
+            product_id: item.product_id
+          }));
+          this.filteredItems = [...this.items];
+          loading.dismiss();
+        },
+        error: async (error) => {
+          loading.dismiss();
+
+          // Handle authentication errors
+          if (error.status === 401) {
+            this.showAuthError();
+            return;
+          }
+
+          const alert = await this.alertCtrl.create({
+            header: 'Error',
+            message: 'Failed to load inventory. Please try again later.',
+            buttons: [
+              {
+                text: 'Dismiss',
+                role: 'cancel'
+              },
+              {
+                text: 'Retry',
+                handler: () => {
+                  this.loadOrderSummary();
+                }
+              }
+            ]
+          });
+          await alert.present();
+        }
+      });
+    } catch (err) {
+      loading.dismiss();
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: 'An unexpected error occurred.',
+        buttons: ['OK']
+      });
+      await alert.present();
+    }
+  }
+
+  private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Error',
-      message: 'An unexpected error occurred.',
-      buttons: ['OK']
+      header: 'Authentication Error',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
     });
     await alert.present();
   }
-}
-async handleRefresh(event: any) {
-  try {
-    await this.loadOrderSummary();
-  } finally {
-    event.target.complete();
+
+  // unauthorized error handler
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/dashboard']); // Or appropriate page
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
-}
+
+  async handleRefresh(event: any) {
+    try {
+      await this.loadOrderSummary();
+    } finally {
+      event.target.complete();
+    }
+  }
 
   async presentActionSheet() {
     const actionSheet = await this.actionSheetController.create({
@@ -145,17 +213,13 @@ async handleRefresh(event: any) {
           icon: 'close-outline',
           cssClass: 'custom-action-sheet-btn',
           handler: () => {
-            this.authService.logout(); // <-- Call logout logic
+            this.authService.logout();
             this.router.navigate(['/login']);
           }
         },
       ]
     });
     await actionSheet.present();
-  }
-
-  ngOnInit() {
-    this.loadOrderSummary();
   }
 
   createOrder() {
@@ -195,15 +259,13 @@ async handleRefresh(event: any) {
 
   openNotifications() {
     console.log('Opening notifications');
-    // Add logic to navigate to notifications page if needed
   }
 
   openMessages() {
     console.log('Opening messages');
-    // Add logic to navigate to messages page if needed
   }
 
   openTrends() {
     this.router.navigate(['/wholesaler/trends']);
-}
+  }
 }

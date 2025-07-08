@@ -64,8 +64,8 @@ export class CartService {
 
   constructor(private http: HttpClient) {}
 
-  getCart(cartId: number): Observable<CartResponse> {
-    return this.http.get<ApiResponse<CartResponse>>(`${this.apiUrl}/getCartitems/${cartId}`).pipe(
+  getCart(cartId: number, retailerId: number): Observable<CartResponse> {
+    return this.http.get<ApiResponse<CartResponse>>(`${this.apiUrl}/getCartitems/${cartId}/${retailerId}`).pipe(
       map(response => {
         if (response.status === 'error') {
           throw new Error(response.message);

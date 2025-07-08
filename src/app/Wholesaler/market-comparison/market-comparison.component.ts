@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IonicModule, NavController, LoadingController, ToastController } from '@ionic/angular';
+import { IonicModule, NavController, LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
@@ -8,6 +8,7 @@ import { chevronBackOutline } from 'ionicons/icons';
 import { MarketComparisonService } from './market-comparison.service';
 import { catchError, finalize, of } from 'rxjs';
 import { GroupedPriceComparison, WholesellerPrice } from './market-comparison.service';
+import { Router } from '@angular/router';
 
 interface ProductPrices {
   [key: string]: number;
@@ -33,6 +34,8 @@ export class MarketComparisonComponent implements OnInit {
   isLoading: boolean = false;
   useRealData: boolean = true;
 
+  private wholesalerId: number | null = null;
+
   private priceData: MarketPrices = {
     'Azadpur Mandi': { 'Potato': 45, 'Onion': 52, 'Tomato': 38, 'Cauliflower': 24, 'Green Peas': 33, 'Cabbage': 26 },
     'Ghazipur Mandi': { 'Potato': 42, 'Onion': 48, 'Tomato': 35, 'Cauliflower': 22, 'Green Peas': 31, 'Cabbage': 24 },
@@ -43,15 +46,43 @@ export class MarketComparisonComponent implements OnInit {
     private navController: NavController,
     private marketComparisonService: MarketComparisonService,
     private loadingController: LoadingController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private alertCtrl: AlertController,
+    private router: Router
   ) {
     addIcons({ chevronBackOutline });
   }
 
   ngOnInit() {
+    this.initializeWholesaler();
     this.initializeCharts();
   }
+  private initializeWholesaler() {
+    const storedWholesalerId = localStorage.getItem('wholesalerId');
+    if (storedWholesalerId) {
+      this.wholesalerId = Number(storedWholesalerId);
+      this.initializeCharts();
+    } else {
+      // Redirect to login if no wholesaler ID found
+      this.showAuthError();
+    }
+  }
 
+  private async showAuthError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Authentication Error',
+      message: 'Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
   async showLoading() {
     this.isLoading = true;
     const loading = await this.loadingController.create({
@@ -62,12 +93,12 @@ export class MarketComparisonComponent implements OnInit {
     return loading;
   }
 
-  private async showToast(message: string) {
+  private async showToast(message: string, color: string = 'warning') {
     const toast = await this.toastController.create({
       message: message,
       duration: 3000,
       position: 'bottom',
-      color: 'warning',
+      color: color,
       buttons: [{ icon: 'close', role: 'cancel' }]
     });
     await toast.present();
@@ -77,57 +108,64 @@ export class MarketComparisonComponent implements OnInit {
     this.navController.navigateBack('/wholesaler/trends');
   }
 
-onMandiChange(event: any) {
-  if (this.selectedMandis.length && this.selectedProducts.length) {
-    this.useRealData = true;  // Reset to try real data again
-    this.updateChart();
+  onMandiChange(event: any) {
+    if (this.selectedMandis.length && this.selectedProducts.length) {
+      this.useRealData = true;  // Reset to try real data again
+      this.updateChart();
+    }
   }
-}
 
-onProductChange(event: any) {
-  if (this.selectedMandis.length && this.selectedProducts.length) {
-    this.useRealData = true;  // Reset to try real data again
-    this.updateChart();
+  onProductChange(event: any) {
+    if (this.selectedMandis.length && this.selectedProducts.length) {
+      this.useRealData = true;  // Reset to try real data again
+      this.updateChart();
+    }
   }
-}
 
-async updateChart() {
-  if (this.useRealData) {
-    const loading = await this.showLoading();
-    try {
-      const productIds = this.selectedProducts.map(name => this.getProductId(name));
+  async updateChart() {
+    if (!this.wholesalerId) {
+      this.showAuthError();
+      return;
+    }
 
-      this.marketComparisonService.getWholesellerPriceComparison(productIds)
-        .pipe(
-          catchError(error => {
-            console.error('API Error:', error);
-            this.showToast('Unable to fetch real-time data. Using stored data.');
-            this.useRealData = false;
-            return of(null);
-          }),
-          finalize(() => {
-            loading.dismiss();
-            this.isLoading = false;
-          })
-        )
-        .subscribe(data => {
-          if (data) {
-            this.updateChartWithRealData(data);
-          } else {
-            this.useRealData = false;
-            this.updateChartWithFallbackData();
-          }
-        });
-    } catch (error) {
-      loading.dismiss();
-      this.isLoading = false;
-      this.useRealData = false;
+    if (this.useRealData) {
+      const loading = await this.showLoading();
+      try {
+        const productIds = this.selectedProducts.map(name => this.getProductId(name));
+
+        this.marketComparisonService.getWholesellerPriceComparison(productIds, this.wholesalerId)
+          .pipe(
+            catchError(error => {
+              console.error('API Error:', error);
+              this.showToast('Unable to fetch real-time data. Using stored data.');
+              this.useRealData = false;
+              return of(null);
+            }),
+            finalize(() => {
+              loading.dismiss();
+              this.isLoading = false;
+            })
+          )
+          .subscribe(data => {
+            if (data) {
+              this.updateChartWithRealData(data);
+              this.showToast('Price data updated successfully!', 'success');
+            } else {
+              this.useRealData = false;
+              this.updateChartWithFallbackData();
+            }
+          });
+      } catch (error) {
+        loading.dismiss();
+        this.isLoading = false;
+        this.useRealData = false;
+        this.updateChartWithFallbackData();
+        this.showToast('Error fetching data. Using fallback data.');
+      }
+    } else {
       this.updateChartWithFallbackData();
     }
-  } else {
-    this.updateChartWithFallbackData();
   }
-}
 
   private updateChartWithRealData(data: GroupedPriceComparison | GroupedPriceComparison[]) {
     const dataArray = Array.isArray(data) ? data : [data];
@@ -228,5 +266,18 @@ async updateChart() {
       'Okhla Mandi': 3
     };
     return mandiMap[mandiName] || 0;
+  }
+
+  async handleRefresh(event: any) {
+    try {
+      this.useRealData = true;
+      await this.updateChart();
+    } finally {
+      event.target.complete();
+    }
+  }
+
+  goBack() {
+    this.router.navigate(['/wholesaler/home']);
   }
 }
