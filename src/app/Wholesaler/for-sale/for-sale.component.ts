@@ -6,10 +6,11 @@ import { addIcons } from 'ionicons';
 import {
   leafOutline, starOutline, warningOutline, cubeOutline,
   cashOutline, calendarOutline, locationOutline,
-  addCircleOutline, homeOutline
+  addCircleOutline, homeOutline, scaleOutline, refreshOutline  // Add scaleOutline
 } from 'ionicons/icons';
 import { WholesalerApiService, WholesellerEntry } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-screen3',
@@ -29,43 +30,64 @@ export class ForSaleComponent implements OnInit {
   warehouses: { warehouse_id: number, warehouse_name: string }[] = [];
   units: { unit_id: number, unit_name: string }[] = [];
 
-  private wholesalerId: number | null = null;
-
   constructor(
     private fb: FormBuilder,
     private wholesalerService: WholesalerApiService,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     addIcons({
-      leafOutline, starOutline, warningOutline, cubeOutline,
-      cashOutline, calendarOutline, locationOutline,
-      addCircleOutline, homeOutline
-    });
-    this.initForm();
+  leafOutline, starOutline, warningOutline, cubeOutline,
+  cashOutline, calendarOutline, locationOutline,
+  addCircleOutline, homeOutline, scaleOutline, refreshOutline  // Add scaleOutline
+});
   }
 
   ngOnInit() {
-    this.initializeWholesaler();
+    this.checkAuthAndLoadData();
   }
-  private initializeWholesaler() {
-    const storedWholesalerId = localStorage.getItem('wholesalerId');
-    if (storedWholesalerId) {
-      this.wholesalerId = Number(storedWholesalerId);
-      this.initForm();
-      this.loadDropdownData();
-    } else {
-      // Redirect to login if no wholesaler ID found
+
+  // authentication check
+  private checkAuthAndLoadData() {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
+      return;
     }
+
+    // Check if user has wholesaler role
+    if (!this.authService.hasRole('wholesaler')) {
+      this.showUnauthorizedError();
+      return;
+    }
+
+    this.initForm();
+    this.loadDropdownData();
   }
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
       header: 'Authentication Error',
-      message: 'Please login again.',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
       buttons: [
         {
           text: 'OK',
@@ -77,11 +99,13 @@ export class ForSaleComponent implements OnInit {
     });
     await alert.present();
   }
+
   private initForm(): void {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
+
     this.orderForm = this.fb.group({
       product_id: ['', Validators.required],
       quality: ['', Validators.required],
@@ -92,8 +116,9 @@ export class ForSaleComponent implements OnInit {
       mandi_id: ['', Validators.required],
       warehouse_id: ['', Validators.required],
       unit_id: [2, Validators.required], // Default to KG
-      wholeseller_id: [3, Validators.required] // TODO: Get from auth service
+      wholeseller_id: [this.authService.getUserId(), Validators.required]
     });
+
     // Set default datetime to current time
     const now = new Date();
     const isoString = now.toISOString().slice(0, 16); // Format for datetime-local input
@@ -103,10 +128,11 @@ export class ForSaleComponent implements OnInit {
   }
 
   async createOrder() {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
+
     if (this.orderForm.valid && !this.isSubmitting) {
       this.isSubmitting = true;
       const loading = await this.loadingCtrl.create({
@@ -125,7 +151,7 @@ export class ForSaleComponent implements OnInit {
           mandi_id: parseInt(formData.mandi_id, 10),
           warehouse_id: parseInt(formData.warehouse_id, 10),
           unit_id: parseInt(formData.unit_id, 10),
-          wholeseller_id: this.wholesalerId, // Use authenticated wholesaler ID
+          // wholeseller_id will be set by service from JWT
           // Keep other conversions
           quantity: parseFloat(formData.quantity),
           price: parseFloat(formData.price),
@@ -136,8 +162,15 @@ export class ForSaleComponent implements OnInit {
 
         await this.showToast('Order created successfully!', 'success');
         this.resetForm();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to create order:', error);
+
+        // Handle authentication errors
+        if (error.status === 401) {
+          this.showAuthError();
+          return;
+        }
+
         await this.showToast('Failed to create order. Please try again.', 'danger');
       } finally {
         await loading.dismiss();
@@ -148,12 +181,13 @@ export class ForSaleComponent implements OnInit {
       this.markFormGroupTouched();
     }
   }
+
   private resetForm() {
     this.orderForm.reset();
     // Reset to default values
     this.orderForm.patchValue({
       unit_id: 2,
-      wholeseller_id: this.wholesalerId,
+      wholeseller_id: this.authService.getUserId(),
       datetime: new Date().toISOString().slice(0, 16)
     });
   }
@@ -226,37 +260,44 @@ export class ForSaleComponent implements OnInit {
   }
 
   private async loadDropdownData() {
-  if (!this.wholesalerId) {
-    this.showAuthError();
-    return;
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Loading form data...',
+      spinner: 'circular'
+    });
+
+    try {
+      await loading.present();
+
+      // Load all dropdown data - service will use JWT token
+      const [products, mandis, warehouses, units] = await Promise.all([
+        this.wholesalerService.getProducts().toPromise(),
+        this.wholesalerService.getMandis().toPromise(),
+        this.wholesalerService.getWarehouses().toPromise(),
+        this.wholesalerService.getUnits().toPromise()
+      ]);
+
+      this.products = products || [];
+      this.mandis = mandis || [];
+      this.warehouses = warehouses || [];
+      this.units = units || [];
+
+    } catch (error: any) {
+      console.error('Failed to load dropdown data:', error);
+
+      // Handle authentication errors
+      if (error.status === 401) {
+        this.showAuthError();
+        return;
+      }
+
+      await this.showToast('Failed to load form data. Please try again.', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
   }
-
-  const loading = await this.loadingCtrl.create({
-    message: 'Loading form data...',
-    spinner: 'circular'
-  });
-
-  try {
-    await loading.present();
-
-    // Load all dropdown data
-    const [products, mandis, warehouses, units] = await Promise.all([
-      this.wholesalerService.getProducts(this.wholesalerId).toPromise(),
-      this.wholesalerService.getMandis(this.wholesalerId).toPromise(),
-      this.wholesalerService.getWarehouses(this.wholesalerId).toPromise(),
-      this.wholesalerService.getUnits().toPromise()
-    ]);
-
-    this.products = products || [];
-    this.mandis = mandis || [];
-    this.warehouses = warehouses || [];
-    this.units = units || [];
-
-  } catch (error) {
-    console.error('Failed to load dropdown data:', error);
-    await this.showToast('Failed to load form data. Please try again.', 'danger');
-  } finally {
-    await loading.dismiss();
-  }
-}
 }

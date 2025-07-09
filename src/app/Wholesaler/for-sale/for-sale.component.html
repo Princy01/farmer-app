@@ -1,7 +1,10 @@
 <ion-header class="ion-no-border">
   <ion-toolbar mode="ios">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
+      <ion-back-button
+        defaultHref="/wholesaler/home"
+        color="dark"
+      ></ion-back-button>
     </ion-buttons>
 
     <ion-title class="ion-text-center custom-title">Update Inventory</ion-title>
@@ -15,55 +18,76 @@
         <form [formGroup]="orderForm">
           <ion-list lines="full">
             <!-- Product Selection -->
-            <ion-item class="custom-item" [class.ion-invalid]="isFieldInvalid('product_id')">
+            <ion-item
+              class="custom-item"
+              [class.ion-invalid]="isFieldInvalid('product_id')"
+            >
               <ion-label position="floating">
                 <ion-icon name="leaf-outline" class="input-icon"></ion-icon>
                 Select Product
               </ion-label>
-              <ion-select formControlName="product_id" placeholder="Choose a product">
-                <ion-select-option *ngFor="let product of products" [value]="product.product_id">
+              <ion-select formControlName="product_id">
+                <ion-select-option
+                  *ngFor="let product of products"
+                  [value]="product.product_id"
+                >
                   {{ product.product_name }}
                 </ion-select-option>
               </ion-select>
               <ion-note slot="error" *ngIf="isFieldInvalid('product_id')">
-                {{ getFieldError('product_id') }}
+                {{ getFieldError("product_id") }}
               </ion-note>
             </ion-item>
 
             <!-- Quality -->
-            <ion-item class="custom-item" [class.ion-invalid]="isFieldInvalid('quality')">
+            <ion-item
+              class="custom-item"
+              [class.ion-invalid]="isFieldInvalid('quality')"
+            >
               <ion-label position="floating">
                 <ion-icon name="star-outline" class="input-icon"></ion-icon>
                 Select Quality
               </ion-label>
-              <ion-select formControlName="quality" interface="action-sheet" placeholder="Choose quality grade">
-                <ion-select-option *ngFor="let quality of qualities" [value]="quality">
+              <ion-select formControlName="quality" interface="action-sheet">
+                <ion-select-option
+                  *ngFor="let quality of qualities"
+                  [value]="quality"
+                >
                   Grade {{ quality }}
                 </ion-select-option>
               </ion-select>
               <ion-note slot="error" *ngIf="isFieldInvalid('quality')">
-                {{ getFieldError('quality') }}
+                {{ getFieldError("quality") }}
               </ion-note>
             </ion-item>
 
             <!-- Wastage -->
-            <ion-item class="custom-item" [class.ion-invalid]="isFieldInvalid('wastage')">
+            <ion-item
+              class="custom-item"
+              [class.ion-invalid]="isFieldInvalid('wastage')"
+            >
               <ion-label position="floating">
                 <ion-icon name="warning-outline" class="input-icon"></ion-icon>
                 Select Wastage Percentage
               </ion-label>
-              <ion-select formControlName="wastage" interface="action-sheet" placeholder="Choose wastage percentage">
-                <ion-select-option *ngFor="let wastage of wastages" [value]="wastage">
+              <ion-select formControlName="wastage" interface="action-sheet">
+                <ion-select-option
+                  *ngFor="let wastage of wastages"
+                  [value]="wastage"
+                >
                   {{ wastage }}
                 </ion-select-option>
               </ion-select>
               <ion-note slot="error" *ngIf="isFieldInvalid('wastage')">
-                {{ getFieldError('wastage') }}
+                {{ getFieldError("wastage") }}
               </ion-note>
             </ion-item>
 
             <!-- Quantity -->
-            <ion-item class="custom-item" [class.ion-invalid]="isFieldInvalid('quantity')">
+            <ion-item
+              class="custom-item"
+              [class.ion-invalid]="isFieldInvalid('quantity')"
+            >
               <ion-label position="floating">
                 <ion-icon name="cube-outline" class="input-icon"></ion-icon>
                 Enter Quantity (kg)
@@ -71,17 +95,20 @@
               <ion-input
                 type="number"
                 formControlName="quantity"
-                placeholder="0.00"
                 step="0.1"
-                min="0.1">
+                min="0.1"
+              >
               </ion-input>
               <ion-note slot="error" *ngIf="isFieldInvalid('quantity')">
-                {{ getFieldError('quantity') }}
+                {{ getFieldError("quantity") }}
               </ion-note>
             </ion-item>
 
             <!-- Price -->
-            <ion-item class="custom-item" [class.ion-invalid]="isFieldInvalid('price')">
+            <ion-item
+              class="custom-item"
+              [class.ion-invalid]="isFieldInvalid('price')"
+            >
               <ion-label position="floating">
                 <ion-icon name="cash-outline" class="input-icon"></ion-icon>
                 Enter Price per kg (₹)
@@ -89,70 +116,97 @@
               <ion-input
                 type="number"
                 formControlName="price"
-                placeholder="0.00"
                 step="0.01"
-                min="0.01">
+                min="0.01"
+              >
               </ion-input>
               <ion-note slot="error" *ngIf="isFieldInvalid('price')">
-                {{ getFieldError('price') }}
+                {{ getFieldError("price") }}
               </ion-note>
             </ion-item>
 
             <!-- Date & Time -->
-            <ion-item class="custom-item" [class.ion-invalid]="isFieldInvalid('datetime')">
+            <ion-item
+              class="custom-item"
+              [class.ion-invalid]="isFieldInvalid('datetime')"
+            >
               <ion-label position="stacked">
                 <ion-icon name="calendar-outline" class="input-icon"></ion-icon>
                 Select Pickup Date & Time
               </ion-label>
-              <ion-input type="datetime-local" formControlName="datetime"></ion-input>
+              <ion-input
+                type="datetime-local"
+                formControlName="datetime"
+              ></ion-input>
               <ion-note slot="error" *ngIf="isFieldInvalid('datetime')">
-                {{ getFieldError('datetime') }}
+                {{ getFieldError("datetime") }}
               </ion-note>
             </ion-item>
 
             <!-- Mandi Selection -->
-            <ion-item class="custom-item" [class.ion-invalid]="isFieldInvalid('mandi_id')">
+            <ion-item
+              class="custom-item"
+              [class.ion-invalid]="isFieldInvalid('mandi_id')"
+            >
               <ion-label position="floating">
                 <ion-icon name="location-outline" class="input-icon"></ion-icon>
                 Select Mandi
               </ion-label>
-              <ion-select formControlName="mandi_id" placeholder="Choose a mandi">
-                <ion-select-option *ngFor="let mandi of mandis" [value]="mandi.mandi_id">
+              <ion-select formControlName="mandi_id">
+                <ion-select-option
+                  *ngFor="let mandi of mandis"
+                  [value]="mandi.mandi_id"
+                >
                   {{ mandi.mandi_name }}
                 </ion-select-option>
               </ion-select>
               <ion-note slot="error" *ngIf="isFieldInvalid('mandi_id')">
-                {{ getFieldError('mandi_id') }}
+                {{ getFieldError("mandi_id") }}
               </ion-note>
             </ion-item>
 
             <!-- Warehouse Selection -->
-            <ion-item class="custom-item" [class.ion-invalid]="isFieldInvalid('warehouse_id')">
+            <ion-item
+              class="custom-item"
+              [class.ion-invalid]="isFieldInvalid('warehouse_id')"
+            >
               <ion-label position="floating">
                 <ion-icon name="home-outline" class="input-icon"></ion-icon>
                 Select Warehouse
               </ion-label>
-              <ion-select formControlName="warehouse_id" placeholder="Choose a warehouse">
-                <ion-select-option *ngFor="let warehouse of warehouses" [value]="warehouse.warehouse_id">
+              <ion-select formControlName="warehouse_id">
+                <ion-select-option
+                  *ngFor="let warehouse of warehouses"
+                  [value]="warehouse.warehouse_id"
+                >
                   {{ warehouse.warehouse_name }}
                 </ion-select-option>
               </ion-select>
               <ion-note slot="error" *ngIf="isFieldInvalid('warehouse_id')">
-                {{ getFieldError('warehouse_id') }}
+                {{ getFieldError("warehouse_id") }}
               </ion-note>
             </ion-item>
 
-            <!-- Unit Selection (Optional - if you want to show it) -->
-            <ion-item class="custom-item">
+            <!-- Unit Selection-->
+            <ion-item
+              class="custom-item"
+              [class.ion-invalid]="isFieldInvalid('unit_id')"
+            >
               <ion-label position="floating">
-                <ion-icon name="cube-outline" class="input-icon"></ion-icon>
+                <ion-icon name="scale-outline" class="input-icon"></ion-icon>
                 Select Unit
               </ion-label>
-              <ion-select formControlName="unit_id" placeholder="Choose unit">
-                <ion-select-option *ngFor="let unit of units" [value]="unit.unit_id">
+              <ion-select formControlName="unit_id">
+                <ion-select-option
+                  *ngFor="let unit of units"
+                  [value]="unit.unit_id"
+                >
                   {{ unit.unit_name }}
                 </ion-select-option>
               </ion-select>
+              <ion-note slot="error" *ngIf="isFieldInvalid('unit_id')">
+                {{ getFieldError("unit_id") }}
+              </ion-note>
             </ion-item>
           </ion-list>
         </form>
@@ -168,7 +222,7 @@
         [disabled]="!orderForm.valid || isSubmitting"
       >
         <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-        {{ isSubmitting ? 'Creating...' : 'Create Order' }}
+        {{ isSubmitting ? "Updating" : "Updating Inventory" }}
       </ion-button>
 
       <ion-button
@@ -188,7 +242,7 @@
     <!-- Loading state indicator -->
     <div *ngIf="isSubmitting" class="loading-overlay">
       <ion-spinner name="circular"></ion-spinner>
-      <p>Creating order...</p>
+      <p>Updating inventory...</p>
     </div>
   </div>
 </ion-content>

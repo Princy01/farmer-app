@@ -3,6 +3,7 @@ import { IonicModule, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WholesalerApiService, OrderFullDetails } from '../services/wholesaler-api.service';
+import { AuthService } from 'src/app/auth/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -19,35 +20,56 @@ export class OrderDetailsComponent implements OnInit {
   loading = true;
   error = false;
 
-  private wholesalerId: number | null = null;
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private wholesalerService: WholesalerApiService,
-    private alertCtrl: AlertController) { }
+    private alertCtrl: AlertController,
+    private authService: AuthService
+  ) { }
 
   ngOnInit() {
     this.orderId = Number(this.route.snapshot.paramMap.get('id'));
-    this.initializeWholesaler();
-    this.loadOrderDetails();
+    this.checkAuthAndLoadData();
   }
 
-  private initializeWholesaler() {
-    const storedWholesalerId = localStorage.getItem('wholesalerId');
-    if (storedWholesalerId) {
-      this.wholesalerId = Number(storedWholesalerId);
-      this.loadOrderDetails();
-    } else {
-      // Redirect to login if no wholesaler ID found
+  // authentication check
+  private checkAuthAndLoadData() {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
+      return;
     }
+
+    // Check if user has wholesaler role
+    if (!this.authService.hasRole('wholesaler')) {
+      this.showUnauthorizedError();
+      return;
+    }
+
+    this.loadOrderDetails();
   }
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
       header: 'Authentication Error',
-      message: 'Please login again.',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
       buttons: [
         {
           text: 'OK',
@@ -77,7 +99,7 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   loadOrderDetails() {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
@@ -85,14 +107,25 @@ export class OrderDetailsComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    this.wholesalerService.getOrderFullDetails(this.orderId, this.wholesalerId)
+    // Call service without wholesaler ID - backend will get user_id from JWT
+    this.wholesalerService.getOrderFullDetails(this.orderId)
       .pipe(
         catchError(error => {
           console.error('Error loading order details:', error);
           this.error = true;
-          if (error.status === 403 || error.status === 401) {
-            this.showUnauthorizedError();
+
+          // Handle authentication errors
+          if (error.status === 401) {
+            this.showAuthError();
+            return of(null);
           }
+
+          if (error.status === 403) {
+            this.showOrderAccessError();
+            return of(null);
+          }
+
+          this.showGenericError();
           return of(null);
         }),
         finalize(() => {
@@ -105,7 +138,8 @@ export class OrderDetailsComponent implements OnInit {
         }
       });
   }
-  private async showUnauthorizedError() {
+
+  private async showOrderAccessError() {
     const alert = await this.alertCtrl.create({
       header: 'Access Denied',
       message: 'You are not authorized to view this order.',
@@ -121,8 +155,27 @@ export class OrderDetailsComponent implements OnInit {
     await alert.present();
   }
 
+  private async showGenericError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Error',
+      message: 'Failed to load order details. Please try again later.',
+      buttons: [
+        {
+          text: 'Dismiss',
+          role: 'cancel'
+        },
+        {
+          text: 'Retry',
+          handler: () => {
+            this.loadOrderDetails();
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
   goBack() {
     this.router.navigate(['/wholesaler/orders']);
   }
-
 }

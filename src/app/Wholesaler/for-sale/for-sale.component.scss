@@ -68,9 +68,28 @@
         border-radius: 12px;
         transition: var(--transition);
 
-        &:focus-within {
-          border-color: var(--ion-color-primary);
-          box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.2);
+        ion-label {
+    font-size: 1rem !important;  // Force consistent font size
+    font-weight: 500 !important;
+    color: var(--ion-color-dark) !important;
+
+    // Icon within label
+    ion-icon {
+      font-size: 1.2rem !important;
+      margin-right: 0.8rem !important;
+      color: var(--ion-color-medium) !important;
+      vertical-align: middle !important;
+      display: inline-block !important;
+    }
+  }
+
+  &:focus-within {
+    border-color: rgb(136, 172, 140);
+    box-shadow: 0 0 0 2px rgba(136, 172, 140, 0.2);
+
+    ion-label ion-icon {
+      color: rgb(136, 172, 140) !important;
+    }
         }
       }
 
@@ -85,6 +104,17 @@
         }
       }
 
+      ion-input, ion-select {
+  --padding-start: 0.8rem;
+  --padding-end: 0.8rem;
+  font-size: 1rem !important;
+
+  &::part(native) {
+    padding: 0.8rem 0;
+    font-size: 1rem !important;
+  }
+}
+
       ion-input {
         --padding-start: 0.8rem;
         --padding-end: 0.8rem;
@@ -96,7 +126,7 @@
         }
       }
       ion-select {
-        --padding-start: 9rem;
+        --padding-start: 14rem;
         --padding-end: 0.8rem;
         --padding-bottom: 1.8rem;
         margin-top: 4px;
@@ -150,3 +180,5 @@
           font-size: 1rem;
         }
       }
+
+      

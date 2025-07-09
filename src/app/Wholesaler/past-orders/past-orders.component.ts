@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { alertCircleOutline, closeCircleOutline } from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
+import { AuthService } from 'src/app/auth/auth.service';
 
 interface OrderItem {
   order_item_id: number;
@@ -42,7 +43,6 @@ export class PastOrdersComponent implements AfterViewInit {
   hasError = false;
 
   private originalOrders: OrderItemDetails[] = [];
-  private wholesalerId: number | null = null;
   customStartDate: string = '';
   customEndDate: string = '';
 
@@ -55,32 +55,69 @@ export class PastOrdersComponent implements AfterViewInit {
     private wholesalerApiService: WholesalerApiService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private authService: AuthService
   ) {
     addIcons({ alertCircleOutline, closeCircleOutline });
-    this.initializeComponent();
-  }
-
-  private initializeComponent() {
-    // Get wholesaler ID from localStorage (same pattern as retailer cart)
-    const storedWholesalerId = localStorage.getItem('wholesalerId');
-    if (storedWholesalerId) {
-      this.wholesalerId = Number(storedWholesalerId);
-      this.loadCompletedOrders();
-    } else {
-      // Redirect to login if no wholesaler ID found
-      this.showError('Authentication Error', 'Please login again.');
-      this.router.navigate(['/wholesaler/login']); // Adjust path as needed
-    }
   }
 
   ngAfterViewInit() {
     this.content.scrollEvents = true;
+    this.checkAuthAndLoadData();
+  }
+
+  // authentication check
+  private checkAuthAndLoadData() {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    // Check if user has wholesaler role
+    if (!this.authService.hasRole('wholesaler')) {
+      this.showUnauthorizedError();
+      return;
+    }
+
+    this.loadCompletedOrders();
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Authentication Error',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   async loadCompletedOrders(daysAgo?: number) {
-    if (!this.wholesalerId) {
-      this.showError('Authentication Error', 'Wholesaler not found. Please login again.');
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
       return;
     }
 
@@ -94,7 +131,8 @@ export class PastOrdersComponent implements AfterViewInit {
       this.isLoading = true;
       this.hasError = false;
 
-      this.wholesalerApiService.getCompletedOrders(this.wholesalerId, daysAgo).subscribe({
+      // Call service without wholesaler ID - backend will get user_id from JWT
+      this.wholesalerApiService.getCompletedOrders(undefined, daysAgo).subscribe({
         next: async (orders) => {
           this.originalOrders = orders;
           this.completedOrders = orders;
@@ -110,7 +148,14 @@ export class PastOrdersComponent implements AfterViewInit {
           await loading.dismiss();
           this.isLoading = false;
           this.hasError = true;
-          this.showError('Failed to load orders', error.message);
+
+          // Handle authentication errors
+          if (error.status === 401) {
+            this.showAuthError();
+            return;
+          }
+
+          this.showError('Failed to load orders', 'Please try again later.');
         }
       });
     } catch (error) {
@@ -143,11 +188,7 @@ export class PastOrdersComponent implements AfterViewInit {
         {
           text: 'Retry',
           handler: () => {
-            if (this.wholesalerId) {
-              this.loadCompletedOrders();
-            } else {
-              this.initializeComponent();
-            }
+            this.loadCompletedOrders();
           }
         }
       ]
@@ -251,4 +292,11 @@ export class PastOrdersComponent implements AfterViewInit {
     return order.order_id;
   }
 
+  async handleRefresh(event: any) {
+    try {
+      await this.loadCompletedOrders();
+    } finally {
+      event.target.complete();
+    }
+  }
 }

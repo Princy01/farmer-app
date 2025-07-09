@@ -210,27 +210,20 @@ export class WholesalerApiService {
     );
   }
 
-  getOrderFullDetails(orderId: number, wholesalerId?: number): Observable<OrderFullDetails> {
+  getOrderFullDetails(orderId: number): Observable<OrderFullDetails> {
     const headers = this.getAuthHeaders();
-    const id = wholesalerId || this.authService.getUserId();
-
-    const url = id ?
-      `${this.apiUrl}/getAllOrderDetails/${orderId}?wholesaler_id=${id}` :
-      `${this.apiUrl}/getAllOrderDetails/${orderId}`;
-
-    return this.http.get<OrderFullDetails>(url, { headers });
+    return this.http.get<OrderFullDetails>(
+      `${this.apiUrl}/getAllOrderDetails/${orderId}`,
+      { headers }
+    );
   }
 
   getCompletedOrders(wholesalerId?: number, daysAgo?: number): Observable<OrderItemDetails[]> {
     const headers = this.getAuthHeaders();
-    const id = wholesalerId || this.authService.getUserId();
 
-    if (!id) {
-      throw new Error('No wholesaler ID available');
-    }
-
+    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<OrderItemDetails[]>(
-      `${this.apiUrl}/getCompletedOrderSummary/${id}`,
+      `${this.apiUrl}/getCompletedOrderSummary`,
       { headers }
     ).pipe(
       map(orders => {
@@ -249,42 +242,30 @@ export class WholesalerApiService {
 
   getRestockingRecommendations(wholesalerId?: number): Observable<RestockProduct[]> {
     const headers = this.getAuthHeaders();
-    const id = wholesalerId || this.authService.getUserId();
 
-    if (!id) {
-      throw new Error('No wholesaler ID available');
-    }
-
+    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<RestockProduct[]>(
-      `${this.apiUrl}/getReStockProductsHandler/${id}`,
+      `${this.apiUrl}/getReStockProductsHandler`,
       { headers }
     );
   }
 
   getBulkOrders(wholesalerId?: number): Observable<BulkOrder[]> {
     const headers = this.getAuthHeaders();
-    const id = wholesalerId || this.authService.getUserId();
 
-    if (!id) {
-      throw new Error('No wholesaler ID available');
-    }
-
+    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<BulkOrder[]>(
-      `${this.apiUrl}/getAllBulkOrderDetails/${id}`,
+      `${this.apiUrl}/getAllBulkOrderDetails`,
       { headers }
     );
   }
 
   getTopRetailers(wholesalerId?: number): Observable<TopRetailer[]> {
     const headers = this.getAuthHeaders();
-    const id = wholesalerId || this.authService.getUserId();
 
-    if (!id) {
-      throw new Error('No wholesaler ID available');
-    }
-
+    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<TopRetailer[]>(
-      `${this.apiUrl}/getTopRetailerDetails/${id}`,
+      `${this.apiUrl}/getTopRetailerDetails`,
       { headers }
     );
   }
@@ -305,7 +286,7 @@ export class WholesalerApiService {
     );
   }
 
-  createWholesellerEntry(entry: WholesellerEntry): Observable<WholesellerEntryResponse> {
+   createWholesellerEntry(entry: WholesellerEntry): Observable<WholesellerEntryResponse> {
     const headers = this.getAuthHeaders();
 
     const entryData = {
@@ -327,42 +308,30 @@ export class WholesalerApiService {
 
   getProducts(wholesalerId?: number): Observable<{ product_id: number, product_name: string }[]> {
     const headers = this.getAuthHeaders();
-    const id = wholesalerId || this.authService.getUserId();
 
-    if (!id) {
-      throw new Error('No wholesaler ID available');
-    }
-
+    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<{ product_id: number, product_name: string }[]>(
-      `${this.apiUrl}/getProducts/${id}`,
+      `${this.apiUrl}/getProducts`,
       { headers }
     );
   }
 
   getMandis(wholesalerId?: number): Observable<{ mandi_id: number, mandi_name: string }[]> {
     const headers = this.getAuthHeaders();
-    const id = wholesalerId || this.authService.getUserId();
 
-    if (!id) {
-      throw new Error('No wholesaler ID available');
-    }
-
+    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<{ mandi_id: number, mandi_name: string }[]>(
-      `${this.apiUrl}/getMandis/${id}`,
+      `${this.apiUrl}/getMandis`,
       { headers }
     );
   }
 
   getWarehouses(wholesalerId?: number): Observable<{ warehouse_id: number, warehouse_name: string }[]> {
     const headers = this.getAuthHeaders();
-    const id = wholesalerId || this.authService.getUserId();
 
-    if (!id) {
-      throw new Error('No wholesaler ID available');
-    }
-
+    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<{ warehouse_id: number, warehouse_name: string }[]>(
-      `${this.apiUrl}/getWarehouses/${id}`,
+      `${this.apiUrl}/getWarehouses`,
       { headers }
     );
   }
