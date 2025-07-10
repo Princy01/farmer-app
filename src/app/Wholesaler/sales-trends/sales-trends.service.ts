@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from 'src/app/auth/auth.service';
 
 export interface SalesTrend {
     month_year: string;
@@ -28,33 +29,46 @@ export interface TopSellingProduct {
 export class SalesTrendsService {
     private apiUrl = environment.apiUrl;
 
-    constructor(private http: HttpClient) { }
+    constructor(
+        private http: HttpClient,
+        private authService: AuthService
+    ) { }
 
-    getMonthlySales(wholesalerId: number): Observable<SalesTrend[]> {
-        return this.http.get<SalesTrend[]>(`${this.apiUrl}/getSalesValue/monthly/${wholesalerId}`);
+    private getAuthHeaders(): HttpHeaders {
+        const token = this.authService.getToken();
+        return new HttpHeaders({
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        });
     }
 
-    getWeeklySales(wholesalerId: number): Observable<SalesTrend[]> {
-        return this.http.get<SalesTrend[]>(`${this.apiUrl}/getSalesValue/weekly/${wholesalerId}`);
+    getMonthlySales(): Observable<SalesTrend[]> {
+        const headers = this.getAuthHeaders();
+        return this.http.get<SalesTrend[]>(`${this.apiUrl}/getSalesValue/monthly`, { headers });
     }
 
-    getYearlySales(wholesalerId: number): Observable<SalesTrend[]> {
-        return this.http.get<SalesTrend[]>(`${this.apiUrl}/getSalesValue/yearly/${wholesalerId}`);
+    getWeeklySales(): Observable<SalesTrend[]> {
+        const headers = this.getAuthHeaders();
+        return this.http.get<SalesTrend[]>(`${this.apiUrl}/getSalesValue/weekly`, { headers });
     }
 
-    getTopSellingDaily(wholesalerId: number): Observable<TopSellingProduct[]> {
-        return this.http.get<TopSellingProduct[]>(`${this.apiUrl}/getTopSellingDaily/${wholesalerId}`);
+    getYearlySales(): Observable<SalesTrend[]> {
+        const headers = this.getAuthHeaders();
+        return this.http.get<SalesTrend[]>(`${this.apiUrl}/getSalesValue/yearly`, { headers });
     }
 
-    getTopSellingWeekly(wholesalerId: number): Observable<TopSellingProduct[]> {
-        return this.http.get<TopSellingProduct[]>(`${this.apiUrl}/getTopSellingWeekly/${wholesalerId}`);
+    getTopSellingWeekly(): Observable<TopSellingProduct[]> {
+        const headers = this.getAuthHeaders();
+        return this.http.get<TopSellingProduct[]>(`${this.apiUrl}/getTopSellingWeekly`, { headers });
     }
 
-    getTopSellingMonthly(wholesalerId: number): Observable<TopSellingProduct[]> {
-        return this.http.get<TopSellingProduct[]>(`${this.apiUrl}/getTopSellingMonthly/${wholesalerId}`);
+    getTopSellingMonthly(): Observable<TopSellingProduct[]> {
+        const headers = this.getAuthHeaders();
+        return this.http.get<TopSellingProduct[]>(`${this.apiUrl}/getTopSellingMonthly`, { headers });
     }
 
-    getTopSellingYearly(wholesalerId: number): Observable<TopSellingProduct[]> {
-        return this.http.get<TopSellingProduct[]>(`${this.apiUrl}/getTopSellingYearly/${wholesalerId}`);
+    getTopSellingYearly(): Observable<TopSellingProduct[]> {
+        const headers = this.getAuthHeaders();
+        return this.http.get<TopSellingProduct[]>(`${this.apiUrl}/getTopSellingYearly`, { headers });
     }
 }

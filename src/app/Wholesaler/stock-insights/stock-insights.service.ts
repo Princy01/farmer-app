@@ -52,9 +52,10 @@ export interface SlowMovingProductData {
 }
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Injectable({
         providedIn: 'root'
@@ -62,26 +63,42 @@ import { environment } from 'src/environments/environment';
 export class StockInsightsService {
         private apiUrl = environment.apiUrl;
 
-        constructor(private http: HttpClient) { }
+        constructor(
+                private http: HttpClient,
+                private authService: AuthService
+        ) { }
 
-        getCurrentStockByMandi(mandiId: number, wholesalerId: number): Observable<CurrentStockData[]> {
-                return this.http.get<CurrentStockData[]>(`${this.apiUrl}/getCurrentStockByMandi/${mandiId}/${wholesalerId}`);
+        private getAuthHeaders(): HttpHeaders {
+                const token = this.authService.getToken();
+                return new HttpHeaders({
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                });
         }
 
-        getLeastStockedProducts(wholesalerId: number): Observable<LeastStockedData[]> {
-                return this.http.get<LeastStockedData[]>(`${this.apiUrl}/getMandiStockedProduct/${wholesalerId}`);
+        getCurrentStockByMandi(mandiId: number): Observable<CurrentStockData[]> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<CurrentStockData[]>(`${this.apiUrl}/getCurrentStockByMandi/${mandiId}`, { headers });
         }
 
-        getLowStockItems(wholesalerId: number): Observable<LowStockItemData[]> {
-                return this.http.get<LowStockItemData[]>(`${this.apiUrl}/getLowStockItems/${wholesalerId}`);
+        getLeastStockedProducts(): Observable<LeastStockedData[]> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<LeastStockedData[]>(`${this.apiUrl}/getMandiStockedProduct`, { headers });
         }
 
-        getStockAvailabilityPercentage(wholesalerId: number): Observable<StockAvailabilityData[]> {
-                return this.http.get<StockAvailabilityData[]>(`${this.apiUrl}/getStockAvailabilityPercentage/${wholesalerId}`);
+        getLowStockItems(): Observable<LowStockItemData[]> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<LowStockItemData[]>(`${this.apiUrl}/getLowStockItems`, { headers });
         }
 
-        getMandiList(wholesalerId: number): Observable<MandiBasicInfo[]> {
-                return this.http.get<MandiBasicInfo[]>(`${this.apiUrl}/getMandiDetails/${wholesalerId}`)
+        getStockAvailabilityPercentage(): Observable<StockAvailabilityData[]> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<StockAvailabilityData[]>(`${this.apiUrl}/getStockAvailability`, { headers });
+        }
+
+        getMandiList(): Observable<MandiBasicInfo[]> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<MandiBasicInfo[]>(`${this.apiUrl}/getMandiDetails`, { headers })
                         .pipe(
                                 map(mandis => mandis.map(mandi => ({
                                         mandi_id: mandi.mandi_id,
@@ -90,7 +107,8 @@ export class StockInsightsService {
                         );
         }
 
-        getSlowMovingProducts(wholesalerId: number): Observable<SlowMovingProductData[]> {
-                return this.http.get<SlowMovingProductData[]>(`${this.apiUrl}/getSlowMovingProducts/${wholesalerId}`);
+        getSlowMovingProducts(): Observable<SlowMovingProductData[]> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<SlowMovingProductData[]>(`${this.apiUrl}/getSlowMovingProducts`, { headers });
         }
 }

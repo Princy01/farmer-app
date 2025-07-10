@@ -8,6 +8,7 @@ import { chevronBackOutline } from 'ionicons/icons';
 import { SalesTrendsService, SalesTrend, TopSellingProduct } from './sales-trends.service';
 import { catchError, finalize, of } from 'rxjs';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/auth.service';
 
 interface ProductData {
   name: string;
@@ -26,91 +27,40 @@ export class SalesTrendsComponent implements OnInit {
   selectedView: string = 'trends';
   selectedPeriod: string = 'monthly';
   selectedMetric: string = 'volume';
-  chartOptions: any
-  // = {
-  //   series: [],
-  //   chart: {
-  //     height: 350,
-  //     type: 'line',
-  //     background: '#ffffff',
-  //     toolbar: { show: true }
-  //   },
-  //   colors: ['#2E93fA', '#66DA26'],
-  //   xaxis: { categories: [] },
-  //   yaxis: [
-  //     {
-  //       title: { text: 'Revenue (₹)' },
-  //       labels: { formatter: (value: number) => `₹${(value / 1000).toFixed(0)}K` }
-  //     },
-  //     {
-  //       opposite: true,
-  //       title: { text: 'Orders' },
-  //       labels: { formatter: (value: number) => `${Math.round(value)}` }
-  //     }
-  //   ],
-  //   title: {
-  //     text: 'Sales Trends',
-  //     align: 'center',
-  //     style: { fontSize: '16px' },
-  //     margin: 40
-  //   }
-  // };
-  topProductsOptions: any
-  // = {
-  //   series: [{
-  //     name: 'Sales Volume',
-  //     data: []
-  //   }],
-  //   chart: {
-  //     type: 'bar',
-  //     height: 450,
-  //     background: '#ffffff',
-  //     toolbar: { show: false }
-  //   },
-  //   xaxis: {
-  //     categories: []
-  //   },
-  //   yaxis: {
-  //     title: {
-  //       text: 'Revenue (₹)'
-  //     },
-  //     labels: {
-  //       formatter: (value: number) =>
-  //       `₹${(value / 1000).toFixed(0)}K`
-  //   }
-  //   },
-  //   colors: [
-  //     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
-  //     '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
-  //   ],
-  //   title: {
-  //     text: `Top Products by Revenue - ${this.capitalize(this.selectedPeriod)}`,
-  //     align: 'center',
-  //     style: {
-  //       fontSize: '16px'
-  //     },
-  //     margin: 20
-  //   },
-  // };
+  chartOptions: any;
+  topProductsOptions: any;
 
   useRealData: boolean = true;
   isLoading: boolean = false;
   errorMessage: string = '';
-
-  private wholesalerId: number | null = null;
 
   constructor(
     private navController: NavController,
     private salesTrendsService: SalesTrendsService,
     private loadingController: LoadingController,
     private alertCtrl: AlertController,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     addIcons({ chevronBackOutline });
   }
 
   ngOnInit() {
-    this.initializeWholesaler();
+    this.checkAuthAndLoadData();
+  }
+
+  // authentication check
+  private checkAuthAndLoadData() {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    // Check if user has wholesaler role
+    if (!this.authService.hasRole('wholesaler')) {
+      this.showUnauthorizedError();
+      return;
+    }
 
     // Set initial data
     this.selectedView = 'trends';
@@ -123,30 +73,28 @@ export class SalesTrendsComponent implements OnInit {
     }, 0);
   }
 
-  private initializeWholesaler() {
-    // Get wholesaler ID from localStorage (same pattern as retailer cart)
-    const storedWholesalerId = localStorage.getItem('wholesalerId');
-    if (storedWholesalerId) {
-      this.wholesalerId = Number(storedWholesalerId);
-      // Set initial data
-      this.selectedView = 'trends';
-      this.selectedPeriod = 'monthly';
-      this.selectedMetric = 'volume';
-
-      // Initialize charts after a brief delay to ensure template is ready
-      setTimeout(() => {
-        this.initializeCharts();
-      }, 0);
-    } else {
-      // Redirect to login if no wholesaler ID found
-      this.showAuthError();
-    }
-  }
-
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
       header: 'Authentication Error',
-      message: 'Please login again.',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  // unauthorized error handler
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
       buttons: [
         {
           text: 'OK',
@@ -208,7 +156,7 @@ export class SalesTrendsComponent implements OnInit {
   }
 
   private async updateTrendsChart() {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
@@ -227,20 +175,27 @@ export class SalesTrendsComponent implements OnInit {
       let dataObservable;
       switch (this.selectedPeriod) {
         case 'weekly':
-          dataObservable = this.salesTrendsService.getWeeklySales(this.wholesalerId);
+          dataObservable = this.salesTrendsService.getWeeklySales();
           break;
         case 'monthly':
-          dataObservable = this.salesTrendsService.getMonthlySales(this.wholesalerId);
+          dataObservable = this.salesTrendsService.getMonthlySales();
           break;
         case 'yearly':
-          dataObservable = this.salesTrendsService.getYearlySales(this.wholesalerId);
+          dataObservable = this.salesTrendsService.getYearlySales();
           break;
         default:
-          dataObservable = this.salesTrendsService.getMonthlySales(this.wholesalerId);
+          dataObservable = this.salesTrendsService.getMonthlySales();
       }
 
       dataObservable.pipe(
         catchError(error => {
+          console.error('API Error:', error);
+
+          if (error.status === 401) {
+            this.showAuthError();
+            return of([]);
+          }
+
           this.errorMessage = 'Failed to fetch real data. Falling back to dummy data.';
           this.useRealData = false;
           const dummyData = this.getDataForPeriod(this.selectedPeriod);
@@ -326,7 +281,7 @@ export class SalesTrendsComponent implements OnInit {
   }
 
   private async updateTopProductsChart() {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
@@ -336,24 +291,28 @@ export class SalesTrendsComponent implements OnInit {
       loading = await this.showLoading();
       let dataObservable;
       switch (this.selectedPeriod) {
-        case 'daily':
-          dataObservable = this.salesTrendsService.getTopSellingDaily(this.wholesalerId);
-          break;
         case 'weekly':
-          dataObservable = this.salesTrendsService.getTopSellingWeekly(this.wholesalerId);
+          dataObservable = this.salesTrendsService.getTopSellingWeekly();
           break;
         case 'monthly':
-          dataObservable = this.salesTrendsService.getTopSellingMonthly(this.wholesalerId);
+          dataObservable = this.salesTrendsService.getTopSellingMonthly();
           break;
         case 'yearly':
-          dataObservable = this.salesTrendsService.getTopSellingYearly(this.wholesalerId);
+          dataObservable = this.salesTrendsService.getTopSellingYearly();
           break;
         default:
-          dataObservable = this.salesTrendsService.getTopSellingMonthly(this.wholesalerId);
+          dataObservable = this.salesTrendsService.getTopSellingMonthly();
       }
 
       dataObservable.pipe(
         catchError(error => {
+          console.error('API Error:', error);
+
+          if (error.status === 401) {
+            this.showAuthError();
+            return of([]);
+          }
+
           this.errorMessage = 'Failed to fetch top products data. Falling back to dummy data.';
           this.useRealData = false;
           return of(this.getTopProductsForPeriod(this.selectedPeriod).map(item => ({

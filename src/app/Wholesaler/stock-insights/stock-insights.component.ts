@@ -17,6 +17,7 @@ import {
   chevronBackOutline
 } from 'ionicons/icons';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/auth.service';
 
 interface WarehouseData {
   products: string[];
@@ -71,15 +72,14 @@ export class StockInsightsComponent implements OnInit {
   isLoading: boolean = false;
   error: string | null = null;
 
-  private wholesalerId: number | null = null;
-
   constructor(
     private navController: NavController,
     private stockInsightsService: StockInsightsService,
     private loadingController: LoadingController,
     private toastController: ToastController,
     private alertCtrl: AlertController,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     addIcons({
       warningOutline,
@@ -93,25 +93,47 @@ export class StockInsightsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.initializeWholesaler();
-    this.loadMandis();
+    this.checkAuthAndLoadData();
   }
 
-  private initializeWholesaler() {
-    const storedWholesalerId = localStorage.getItem('wholesalerId');
-    if (storedWholesalerId) {
-      this.wholesalerId = Number(storedWholesalerId);
-      this.loadMandis();
-    } else {
-      // Redirect to login if no wholesaler ID found
+  // authentication check
+  private checkAuthAndLoadData() {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
+      return;
     }
+
+    // Check if user has wholesaler role
+    if (!this.authService.hasRole('wholesaler')) {
+      this.showUnauthorizedError();
+      return;
+    }
+
+    this.loadMandis();
   }
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
       header: 'Authentication Error',
-      message: 'Please login again.',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  // unauthorized error handler
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
       buttons: [
         {
           text: 'OK',
@@ -123,18 +145,20 @@ export class StockInsightsComponent implements OnInit {
     });
     await alert.present();
   }
+
   private async loadMandis() {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
+
     this.isLoading = true;
     this.error = null;
 
     const loading = await this.showLoading();
 
     try {
-      this.stockInsightsService.getMandiList(this.wholesalerId).subscribe({
+      this.stockInsightsService.getMandiList().subscribe({
         next: (mandis) => {
           this.warehouses = mandis;
           if (mandis.length > 0) {
@@ -144,8 +168,14 @@ export class StockInsightsComponent implements OnInit {
             this.error = 'No mandis available for your account';
           }
         },
-        error: (error) => {
+        error: async (error) => {
           console.error('Failed to load mandis:', error);
+
+          if (error.status === 401) {
+            await this.showAuthError();
+            return;
+          }
+
           this.error = 'Failed to load mandi list. Please try again.';
           this.showErrorToast(this.error);
         },
@@ -203,13 +233,14 @@ export class StockInsightsComponent implements OnInit {
   }
 
   private async initializeAlerts() {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
+
     const loading = await this.showLoading();
     try {
-      this.stockInsightsService.getLowStockItems(this.wholesalerId)
+      this.stockInsightsService.getLowStockItems()
         .pipe(
           finalize(() => {
             loading.dismiss();
@@ -220,8 +251,14 @@ export class StockInsightsComponent implements OnInit {
           next: (data) => {
             this.lowStockAlerts = data;
           },
-          error: (error) => {
+          error: async (error) => {
             console.error('Failed to fetch low stock items:', error);
+
+            if (error.status === 401) {
+              await this.showAuthError();
+              return;
+            }
+
             this.showErrorToast('Failed to fetch low stock alerts');
           }
         });
@@ -232,13 +269,14 @@ export class StockInsightsComponent implements OnInit {
   }
 
   private async initializeSlowMoving() {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
+
     const loading = await this.showLoading();
     try {
-      this.stockInsightsService.getSlowMovingProducts(this.wholesalerId)
+      this.stockInsightsService.getSlowMovingProducts()
         .pipe(
           finalize(() => {
             loading.dismiss();
@@ -249,8 +287,14 @@ export class StockInsightsComponent implements OnInit {
           next: (data) => {
             this.slowMovingProducts = data;
           },
-          error: (error) => {
+          error: async (error) => {
             console.error('Failed to fetch slow moving products:', error);
+
+            if (error.status === 401) {
+              await this.showAuthError();
+              return;
+            }
+
             this.showErrorToast('Failed to fetch slow moving products');
           }
         });
@@ -261,14 +305,14 @@ export class StockInsightsComponent implements OnInit {
   }
 
   async updateChartData() {
-    if (!this.selectedWarehouse || !this.wholesalerId) {
+    if (!this.selectedWarehouse || !this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-      const loading = await this.showLoading();
+    const loading = await this.showLoading();
     try {
-      this.stockInsightsService.getCurrentStockByMandi(this.selectedWarehouse.mandi_id, this.wholesalerId)
+      this.stockInsightsService.getCurrentStockByMandi(this.selectedWarehouse.mandi_id)
         .pipe(
           finalize(() => {
             loading.dismiss();
@@ -279,8 +323,14 @@ export class StockInsightsComponent implements OnInit {
           next: (data) => {
             this.updateChartWithData(data);
           },
-          error: (error) => {
+          error: async (error) => {
             console.error('Failed to fetch stock data:', error);
+
+            if (error.status === 401) {
+              await this.showAuthError();
+              return;
+            }
+
             this.showErrorToast('Failed to fetch stock data');
           }
         });

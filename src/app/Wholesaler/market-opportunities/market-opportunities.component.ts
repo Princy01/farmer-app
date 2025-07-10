@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
 import { ModalController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { WholesalerApiService, BulkOrder, TopRetailer } from '../services/wholesaler-api.service';
 import { OfferModalComponent } from '../offer-modal/offer-modal.component';
-// import { RetailerProductsModalComponent } from '../market-opportunities/retailer-products-modal/retailer-products-modal.component';
 import { addIcons } from 'ionicons';
 import { add, listOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-market-opportunities',
@@ -22,38 +22,60 @@ export class MarketOpportunitiesComponent implements OnInit {
   bulkOrders: BulkOrder[] = [];
   topRetailers: TopRetailer[] = [];
 
-  private wholesalerId: number | null = null;
-
   constructor(
     private wholesalerService: WholesalerApiService,
     private modalCtrl: ModalController,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
+    private loadingCtrl: LoadingController,
+    private authService: AuthService,
     private router: Router
   ) {
     addIcons({ listOutline });
   }
 
   ngOnInit() {
-    this.initializeWholesaler();
-    this.loadData();
+    this.checkAuthAndLoadData();
   }
 
-  private initializeWholesaler() {
-    const storedWholesalerId = localStorage.getItem('wholesalerId');
-    if (storedWholesalerId) {
-      this.wholesalerId = Number(storedWholesalerId);
-      this.loadData();
-    } else {
-      // Redirect to login if no wholesaler ID found
+  // authentication check
+  private checkAuthAndLoadData() {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
+      return;
     }
+
+    // Check if user has wholesaler role
+    if (!this.authService.hasRole('wholesaler')) {
+      this.showUnauthorizedError();
+      return;
+    }
+
+    this.loadData();
   }
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
       header: 'Authentication Error',
-      message: 'Please login again.',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  // unauthorized error handler
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
       buttons: [
         {
           text: 'OK',
@@ -67,45 +89,67 @@ export class MarketOpportunitiesComponent implements OnInit {
   }
 
   async loadData() {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-    this.isLoading = true;
-    this.error = null;
+    const loading = await this.loadingCtrl.create({
+      message: 'Loading market opportunities...',
+      spinner: 'circular',
+    });
 
     try {
-      // Load bulk orders
-      this.wholesalerService.getBulkOrders(this.wholesalerId).subscribe({
+      await loading.present();
+      this.isLoading = true;
+      this.error = null;
+
+      // Load bulk orders using JWT
+      this.wholesalerService.getBulkOrders().subscribe({
         next: (data) => {
           this.bulkOrders = data;
         },
-        error: (error) => {
+        error: async (error) => {
           console.error('Failed to load bulk orders:', error);
+
+          if (error.status === 401) {
+            await this.showAuthError();
+            return;
+          }
+
           this.error = 'Failed to load bulk orders. Please try again.';
           this.showErrorToast('Failed to load bulk orders');
         }
       });
 
-      // Load top retailers
-      this.wholesalerService.getTopRetailers(this.wholesalerId).subscribe({
+      // Load top retailers using JWT
+      this.wholesalerService.getTopRetailers().subscribe({
         next: (data) => {
           this.topRetailers = data;
           console.log('Top retailers:', this.topRetailers);
+          this.isLoading = false;
+          loading.dismiss();
         },
-        error: (error) => {
+        error: async (error) => {
           console.error('Failed to load top retailers:', error);
+          this.isLoading = false;
+          loading.dismiss();
+
+          if (error.status === 401) {
+            await this.showAuthError();
+            return;
+          }
+
           this.error = 'Failed to load top retailers. Please try again.';
           this.showErrorToast('Failed to load top retailers');
         }
       });
     } catch (err) {
+      this.isLoading = false;
+      loading.dismiss();
       console.error('Failed to load data:', err);
       this.error = 'Failed to load market opportunities. Please try again.';
       this.showErrorToast('Failed to load market opportunities');
-    } finally {
-      this.isLoading = false;
     }
   }
 
@@ -120,15 +164,15 @@ export class MarketOpportunitiesComponent implements OnInit {
   }
 
   async openOfferModal(order: BulkOrder) {
-    if (!this.wholesalerId) {
-      this.showAuthError();
+    if (!this.authService.isAuthenticated()) {
+      await this.showAuthError();
       return;
     }
 
     try {
       const modal = await this.modalCtrl.create({
         component: OfferModalComponent,
-        componentProps: { order, wholesalerId: this.wholesalerId },
+        componentProps: { order }, // Removed wholesalerId as it will use JWT
         breakpoints: [0, 0.5, 0.8],
         initialBreakpoint: 0.8
       });
