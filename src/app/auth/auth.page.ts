@@ -68,10 +68,10 @@ export class LoginPage {
       name: ['', Validators.required],
       identifier: ['', [Validators.required, this.emailOrPhoneValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      address: [''],
+      address: ['', Validators.required],
       location: ['', Validators.required],
       state: ['', Validators.required],
-      pincode: [''],
+      pincode: ['', Validators.required],
       role_id: ['', Validators.required],
       active_status: [1]
     });

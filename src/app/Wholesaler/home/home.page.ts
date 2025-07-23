@@ -5,7 +5,7 @@ import { addIcons } from 'ionicons';
 import {
   chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
   chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
-  trendingUpOutline, reloadOutline, settingsOutline, closeOutline
+  trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline
 } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
@@ -37,7 +37,7 @@ export class HomePage {
     addIcons({
       chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
       chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
-      trendingUpOutline, reloadOutline, settingsOutline, closeOutline
+      trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline
     });
   }
 
@@ -184,6 +184,15 @@ export class HomePage {
             this.router.navigate(['/wholesaler/profile']);
           }
         },
+        {
+          text: 'Business Locations',
+          icon: 'location-outline',
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.router.navigate(['/wholesaler/business-locations']);
+          }
+        },
+
         {
           text: 'Market Opportunities',
           icon: 'trending-up-outline',

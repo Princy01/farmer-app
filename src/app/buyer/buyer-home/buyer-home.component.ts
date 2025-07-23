@@ -120,14 +120,14 @@ export class BuyerHomeComponent {
             });
           }
         },
-        {
-          text: 'Linked Accounts',
-          icon: 'link-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
-            this.router.navigate(['/buyer/linked-accounts']);
-          }
-        },
+        // {
+        //   text: 'Linked Accounts',
+        //   icon: 'link-outline',
+        //   cssClass: 'custom-action-sheet-btn',
+        //   handler: () => {
+        //     this.router.navigate(['/buyer/linked-accounts']);
+        //   }
+        // },
         {
           text: 'Settings',
           icon: 'settings-outline',

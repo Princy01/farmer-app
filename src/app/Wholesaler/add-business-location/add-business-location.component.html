@@ -1,0 +1,180 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/wholesaler/business-locations"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ pageTitle }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <form [formGroup]="businessForm" (ngSubmit)="onSubmit()">
+
+      <!-- Shop Name -->
+      <ion-item [class.ion-invalid]="businessForm.get('shopName')?.invalid && businessForm.get('shopName')?.touched">
+        <ion-label position="stacked">Shop Name *</ion-label>
+        <ion-input
+          formControlName="shopName"
+          placeholder="Enter shop name"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('shopName')">
+        {{ getErrorMessage('shopName') }}
+      </div>
+
+      <!-- Phone Number -->
+      <ion-item [class.ion-invalid]="businessForm.get('number')?.invalid && businessForm.get('number')?.touched">
+        <ion-label position="stacked">Phone Number *</ion-label>
+        <ion-input
+          formControlName="number"
+          placeholder="Enter 10-digit phone number"
+          type="tel">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('number')">
+        {{ getErrorMessage('number') }}
+      </div>
+
+      <!-- Location -->
+      <ion-item [class.ion-invalid]="businessForm.get('location')?.invalid && businessForm.get('location')?.touched">
+        <ion-label position="stacked">Location *</ion-label>
+        <ion-input
+          formControlName="location"
+          placeholder="Enter city/location"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('location')">
+        {{ getErrorMessage('location') }}
+      </div>
+
+      <!-- State -->
+      <ion-item [class.ion-invalid]="businessForm.get('state')?.invalid && businessForm.get('state')?.touched">
+        <ion-label position="stacked">State *</ion-label>
+        <ion-select formControlName="state" placeholder="Select state">
+          <ion-select-option *ngFor="let state of states" [value]="state">
+            {{ state }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('state')">
+        {{ getErrorMessage('state') }}
+      </div>
+
+      <!-- Address -->
+      <ion-item [class.ion-invalid]="businessForm.get('address')?.invalid && businessForm.get('address')?.touched">
+        <ion-label position="stacked">Address *</ion-label>
+        <ion-textarea
+          formControlName="address"
+          placeholder="Enter complete address"
+          rows="3">
+        </ion-textarea>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('address')">
+        {{ getErrorMessage('address') }}
+      </div>
+
+      <!-- Email -->
+      <ion-item [class.ion-invalid]="businessForm.get('email')?.invalid && businessForm.get('email')?.touched">
+        <ion-label position="stacked">Email *</ion-label>
+        <ion-input
+          formControlName="email"
+          placeholder="Enter email address"
+          type="email">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('email')">
+        {{ getErrorMessage('email') }}
+      </div>
+
+      <!-- GST Number -->
+      <ion-item [class.ion-invalid]="businessForm.get('gstNumber')?.invalid && businessForm.get('gstNumber')?.touched">
+        <ion-label position="stacked">GST Number *</ion-label>
+        <ion-input
+          formControlName="gstNumber"
+          placeholder="Enter GST number"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('gstNumber')">
+        {{ getErrorMessage('gstNumber') }}
+      </div>
+
+      <!-- PAN -->
+      <ion-item [class.ion-invalid]="businessForm.get('pan')?.invalid && businessForm.get('pan')?.touched">
+        <ion-label position="stacked">PAN Number *</ion-label>
+        <ion-input
+          formControlName="pan"
+          placeholder="Enter PAN number"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('pan')">
+        {{ getErrorMessage('pan') }}
+      </div>
+
+      <!-- Pincode -->
+      <ion-item [class.ion-invalid]="businessForm.get('pincode')?.invalid && businessForm.get('pincode')?.touched">
+        <ion-label position="stacked">Pincode *</ion-label>
+        <ion-input
+          formControlName="pincode"
+          placeholder="Enter 6-digit pincode"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('pincode')">
+        {{ getErrorMessage('pincode') }}
+      </div>
+
+      <!-- Privileged User -->
+      <ion-item [class.ion-invalid]="businessForm.get('privilegedUser')?.invalid && businessForm.get('privilegedUser')?.touched">
+        <ion-label position="stacked">Privileged User *</ion-label>
+        <ion-input
+          formControlName="privilegedUser"
+          placeholder="Enter privileged user name"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('privilegedUser')">
+        {{ getErrorMessage('privilegedUser') }}
+      </div>
+
+      <!-- Type ID -->
+      <ion-item>
+        <ion-label position="stacked">Business Type</ion-label>
+        <ion-select formControlName="typeId">
+          <ion-select-option value="wholesale">Wholesale</ion-select-option>
+          <ion-select-option value="retail">Retail</ion-select-option>
+          <ion-select-option value="both">Both</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- Established Year -->
+      <ion-item [class.ion-invalid]="businessForm.get('establishedYear')?.invalid && businessForm.get('establishedYear')?.touched">
+        <ion-label position="stacked">Established Year</ion-label>
+        <ion-input
+          formControlName="establishedYear"
+          placeholder="Enter year (e.g., 2020)"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('establishedYear')">
+        {{ getErrorMessage('establishedYear') }}
+      </div>
+
+      <!-- Submit Button -->
+      <ion-button
+        expand="block"
+        type="submit"
+        color="primary"
+        class="submit-btn"
+        [disabled]="businessForm.invalid">
+        <ion-icon name="save" slot="start"></ion-icon>
+        {{ isEditMode ? 'Update Location' : 'Save Location' }}
+      </ion-button>
+
+    </form>
+  </div>
+</ion-content>

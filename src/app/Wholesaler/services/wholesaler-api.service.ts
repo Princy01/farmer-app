@@ -170,6 +170,24 @@ export interface WholesellerEntryResponse {
   entry_id: number;
 }
 
+// For business locations (mandis)
+export interface Mandi {
+  mandi_id: number;
+  mandi_location: string;
+  mandi_incharge: string;
+  mandi_incharge_num: string;
+  mandi_pincode: string;
+  mandi_address: string;
+  mandi_state_id: number;
+  state_name: string;
+  state_shortnames: string;
+  mandi_name: string;
+  mandi_shortnames: string;
+  mandi_city_id: number;
+  city_name: string;
+  city_shortnames: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -316,15 +334,22 @@ export class WholesalerApiService {
     );
   }
 
-  getMandis(wholesalerId?: number): Observable<{ mandi_id: number, mandi_name: string }[]> {
+  getMandis(): Observable<Mandi[]> {
     const headers = this.getAuthHeaders();
-
-    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
-    return this.http.get<{ mandi_id: number, mandi_name: string }[]>(
-      `${this.apiUrl}/getMandis`,
+    return this.http.get<Mandi[]>(
+      `${this.apiUrl}/getAllMandiDetails`,
       { headers }
     );
   }
+
+  addMandi(mandi: any): Observable<any> {
+  const headers = this.getAuthHeaders();
+  return this.http.post<any>(
+    `${this.apiUrl}/InsertMandiDetailsForWholeseller`,
+    mandi,
+    { headers }
+  );
+}
 
   getWarehouses(wholesalerId?: number): Observable<{ warehouse_id: number, warehouse_name: string }[]> {
     const headers = this.getAuthHeaders();

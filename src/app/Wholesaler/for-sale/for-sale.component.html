@@ -166,7 +166,7 @@
             </ion-item>
 
             <!-- Warehouse Selection -->
-            <ion-item
+            <!-- <ion-item
               class="custom-item"
               [class.ion-invalid]="isFieldInvalid('warehouse_id')"
             >
@@ -185,29 +185,7 @@
               <ion-note slot="error" *ngIf="isFieldInvalid('warehouse_id')">
                 {{ getFieldError("warehouse_id") }}
               </ion-note>
-            </ion-item>
-
-            <!-- Unit Selection-->
-            <ion-item
-              class="custom-item"
-              [class.ion-invalid]="isFieldInvalid('unit_id')"
-            >
-              <ion-label position="floating">
-                <ion-icon name="scale-outline" class="input-icon"></ion-icon>
-                Select Unit
-              </ion-label>
-              <ion-select formControlName="unit_id">
-                <ion-select-option
-                  *ngFor="let unit of units"
-                  [value]="unit.unit_id"
-                >
-                  {{ unit.unit_name }}
-                </ion-select-option>
-              </ion-select>
-              <ion-note slot="error" *ngIf="isFieldInvalid('unit_id')">
-                {{ getFieldError("unit_id") }}
-              </ion-note>
-            </ion-item>
+            </ion-item> -->
           </ion-list>
         </form>
       </ion-card-content>
@@ -222,7 +200,7 @@
         [disabled]="!orderForm.valid || isSubmitting"
       >
         <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-        {{ isSubmitting ? "Updating" : "Updating Inventory" }}
+        {{ isSubmitting ? "Updating" : "Update Inventory" }}
       </ion-button>
 
       <ion-button

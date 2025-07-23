@@ -9,6 +9,7 @@ import { MarketComparisonService } from './market-comparison.service';
 import { catchError, finalize, of } from 'rxjs';
 import { GroupedPriceComparison, WholesellerPrice } from './market-comparison.service';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/auth/auth.service';
 
 interface ProductPrices {
   [key: string]: number;
@@ -34,8 +35,6 @@ export class MarketComparisonComponent implements OnInit {
   isLoading: boolean = false;
   useRealData: boolean = true;
 
-  private wholesalerId: number | null = null;
-
   private priceData: MarketPrices = {
     'Azadpur Mandi': { 'Potato': 45, 'Onion': 52, 'Tomato': 38, 'Cauliflower': 24, 'Green Peas': 33, 'Cabbage': 26 },
     'Ghazipur Mandi': { 'Potato': 42, 'Onion': 48, 'Tomato': 35, 'Cauliflower': 22, 'Green Peas': 31, 'Cabbage': 24 },
@@ -48,30 +47,54 @@ export class MarketComparisonComponent implements OnInit {
     private loadingController: LoadingController,
     private toastController: ToastController,
     private alertCtrl: AlertController,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
+
   ) {
     addIcons({ chevronBackOutline });
   }
 
   ngOnInit() {
-    this.initializeWholesaler();
-    this.initializeCharts();
+    this.checkAuthAndInitialize();
   }
-  private initializeWholesaler() {
-    const storedWholesalerId = localStorage.getItem('wholesalerId');
-    if (storedWholesalerId) {
-      this.wholesalerId = Number(storedWholesalerId);
-      this.initializeCharts();
-    } else {
-      // Redirect to login if no wholesaler ID found
+
+  private checkAuthAndInitialize() {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
+      return;
     }
+
+    //Check if user has wholesaler role
+    if (!this.authService.hasRole('wholesaler')) {
+      this.showUnauthorizedError();
+      return;
+    }
+
+      this.initializeCharts();
   }
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
       header: 'Authentication Error',
-      message: 'Please login again.',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  // Unauthorized error handler
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
       buttons: [
         {
           text: 'OK',
@@ -83,6 +106,7 @@ export class MarketComparisonComponent implements OnInit {
     });
     await alert.present();
   }
+
   async showLoading() {
     this.isLoading = true;
     const loading = await this.loadingController.create({
@@ -123,7 +147,7 @@ export class MarketComparisonComponent implements OnInit {
   }
 
   async updateChart() {
-    if (!this.wholesalerId) {
+    if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
@@ -133,10 +157,18 @@ export class MarketComparisonComponent implements OnInit {
       try {
         const productIds = this.selectedProducts.map(name => this.getProductId(name));
 
-        this.marketComparisonService.getWholesellerPriceComparison(productIds, this.wholesalerId)
+        // Call service without wholesaler ID - backend will get user_id from JWT
+        this.marketComparisonService.getWholesellerPriceComparison(productIds)
           .pipe(
             catchError(error => {
               console.error('API Error:', error);
+
+              // Handle authentication errors
+              if (error.status === 401) {
+                this.showAuthError();
+                return of(null);
+              }
+
               this.showToast('Unable to fetch real-time data. Using stored data.');
               this.useRealData = false;
               return of(null);
@@ -270,12 +302,18 @@ export class MarketComparisonComponent implements OnInit {
 
   async handleRefresh(event: any) {
     try {
+      if (!this.authService.isAuthenticated()) {
+        this.showAuthError();
+        return;
+      }
+
       this.useRealData = true;
       await this.updateChart();
     } finally {
       event.target.complete();
     }
   }
+
 
   goBack() {
     this.router.navigate(['/wholesaler/home']);

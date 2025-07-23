@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, map, catchError } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/auth/auth.service';
 
 interface CartProduct {
   product_id: number;
@@ -40,7 +41,7 @@ export interface CartResponse {
 }
 
 interface CreateCartRequest {
-  retailer_id: number;
+  retailer_id?: number; // Optional since it will come from JWT
   wholeseller_id?: number;
   products: Array<{
     product_id: number;
@@ -62,10 +63,20 @@ export class CartService {
   private cartSubject = new BehaviorSubject<CartResponse | null>(null);
   cart$ = this.cartSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
-  getCart(cartId: number, retailerId: number): Observable<CartResponse> {
-    return this.http.get<ApiResponse<CartResponse>>(`${this.apiUrl}/getCartitems/${cartId}/${retailerId}`).pipe(
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  // Remove retailerId parameter - backend will get retailer_id from JWT
+  getCart(cartId: number): Observable<CartResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<ApiResponse<CartResponse>>(`${this.apiUrl}/getCartitems/${cartId}`, { headers }).pipe(
       map(response => {
         if (response.status === 'error') {
           throw new Error(response.message);
@@ -81,7 +92,15 @@ export class CartService {
   }
 
   createCart(cartData: CreateCartRequest): Observable<CartResponse> {
-    return this.http.post<ApiResponse<CartResponse>>(`${this.apiUrl}/InsertCartDetails`, cartData).pipe(
+    const headers = this.getAuthHeaders();
+
+    // Remove retailer_id from request - backend will get it from JWT
+    const requestData = {
+      ...cartData,
+      retailer_id: cartData.retailer_id || this.authService.getUserId()
+    };
+
+    return this.http.post<ApiResponse<CartResponse>>(`${this.apiUrl}/InsertCartDetails`, requestData, { headers }).pipe(
       map(response => {
         if (response.status === 'error') {
           throw new Error(response.message);
@@ -97,11 +116,12 @@ export class CartService {
   }
 
   removeCartItem(cartId: number, productId: number, wholesellerId?: number): Observable<CartResponse> {
+    const headers = this.getAuthHeaders();
     const url = wholesellerId ?
       `${this.apiUrl}/cart/${cartId}/item/${productId}?wholeseller_id=${wholesellerId}` :
       `${this.apiUrl}/cart/${cartId}/item/${productId}`;
 
-    return this.http.delete<ApiResponse<CartResponse>>(url).pipe(
+    return this.http.delete<ApiResponse<CartResponse>>(url, { headers }).pipe(
       map(response => {
         if (response.status === 'error') {
           throw new Error(response.message);

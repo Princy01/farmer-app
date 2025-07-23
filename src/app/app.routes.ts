@@ -62,6 +62,14 @@ export const routes: Routes = [
     path: 'wholesaler/restocking-recommendations',
     loadComponent: () => import('./Wholesaler/restocking-recommendations/restocking-recommendations.component').then((m) => m.RestockingRecommendationsComponent),
   },
+  {
+  path: 'wholesaler/business-locations',
+  loadComponent: () => import('./Wholesaler/business-locations/business-locations.component').then((m) => m.BusinessLocationsComponent),
+  },
+  {
+    path: 'wholesaler/add-business-location',
+    loadComponent: () => import('./Wholesaler/add-business-location/add-business-location.component').then((m) => m.AddBusinessLocationComponent),
+  },
 
   {
     path: 'admin',
