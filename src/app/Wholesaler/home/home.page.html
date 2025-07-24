@@ -14,7 +14,7 @@
     </ion-buttons>
 
     <ion-title mode="ios" style="--color: rgb(245, 240, 230)">Go4u</ion-title>
-    .
+
     <ion-buttons mode="ios" slot="end">
       <ion-button (click)="openMessages()">
         <ion-badge *ngIf="messages > 0" class="custom-badge"
@@ -31,40 +31,49 @@
 </ion-header>
 
 <ion-content [scrollEvents]="true">
-  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
-    <ion-refresher-content
-      pullingIcon="chevron-down-circle-outline"
-      pullingText="Pull to refresh"
-      refreshingSpinner="circular"
-      refreshingText="Refreshing..."
-    >
-    </ion-refresher-content>
-  </ion-refresher>
-
-  <div class="search-wrapper">
-    <ion-searchbar
-      placeholder="Search items..."
-      (ionInput)="searchItems($event)"
-    ></ion-searchbar>
-  </div>
-  <ion-list>
-    <ion-item *ngFor="let item of filteredItems" lines="none">
-      <ion-label>
-        <h2>{{ item.name }}</h2>
-        <p>Total Quantity: {{ item.qty }} kg</p>
-        <p>Orders placed: {{ item.orders }} kg</p>
-      </ion-label>
-      <ion-icon
-        name="chevron-forward-outline"
-        size="small"
-        (click)="viewDetails(item)"
+  <div class="content-container">
+    <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+      <ion-refresher-content
+        pullingIcon="chevron-down-circle-outline"
+        pullingText="Pull to refresh"
+        refreshingSpinner="circular"
+        refreshingText="Refreshing..."
       >
-      </ion-icon>
-    </ion-item>
-  </ion-list>
+      </ion-refresher-content>
+    </ion-refresher>
 
-  <div class="center-button">
-    <ion-button (click)="loadMore()" class="loadMore">Load More</ion-button>
+    <div class="search-wrapper">
+      <ion-searchbar
+        placeholder="Search items..."
+        (ionInput)="searchItems($event)"
+      ></ion-searchbar>
+    </div>
+
+    <ion-list>
+      <ion-item *ngFor="let item of filteredItems" lines="none">
+        <ion-label>
+          <h2>{{ item.name }}</h2>
+          <p>Total Quantity: {{ item.qty }} kg</p>
+          <p>Orders placed: {{ item.orders }} kg</p>
+        </ion-label>
+        <ion-icon
+          name="chevron-forward-outline"
+          size="small"
+          (click)="viewDetails(item)"
+        >
+        </ion-icon>
+      </ion-item>
+    </ion-list>
+
+    <ion-infinite-scroll
+      threshold="100px"
+      (ionInfinite)="onInfiniteScroll($event)"
+      [disabled]="!isInfiniteScrollEnabled">
+      <ion-infinite-scroll-content
+        loadingSpinner="bubbles"
+        loadingText="Loading more items...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
   </div>
 </ion-content>
 
