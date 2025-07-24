@@ -50,7 +50,7 @@ export class HomePage {
     this.checkAuthAndLoadData();
   }
 
-   private setItemsPerPage() {
+  private setItemsPerPage() {
     if (window.innerWidth >= 768) {
       this.itemsPerPage = 8; // Load more items on desktop
     } else {
@@ -526,9 +526,18 @@ export class HomePage {
   }
 
   viewDetails(item: any) {
-    console.log('Item details:', item);
+    // Navigate to product details page with product data
+    this.router.navigate(['/wholesaler/product-details'], {
+      queryParams: {
+        productId: item.product_id,
+        wholesellerId: item.wholeseller_id,
+        mandiId: item.mandi_id
+      },
+      state: {
+        productData: item
+      }
+    });
   }
-
   openProfile() {
     this.navCtrl.navigateForward('/profile');
   }

@@ -15,6 +15,10 @@ export const routes: Routes = [
     loadComponent: () => import('./Wholesaler/home/home.page').then((m) => m.HomePage),
   },
   {
+    path: 'wholesaler/product-details',
+    loadComponent: () => import('./Wholesaler/product-details/product-details.component').then((m) => m.ProductDetailsComponent),
+  },
+  {
     path: 'wholesaler/orders',
     loadComponent: () => import('./Wholesaler/My-Orders/orders.component').then((m) => m.OrdersComponent),
   },
