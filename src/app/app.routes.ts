@@ -67,6 +67,10 @@ export const routes: Routes = [
     loadComponent: () => import('./Wholesaler/restocking-recommendations/restocking-recommendations.component').then((m) => m.RestockingRecommendationsComponent),
   },
   {
+    path: 'wholesaler/business-registration',
+    loadComponent: () => import('./Wholesaler/business-registration/business-registration.component').then((m) => m.BusinessRegistrationComponent),
+  },
+  {
   path: 'wholesaler/business-locations',
   loadComponent: () => import('./Wholesaler/business-locations/business-locations.component').then((m) => m.BusinessLocationsComponent),
   },
