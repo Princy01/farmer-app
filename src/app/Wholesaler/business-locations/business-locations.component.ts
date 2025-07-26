@@ -3,9 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
-import { AlertController, LoadingController, ModalController} from '@ionic/angular/standalone';
+import { AlertController, LoadingController, ModalController, ActionSheetController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { add, location, business, create, eye } from 'ionicons/icons';
+import {
+  add, location, business, create, eye, home, list, cube, time,
+  analytics, pulse, notifications, person, menu, logOut, settings,
+  bulb, barChart, close
+} from 'ionicons/icons';
 import { BusinessLocationsService, BusinessLocation } from '../services/business-locations.service';
 import { LocationDetailsModalComponent } from './location-details-modal.component';
 
@@ -25,9 +29,14 @@ export class BusinessLocationsComponent implements OnInit {
     private router: Router,
     private alertController: AlertController,
     private loadingController: LoadingController,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private actionSheetController: ActionSheetController
   ) {
-    addIcons({ add, location, business, create, eye });
+    addIcons({
+      add, location, business, create, eye, home, list, cube, time,
+      analytics, pulse, notifications, person, menu, logOut, settings,
+      bulb, barChart, close
+    });
   }
 
   ngOnInit() {
@@ -84,10 +93,117 @@ export class BusinessLocationsComponent implements OnInit {
       componentProps: {
         location: location
       },
-      breakpoints: [0, 0.5, 0.75, 1],
-      initialBreakpoint: 0.75
+      presentingElement: undefined,
+    showBackdrop: true,
+    backdropDismiss: true
     });
 
     await modal.present();
+  }
+
+  navigateToHome() {
+    this.router.navigate(['/wholesaler/home']);
+  }
+
+  navigateToMyOrders() {
+    this.router.navigate(['wholesaler/orders']);
+  }
+
+  navigateToUpdateInventory() {
+    this.router.navigate(['wholesaler/for-sale']);
+  }
+
+  navigateToPastOrders() {
+    this.router.navigate(['/wholesaler/past-orders']);
+  }
+
+  navigateToRestockingRecommendations() {
+    this.router.navigate(['/wholesaler/restocking-recommendations']);
+  }
+
+  navigateToMarketOpportunities() {
+    this.router.navigate(['/wholesaler/market-opportunities']);
+  }
+
+  navigateToTrends() {
+    this.router.navigate(['/wholesaler/trends']);
+  }
+
+  async presentActionSheet() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Quick Actions',
+      buttons: [
+        {
+          text: 'Home Dashboard',
+          icon: 'home',
+          handler: () => this.navigateToHome()
+        },
+        {
+          text: 'My Orders',
+          icon: 'list',
+          handler: () => this.navigateToMyOrders()
+        },
+        {
+          text: 'Update Inventory',
+          icon: 'cube',
+          handler: () => this.navigateToUpdateInventory()
+        },
+        {
+          text: 'Past Orders',
+          icon: 'time',
+          handler: () => this.navigateToPastOrders()
+        },
+        {
+          text: 'Restocking Recommendations',
+          icon: 'bulb',
+          handler: () => this.navigateToRestockingRecommendations()
+        },
+        {
+          text: 'Market Opportunities',
+          icon: 'analytics',
+          handler: () => this.navigateToMarketOpportunities()
+        },
+        {
+          text: 'Trends',
+          icon: 'pulse',
+          handler: () => this.navigateToTrends()
+        },
+        {
+          text: 'Settings',
+          icon: 'settings',
+          handler: () => this.router.navigate(['/wholesaler/settings'])
+        },
+        {
+          text: 'Cancel',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+
+    await actionSheet.present();
+  }
+
+  // Method for logout
+  async logout() {
+    const alert = await this.alertController.create({
+      header: 'Logout',
+      message: 'Are you sure you want to logout?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Logout',
+          handler: () => {
+            // Add logout logic here
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 }

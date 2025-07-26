@@ -140,7 +140,7 @@ export class LoginPage {
               this.router.navigate(['/admin/driver']);
               break;
             case 'wholesaler':
-              this.router.navigate(['/wholesaler/home']);
+              this.router.navigate(['/wholesaler/business-registration']);
               break;
             case 'retailer':
               this.router.navigate(['/buyer/buyer-home']);

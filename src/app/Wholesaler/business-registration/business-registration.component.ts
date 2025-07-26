@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { add, save} from 'ionicons/icons';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-business-registration',
@@ -32,6 +35,8 @@ export class BusinessRegistrationComponent {
       pan_number: ['', [Validators.required, Validators.pattern(/[A-Z]{5}[0-9]{4}[A-Z]{1}/)]],
       privileged_user: [0],
     });
+
+    addIcons({save});
   }
 
   async onSubmit() {
