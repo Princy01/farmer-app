@@ -5,11 +5,15 @@ import { addIcons } from 'ionicons';
 import {
   chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
   chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
-  trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline
+  trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
+  homeOutline, business, list, cubeOutline, time, analytics, pulse, bulb, logOutOutline,
+  businessOutline,
+  bulbOutline
 } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { MenuService } from '../services/menu.service'; // Adjust path if needed
 
 @Component({
   selector: 'app-home',
@@ -18,12 +22,13 @@ import { AuthService } from 'src/app/auth/auth.service';
   standalone: true,
   imports: [IonicModule, CommonModule]
 })
+
 export class HomePage {
   items: any[] = [];
   filteredItems: any[] = [];
   notifications = 5;
   messages = 3;
-  private allDummyData: any[] = []; // Store all dummy data
+  allDummyData: any[] = []; // Store all dummy data
   private currentPage = 0;
   private itemsPerPage = 5; // Show 5 items per page
   isInfiniteScrollEnabled = true;
@@ -36,12 +41,14 @@ export class HomePage {
     private wholesalerService: WholesalerApiService,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
-    private authService: AuthService
+    private authService: AuthService,
+    public menuService: MenuService,
   ) {
     addIcons({
       chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
       chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
-      trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline
+      trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
+      homeOutline, businessOutline, list, cubeOutline, time, analytics, pulse, bulbOutline, logOutOutline
     });
   }
 
@@ -51,10 +58,19 @@ export class HomePage {
   }
 
   private setItemsPerPage() {
-    if (window.innerWidth >= 768) {
-      this.itemsPerPage = 8; // Load more items on desktop
+    // Adjust items per page based on breakpoint, assuming desktop (lg+) has 4+ columns
+    if (window.innerWidth >= 1536) { // 2xl
+      this.itemsPerPage = 20; // 5 rows of 4 columns
+    } else if (window.innerWidth >= 1280) { // xl
+      this.itemsPerPage = 16; // 4 rows of 4 columns
+    } else if (window.innerWidth >= 1024) { // lg
+      this.itemsPerPage = 12; // 3 rows of 4 columns
+    } else if (window.innerWidth >= 768) { // md
+      this.itemsPerPage = 8; // 2 rows of 4 columns
+    } else if (window.innerWidth >= 640) { // sm
+      this.itemsPerPage = 6; // 1.5 rows of 4 columns
     } else {
-      this.itemsPerPage = 5; // Keep 5 for mobile
+      this.itemsPerPage = 5; // xs: mobile, 1 column, 5 items
     }
   }
 
@@ -158,6 +174,246 @@ export class HomePage {
 
   private getDummyData() {
     return [
+      {
+        name: 'Tomatoes',
+        qty: 150,
+        orders: 75,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 1
+      },
+      {
+        name: 'Onions',
+        qty: 200,
+        orders: 120,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 2
+      },
+      {
+        name: 'Potatoes',
+        qty: 300,
+        orders: 180,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 3
+      },
+      {
+        name: 'Carrots',
+        qty: 100,
+        orders: 60,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 4
+      },
+      {
+        name: 'Cabbage',
+        qty: 80,
+        orders: 45,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 5
+      },
+      {
+        name: 'Cauliflower',
+        qty: 120,
+        orders: 70,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 6
+      },
+      {
+        name: 'Green Beans',
+        qty: 90,
+        orders: 50,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 7
+      },
+      {
+        name: 'Bell Peppers',
+        qty: 60,
+        orders: 35,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 8
+      },
+      {
+        name: 'Spinach',
+        qty: 75,
+        orders: 40,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 9
+      },
+      {
+        name: 'Broccoli',
+        qty: 85,
+        orders: 55,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 10
+      },
+      {
+        name: 'Lettuce',
+        qty: 65,
+        orders: 30,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 11
+      },
+      {
+        name: 'Cucumber',
+        qty: 110,
+        orders: 85,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 12
+      },
+      {
+        name: 'Radish',
+        qty: 45,
+        orders: 25,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 13
+      },
+      {
+        name: 'Sweet Corn',
+        qty: 95,
+        orders: 60,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 14
+      },
+      {
+        name: 'Peas',
+        qty: 70,
+        orders: 45,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 15
+      },
+      {
+        name: 'Tomatoes',
+        qty: 150,
+        orders: 75,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 1
+      },
+      {
+        name: 'Onions',
+        qty: 200,
+        orders: 120,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 2
+      },
+      {
+        name: 'Potatoes',
+        qty: 300,
+        orders: 180,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 3
+      },
+      {
+        name: 'Carrots',
+        qty: 100,
+        orders: 60,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 4
+      },
+      {
+        name: 'Cabbage',
+        qty: 80,
+        orders: 45,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 5
+      },
+      {
+        name: 'Cauliflower',
+        qty: 120,
+        orders: 70,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 6
+      },
+      {
+        name: 'Green Beans',
+        qty: 90,
+        orders: 50,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 7
+      },
+      {
+        name: 'Bell Peppers',
+        qty: 60,
+        orders: 35,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 8
+      },
+      {
+        name: 'Spinach',
+        qty: 75,
+        orders: 40,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 9
+      },
+      {
+        name: 'Broccoli',
+        qty: 85,
+        orders: 55,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 10
+      },
+      {
+        name: 'Lettuce',
+        qty: 65,
+        orders: 30,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 11
+      },
+      {
+        name: 'Cucumber',
+        qty: 110,
+        orders: 85,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 12
+      },
+      {
+        name: 'Radish',
+        qty: 45,
+        orders: 25,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 13
+      },
+      {
+        name: 'Sweet Corn',
+        qty: 95,
+        orders: 60,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 14
+      },
+      {
+        name: 'Peas',
+        qty: 70,
+        orders: 45,
+        wholeseller_id: 1,
+        mandi_id: 1,
+        product_id: 15
+      },
       {
         name: 'Tomatoes',
         qty: 150,
@@ -437,62 +693,89 @@ export class HomePage {
     await alert.present();
   }
 
-  async presentActionSheet() {
-    const actionSheet = await this.actionSheetController.create({
-      header: 'Account Options',
+  // Menu functions
+  openMenu() {
+    this.menuService.openMenu();
+  }
+  closeMenu() {
+    this.menuService.closeMenu();
+  }
+
+  // Navigation functions
+  async navigateToHome() {
+    await this.closeMenu();
+    // Already on home, just scroll to top
+    const content = document.querySelector('ion-content');
+    if (content) {
+      content.scrollToTop(300);
+    }
+  }
+
+  async navigateToBusinessLocations() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/business-locations']);
+  }
+
+  async navigateToMyOrders() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/orders']);
+  }
+
+  async navigateToUpdateInventory() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/for-sale']);
+  }
+
+  async navigateToPastOrders() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/past-orders']);
+  }
+
+  async navigateToRestockingRecommendations() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/restocking-recommendations']);
+  }
+
+  async navigateToMarketOpportunities() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/market-opportunities']);
+  }
+
+  async navigateToTrends() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/trends']);
+  }
+
+  async navigateToProfile() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/profile']);
+  }
+
+  async navigateToSettings() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/settings']);
+  }
+
+  async logout() {
+    const alert = await this.alertCtrl.create({
+      header: 'Logout',
+      message: 'Are you sure you want to logout?',
       buttons: [
         {
-          text: 'Profile',
-          icon: 'person-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
-            this.router.navigate(['/wholesaler/profile']);
-          }
-        },
-        {
-          text: 'Business Locations',
-          icon: 'location-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
-            this.router.navigate(['/wholesaler/business-locations']);
-          }
-        },
-        {
-          text: 'Market Opportunities',
-          icon: 'trending-up-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
-            this.router.navigate(['/wholesaler/market-opportunities']);
-          }
-        },
-        {
-          text: 'Restocking Recommendations',
-          icon: 'reload-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
-            this.router.navigate(['/wholesaler/restocking-recommendations']);
-          }
-        },
-        {
-          text: 'Settings',
-          icon: 'settings-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
-            this.router.navigate(['/wholesaler/settings']);
-          }
+          text: 'Cancel',
+          role: 'cancel'
         },
         {
           text: 'Logout',
-          icon: 'close-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
+          handler: async () => {
+            await this.closeMenu();
             this.authService.logout();
             this.router.navigate(['/login']);
           }
-        },
+        }
       ]
     });
-    await actionSheet.present();
+    await alert.present();
   }
 
   createOrder() {

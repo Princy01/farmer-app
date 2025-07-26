@@ -4,7 +4,7 @@
       <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
     </ion-buttons>
 
-    <ion-title *ngIf="!isSearchVisible">My Orders</ion-title>
+    <ion-title *ngIf="!isSearchVisible">Orders Received</ion-title>
     <ion-searchbar *ngIf="isSearchVisible"
       [(ngModel)]="searchTerm"
       (ionInput)="handleSearch($event)"
