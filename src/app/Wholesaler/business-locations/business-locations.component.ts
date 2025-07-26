@@ -12,13 +12,14 @@ import {
 } from 'ionicons/icons';
 import { BusinessLocationsService, BusinessLocation } from '../services/business-locations.service';
 import { LocationDetailsModalComponent } from './location-details-modal.component';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-business-locations',
   templateUrl: './business-locations.component.html',
   styleUrls: ['./business-locations.component.scss'],
   standalone: true,
-  imports: [ CommonModule, FormsModule, IonicModule ]
+  imports: [CommonModule, FormsModule, IonicModule]
 })
 export class BusinessLocationsComponent implements OnInit {
   businessLocations: BusinessLocation[] = [];
@@ -30,7 +31,9 @@ export class BusinessLocationsComponent implements OnInit {
     private alertController: AlertController,
     private loadingController: LoadingController,
     private modalController: ModalController,
-    private actionSheetController: ActionSheetController
+    private actionSheetController: ActionSheetController,
+    private authService: AuthService
+
   ) {
     addIcons({
       add, location, business, create, eye, home, list, cube, time,
@@ -94,8 +97,8 @@ export class BusinessLocationsComponent implements OnInit {
         location: location
       },
       presentingElement: undefined,
-    showBackdrop: true,
-    backdropDismiss: true
+      showBackdrop: true,
+      backdropDismiss: true
     });
 
     await modal.present();
@@ -132,6 +135,7 @@ export class BusinessLocationsComponent implements OnInit {
   async presentActionSheet() {
     const actionSheet = await this.actionSheetController.create({
       header: 'Quick Actions',
+      backdropDismiss: true,
       buttons: [
         {
           text: 'Home Dashboard',
@@ -174,10 +178,15 @@ export class BusinessLocationsComponent implements OnInit {
           handler: () => this.router.navigate(['/wholesaler/settings'])
         },
         {
-          text: 'Cancel',
+          text: 'Logout',
           icon: 'close',
-          role: 'cancel'
-        }
+          cssClass: 'custom-action-sheet-btn',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        },
+        
       ]
     });
 
@@ -197,7 +206,7 @@ export class BusinessLocationsComponent implements OnInit {
         {
           text: 'Logout',
           handler: () => {
-            // Add logout logic here
+            this.authService.logout();
             this.router.navigate(['/login']);
           }
         }
