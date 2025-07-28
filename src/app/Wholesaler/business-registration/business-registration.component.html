@@ -10,188 +10,334 @@
 <ion-content [fullscreen]="true">
   <div class="container">
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
       <!-- Registration Number -->
-      <ion-item [class.ion-invalid]="form.get('b_registration_num')?.invalid && form.get('b_registration_num')?.touched">
+      <ion-item
+        [class.ion-invalid]="
+          form.get('b_registration_num')?.invalid &&
+          form.get('b_registration_num')?.touched
+        "
+      >
         <ion-label position="stacked">Registration Number *</ion-label>
         <ion-input
           formControlName="b_registration_num"
           placeholder="Enter registration number"
-          type="text">
+          type="text"
+        >
         </ion-input>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('b_registration_num')?.invalid && form.get('b_registration_num')?.touched">
+      <div
+        class="error-message"
+        *ngIf="
+          form.get('b_registration_num')?.invalid &&
+          form.get('b_registration_num')?.touched
+        "
+      >
         Registration number is required
       </div>
 
       <!-- Owner Name -->
-      <ion-item [class.ion-invalid]="form.get('b_owner_name')?.invalid && form.get('b_owner_name')?.touched">
+      <ion-item
+        [class.ion-invalid]="
+          form.get('b_owner_name')?.invalid && form.get('b_owner_name')?.touched
+        "
+      >
         <ion-label position="stacked">Owner Name *</ion-label>
         <ion-input
           formControlName="b_owner_name"
           placeholder="Enter owner name"
-          type="text">
+          type="text"
+        >
         </ion-input>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('b_owner_name')?.invalid && form.get('b_owner_name')?.touched">
+      <div
+        class="error-message"
+        *ngIf="
+          form.get('b_owner_name')?.invalid && form.get('b_owner_name')?.touched
+        "
+      >
         Owner name is required
       </div>
 
       <!-- Category ID -->
-      <ion-item [class.ion-invalid]="form.get('b_category_id')?.invalid && form.get('b_category_id')?.touched">
+      <ion-item
+        [class.ion-invalid]="
+          form.get('b_category_id')?.invalid &&
+          form.get('b_category_id')?.touched
+        "
+      >
         <ion-label position="stacked">Category ID *</ion-label>
         <ion-input
           formControlName="b_category_id"
           placeholder="Enter category ID"
-          type="number">
+          type="number"
+        >
         </ion-input>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('b_category_id')?.invalid && form.get('b_category_id')?.touched">
+      <div
+        class="error-message"
+        *ngIf="
+          form.get('b_category_id')?.invalid &&
+          form.get('b_category_id')?.touched
+        "
+      >
         Category ID is required
       </div>
 
-      <!-- Type ID -->
-      <ion-item [class.ion-invalid]="form.get('b_type_id')?.invalid && form.get('b_type_id')?.touched">
+      <!-- Business Type ID -->
+      <ion-item
+        [class.ion-invalid]="
+          form.get('b_type_id')?.invalid && form.get('b_type_id')?.touched
+        "
+      >
         <ion-label position="stacked">Business Type *</ion-label>
-        <ion-select formControlName="b_type_id" placeholder="Select business type">
-          <ion-select-option value="1">Wholesale</ion-select-option>
-          <ion-select-option value="2">Retail</ion-select-option>
-          <ion-select-option value="3">Both</ion-select-option>
+        <ion-select
+          formControlName="b_type_id"
+          placeholder="Select business type"
+        >
+          <ion-select-option
+            *ngFor="let type of businessTypes"
+            [value]="type.b_typeid"
+          >
+            {{ type.b_typename }}
+          </ion-select-option>
         </ion-select>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('b_type_id')?.invalid && form.get('b_type_id')?.touched">
+      <div
+        class="error-message"
+        *ngIf="form.get('b_type_id')?.invalid && form.get('b_type_id')?.touched"
+      >
         Business type is required
       </div>
 
       <!-- State ID -->
-      <ion-item [class.ion-invalid]="form.get('state_id')?.invalid && form.get('state_id')?.touched">
-        <ion-label position="stacked">State ID *</ion-label>
-        <ion-input
-          formControlName="state_id"
-          placeholder="Enter state ID"
-          type="number">
-        </ion-input>
+      <ion-item
+        [class.ion-invalid]="
+          form.get('state_id')?.invalid && form.get('state_id')?.touched
+        "
+      >
+        <ion-label position="stacked">State *</ion-label>
+        <ion-select formControlName="state_id" placeholder="Select state">
+          <ion-select-option *ngFor="let state of states" [value]="state.id">
+            {{ state.state_name }} ({{ state.state_shortname }})
+          </ion-select-option>
+        </ion-select>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('state_id')?.invalid && form.get('state_id')?.touched">
-        State ID is required
+      <div
+        class="error-message"
+        *ngIf="form.get('state_id')?.invalid && form.get('state_id')?.touched"
+      >
+        State is required
       </div>
 
-      <!-- Location ID -->
-      <ion-item [class.ion-invalid]="form.get('location_id')?.invalid && form.get('location_id')?.touched">
-        <ion-label position="stacked">Location ID *</ion-label>
-        <ion-input
-          formControlName="location_id"
-          placeholder="Enter location ID"
-          type="number">
-        </ion-input>
+      <!-- City -->
+      <ion-item
+        [class.ion-invalid]="
+          form.get('location_id')?.invalid && form.get('location_id')?.touched
+        "
+      >
+        <ion-label position="stacked">City *</ion-label>
+        <ion-select formControlName="location_id" placeholder="Select city">
+          <ion-select-option *ngFor="let city of cities" [value]="city.id">
+            {{ city.city_name }} ({{ city.city_shortname }})
+          </ion-select-option>
+        </ion-select>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('location_id')?.invalid && form.get('location_id')?.touched">
-        Location ID is required
+      <div
+        class="error-message"
+        *ngIf="
+          form.get('location_id')?.invalid && form.get('location_id')?.touched
+        "
+      >
+        City is required
+      </div>
+
+      <!-- Location -->
+      <ion-item
+        [class.ion-invalid]="
+          form.get('location_id')?.invalid && form.get('location_id')?.touched
+        "
+      >
+        <ion-label position="stacked">Location *</ion-label>
+        <ion-select formControlName="location_id" placeholder="Select location">
+          <ion-select-option
+            *ngFor="let location of locations"
+            [value]="location.id"
+          >
+            {{ location.location_name }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <div
+        class="error-message"
+        *ngIf="
+          form.get('location_id')?.invalid && form.get('location_id')?.touched
+        "
+      >
+        Location is required
       </div>
 
       <!-- Address -->
-      <ion-item [class.ion-invalid]="form.get('address')?.invalid && form.get('address')?.touched">
+      <ion-item
+        [class.ion-invalid]="
+          form.get('address')?.invalid && form.get('address')?.touched
+        "
+      >
         <ion-label position="stacked">Address *</ion-label>
         <ion-textarea
           formControlName="address"
           placeholder="Enter complete address"
-          rows="3">
+          rows="3"
+        >
         </ion-textarea>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
+      <div
+        class="error-message"
+        *ngIf="form.get('address')?.invalid && form.get('address')?.touched"
+      >
         Address is required
       </div>
 
       <!-- Mobile Number -->
-      <ion-item [class.ion-invalid]="form.get('mobile_number')?.invalid && form.get('mobile_number')?.touched">
+      <ion-item
+        [class.ion-invalid]="
+          form.get('mobile_number')?.invalid &&
+          form.get('mobile_number')?.touched
+        "
+      >
         <ion-label position="stacked">Mobile Number *</ion-label>
         <ion-input
           formControlName="mobile_number"
           placeholder="Enter 10-digit mobile number"
-          type="tel">
+          type="tel"
+        >
         </ion-input>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('mobile_number')?.invalid && form.get('mobile_number')?.touched">
-        <span *ngIf="form.get('mobile_number')?.errors?.['required']">Mobile number is required</span>
-        <span *ngIf="form.get('mobile_number')?.errors?.['pattern']">Please enter a valid 10-digit mobile number</span>
+      <div
+        class="error-message"
+        *ngIf="
+          form.get('mobile_number')?.invalid &&
+          form.get('mobile_number')?.touched
+        "
+      >
+        <span *ngIf="form.get('mobile_number')?.errors?.['required']"
+          >Mobile number is required</span
+        >
+        <span *ngIf="form.get('mobile_number')?.errors?.['pattern']"
+          >Please enter a valid 10-digit mobile number</span
+        >
       </div>
 
       <!-- Email -->
-      <ion-item [class.ion-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
+      <ion-item
+        [class.ion-invalid]="
+          form.get('email')?.invalid && form.get('email')?.touched
+        "
+      >
         <ion-label position="stacked">Email *</ion-label>
         <ion-input
           formControlName="email"
           placeholder="Enter email address"
-          type="email">
+          type="email"
+        >
         </ion-input>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
-        <span *ngIf="form.get('email')?.errors?.['required']">Email is required</span>
-        <span *ngIf="form.get('email')?.errors?.['email']">Please enter a valid email address</span>
+      <div
+        class="error-message"
+        *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
+      >
+        <span *ngIf="form.get('email')?.errors?.['required']"
+          >Email is required</span
+        >
+        <span *ngIf="form.get('email')?.errors?.['email']"
+          >Please enter a valid email address</span
+        >
       </div>
 
       <!-- Established Year -->
-      <ion-item [class.ion-invalid]="form.get('established_year')?.invalid && form.get('established_year')?.touched">
+      <ion-item
+        [class.ion-invalid]="
+          form.get('established_year')?.invalid &&
+          form.get('established_year')?.touched
+        "
+      >
         <ion-label position="stacked">Established Year *</ion-label>
         <ion-input
           formControlName="established_year"
           placeholder="Enter year (e.g., 2020)"
-          type="text">
+          type="text"
+        >
         </ion-input>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('established_year')?.invalid && form.get('established_year')?.touched">
-        <span *ngIf="form.get('established_year')?.errors?.['required']">Established year is required</span>
-        <span *ngIf="form.get('established_year')?.errors?.['pattern']">Please enter a valid 4-digit year</span>
-      </div>
-
-      <!-- User ID -->
-      <ion-item [class.ion-invalid]="form.get('user_id')?.invalid && form.get('user_id')?.touched">
-        <ion-label position="stacked">User ID *</ion-label>
-        <ion-input
-          formControlName="user_id"
-          placeholder="Enter user ID"
-          type="number">
-        </ion-input>
-      </ion-item>
-      <div class="error-message" *ngIf="form.get('user_id')?.invalid && form.get('user_id')?.touched">
-        User ID is required
+      <div
+        class="error-message"
+        *ngIf="
+          form.get('established_year')?.invalid &&
+          form.get('established_year')?.touched
+        "
+      >
+        <span *ngIf="form.get('established_year')?.errors?.['required']"
+          >Established year is required</span
+        >
+        <span *ngIf="form.get('established_year')?.errors?.['pattern']"
+          >Please enter a valid 4-digit year</span
+        >
       </div>
 
       <!-- GST Number -->
-      <ion-item [class.ion-invalid]="form.get('gst_number')?.invalid && form.get('gst_number')?.touched">
+      <ion-item
+        [class.ion-invalid]="
+          form.get('gst_number')?.invalid && form.get('gst_number')?.touched
+        "
+      >
         <ion-label position="stacked">GST Number *</ion-label>
         <ion-input
           formControlName="gst_number"
           placeholder="Enter GST number"
-          type="text">
+          type="text"
+        >
         </ion-input>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('gst_number')?.invalid && form.get('gst_number')?.touched">
+      <div
+        class="error-message"
+        *ngIf="
+          form.get('gst_number')?.invalid && form.get('gst_number')?.touched
+        "
+      >
         GST number is required
       </div>
 
       <!-- PAN Number -->
-      <ion-item [class.ion-invalid]="form.get('pan_number')?.invalid && form.get('pan_number')?.touched">
+      <ion-item
+        [class.ion-invalid]="
+          form.get('pan_number')?.invalid && form.get('pan_number')?.touched
+        "
+      >
         <ion-label position="stacked">PAN Number *</ion-label>
         <ion-input
           formControlName="pan_number"
           placeholder="Enter PAN number"
-          type="text">
+          type="text"
+        >
         </ion-input>
       </ion-item>
-      <div class="error-message" *ngIf="form.get('pan_number')?.invalid && form.get('pan_number')?.touched">
-        <span *ngIf="form.get('pan_number')?.errors?.['required']">PAN number is required</span>
-        <span *ngIf="form.get('pan_number')?.errors?.['pattern']">Please enter a valid PAN number (e.g., ABCDE1234F)</span>
+      <div
+        class="error-message"
+        *ngIf="
+          form.get('pan_number')?.invalid && form.get('pan_number')?.touched
+        "
+      >
+        <span *ngIf="form.get('pan_number')?.errors?.['required']"
+          >PAN number is required</span
+        >
+        <span *ngIf="form.get('pan_number')?.errors?.['pattern']"
+          >Please enter a valid PAN number (e.g., ABCDE1234F)</span
+        >
       </div>
 
       <!-- Privileged User -->
       <ion-item>
-        <ion-label position="stacked">Privileged User</ion-label>
-        <ion-input
-          formControlName="privileged_user"
-          placeholder="Enter privileged user value"
-          type="number">
-        </ion-input>
+        <ion-label>Privileged User</ion-label>
+        <ion-toggle formControlName="privileged_user"></ion-toggle>
       </ion-item>
 
       <!-- Active Status -->
@@ -206,11 +352,11 @@
         type="submit"
         color="primary"
         class="submit-btn"
-        [disabled]="form.invalid">
+        [disabled]="form.invalid"
+      >
         <ion-icon name="save" slot="start"></ion-icon>
         Submit Registration
       </ion-button>
-
     </form>
   </div>
 </ion-content>

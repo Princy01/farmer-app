@@ -20,7 +20,7 @@ export const routes: Routes = [
   },
   {
     path: 'wholesaler/orders',
-    loadComponent: () => import('./Wholesaler/Orders-received/orders.component').then((m) => m.OrdersComponent),
+    loadComponent: () => import('./Wholesaler/orders-received/orders.component').then((m) => m.OrdersComponent),
   },
   {
     path: 'wholesaler/order-details/:id',
