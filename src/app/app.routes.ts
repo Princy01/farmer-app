@@ -74,10 +74,10 @@ export const routes: Routes = [
   path: 'wholesaler/business-locations',
   loadComponent: () => import('./Wholesaler/business-locations/business-locations.component').then((m) => m.BusinessLocationsComponent),
   },
-  {
-    path: 'wholesaler/add-business-location',
-    loadComponent: () => import('./Wholesaler/add-business-location/add-business-location.component').then((m) => m.AddBusinessLocationComponent),
-  },
+  // {
+  //   path: 'wholesaler/add-business-location',
+  //   loadComponent: () => import('./Wholesaler/add-business-location/add-business-location.component').then((m) => m.AddBusinessLocationComponent),
+  // },
 
   {
     path: 'admin',

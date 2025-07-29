@@ -10,7 +10,7 @@ import {
   analytics, pulse, notifications, person, menu, logOut, settings,
   bulb, barChart, close
 } from 'ionicons/icons';
-import { BusinessLocationsService, BusinessLocation } from '../services/business-locations.service';
+import { BusinessLocationsService, BusinessLocation } from './business-locations.service';
 import { LocationDetailsModalComponent } from './location-details-modal.component';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -43,29 +43,93 @@ export class BusinessLocationsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadBusinessLocations();
+    this.checkAuthAndLoadLocations();
   }
 
   ionViewWillEnter() {
-    this.loadBusinessLocations();
+    this.checkAuthAndLoadLocations();
+  }
+
+  private async checkAuthAndLoadLocations() {
+    if (!this.authService.isAuthenticated()) {
+      await this.showAuthError();
+      return;
+    }
+
+    if (!this.authService.hasRole('wholesaler')) {
+      await this.showUnauthorizedError();
+      return;
+    }
+
+    await this.loadBusinessLocations();
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertController.create({
+      header: 'Authentication Error',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async showUnauthorizedError() {
+    const alert = await this.alertController.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   async loadBusinessLocations() {
+    this.isLoading = true;
     const loading = await this.loadingController.create({
       message: 'Loading locations...'
     });
     await loading.present();
 
     try {
-      const userId = '1';
-      this.businessService.getAllBusinessesOfWholesaler(userId).subscribe({
+      const userId = this.authService.getUserId();
+      if (!userId) {
+        this.isLoading = false;
+        loading.dismiss();
+        await this.showAuthError();
+        return;
+      }
+      this.businessService.getAllBusinessesOfWholesaler().subscribe({
         next: (locations: BusinessLocation[]) => {
           this.businessLocations = locations;
           this.isLoading = false;
         },
-        error: (error: any) => {
-          console.error('Error loading locations:', error);
+        error: async (error: any) => {
           this.isLoading = false;
+          loading.dismiss();
+          if (error.status === 401) {
+            await this.showAuthError();
+            return;
+          }
+          const alert = await this.alertController.create({
+            header: 'Error',
+            message: 'Failed to load locations. Please try again later.',
+            buttons: ['OK']
+          });
+          await alert.present();
         },
         complete: () => {
           loading.dismiss();
@@ -74,6 +138,12 @@ export class BusinessLocationsComponent implements OnInit {
     } catch (error) {
       this.isLoading = false;
       loading.dismiss();
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'An unexpected error occurred.',
+        buttons: ['OK']
+      });
+      await alert.present();
     }
   }
 
@@ -85,7 +155,7 @@ export class BusinessLocationsComponent implements OnInit {
     this.router.navigate(['/wholesaler/add-business-location'], {
       queryParams: {
         mode: 'edit',
-        locationId: location.id
+        locationId: location.b_branch_id
       }
     });
   }

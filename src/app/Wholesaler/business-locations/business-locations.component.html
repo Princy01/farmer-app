@@ -1,9 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title>Business Locations</ion-title>
-        <ion-buttons slot="start">
-      <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -35,7 +32,7 @@
             <ion-card-header>
               <ion-card-title>
                 <ion-icon name="business" class="location-icon"></ion-icon>
-                {{ location.shopName }}
+                {{ location.b_shop_name }}
               </ion-card-title>
             </ion-card-header>
 
@@ -48,15 +45,15 @@
                     color="primary"
                   ></ion-icon>
                   <ion-label>
-                    <h3>{{ location.location }}, {{ location.state }}</h3>
-                    <p>{{ location.address }}</p>
+                    <h3>{{ location.b_location }}, {{ location.b_state }}</h3>
+                    <p>{{ location.b_address }}</p>
                   </ion-label>
                 </ion-item>
 
                 <ion-item>
                   <ion-label>
-                    <p><strong>Contact:</strong> {{ location.number }}</p>
-                    <p><strong>Email:</strong> {{ location.email }}</p>
+                    <p><strong>Contact:</strong> {{ location.b_number }}</p>
+                    <p><strong>Email:</strong> {{ location.b_email }}</p>
                   </ion-label>
                 </ion-item>
               </ion-list>
@@ -107,10 +104,4 @@
     </div>
   </div>
 
-  <!-- Floating Action Button for Quick Add -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button color="primary" (click)="addNewLocation()">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
 </ion-content>

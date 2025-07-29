@@ -6,14 +6,14 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { close, call, mail, location, business, card, pin, person, time } from 'ionicons/icons';
-import { BusinessLocation } from '../services/business-locations.service';
+import { BusinessLocation } from './business-locations.service';
 
 @Component({
   selector: 'app-location-details-modal',
   template: `
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ location?.shopName }}</ion-title>
+<ion-title>{{ location?.b_shop_name }}</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="dismiss()">
             <ion-icon name="close"></ion-icon>
@@ -31,7 +31,7 @@ import { BusinessLocation } from '../services/business-locations.service';
               <ion-icon name="business" slot="start" color="primary"></ion-icon>
               <ion-label>
                 <h3>Shop Name</h3>
-                <p>{{ location.shopName }}</p>
+                <p>{{ location.b_shop_name }}</p>
               </ion-label>
             </ion-item>
 
@@ -39,7 +39,7 @@ import { BusinessLocation } from '../services/business-locations.service';
               <ion-icon name="call" slot="start" color="primary"></ion-icon>
               <ion-label>
                 <h3>Contact Number</h3>
-                <p>{{ location.number }}</p>
+                <p>{{ location.b_number }}</p>
               </ion-label>
             </ion-item>
 
@@ -47,7 +47,7 @@ import { BusinessLocation } from '../services/business-locations.service';
               <ion-icon name="mail" slot="start" color="secondary"></ion-icon>
               <ion-label>
                 <h3>Email Address</h3>
-                <p>{{ location.email }}</p>
+                <p>{{ location.b_email }}</p>
               </ion-label>
             </ion-item>
 
@@ -55,7 +55,7 @@ import { BusinessLocation } from '../services/business-locations.service';
               <ion-icon name="location" slot="start" color="tertiary"></ion-icon>
               <ion-label>
                 <h3>Location</h3>
-                <p>{{ location.location }}, {{ location.state }}</p>
+                <p>{{ location.b_location }}, {{ location.b_state }}</p>
               </ion-label>
             </ion-item>
 
@@ -63,23 +63,23 @@ import { BusinessLocation } from '../services/business-locations.service';
               <ion-icon name="business" slot="start" color="success"></ion-icon>
               <ion-label>
                 <h3>Full Address</h3>
-                <p>{{ location.address }}</p>
+                <p>{{ location.b_address }}</p>
               </ion-label>
             </ion-item>
 
-            <ion-item>
+            <!-- <ion-item>
               <ion-icon name="pin" slot="start" color="warning"></ion-icon>
               <ion-label>
                 <h3>Pincode</h3>
                 <p>{{ location.pincode }}</p>
               </ion-label>
-            </ion-item>
+            </ion-item> -->
 
             <ion-item>
               <ion-icon name="card" slot="start" color="danger"></ion-icon>
               <ion-label>
                 <h3>GST Number</h3>
-                <p>{{ location.gstNumber }}</p>
+                <p>{{ location.b_gst_num }}</p>
               </ion-label>
             </ion-item>
 
@@ -87,7 +87,7 @@ import { BusinessLocation } from '../services/business-locations.service';
               <ion-icon name="card" slot="start" color="medium"></ion-icon>
               <ion-label>
                 <h3>PAN Number</h3>
-                <p>{{ location.pan }}</p>
+                <p>{{ location.b_pan_num }}</p>
               </ion-label>
             </ion-item>
 
@@ -95,15 +95,15 @@ import { BusinessLocation } from '../services/business-locations.service';
               <ion-icon name="business" slot="start" color="primary"></ion-icon>
               <ion-label>
                 <h3>Privileged User</h3>
-                <p>{{ location.privilegedUser }}</p>
+                <p>{{ location.b_privilege_user }}</p>
               </ion-label>
             </ion-item>
 
-            <ion-item *ngIf="location.establishedYear">
+            <ion-item *ngIf="location.b_established_year">
               <ion-icon name="business" slot="start" color="secondary"></ion-icon>
               <ion-label>
                 <h3>Established Year</h3>
-                <p>{{ location.establishedYear }}</p>
+                <p>{{ location.b_established_year }}</p>
               </ion-label>
             </ion-item>
 
@@ -111,7 +111,7 @@ import { BusinessLocation } from '../services/business-locations.service';
               <ion-icon name="business" slot="start" color="tertiary"></ion-icon>
               <ion-label>
                 <h3>Business Type</h3>
-                <p>{{ location.typeId | titlecase }}</p>
+                <p>{{ location.b_type_id }}</p>
               </ion-label>
             </ion-item>
 

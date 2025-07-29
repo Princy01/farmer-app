@@ -4,7 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { IonicModule, ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { save } from 'ionicons/icons';
-import { State, City, Location, BusinessType, BusinessRegistrationService } from './business-registration.service';
+import { State, City, Location, BusinessType, BusinessCategory, BusinessRegistrationService } from './business-registration.service';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-business-registration',
@@ -15,6 +16,7 @@ import { State, City, Location, BusinessType, BusinessRegistrationService } from
 })
 export class BusinessRegistrationComponent implements OnInit {
   form: FormGroup;
+  businessCategories: BusinessCategory[] = [];
   states: State[] = [];
   cities: City[] = [];
   locations: Location[] = [];
@@ -23,7 +25,8 @@ export class BusinessRegistrationComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private toastCtrl: ToastController,
-    private businessRegistrationService: BusinessRegistrationService
+    private businessRegistrationService: BusinessRegistrationService,
+    private authService: AuthService
   ) {
     this.form = this.fb.group({
       bid: [null],
@@ -49,20 +52,33 @@ export class BusinessRegistrationComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.fetchBusinessCategories();
     this.fetchBusinessTypes();
     this.fetchStates();
+
+    // Set user_id from AuthService
+    const userId = this.authService.getUserId();
+    if (userId) {
+      this.form.get('user_id')?.setValue(userId);
+    }
+
     this.form.get('state_id')?.valueChanges.subscribe((stateId) => {
       if (stateId) {
         this.fetchCities(stateId);
+        this.form.get('city_id')?.setValue(null);
+        this.locations = [];
+        this.form.get('location_id')?.setValue(null);
       } else {
         this.cities = [];
-        this.form.get('location_id')?.setValue(null);
         this.locations = [];
+        this.form.get('city_id')?.setValue(null);
+        this.form.get('location_id')?.setValue(null);
       }
     });
-    this.form.get('location_id')?.valueChanges.subscribe((cityId) => {
+    this.form.get('city_id')?.valueChanges.subscribe((cityId) => {
       if (cityId) {
         this.fetchLocations(cityId);
+        this.form.get('location_id')?.setValue(null);
       } else {
         this.locations = [];
         this.form.get('location_id')?.setValue(null);
@@ -70,6 +86,20 @@ export class BusinessRegistrationComponent implements OnInit {
     });
   }
 
+  fetchBusinessCategories() {
+    this.businessRegistrationService.getBusinessCategories().subscribe({
+      next: (data) => (this.businessCategories = data),
+      error: async () => {
+        const toast = await this.toastCtrl.create({
+          message: 'Failed to load business categories',
+          duration: 2000,
+          color: 'danger',
+        });
+        toast.present();
+      },
+    });
+  }
+  
   fetchBusinessTypes() {
     this.businessRegistrationService.getBusinessTypes().subscribe({
       next: (data) => (this.businessTypes = data),
@@ -128,13 +158,31 @@ export class BusinessRegistrationComponent implements OnInit {
 
   async onSubmit() {
     if (this.form.valid) {
-      console.log(this.form.value);
-      const toast = await this.toastCtrl.create({
-        message: 'Form submitted successfully!',
-        duration: 2000,
-        color: 'success',
+      // Prepare payload as per Go struct
+      const payload = {
+        ...this.form.value,
+        city_id: this.form.value.city_id
+      };
+
+      this.businessRegistrationService.addNewBusiness(payload).subscribe({
+        next: async (res) => {
+          const toast = await this.toastCtrl.create({
+            message: 'Business registered successfully!',
+            duration: 2000,
+            color: 'success',
+          });
+          toast.present();
+          this.form.reset();
+        },
+        error: async (err) => {
+          const toast = await this.toastCtrl.create({
+            message: err?.error?.error || 'Failed to register business',
+            duration: 2000,
+            color: 'danger',
+          });
+          toast.present();
+        }
       });
-      toast.present();
     } else {
       this.form.markAllAsTouched();
       const toast = await this.toastCtrl.create({

@@ -3,6 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
+export interface BusinessCategory {
+        b_category_id: number;
+        b_category_name: string;
+}
+
 export interface BusinessType {
         b_typeid: number;
         b_typename: string;
@@ -36,6 +41,10 @@ export class BusinessRegistrationService {
 
         constructor(private http: HttpClient) { }
 
+        getBusinessCategories(): Observable<BusinessCategory[]> {
+                return this.http.get<BusinessCategory[]>(`${this.apiUrl}/getBusinessCategory`);
+        }
+
         getStates(): Observable<State[]> {
                 return this.http.get<State[]>(`${this.apiUrl}/getStates`);
         }
@@ -50,5 +59,9 @@ export class BusinessRegistrationService {
 
         getBusinessTypes(): Observable<BusinessType[]> {
                 return this.http.get<BusinessType[]>(`${this.apiUrl}/getBusinessTypes`);
+        }
+
+        addNewBusiness(business: any) {
+                return this.http.post<any>(`${this.apiUrl}/AddNewBusiness`, business);
         }
 }

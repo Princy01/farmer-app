@@ -65,13 +65,18 @@
           form.get('b_category_id')?.touched
         "
       >
-        <ion-label position="stacked">Category ID *</ion-label>
-        <ion-input
+        <ion-label position="stacked">Business Category *</ion-label>
+        <ion-select
           formControlName="b_category_id"
-          placeholder="Enter category ID"
-          type="number"
+          placeholder="Select business category"
         >
-        </ion-input>
+          <ion-select-option
+            *ngFor="let category of businessCategories"
+            [value]="category.b_category_id"
+          >
+            {{ category.b_category_name }}
+          </ion-select-option>
+        </ion-select>
       </ion-item>
       <div
         class="error-message"
@@ -80,7 +85,7 @@
           form.get('b_category_id')?.touched
         "
       >
-        Category ID is required
+        Business category is required
       </div>
 
       <!-- Business Type ID -->
@@ -132,11 +137,11 @@
       <!-- City -->
       <ion-item
         [class.ion-invalid]="
-          form.get('location_id')?.invalid && form.get('location_id')?.touched
+          form.get('city_id')?.invalid && form.get('city_id')?.touched
         "
       >
         <ion-label position="stacked">City *</ion-label>
-        <ion-select formControlName="location_id" placeholder="Select city">
+        <ion-select formControlName="city_id" placeholder="Select city">
           <ion-select-option *ngFor="let city of cities" [value]="city.id">
             {{ city.city_name }} ({{ city.city_shortname }})
           </ion-select-option>
@@ -144,9 +149,7 @@
       </ion-item>
       <div
         class="error-message"
-        *ngIf="
-          form.get('location_id')?.invalid && form.get('location_id')?.touched
-        "
+        *ngIf="form.get('city_id')?.invalid && form.get('city_id')?.touched"
       >
         City is required
       </div>
