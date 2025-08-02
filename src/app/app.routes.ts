@@ -74,10 +74,14 @@ export const routes: Routes = [
   path: 'wholesaler/business-locations',
   loadComponent: () => import('./Wholesaler/business-locations/business-locations.component').then((m) => m.BusinessLocationsComponent),
   },
-  // {
-  //   path: 'wholesaler/add-business-location',
-  //   loadComponent: () => import('./Wholesaler/add-business-location/add-business-location.component').then((m) => m.AddBusinessLocationComponent),
-  // },
+  {
+  path: 'wholesaler/business-update',
+  loadComponent: () => import('./Wholesaler/business-update/business-update.component').then(m => m.BusinessUpdatePage),
+  },
+  {
+    path: 'wholesaler/add-business-location',
+    loadComponent: () => import('./Wholesaler/add-business-location/add-business-location.component').then((m) => m.AddBusinessLocationComponent),
+  },
 
   {
     path: 'admin',

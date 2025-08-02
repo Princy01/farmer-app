@@ -7,8 +7,7 @@ import {
   chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
   trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
   homeOutline, business, list, cubeOutline, time, analytics, pulse, bulb, logOutOutline,
-  businessOutline,
-  bulbOutline
+  businessOutline, bulbOutline, createOutline
 } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
@@ -48,7 +47,7 @@ export class HomePage {
       chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
       chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
       trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
-      homeOutline, businessOutline, list, cubeOutline, time, analytics, pulse, bulbOutline, logOutOutline
+      homeOutline, businessOutline, list, cubeOutline, time, analytics, pulse, bulbOutline, logOutOutline, createOutline
     });
   }
 
@@ -714,6 +713,11 @@ export class HomePage {
   async navigateToBusinessLocations() {
     await this.closeMenu();
     this.router.navigate(['/wholesaler/business-locations']);
+  }
+
+  async navigateToUpdateBusiness() {
+    await this.closeMenu();
+    this.router.navigate(['/wholesaler/business-update']);
   }
 
   async navigateToMyOrders() {
