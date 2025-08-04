@@ -368,4 +368,12 @@ export class WholesalerApiService {
       { headers }
     );
   }
+
+  getBusinessExistsOrNot(): Observable<boolean> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<boolean>(
+      `${this.apiUrl}/getBusinessExistsOrNot`,
+      { headers }
+    );
+  }
 }

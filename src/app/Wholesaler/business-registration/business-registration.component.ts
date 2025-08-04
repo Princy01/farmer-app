@@ -6,6 +6,8 @@ import { addIcons } from 'ionicons';
 import { save } from 'ionicons/icons';
 import { State, City, Location, BusinessType, BusinessCategory, BusinessRegistrationService } from './business-registration.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { WholesalerApiService } from '../services/wholesaler-api.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-business-registration',
@@ -26,7 +28,9 @@ export class BusinessRegistrationComponent implements OnInit {
     private fb: FormBuilder,
     private toastCtrl: ToastController,
     private businessRegistrationService: BusinessRegistrationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private wholesalerApiService: WholesalerApiService,
+    private router: Router
   ) {
     this.form = this.fb.group({
       bid: [null],
@@ -52,6 +56,25 @@ export class BusinessRegistrationComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Check business existence first
+    this.wholesalerApiService.getBusinessExistsOrNot().subscribe({
+      next: (exists) => {
+        if (exists) {
+          // Business already exists, navigate to the home
+          this.router.navigate(['/wholesaler/home']);
+        } else {
+          // Business does not exist, continue with registration initialization
+          this.initializeRegistrationForm();
+        }
+      },
+      error: (err) => {
+        // Business does not exist, continue with registration
+        this.initializeRegistrationForm();
+      }
+    });
+  }
+
+  private initializeRegistrationForm() {
     this.fetchBusinessCategories();
     this.fetchBusinessTypes();
     this.fetchStates();
@@ -75,6 +98,7 @@ export class BusinessRegistrationComponent implements OnInit {
         this.form.get('location_id')?.setValue(null);
       }
     });
+    
     this.form.get('city_id')?.valueChanges.subscribe((cityId) => {
       if (cityId) {
         this.fetchLocations(cityId);
