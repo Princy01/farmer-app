@@ -23,8 +23,8 @@
 
       <!-- Business Locations List -->
       <div *ngIf="!isLoading">
-        <!-- Show locations if available -->
-        <div *ngIf="businessLocations.length > 0; else noLocations">
+        <!-- Show locations if available - Added null safety -->
+        <div *ngIf="businessLocations && businessLocations.length > 0; else noLocations">
           <ion-card
             *ngFor="let location of businessLocations"
             class="location-card"
@@ -32,7 +32,7 @@
             <ion-card-header>
               <ion-card-title>
                 <ion-icon name="business" class="location-icon"></ion-icon>
-                {{ location.b_shop_name }}
+                {{ location.shop_name }}
               </ion-card-title>
             </ion-card-header>
 
@@ -45,15 +45,29 @@
                     color="primary"
                   ></ion-icon>
                   <ion-label>
-                    <h3>{{ location.b_location }}, {{ location.b_state }}</h3>
-                    <p>{{ location.b_address }}</p>
+                    <h3>Location ID: {{ location.location }}, State: {{ location.state }}, City: {{ location.b_city_id }}</h3>
+                    <p>{{ location.address }}</p>
                   </ion-label>
                 </ion-item>
 
                 <ion-item>
                   <ion-label>
-                    <p><strong>Contact:</strong> {{ location.b_number }}</p>
-                    <p><strong>Email:</strong> {{ location.b_email }}</p>
+                    <p><strong>Contact:</strong> {{ location.number }}</p>
+                    <p><strong>Email:</strong> {{ location.email }}</p>
+                  </ion-label>
+                </ion-item>
+
+                <ion-item>
+                  <ion-label>
+                    <p><strong>Status:</strong> {{ location.active_status ? 'Active' : 'Inactive' }}</p>
+                    <p><strong>Privileged:</strong> {{ location.privilege_user ? 'Yes' : 'No' }}</p>
+                  </ion-label>
+                </ion-item>
+
+                <ion-item>
+                  <ion-label>
+                    <p><strong>Created:</strong> {{ location.created_at | date:'short' }}</p>
+                    <p><strong>Updated:</strong> {{ location.updated_at | date:'short' }}</p>
                   </ion-label>
                 </ion-item>
               </ion-list>
@@ -103,5 +117,4 @@
       </div>
     </div>
   </div>
-
 </ion-content>

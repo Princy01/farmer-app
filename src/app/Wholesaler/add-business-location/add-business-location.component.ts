@@ -40,10 +40,10 @@ export class AddBusinessLocationComponent implements OnInit {
                 email: 'Email',
                 gstNumber: 'GST Number',
                 pan: 'PAN Number',
-                pincode: 'Pincode',
                 privilegedUser: 'Privileged User',
                 b_type_id: 'Business Type',
-                establishedYear: 'Established Year'
+                establishedYear: 'Established Year',
+                active_status: 'Active Status'
         };
 
         constructor(
@@ -68,7 +68,6 @@ export class AddBusinessLocationComponent implements OnInit {
                         email: ['', [Validators.required, Validators.email]],
                         gstNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/)]],
                         pan: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
-                        pincode: ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]],
                         privilegedUser: [false, Validators.required],
                         active_status: [1],
                         b_type_id: [null, Validators.required],
@@ -177,26 +176,36 @@ export class AddBusinessLocationComponent implements OnInit {
 
         // Placeholder for loading existing location data in edit mode
         loadLocationData() {
-                // TODO: Implement API call to fetch location by ID and patch the form
-                // Example:
-                // this.addBusinessService.getBusinessLocationById(this.locationId).subscribe(location => {
-                //     this.businessForm.patchValue({
-                //         shopName: location.b_shop_name,
-                //         number: location.b_number,
-                //         state: location.b_state,
-                //         city: location.b_city,
-                //         location: location.b_location,
-                //         address: location.b_address,
-                //         email: location.b_email,
-                //         gstNumber: location.b_gst_num,
-                //         pan: location.b_pan_num,
-                //         pincode: location.b_pincode,
-                //         privilegedUser: location.b_privilege_user,
-                //         active_status: location.active_status,
-                //         b_type_id: location.b_type_id,
-                //         establishedYear: location.b_established_year
-                //     });
-                // });
+                if (this.locationId) {
+                        this.addBusinessService.getBusinessBranchById(this.locationId).subscribe({
+                                next: (location) => {
+                                        // First load the dependent data
+                                        this.loadCities(location.state);
+                                        this.loadLocations(location.city_id);
+
+                                        // Patch the form with loaded data
+                                        this.businessForm.patchValue({
+                                                shopName: location.shop_name,
+                                                number: location.number,
+                                                state: location.state,
+                                                city: location.city_id,
+                                                location: location.location,
+                                                address: location.address,
+                                                email: location.email,
+                                                gstNumber: location.gst_num,
+                                                pan: location.pan_num,
+                                                privilegedUser: location.privilege_user,
+                                                active_status: location.active_status ? 1 : 0,
+                                                b_type_id: location.type_id,
+                                                establishedYear: location.established_year
+                                        });
+                                },
+                                error: (error) => {
+                                        console.error('Error loading location data:', error);
+                                        this.showToast('Error loading location data', 'danger');
+                                }
+                        });
+                }
         }
 
         async onSubmit() {
@@ -207,26 +216,25 @@ export class AddBusinessLocationComponent implements OnInit {
                         await loading.present();
 
                         try {
-                                // Map form values to backend field names
+                                // Map form values to backend field names that match BusinessBranch struct
                                 const formValue = this.businessForm.value;
                                 const formData: any = {
-                                        b_shop_name: formValue.shopName,
-                                        b_number: formValue.number,
-                                        b_state: formValue.state,
-                                        b_city: formValue.city,
-                                        b_location: formValue.location,
-                                        b_address: formValue.address,
-                                        b_email: formValue.email,
-                                        b_gst_num: formValue.gstNumber,
-                                        b_pan_num: formValue.pan,
-                                        b_pincode: formValue.pincode,
-                                        b_privilege_user: formValue.privilegedUser ? 1 : 0,
-                                        active_status: formValue.active_status,
-                                        b_type_id: formValue.b_type_id,
-                                        b_established_year: formValue.establishedYear
+                                        shop_name: formValue.shopName,
+                                        number: formValue.number,
+                                        type_id: formValue.b_type_id,
+                                        location: formValue.location,
+                                        state: formValue.state,
+                                        city_id: formValue.city,
+                                        address: formValue.address,
+                                        email: formValue.email,
+                                        gst_num: formValue.gstNumber,
+                                        pan_num: formValue.pan,
+                                        privilege_user: formValue.privilegedUser,
+                                        established_year: formValue.establishedYear || '',
+                                        active_status: formValue.active_status === 1
                                 };
-                                const userId = this.authService.getUserId();
 
+                                const userId = this.authService.getUserId();
                                 if (!userId) {
                                         loading.dismiss();
                                         await this.showAuthError();
@@ -234,7 +242,8 @@ export class AddBusinessLocationComponent implements OnInit {
                                 }
 
                                 if (this.isEditMode && this.locationId) {
-                                        formData.b_branch_id = this.locationId;
+                                        // For update, add the branch_id
+                                        formData.branch_id = this.locationId;
                                         this.addBusinessService.modifyBusinessesOfWholesaler(formData).subscribe({
                                                 next: async () => {
                                                         loading.dismiss();
@@ -243,6 +252,7 @@ export class AddBusinessLocationComponent implements OnInit {
                                                 },
                                                 error: async (error: any) => {
                                                         loading.dismiss();
+                                                        console.error('Update error:', error);
                                                         await this.showToast('Error updating location. Please try again.', 'danger');
                                                 }
                                         });
@@ -255,12 +265,14 @@ export class AddBusinessLocationComponent implements OnInit {
                                                 },
                                                 error: async (error: any) => {
                                                         loading.dismiss();
+                                                        console.error('Create error:', error);
                                                         await this.showToast('Error creating location. Please try again.', 'danger');
                                                 }
                                         });
                                 }
                         } catch (error) {
                                 loading.dismiss();
+                                console.error('Unexpected error:', error);
                                 await this.showToast('An unexpected error occurred.', 'danger');
                         }
                 } else {
@@ -304,8 +316,6 @@ export class AddBusinessLocationComponent implements OnInit {
                                                 return 'Please enter a valid GST number';
                                         case 'pan':
                                                 return 'Please enter a valid PAN number';
-                                        case 'pincode':
-                                                return 'Please enter a valid 6-digit pincode';
                                         case 'establishedYear':
                                                 return 'Please enter a valid year';
                                         default:

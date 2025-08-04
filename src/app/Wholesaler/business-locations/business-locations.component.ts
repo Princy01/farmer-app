@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IonicModule, AlertController, LoadingController, ModalController, ActionSheetController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
-import { AlertController, LoadingController, ModalController, ActionSheetController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   add, location, business, create, eye, home, list, cube, time,
   analytics, pulse, notifications, person, menu, logOut, settings,
   bulb, barChart, close
 } from 'ionicons/icons';
+
 import { BusinessLocationsService, BusinessLocation } from './business-locations.service';
 import { LocationDetailsModalComponent } from './location-details-modal.component';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -22,7 +22,7 @@ import { AuthService } from 'src/app/auth/auth.service';
   imports: [CommonModule, FormsModule, IonicModule]
 })
 export class BusinessLocationsComponent implements OnInit {
-  businessLocations: BusinessLocation[] = [];
+  businessLocations: BusinessLocation[] = []; // Initialize as empty array
   isLoading = true;
 
   constructor(
@@ -33,7 +33,6 @@ export class BusinessLocationsComponent implements OnInit {
     private modalController: ModalController,
     private actionSheetController: ActionSheetController,
     private authService: AuthService
-
   ) {
     addIcons({
       add, location, business, create, eye, home, list, cube, time,
@@ -108,22 +107,30 @@ export class BusinessLocationsComponent implements OnInit {
       const userId = this.authService.getUserId();
       if (!userId) {
         this.isLoading = false;
+        this.businessLocations = []; // Ensure it's an empty array
         loading.dismiss();
         await this.showAuthError();
         return;
       }
+
       this.businessService.getAllBusinessesOfWholesaler().subscribe({
         next: (locations: BusinessLocation[]) => {
-          this.businessLocations = locations;
+          // Ensure we always have an array, even if the response is null/undefined
+          this.businessLocations = locations || [];
           this.isLoading = false;
         },
         error: async (error: any) => {
           this.isLoading = false;
+          this.businessLocations = []; // Set to empty array on error
           loading.dismiss();
+
+          console.error('Error loading business locations:', error);
+
           if (error.status === 401) {
             await this.showAuthError();
             return;
           }
+
           const alert = await this.alertController.create({
             header: 'Error',
             message: 'Failed to load locations. Please try again later.',
@@ -137,7 +144,11 @@ export class BusinessLocationsComponent implements OnInit {
       });
     } catch (error) {
       this.isLoading = false;
+      this.businessLocations = []; // Set to empty array on error
       loading.dismiss();
+
+      console.error('Unexpected error:', error);
+
       const alert = await this.alertController.create({
         header: 'Error',
         message: 'An unexpected error occurred.',
@@ -155,7 +166,7 @@ export class BusinessLocationsComponent implements OnInit {
     this.router.navigate(['/wholesaler/add-business-location'], {
       queryParams: {
         mode: 'edit',
-        locationId: location.b_branch_id
+        locationId: location.branch_id
       }
     });
   }
@@ -173,5 +184,4 @@ export class BusinessLocationsComponent implements OnInit {
 
     await modal.present();
   }
-
 }

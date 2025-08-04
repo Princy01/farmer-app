@@ -31,6 +31,24 @@ export interface BusinessType {
   remarks: string;
 }
 
+export interface BusinessBranch {
+  branch_id: number;
+  bid: number;
+  shop_name: string;
+  type_id: number;
+  location: number;
+  state: number;
+  city_id: number;
+  address: string;
+  email: string;
+  number: string;
+  gst_num: string;
+  pan_num: string;
+  privilege_user: boolean;
+  established_year: string;
+  active_status: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AddBusinessService {
   private apiUrl = environment.apiUrl;
@@ -63,15 +81,20 @@ export class AddBusinessService {
     return this.http.get<Location[]>(`${this.apiUrl}/getLocationsByCity/${cityId}`, { headers });
   }
 
-  // createBusinessesOfWholesaler(data: any): Observable<any> {
-  //   const headers = this.getAuthHeaders();
-  //   return this.http.post(`${this.apiUrl}/createBusinessBranch`, data, { headers });
-  // }
+  createBusinessesOfWholesaler(data: any): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.post(`${this.apiUrl}/business-branches`, data, { headers });
+  }
 
-  // modifyBusinessesOfWholesaler(data: any): Observable<any> {
-  //   const headers = this.getAuthHeaders();
-  //   return this.http.put(`${this.apiUrl}/updateBusinessBranch`, data, { headers });
-  // }
+  modifyBusinessesOfWholesaler(data: any): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.put(`${this.apiUrl}/branchDetailsUpdate`, data, { headers });
+  }
+
+  getBusinessBranchById(branchId: number): Observable<BusinessBranch> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<BusinessBranch>(`${this.apiUrl}/business-branches/${branchId}`, { headers });
+  }
 
   getBusinessTypes(): Observable<BusinessType[]> {
     const headers = this.getAuthHeaders();

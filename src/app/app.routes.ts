@@ -176,6 +176,10 @@ export const routes: Routes = [
     loadComponent: () => import('./buyer/buyer.page').then((m) => m.BuyerPage),
     children: [
       {
+        path: 'business-registration',
+        loadComponent: () => import('./buyer/business-registration/business-registration.component').then((m) => m.BusinessRegistrationComponent),
+      },
+      {
         path: 'buyer-home',
         loadComponent: () => import('./buyer/buyer-home/buyer-home.component').then((m) => m.BuyerHomeComponent),
       },
