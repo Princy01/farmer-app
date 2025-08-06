@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '@/services/api.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 export interface Category {
   category_id: number;
@@ -10,6 +11,7 @@ export interface Category {
   active_status?: number;
   category_regional_id?: number;
 }
+
 export interface PaymentMode {
   id: number;
   payment_mode: string;
@@ -49,49 +51,52 @@ export interface CategoryWithSubCategories {
   active_status?: number;
   category_regional_id?: number;
 }
-  @Injectable({
+
+@Injectable({
   providedIn: 'root'
 })
 export class BuyerApiService {
-  constructor(private api: ApiService) {}
+  private apiUrl = environment.apiUrl;
+
+  constructor(private http: HttpClient) {}
+
+  getCategoryBySuperCategoryId(superCatId: number): Observable<Category[]> {
+  return this.http.get<Category[]>(`${this.apiUrl}/getCategoriesBySupID/${superCatId}`);
+}
+
+  getProductsByCategoryId(categoryId: number): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/getProductByCatId/${categoryId}`);
+  }
 
   getCategories(): Observable<Category[]> {
-    return this.api.get<Category[]>('getCategories');
+    return this.http.get<Category[]>(`${this.apiUrl}/getCategories`);
   }
 
   getCategoryById(categoryId: number): Observable<CategoryWithSubCategories> {
-    return this.api.get<CategoryWithSubCategories>(`getCategories/${categoryId}`);
+    return this.http.get<CategoryWithSubCategories>(`${this.apiUrl}/getCategories/${categoryId}`);
   }
 
   getProductRegionalNameById(id: number): Observable<ProductRegional> {
-    return this.api.get<ProductRegional>(`getProductCategoryRegionalName/${id}`);
+    return this.http.get<ProductRegional>(`${this.apiUrl}/getProductCategoryRegionalName/${id}`);
   }
 
   getAllProducts(): Observable<Product[]> {
-    return this.api.get<Product[]>('getProducts');
+    return this.http.get<Product[]>(`${this.apiUrl}/getProducts`);
   }
 
   getProductById(productId: number): Observable<Product> {
-    return this.api.get<Product>(`getProducts/${productId}`);
-  }
-
-  getProductsByCategoryId(categoryId: number): Observable<Product[]> {
-    return this.api.get<Product[]>(`getProductByCatId/${categoryId}`);
+    return this.http.get<Product>(`${this.apiUrl}/getProducts/${productId}`);
   }
 
   getProductCategoryRegionalById(id: number): Observable<CategoryRegionalLanguage> {
-    return this.api.get<CategoryRegionalLanguage>(`getProductCategoryRegional/${id}`);
+    return this.http.get<CategoryRegionalLanguage>(`${this.apiUrl}/getProductCategoryRegional/${id}`);
   }
 
   getModeOfPayments(): Observable<PaymentMode[]> {
-    return this.api.get<PaymentMode[]>('getModeOfPayments');
+    return this.http.get<PaymentMode[]>(`${this.apiUrl}/getModeOfPayments`);
   }
 
   getSuperCategories(): Observable<Category[]> {
-    return this.api.get<Category[]>('getSuperCategories');
-  }
-
-  getCategoryBySuperCategoryId(superCatId: number): Observable<Category> {
-    return this.api.get<Category>(`getCategoriesBySupID/${superCatId}`);
+    return this.http.get<Category[]>(`${this.apiUrl}/getSuperCategories`);
   }
 }

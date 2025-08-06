@@ -745,11 +745,6 @@ export class HomePage {
     this.router.navigate(['/wholesaler/market-opportunities']);
   }
 
-  async navigateToTrends() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/trends']);
-  }
-
   async navigateToProfile() {
     await this.closeMenu();
     this.router.navigate(['/wholesaler/profile']);

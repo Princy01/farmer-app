@@ -1,9 +1,9 @@
-// filepath: c:\Users\princ\IONIC_PROJECTS\farmer-app-standalone-master\src\app\buyer\buyer-home\buyer-home.component.ts
 import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, IonContent, ActionSheetController } from '@ionic/angular';
+import { IonicModule, IonContent, MenuController, AlertController } from '@ionic/angular';
 import { RouterModule, Router } from '@angular/router';
 import { BuyerApiService } from '../services/buyer-api.service';
+import { AuthService } from 'src/app/auth/auth.service';
 import { addIcons } from 'ionicons';
 import {
   personCircleOutline,
@@ -19,7 +19,10 @@ import {
   statsChartOutline,
   gridOutline,
   alertCircleOutline,
-  refreshOutline
+  refreshOutline,
+  menuOutline,
+  createOutline,
+  logOutOutline
 } from 'ionicons/icons';
 
 interface Category {
@@ -45,8 +48,10 @@ export class BuyerHomeComponent {
 
   constructor(
     private router: Router,
-    private actionSheetController: ActionSheetController,
-    private buyerApiService: BuyerApiService
+    private menuCtrl: MenuController,
+    private buyerApiService: BuyerApiService,
+    private authService: AuthService,
+    private alertCtrl: AlertController
   ) {
     addIcons({
       personCircleOutline,
@@ -62,7 +67,10 @@ export class BuyerHomeComponent {
       statsChartOutline,
       gridOutline,
       alertCircleOutline,
-      refreshOutline
+      refreshOutline,
+      menuOutline,
+      createOutline,
+      logOutOutline
     });
   }
 
@@ -97,54 +105,64 @@ export class BuyerHomeComponent {
     event.target.src = '';
   }
 
-  async presentActionSheet() {
-    const actionSheet = await this.actionSheetController.create({
-      header: 'Account Options',
-      cssClass: 'custom-action-sheet',
+  // Menu functions
+  openMenu() {
+    this.menuCtrl.open('buyer-menu');
+  }
+
+  closeMenu() {
+    this.menuCtrl.close('buyer-menu');
+  }
+
+  // Navigation functions
+  async navigateToProfile() {
+    await this.closeMenu();
+    this.router.navigate(['/buyer/profile']);
+  }
+
+  async navigateToTrackOrders() {
+    await this.closeMenu();
+    this.router.navigate(['/buyer/retailer-order-tracking'], {
+      queryParams: { id: 'ORD123456' }
+    });
+  }
+
+  navigateToBusinessLocations() {
+    this.router.navigate(['/buyer/business-locations']);
+  }
+
+  navigateToUpdateBusiness() {
+    this.router.navigate(['/buyer/update-business']);
+  }
+
+
+  async navigateToSettings() {
+    await this.closeMenu();
+    this.router.navigate(['/buyer/settings']);
+  }
+
+  async logout() {
+    await this.closeMenu();
+
+    const alert = await this.alertCtrl.create({
+      header: 'Confirm Logout',
+      message: 'Are you sure you want to logout?',
       buttons: [
         {
-          text: 'Profile',
-          icon: 'person-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
-            this.router.navigate(['/buyer/profile']);
-          }
-        },
-        {
-          text: 'Track Orders',
-          icon: 'archive-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
-            this.router.navigate(['/buyer/retailer-order-tracking'], {
-              queryParams: { id: 'ORD123456' }
-            });
-          }
-        },
-        // {
-        //   text: 'Linked Accounts',
-        //   icon: 'link-outline',
-        //   cssClass: 'custom-action-sheet-btn',
-        //   handler: () => {
-        //     this.router.navigate(['/buyer/linked-accounts']);
-        //   }
-        // },
-        {
-          text: 'Settings',
-          icon: 'settings-outline',
-          cssClass: 'custom-action-sheet-btn',
-          handler: () => {
-            this.router.navigate(['/buyer/settings']);
-          }
-        },
-        {
           text: 'Cancel',
-          icon: 'close-outline',
-          role: 'cancel',
-          cssClass: 'custom-action-sheet-btn'
+          role: 'cancel'
+        },
+        {
+          text: 'Logout',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
         }
       ]
     });
-    await actionSheet.present();
+
+    await alert.present();
   }
 
   openTrends() {
