@@ -52,6 +52,16 @@ export interface CategoryWithSubCategories {
   category_regional_id?: number;
 }
 
+export interface ProductAll {
+  product_id: number;
+  product_name: string;
+  cat_id: number;
+  cat_name: string;
+  image_path: string;
+  active_status: number;
+  nutrition_factor: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -68,6 +78,10 @@ export class BuyerApiService {
     return this.http.get<Product[]>(`${this.apiUrl}/getProductByCatId/${categoryId}`);
   }
 
+  getAllProductsOfSuperCategory(superCatId: number): Observable<ProductAll[]> {
+    return this.http.get<ProductAll[]>(`${this.apiUrl}/getAllProductsOfSuperCategory/${superCatId}`);
+  }
+  
   getCategories(): Observable<Category[]> {
     return this.http.get<Category[]>(`${this.apiUrl}/getCategories`);
   }

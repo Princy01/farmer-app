@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { chevronBack, search, funnelOutline, swapVerticalOutline, heartOutline, cartOutline } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
-import { BuyerApiService, Product, Category } from '../services/buyer-api.service';
+import { BuyerApiService, Product, ProductAll, Category } from '../services/buyer-api.service';
 import { catchError, finalize, switchMap, tap } from 'rxjs';
 import { of } from 'rxjs';
 import { Location } from '@angular/common';
@@ -24,24 +24,24 @@ export class CategoryPageComponent implements OnInit {
 
   // Navigation and Selection
   superCategoryId: number = -1;
-  categoryId: number = -1; // Added this for template compatibility
-  selectedSubcategoryId: number = -1; // Added this for template compatibility
+  categoryId: number = -1;
+  selectedSubcategoryId: number = -1;
   selectedCategoryId: number = -1;
 
   // UI State
   isSearchActive = false;
   searchQuery = '';
-  categoryName: string = ''; // Added this for template compatibility
+  categoryName: string = '';
   superCategoryName: string = '';
   selectedCategoryName: string | null = null;
-  selectedSubcategory: string | null = null; // Added this for template compatibility
+  selectedSubcategory: string | null = null;
   showProducts = false;
 
   // Data
   categories: Category[] = [];
-  category: Category | null = null; // Added this for template compatibility
-  productsList: Product[] = [];
-  filteredAndSortedItems: Product[] = [];
+  category: Category | null = null;
+  productsList: ProductAll[] = []; // Changed to ProductAll[]
+  filteredAndSortedItems: ProductAll[] = []; // Changed to ProductAll[]
 
   // Loading States
   loadingCategories = false;
@@ -73,7 +73,7 @@ export class CategoryPageComponent implements OnInit {
   ];
 
   sortOption: string = 'name-asc';
-  selectedProduct: Product | null = null;
+  selectedProduct: ProductAll | null = null; // Changed to ProductAll
 
   constructor(
     private route: ActivatedRoute,
@@ -88,35 +88,45 @@ export class CategoryPageComponent implements OnInit {
     this.route.params.pipe(
       tap(params => {
         this.superCategoryId = +params['superCategoryId'] || +params['categoryId'];
-        this.categoryId = this.superCategoryId; // For template compatibility
+        this.categoryId = this.superCategoryId;
         this.loadingCategories = true;
         this.showProducts = false;
         this.errorLoadingCategories = false;
       }),
-      switchMap(params => this.buyerApiService.getCategoryBySuperCategoryId(this.superCategoryId).pipe(
-        catchError(error => {
-          console.error('Error fetching categories:', error);
-          this.errorLoadingCategories = true;
-          this.loadingCategories = false;
-          return of([]);
-        })
-      ))
+      switchMap(params => {
+        // First get the super category info to get the proper name
+        return this.buyerApiService.getSuperCategories().pipe(
+          switchMap(superCategories => {
+            // Find the current super category
+            const currentSuperCategory = superCategories.find(cat => cat.category_id === this.superCategoryId);
+            if (currentSuperCategory) {
+              this.categoryName = currentSuperCategory.category_name;
+              this.superCategoryName = currentSuperCategory.category_name;
+              this.category = currentSuperCategory;
+            } else {
+              this.categoryName = 'Products';
+              this.superCategoryName = this.categoryName;
+            }
+
+            // Now get the subcategories
+            return this.buyerApiService.getCategoryBySuperCategoryId(this.superCategoryId);
+          }),
+          catchError(error => {
+            console.error('Error fetching categories:', error);
+            this.errorLoadingCategories = true;
+            this.loadingCategories = false;
+            // Fallback to generic name
+            this.categoryName = 'Products';
+            this.superCategoryName = this.categoryName;
+            return of([]);
+          })
+        );
+      })
     ).subscribe({
       next: (categoryData) => {
         if (categoryData && categoryData.length > 0) {
           this.categories = Array.isArray(categoryData) ? categoryData : [categoryData];
-
-          // Use a generic name for the parent category
-          this.categoryName = 'Products'; // This will show "All Products"
-          this.superCategoryName = this.categoryName;
-
-          // Set category for template compatibility - use first subcategory but override the name
-          this.category = {
-            ...this.categories[0],
-            category_name: this.categoryName
-          };
         } else {
-          this.categoryName = 'Products';
           this.categories = [];
         }
         this.loadingCategories = false;
@@ -133,16 +143,16 @@ export class CategoryPageComponent implements OnInit {
     this.loadingProducts = true;
     this.errorLoadingProducts = false;
     this.selectedCategoryId = category.category_id;
-    this.selectedSubcategoryId = category.category_id; // For template compatibility
+    this.selectedSubcategoryId = category.category_id;
     this.selectedCategoryName = category.category_name;
-    this.selectedSubcategory = category.category_name; // For template compatibility
+    this.selectedSubcategory = category.category_name;
 
     // Check if this is the "All" option (using categoryId which is same as superCategoryId)
     if (category.category_id === this.categoryId) {
-      // Load all products
-      this.buyerApiService.getAllProducts().pipe(
+      // Load all products of the super category
+      this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
         catchError(error => {
-          console.error('Error fetching all products:', error);
+          console.error('Error fetching all products of super category:', error);
           this.errorLoadingProducts = true;
           this.loadingProducts = false;
           return of([]);
@@ -154,13 +164,13 @@ export class CategoryPageComponent implements OnInit {
           this.loadingProducts = false;
         },
         error: (error) => {
-          console.error('Error loading all products:', error);
+          console.error('Error loading all products of super category:', error);
           this.errorLoadingProducts = true;
           this.loadingProducts = false;
         }
       });
     } else {
-      // Load products by specific category
+      // Load products by specific category - need to convert Product[] to ProductAll[]
       this.buyerApiService.getProductsByCategoryId(category.category_id).pipe(
         catchError(error => {
           console.error('Error fetching products:', error);
@@ -170,7 +180,16 @@ export class CategoryPageComponent implements OnInit {
         })
       ).subscribe({
         next: (products) => {
-          this.productsList = products || [];
+          // Convert Product[] to ProductAll[] format for consistency
+          this.productsList = products.map(product => ({
+            product_id: product.product_id,
+            product_name: product.product_name,
+            cat_id: product.category_id,
+            cat_name: product.category_name,
+            image_path: product.image_path,
+            active_status: product.active_status,
+            nutrition_factor: '' // Default value since it's not in Product interface
+          })) || [];
           this.applyFilters();
           this.loadingProducts = false;
         },
@@ -192,9 +211,9 @@ export class CategoryPageComponent implements OnInit {
   backToCategories() {
     this.showProducts = false;
     this.selectedCategoryId = -1;
-    this.selectedSubcategoryId = -1; // For template compatibility
+    this.selectedSubcategoryId = -1;
     this.selectedCategoryName = null;
-    this.selectedSubcategory = null; // For template compatibility
+    this.selectedSubcategory = null;
     this.productsList = [];
     this.filteredAndSortedItems = [];
   }
@@ -221,7 +240,7 @@ export class CategoryPageComponent implements OnInit {
   }
 
   // Filter and Sort Methods
-  getFilteredAndSortedItems(): Product[] {
+  getFilteredAndSortedItems(): ProductAll[] {
     if (!this.productsList) return [];
 
     let items = [...this.productsList];
@@ -247,10 +266,10 @@ export class CategoryPageComponent implements OnInit {
         items.sort((a, b) => b.product_name.localeCompare(a.product_name));
         break;
       case 'category-asc':
-        items.sort((a, b) => a.category_name.localeCompare(b.category_name));
+        items.sort((a, b) => a.cat_name.localeCompare(b.cat_name));
         break;
       case 'category-desc':
-        items.sort((a, b) => b.category_name.localeCompare(a.category_name));
+        items.sort((a, b) => b.cat_name.localeCompare(a.cat_name));
         break;
     }
 
@@ -262,7 +281,7 @@ export class CategoryPageComponent implements OnInit {
   }
 
   // Modal Methods
-  openProductModal(product: Product) {
+  openProductModal(product: ProductAll) {
     this.selectedProduct = product;
     this.productModal?.present();
   }
