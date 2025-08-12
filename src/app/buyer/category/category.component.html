@@ -143,16 +143,10 @@
               *ngIf="filteredAndSortedItems.length > 0; else noItems"
             >
               <ion-item
-                *ngFor="let item of filteredAndSortedItems"
-                class="product-item"
-                (click)="openProductModal(item)"
+                *ngFor="let product of filteredAndSortedItems"
+                (click)="goToProductDetails(product)"
               >
-                <div class="large-thumbnail">
-                  <img [src]="item.image_path" [alt]="item.product_name" />
-                </div>
-                <ion-label>
-                  <h2 class="product-title">{{ item.product_name }}</h2>
-                </ion-label>
+                <ion-label>{{ product.product_name }}</ion-label>
               </ion-item>
             </ng-container>
           </ion-list>

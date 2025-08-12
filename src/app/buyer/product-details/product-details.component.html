@@ -1,45 +1,38 @@
-<!-- <ion-header>
+<ion-header>
   <ion-toolbar>
+    <ion-title>{{ product.product_name }}</ion-title>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/"></ion-back-button>
+      <ion-back-button defaultHref="/buyer/buyer-home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Product Details</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ng-container *ngIf="productDetails; else loading">
-    <ion-card>
-      <img [src]="productDetails.image" [alt]="productDetails.name" />
-      <ion-card-header>
-        <ion-card-title>{{ productDetails.name }}</ion-card-title>
-        <p class="hindi-name">({{ productDetails.hindiName }})</p>
-      </ion-card-header>
-      <ion-card-content>
-        <p><strong>Source:</strong> {{ productDetails.source }}</p>
-        <p><strong>Nutrition:</strong> {{ productDetails.nutrition }}</p>
-        <p><strong>Location:</strong> {{ productDetails.location }}</p>
-        <p><strong>Customer Ratings:</strong> {{ productDetails.ratings }}</p>
-      </ion-card-content>
-    </ion-card>
+  <ion-card>
+    <img [src]="product.image_path" alt="{{ product.product_name }}" />
+    <ion-card-header>
+      <ion-card-title>{{ product.product_name }}</ion-card-title>
+    </ion-card-header>
 
-    <ion-list>
-      <ion-list-header>
-        <strong>Available in Mandi: {{ productDetails.mandiName }}</strong>
-      </ion-list-header>
-      <ion-item *ngFor="let wholesaler of productDetails.wholesalers">
-        <ion-label>
-          <h2>{{ wholesaler.name }}</h2>
-          <p><strong>Price:</strong> ₹{{ wholesaler.price }} per kg</p>
-          <p><strong>Earliest Delivery:</strong> {{ wholesaler.deliveryDate }}</p>
-          <p><strong>Wastage:</strong> {{ wholesaler.wastage }}%</p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-  </ng-container>
+    <!-- Wholesaler Info Horizontal Scroll -->
+    <div class="wholesaler-scroll">
+      <ion-card *ngFor="let wholesaler of wholesalers">
+        <ion-card-header>
+          <ion-card-title>{{ wholesaler.name }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p><b>Retailer:</b> {{ wholesaler.retailer }}</p>
+          <p><b>Price:</b> ₹{{ wholesaler.price }}</p>
+          <p><b>Distance:</b> {{ wholesaler.distance }}</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
-  <ng-template #loading>
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Loading product details...</p>
-  </ng-template>
-</ion-content> -->
+    <!-- General Product Info -->
+
+    <ion-card-content>
+      <p>{{ product.description }}</p>
+      <p><b>Nutrition:</b> {{ product.nutrition_factor }}</p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

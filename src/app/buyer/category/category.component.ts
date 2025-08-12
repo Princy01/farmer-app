@@ -20,7 +20,6 @@ import { Location } from '@angular/common';
 export class CategoryPageComponent implements OnInit {
   @ViewChild('filterModal') filterModal!: IonModal;
   @ViewChild('sortModal') sortModal!: IonModal;
-  @ViewChild('productModal') productModal!: IonModal;
 
   // Navigation and Selection
   superCategoryId: number = -1;
@@ -73,7 +72,6 @@ export class CategoryPageComponent implements OnInit {
   ];
 
   sortOption: string = 'name-asc';
-  selectedProduct: ProductAll | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -322,16 +320,6 @@ export class CategoryPageComponent implements OnInit {
     this.filteredAndSortedItems = this.getFilteredAndSortedItems();
   }
 
-  // Modal Methods
-  openProductModal(product: ProductAll) {
-    this.selectedProduct = product;
-    this.productModal?.present();
-  }
-
-  closeProductModal() {
-    this.productModal?.dismiss();
-  }
-
   openFilterModal() {
     this.filterModal?.present();
   }
@@ -365,4 +353,8 @@ export class CategoryPageComponent implements OnInit {
     this.closeSortModal();
     this.applyFilters();
   }
+
+  goToProductDetails(product: ProductAll) {
+  this.router.navigate(['/buyer/product-details', product.product_id]);
+}
 }

@@ -40,19 +40,19 @@ export const routes: Routes = [
   },
   {
     path: 'wholesaler/trends/sales-trends',
-    loadComponent: () => import('./Wholesaler/sales-trends/sales-trends.component').then((m) => m. SalesTrendsComponent),
+    loadComponent: () => import('./Wholesaler/sales-trends/sales-trends.component').then((m) => m.SalesTrendsComponent),
   },
   {
     path: 'wholesaler/trends/demand-trends',
-    loadComponent: () => import('./Wholesaler/demand-trends/demand-trends.component').then((m) => m. DemandTrendsComponent),
+    loadComponent: () => import('./Wholesaler/demand-trends/demand-trends.component').then((m) => m.DemandTrendsComponent),
   },
   {
     path: 'wholesaler/trends/stock-insights',
-    loadComponent: () => import('./Wholesaler/stock-insights/stock-insights.component').then((m) => m. StockInsightsComponent),
+    loadComponent: () => import('./Wholesaler/stock-insights/stock-insights.component').then((m) => m.StockInsightsComponent),
   },
   {
     path: 'wholesaler/trends/market-comparison',
-    loadComponent: () => import('./Wholesaler/market-comparison/market-comparison.component').then((m) => m. MarketComparisonComponent),
+    loadComponent: () => import('./Wholesaler/market-comparison/market-comparison.component').then((m) => m.MarketComparisonComponent),
   },
   {
     path: 'wholesaler/market-opportunities',
@@ -71,12 +71,12 @@ export const routes: Routes = [
     loadComponent: () => import('./Wholesaler/business-registration/business-registration.component').then((m) => m.BusinessRegistrationComponent),
   },
   {
-  path: 'wholesaler/business-locations',
-  loadComponent: () => import('./Wholesaler/business-locations/business-locations.component').then((m) => m.BusinessLocationsComponent),
+    path: 'wholesaler/business-locations',
+    loadComponent: () => import('./Wholesaler/business-locations/business-locations.component').then((m) => m.BusinessLocationsComponent),
   },
   {
-  path: 'wholesaler/business-update',
-  loadComponent: () => import('./Wholesaler/business-update/business-update.component').then(m => m.BusinessUpdatePage),
+    path: 'wholesaler/business-update',
+    loadComponent: () => import('./Wholesaler/business-update/business-update.component').then(m => m.BusinessUpdatePage),
   },
   {
     path: 'wholesaler/add-business-location',
@@ -199,10 +199,10 @@ export const routes: Routes = [
         path: 'category/:categoryId',
         loadComponent: () => import('./buyer/category/category.component').then((m) => m.CategoryPageComponent),
       },
-      // {
-      //   path: 'product-details/:selectedProduct',
-      //   loadComponent: () => import('./buyer/product-details/product-details.component').then((m) => m.ProductDetailsComponent),
-      // },
+      {
+        path: 'product-details/:productId',
+        loadComponent: () => import('./buyer/product-details/product-details.component').then(m => m.ProductDetailsComponent)
+      },
       {
         path: 'wishlist',
         loadComponent: () => import('./buyer/wishlist/wishlist.component').then((m) => m.WishlistComponent),
@@ -224,8 +224,8 @@ export const routes: Routes = [
         loadComponent: () => import('./buyer/retailer-order-tracking/retailer-order-tracking.component').then((m) => m.RetailerOrderTrackingComponent),
       },
       {
-      path: 'RetailerTrends',
-      loadComponent: () => import('./buyer/retailer-trends/retailer-trends.component').then((m) => m.RetailerTrendsComponent),
+        path: 'RetailerTrends',
+        loadComponent: () => import('./buyer/retailer-trends/retailer-trends.component').then((m) => m.RetailerTrendsComponent),
       }
     ]
   },
@@ -360,6 +360,6 @@ export const routes: Routes = [
         path: 'customer-chat',
         loadComponent: () => import('./transport/customer-chat/customer-chat.component').then((m) => m.CustomerChatComponent),
       }
-]
-}
+    ]
+  }
 ];

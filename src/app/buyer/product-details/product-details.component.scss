@@ -1,0 +1,20 @@
+ion-card img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  margin: 0 auto;
+}
+
+.wholesaler-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  margin: 16px 0 24px 0;
+}
+
+.wholesaler-scroll ion-card {
+  min-width: 220px;
+  flex: 0 0 auto;
+}
