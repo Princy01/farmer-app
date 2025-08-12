@@ -201,58 +201,7 @@
           </div>
         </div>
 
-        <!-- Address field -->
-        <div class="input-group">
-          <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="location-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-input
-              placeholder="Address"
-              formControlName="address"
-              class="input-field"
-            >
-            </ion-input>
-          </ion-item>
-        </div>
-
-        <!-- Location/city field -->
-        <div class="input-group">
-          <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="map-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-select
-              placeholder="Select Location"
-              formControlName="location"
-              class="role-select"
-            >
-              <ion-select-option
-                *ngFor="let location of locations"
-                [value]="location.id"
-              >
-                {{ location.location }}
-              </ion-select-option>
-            </ion-select>
-            <ion-spinner
-              *ngIf="isLoadingLocations"
-              name="dots"
-              slot="end"
-            ></ion-spinner>
-          </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('location')?.touched && registerForm.get('location')?.errors?.['required']"
-          >
-            Please select a location
-          </div>
-        </div>
-
-        <!-- State field-->
+        <!-- State field (first in cascade) -->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
             <ion-icon
@@ -269,7 +218,7 @@
                 *ngFor="let state of states"
                 [value]="state.id"
               >
-                {{ state.state }}
+                {{ state.state_name }}
               </ion-select-option>
             </ion-select>
             <ion-spinner
@@ -286,7 +235,97 @@
           </div>
         </div>
 
-        <!-- Pincode field-->
+        <!-- City field (second in cascade) -->
+        <div class="input-group">
+          <ion-item class="custom-input" lines="none">
+            <ion-icon
+              name="business-outline"
+              slot="start"
+              class="input-icon"
+            ></ion-icon>
+            <ion-select
+              placeholder="Select City"
+              formControlName="city"
+              class="role-select"
+              [disabled]="!registerForm.get('state')?.value"
+            >
+              <ion-select-option *ngFor="let city of cities" [value]="city.id">
+                {{ city.city_name }}
+              </ion-select-option>
+            </ion-select>
+            <ion-spinner
+              *ngIf="isLoadingCities"
+              name="dots"
+              slot="end"
+            ></ion-spinner>
+          </ion-item>
+          <div
+            class="error-message"
+            *ngIf="registerForm.get('city')?.touched && registerForm.get('city')?.errors?.['required']"
+          >
+            Please select a city
+          </div>
+        </div>
+
+        <!-- Location field (third in cascade) -->
+        <div class="input-group">
+          <ion-item class="custom-input" lines="none">
+            <ion-icon
+              name="location-outline"
+              slot="start"
+              class="input-icon"
+            ></ion-icon>
+            <ion-select
+              placeholder="Select Location"
+              formControlName="location"
+              class="role-select"
+              [disabled]="!registerForm.get('city')?.value"
+            >
+              <ion-select-option
+                *ngFor="let location of locations"
+                [value]="location.id"
+              >
+                {{ location.location_name }}
+              </ion-select-option>
+            </ion-select>
+            <ion-spinner
+              *ngIf="isLoadingLocations"
+              name="dots"
+              slot="end"
+            ></ion-spinner>
+          </ion-item>
+          <div
+            class="error-message"
+            *ngIf="registerForm.get('location')?.touched && registerForm.get('location')?.errors?.['required']"
+          >
+            Please select a location
+          </div>
+        </div>
+
+        <!-- Address field (after location selection) -->
+        <div class="input-group">
+          <ion-item class="custom-input" lines="none">
+            <ion-icon
+              name="storefront-outline"
+              slot="start"
+              class="input-icon"
+            ></ion-icon>
+            <ion-input
+              placeholder="Address"
+              formControlName="address"
+              class="input-field"
+            >
+            </ion-input>
+          </ion-item>
+          <div
+            class="error-message"
+            *ngIf="registerForm.get('address')?.touched && registerForm.get('address')?.errors?.['required']"
+          >
+            Address is required
+          </div>
+        </div>
+
+        <!-- Pincode field -->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
             <ion-icon
@@ -301,6 +340,12 @@
             >
             </ion-input>
           </ion-item>
+          <div
+            class="error-message"
+            *ngIf="registerForm.get('pincode')?.touched && registerForm.get('pincode')?.errors?.['required']"
+          >
+            Pincode is required
+          </div>
         </div>
 
         <!-- Role selection -->

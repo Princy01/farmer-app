@@ -1,0 +1,107 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" fill="clear">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Update Business</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="form-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="business-outline"></ion-icon>
+          Business Update
+        </ion-card-title>
+        <ion-card-subtitle>Update your business details</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="businessForm" (ngSubmit)="onUpdateBusiness()">
+
+          <!-- Email -->
+          <ion-item
+            fill="outline"
+            class="form-item"
+            [class.ion-invalid]="isFieldInvalid('email')">
+            <ion-label position="stacked">Business Email Address *</ion-label>
+            <ion-input
+              formControlName="email"
+              type="email"
+              placeholder="Enter your business email">
+              <ion-icon name="mail-outline" slot="start"></ion-icon>
+            </ion-input>
+            <ion-note slot="error" *ngIf="isFieldInvalid('email')">
+              {{ getErrorMessage('email') }}
+            </ion-note>
+          </ion-item>
+
+          <!-- Mobile Number -->
+          <ion-item
+            fill="outline"
+            class="form-item"
+            [class.ion-invalid]="isFieldInvalid('mobile_number')">
+            <ion-label position="stacked">Business Mobile Number *</ion-label>
+            <ion-input
+              formControlName="mobile_number"
+              type="tel"
+              placeholder="Enter business mobile number">
+              <ion-icon name="call-outline" slot="start"></ion-icon>
+            </ion-input>
+            <ion-note slot="error" *ngIf="isFieldInvalid('mobile_number')">
+              {{ getErrorMessage('mobile_number') }}
+            </ion-note>
+            <ion-note slot="helper">10-15 digit mobile number</ion-note>
+          </ion-item>
+
+          <!-- Address -->
+          <ion-item
+            fill="outline"
+            class="form-item"
+            [class.ion-invalid]="isFieldInvalid('address')">
+            <ion-label position="stacked">Business Address *</ion-label>
+            <ion-textarea
+              formControlName="address"
+              rows="3"
+              placeholder="Enter complete retailer business address">
+              <ion-icon name="location-outline" slot="start"></ion-icon>
+            </ion-textarea>
+            <ion-note slot="error" *ngIf="isFieldInvalid('address')">
+              {{ getErrorMessage('address') }}
+            </ion-note>
+          </ion-item>
+
+          <!-- Active Status -->
+          <ion-item fill="outline" class="form-item">
+            <ion-label>Business Status</ion-label>
+            <ion-toggle
+              formControlName="is_active"
+              color="success"
+              slot="end">
+            </ion-toggle>
+            <ion-note slot="helper">
+              <ion-icon [name]="businessForm.value.is_active ? 'checkmark-circle-outline' : 'close-circle-outline'"
+                        [color]="businessForm.value.is_active ? 'success' : 'danger'"></ion-icon>
+              {{ businessForm.value.is_active ? 'Business Active' : 'Business Inactive' }}
+            </ion-note>
+          </ion-item>
+
+          <!-- Submit Button -->
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="businessForm.invalid || isLoading"
+            class="submit-button">
+            <ion-icon name="save-outline" slot="start"></ion-icon>
+            <span *ngIf="!isLoading">Update Business</span>
+            <span *ngIf="isLoading">Updating...</span>
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

@@ -40,8 +40,8 @@ export class CategoryPageComponent implements OnInit {
   // Data
   categories: Category[] = [];
   category: Category | null = null;
-  productsList: ProductAll[] = []; // Changed to ProductAll[]
-  filteredAndSortedItems: ProductAll[] = []; // Changed to ProductAll[]
+  productsList: ProductAll[] = [];
+  filteredAndSortedItems: ProductAll[] = [];
 
   // Loading States
   loadingCategories = false;
@@ -73,7 +73,7 @@ export class CategoryPageComponent implements OnInit {
   ];
 
   sortOption: string = 'name-asc';
-  selectedProduct: ProductAll | null = null; // Changed to ProductAll
+  selectedProduct: ProductAll | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -89,6 +89,11 @@ export class CategoryPageComponent implements OnInit {
       tap(params => {
         this.superCategoryId = +params['superCategoryId'] || +params['categoryId'];
         this.categoryId = this.superCategoryId;
+
+        // Pre-set the "All" selection
+        this.selectedCategoryId = this.categoryId;
+        this.selectedSubcategoryId = this.categoryId;
+
         this.loadingCategories = true;
         this.showProducts = false;
         this.errorLoadingCategories = false;
@@ -103,9 +108,15 @@ export class CategoryPageComponent implements OnInit {
               this.categoryName = currentSuperCategory.category_name;
               this.superCategoryName = currentSuperCategory.category_name;
               this.category = currentSuperCategory;
+
+              // Set the selected category name
+              this.selectedCategoryName = `All ${this.categoryName}`;
+              this.selectedSubcategory = this.selectedCategoryName;
             } else {
               this.categoryName = 'Products';
               this.superCategoryName = this.categoryName;
+              this.selectedCategoryName = `All ${this.categoryName}`;
+              this.selectedSubcategory = this.selectedCategoryName;
             }
 
             // Now get the subcategories
@@ -118,6 +129,8 @@ export class CategoryPageComponent implements OnInit {
             // Fallback to generic name
             this.categoryName = 'Products';
             this.superCategoryName = this.categoryName;
+            this.selectedCategoryName = `All ${this.categoryName}`;
+            this.selectedSubcategory = this.selectedCategoryName;
             return of([]);
           })
         );
@@ -130,11 +143,40 @@ export class CategoryPageComponent implements OnInit {
           this.categories = [];
         }
         this.loadingCategories = false;
+
+        // Automatically load all products
+        this.loadAllProducts();
       },
       error: (error) => {
         console.error('Error loading categories:', error);
         this.errorLoadingCategories = true;
         this.loadingCategories = false;
+      }
+    });
+  }
+
+  // New method to load all products automatically
+  loadAllProducts() {
+    this.loadingProducts = true;
+    this.errorLoadingProducts = false;
+
+    this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
+      catchError(error => {
+        console.error('Error fetching all products of super category:', error);
+        this.errorLoadingProducts = true;
+        this.loadingProducts = false;
+        return of([]);
+      })
+    ).subscribe({
+      next: (products) => {
+        this.productsList = products || [];
+        this.applyFilters();
+        this.loadingProducts = false;
+      },
+      error: (error) => {
+        console.error('Error loading all products of super category:', error);
+        this.errorLoadingProducts = true;
+        this.loadingProducts = false;
       }
     });
   }

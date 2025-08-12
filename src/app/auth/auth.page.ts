@@ -11,7 +11,7 @@ import {
   carOutline, shieldCheckmarkOutline, logInOutline,
   personAddOutline, locationOutline, mapOutline
 } from 'ionicons/icons';
-import { AuthService, UserRegistration, LoginCredentials, Location, State } from './auth.service';
+import { AuthService, UserRegistration, LoginCredentials, Location, State, City } from './auth.service';
 
 enum UserRole {
   Admin = 1,
@@ -34,10 +34,12 @@ export class LoginPage {
   showLoginPassword = false;
   showRegisterPassword = false;
   isLoading = false;
-  locations: Location[] = [];
   states: State[] = [];
-  isLoadingLocations = false;
+  cities: City[] = [];
+  locations: Location[] = [];
   isLoadingStates = false;
+  isLoadingCities = false;
+  isLoadingLocations = false;
 
   userRoles = [
     { id: UserRole.Wholesaler, name: 'Wholesaler' },
@@ -68,15 +70,39 @@ export class LoginPage {
       name: ['', Validators.required],
       identifier: ['', [Validators.required, this.emailOrPhoneValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      state: [null, Validators.required],
+      city: [null, Validators.required],
+      location: [null, Validators.required],
       address: ['', Validators.required],
-      location: ['', Validators.required],
-      state: ['', Validators.required],
       pincode: ['', Validators.required],
       role_id: ['', Validators.required],
       active_status: [1]
     });
-    this.loadLocations();
+
     this.loadStates();
+    this.setupFormValueChanges();
+  }
+
+  setupFormValueChanges() {
+    // Reset city and location when state changes
+    this.registerForm.get('state')?.valueChanges.subscribe((stateId) => {
+      if (stateId) {
+        this.loadCities(stateId);
+        this.registerForm.get('city')?.reset();
+        this.registerForm.get('location')?.reset();
+        this.cities = [];
+        this.locations = [];
+      }
+    });
+
+    // Reset location when city changes
+    this.registerForm.get('city')?.valueChanges.subscribe((cityId) => {
+      if (cityId) {
+        this.loadLocations(cityId);
+        this.registerForm.get('location')?.reset();
+        this.locations = [];
+      }
+    });
   }
 
   toggleLoginPasswordVisibility() {
@@ -143,7 +169,7 @@ export class LoginPage {
               this.router.navigate(['/wholesaler/business-registration']);
               break;
             case 'retailer':
-              this.router.navigate(['/buyer/buyer-home']);
+              this.router.navigate(['/buyer/business-registration']);
               break;
             case 'driver':
               this.router.navigate(['/transport/transport-dashboard']);
@@ -185,16 +211,15 @@ export class LoginPage {
     // Create a copy of the form data
     const formData = { ...this.registerForm.value };
 
-    // IMPORTANT: The backend expects an "identifier" field, not email/mobile_num
-    // The backend will determine if it's an email or phone number
+    // Map form data to match backend expectations
     const userData = {
-      identifier: formData.identifier,   // This is the key field the backend expects
+      identifier: formData.identifier,
       password: formData.password,
       name: formData.name,
       address: formData.address,
       pincode: formData.pincode,
-      location: formData.location,
-      state: formData.state,
+      location: formData.location, // This is the location ID
+      state: formData.state, // This is the state ID
       role_id: formData.role_id,
       active_status: formData.active_status
     };
@@ -206,26 +231,24 @@ export class LoginPage {
 
         // Reset the form and return to login mode
         this.registerForm.reset({
+          state: null,
+          city: null,
+          location: null,
           address: '',
-          location: '',
-          state: '',
           pincode: '',
           active_status: 1
         });
+        this.cities = [];
+        this.locations = [];
         this.authMode = 'login';
       },
       error: (error) => {
         this.isLoading = false;
-
-        // Log full error details for developers
         console.error('Registration failed:', error);
 
-        // User-friendly error message
         let errorMessage = 'Unable to create your account. Please try again later.';
 
-        // Extract the most helpful error message
         if (error.error && typeof error.error === 'object' && error.error.error) {
-          // Check if it contains user-friendly info
           if (error.error.error.includes('already exists')) {
             errorMessage = 'An account with this email or phone number already exists.';
           } else if (error.error.error.includes('Invalid email')) {
@@ -241,20 +264,6 @@ export class LoginPage {
       }
     });
   }
-  loadLocations() {
-    this.isLoadingLocations = true;
-    this.authService.getLocations().subscribe({
-      next: (locations) => {
-        this.locations = locations;
-        this.isLoadingLocations = false;
-      },
-      error: (error) => {
-        console.error('Failed to load locations:', error);
-        this.isLoadingLocations = false;
-        this.presentToast('Failed to load locations. Please try again.', 'danger');
-      }
-    });
-  }
 
   loadStates() {
     this.isLoadingStates = true;
@@ -267,6 +276,36 @@ export class LoginPage {
         console.error('Failed to load states:', error);
         this.isLoadingStates = false;
         this.presentToast('Failed to load states. Please try again.', 'danger');
+      }
+    });
+  }
+
+  loadCities(stateId: number) {
+    this.isLoadingCities = true;
+    this.authService.getCitiesOfState(stateId).subscribe({
+      next: (cities) => {
+        this.cities = cities;
+        this.isLoadingCities = false;
+      },
+      error: (error) => {
+        console.error('Failed to load cities:', error);
+        this.isLoadingCities = false;
+        this.presentToast('Failed to load cities. Please try again.', 'danger');
+      }
+    });
+  }
+
+  loadLocations(cityId: number) {
+    this.isLoadingLocations = true;
+    this.authService.getLocationsByCity(cityId).subscribe({
+      next: (locations) => {
+        this.locations = locations;
+        this.isLoadingLocations = false;
+      },
+      error: (error) => {
+        console.error('Failed to load locations:', error);
+        this.isLoadingLocations = false;
+        this.presentToast('Failed to load locations. Please try again.', 'danger');
       }
     });
   }

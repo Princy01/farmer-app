@@ -76,12 +76,11 @@ export class AddBusinessLocationComponent implements OnInit {
         }
 
         ngOnInit() {
-                // Auth check like home page
                 if (!this.authService.isAuthenticated()) {
                         this.showAuthError();
                         return;
                 }
-                if (!this.authService.hasRole || !this.authService.hasRole('wholesaler')) {
+                if (!this.authService.hasRole || !this.authService.hasRole('retailer')) {
                         this.showUnauthorizedError();
                         return;
                 }
@@ -244,11 +243,11 @@ export class AddBusinessLocationComponent implements OnInit {
                                 if (this.isEditMode && this.locationId) {
                                         // For update, add the branch_id
                                         formData.branch_id = this.locationId;
-                                        this.addBusinessService.modifyBusinessesOfWholesaler(formData).subscribe({
+                                        this.addBusinessService.modifyBusinessBranch(formData).subscribe({
                                                 next: async () => {
                                                         loading.dismiss();
                                                         await this.showToast('Business location updated successfully!', 'success');
-                                                        this.router.navigate(['/wholesaler/business-locations']);
+                                                        this.router.navigate(['/retailer/business-locations']);
                                                 },
                                                 error: async (error: any) => {
                                                         loading.dismiss();
@@ -257,11 +256,11 @@ export class AddBusinessLocationComponent implements OnInit {
                                                 }
                                         });
                                 } else {
-                                        this.addBusinessService.createBusinessesOfWholesaler(formData).subscribe({
+                                        this.addBusinessService.createBusinessBranch(formData).subscribe({
                                                 next: async () => {
                                                         loading.dismiss();
                                                         await this.showToast('Business location created successfully!', 'success');
-                                                        this.router.navigate(['/wholesaler/business-locations']);
+                                                        this.router.navigate(['/buyer/business-locations']);
                                                 },
                                                 error: async (error: any) => {
                                                         loading.dismiss();
@@ -327,6 +326,6 @@ export class AddBusinessLocationComponent implements OnInit {
         }
 
         goBack() {
-                this.router.navigate(['/wholesaler/business-locations']);
+                this.router.navigate(['/buyer/business-locations']);
         }
 }

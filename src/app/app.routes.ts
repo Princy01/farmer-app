@@ -180,6 +180,18 @@ export const routes: Routes = [
         loadComponent: () => import('./buyer/business-registration/business-registration.component').then((m) => m.BusinessRegistrationComponent),
       },
       {
+        path: 'business-locations',
+        loadComponent: () => import('./buyer/business-locations/business-locations.component').then((m) => m.BusinessLocationsComponent),
+      },
+      {
+        path: 'add-business-location',
+        loadComponent: () => import('./buyer/add-business-location/add-business-location.component').then((m) => m.AddBusinessLocationComponent),
+      },
+      // {
+      //   path: 'business-update',
+      //   loadComponent: () => import('./buyer/business-update/business-update.component').then((m) => m.BusinessUpdateComponent),
+      // },
+      {
         path: 'buyer-home',
         loadComponent: () => import('./buyer/buyer-home/buyer-home.component').then((m) => m.BuyerHomeComponent),
       },

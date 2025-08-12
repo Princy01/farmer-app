@@ -24,7 +24,7 @@ export interface UserResponse {
 export interface UserRegistration {
   name: string;
   password: string;
-  identifier: string;  // This will be sent as-is to backend
+  identifier: string;
   address: string;
   pincode: string;
   location: number;
@@ -42,16 +42,23 @@ export interface AuthResponse {
 
 export interface Location {
   id: number;
-  location: string;
-  city_id?: number;
-  city_name?: string;
-  state_id?: number;
+  location_name: string | null;
+  city_id: number;
+  city_name: string | null;
+  state_id: number;
+  state_name: string | null;
 }
 
 export interface State {
   id: number;
-  state: string;
-  state_shortnames?: string;
+  state_name: string;
+  state_shortname: string;
+}
+
+export interface City {
+  id: number;
+  city_shortname: string;
+  city_name: string;
 }
 
 @Injectable({
@@ -117,7 +124,6 @@ export class AuthService {
       );
   }
 
-  // ✅ Enhanced setAuthData method
   setAuthData(accessToken: string, refreshToken: string, roleId: number): void {
     localStorage.setItem(this.accessTokenKey, accessToken);
     localStorage.setItem(this.refreshTokenKey, refreshToken);
@@ -130,7 +136,6 @@ export class AuthService {
     }
   }
 
-  // ✅ Extract user ID from JWT token
   private extractUserIdFromToken(token: string): number | null {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -141,7 +146,7 @@ export class AuthService {
     }
   }
 
-  // ✅ Map role IDs to role names
+  // Map role IDs to role names
   private mapRoleIdToRole(roleId: number): string {
     const roleMap: { [key: number]: string } = {
       1: 'admin',
@@ -152,7 +157,7 @@ export class AuthService {
     return roleMap[roleId] || 'unknown';
   }
 
-  // ✅ Enhanced logout method
+  // Enhanced logout method
   logout(): void {
     localStorage.removeItem(this.accessTokenKey);
     localStorage.removeItem(this.refreshTokenKey);
@@ -163,7 +168,7 @@ export class AuthService {
     localStorage.removeItem('wholesalerId');
   }
 
-  // ✅ Updated authentication check methods
+  // Updated authentication check methods
   getToken(): string | null {
     return localStorage.getItem(this.accessTokenKey);
   }
@@ -177,7 +182,7 @@ export class AuthService {
     return this.isAuthenticated();
   }
 
-  // ✅ New helper methods
+  // New helper methods
   getUserRole(): string | null {
     return localStorage.getItem(this.roleKey);
   }
@@ -198,7 +203,7 @@ export class AuthService {
     return role ? roleMap[role] || null : null;
   }
 
-  // ✅ Check if token is expired
+  // Check if token is expired
   private isTokenExpired(token: string): boolean {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -208,19 +213,19 @@ export class AuthService {
     }
   }
 
-  // ✅ Check if user has specific role
+  // Check if user has specific role
   hasRole(role: string): boolean {
     return this.getUserRole() === role;
   }
 
-  // ✅ Check if user has any of the specified roles
+  // Check if user has any of the specified roles
   hasAnyRole(roles: string[]): boolean {
     const userRole = this.getUserRole();
     return userRole ? roles.includes(userRole) : false;
   }
 
-  getLocations(): Observable<Location[]> {
-    return this.http.get<Location[]>(`${this.apiUrl}/getLocations`)
+   getStates(): Observable<State[]> {
+    return this.http.get<State[]>(`${this.apiUrl}/getStates`)
       .pipe(
         catchError(error => {
           return throwError(() => error);
@@ -228,8 +233,17 @@ export class AuthService {
       );
   }
 
-  getStates(): Observable<State[]> {
-    return this.http.get<State[]>(`${this.apiUrl}/getStates`)
+  getCitiesOfState(stateId: number): Observable<City[]> {
+    return this.http.get<City[]>(`${this.apiUrl}/getAllCitiesOfState/${stateId}`)
+      .pipe(
+        catchError(error => {
+          return throwError(() => error);
+        })
+      );
+  }
+
+  getLocationsByCity(cityId: number): Observable<Location[]> {
+    return this.http.get<Location[]>(`${this.apiUrl}/getLocationsByCity/${cityId}`)
       .pipe(
         catchError(error => {
           return throwError(() => error);

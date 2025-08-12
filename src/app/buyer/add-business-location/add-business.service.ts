@@ -81,12 +81,12 @@ export class AddBusinessService {
     return this.http.get<Location[]>(`${this.apiUrl}/getLocationsByCity/${cityId}`, { headers });
   }
 
-  createBusinessesOfWholesaler(data: any): Observable<any> {
+  createBusinessBranch(data: any): Observable<any> {
     const headers = this.getAuthHeaders();
     return this.http.post(`${this.apiUrl}/business-branches`, data, { headers });
   }
 
-  modifyBusinessesOfWholesaler(data: any): Observable<any> {
+  modifyBusinessBranch(data: any): Observable<any> {
     const headers = this.getAuthHeaders();
     return this.http.put(`${this.apiUrl}/branchDetailsUpdate`, data, { headers });
   }

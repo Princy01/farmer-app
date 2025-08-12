@@ -81,7 +81,7 @@ export class BuyerApiService {
   getAllProductsOfSuperCategory(superCatId: number): Observable<ProductAll[]> {
     return this.http.get<ProductAll[]>(`${this.apiUrl}/getAllProductsOfSuperCategory/${superCatId}`);
   }
-  
+
   getCategories(): Observable<Category[]> {
     return this.http.get<Category[]>(`${this.apiUrl}/getCategories`);
   }

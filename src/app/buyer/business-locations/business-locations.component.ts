@@ -55,7 +55,7 @@ export class BusinessLocationsComponent implements OnInit {
       return;
     }
 
-    if (!this.authService.hasRole('wholesaler')) {
+    if (!this.authService.hasRole('retailer')) {
       await this.showUnauthorizedError();
       return;
     }
@@ -113,7 +113,7 @@ export class BusinessLocationsComponent implements OnInit {
         return;
       }
 
-      this.businessService.getAllBusinessesOfWholesaler().subscribe({
+      this.businessService.getAllBusinessesOfUser().subscribe({
         next: (locations: BusinessLocation[]) => {
           // Ensure we always have an array, even if the response is null/undefined
           this.businessLocations = locations || [];
@@ -159,11 +159,11 @@ export class BusinessLocationsComponent implements OnInit {
   }
 
   addNewLocation() {
-    this.router.navigate(['/wholesaler/add-business-location']);
+    this.router.navigate(['/buyer/add-business-location']);
   }
 
   async modifyLocation(location: BusinessLocation) {
-    this.router.navigate(['/wholesaler/add-business-location'], {
+    this.router.navigate(['/buyer/add-business-location'], {
       queryParams: {
         mode: 'edit',
         locationId: location.branch_id

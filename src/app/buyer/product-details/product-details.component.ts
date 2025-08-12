@@ -1,11 +1,13 @@
 // import { Component, OnInit } from '@angular/core';
 // import { ActivatedRoute } from '@angular/router';
 // import { ProductService } from '../../services/product.service';
+// import { IonicModule } from "@ionic/angular";
 
 // @Component({
 //   selector: 'app-product-details',
 //   templateUrl: './product-details.component.html',
 //   styleUrls: ['./product-details.component.scss'],
+//   imports: [IonicModule]
 // })
 // export class ProductDetailsComponent implements OnInit {
 //   productId: string | null = null;

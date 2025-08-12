@@ -58,8 +58,8 @@ export class BusinessLocationsService {
         });
     }
 
-    getAllBusinessesOfWholesaler(): Observable<BusinessLocation[]> {
+    getAllBusinessesOfUser(): Observable<BusinessLocation[]> {
         const headers = this.getAuthHeaders();
-        return this.http.get<BusinessLocation[]>(`${this.apiUrl}/getAllBusinessBranchesByWholeSaler`, { headers });
+        return this.http.get<BusinessLocation[]>(`${this.apiUrl}/getAllBusinessBranchesByUser`, { headers });
     }
 }

@@ -132,7 +132,7 @@ export class BuyerHomeComponent {
   }
 
   navigateToUpdateBusiness() {
-    this.router.navigate(['/buyer/update-business']);
+    this.router.navigate(['/buyer/business-update']);
   }
 
 

@@ -6,6 +6,7 @@ import { addIcons } from 'ionicons';
 import { save } from 'ionicons/icons';
 import { State, City, Location, BusinessType, BusinessCategory, BusinessRegistrationService } from './business-registration.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-business-registration',
@@ -26,7 +27,8 @@ export class BusinessRegistrationComponent implements OnInit {
     private fb: FormBuilder,
     private toastCtrl: ToastController,
     private businessRegistrationService: BusinessRegistrationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     this.form = this.fb.group({
       bid: [null],
@@ -52,6 +54,25 @@ export class BusinessRegistrationComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Check business existence first
+    this.businessRegistrationService.getBusinessExistsOrNot().subscribe({
+      next: (exists: boolean) => {
+        if (exists) {
+          // Business already exists, navigate to the home
+          this.router.navigate(['/buyer/buyer-home']);
+        } else {
+          // Business does not exist, continue with registration initialization
+          this.initializeRegistrationForm();
+        }
+      },
+      error: (err: any) => {
+        // Business does not exist, continue with registration
+        this.initializeRegistrationForm();
+      }
+    });
+  }
+
+  private initializeRegistrationForm() {
     this.fetchBusinessCategories();
     this.fetchBusinessTypes();
     this.fetchStates();
@@ -75,6 +96,7 @@ export class BusinessRegistrationComponent implements OnInit {
         this.form.get('location_id')?.setValue(null);
       }
     });
+
     this.form.get('city_id')?.valueChanges.subscribe((cityId) => {
       if (cityId) {
         this.fetchLocations(cityId);
@@ -173,6 +195,8 @@ export class BusinessRegistrationComponent implements OnInit {
           });
           toast.present();
           this.form.reset();
+          // Navigate to buyer home after successful registration
+          this.router.navigate(['/buyer/buyer-home']);
         },
         error: async (err) => {
           const toast = await this.toastCtrl.create({

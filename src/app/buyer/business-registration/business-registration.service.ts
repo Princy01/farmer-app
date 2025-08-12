@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/auth/auth.service';
 
 export interface BusinessCategory {
         b_category_id: number;
@@ -39,7 +40,15 @@ export interface Location {
 export class BusinessRegistrationService {
         private apiUrl = environment.apiUrl;
 
-        constructor(private http: HttpClient) { }
+        constructor(private http: HttpClient, private authService: AuthService) { }
+
+        private getAuthHeaders(): HttpHeaders {
+                const token = this.authService.getToken();
+                return new HttpHeaders({
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                });
+        }
 
         getBusinessCategories(): Observable<BusinessCategory[]> {
                 return this.http.get<BusinessCategory[]>(`${this.apiUrl}/getBusinessCategory`);
@@ -61,7 +70,15 @@ export class BusinessRegistrationService {
                 return this.http.get<BusinessType[]>(`${this.apiUrl}/getBusinessTypes`);
         }
 
-        addNewBusiness(business: any) {
+        addNewBusiness(business: any): Observable<any> {
                 return this.http.post<any>(`${this.apiUrl}/AddNewBusiness`, business);
+        }
+
+        getBusinessExistsOrNot(): Observable<boolean> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<boolean>(
+                        `${this.apiUrl}/getBusinessExistsOrNot`,
+                        { headers }
+                );
         }
 }
