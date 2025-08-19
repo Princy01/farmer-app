@@ -7,14 +7,36 @@ ion-card img {
   margin: 0 auto;
 }
 
-.wholesaler-scroll {
+.wholesaler-vertical-scroll {
+  overflow-y: auto;
   display: flex;
-  overflow-x: auto;
+  flex-direction: column;
   gap: 12px;
   margin: 16px 0 24px 0;
+  max-height: calc(100vh - 350px); // Responsive to viewport
 }
 
-.wholesaler-scroll ion-card {
-  min-width: 220px;
+.wholesaler-vertical-scroll ion-card {
+  width: 100%;
   flex: 0 0 auto;
+  min-height: 120px; // Mobile: taller cards, fewer visible
+}
+
+/* Tablet screens */
+@media (min-width: 600px) {
+  .wholesaler-vertical-scroll ion-card {
+    min-height: 100px; // More cards visible
+  }
+}
+
+/* Laptop/Desktop screens */
+@media (min-width: 1024px) {
+  .wholesaler-vertical-scroll {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .wholesaler-vertical-scroll ion-card {
+    width: 48%;
+    margin-bottom: 12px;
+  }
 }

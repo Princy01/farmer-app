@@ -146,6 +146,18 @@
                 *ngFor="let product of filteredAndSortedItems"
                 (click)="goToProductDetails(product)"
               >
+                <img
+                  [src]="product.image_path"
+                  alt="{{ product.product_name }}"
+                  style="
+                    width: 70px;
+                    height: 80px;
+                    object-fit: contain;
+                    margin-right: 12px;
+                    border-radius: 6px;
+                  "
+                  slot="start"
+                />
                 <ion-label>{{ product.product_name }}</ion-label>
               </ion-item>
             </ng-container>

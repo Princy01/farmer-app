@@ -12,7 +12,9 @@
 <ion-content [fullscreen]="true">
   <div class="container">
     <form [formGroup]="businessForm" (ngSubmit)="onSubmit()">
+
       <!-- Shop Name -->
+
       <ion-item
         [class.ion-invalid]="
           businessForm.get('shopName')?.invalid &&
@@ -24,6 +26,7 @@
           formControlName="shopName"
           placeholder="Enter shop name"
           type="text"
+          [disabled]="isEditMode"
         >
         </ion-input>
       </ion-item>
@@ -31,7 +34,7 @@
         {{ getErrorMessage("shopName") }}
       </div>
 
-      <!-- Phone Number -->
+      <!-- Phone Number (editable in edit mode) -->
       <ion-item
         [class.ion-invalid]="
           businessForm.get('number')?.invalid &&
@@ -43,6 +46,7 @@
           formControlName="number"
           placeholder="Enter 10-digit phone number"
           type="tel"
+          [disabled]="false"
         >
         </ion-input>
       </ion-item>
@@ -58,7 +62,11 @@
         "
       >
         <ion-label position="stacked">State *</ion-label>
-        <ion-select formControlName="state" placeholder="Select state">
+        <ion-select
+          formControlName="state"
+          placeholder="Select state"
+          [disabled]="isEditMode"
+        >
           <ion-select-option *ngFor="let state of states" [value]="state.id">
             {{ state.state_name }}
           </ion-select-option>
@@ -75,7 +83,11 @@
         "
       >
         <ion-label position="stacked">City *</ion-label>
-        <ion-select formControlName="city" placeholder="Select city">
+        <ion-select
+          formControlName="city"
+          placeholder="Select city"
+          [disabled]="isEditMode"
+        >
           <ion-select-option *ngFor="let city of cities" [value]="city.id">
             {{ city.city_name }}
           </ion-select-option>
@@ -85,7 +97,7 @@
         {{ getErrorMessage("city") }}
       </div>
 
-      <!-- Location -->
+      <!-- Location (editable in edit mode) -->
       <ion-item
         [class.ion-invalid]="
           businessForm.get('location')?.invalid &&
@@ -93,7 +105,11 @@
         "
       >
         <ion-label position="stacked">Location *</ion-label>
-        <ion-select formControlName="location" placeholder="Select location">
+        <ion-select
+          formControlName="location"
+          placeholder="Select location"
+          [disabled]="false"
+        >
           <ion-select-option
             *ngFor="let location of locations"
             [value]="location.id"
@@ -106,7 +122,7 @@
         {{ getErrorMessage("location") }}
       </div>
 
-      <!-- Address -->
+      <!-- Address (editable in edit mode) -->
       <ion-item
         [class.ion-invalid]="
           businessForm.get('address')?.invalid &&
@@ -118,6 +134,7 @@
           formControlName="address"
           placeholder="Enter complete address"
           rows="3"
+          [disabled]="false"
         >
         </ion-textarea>
       </ion-item>
@@ -125,7 +142,7 @@
         {{ getErrorMessage("address") }}
       </div>
 
-      <!-- Email -->
+      <!-- Email (editable in edit mode) -->
       <ion-item
         [class.ion-invalid]="
           businessForm.get('email')?.invalid &&
@@ -137,6 +154,7 @@
           formControlName="email"
           placeholder="Enter email address"
           type="email"
+          [disabled]="false"
         >
         </ion-input>
       </ion-item>
@@ -156,6 +174,7 @@
           formControlName="gstNumber"
           placeholder="Enter GST number"
           type="text"
+          [disabled]="isEditMode"
         >
         </ion-input>
       </ion-item>
@@ -174,44 +193,12 @@
           formControlName="pan"
           placeholder="Enter PAN number"
           type="text"
+          [disabled]="isEditMode"
         >
         </ion-input>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('pan')">
         {{ getErrorMessage("pan") }}
-      </div>
-
-      <!-- Privileged User -->
-      <ion-item>
-        <ion-label>Privileged User</ion-label>
-        <ion-toggle formControlName="privilegedUser"></ion-toggle>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('privilegedUser')">
-        {{ getErrorMessage("privilegedUser") }}
-      </div>
-
-      <!-- Business Type -->
-      <ion-item
-        [class.ion-invalid]="
-          businessForm.get('b_type_id')?.invalid &&
-          businessForm.get('b_type_id')?.touched
-        "
-      >
-        <ion-label position="stacked">Business Type *</ion-label>
-        <ion-select
-          formControlName="b_type_id"
-          placeholder="Select business type"
-        >
-          <ion-select-option
-            *ngFor="let type of businessTypes"
-            [value]="type.b_typeid"
-          >
-            {{ type.b_typename }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('b_type_id')">
-        {{ getErrorMessage("b_type_id") }}
       </div>
 
       <!-- Established Year -->
@@ -226,6 +213,7 @@
           formControlName="establishedYear"
           placeholder="Enter year (e.g., 2020)"
           type="text"
+          [disabled]="isEditMode"
         >
         </ion-input>
       </ion-item>

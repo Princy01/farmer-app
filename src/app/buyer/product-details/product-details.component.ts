@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { addIcons } from 'ionicons';
+import { add, heartOutline, star } from 'ionicons/icons';
 
 @Component({
   selector: 'app-product-details',
@@ -15,7 +17,9 @@ export class ProductDetailsComponent implements OnInit {
   product: any;
   wholesalers: any[] = [];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute) {
+    addIcons({ add, heartOutline, star });
+  }
 
   ngOnInit() {
     this.productId = +this.route.snapshot.params['productId'];
@@ -29,17 +33,9 @@ export class ProductDetailsComponent implements OnInit {
     };
     // Dummy wholesaler info
     this.wholesalers = [
-      { name: 'Mandi A', price: 20, distance: '2km', retailer: 'Retailer 1' },
-      { name: 'Mandi B', price: 22, distance: '5km', retailer: 'Retailer 2' },
-      { name: 'Mandi C', price: 19, distance: '7km', retailer: 'Retailer 3' },
-      { name: 'Mandi A', price: 20, distance: '2km', retailer: 'Retailer 1' },
-      { name: 'Mandi B', price: 22, distance: '5km', retailer: 'Retailer 2' },
-      { name: 'Mandi A', price: 20, distance: '2km', retailer: 'Retailer 1' },
-      { name: 'Mandi B', price: 22, distance: '5km', retailer: 'Retailer 2' },
-      { name: 'Mandi A', price: 20, distance: '2km', retailer: 'Retailer 1' },
-      { name: 'Mandi B', price: 22, distance: '5km', retailer: 'Retailer 2' },
-      { name: 'Mandi A', price: 20, distance: '2km', retailer: 'Retailer 1' },
-      { name: 'Mandi B', price: 22, distance: '5km', retailer: 'Retailer 2' }
+      { name: 'Mandi A', price: 200, distance: '2km', quantity: 100, rating: 4.5 },
+      { name: 'Mandi B', price: 220, distance: '5km', quantity: 80, rating: 4.2 },
+      { name: 'Mandi C', price: 190, distance: '7km', quantity: 120, rating: 4.7 }
     ];
   }
 }

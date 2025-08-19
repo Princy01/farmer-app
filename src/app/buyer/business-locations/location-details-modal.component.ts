@@ -1,7 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
-import { BusinessLocation } from './business-locations.service';
+import { BusinessBranchWithNames } from './business-locations.service';
+import { addIcons } from 'ionicons';
+import { call, mail, business, location, card, time, pulse, close } from 'ionicons/icons';
 
 @Component({
   selector: 'app-location-details-modal',
@@ -50,7 +52,11 @@ import { BusinessLocation } from './business-locations.service';
               <ion-icon name="location" slot="start" color="primary"></ion-icon>
               <ion-label>
                 <h3>Location Details</h3>
-                <p>Location ID: {{ location.location }}, State ID: {{ location.state }}, City ID: {{ location.b_city_id }}</p>
+                <p>
+                  Location: {{ location.location_name }},
+                  State: {{ location.state_name }},
+                  City: {{ location.city_name }}
+                </p>
               </ion-label>
             </ion-item>
 
@@ -91,14 +97,6 @@ import { BusinessLocation } from './business-locations.service';
               <ion-label>
                 <h3>Established Year</h3>
                 <p>{{ location.established_year }}</p>
-              </ion-label>
-            </ion-item>
-
-            <ion-item>
-              <ion-icon name="business" slot="start" color="tertiary"></ion-icon>
-              <ion-label>
-                <h3>Business Type</h3>
-                <p>Type ID: {{ location.type_id }}</p>
               </ion-label>
             </ion-item>
 
@@ -164,9 +162,11 @@ import { BusinessLocation } from './business-locations.service';
   ]
 })
 export class LocationDetailsModalComponent {
-  @Input() location: BusinessLocation | null = null;
+  @Input() location: BusinessBranchWithNames | null = null;
 
-  constructor(private modalController: ModalController) {}
+  constructor(private modalController: ModalController) {
+    addIcons({ call, mail, business, location, card, time, pulse, close });
+  }
 
   dismiss() {
     this.modalController.dismiss();

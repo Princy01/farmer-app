@@ -10,7 +10,7 @@ import {
   bulb, barChart, close
 } from 'ionicons/icons';
 
-import { BusinessLocationsService, BusinessLocation } from './business-locations.service';
+import { BusinessLocationsService, BusinessBranchWithNames } from './business-locations.service';
 import { LocationDetailsModalComponent } from './location-details-modal.component';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -22,7 +22,7 @@ import { AuthService } from 'src/app/auth/auth.service';
   imports: [CommonModule, FormsModule, IonicModule]
 })
 export class BusinessLocationsComponent implements OnInit {
-  businessLocations: BusinessLocation[] = []; // Initialize as empty array
+  businessLocations: BusinessBranchWithNames[] = [];
   isLoading = true;
 
   constructor(
@@ -107,21 +107,20 @@ export class BusinessLocationsComponent implements OnInit {
       const userId = this.authService.getUserId();
       if (!userId) {
         this.isLoading = false;
-        this.businessLocations = []; // Ensure it's an empty array
+        this.businessLocations = [];
         loading.dismiss();
         await this.showAuthError();
         return;
       }
 
-      this.businessService.getAllBusinessesOfWholesaler().subscribe({
-        next: (locations: BusinessLocation[]) => {
-          // Ensure we always have an array, even if the response is null/undefined
+      this.businessService.getAllBusinessesWithNameOfWholesaler().subscribe({
+        next: (locations: BusinessBranchWithNames[]) => {
           this.businessLocations = locations || [];
           this.isLoading = false;
         },
         error: async (error: any) => {
           this.isLoading = false;
-          this.businessLocations = []; // Set to empty array on error
+          this.businessLocations = [];
           loading.dismiss();
 
           console.error('Error loading business locations:', error);
@@ -144,7 +143,7 @@ export class BusinessLocationsComponent implements OnInit {
       });
     } catch (error) {
       this.isLoading = false;
-      this.businessLocations = []; // Set to empty array on error
+      this.businessLocations = [];
       loading.dismiss();
 
       console.error('Unexpected error:', error);
@@ -162,16 +161,19 @@ export class BusinessLocationsComponent implements OnInit {
     this.router.navigate(['/wholesaler/add-business-location']);
   }
 
-  async modifyLocation(location: BusinessLocation) {
+  async modifyLocation(location: BusinessBranchWithNames) {
     this.router.navigate(['/wholesaler/add-business-location'], {
       queryParams: {
         mode: 'edit',
         locationId: location.branch_id
+      },
+      state: {
+        location: location
       }
     });
   }
 
-  async viewLocationDetails(location: BusinessLocation) {
+  async viewLocationDetails(location: BusinessBranchWithNames) {
     const modal = await this.modalController.create({
       component: LocationDetailsModalComponent,
       componentProps: {

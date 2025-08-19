@@ -6,8 +6,9 @@ import { ToastController, LoadingController, AlertController } from '@ionic/angu
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { save, arrowBack } from 'ionicons/icons';
-import { AddBusinessService, State, City, Location, BusinessType } from './add-business.service';
+import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch } from './add-business.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { BusinessBranchWithNames } from '../business-locations/business-locations.service';
 
 @Component({
         selector: 'app-add-business-location',
@@ -68,9 +69,9 @@ export class AddBusinessLocationComponent implements OnInit {
                         email: ['', [Validators.required, Validators.email]],
                         gstNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/)]],
                         pan: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
-                        privilegedUser: [false, Validators.required],
-                        active_status: [1],
-                        b_type_id: [null, Validators.required],
+                        privilegedUser: [false],
+                        active_status: [true],
+                        b_type_id: [3],
                         establishedYear: ['', [Validators.pattern(/^[0-9]{4}$/)]]
                 });
         }
@@ -87,6 +88,7 @@ export class AddBusinessLocationComponent implements OnInit {
 
                 this.route.queryParams.subscribe(params => {
                         if (params['mode'] === 'edit' && params['locationId']) {
+
                                 this.isEditMode = true;
                                 this.locationId = +params['locationId'];
                                 this.pageTitle = 'Edit Business Location';
@@ -173,37 +175,45 @@ export class AddBusinessLocationComponent implements OnInit {
                 });
         }
 
-        // Placeholder for loading existing location data in edit mode
         loadLocationData() {
                 if (this.locationId) {
-                        this.addBusinessService.getBusinessBranchById(this.locationId).subscribe({
-                                next: (location) => {
-                                        // First load the dependent data
-                                        this.loadCities(location.state);
-                                        this.loadLocations(location.city_id);
-
-                                        // Patch the form with loaded data
-                                        this.businessForm.patchValue({
-                                                shopName: location.shop_name,
-                                                number: location.number,
-                                                state: location.state,
-                                                city: location.city_id,
-                                                location: location.location,
-                                                address: location.address,
-                                                email: location.email,
-                                                gstNumber: location.gst_num,
-                                                pan: location.pan_num,
-                                                privilegedUser: location.privilege_user,
-                                                active_status: location.active_status ? 1 : 0,
-                                                b_type_id: location.type_id,
-                                                establishedYear: location.established_year
-                                        });
-                                },
-                                error: (error) => {
-                                        console.error('Error loading location data:', error);
-                                        this.showToast('Error loading location data', 'danger');
-                                }
-                        });
+                        const navigation = this.router.getCurrentNavigation();
+                        if (navigation && navigation.extras.state) {
+                                let location = navigation.extras.state['location'] as BusinessBranchWithNames | null;
+                                console.log('Location from state:', location);
+                                this.loadCities(location!.state_id);
+                                this.loadLocations(location!.city_id);
+                                this.businessForm.patchValue({
+                                        shopName: location?.shop_name || '',
+                                        number: location?.number || '',
+                                        state: location?.state_id || null,
+                                        city: location?.city_id || null,
+                                        location: location?.location_id || null,
+                                        address: location?.address || '',
+                                        email: location?.email || '',
+                                        gstNumber: location?.gst_num || '',
+                                        pan: location?.pan_num || '',
+                                        privilegedUser: location?.privilege_user || false,
+                                        active_status: location?.active_status ? 1 : 0,
+                                        b_type_id: location?.type_id || 3,
+                                        establishedYear: location?.established_year || ''
+                                });
+                                // Disable all fields except phone number, email, location, and address
+                                this.businessForm.get('shopName')?.disable();
+                                this.businessForm.get('state')?.disable();
+                                this.businessForm.get('city')?.disable();
+                                this.businessForm.get('gstNumber')?.disable();
+                                this.businessForm.get('pan')?.disable();
+                                this.businessForm.get('privilegedUser')?.disable();
+                                this.businessForm.get('b_type_id')?.disable();
+                                this.businessForm.get('establishedYear')?.disable();
+                                this.businessForm.get('active_status')?.disable();
+                                // The following remain enabled:
+                                this.businessForm.get('number')?.enable();
+                                this.businessForm.get('location')?.enable();
+                                this.businessForm.get('address')?.enable();
+                                this.businessForm.get('email')?.enable();
+                        }
                 }
         }
 
@@ -216,21 +226,21 @@ export class AddBusinessLocationComponent implements OnInit {
 
                         try {
                                 // Map form values to backend field names that match BusinessBranch struct
-                                const formValue = this.businessForm.value;
+                                const formValue = this.businessForm.getRawValue();
                                 const formData: any = {
                                         shop_name: formValue.shopName,
                                         number: formValue.number,
-                                        type_id: formValue.b_type_id,
+                                        type_id: 3,
                                         location: formValue.location,
                                         state: formValue.state,
-                                        city_id: formValue.city,
+                                        b_city_id: formValue.city,
                                         address: formValue.address,
                                         email: formValue.email,
                                         gst_num: formValue.gstNumber,
                                         pan_num: formValue.pan,
-                                        privilege_user: formValue.privilegedUser,
+                                        privilege_user: false,
                                         established_year: formValue.establishedYear || '',
-                                        active_status: formValue.active_status === 1
+                                        active_status: true
                                 };
 
                                 const userId = this.authService.getUserId();
@@ -247,7 +257,7 @@ export class AddBusinessLocationComponent implements OnInit {
                                                 next: async () => {
                                                         loading.dismiss();
                                                         await this.showToast('Business location updated successfully!', 'success');
-                                                        this.router.navigate(['/retailer/business-locations']);
+                                                        this.router.navigate(['/buyer/business-locations']);
                                                 },
                                                 error: async (error: any) => {
                                                         loading.dismiss();
