@@ -18,6 +18,8 @@ export interface PaymentMode {
 }
 
 export interface Product {
+  nutrition_factor: string;
+  description: string;
   product_id: number;
   category_id: number;
   category_name: string;
@@ -60,6 +62,7 @@ export interface ProductAll {
   image_path: string;
   active_status: number;
   nutrition_factor: string;
+  description?: string;
 }
 
 @Injectable({

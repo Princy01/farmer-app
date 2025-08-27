@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, IonModal } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { chevronBack, search, funnelOutline, swapVerticalOutline, heartOutline, cartOutline } from 'ionicons/icons';
+import { chevronBack, close, search, heart, funnelOutline, swapVerticalOutline, heartOutline, cartOutline, alertCircleOutline, star } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import { BuyerApiService, Product, ProductAll, Category } from '../services/buyer-api.service';
 import { catchError, finalize, switchMap, tap } from 'rxjs';
@@ -26,6 +26,9 @@ export class CategoryPageComponent implements OnInit {
   categoryId: number = -1;
   selectedSubcategoryId: number = -1;
   selectedCategoryId: number = -1;
+  selectedProduct: ProductAll | null = null;
+  wholesalers: any[] = [];
+
 
   // UI State
   isSearchActive = false;
@@ -79,7 +82,7 @@ export class CategoryPageComponent implements OnInit {
     private location: Location,
     private buyerApiService: BuyerApiService
   ) {
-    addIcons({ chevronBack, search, funnelOutline, swapVerticalOutline, heartOutline, cartOutline });
+    addIcons({ chevronBack, close, search, heart, alertCircleOutline, funnelOutline, swapVerticalOutline, heartOutline, cartOutline, star });
   }
 
   ngOnInit() {
@@ -186,6 +189,7 @@ export class CategoryPageComponent implements OnInit {
     this.selectedSubcategoryId = category.category_id;
     this.selectedCategoryName = category.category_name;
     this.selectedSubcategory = category.category_name;
+    this.selectedProduct = null;
 
     // Check if this is the "All" option (using categoryId which is same as superCategoryId)
     if (category.category_id === this.categoryId) {
@@ -247,6 +251,16 @@ export class CategoryPageComponent implements OnInit {
     this.selectSubcategory(category);
   }
 
+  selectProduct(product: ProductAll) {
+    this.selectedProduct = product;
+    // Dummy mandi/wholesaler info
+    this.wholesalers = [
+      { name: 'Mandi A', price: 200, distance: '2km', quantity: 100, rating: 4.5, favorite: false },
+      { name: 'Mandi B', price: 220, distance: '5km', quantity: 80, rating: 4.2, favorite: false },
+      { name: 'Mandi C', price: 190, distance: '7km', quantity: 120, rating: 4.7, favorite: false }
+    ];
+  }
+
   // Method to go back to categories view
   backToCategories() {
     this.showProducts = false;
@@ -256,6 +270,11 @@ export class CategoryPageComponent implements OnInit {
     this.selectedSubcategory = null;
     this.productsList = [];
     this.filteredAndSortedItems = [];
+  }
+
+
+  toggleFavorite(wholesaler: any) {
+    wholesaler.favorite = !wholesaler.favorite;
   }
 
   // Navigation back
@@ -355,6 +374,6 @@ export class CategoryPageComponent implements OnInit {
   }
 
   goToProductDetails(product: ProductAll) {
-  this.router.navigate(['/buyer/product-details', product.product_id]);
-}
+    this.router.navigate(['/buyer/product-details', product.product_id]);
+  }
 }

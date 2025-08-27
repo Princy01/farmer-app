@@ -1,0 +1,67 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Add Product</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="modal-content">
+    <div class="recommend-link" *ngIf="!showAddNew">
+      <ion-text color="medium">
+        Don't see the product you are looking for?
+        <a (click)="showAddNew = true" style="color: #3880ff; cursor: pointer; text-decoration: underline;">
+          Recommend New
+        </a>
+      </ion-text>
+    </div>
+
+    <div *ngIf="!showAddNew">
+      <ion-searchbar [(ngModel)]="searchTerm" placeholder="Search products"></ion-searchbar>
+      <ion-list>
+        <ion-item *ngFor="let prod of filteredProducts()">
+          <ion-checkbox slot="start" [(ngModel)]="prod.selected"></ion-checkbox>
+          <ion-label>
+            <strong>{{ prod.product_name }}</strong>
+            <span class="product-meta">({{ prod.cat_name }})</span>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <div *ngIf="showAddNew" class="new-section">
+      <ion-item>
+        <ion-label position="stacked">Product Name</ion-label>
+        <ion-input [(ngModel)]="newProduct.name" placeholder="Enter product name"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Category</ion-label>
+        <ion-select [(ngModel)]="newProduct.category" placeholder="Select category">
+          <ion-select-option *ngFor="let cat of categories" [value]="cat">{{ cat }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Price (₹ per 10Kg)</ion-label>
+        <ion-input type="number" [(ngModel)]="newProduct.price" placeholder="Enter price"></ion-input>
+      </ion-item>
+      <ion-button expand="block" color="success" (click)="addNew()" style="margin-top: 16px;">
+        Recommend Product
+      </ion-button>
+      <ion-button expand="block" fill="clear" color="medium" (click)="showAddNew = false" style="margin-top: 8px;">
+        Back to Product List
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer *ngIf="!showAddNew">
+  <ion-toolbar>
+    <ion-button expand="block" color="success" (click)="addSelected()" [disabled]="!hasSelectedProducts()">
+      Add Selected Products
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

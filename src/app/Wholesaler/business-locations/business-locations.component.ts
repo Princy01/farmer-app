@@ -7,11 +7,10 @@ import { addIcons } from 'ionicons';
 import {
   add, location, business, create, eye, home, list, cube, time,
   analytics, pulse, notifications, person, menu, logOut, settings,
-  bulb, barChart, close
+  bulb, barChart, close, card, call, mail, arrowBack
 } from 'ionicons/icons';
 
 import { BusinessLocationsService, BusinessBranchWithNames } from './business-locations.service';
-import { LocationDetailsModalComponent } from './location-details-modal.component';
 import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
@@ -37,7 +36,7 @@ export class BusinessLocationsComponent implements OnInit {
     addIcons({
       add, location, business, create, eye, home, list, cube, time,
       analytics, pulse, notifications, person, menu, logOut, settings,
-      bulb, barChart, close
+      bulb, barChart, close, card, call, mail, arrowBack
     });
   }
 
@@ -173,17 +172,13 @@ export class BusinessLocationsComponent implements OnInit {
     });
   }
 
-  async viewLocationDetails(location: BusinessBranchWithNames) {
-    const modal = await this.modalController.create({
-      component: LocationDetailsModalComponent,
-      componentProps: {
-        location: location
-      },
-      presentingElement: undefined,
-      showBackdrop: true,
-      backdropDismiss: true
-    });
+  viewProducts(location: BusinessBranchWithNames) {
+  this.router.navigate(['/wholesaler/branch-products'], {
+    queryParams: { branchId: location.branch_id, branchName: location.shop_name }
+  });
+}
 
-    await modal.present();
+goBack() {
+    this.router.navigate(['/wholesaler/home']);
   }
 }

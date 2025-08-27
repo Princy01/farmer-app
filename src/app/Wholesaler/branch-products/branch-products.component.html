@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Products in {{ branchName }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="products-page">
+    <div class="products-header">
+      <ion-button color="success" (click)="addProduct()">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Add Product
+      </ion-button>
+    </div>
+
+    <ion-searchbar [(ngModel)]="searchTerm" placeholder="Search products"></ion-searchbar>
+
+    <div class="products-list">
+      <ion-card *ngFor="let product of filteredProducts(); let i = index" class="product-card">
+        <ion-card-header>
+          <ion-card-title>{{ product.name }}</ion-card-title>
+          <ion-card-subtitle>{{ product.category }}</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="product-details">
+            <div>
+              <strong>Price:</strong> ₹{{ product.price }}/ 10 Kg
+            </div>
+            <div class="quantity-controls">
+              <strong>Stock:</strong>
+              <span class="stock-value">{{ product.stock }}Kg</span>
+
+            </div>
+          </div>
+          <div class="product-actions">
+            <ion-button size="small" color="danger" (click)="removeProduct(i)">
+              <ion-icon name="trash" slot="start"></ion-icon>
+              Remove
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      <div *ngIf="filteredProducts().length === 0" class="no-products">
+        <ion-icon name="cube" size="large" color="medium"></ion-icon>
+        <p>No products found for this branch.</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

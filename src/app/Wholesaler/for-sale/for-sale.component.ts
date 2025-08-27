@@ -115,7 +115,7 @@ export class ForSaleComponent implements OnInit {
       datetime: ['', Validators.required],
       mandi_id: ['', Validators.required],
       warehouse_id: ['', Validators.required],
-      unit_id: [2, Validators.required], // Default to KG
+      // unit_id: [2, Validators.required], // Default to KG
       wholeseller_id: [this.authService.getUserId(), Validators.required]
     });
 
