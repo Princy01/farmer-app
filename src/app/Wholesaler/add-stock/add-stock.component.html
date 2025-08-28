@@ -1,0 +1,72 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Add Stock</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-item>
+    <ion-label position="floating">Product</ion-label>
+    <ion-select [(ngModel)]="stockData.productID">
+      <ion-select-option *ngFor="let product of products" [value]="product.id">
+        {{ product.name }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Quality</ion-label>
+    <ion-select [(ngModel)]="stockData.quality">
+      <ion-select-option *ngFor="let quality of qualities" [value]="quality">
+        {{ quality }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Wastage</ion-label>
+    <div class="stepper">
+      <ion-button fill="outline" (click)="decrement('wastage')">-</ion-button>
+      <span class="stepper-value">{{ stockData.wastage || 0 }} Kg</span>
+      <ion-button fill="outline" (click)="increment('wastage')">+</ion-button>
+      <ion-button fill="outline" (click)="addFifty('wastage')">+50Kg</ion-button>
+    </div>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Stock Received</ion-label>
+    <div class="stepper">
+      <ion-button fill="outline" (click)="decrement('stockReceived')">-</ion-button>
+      <span class="stepper-value">{{ stockData.stockReceived || 0 }} Kg</span>
+      <ion-button fill="outline" (click)="increment('stockReceived')">+</ion-button>
+      <ion-button fill="outline" (click)="addFifty('stockReceived')">+50Kg</ion-button>
+    </div>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Stock Carried Forward</ion-label>
+    <div class="stepper">
+      <ion-button fill="outline" (click)="decrement('stockCarriedForward')">-</ion-button>
+      <span class="stepper-value">{{ stockData.stockCarriedForward || 0 }} Kg</span>
+      <ion-button fill="outline" (click)="increment('stockCarriedForward')">+</ion-button>
+      <ion-button fill="outline" (click)="addFifty('stockCarriedForward')">+50Kg</ion-button>
+    </div>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Price per Unit</ion-label>
+    <div class="stepper">
+      <ion-button fill="outline" (click)="decrement('pricePerUint')">-</ion-button>
+      <span class="stepper-value">₹{{ stockData.pricePerUint || 0 }}</span>
+      <ion-button fill="outline" (click)="increment('pricePerUint')">+</ion-button>
+      <ion-button fill="outline" (click)="addFifty('pricePerUint')">+50</ion-button>
+    </div>
+  </ion-item>
+
+  <ion-button expand="block" class="ion-margin-top" (click)="addStock()">
+    Save
+  </ion-button>
+</ion-content>

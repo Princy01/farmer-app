@@ -86,6 +86,18 @@ export const routes: Routes = [
     path: 'wholesaler/branch-products',
     loadComponent: () => import('./Wholesaler/branch-products/branch-products.component').then((m) => m.BranchProductsComponent),
   },
+  {
+    path: 'wholesaler/stock-dashboard',
+    loadComponent: () => import('./Wholesaler/stock-dashboard/stock-dashboard.component').then((m) => m.StockDashboardAddStockComponent),
+  },
+  {
+    path: 'wholesaler/add-stock',
+    loadComponent: () => import('./Wholesaler/add-stock/add-stock.component').then((m) => m.AddStockComponent),
+  },
+  {
+    path: 'wholesaler/update-stock',
+    loadComponent: () => import('./Wholesaler/update-stock/update-stock.component').then((m) => m.UpdateStockComponent),
+  },
 
   {
     path: 'admin',

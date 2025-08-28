@@ -183,68 +183,66 @@ export class CategoryPageComponent implements OnInit {
   }
 
   selectSubcategory(category: Category | { category_id: number; category_name: string }) {
-    this.loadingProducts = true;
-    this.errorLoadingProducts = false;
-    this.selectedCategoryId = category.category_id;
-    this.selectedSubcategoryId = category.category_id;
-    this.selectedCategoryName = category.category_name;
-    this.selectedSubcategory = category.category_name;
-    this.selectedProduct = null;
+  this.loadingProducts = true;
+  this.errorLoadingProducts = false;
+  this.selectedCategoryId = category.category_id;
+  this.selectedSubcategoryId = category.category_id;
+  this.selectedCategoryName = category.category_name;
+  this.selectedSubcategory = category.category_name;
+  this.selectedProduct = null;
 
-    // Check if this is the "All" option (using categoryId which is same as superCategoryId)
-    if (category.category_id === this.categoryId) {
-      // Load all products of the super category
-      this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
-        catchError(error => {
-          console.error('Error fetching all products of super category:', error);
-          this.errorLoadingProducts = true;
-          this.loadingProducts = false;
-          return of([]);
-        })
-      ).subscribe({
-        next: (products) => {
-          this.productsList = products || [];
-          this.applyFilters();
-          this.loadingProducts = false;
-        },
-        error: (error) => {
-          console.error('Error loading all products of super category:', error);
-          this.errorLoadingProducts = true;
-          this.loadingProducts = false;
-        }
-      });
-    } else {
-      // Load products by specific category - need to convert Product[] to ProductAll[]
-      this.buyerApiService.getProductsByCategoryId(category.category_id).pipe(
-        catchError(error => {
-          console.error('Error fetching products:', error);
-          this.errorLoadingProducts = true;
-          this.loadingProducts = false;
-          return of([]);
-        })
-      ).subscribe({
-        next: (products) => {
-          // Convert Product[] to ProductAll[] format for consistency
-          this.productsList = products.map(product => ({
-            product_id: product.product_id,
-            product_name: product.product_name,
-            cat_id: product.category_id,
-            cat_name: product.category_name,
-            image_path: product.image_path,
-            active_status: product.active_status,
-            nutrition_factor: '' // Default value since it's not in Product interface
-          })) || [];
-          this.applyFilters();
-          this.loadingProducts = false;
-        },
-        error: (error) => {
-          console.error('Error loading products:', error);
-          this.errorLoadingProducts = true;
-          this.loadingProducts = false;
-        }
-      });
-    }
+  if (category.category_id === this.categoryId) {
+    this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
+      catchError(error => {
+        console.error('Error fetching all products of super category:', error);
+        this.errorLoadingProducts = true;
+        this.loadingProducts = false;
+        return of([]);
+      })
+    ).subscribe({
+      next: (products) => {
+        this.productsList = products || [];
+        this.applyFilters();
+        this.loadingProducts = false; // Ensure loading is stopped
+      },
+      error: (error) => {
+        console.error('Error loading all products of super category:', error);
+        this.errorLoadingProducts = true;
+        this.loadingProducts = false;
+      }
+    });
+  } else {
+    this.buyerApiService.getProductsByCategoryId(category.category_id).pipe(
+      catchError(error => {
+        console.error('Error fetching products:', error);
+        this.errorLoadingProducts = true;
+        this.loadingProducts = false;
+        return of([]);
+      })
+    ).subscribe({
+      next: (products) => {
+        this.productsList = (products && products.length > 0)
+          ? products.map(product => ({
+              product_id: product.product_id,
+              product_name: product.product_name,
+              cat_id: product.category_id,
+              cat_name: product.category_name,
+              image_path: product.image_path,
+              active_status: product.active_status,
+              nutrition_factor: '' // Default value since it's not in Product interface
+            }))
+          : [];
+        this.applyFilters();
+        this.loadingProducts = false; // Ensure loading is stopped even if empty
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
+        this.errorLoadingProducts = true;
+        this.loadingProducts = false;
+      }
+    });
   }
+}
 
   // Keep the original method name as well
   selectCategory(category: Category) {
@@ -261,7 +259,6 @@ export class CategoryPageComponent implements OnInit {
     ];
   }
 
-  // Method to go back to categories view
   backToCategories() {
     this.showProducts = false;
     this.selectedCategoryId = -1;

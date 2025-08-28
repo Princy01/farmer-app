@@ -1,0 +1,39 @@
+ion-content {
+  ion-list {
+    margin-top: 16px;
+  }
+
+  ion-item {
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    background: #fff;
+  }
+
+  ion-label h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  ion-label p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #666;
+  }
+
+  ion-text {
+    display: block;
+    text-align: center;
+    margin-top: 32px;
+    color: #888;
+    font-size: 1.1rem;
+  }
+}
+
+ion-fab {
+  ion-fab-button {
+    background: var(--ion-color-primary);
+    color: #fff;
+  }
+}

@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Today's Stock</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list *ngIf="todayStock.length > 0; else noStock">
+    <ion-item *ngFor="let item of todayStock">
+      <ion-label>
+        <h2>{{ item.productName }}</h2>
+        <p>Current Stock: {{ item.currentStock }}</p>
+        <p>Price: ₹{{ item.price }}</p>
+      </ion-label>
+      <ion-button fill="outline" (click)="openUpdateStock(item)">Update</ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #noStock>
+    <ion-text class="ion-padding">No stock added yet for today.</ion-text>
+  </ng-template>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openAddStock()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
