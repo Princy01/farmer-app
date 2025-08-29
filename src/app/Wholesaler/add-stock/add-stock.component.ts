@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { StockService } from 'src/app/Wholesaler/services/stock.service';
+import { StockService, BusinessBranchWithNames, AddStockPayload } from 'src/app/Wholesaler/services/stock.service';
+import { AuthService } from 'src/app/auth/auth.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-add-stock',
@@ -13,45 +15,75 @@ import { StockService } from 'src/app/Wholesaler/services/stock.service';
 })
 export class AddStockComponent {
   stockData: any = {
-    productID: null,
-    quality: null,
+    productId: null,
+    quality: 0,
     wastage: 0,
     stockReceived: 0,
     stockCarriedForward: 0,
-    pricePerUint: 0,
-    businessBranchId: 1,
+    pricePerUnit: 0,
+    branchId: null,
     dateOfEntry: new Date().toISOString().split('T')[0]
   };
 
-  // Dummy data for select options; replace with backend integration later
+  branches: BusinessBranchWithNames[] = [];
   products = [
     { id: 1, name: 'Tomato' },
     { id: 2, name: 'Potato' }
   ];
-  qualities = ['A', 'B', 'C'];
+
+  qualities = [1.0, 2.0, 3.0];
 
   constructor(
     private stockService: StockService,
     private modalCtrl: ModalController,
-    private toastCtrl: ToastController
-  ) {}
+    private toastCtrl: ToastController,
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.loadBranches();
+  }
 
   increment(field: string) {
     this.stockData[field] = (this.stockData[field] || 0) + 1;
+    this.cdr.detectChanges();
   }
 
   decrement(field: string) {
     if ((this.stockData[field] || 0) > 0) {
       this.stockData[field]--;
+      this.cdr.detectChanges();
     }
   }
 
   addFifty(field: string) {
     this.stockData[field] = (this.stockData[field] || 0) + 50;
+    this.cdr.detectChanges();
+  }
+
+  async loadBranches() {
+    const userId = this.authService.getUserId();
+    if (userId) {
+      this.stockService.getBranchesByUser(userId).subscribe(branches => {
+        this.branches = branches || [];
+        this.cdr.detectChanges();
+      });
+    }
   }
 
   addStock() {
-    this.stockService.addStock(this.stockData).subscribe({
+    // Use snake_case keys for payload
+    const payload: AddStockPayload = {
+      product_id: this.stockData.productId,
+      quality: this.stockData.quality,
+      wastage: this.stockData.wastage,
+      stock_received: this.stockData.stockReceived,
+      stock_carried_forward: this.stockData.stockCarriedForward,
+      price_per_unit: this.stockData.pricePerUnit,
+      b_b_id: this.stockData.branchId,
+      date_of_entry: this.stockData.dateOfEntry
+    };
+
+    this.stockService.addStock(payload).subscribe({
       next: async () => {
         const toast = await this.toastCtrl.create({
           message: 'Stock added successfully',

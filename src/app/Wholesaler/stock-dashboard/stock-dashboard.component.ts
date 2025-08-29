@@ -1,44 +1,71 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
-import { StockService } from 'src/app/Wholesaler/services/stock.service';
+import { FormsModule } from '@angular/forms';
+import { StockService, ProductPriceData, BusinessBranchWithNames } from 'src/app/Wholesaler/services/stock.service'; // <-- Import types
 import { AddStockComponent } from '../add-stock/add-stock.component';
 import { UpdateStockComponent } from '../update-stock/update-stock.component';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-stock-dashboard',
   templateUrl: './stock-dashboard.component.html',
   styleUrls: ['./stock-dashboard.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, FormsModule],
 })
 export class StockDashboardAddStockComponent implements OnInit {
-  todayStock: any[] = [];
+  todayStock: ProductPriceData[] = [];
+  branches: BusinessBranchWithNames[] = [];
+  selectedBranchId: number | null = null;
+  userId: number | null = null;
 
   constructor(
     private stockService: StockService,
+    private authService: AuthService,
     private modalCtrl: ModalController
   ) {
     addIcons({ add });
   }
 
   ngOnInit() {
-    this.loadTodayStock();
+    this.userId = this.authService.getUserId();
+    this.fetchBranches();
   }
 
-  loadTodayStock() {
-    this.stockService.getTodayStock().subscribe(data => {
-      this.todayStock = data;
-        // this.todayStock = [];
+  fetchBranches() {
+    if (this.userId === null) return;
+    this.stockService.getBranchesByUser(this.userId).subscribe(data => {
+      this.branches = data;
+      if (this.branches.length > 0) {
+        this.selectedBranchId = this.branches[0].branch_id;
+              console.log('Selected branch:', this.selectedBranchId);
 
+        this.loadTodayStock();
+      }
     });
   }
 
+  loadTodayStock() {
+  const today = new Date().toISOString().split('T')[0];
+  if (!this.selectedBranchId) {
+    console.log('No branch selected');
+    return;
+  }
+  console.log('Loading stock for branch:', this.selectedBranchId, 'date:', today);
+  this.stockService.getProductsStockOfBranchForDate(this.selectedBranchId, today).subscribe(data => {
+    console.log('API response:', data);
+    this.todayStock = data || [];
+  });
+}
+
   async openAddStock() {
+    if (!this.selectedBranchId) return;
     const modal = await this.modalCtrl.create({
-      component: AddStockComponent
+      component: AddStockComponent,
+      componentProps: { branchId: this.selectedBranchId }
     });
     await modal.present();
     await modal.onWillDismiss();
@@ -46,9 +73,10 @@ export class StockDashboardAddStockComponent implements OnInit {
   }
 
   async openUpdateStock(item: any) {
+    if (!this.selectedBranchId) return;
     const modal = await this.modalCtrl.create({
       component: UpdateStockComponent,
-      componentProps: { stockItem: item }
+      componentProps: { stockItem: item, branchId: this.selectedBranchId }
     });
     await modal.present();
     await modal.onWillDismiss();
