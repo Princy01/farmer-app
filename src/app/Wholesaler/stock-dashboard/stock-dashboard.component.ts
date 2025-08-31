@@ -73,13 +73,15 @@ export class StockDashboardAddStockComponent implements OnInit {
   }
 
   async openUpdateStock(item: any) {
-    if (!this.selectedBranchId) return;
-    const modal = await this.modalCtrl.create({
-      component: UpdateStockComponent,
-      componentProps: { stockItem: item, branchId: this.selectedBranchId }
-    });
-    await modal.present();
-    await modal.onWillDismiss();
-    this.loadTodayStock();
-  }
+  if (!this.selectedBranchId) return;
+  const modal = await this.modalCtrl.create({
+    component: UpdateStockComponent,
+    componentProps: { stockItem: item, branchId: this.selectedBranchId },
+    breakpoints: [0, 0.4, 0.8],
+    initialBreakpoint: 0.4
+  });
+  await modal.present();
+  await modal.onWillDismiss();
+  this.loadTodayStock();
+}
 }

@@ -9,18 +9,8 @@
 
 <ion-content class="ion-padding">
   <ion-item>
-    <ion-label>Product</ion-label>
-    <ion-text>{{ stockItem.productName }}</ion-text>
-  </ion-item>
-
-  <ion-item>
-    <ion-label>Current Stock</ion-label>
-    <ion-text>{{ stockItem.currentStock }}</ion-text>
-  </ion-item>
-
-  <ion-item>
     <ion-label position="floating">Stock to Deduct</ion-label>
-    <ion-input type="number" [(ngModel)]="stockUpdateData.stock"></ion-input>
+    <ion-input type="number" [(ngModel)]="stockToDeduct"></ion-input>
   </ion-item>
 
   <ion-button expand="block" class="ion-margin-top" (click)="updateStock()">

@@ -40,9 +40,10 @@ export interface AddStockPayload {
 }
 
 export interface UpdateStockPayload {
-  stockId: number;
-  quantity?: number;
-  price?: number;
+  product_id: number;
+  stock_to_be_deducted: number;
+  b_b_id: number;
+  date_of_entry: string;
 }
 
 @Injectable({
