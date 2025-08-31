@@ -725,9 +725,9 @@ export class HomePage {
     this.router.navigate(['/wholesaler/orders']);
   }
 
-  async navigateToUpdateInventory() {
+  async navigateToStockDashboard() {
     await this.closeMenu();
-    this.router.navigate(['/wholesaler/for-sale']);
+    this.router.navigate(['/wholesaler/stock-dashboard']);
   }
 
   async navigateToPastOrders() {

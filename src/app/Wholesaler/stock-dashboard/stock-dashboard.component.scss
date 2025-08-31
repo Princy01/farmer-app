@@ -10,6 +10,34 @@ ion-content {
     background: #fff;
   }
 
+  // Branch selector styling
+  ion-item:first-child {
+    margin-top: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    background: #f8f9fa;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    border-radius: 10px;
+    padding: 12px 16px;
+
+    ion-label {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #333;
+      margin-right: 12px;
+    }
+
+    ion-select {
+      min-width: 180px;
+      font-size: 1rem;
+      background: #fff;
+      border-radius: 6px;
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      box-shadow: none;
+    }
+  }
+
   ion-label h2 {
     font-size: 1.1rem;
     font-weight: 600;
@@ -31,9 +59,22 @@ ion-content {
   }
 }
 
+// Add button styling
 ion-fab {
   ion-fab-button {
     background: var(--ion-color-primary);
     color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    width: 56px;
+    height: 56px;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 2rem;
+    }
   }
 }
