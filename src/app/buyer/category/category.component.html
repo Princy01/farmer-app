@@ -223,9 +223,13 @@
                     margin-top: 8px;
                   "
                 >
-                  <ion-button size="small" color="primary"
-                    >Add to Cart</ion-button
+                  <ion-button
+                    size="small"
+                    color="primary"
+                    (click)="addToCart(wholesaler, $event)"
                   >
+                    Add to Cart
+                  </ion-button>
                   <span
                     style="
                       display: flex;

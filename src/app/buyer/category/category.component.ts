@@ -1,11 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, IonModal } from '@ionic/angular';
+import { IonicModule, IonModal, AlertController, LoadingController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { chevronBack, close, search, heart, funnelOutline, swapVerticalOutline, heartOutline, cartOutline, alertCircleOutline, star } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import { BuyerApiService, Product, ProductAll, Category } from '../services/buyer-api.service';
+import { CartService, CreateCartRequest } from '../cart/cart.service';
+import { AuthService } from '../../auth/auth.service';
 import { catchError, finalize, switchMap, tap } from 'rxjs';
 import { of } from 'rxjs';
 import { Location } from '@angular/common';
@@ -28,7 +30,6 @@ export class CategoryPageComponent implements OnInit {
   selectedCategoryId: number = -1;
   selectedProduct: ProductAll | null = null;
   wholesalers: any[] = [];
-
 
   // UI State
   isSearchActive = false;
@@ -80,10 +81,216 @@ export class CategoryPageComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private location: Location,
-    private buyerApiService: BuyerApiService
+    private buyerApiService: BuyerApiService,
+    private cartService: CartService,
+    private authService: AuthService,
+    private alertCtrl: AlertController,
+    private loadingCtrl: LoadingController
   ) {
     addIcons({ chevronBack, close, search, heart, alertCircleOutline, funnelOutline, swapVerticalOutline, heartOutline, cartOutline, star });
   }
+
+  async addToCart(wholesaler: any, event?: Event) {
+  if (event) {
+    event.stopPropagation();
+  }
+
+  if (!this.authService.isAuthenticated()) {
+    const alert = await this.alertCtrl.create({
+      header: 'Authentication Required',
+      message: 'Please login to add items to cart.',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Login',
+          handler: () => {
+            this.router.navigate(['/auth/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+    return;
+  }
+
+  if (!this.selectedProduct) {
+    const alert = await this.alertCtrl.create({
+      header: 'Error',
+      message: 'No product selected.',
+      buttons: ['OK']
+    });
+    await alert.present();
+    return;
+  }
+
+  const loading = await this.loadingCtrl.create({
+    message: 'Adding to cart...',
+    spinner: 'circular'
+  });
+
+  try {
+    await loading.present();
+
+    // FIXED: Handle both string and number return types
+    const userIdFromAuth = this.authService.getUserId();
+    if (!userIdFromAuth) {
+      throw new Error('Unable to get retailer ID');
+    }
+
+    // Convert to number regardless of input type
+    const retailerId = typeof userIdFromAuth === 'string'
+      ? parseInt(userIdFromAuth, 10)
+      : Number(userIdFromAuth);
+
+    if (isNaN(retailerId)) {
+      throw new Error('Invalid retailer ID');
+    }
+
+    // Simple cart request - let backend handle existing cart logic
+    const cartRequest: CreateCartRequest = {
+      retailer_id: retailerId,
+      wholeseller_id: wholesaler.id,
+      products: [
+        {
+          product_id: this.selectedProduct.product_id,
+          quantity: 1,
+          unit_id: 1,
+          price_while_added: wholesaler.price,
+          latest_wholesaler_price: wholesaler.price,
+          price_updated_at: new Date().toISOString(),
+          wholeseller_id: wholesaler.id,
+          is_active: true
+        }
+      ],
+      device_info: {
+        platform: 'web',
+        timestamp: new Date().toISOString()
+      },
+      cart_status: 0
+    };
+
+    console.log('Cart request payload:', JSON.stringify(cartRequest, null, 2));
+
+    this.cartService.createCart(cartRequest).subscribe({
+      next: async (response) => {
+        loading.dismiss();
+
+        const alert = await this.alertCtrl.create({
+          header: 'Success',
+          message: `${this.selectedProduct?.product_name} added to cart successfully!`,
+          buttons: [
+            {
+              text: 'Continue Shopping',
+              role: 'cancel'
+            },
+            {
+              text: 'View Cart',
+              handler: () => {
+                this.router.navigate(['/buyer/cart']);
+              }
+            }
+          ]
+        });
+        await alert.present();
+      },
+      error: async (error) => {
+        loading.dismiss();
+        console.error('Error adding to cart:', error);
+
+        // Handle specific error messages from backend
+        let errorMessage = 'Failed to add item to cart. Please try again.';
+
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
+        const alert = await this.alertCtrl.create({
+          header: 'Error',
+          message: errorMessage,
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
+    });
+
+  } catch (error) {
+    loading.dismiss();
+    console.error('Error adding to cart:', error);
+
+    const alert = await this.alertCtrl.create({
+      header: 'Error',
+      message: 'Failed to add item to cart. Please try again.',
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+}
+
+  private createNewCart(wholesaler: any, retailerId: number, loading: HTMLIonLoadingElement, existingCartRequest?: CreateCartRequest) {
+  const cartRequest = existingCartRequest || {
+    retailer_id: retailerId,
+    wholeseller_id: wholesaler.id || 1,
+    products: [
+      {
+        product_id: this.selectedProduct!.product_id,
+        quantity: 1,
+        unit_id: 1,
+        price_while_added: wholesaler.price,
+        latest_wholesaler_price: wholesaler.price,
+        price_updated_at: new Date().toISOString(),
+        wholeseller_id: wholesaler.id || 1,
+        is_active: true
+      }
+    ],
+    device_info: {
+      platform: 'web',
+      timestamp: new Date().toISOString()
+    },
+    cart_status: 0
+  };
+
+  console.log('Cart request payload:', JSON.stringify(cartRequest, null, 2));
+
+  this.cartService.createCart(cartRequest).subscribe({
+    next: async (response) => {
+      loading.dismiss();
+
+      const alert = await this.alertCtrl.create({
+        header: 'Success',
+        message: `${this.selectedProduct?.product_name} added to cart successfully!`,
+        buttons: [
+          {
+            text: 'Continue Shopping',
+            role: 'cancel'
+          },
+          {
+            text: 'View Cart',
+            handler: () => {
+              this.router.navigate(['/buyer/cart']);
+            }
+          }
+        ]
+      });
+      await alert.present();
+    },
+    error: async (error) => {
+      loading.dismiss();
+      console.error('Error creating cart:', error);
+
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: error.message || 'Failed to add item to cart. Please try again.',
+        buttons: ['OK']
+      });
+      await alert.present();
+    }
+  });
+}
 
   ngOnInit() {
     this.route.params.pipe(
@@ -156,8 +363,7 @@ export class CategoryPageComponent implements OnInit {
     });
   }
 
-  // New method to load all products automatically
-  loadAllProducts() {
+    loadAllProducts() {
     this.loadingProducts = true;
     this.errorLoadingProducts = false;
 
@@ -183,66 +389,66 @@ export class CategoryPageComponent implements OnInit {
   }
 
   selectSubcategory(category: Category | { category_id: number; category_name: string }) {
-  this.loadingProducts = true;
-  this.errorLoadingProducts = false;
-  this.selectedCategoryId = category.category_id;
-  this.selectedSubcategoryId = category.category_id;
-  this.selectedCategoryName = category.category_name;
-  this.selectedSubcategory = category.category_name;
-  this.selectedProduct = null;
+    this.loadingProducts = true;
+    this.errorLoadingProducts = false;
+    this.selectedCategoryId = category.category_id;
+    this.selectedSubcategoryId = category.category_id;
+    this.selectedCategoryName = category.category_name;
+    this.selectedSubcategory = category.category_name;
+    this.selectedProduct = null;
 
-  if (category.category_id === this.categoryId) {
-    this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
-      catchError(error => {
-        console.error('Error fetching all products of super category:', error);
-        this.errorLoadingProducts = true;
-        this.loadingProducts = false;
-        return of([]);
-      })
-    ).subscribe({
-      next: (products) => {
-        this.productsList = products || [];
-        this.applyFilters();
-        this.loadingProducts = false; // Ensure loading is stopped
-      },
-      error: (error) => {
-        console.error('Error loading all products of super category:', error);
-        this.errorLoadingProducts = true;
-        this.loadingProducts = false;
-      }
-    });
-  } else {
-    this.buyerApiService.getProductsByCategoryId(category.category_id).pipe(
-      catchError(error => {
-        console.error('Error fetching products:', error);
-        this.errorLoadingProducts = true;
-        this.loadingProducts = false;
-        return of([]);
-      })
-    ).subscribe({
-      next: (products) => {
-        this.productsList = (products && products.length > 0)
-          ? products.map(product => ({
+    if (category.category_id === this.categoryId) {
+      this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
+        catchError(error => {
+          console.error('Error fetching all products of super category:', error);
+          this.errorLoadingProducts = true;
+          this.loadingProducts = false;
+          return of([]);
+        })
+      ).subscribe({
+        next: (products) => {
+          this.productsList = products || [];
+          this.applyFilters();
+          this.loadingProducts = false;
+        },
+        error: (error) => {
+          console.error('Error loading all products of super category:', error);
+          this.errorLoadingProducts = true;
+          this.loadingProducts = false;
+        }
+      });
+    } else {
+      this.buyerApiService.getProductsByCategoryId(category.category_id).pipe(
+        catchError(error => {
+          console.error('Error fetching products:', error);
+          this.errorLoadingProducts = true;
+          this.loadingProducts = false;
+          return of([]);
+        })
+      ).subscribe({
+        next: (products) => {
+          this.productsList = (products && products.length > 0)
+            ? products.map(product => ({
               product_id: product.product_id,
               product_name: product.product_name,
               cat_id: product.category_id,
               cat_name: product.category_name,
               image_path: product.image_path,
               active_status: product.active_status,
-              nutrition_factor: '' // Default value since it's not in Product interface
+              nutrition_factor: ''
             }))
-          : [];
-        this.applyFilters();
-        this.loadingProducts = false; // Ensure loading is stopped even if empty
-      },
-      error: (error) => {
-        console.error('Error loading products:', error);
-        this.errorLoadingProducts = true;
-        this.loadingProducts = false;
-      }
-    });
+            : [];
+          this.applyFilters();
+          this.loadingProducts = false;
+        },
+        error: (error) => {
+          console.error('Error loading products:', error);
+          this.errorLoadingProducts = true;
+          this.loadingProducts = false;
+        }
+      });
+    }
   }
-}
 
   // Keep the original method name as well
   selectCategory(category: Category) {
@@ -253,9 +459,9 @@ export class CategoryPageComponent implements OnInit {
     this.selectedProduct = product;
     // Dummy mandi/wholesaler info
     this.wholesalers = [
-      { name: 'Mandi A', price: 200, distance: '2km', quantity: 100, rating: 4.5, favorite: false },
-      { name: 'Mandi B', price: 220, distance: '5km', quantity: 80, rating: 4.2, favorite: false },
-      { name: 'Mandi C', price: 190, distance: '7km', quantity: 120, rating: 4.7, favorite: false }
+      { id: 4, name: 'Mandi A', price: 200, distance: '2km', quantity: 100, rating: 4.5, favorite: false },
+      { id: 2, name: 'Mandi B', price: 220, distance: '5km', quantity: 80, rating: 4.2, favorite: false },
+      { id: 3, name: 'Mandi C', price: 190, distance: '7km', quantity: 120, rating: 4.7, favorite: false }
     ];
   }
 

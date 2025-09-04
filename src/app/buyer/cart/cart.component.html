@@ -15,6 +15,12 @@
 </ion-header>
 
 <ion-content class="cart-content">
+  <!-- ADDED: Loading spinner overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <ion-spinner name="circular" color="primary"></ion-spinner>
+    <p class="loading-text">Updating cart...</p>
+  </div>
+
   <ng-container *ngIf="cartProducts.length > 0; else emptyCart">
     <!-- Cart Items Section -->
     <div class="cart-items-section">
@@ -62,11 +68,12 @@
                     <!-- Quantity Controls Column -->
                     <ion-col size="9" size-sm="10" size-md="10" size-lg="2" class="quantity-col">
                       <div class="quantity-controls">
+                        <!-- UPDATED: Added loading state and better disabled logic -->
                         <ion-button
                           class="qty-btn decrease-btn"
                           fill="clear"
                           (click)="decreaseQuantity(i)"
-                          [disabled]="item.quantity <= 1"
+                          [disabled]="item.quantity <= 1 || isLoading"
                         >
                           <ion-icon name="remove-outline"></ion-icon>
                         </ion-button>
@@ -76,10 +83,12 @@
                           <span class="quantity-unit">{{ item.unit_name }}</span>
                         </div>
 
+                        <!-- UPDATED: Added loading state -->
                         <ion-button
                           class="qty-btn increase-btn"
                           fill="clear"
                           (click)="increaseQuantity(i)"
+                          [disabled]="isLoading"
                         >
                           <ion-icon name="add-outline"></ion-icon>
                         </ion-button>
@@ -88,10 +97,12 @@
 
                     <!-- Remove Button Column -->
                     <ion-col size="3" size-sm="2" size-md="2" size-lg="2" class="remove-col">
+                      <!-- UPDATED: Added loading state -->
                       <ion-button
                         fill="clear"
                         class="remove-btn"
                         (click)="removeItem(i)"
+                        [disabled]="isLoading"
                       >
                         <ion-icon name="trash-outline" class="trash-icon"></ion-icon>
                       </ion-button>
@@ -118,11 +129,13 @@
                 formControlName="discountCode"
                 placeholder="Enter discount code"
                 class="discount-field"
+                [disabled]="isLoading"
               ></ion-input>
             </ion-item>
             <ion-button
               class="apply-discount-btn"
               (click)="applyDiscount()"
+              [disabled]="isLoading"
             >
               Apply
             </ion-button>
@@ -153,6 +166,7 @@
               type="datetime-local"
               placeholder="Select delivery date"
               class="delivery-field"
+              [disabled]="isLoading"
             ></ion-input>
           </ion-item>
         </ion-card>
@@ -198,6 +212,7 @@
         <ion-button
           class="continue-shopping-btn"
           (click)="goBack()"
+          [disabled]="isLoading"
         >
           <ion-icon name="storefront-outline" slot="start"></ion-icon>
           Continue Shopping
@@ -223,10 +238,12 @@
       </div>
     </div>
 
+    <!-- UPDATED: Added loading state -->
     <ion-button
       class="checkout-btn"
       expand="block"
       (click)="checkout()"
+      [disabled]="isLoading"
     >
       <ion-icon name="card-outline" slot="start"></ion-icon>
       Proceed to Checkout

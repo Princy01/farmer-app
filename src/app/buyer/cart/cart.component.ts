@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
+import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
 import {
   trashOutline,
@@ -28,12 +29,14 @@ import { AuthService } from 'src/app/auth/auth.service';
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss']
 })
-export class CartComponent implements OnInit {
+export class CartComponent implements OnInit, OnDestroy {
   cartForm: FormGroup;
   cartDetails: CartResponse['cart_details'] | null = null;
   cartProducts: CartResponse['products'] = [];
   discount = 0;
   isLoading: boolean = false;
+
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private router: Router,
@@ -41,7 +44,8 @@ export class CartComponent implements OnInit {
     private cartService: CartService,
     private authService: AuthService,
     private alertCtrl: AlertController,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController
   ) {
     addIcons({
       trashOutline,
@@ -67,27 +71,24 @@ export class CartComponent implements OnInit {
     this.checkAuthAndLoadCart();
   }
 
-  // Authentication check
+  ngOnDestroy() {
+    // Clean up subscriptions
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.cartService.clearPendingOperations();
+  }
+
   private checkAuthAndLoadCart() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-    // Check if user has retailer role
     if (!this.authService.hasRole('retailer')) {
       this.showUnauthorizedError();
       return;
     }
 
-    // Load cart using cartId from localStorage (if available) or create new cart
-    const cartId = localStorage.getItem('cartId');
-    if (cartId) {
-      this.loadCart(Number(cartId));
-    } else {
-      // Redirect to buyer home if no cart exists
-      this.router.navigate(['/buyer/buyer-home']);
-    }
+    this.loadCart();
   }
 
   private async showAuthError() {
@@ -107,7 +108,6 @@ export class CartComponent implements OnInit {
     await alert.present();
   }
 
-  // Unauthorized error handler
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
       header: 'Access Denied',
@@ -128,7 +128,7 @@ export class CartComponent implements OnInit {
     this.router.navigate(['/buyer/buyer-home']);
   }
 
-  async loadCart(cartId: number) {
+  async loadCart() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
@@ -143,9 +143,9 @@ export class CartComponent implements OnInit {
       await loading.present();
       this.isLoading = true;
 
-      // Call service without retailerId - backend will get retailer_id from JWT
-      this.cartService.getCart(cartId).subscribe({
+      const subscription = this.cartService.getCart().subscribe({
         next: (response) => {
+          console.log('Cart loaded:', response);
           this.cartDetails = response.cart_details;
           this.cartProducts = response.products;
           loading.dismiss();
@@ -155,7 +155,6 @@ export class CartComponent implements OnInit {
           loading.dismiss();
           this.isLoading = false;
 
-          // Handle authentication errors
           if (error.status === 401) {
             this.showAuthError();
             return;
@@ -173,7 +172,7 @@ export class CartComponent implements OnInit {
               {
                 text: 'Retry',
                 handler: () => {
-                  this.loadCart(cartId);
+                  this.loadCart();
                 }
               }
             ]
@@ -181,6 +180,8 @@ export class CartComponent implements OnInit {
           await alert.present();
         }
       });
+
+      this.subscriptions.push(subscription);
     } catch (err) {
       loading.dismiss();
       this.isLoading = false;
@@ -199,13 +200,131 @@ export class CartComponent implements OnInit {
     );
   }
 
-  increaseQuantity(index: number) {
-    this.cartProducts[index].quantity++;
+  async increaseQuantity(index: number) {
+    if (!this.cartDetails || this.isLoading) return;
+
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    const product = this.cartProducts[index];
+    const newQuantity = product.quantity + 1;
+
+    console.log('Increasing quantity for product:', product.product_id, 'from', product.quantity, 'to', newQuantity);
+
+    this.isLoading = true;
+
+    try {
+      const subscription = this.cartService.updateProductQuantity(
+        this.cartDetails.cart_id,
+        product.product_id,
+        newQuantity
+      ).subscribe({
+        next: (response) => {
+          console.log('Quantity increase successful:', response);
+          this.cartDetails = response.cart_details;
+          this.cartProducts = response.products || [];
+          this.isLoading = false;
+        },
+        error: async (error) => {
+          console.error('Error increasing quantity:', error);
+          this.isLoading = false;
+
+          if (error.message?.includes('already in progress')) {
+            return; // Silently ignore concurrent requests
+          }
+
+          if (error.status === 401) {
+            this.showAuthError();
+            return;
+          }
+
+          const alert = await this.alertCtrl.create({
+            header: 'Error',
+            message: 'Failed to update quantity. Please try again.',
+            buttons: [
+              {
+                text: 'OK',
+                handler: () => {
+                  this.loadCart(); // Reload to sync state
+                }
+              }
+            ]
+          });
+          await alert.present();
+        }
+      });
+
+      this.subscriptions.push(subscription);
+    } catch (err) {
+      this.isLoading = false;
+      console.error('Unexpected error:', err);
+    }
   }
 
-  decreaseQuantity(index: number) {
-    if (this.cartProducts[index].quantity > 1) {
-      this.cartProducts[index].quantity--;
+  async decreaseQuantity(index: number) {
+    if (!this.cartDetails || this.isLoading) return;
+
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    const product = this.cartProducts[index];
+    if (product.quantity <= 1) return;
+
+    const newQuantity = product.quantity - 1;
+
+    console.log('Decreasing quantity for product:', product.product_id, 'from', product.quantity, 'to', newQuantity);
+
+    this.isLoading = true;
+
+    try {
+      const subscription = this.cartService.updateProductQuantity(
+        this.cartDetails.cart_id,
+        product.product_id,
+        newQuantity
+      ).subscribe({
+        next: (response) => {
+          console.log('Quantity decrease successful:', response);
+          this.cartDetails = response.cart_details;
+          this.cartProducts = response.products || [];
+          this.isLoading = false;
+        },
+        error: async (error) => {
+          console.error('Error decreasing quantity:', error);
+          this.isLoading = false;
+
+          if (error.message?.includes('already in progress')) {
+            return; // Silently ignore concurrent requests
+          }
+
+          if (error.status === 401) {
+            this.showAuthError();
+            return;
+          }
+
+          const alert = await this.alertCtrl.create({
+            header: 'Error',
+            message: 'Failed to update quantity. Please try again.',
+            buttons: [
+              {
+                text: 'OK',
+                handler: () => {
+                  this.loadCart(); // Reload to sync state
+                }
+              }
+            ]
+          });
+          await alert.present();
+        }
+      });
+
+      this.subscriptions.push(subscription);
+    } catch (err) {
+      this.isLoading = false;
+      console.error('Unexpected error:', err);
     }
   }
 
@@ -217,6 +336,32 @@ export class CartComponent implements OnInit {
       return;
     }
 
+    const product = this.cartProducts[index];
+
+    const confirmAlert = await this.alertCtrl.create({
+      header: 'Remove Item',
+      message: `Are you sure you want to remove "${product.product_name}" from your cart?`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Remove',
+          cssClass: 'danger-button',
+          handler: async () => {
+            await this.performItemRemoval(product.product_id, product.product_name);
+          }
+        }
+      ]
+    });
+
+    await confirmAlert.present();
+  }
+
+  private async performItemRemoval(productId: number, productName: string) {
+    if (!this.cartDetails) return;
+
     const loading = await this.loadingCtrl.create({
       message: 'Removing item...',
       spinner: 'circular'
@@ -224,38 +369,66 @@ export class CartComponent implements OnInit {
 
     try {
       await loading.present();
-      const product = this.cartProducts[index];
 
-      this.cartService.removeCartItem(
+      console.log('Removing item:', {
+        cartId: this.cartDetails.cart_id,
+        productId: productId
+      });
+
+      const subscription = this.cartService.removeCartItem(
         this.cartDetails.cart_id,
-        product.product_id,
-        this.cartDetails.wholeseller_id
+        productId
       ).subscribe({
         next: (response) => {
-          this.cartProducts = response.products;
+          console.log('Item removed successfully:', response);
+
+          this.cartProducts = response.products || [];
           this.cartDetails = response.cart_details;
+
           loading.dismiss();
+          this.showSuccessToast(`${productName} removed from cart`);
         },
         error: async (error) => {
           loading.dismiss();
+          console.error('Error removing item:', error);
 
-          // Handle authentication errors
+          if (error.message?.includes('already in progress')) {
+            return; // Silently ignore concurrent requests
+          }
+
           if (error.status === 401) {
             this.showAuthError();
             return;
           }
 
-          console.error('Error removing item:', error);
+          let errorMessage = 'Failed to remove item. Please try again.';
+          if (error.error && error.error.message) {
+            errorMessage = error.error.message;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
           const alert = await this.alertCtrl.create({
             header: 'Error',
-            message: 'Failed to remove item. Please try again.',
-            buttons: ['OK']
+            message: errorMessage,
+            buttons: [
+              {
+                text: 'OK',
+                handler: () => {
+                  this.loadCart(); // Reload to sync state
+                }
+              }
+            ]
           });
           await alert.present();
         }
       });
+
+      this.subscriptions.push(subscription);
     } catch (err) {
       loading.dismiss();
+      console.error('Unexpected error:', err);
+
       const alert = await this.alertCtrl.create({
         header: 'Error',
         message: 'An unexpected error occurred.',
@@ -265,8 +438,17 @@ export class CartComponent implements OnInit {
     }
   }
 
+  private async showSuccessToast(message: string) {
+    const toast = await this.toastCtrl.create({
+      message: message,
+      duration: 2000,
+      position: 'bottom',
+      color: 'success'
+    });
+    await toast.present();
+  }
+
   applyDiscount() {
-    // TODO: Implement API call for discount
     const code = this.cartForm.get('discountCode')?.value;
     const validCodes: { [key: string]: number } = {
       'SAVE10': 10,
@@ -284,7 +466,6 @@ export class CartComponent implements OnInit {
       return;
     }
 
-    // Navigate to checkout with cart data including retailer info
     this.router.navigate(['/buyer/checkout'], {
       state: {
         cartItems: this.cartProducts,
@@ -312,10 +493,7 @@ export class CartComponent implements OnInit {
         return;
       }
 
-      const cartId = localStorage.getItem('cartId');
-      if (cartId) {
-        await this.loadCart(Number(cartId));
-      }
+      await this.loadCart();
     } finally {
       event.target.complete();
     }
