@@ -4,12 +4,12 @@
 
 /* Header Styles */
 .main-toolbar {
-  --background: linear-gradient(135deg, rgb(136, 172, 140) 0%, rgb(106, 142, 110) 100%);
+  --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
   --color: #fff;
   --border-color: transparent;
   --padding-start: 16px;
   --padding-end: 16px;
-  box-shadow: 0 4px 12px rgba(136, 172, 140, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
 }
 
 .app-title {
@@ -30,6 +30,112 @@
 
   ion-icon {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+}
+
+/* Menu Styles */
+ion-menu {
+  ion-header ion-toolbar {
+    --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+    --color: #fff;
+    --border-color: transparent;
+    box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+  }
+
+  ion-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  ion-buttons ion-button {
+    --color: #fff;
+    --background-activated: rgba(255, 255, 255, 0.1);
+  }
+
+  ion-content {
+    --background: linear-gradient(to bottom, rgba(var(--ion-color-primary-rgb), 0.02) 0%, #ffffff 50%);
+  }
+
+  ion-list {
+    background: transparent;
+    padding: 1rem 0;
+  }
+
+  ion-item {
+    --background: transparent;
+    --color: #333;
+    --border-color: rgba(var(--ion-color-primary-rgb), 0.1);
+    --inner-border-width: 0 0 1px 0;
+    --padding-start: 1.5rem;
+    --padding-end: 1.5rem;
+    --padding-top: 1rem;
+    --padding-bottom: 1rem;
+    margin: 0.25rem 1rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+
+    &:hover {
+      --background: rgba(var(--ion-color-primary-rgb), 0.05);
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.1);
+
+      .menu-icon {
+        transform: scale(1.1);
+        color: var(--ion-color-primary);
+      }
+    }
+
+    &:active {
+      --background: rgba(var(--ion-color-primary-rgb), 0.1);
+      transform: scale(0.98);
+    }
+
+    // Logout item special styling
+    &:last-child {
+      margin-top: 2rem;
+      border-top: 2px solid rgba(var(--ion-color-primary-rgb), 0.1);
+      border-radius: 0;
+      --inner-border-width: 0;
+
+      &:hover {
+        --background: rgba(244, 67, 54, 0.05);
+        --color: #f44336;
+
+        .menu-icon {
+          color: #f44336;
+        }
+      }
+    }
+  }
+
+  ion-label {
+    color: #333;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+  }
+
+  .menu-icon {
+    color: var(--ion-color-primary);
+    font-size: 1.3rem;
+    margin-right: 0.5rem;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 1px 2px rgba(var(--ion-color-primary-rgb), 0.2));
+  }
+
+  // Logout icon styling
+  ion-icon[name="log-out-outline"] {
+    color: #f44336 !important;
+    filter: drop-shadow(0 1px 2px rgba(244, 67, 54, 0.2));
+  }
+
+  // Logout label styling
+  ion-label[color="danger"] {
+    --color: #f44336 !important;
+    color: #f44336 !important;
   }
 }
 
@@ -55,7 +161,7 @@
 
 .location-icon {
   font-size: 1.3rem;
-  color: rgba(123, 123, 123, 0.9);
+  color: rgba(255, 255, 255, 0.9);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
@@ -65,7 +171,7 @@
 
 .location-title {
   font-size: 0.9rem;
-  color: rgba(123, 123, 123, 0.9);
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -74,7 +180,7 @@
 .location-address {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #505050;
+  color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -109,24 +215,24 @@
   --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   --color: #333;
   --placeholder-color: #666;
-  --icon-color: rgb(136, 172, 140);
+  --icon-color: var(--ion-color-primary);
   margin: 0.5rem 1rem;
 }
 
 /* Search Container */
 .search-container {
   padding: 1.5rem 1rem;
-  background: linear-gradient(135deg, rgba(136, 172, 140, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
 }
 
 .main-searchbar {
   --background: #fff;
   --border-radius: 25px;
-  --box-shadow: 0 4px 16px rgba(136, 172, 140, 0.15);
+  --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.15);
   --color: #333;
   --placeholder-color: #666;
-  --icon-color: rgb(136, 172, 140);
-  border: 1px solid rgba(136, 172, 140, 0.1);
+  --icon-color: var(--ion-color-primary);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
 }
 
 /* Categories Section */
@@ -153,8 +259,8 @@
 
 .title-icon {
   font-size: 1.5rem;
-  color: rgb(136, 172, 140);
-  filter: drop-shadow(0 1px 2px rgba(136, 172, 140, 0.3));
+  color: var(--ion-color-primary);
+  filter: drop-shadow(0 1px 2px rgba(var(--ion-color-primary-rgb), 0.3));
 }
 
 /* Loading and Error States */
@@ -194,9 +300,9 @@
 }
 
 .retry-btn {
-  --color: rgb(136, 172, 140);
-  --border-color: rgb(136, 172, 140);
-  --background-activated: rgba(136, 172, 140, 0.1);
+  --color: var(--ion-color-primary);
+  --border-color: var(--ion-color-primary);
+  --background-activated: rgba(var(--ion-color-primary-rgb), 0.1);
 }
 
 /* Categories Grid */
@@ -212,7 +318,7 @@
   --background: #fff;
   border-radius: 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(136, 172, 140, 0.1);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   margin: 0;
   position: relative;
@@ -221,14 +327,14 @@
 
   &:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 32px rgba(136, 172, 140, 0.25);
+    box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.25);
 
     .category-image {
       transform: scale(1.1);
     }
 
     .card-overlay {
-      background: linear-gradient(135deg, rgba(136, 172, 140, 0.3), rgba(136, 172, 140, 0.1));
+      background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.3), rgba(var(--ion-color-primary-rgb), 0.1));
     }
 
     .card-arrow {
@@ -246,7 +352,7 @@
   position: relative;
   height: 140px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(136, 172, 140, 0.1), rgba(136, 172, 140, 0.05));
+  background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.1), rgba(var(--ion-color-primary-rgb), 0.05));
 }
 
 .category-image {
@@ -263,7 +369,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(136, 172, 140, 0.1), transparent);
+  background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.1), transparent);
   transition: background 0.3s ease;
 }
 
@@ -279,7 +385,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
   font-size: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
@@ -308,9 +414,9 @@
 
 .product-count {
   font-size: 0.85rem;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
   font-weight: 600;
-  background: rgba(136, 172, 140, 0.1);
+  background: rgba(var(--ion-color-primary-rgb), 0.1);
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   letter-spacing: 0.5px;
@@ -394,5 +500,5 @@
 
 /* Action Sheet Styling */
 .custom-action-sheet-btn {
-  --color: rgb(136, 172, 140) !important;
+  --color: var(--ion-color-primary) !important;
 }

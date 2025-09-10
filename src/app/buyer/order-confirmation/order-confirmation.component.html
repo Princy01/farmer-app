@@ -1,0 +1,178 @@
+<ion-header mode="ios">
+  <ion-toolbar class="confirmation-toolbar">
+    <ion-title class="page-title">Order Confirmation</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="confirmation-content">
+
+  <!-- Success Animation -->
+  <div class="success-section" *ngIf="showAnimation">
+    <div class="success-animation">
+      <div class="checkmark-circle">
+        <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
+      </div>
+      <div class="success-ripple"></div>
+    </div>
+    <h1 class="success-title">Order Confirmed!</h1>
+    <p class="success-message">Thank you for your order. We're processing it now.</p>
+  </div>
+
+  <!-- Order Details Card -->
+  <div class="card-section" *ngIf="!showAnimation">
+    <ion-card class="modern-card order-details-card">
+      <div class="card-header">
+        <div class="header-content">
+          <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
+          <h2 class="card-title">Order Details</h2>
+        </div>
+        <div class="order-id-badge">
+          #{{ orderData?.orderId }}
+        </div>
+      </div>
+
+      <ion-card-content class="card-content">
+        <div class="detail-row">
+          <div class="detail-label">
+            <ion-icon name="time-outline" class="detail-icon"></ion-icon>
+            Order Date
+          </div>
+          <div class="detail-value">{{ getFormattedDate(orderData?.orderDate) }}</div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-label">
+            <ion-icon name="location-outline" class="detail-icon"></ion-icon>
+            Delivery Address
+          </div>
+          <div class="detail-value">{{ orderData?.deliveryAddress || 'Default Address' }}</div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-label">
+            <ion-icon name="card-outline" class="detail-icon"></ion-icon>
+            Payment Method
+          </div>
+          <div class="detail-value">{{ orderData?.paymentMethod }}</div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-label">
+            <ion-icon name="cash-outline" class="detail-icon"></ion-icon>
+            Total Amount
+          </div>
+          <div class="detail-value price">₹{{ orderData?.grandTotal }}</div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Delivery Information -->
+  <div class="card-section" *ngIf="!showAnimation">
+    <ion-card class="modern-card delivery-info-card">
+      <div class="card-header">
+        <div class="header-content">
+          <ion-icon name="time-outline" class="header-icon"></ion-icon>
+          <h2 class="card-title">Delivery Information</h2>
+        </div>
+      </div>
+
+      <ion-card-content class="card-content">
+        <div class="delivery-estimate">
+          <div class="estimate-icon">
+            <ion-icon name="rocket-outline"></ion-icon>
+          </div>
+          <div class="estimate-info">
+            <h3>Estimated Delivery</h3>
+            <p class="delivery-time">{{ estimatedDelivery }}</p>
+            <p class="delivery-note" *ngIf="orderData?.hasTransport">
+              A driver will be assigned shortly for your delivery
+            </p>
+            <p class="delivery-note" *ngIf="!orderData?.hasTransport">
+              You can arrange pickup directly with the seller
+            </p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Order Items -->
+  <div class="card-section" *ngIf="!showAnimation">
+    <ion-card class="modern-card items-card">
+      <div class="card-header">
+        <div class="header-content">
+          <ion-icon name="bag-outline" class="header-icon"></ion-icon>
+          <h2 class="card-title">Items Ordered</h2>
+        </div>
+        <div class="items-count">{{ orderData?.items?.length }} items</div>
+      </div>
+
+      <ion-card-content class="card-content">
+        <div class="items-list">
+          <div class="item-row" *ngFor="let item of orderData?.items">
+            <div class="item-image">
+              <img [src]="'assets/img/' + item.product_name + '.png'"
+                   [alt]="item.product_name"
+                   class="product-img">
+            </div>
+            <div class="item-info">
+              <h4 class="item-name">{{ item.product_name }}</h4>
+              <p class="item-specs">{{ item.quantity }} {{ item.unit_name }}</p>
+            </div>
+            <div class="item-price">
+              ₹{{ item.latest_wholesaler_price * item.quantity }}
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card-section" *ngIf="!showAnimation">
+    <ion-card class="modern-card actions-card">
+      <ion-card-content class="actions-content">
+        <div class="action-buttons">
+          <ion-button
+            expand="block"
+            class="action-btn primary"
+            (click)="trackOrder()">
+            <ion-icon name="location-outline" slot="start"></ion-icon>
+            Track Your Order
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            class="action-btn secondary"
+            (click)="downloadInvoice()">
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+            Download Invoice
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Bottom Actions -->
+  <div class="bottom-actions" *ngIf="!showAnimation">
+    <ion-button
+      expand="block"
+      fill="clear"
+      class="bottom-btn"
+      (click)="goToOrderHistory()">
+      <ion-icon name="receipt-outline" slot="start"></ion-icon>
+      View All Orders
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      fill="clear"
+      class="bottom-btn"
+      (click)="goHome()">
+      <ion-icon name="home-outline" slot="start"></ion-icon>
+      Continue Shopping
+    </ion-button>
+  </div>
+</ion-content>

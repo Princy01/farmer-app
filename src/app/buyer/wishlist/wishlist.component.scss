@@ -1,9 +1,9 @@
 /* Header Styling */
 .wishlist-toolbar {
-  --background: linear-gradient(135deg, rgb(136, 172, 140) 0%, rgb(106, 142, 110) 100%);
+  --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
   --color: #fff;
   --border-color: transparent;
-  box-shadow: 0 4px 12px rgba(136, 172, 140, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
 }
 
 .back-btn, .clear-btn {
@@ -41,13 +41,13 @@
 
 /* Content Styling */
 .wishlist-content {
-  --background: linear-gradient(to bottom, #f8fdf9 0%, #ffffff 50%);
+  --background: linear-gradient(to bottom, rgba(var(--ion-color-primary-rgb), 0.02) 0%, #ffffff 50%);
 }
 
 /* Stats Container */
 .stats-container {
   padding: 16px;
-  background: linear-gradient(135deg, rgba(136, 172, 140, 0.05), rgba(255, 255, 255, 0.8));
+  background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.05), rgba(255, 255, 255, 0.8));
 }
 
 .stats-card {
@@ -56,8 +56,8 @@
   padding: 16px;
   display: flex;
   justify-content: space-around;
-  box-shadow: 0 4px 16px rgba(136, 172, 140, 0.1);
-  border: 1px solid rgba(136, 172, 140, 0.1);
+  box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.1);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
 }
 
 .stat-item {
@@ -70,7 +70,7 @@
 .stat-number {
   font-size: 1.8rem;
   font-weight: 700;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 .stat-label {
@@ -95,8 +95,8 @@
   background: #fff;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(136, 172, 140, 0.08);
-  border: 1px solid rgba(136, 172, 140, 0.1);
+  box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.08);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
   transition: all 0.3s ease;
   position: relative;
   margin-bottom: 16px;
@@ -105,8 +105,8 @@
 
   &:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 32px rgba(136, 172, 140, 0.15);
-    border-color: rgba(136, 172, 140, 0.2);
+    box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.15);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.2);
 
     .image-overlay {
       opacity: 1;
@@ -145,7 +145,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 16px 16px 0 0;
-  background: linear-gradient(135deg, #f8fdf9, #ffffff);
+  background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.02), #ffffff);
   padding: 12px;
   height: 160px; /* Increased height for better visibility */
   display: flex;
@@ -196,8 +196,8 @@
 .wishlist-card {
   &:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 32px rgba(136, 172, 140, 0.15);
-    border-color: rgba(136, 172, 140, 0.2);
+    box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.15);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.2);
 
     .image-overlay {
       opacity: 1;
@@ -335,7 +335,7 @@
 .current-price {
   font-size: 1.3rem;
   font-weight: 700;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 .price-unit {
@@ -349,18 +349,18 @@
 }
 
 .add-to-cart-btn {
-  --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
+  --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
   --color: #fff;
   --border-radius: 25px;
   height: 42px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  --box-shadow: 0 4px 12px rgba(136, 172, 140, 0.3);
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
 
   &:hover {
     transform: translateY(-2px);
-    --box-shadow: 0 6px 16px rgba(136, 172, 140, 0.4);
+    --box-shadow: 0 6px 16px rgba(var(--ion-color-primary-rgb), 0.4);
   }
 }
 
@@ -371,18 +371,18 @@
 }
 
 .bulk-add-btn {
-  --background: linear-gradient(135deg, #ff9f43, #ee5a24);
+  --background: linear-gradient(135deg, var(--ion-color-secondary), var(--ion-color-secondary-shade));
   --color: #fff;
   --border-radius: 25px;
   height: 48px;
   font-weight: 600;
   max-width: 300px;
   margin: 0 auto;
-  --box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3);
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-secondary-rgb), 0.3);
 
   &:hover {
     transform: translateY(-2px);
-    --box-shadow: 0 6px 16px rgba(255, 159, 67, 0.4);
+    --box-shadow: 0 6px 16px rgba(var(--ion-color-secondary-rgb), 0.4);
   }
 }
 
@@ -404,7 +404,7 @@
 
 .empty-icon {
   font-size: 6rem;
-  color: rgba(136, 172, 140, 0.3);
+  color: rgba(var(--ion-color-primary-rgb), 0.3);
   animation: float 3s ease-in-out infinite;
 }
 
@@ -464,17 +464,17 @@
 }
 
 .browse-btn {
-  --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
+  --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
   --color: #fff;
   --border-radius: 25px;
   height: 48px;
   font-weight: 600;
   padding: 0 30px;
-  --box-shadow: 0 4px 12px rgba(136, 172, 140, 0.3);
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
 
   &:hover {
     transform: translateY(-2px);
-    --box-shadow: 0 6px 16px rgba(136, 172, 140, 0.4);
+    --box-shadow: 0 6px 16px rgba(var(--ion-color-primary-rgb), 0.4);
   }
 }
 
@@ -482,7 +482,7 @@
 .wishlist-footer {
   background: #fff;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
-  border-top: 1px solid rgba(136, 172, 140, 0.1);
+  border-top: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
 }
 
 .footer-toolbar {
@@ -509,7 +509,7 @@
 
 .cart-icon {
   font-size: 1.5rem;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 .cart-details {
@@ -527,21 +527,21 @@
 .cart-total {
   font-size: 1.1rem;
   font-weight: 700;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 .go-to-cart-btn {
-  --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
+  --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
   --color: #fff;
   --border-radius: 25px;
   height: 44px;
   font-weight: 600;
   padding: 0 20px;
-  --box-shadow: 0 4px 12px rgba(136, 172, 140, 0.3);
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
 
   &:hover {
     transform: translateY(-2px);
-    --box-shadow: 0 6px 16px rgba(136, 172, 140, 0.4);
+    --box-shadow: 0 6px 16px rgba(var(--ion-color-primary-rgb), 0.4);
   }
 }
 

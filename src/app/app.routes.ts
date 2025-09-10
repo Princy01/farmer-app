@@ -203,10 +203,10 @@ export const routes: Routes = [
         path: 'add-business-location',
         loadComponent: () => import('./buyer/add-business-location/add-business-location.component').then((m) => m.AddBusinessLocationComponent),
       },
-      // {
-      //   path: 'business-update',
-      //   loadComponent: () => import('./buyer/business-update/business-update.component').then((m) => m.BusinessUpdateComponent),
-      // },
+      {
+        path: 'business-update',
+        loadComponent: () => import('./buyer/business-update/business-update.component').then((m) => m.BusinessUpdateComponent),
+      },
       {
         path: 'buyer-home',
         loadComponent: () => import('./buyer/buyer-home/buyer-home.component').then((m) => m.BuyerHomeComponent),
@@ -214,10 +214,6 @@ export const routes: Routes = [
       {
         path: 'category/:categoryId',
         loadComponent: () => import('./buyer/category/category.component').then((m) => m.CategoryPageComponent),
-      },
-      {
-        path: 'product-details/:productId',
-        loadComponent: () => import('./buyer/product-details/product-details.component').then(m => m.ProductDetailsComponent)
       },
       {
         path: 'wishlist',
@@ -242,7 +238,16 @@ export const routes: Routes = [
       {
         path: 'RetailerTrends',
         loadComponent: () => import('./buyer/retailer-trends/retailer-trends.component').then((m) => m.RetailerTrendsComponent),
-      }
+      },
+      {
+        path: 'payment',
+        loadComponent: () => import('./buyer/payment/payment.component').then((m) => m.PaymentComponent),
+      },
+      {
+        path: 'order-confirmation',
+        loadComponent: () => import('./buyer/order-confirmation/order-confirmation.component').then((m) => m.OrderConfirmationComponent),
+      },
+
     ]
   },
   {

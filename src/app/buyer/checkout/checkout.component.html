@@ -10,7 +10,6 @@
 </ion-header>
 
 <ion-content class="checkout-content">
-
   <!-- Order Details Section -->
   <div class="card-section">
     <ion-card class="modern-card">
@@ -23,14 +22,20 @@
       <ion-card-content class="card-content">
         <div class="detail-item">
           <div class="detail-label">
-            <ion-icon name="person-outline" class="detail-icon buyer-icon"></ion-icon>
+            <ion-icon
+              name="person-outline"
+              class="detail-icon buyer-icon"
+            ></ion-icon>
             <span>Buyer</span>
           </div>
           <div class="detail-value">{{ getRetailerInfo() }}</div>
         </div>
         <div class="detail-item">
           <div class="detail-label">
-            <ion-icon name="storefront-outline" class="detail-icon seller-icon"></ion-icon>
+            <ion-icon
+              name="storefront-outline"
+              class="detail-icon seller-icon"
+            ></ion-icon>
             <span>Seller</span>
           </div>
           <div class="detail-value">{{ getWholesellerInfo() }}</div>
@@ -47,23 +52,98 @@
           <ion-icon name="location-outline" class="header-icon"></ion-icon>
           <h2 class="card-title">Delivery Address</h2>
         </div>
+        <ion-button
+          fill="outline"
+          size="small"
+          class="add-address-btn-header"
+          (click)="addNewAddress()"
+        >
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Add New
+        </ion-button>
       </div>
       <ion-card-content class="card-content">
-        <div class="address-container" *ngIf="selectedAddress">
-          <div class="address-info">
-            <h3 class="address-name">{{ selectedAddress.name }}</h3>
-            <p class="address-text">
-              {{ selectedAddress.street }}, {{ selectedAddress.city }},<br />
-              {{ selectedAddress.state }} - {{ selectedAddress.zip }}
-            </p>
-          </div>
+        <!-- Loading state -->
+        <div class="loading-container" *ngIf="isLoadingBranches">
+          <ion-spinner name="dots"></ion-spinner>
+          <p class="loading-text">Loading delivery addresses...</p>
+        </div>
+
+        <!-- No branches available -->
+        <div
+          class="no-addresses"
+          *ngIf="!isLoadingBranches && businessBranches.length === 0"
+        >
+          <ion-icon name="location-outline" class="empty-icon"></ion-icon>
+          <p class="empty-text">No delivery addresses found</p>
           <ion-button
             fill="outline"
-            class="change-address-btn"
-            (click)="changeAddress()">
-            <ion-icon name="pencil-outline" slot="start"></ion-icon>
-            Change
+            class="add-address-btn"
+            (click)="addNewAddress()"
+          >
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Add New Address
           </ion-button>
+        </div>
+
+        <!-- Address cards for all branches -->
+        <div
+          class="addresses-grid"
+          *ngIf="!isLoadingBranches && businessBranches.length > 0"
+        >
+          <div
+            class="address-card"
+            *ngFor="let branch of businessBranches; trackBy: trackByBranchId"
+            [class.selected]="branch.branch_id === selectedBranch?.branch_id"
+            (click)="selectBranch(branch)"
+          >
+            <div class="address-card-header">
+              <h3 class="shop-name">{{ branch.shop_name }}</h3>
+              <ion-icon
+                name="checkmark-circle"
+                class="selected-icon"
+                *ngIf="branch.branch_id === selectedBranch?.branch_id"
+              >
+              </ion-icon>
+            </div>
+
+            <div class="address-details">
+              <div class="address-line">
+                <ion-icon
+                  name="location-outline"
+                  class="detail-icon"
+                ></ion-icon>
+                <div class="address-info">
+                  <p class="address-text">{{ branch.address }}</p>
+                  <p class="location-text">
+                    {{ branch.city_name }}, {{ branch.state_name }}
+                  </p>
+                  <p class="area-text">{{ branch.location_name }}</p>
+                </div>
+              </div>
+
+              <div class="contact-details">
+                <div class="contact-item" *ngIf="branch.number">
+                  <ion-icon name="call-outline" class="contact-icon"></ion-icon>
+                  <span class="contact-text">{{ branch.number }}</span>
+                </div>
+                <div class="contact-item" *ngIf="branch.email">
+                  <ion-icon name="mail-outline" class="contact-icon"></ion-icon>
+                  <span class="contact-text">{{ branch.email }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="selection-overlay"
+              *ngIf="branch.branch_id === selectedBranch?.branch_id"
+            >
+              <div class="selection-badge">
+                <ion-icon name="checkmark" class="check-icon"></ion-icon>
+                <span>Selected</span>
+              </div>
+            </div>
+          </div>
         </div>
       </ion-card-content>
     </ion-card>
@@ -84,17 +164,24 @@
           <div class="item-card" *ngFor="let item of cartItems">
             <div class="item-info">
               <div class="product-image">
-                <img [src]="'assets/img/' + item.product_name + '.png'"
-                     [alt]="item.product_name"
-                     class="product-img">
+                <img
+                  [src]="'assets/img/' + item.product_name + '.png'"
+                  [alt]="item.product_name"
+                  class="product-img"
+                />
               </div>
               <div class="product-details">
                 <h3 class="product-name">{{ item.product_name }}</h3>
-                <p class="product-specs">₹{{ item.latest_wholesaler_price }} × {{ item.quantity }} {{ item.unit_name }}</p>
+                <p class="product-specs">
+                  ₹{{ item.latest_wholesaler_price }} × {{ item.quantity }}
+                  {{ item.unit_name }}
+                </p>
               </div>
             </div>
             <div class="item-price">
-              <span class="price-amount">₹{{ item.latest_wholesaler_price * item.quantity }}</span>
+              <span class="price-amount"
+                >₹{{ item.latest_wholesaler_price * item.quantity }}</span
+              >
             </div>
           </div>
         </div>
@@ -121,9 +208,7 @@
                 <p>Let us arrange professional transport for your order</p>
               </div>
             </div>
-            <ion-button
-              class="arrange-btn"
-              (click)="arrangeRide()">
+            <ion-button class="arrange-btn" (click)="arrangeRide()">
               <ion-icon name="add-outline" slot="start"></ion-icon>
               Arrange Transport
             </ion-button>
@@ -151,7 +236,9 @@
                 <ion-icon name="cash-outline" class="summary-icon"></ion-icon>
                 Estimated Cost
               </div>
-              <div class="summary-value price-highlight">₹{{ estimatedRidePrice }}</div>
+              <div class="summary-value price-highlight">
+                ₹{{ estimatedRidePrice }}
+              </div>
             </div>
           </div>
 
@@ -160,7 +247,9 @@
               <ion-spinner name="dots" class="search-spinner"></ion-spinner>
               <div class="search-text">
                 <h4>Finding Available Drivers</h4>
-                <p>Please wait while we connect you with nearby transporters...</p>
+                <p>
+                  Please wait while we connect you with nearby transporters...
+                </p>
               </div>
             </div>
           </div>
@@ -183,11 +272,15 @@
             </div>
           </div>
 
-          <div class="transport-actions" *ngIf="!isSearchingDriver && !selectedTransporter">
+          <div
+            class="transport-actions"
+            *ngIf="!isSearchingDriver && !selectedTransporter"
+          >
             <ion-button
               expand="block"
               class="search-driver-btn"
-              (click)="confirmDriverSearch()">
+              (click)="confirmDriverSearch()"
+            >
               <ion-icon name="search-outline" slot="start"></ion-icon>
               Search Available Drivers
             </ion-button>
@@ -195,7 +288,8 @@
               expand="block"
               fill="outline"
               class="change-transport-btn"
-              (click)="arrangeRide()">
+              (click)="arrangeRide()"
+            >
               <ion-icon name="settings-outline" slot="start"></ion-icon>
               Change Transport Options
             </ion-button>
@@ -234,52 +328,6 @@
     </ion-card>
   </div>
 
-  <!-- Payment Methods -->
-  <div class="card-section" *ngIf="!loadingPaymentMethods && paymentMethods.length">
-    <ion-card class="modern-card">
-      <div class="card-header">
-        <div class="header-content">
-          <ion-icon name="card-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Payment Method</h2>
-        </div>
-      </div>
-      <ion-card-content class="card-content">
-        <ion-radio-group [(ngModel)]="selectedPaymentMethod" class="payment-options">
-          <div class="payment-option"
-               *ngFor="let method of paymentMethods"
-               [class.selected]="selectedPaymentMethod === method.payment_mode">
-            <div class="payment-info">
-              <ion-icon [name]="getPaymentIcon(method.payment_mode)" class="payment-icon"></ion-icon>
-              <span class="payment-label">{{ method.payment_mode }}</span>
-            </div>
-            <ion-radio [value]="method.payment_mode"></ion-radio>
-          </div>
-        </ion-radio-group>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- Loading State -->
-  <div class="card-section" *ngIf="loadingPaymentMethods">
-    <ion-card class="modern-card">
-      <ion-card-content class="loading-content">
-        <ion-spinner name="dots" class="loading-spinner"></ion-spinner>
-        <p class="loading-text">Loading payment methods...</p>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- Error State -->
-  <div class="card-section" *ngIf="errorLoadingPaymentMethods">
-    <ion-card class="modern-card error-card">
-      <ion-card-content class="error-content">
-        <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
-        <h3 class="error-title">Payment Methods Unavailable</h3>
-        <p class="error-text">Failed to load payment methods. Please try again later.</p>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
   <!-- Bottom Spacing -->
   <div class="bottom-spacing"></div>
 </ion-content>
@@ -293,10 +341,11 @@
     </div>
     <ion-button
       class="confirm-order-btn"
-      (click)="confirmOrder()"
-      [disabled]="orderPlaced || !selectedPaymentMethod">
-      <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-      {{ orderPlaced ? 'Order Placed' : 'Confirm Order' }}
+      (click)="proceedToPayment()"
+      [disabled]="isLoading || !selectedBranch"
+    >
+      <ion-icon name="arrow-forward-outline" slot="start"></ion-icon>
+      {{ isLoading ? "Processing..." : "Proceed to Payment" }}
     </ion-button>
   </div>
 </ion-footer>

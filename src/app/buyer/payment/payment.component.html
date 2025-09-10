@@ -1,0 +1,141 @@
+<ion-header mode="ios">
+  <ion-toolbar class="payment-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" class="back-btn">
+        <ion-icon name="chevron-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="page-title">Payment</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="payment-content">
+
+  <!-- Order Summary Card -->
+  <div class="card-section">
+    <ion-card class="modern-card order-summary-card">
+      <div class="card-header">
+        <div class="header-content">
+          <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
+          <h2 class="card-title">Order Summary</h2>
+        </div>
+      </div>
+      <ion-card-content class="card-content">
+        <div class="summary-item" *ngFor="let item of orderData?.items">
+          <div class="item-info">
+            <span class="item-name">{{ item.product_name }}</span>
+            <span class="item-quantity">{{ item.quantity }} {{ item.unit_name }}</span>
+          </div>
+          <span class="item-price">₹{{ item.latest_wholesaler_price * item.quantity }}</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-row">
+          <span class="summary-label">Items Total</span>
+          <span class="summary-amount">₹{{ orderData?.totalPrice }}</span>
+        </div>
+
+        <div class="summary-row" *ngIf="orderData?.transportCost > 0">
+          <span class="summary-label">Transport Cost</span>
+          <span class="summary-amount">₹{{ orderData?.transportCost }}</span>
+        </div>
+
+        <!-- New Total Design -->
+        <div class="total-section">
+          <div class="total-container">
+            <div class="total-info">
+              <span class="total-label">Total Amount</span>
+              <span class="total-amount">₹{{ orderData?.grandTotal }}</span>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Security Info -->
+  <div class="card-section">
+    <ion-card class="modern-card security-card">
+      <ion-card-content class="security-content">
+        <div class="security-info">
+          <ion-icon name="shield-checkmark-outline" class="security-icon"></ion-icon>
+          <div class="security-text">
+            <h3>Secure Payment</h3>
+            <p>Your payment information is protected with bank-level security</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Payment Methods -->
+  <div class="card-section">
+    <ion-card class="modern-card payment-methods-card">
+      <div class="card-header">
+        <div class="header-content">
+          <ion-icon name="card-outline" class="header-icon"></ion-icon>
+          <h2 class="card-title">Payment Methods</h2>
+        </div>
+      </div>
+
+      <ion-card-content class="card-content" *ngIf="!loadingPaymentMethods">
+        <div
+          class="payment-option"
+          [class.selected]="selectedPaymentMethod === method.id"
+          [class.disabled]="!method.available"
+          *ngFor="let method of paymentMethods"
+          (click)="method.available && selectPaymentMethod(method.id)">
+
+          <div class="payment-info">
+            <ion-icon [name]="method.icon" class="payment-icon"></ion-icon>
+            <div class="payment-details">
+              <span class="payment-label">{{ method.name }}</span>
+              <span class="payment-description">{{ method.description }}</span>
+            </div>
+          </div>
+
+          <div class="payment-check" *ngIf="selectedPaymentMethod === method.id">
+            <ion-icon name="checkmark-circle" class="check-icon"></ion-icon>
+          </div>
+
+          <div class="payment-unavailable" *ngIf="!method.available">
+            <span class="unavailable-text">Not Available</span>
+          </div>
+        </div>
+      </ion-card-content>
+
+      <!-- Loading State -->
+      <ion-card-content class="loading-content" *ngIf="loadingPaymentMethods">
+        <ion-spinner name="dots" class="loading-spinner"></ion-spinner>
+        <p class="loading-text">Loading payment methods...</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Bottom Spacing -->
+  <div class="bottom-spacing"></div>
+</ion-content>
+
+<!-- Payment Button -->
+<ion-footer class="payment-footer">
+  <div class="footer-content">
+    <div class="total-display">
+      <span class="total-label">
+        {{ selectedPaymentMethod === 'COD' ? 'Amount to Pay on Delivery' : 'Total to Pay' }}
+      </span>
+      <span class="total-amount">₹{{ orderData?.grandTotal }}</span>
+    </div>
+    <ion-button
+      class="pay-now-btn"
+      expand="block"
+      [disabled]="isProcessingPayment || !selectedPaymentMethod"
+      [class.cod-btn]="selectedPaymentMethod === 'COD'"
+      (click)="processPayment()">
+      <ion-icon name="lock-closed-outline" slot="start" *ngIf="!isProcessingPayment && selectedPaymentMethod !== 'COD'"></ion-icon>
+      <ion-icon name="cash-outline" slot="start" *ngIf="!isProcessingPayment && selectedPaymentMethod === 'COD'"></ion-icon>
+      <ion-spinner name="dots" *ngIf="isProcessingPayment"></ion-spinner>
+      {{ getPayButtonText() }}
+    </ion-button>
+  </div>
+</ion-footer>

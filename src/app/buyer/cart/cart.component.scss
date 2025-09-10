@@ -4,10 +4,10 @@
 
 /* Header Styles */
 .cart-toolbar {
-  --background: linear-gradient(135deg, rgb(136, 172, 140) 0%, rgb(106, 142, 110) 100%);
+  --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
   --color: #fff;
   --border-color: transparent;
-  box-shadow: 0 4px 12px rgba(136, 172, 140, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
 }
 
 .back-btn {
@@ -53,7 +53,7 @@
 
 .section-icon {
   font-size: 1.2rem;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 .items-count {
@@ -101,7 +101,7 @@
   border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
-  background: linear-gradient(135deg, rgba(136, 172, 140, 0.1), rgba(136, 172, 140, 0.05));
+  background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.1), rgba(var(--ion-color-primary-rgb), 0.05));
 }
 
 .product-image {
@@ -116,7 +116,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(136, 172, 140, 0.1), transparent);
+  background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.1), transparent);
 }
 
 .product-details {
@@ -149,7 +149,7 @@
 .total-price {
   font-size: 1.1rem;
   font-weight: 700;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 .price-alert {
@@ -190,17 +190,15 @@
 
 .qty-btn {
   --background: transparent;
-  --color: rgb(136, 172, 140);
+  --color: var(--ion-color-primary);
   --border-radius: 50%;
-  // width: 32px;
-  // height: 32px;
 
   &.decrease-btn:disabled {
     --color: #ccc;
   }
 
   &:hover {
-    --background: rgba(136, 172, 140, 0.1);
+    --background: rgba(var(--ion-color-primary-rgb), 0.1);
   }
 }
 
@@ -265,7 +263,7 @@
 
 .card-icon {
   font-size: 1rem;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 .discount-input-section {
@@ -292,7 +290,7 @@
 }
 
 .apply-discount-btn {
-  --background: rgb(136, 172, 140);
+  --background: var(--ion-color-primary);
   --color: #fff;
   --border-radius: 12px;
   height: 48px;
@@ -400,7 +398,7 @@
 .total-value {
   font-size: 1.3rem;
   font-weight: 700;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 /* Empty Cart */
@@ -438,7 +436,7 @@
 }
 
 .continue-shopping-btn {
-  --background: rgb(136, 172, 140);
+  --background: var(--ion-color-primary);
   --color: #fff;
   --border-radius: 25px;
   height: 48px;
@@ -480,7 +478,7 @@
 .total-amount {
   font-size: 1.3rem;
   font-weight: 700;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 .items-info {
@@ -489,14 +487,14 @@
 }
 
 .checkout-btn {
-  --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
+  --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
   --color: #fff;
   --border-radius: 25px;
   height: 56px;
   font-weight: 600;
   font-size: 1rem;
   min-width: 180px;
-  box-shadow: 0 4px 16px rgba(136, 172, 140, 0.4);
+  box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.4);
 }
 
 .bottom-spacing {

@@ -1,13 +1,16 @@
 ion-header ion-toolbar {
-  --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
+  --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+  --color: #fff;
+  --border-color: transparent;
+  box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
 }
 
 ion-icon {
-  color: rgb(154, 192, 159);
+  color: var(--ion-color-primary);
 }
 
 ion-back-button {
-  --color: rgb(143, 176, 148);
+  --color: #fff;
   --icon-font-size: 20px;
 }
 
@@ -15,25 +18,26 @@ ion-back-button {
   font-size: 18px;
   font-weight: bold;
   margin-left: 10px;
-  color: rgb(143, 176, 148);
+  color: #fff;
   font-family: 'Georgia', serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.subcategory-content{
-  .subcategory-name{
-   font-size: 0.9rem;
+.subcategory-content {
+  .subcategory-name {
+    font-size: 0.9rem;
   }
-  .hindi-name{
-        color: gray;
-        font-size: 0.7rem;
-      }
+  .hindi-name {
+    color: gray;
+    font-size: 0.7rem;
+  }
 }
 
 ion-card {
   text-align: center;
   cursor: pointer;
 
-  ion-card-title{
+  ion-card-title {
     font-size: 1rem;
   }
 }
@@ -48,7 +52,7 @@ ion-card {
   background: transparent;
   border-radius: 10px;
   padding: 10px;
-  display:flex;
+  display: flex;
   flex-direction: column;
   gap: 20px;
 }
@@ -59,7 +63,7 @@ ion-card {
   align-items: center;
   padding: 1px;
   border-radius: 18px;
-  box-shadow: 0px 2px 2px 2px rgba(143, 176, 148, 0.2);
+  box-shadow: 0px 2px 2px 2px rgba(var(--ion-color-primary-rgb), 0.2);
 }
 
 /* Larger thumbnail image */
@@ -155,7 +159,7 @@ ion-card {
 .subcategory-name {
   font-size: 0.7rem;
   font-family: 'Perpetua', serif;
-  color: rgb(109, 139, 112);
+  color: var(--ion-color-primary);
   white-space: normal;
 }
 
@@ -183,14 +187,14 @@ ion-card {
   font-weight: bold;
   border-radius: 20px;
   padding: 10px;
-  --color: rgb(136, 172, 140);
+  --color: var(--ion-color-primary);
 }
 
 .filter-button ion-icon,
 .sort-button ion-icon {
   margin-right: 5px;
   font-size: 18px;
-  color: rgb(136, 172, 140);
+  color: var(--ion-color-primary);
 }
 
 .modal-product-image {
@@ -206,23 +210,24 @@ ion-card {
   padding: 20px;
   color: gray;
 }
+
 .no-items ion-icon {
   font-size: 40px;
   margin-bottom: 10px;
   color: #888;
 }
+
 ion-modal ion-content {
   --offset-top: unset !important;
   --offset-bottom: unset !important;
   overflow-y: auto !important;
 }
 
-//PRODUCT MODAL
-
+// PRODUCT MODAL
 .product-modal {
   ion-toolbar {
-    --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
-    --color: rgb(174, 172, 172);
+    --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+    --color: #fff;
     height: 55px;
   }
 
@@ -236,9 +241,10 @@ ion-modal ion-content {
     align-items: center;
     text-align: center;
   }
+
   ion-button {
     --border-radius: 6px;
-    --color: rgb(164, 192, 154);
+    --color: var(--ion-color-primary);
     font-size: 14px;
     padding: 6px 10px;
   }
@@ -248,11 +254,12 @@ ion-modal ion-content {
     justify-content: center;
     padding: 10px 0;
   }
+
   .product-image-container {
     position: relative;
     span {
       position: absolute;
-      right: .5rem;
+      right: 0.5rem;
       bottom: 1rem;
     }
   }
@@ -269,13 +276,13 @@ ion-modal ion-content {
     font-weight: bold;
     text-align: center;
     margin-top: 2px;
-    color: rgb(76, 91, 66);
+    color: var(--ion-color-primary);
   }
 
   .details-container {
     text-align: center;
     margin-top: 15px;
-    color: rgb(168, 166, 166);
+    color: #666;
   }
 
   .detail-value {
@@ -315,26 +322,25 @@ ion-modal ion-content {
     font-weight: bold;
     border-radius: 20px;
     padding: 10px;
-    --color: rgb(136, 172, 140);
+    --color: var(--ion-color-primary);
   }
 
   .wishlist-button ion-icon,
   .cart-button ion-icon {
     margin-right: 5px;
     font-size: 18px;
-    color: rgb(136, 172, 140);
+    color: var(--ion-color-primary);
   }
 }
 
-//FILTER MODAL
-
+// FILTER MODAL
 .filter-modal {
   --border-radius: 10px;
   --background: #f8f9fa;
 
   ion-toolbar {
-    --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
-    --color: rgb(174, 172, 172);
+    --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+    --color: #fff;
     height: 55px;
   }
 
@@ -358,7 +364,7 @@ ion-modal ion-content {
 
   ion-button {
     --border-radius: 6px;
-    --color: rgb(164, 192, 154);
+    --color: var(--ion-color-primary);
     font-size: 14px;
     padding: 6px 10px;
   }
@@ -366,8 +372,8 @@ ion-modal ion-content {
   ion-range {
     padding: 0 12px;
     --bar-height: 4px;
-    --bar-background: rgb(136, 172, 140);
-    --bar-background-active: rgb(200, 239, 205);
+    --bar-background: var(--ion-color-primary);
+    --bar-background-active: rgba(var(--ion-color-primary-rgb), 0.3);
     --knob-size: 22px;
   }
 
@@ -378,7 +384,7 @@ ion-modal ion-content {
     --track-background-checked: #ddd;
 
     --handle-background: rgba(241, 238, 238, 0.968);
-    --handle-background-checked: rgb(136, 172, 140);
+    --handle-background-checked: var(--ion-color-primary);
 
     --handle-width: 15px;
     --handle-height: 27px;
@@ -396,9 +402,9 @@ ion-modal ion-content {
   }
 
   ion-checkbox {
-    --checkbox-background-checked: rgb(136, 172, 140);
-    --checkbox-border-color-checked: rgb(136, 172, 140);
-    --border-color-checked: rgb(136, 172, 140);
+    --checkbox-background-checked: var(--ion-color-primary);
+    --checkbox-border-color-checked: var(--ion-color-primary);
+    --border-color-checked: var(--ion-color-primary);
     --size: 18px;
   }
 
@@ -427,7 +433,7 @@ ion-modal ion-content {
 
     ion-button {
       font-family: 'Georgia', 'Times', serif;
-      --background: rgb(136, 172, 140);
+      --background: var(--ion-color-primary);
       --color: white;
       --border-radius: 8px;
       --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -442,10 +448,11 @@ ion-modal ion-content {
   --background: #f8f9fa;
 
   ion-toolbar {
-    --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
-    --color: rgb(174, 172, 172);
+    --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+    --color: #fff;
     height: 55px;
   }
+
   ion-title {
     font-size: 16px;
   }
@@ -465,12 +472,12 @@ ion-modal ion-content {
   }
 
   ion-radio {
-    --color-checked: rgb(136, 172, 140);
+    --color-checked: var(--ion-color-primary);
   }
 
   ion-button {
     --border-radius: 6px;
-    --color: rgb(164, 192, 154);
+    --color: var(--ion-color-primary);
     font-size: 14px;
     padding: 6px 10px;
   }
@@ -482,7 +489,7 @@ ion-modal ion-content {
 
     ion-button {
       font-family: 'Georgia', 'Times', serif;
-      --background: rgb(136, 172, 140);
+      --background: var(--ion-color-primary);
       --color: white;
       --border-radius: 8px;
       --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -490,6 +497,7 @@ ion-modal ion-content {
       padding: 8px 12px;
     }
   }
+
   .radio-item {
     display: flex;
     justify-content: space-between;
@@ -497,7 +505,7 @@ ion-modal ion-content {
   }
 
   ion-radio::part(container) {
-    border: 2px solid rgb(136, 172, 140);
+    border: 2px solid var(--ion-color-primary);
     border-radius: 50%;
     width: 18px;
     height: 18px;
@@ -505,8 +513,8 @@ ion-modal ion-content {
   }
 
   ion-radio[aria-checked="true"]::part(container) {
-    background: rgb(136, 172, 140);
-    border: 2px solid rgb(136, 172, 140);
+    background: var(--ion-color-primary);
+    border: 2px solid var(--ion-color-primary);
   }
 
   ion-radio[aria-checked="true"]::part(mark) {
@@ -517,7 +525,6 @@ ion-modal ion-content {
   }
 }
 
-
 .horizontal-scroll-container {
   display: flex;
   flex-direction: row;
@@ -526,7 +533,7 @@ ion-modal ion-content {
   padding: 12px 0;
   background: transparent;
   scrollbar-width: thin;
-  scrollbar-color: #b2c8b4 #f8f8f8;
+  scrollbar-color: rgba(var(--ion-color-primary-rgb), 0.5) #f8f8f8;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -535,7 +542,7 @@ ion-modal ion-content {
 }
 
 .horizontal-scroll-container::-webkit-scrollbar-thumb {
-  background: #b2c8b4;
+  background: rgba(var(--ion-color-primary-rgb), 0.5);
   border-radius: 4px;
 }
 
@@ -544,8 +551,8 @@ ion-modal ion-content {
 }
 
 ion-card.selected {
-  border: 2px solid #8fb094;
-  box-shadow: 0 0 8px rgba(143, 176, 148, 0.2);
+  border: 2px solid var(--ion-color-primary);
+  box-shadow: 0 0 8px rgba(var(--ion-color-primary-rgb), 0.2);
 }
 
 .product-details-embedded {
@@ -571,7 +578,7 @@ ion-card.selected {
 
 .wholesaler-vertical-scroll ion-card {
   text-align: left;
-  box-shadow: 0px 2px 6px rgba(143, 176, 148, 0.08);
+  box-shadow: 0px 2px 6px rgba(var(--ion-color-primary-rgb), 0.08);
   border-radius: 8px;
   padding: 8px;
   margin-bottom: 0; /* Remove bottom margin, use grid gap instead */
@@ -579,13 +586,14 @@ ion-card.selected {
 
 .wholesaler-vertical-scroll ion-card-title {
   font-size: 1rem;
-  color: #8fb094;
+  color: var(--ion-color-primary);
 }
 
 .wholesaler-vertical-scroll ion-icon[name="heart-outline"] {
   color: #e74c3c;
   font-size: 1.5em;
 }
+
 .heart-icon {
   position: absolute;
   top: 10px;
@@ -595,7 +603,51 @@ ion-card.selected {
   cursor: pointer;
   z-index: 2;
 }
+
 .wholesaler-vertical-scroll ion-icon[name="star"] {
   color: #f4d03f;
   margin-right: 4px;
+}
+
+/* Loading and Error States */
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  min-height: 200px;
+}
+
+.loading-container ion-spinner {
+  --color: var(--ion-color-primary);
+  margin-bottom: 1rem;
+}
+
+.loading-container p,
+.error-container p {
+  color: #666;
+  margin: 0.5rem 0;
+}
+
+.error-container ion-icon {
+  margin-bottom: 1rem;
+}
+
+.error-container ion-button {
+  --background: var(--ion-color-primary);
+  --color: #fff;
+  --border-radius: 12px;
+  margin-top: 1rem;
+}
+
+/* Search Bar */
+ion-searchbar {
+  --background: rgba(255, 255, 255, 0.1);
+  --color: #fff;
+  --placeholder-color: rgba(255, 255, 255, 0.7);
+  --icon-color: #fff;
+  --clear-button-color: #fff;
 }

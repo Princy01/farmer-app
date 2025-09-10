@@ -175,7 +175,7 @@
                 [src]="category.img_path"
                 [alt]="category.category_name"
                 class="category-image"
-                (error)="onImageError($event)"
+                (error)="onImageError($event.target)"
               />
               <div class="card-overlay"></div>
               <div class="card-arrow">

@@ -1,12 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { chevronBack, chevronForward, phonePortraitOutline, cashOutline, cardOutline, globeOutline, walletOutline } from 'ionicons/icons';
+import {
+  chevronBack,
+  arrowForwardOutline,
+  chevronDown,
+  receiptOutline,
+  personOutline,
+  storefrontOutline,
+  locationOutline,
+  bagOutline,
+  carOutline,
+  calculatorOutline,
+  pencilOutline,
+  addOutline,
+  rocketOutline,
+  flashOutline,
+  timeOutline,
+  cashOutline,
+  checkmarkCircle,
+  searchOutline,
+  settingsOutline,
+  callOutline,
+  mailOutline,
+  person,
+  checkmark
+} from 'ionicons/icons';
 import { DatabaseService } from '../../services/database.service';
-import { BuyerApiService } from '../services/buyer-api.service';
+import { CheckoutService, BusinessBranch } from './checkout.service';
+import { AuthService } from 'src/app/auth/auth.service';
 
 interface CartItem {
   product_id: number;
@@ -32,40 +57,6 @@ interface WholeSeller {
   id: number;
   name?: string;
 }
-interface DirectOrder {
-  id: number;
-  buyerId: string;
-  sellerId: string;
-  items: any[];
-  totalAmount: number;
-  pickupLocation: string;
-  dropoffLocation: string;
-  weight: number;
-  distance?: number;
-  status: 'pending' | 'accepted' | 'rejected' | 'completed';
-  createdAt: Date;
-  transportRequired: false;
-}
-
-interface DeliveryAddress {
-  name: string;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-}
-
-interface Order {
-  items: CartItem[];
-  paymentMethod: string;
-  total: number;
-  deliveryType: string | null;
-  urgency: string | null;
-  transporterId: string | null;
-  pickupLocation: string;
-  dropoffLocation: string;
-  weight: number;
-}
 
 @Component({
   selector: 'app-checkout',
@@ -74,15 +65,12 @@ interface Order {
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
 })
-export class CheckoutComponent {
+export class CheckoutComponent implements OnInit {
   cartItems: CartItem[] = [];
   retailerInfo: RetailerInfo | null = null;
   wholeSeller: WholeSeller | null = null;
   totalPrice: number = 0;
-  selectedPaymentMethod: string = 'upi';
   estimatedDelivery: string = '3-5 Business Days';
-  trackingNumber: string = 'TRK123456789';
-  orderPlaced: boolean = false;
   isLoading: boolean = false;
 
   selectedDeliveryType: string | null = null;
@@ -95,22 +83,46 @@ export class CheckoutComponent {
   isSearchingDriver: boolean = false;
   hasRideRequest: boolean = false;
 
-  selectedAddress: DeliveryAddress = {
-    name: 'ABC',
-    street: '123 XY',
-    city: 'New Delhi',
-    state: 'Delhi',
-    zip: '110001',
-  };
+  // Delivery address properties
+  businessBranches: BusinessBranch[] = [];
+  selectedBranch: BusinessBranch | null = null;
+  isLoadingBranches: boolean = false;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private databaseService: DatabaseService,
     private alertCtrl: AlertController,
-    private buyerApiService: BuyerApiService
+    private loadingController: LoadingController,
+    private checkoutService: CheckoutService,
+    private authService: AuthService
   ) {
-    addIcons({ chevronBack, chevronForward, phonePortraitOutline, cashOutline, cardOutline, globeOutline, walletOutline });
+    addIcons({
+      chevronBack,
+      arrowForwardOutline,
+      chevronDown,
+      receiptOutline,
+      personOutline,
+      storefrontOutline,
+      locationOutline,
+      bagOutline,
+      carOutline,
+      calculatorOutline,
+      pencilOutline,
+      addOutline,
+      rocketOutline,
+      flashOutline,
+      timeOutline,
+      cashOutline,
+      checkmarkCircle,
+      searchOutline,
+      settingsOutline,
+      callOutline,
+      mailOutline,
+      person,
+      checkmark
+    });
+
     this.loadTransporters();
 
     const navData = this.router.getCurrentNavigation()?.extras.state;
@@ -119,7 +131,7 @@ export class CheckoutComponent {
       this.totalPrice = navData['totalPrice'] || 0;
       this.retailerInfo = navData['retailer'] || null;
       this.wholeSeller = navData['wholeseller'] || null;
-
+      this.grandTotal = this.totalPrice;
     }
 
     this.route.queryParams.subscribe((params) => {
@@ -131,61 +143,158 @@ export class CheckoutComponent {
         this.selectedUrgency = params['urgency'];
       }
       if (this.hasRideRequest) {
-        // Wait for next render cycle before showing alert
         setTimeout(() => this.confirmDriverSearch(), 100);
       }
-              this.calculateRidePrice();
-
+      this.calculateRidePrice();
     });
   }
 
-  loadingPaymentMethods = false;
-  errorLoadingPaymentMethods = false;
-  paymentMethods: any[] = [];
   ngOnInit() {
-    // Uncomment this when ready to use real API
-    // this.fetchPaymentMethods();
-
-    // Dummy data for development
-    this.paymentMethods = [
-      { id: 1, payment_mode: 'UPI' },
-      { id: 2, payment_mode: 'Cash on Delivery' },
-      { id: 3, payment_mode: 'Credit/Debit Card' },
-      { id: 4, payment_mode: 'Net Banking' },
-      { id: 5, payment_mode: 'Wallet (e.g., Paytm, PhonePe)' },
-    ];
+    this.calculateRidePrice();
+    this.checkAuthAndLoadBranches();
   }
 
-  // Real API call (currently commented)
-  /*
-  fetchPaymentMethods() {
-    this.loadingPaymentMethods = true;
-    this.errorLoadingPaymentMethods = false;
-    this.buyerApiService.getModeOfPayments().subscribe({
-      next: (response) => {
-        this.paymentMethods = response;
-        this.loadingPaymentMethods = false;
-        console.log('Payment Methods:', this.paymentMethods);
-      },
-      error: (error) => {
-        this.errorLoadingPaymentMethods = true;
-        this.loadingPaymentMethods = false;
-        console.error('Error fetching payment methods:', error);
-      }
+  private async checkAuthAndLoadBranches() {
+    if (!this.authService.isAuthenticated()) {
+      await this.showAuthError();
+      return;
+    }
+
+    if (!this.authService.hasRole('retailer')) {
+      await this.showUnauthorizedError();
+      return;
+    }
+
+    await this.loadBusinessBranches();
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Authentication Error',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
     });
+    await alert.present();
   }
-  */
+
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  // Load business branches from backend
+  async loadBusinessBranches() {
+    this.isLoadingBranches = true;
+    const loading = await this.loadingController.create({
+      message: 'Loading delivery addresses...'
+    });
+    await loading.present();
+
+    try {
+      const userId = this.authService.getUserId();
+      if (!userId) {
+        this.isLoadingBranches = false;
+        this.businessBranches = [];
+        loading.dismiss();
+        await this.showAuthError();
+        return;
+      }
+
+      this.checkoutService.getAllBusinessBranches().subscribe({
+        next: (branches: BusinessBranch[]) => {
+          this.businessBranches = branches?.filter(branch => branch.active_status) || [];
+
+          // Auto-select first branch if available
+          if (this.businessBranches.length > 0) {
+            this.selectedBranch = this.businessBranches[0];
+            this.calculateRidePrice(); // Recalculate with new branch
+          }
+          this.isLoadingBranches = false;
+        },
+        error: async (error: any) => {
+          this.isLoadingBranches = false;
+          this.businessBranches = [];
+          loading.dismiss();
+
+          console.error('Error loading business branches:', error);
+
+          if (error.status === 401) {
+            await this.showAuthError();
+            return;
+          }
+
+          const alert = await this.alertCtrl.create({
+            header: 'Error',
+            message: 'Failed to load delivery addresses. Please try again later.',
+            buttons: ['OK']
+          });
+          await alert.present();
+        },
+        complete: () => {
+          loading.dismiss();
+        }
+      });
+    } catch (error) {
+      this.isLoadingBranches = false;
+      this.businessBranches = [];
+      loading.dismiss();
+
+      console.error('Unexpected error:', error);
+
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: 'An unexpected error occurred.',
+        buttons: ['OK']
+      });
+      await alert.present();
+    }
+  }
+
+  // Select a branch
+  selectBranch(branch: BusinessBranch) {
+    this.selectedBranch = branch;
+    this.calculateRidePrice(); // Recalculate with new branch
+  }
+
+  // Add new delivery address (placeholder for future implementation)
+  addNewAddress() {
+    this.showInfoAlert('Add New Address', 'This feature will be available soon. You can add custom delivery addresses.');
+  }
+
+  // Track by function for better performance
+  trackByBranchId(index: number, branch: BusinessBranch): number {
+    return branch.branch_id;
+  }
 
   private loadTransporters() {
     this.availableTransporters = this.databaseService.getAvailableTransporters();
   }
 
   calculateRidePrice() {
-    if (this.selectedDeliveryType && this.selectedAddress) {
+    if (this.selectedDeliveryType && this.selectedBranch) {
       const totalWeight = this.calculateTotalWeight();
 
       this.estimatedRidePrice = this.databaseService.calculateBasePrice(
-        this.selectedAddress.city,
+        this.selectedBranch.city_name,
         'Destination',
         totalWeight,
         this.selectedDeliveryType,
@@ -204,10 +313,15 @@ export class CheckoutComponent {
   }
 
   arrangeRide() {
+    if (!this.selectedBranch) {
+      this.showErrorAlert('Please select a delivery address first.');
+      return;
+    }
+
     this.router.navigate(['/buyer/ride'], {
       queryParams: {
         totalWeight: this.calculateTotalWeight(),
-        pickup: this.selectedAddress.city,
+        pickup: this.selectedBranch.city_name,
         delivery: 'Destination'
       }
     });
@@ -241,7 +355,6 @@ export class CheckoutComponent {
   }
 
   private calculateTotalWeight(): number {
-    console.log(this.cartItems)
     return this.cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
   }
 
@@ -258,10 +371,15 @@ export class CheckoutComponent {
       return;
     }
 
+    if (!this.selectedBranch) {
+      this.showErrorAlert('Please select a delivery address first.');
+      return;
+    }
+
     const request = {
       deliveryType: this.selectedDeliveryType!,
       urgency: this.selectedUrgency!,
-      pickup: this.selectedAddress.city,
+      pickup: this.selectedBranch.city_name,
       delivery: 'Destination',
       distance: this.getDistance(),
       load: {
@@ -272,15 +390,11 @@ export class CheckoutComponent {
       requestedDate: new Date().toISOString()
     };
 
-    // Create order only once
     const newOrderId = await this.databaseService.createUnassignedOrder(request);
     this.currentOrderId = newOrderId;
 
     const pollInterval = setInterval(async () => {
-      console.log("Checking driver assignment for order:", this.currentOrderId);
-
       const assignedDriver = await this.databaseService.checkOrderAssignment(this.currentOrderId!);
-      console.log('Driver assignment result:', assignedDriver);
 
       if (assignedDriver) {
         this.isSearchingDriver = false;
@@ -291,7 +405,6 @@ export class CheckoutComponent {
       }
     }, 5000);
 
-    // Clear polling after timeout
     setTimeout(() => {
       if (this.isSearchingDriver) {
         clearInterval(pollInterval);
@@ -303,9 +416,7 @@ export class CheckoutComponent {
   }
 
   private getDistance(): number {
-    // You could either calculate this based on actual locations
-    // or get it from a previous calculation
-    return Math.floor(Math.random() * (150 - 50 + 1)) + 50; // Sample 50-150km
+    return Math.floor(Math.random() * (150 - 50 + 1)) + 50;
   }
 
   private async showDriverFoundAlert(driver: any) {
@@ -344,133 +455,54 @@ export class CheckoutComponent {
     await alert.present();
   }
 
-  async confirmOrder() {
-    if (!this.selectedTransporter) {
-      const alert = await this.alertCtrl.create({
-        header: 'No Transporter Selected',
-        message: 'Your order will be processed directly with the seller without transport arrangement.',
-        buttons: [
-          {
-            text: 'Cancel',
-            role: 'cancel'
-          },
-          {
-            text: 'Continue',
-            handler: () => {
-              this.processDirectOrder();
-            }
-          }
-        ]
-      });
-      await alert.present();
+  private async showErrorAlert(message: string) {
+    const alert = await this.alertCtrl.create({
+      header: 'Error',
+      message: message,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  private async showInfoAlert(header: string, message: string) {
+    const alert = await this.alertCtrl.create({
+      header: header,
+      message: message,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  proceedToPayment() {
+    if (this.isLoading) return;
+
+    if (!this.selectedBranch) {
+      this.showErrorAlert('Please select a delivery address first.');
       return;
     }
 
-    // Process normal order with transporter
-    await this.processOrderWithTransport();
-  }
+    const orderData = {
+      items: this.cartItems,
+      totalPrice: this.totalPrice,
+      transportCost: this.estimatedRidePrice,
+      grandTotal: this.grandTotal,
+      retailerInfo: this.retailerInfo,
+      wholeSeller: this.wholeSeller,
+      selectedBranch: this.selectedBranch,
+      hasTransport: this.hasRideRequest,
+      selectedDeliveryType: this.selectedDeliveryType,
+      selectedUrgency: this.selectedUrgency,
+      selectedTransporter: this.selectedTransporter,
+      transporterName: this.getAvailableTransporterName()
+    };
 
-  private async processDirectOrder() {
-    this.isLoading = true;
-    try {
-      const directOrder: DirectOrder = {
-        id: Date.now(),
-        buyerId: this.retailerInfo?.id.toString() || 'unknown',
-        sellerId: this.wholeSeller?.id.toString() || 'unknown',
-        items: this.cartItems.map(item => ({
-          product_id: item.product_id,
-          quantity: item.quantity,
-          price: item.latest_wholesaler_price,
-          unit_id: item.unit_id
-        })),
-        totalAmount: this.totalPrice,
-        pickupLocation: this.wholeSeller?.name || 'Unknown Location',
-        dropoffLocation: this.retailerInfo?.address || 'Unknown Address',
-        weight: this.calculateTotalWeight(),
-        status: 'pending',
-        createdAt: new Date(),
-        transportRequired: false
-      };
-
-      const result = await this.databaseService.assignDirectOrder(directOrder);
-
-      if (result.success) {
-        this.orderPlaced = true;
-        const alert = await this.alertCtrl.create({
-          header: 'Success',
-          message: 'Order sent directly to seller!',
-          buttons: ['OK']
-        });
-        await alert.present();
-      } else {
-        const alert = await this.alertCtrl.create({
-          header: 'Error',
-          message: result.message || 'Failed to place direct order.',
-          buttons: ['OK']
-        });
-        await alert.present();
-      }
-    } catch (error) {
-      console.error('Error processing direct order:', error);
-      const alert = await this.alertCtrl.create({
-        header: 'Error',
-        message: 'An unexpected error occurred.',
-        buttons: ['OK']
-      });
-      await alert.present();
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  private async processOrderWithTransport() {
-    this.isLoading = true;
-    try {
-      const order: Order = {
-        items: this.cartItems,
-        paymentMethod: this.selectedPaymentMethod,
-        total: this.grandTotal,
-        deliveryType: this.selectedDeliveryType,
-        urgency: this.selectedUrgency,
-        transporterId: this.selectedTransporter,
-        pickupLocation: this.wholeSeller?.name || 'Unknown Location',
-        dropoffLocation: this.retailerInfo?.address || 'Unknown Address',
-        weight: this.calculateTotalWeight()
-      };
-
-      const result = await this.databaseService.assignOrderToTransporters(order);
-
-      if (result.success) {
-        this.orderPlaced = true;
-        const alert = await this.alertCtrl.create({
-          header: 'Success',
-          message: 'Order confirmed successfully!',
-          buttons: ['OK']
-        });
-        await alert.present();
-      } else {
-        const alert = await this.alertCtrl.create({
-          header: 'Error',
-          message: result.message || 'Failed to assign order.',
-          buttons: ['OK']
-        });
-        await alert.present();
-      }
-    } finally {
-      this.isLoading = false;
-    }
+    this.router.navigate(['/buyer/payment'], {
+      state: { orderData }
+    });
   }
 
   goBack() {
     this.router.navigate(['/buyer/cart']);
-  }
-
-  changeAddress() {
-    this.router.navigate(['/buyer/select-address']);
-  }
-
-  selectPayment(method: string) {
-    this.selectedPaymentMethod = method;
   }
 
   getAvailableTransporterName(): string {
@@ -488,21 +520,4 @@ export class CheckoutComponent {
     if (!this.wholeSeller) return 'Direct Order';
     return `${this.wholeSeller.name || 'Unknown Wholeseller'}`;
   }
-
-  getPaymentIcon(paymentMode: string): string {
-  switch (paymentMode.toLowerCase()) {
-    case 'upi':
-      return 'phone-portrait-outline';
-    case 'cash on delivery':
-      return 'cash-outline';
-    case 'credit/debit card':
-      return 'card-outline';
-    case 'net banking':
-      return 'globe-outline';
-    case 'wallet (e.g., paytm, phonepe)':
-      return 'wallet-outline';
-    default:
-      return 'card-outline';
-  }
-}
 }
