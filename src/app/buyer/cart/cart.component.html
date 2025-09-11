@@ -7,7 +7,7 @@
     </ion-buttons>
     <ion-title class="cart-title">My Cart</ion-title>
     <ion-buttons slot="end">
-      <ion-badge color="success" class="cart-count" *ngIf="cartProducts.length > 0">
+      <ion-badge class="cart-count" *ngIf="cartProducts.length > 0">
         {{ cartProducts.length }}
       </ion-badge>
     </ion-buttons>
@@ -17,7 +17,7 @@
 <ion-content class="cart-content">
   <!-- ADDED: Loading spinner overlay -->
   <div class="loading-overlay" *ngIf="isLoading">
-    <ion-spinner name="circular" color="primary"></ion-spinner>
+    <ion-spinner name="dots" color="primary"></ion-spinner>
     <p class="loading-text">Updating cart...</p>
   </div>
 

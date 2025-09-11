@@ -1,15 +1,15 @@
 <ion-header [translucent]="true">
-  <ion-toolbar color="primary">
+  <ion-toolbar class="business-locations-toolbar">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button (click)="goBack()" class="back-btn">
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Business Locations</ion-title>
+    <ion-title class="page-title">Business Locations</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="business-locations-content">
   <div class="container">
     <!-- Business Locations Section -->
     <div class="locations-section">
@@ -17,7 +17,6 @@
         <ion-button
           expand="block"
           fill="solid"
-          color="primary"
           class="add-location-btn"
           (click)="addNewLocation()"
         >
@@ -47,7 +46,6 @@
                   <ion-icon
                     name="location"
                     slot="start"
-                    color="primary"
                   ></ion-icon>
                   <ion-label>
                     <h3>Location: {{ location.location_name }}, State: {{ location.state_name }}, City: {{ location.city_name }}</h3>
@@ -81,17 +79,15 @@
                 <ion-button
                   size="small"
                   fill="outline"
-                  color="primary"
                   (click)="viewLocationDetails(location)"
                 >
                   <ion-icon name="eye" slot="start"></ion-icon>
                   View Details
                 </ion-button>
 
-                <ion-button
+                <ion-button color="tertiary"
                   size="small"
                   fill="solid"
-                  color="secondary"
                   (click)="modifyLocation(location)"
                 >
                   <ion-icon name="create" slot="start"></ion-icon>

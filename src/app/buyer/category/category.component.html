@@ -225,7 +225,6 @@
                 >
                   <ion-button
                     size="small"
-                    color="primary"
                     (click)="addToCart(wholesaler, $event)"
                   >
                     Add to Cart
@@ -266,7 +265,7 @@
     <div class="no-items">
       <ion-icon name="alert-circle-outline"></ion-icon>
       <p>No items found matching your filters.</p>
-      <ion-button color="light" (click)="clearFilters()"
+      <ion-button (click)="clearFilters()"
         >Clear Filters</ion-button
       >
     </div>

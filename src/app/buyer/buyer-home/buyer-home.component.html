@@ -1,5 +1,5 @@
 <ion-header mode="ios" [class.hidden]="hideHeader" id="main-content">
-  <ion-toolbar class="main-toolbar" color="primary">
+  <ion-toolbar class="main-toolbar">
     <ion-buttons slot="start" mode="ios">
       <ion-menu-button (click)="openMenu()">
         <ion-icon name="menu-outline" size="large"></ion-icon>
@@ -21,7 +21,7 @@
     </ion-buttons>
   </ion-toolbar>
 
-  <div class="location-container">
+  <!-- <div class="location-container">
     <div class="location-content">
       <ion-icon name="location-outline" class="location-icon"></ion-icon>
       <div class="location-info">
@@ -33,24 +33,24 @@
         class="location-arrow"
       ></ion-icon>
     </div>
-  </div>
+  </div> -->
 </ion-header>
 
-<ion-menu side="start" menuId="buyer-menu" contentId="buyer-main-content">
+<ion-menu side="start" menuId="buyer-menu" contentId="buyer-main-content" class="custom-menu">
   <ion-header>
-    <ion-toolbar style="--background: grey">
-      <ion-title>Menu</ion-title>
+    <ion-toolbar class="menu-toolbar">
+      <ion-title class="menu-title">Menu</ion-title>
       <ion-buttons slot="end">
-        <ion-button (click)="closeMenu()">
+        <ion-button (click)="closeMenu()" class="menu-close-btn">
           <ion-icon name="close-outline"></ion-icon>
         </ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
-  <ion-content>
-    <ion-list>
-      <ion-item button (click)="navigateToProfile()" lines="none">
+  <ion-content class="menu-content">
+    <ion-list class="menu-list">
+      <ion-item button (click)="navigateToProfile()" lines="none" class="menu-item">
         <ion-icon
           name="person-outline"
           slot="start"
@@ -58,7 +58,7 @@
         ></ion-icon>
         <ion-label>Profile</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToTrackOrders()" lines="none">
+      <ion-item button (click)="navigateToTrackOrders()" lines="none" class="menu-item">
         <ion-icon
           name="archive-outline"
           slot="start"
@@ -66,7 +66,7 @@
         ></ion-icon>
         <ion-label>Track Orders</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToBusinessLocations()" lines="none">
+      <ion-item button (click)="navigateToBusinessLocations()" lines="none" class="menu-item">
         <ion-icon
           name="location-outline"
           slot="start"
@@ -74,7 +74,7 @@
         ></ion-icon>
         <ion-label>Business Locations</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToUpdateBusiness()" lines="none">
+      <ion-item button (click)="navigateToUpdateBusiness()" lines="none" class="menu-item">
         <ion-icon
           name="create-outline"
           slot="start"
@@ -82,7 +82,7 @@
         ></ion-icon>
         <ion-label>Update Business</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToSettings()" lines="none">
+      <ion-item button (click)="navigateToSettings()" lines="none" class="menu-item">
         <ion-icon
           name="settings-outline"
           slot="start"
@@ -90,9 +90,9 @@
         ></ion-icon>
         <ion-label>Settings</ion-label>
       </ion-item>
-      <ion-item button (click)="logout()" lines="none">
-        <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
-        <ion-label color="danger">Logout</ion-label>
+      <ion-item button (click)="logout()" lines="none" class="menu-item logout-item">
+        <ion-icon name="log-out-outline" slot="start" class="menu-icon logout-icon"></ion-icon>
+        <ion-label class="logout-label">Logout</ion-label>
       </ion-item>
     </ion-list>
   </ion-content>
@@ -126,7 +126,7 @@
   <div class="categories-section">
     <!-- Loading State -->
     <div class="loading-container" *ngIf="loadingCategories">
-      <ion-spinner name="crescent" color="success"></ion-spinner>
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
       <p class="loading-text">Loading categories...</p>
     </div>
 

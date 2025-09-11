@@ -2,7 +2,7 @@
   <div class="background-overlay"></div>
 
   <div class="login-container">
-    <!-- Header Section - No changes needed -->
+    <!-- Header Section -->
     <div class="header-section">
       <div class="logo-container">
         <ion-icon name="storefront" class="app-logo"></ion-icon>
@@ -11,7 +11,7 @@
       <p class="app-subtitle">Connecting Wholesalers & Retailers</p>
     </div>
 
-    <!-- Segmented Control - No changes needed -->
+    <!-- Segmented Control -->
     <div class="segment-container">
       <ion-segment [(ngModel)]="authMode" value="login" class="custom-segment">
         <ion-segment-button value="login" class="segment-button">
@@ -23,7 +23,7 @@
       </ion-segment>
     </div>
 
-    <!-- Login Form - Minor changes to match backend fields -->
+    <!-- Login Form -->
     <div class="form-container" *ngIf="authMode === 'login'">
       <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
         <div class="input-group">
@@ -398,7 +398,7 @@
       </form>
     </div>
 
-    <!-- Features Section - No changes needed -->
+    <!-- Features Section -->
     <div class="features-section">
       <div class="feature-item">
         <ion-icon name="storefront-outline" class="feature-icon"></ion-icon>
