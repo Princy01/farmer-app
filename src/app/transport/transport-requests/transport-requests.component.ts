@@ -1,67 +1,36 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { AlertController, ToastController, IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 import { addIcons } from 'ionicons';
 import {
   chevronForwardOutline, funnelOutline, swapVerticalOutline, flashOutline,
   locationOutline, flagOutline, cubeOutline, navigateOutline, calendarOutline,
   pricetagOutline, checkmarkOutline, checkmarkCircleOutline, checkmarkCircle,
-  listOutline, carOutline, arrowForwardOutline, timeOutline, flash
+  listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline
 } from 'ionicons/icons';
 import { FilterModalComponent } from '../filter-modal/filter-modal.component';
 import { SortModalComponent } from '../sort-modal/sort-modal.component';
 import { formatDate } from '@angular/common';
-import { DatabaseService } from '../../services/database.service';
-import { MockDataService } from '../../services/mock-data.service';
-
-interface DeliveryOrder {
-  id: string;
-  items: CartItem[];
-  paymentMethod: string;
-  total: number;
-  deliveryType: string;
-  urgency: string;
-  transporterId: string | null;
-  pickupLocation: string;
-  dropoffLocation: string;
-  weight: number;
-  distance: number;
-  suggestedPrice: number;
-  accepted?: boolean;
-  rejected?: boolean;
-  assigned?: boolean;
-  createdAt: string;
-  deliveryDate: string;
-}
-
-interface CartItem {
-  id: number;
-  name: string;
-  image: string;
-  hindiName: string;
-  quantity: number;
-  price: number;
-  weight: number;
-}
-
+import { TransportRequestService, TransportRequest } from './transport-requests.service';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-transport-requests',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, HttpClientModule],
   templateUrl: './transport-requests.component.html',
   styleUrls: ['./transport-requests.component.scss'],
 })
-export class TransportRequestsComponent implements OnInit {
-  unassignedOrders: any[] = [];
+export class TransportRequestsComponent implements OnInit, OnDestroy {
+  transportRequests: TransportRequest[] = [];
+  filteredRequests: TransportRequest[] = [];
+  private subscription = new Subscription();
   private pollInterval: any;
 
-  transporterId: string = 'T001'; // Replace with actual driver ID
-  transporterDetails: any;
-
-  private modalController = inject(ModalController);
-
-  pendingDeliveries: DeliveryOrder[] = [];
-  originalDeliveries: DeliveryOrder[] = [];
+  // Driver configuration
+  transporterId: string = 'T001';
+  vehicleId: number = 1; // Default vehicle ID
+  region: string = 'Mumbai'; // Driver's region
 
   // Driver Load Constraints
   minLoad: number = 300;
@@ -75,37 +44,39 @@ export class TransportRequestsComponent implements OnInit {
   sharedDeliveries = false;
   singleDelivery = false;
 
+  // Request states tracking
+  acceptedRequests = new Set<number>();
+  rejectedRequests = new Set<number>();
+
+  private modalController = inject(ModalController);
+
   constructor(
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
-    private databaseService: DatabaseService,
-    private mockDataService: MockDataService
+    private transportRequestService: TransportRequestService
   ) {
     addIcons({
       chevronForwardOutline, funnelOutline, swapVerticalOutline, flashOutline,
       locationOutline, flagOutline, cubeOutline, navigateOutline, calendarOutline,
       pricetagOutline, checkmarkOutline, checkmarkCircleOutline, checkmarkCircle,
-      listOutline, carOutline, arrowForwardOutline, timeOutline, flash
+      listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline
     });
   }
 
   ngOnInit() {
-    this.transporterDetails = this.databaseService.getTransporterDetails(this.transporterId);
+    this.loadTransportRequests();
     this.startPolling();
   }
 
   ngOnDestroy() {
+    this.subscription.unsubscribe();
     this.stopPolling();
   }
 
   private startPolling() {
-    this.loadUnassignedOrders();
-    this.loadPendingDeliveries();
     this.pollInterval = setInterval(() => {
-      this.transporterDetails = this.databaseService.getTransporterDetails(this.transporterId);
-      this.loadUnassignedOrders();
-      this.loadPendingDeliveries();
-    }, 5000);
+      this.loadTransportRequests();
+    }, 10000); // Poll every 10 seconds
   }
 
   private stopPolling() {
@@ -114,79 +85,167 @@ export class TransportRequestsComponent implements OnInit {
     }
   }
 
-  private checkLoadWithinCapacity(orderWeight: number) {
-    const currentLoad = this.transporterDetails.assignedOrders.reduce((acc: number, current: any) => {
-      return current.weight + acc;
-    }, 0);
-    return this.transporterDetails.loadCapacity >= currentLoad + orderWeight;
-  }
-
-  private loadUnassignedOrders() {
-    const orders = this.databaseService.getUnassignedOrders();
-    this.unassignedOrders = orders.filter((order: any) => {
-      const orderAge = Date.now() - new Date(order.createdAt).getTime();
-      return orderAge < 120000 && !order.assigned;
-    });
-
-    if (orders.length !== this.unassignedOrders.length) {
-      this.databaseService.saveUnassignedOrders(this.unassignedOrders);
-    }
-  }
-
-  async acceptUnassignedOrder(order: any) {
-    const withinCapacity = this.checkLoadWithinCapacity(order.load.weight);
-
-    if (!withinCapacity) {
-      const alert = await this.alertCtrl.create({
-        header: 'Capacity Exceeded',
-        message: 'This order exceeds your current load capacity. Please complete some deliveries first.',
-        buttons: ['OK']
+  private loadTransportRequests() {
+    const sub = this.transportRequestService.getTransportRequests(this.region)
+      .subscribe({
+        next: (response) => {
+          this.transportRequests = response.delivery_requests;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Failed to load transport requests:', error);
+          this.showToast('Failed to load requests. Please try again.', 'danger');
+        }
       });
-      await alert.present();
+
+    this.subscription.add(sub);
+  }
+
+  async acceptOrder(request: TransportRequest) {
+    // Check if already accepted or rejected
+    if (this.acceptedRequests.has(request.job_id) || this.rejectedRequests.has(request.job_id)) {
+      return;
+    }
+
+    // Check load capacity
+    if (!this.checkLoadWithinCapacity(request.weight)) {
+      const toast = await this.toastCtrl.create({
+        message: 'This order exceeds your current load capacity. Please complete some deliveries first.',
+        duration: 4000,
+        position: 'middle',
+        color: 'warning',
+        buttons: [
+          {
+            text: 'OK',
+            role: 'cancel'
+          }
+        ]
+      });
+      await toast.present();
+      return;
+    }
+
+    // Use a simple confirmation alert instead of HTML
+    const alert = await this.alertCtrl.create({
+      header: 'Accept Transport Request',
+      message: `Job #${request.job_id}\n\nPickup: ${request.pickup_location}\nDelivery: ${request.dropoff_location}\nWeight: ${request.weight}kg\nDistance: ${request.distance}km\nPrice: ₹${request.base_price}`,
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Accept',
+          handler: async () => {
+            // Show loading toast
+            const loadingToast = await this.toastCtrl.create({
+              message: 'Processing request...',
+              duration: 2000,
+              position: 'middle'
+            });
+            await loadingToast.present();
+
+            const sub = this.transportRequestService.acceptTransportRequest(request.job_id, this.vehicleId)
+              .subscribe({
+                next: (response) => {
+                  this.acceptedRequests.add(request.job_id);
+                  this.currentLoad += request.weight;
+                  loadingToast.dismiss();
+                  this.showToast('Request accepted successfully!', 'success');
+
+                  const remainingCapacity = this.maxLoad - this.currentLoad;
+                  if (remainingCapacity > 0) {
+                    this.promptForMoreOrders(remainingCapacity);
+                  }
+                },
+                error: (error) => {
+                  console.error('Failed to accept request:', error);
+                  loadingToast.dismiss();
+                  this.showToast('Failed to accept request. Please try again.', 'danger');
+                }
+              });
+
+            this.subscription.add(sub);
+          },
+        },
+      ]
+    });
+    await alert.present();
+  }
+
+
+  async rejectOrder(request: TransportRequest) {
+    // Check if already accepted or rejected
+    if (this.acceptedRequests.has(request.job_id) || this.rejectedRequests.has(request.job_id)) {
       return;
     }
 
     const alert = await this.alertCtrl.create({
-      header: 'Accept Urgent Request',
-      message: `
-        <strong>Pickup:</strong> ${order.pickup}<br>
-        <strong>Delivery:</strong> ${order.delivery}<br>
-        <strong>Distance:</strong> ${order.distance} km<br>
-        <strong>Load:</strong> ${order.load.weight} kg (${order.load.type})<br>
-        <strong>Base Price:</strong> ₹${order.basePrice}<br>
-        <strong>Date:</strong> ${order.requestedDate}
-      `,
+      header: 'Reject Request',
+      message: `Are you sure you want to reject Job #${request.job_id}?\n\nPickup: ${request.pickup_location}\nDelivery: ${request.dropoff_location}`,
       buttons: [
+        { text: 'Cancel', role: 'cancel' },
         {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Accept',
-          handler: () => {
-            const accepted = this.databaseService.acceptUnassignedOrder(
-              order.id,
-              this.transporterId
-            );
+          text: 'Reject',
+          role: 'destructive',
+          handler: async () => {
+            const sub = this.transportRequestService.rejectTransportRequest(request.job_id)
+              .subscribe({
+                next: (response) => {
+                  this.rejectedRequests.add(request.job_id);
+                  this.showToast('Request rejected', 'warning');
+                },
+                error: (error) => {
+                  console.error('Failed to reject request:', error);
+                  this.showToast('Failed to reject request. Please try again.', 'danger');
+                }
+              });
 
-            if (accepted) {
-              this.showToast('Order accepted successfully!');
-              this.loadUnassignedOrders();
-            } else {
-              this.showToast('Failed to accept order');
-            }
-          }
-        }
+            this.subscription.add(sub);
+          },
+        },
       ]
     });
-
     await alert.present();
   }
 
-  loadPendingDeliveries() {
-    this.originalDeliveries = this.databaseService.getPendingDeliveriesFromLocalStorage(this.transporterId);
-    this.pendingDeliveries = [...this.originalDeliveries];
-    this.applyFilters();
+  private checkLoadWithinCapacity(orderWeight: number): boolean {
+    return this.maxLoad >= this.currentLoad + orderWeight;
+  }
+
+  async promptForMoreOrders(remainingCapacity: number) {
+    const toast = await this.toastCtrl.create({
+      message: `You still have ${remainingCapacity}kg capacity available. Check for more orders!`,
+      duration: 5000,
+      position: 'middle',
+      color: 'primary',
+      buttons: [
+        {
+          text: 'View Orders',
+          handler: () => {
+            this.showAvailableOrders(remainingCapacity);
+          }
+        },
+        {
+          text: 'Dismiss',
+          role: 'cancel'
+        }
+      ]
+    });
+    await toast.present();
+  }
+
+  showAvailableOrders(remainingCapacity: number) {
+    const availableOrders = this.filteredRequests.filter(request =>
+      !this.acceptedRequests.has(request.job_id) &&
+      !this.rejectedRequests.has(request.job_id) &&
+      request.weight <= remainingCapacity
+    );
+
+    if (availableOrders.length === 0) {
+      this.showToast('No more orders fit within your remaining capacity.', 'warning');
+      return;
+    }
+
+    availableOrders.sort((a, b) => a.distance - b.distance);
+    this.filteredRequests = availableOrders;
   }
 
   async openFilterModal() {
@@ -213,18 +272,18 @@ export class TransportRequestsComponent implements OnInit {
   }
 
   applyFilters() {
-    let filteredOrders = [...this.originalDeliveries];
+    let filteredOrders = [...this.transportRequests];
 
     filteredOrders = filteredOrders.filter(order =>
       order.weight >= this.minLoad && order.weight <= this.maxLoad
     );
 
     if (this.priorityDeliveries) {
-      filteredOrders = filteredOrders.filter(order => order.distance < 100);
+      filteredOrders = filteredOrders.filter(order => order.urgency.toLowerCase() === 'high');
     }
 
     if (this.delayedDeliveries) {
-      filteredOrders = filteredOrders.filter(order => new Date(order.deliveryDate) < new Date());
+      filteredOrders = filteredOrders.filter(order => new Date(order.delivery_date) < new Date());
     }
 
     if (this.sharedDeliveries) {
@@ -235,8 +294,9 @@ export class TransportRequestsComponent implements OnInit {
       filteredOrders = filteredOrders.filter(order => order.weight > 500);
     }
 
-    this.pendingDeliveries = filteredOrders;
+    this.filteredRequests = filteredOrders;
   }
+
 
   async openSortModal() {
     const modal = await this.modalController.create({
@@ -256,154 +316,32 @@ export class TransportRequestsComponent implements OnInit {
   applySort() {
     switch (this.sortOption) {
       case 'distance-asc':
-        this.pendingDeliveries.sort((a, b) => a.distance - b.distance);
+        this.filteredRequests.sort((a, b) => a.distance - b.distance);
         break;
       case 'distance-desc':
-        this.pendingDeliveries.sort((a, b) => b.distance - a.distance);
+        this.filteredRequests.sort((a, b) => b.distance - a.distance);
         break;
       case 'price-desc':
-        this.pendingDeliveries.sort((a, b) => b.suggestedPrice - a.suggestedPrice);
+        this.filteredRequests.sort((a, b) => b.base_price - a.base_price);
         break;
       case 'quantity-asc':
-        this.pendingDeliveries.sort((a, b) => a.weight - b.weight);
+        this.filteredRequests.sort((a, b) => a.weight - b.weight);
         break;
       case 'quantity-desc':
-        this.pendingDeliveries.sort((a, b) => b.weight - a.weight);
+        this.filteredRequests.sort((a, b) => b.weight - a.weight);
         break;
     }
   }
 
-  async acceptOrder(order: DeliveryOrder) {
-    const withinCapacity = this.checkLoadWithinCapacity(order.weight);
-
-    if (!withinCapacity) {
-      const alert = await this.alertCtrl.create({
-        header: 'Capacity Exceeded',
-        message: 'This order exceeds your current load capacity. Please complete some deliveries first.',
-        buttons: ['OK']
-      });
-      await alert.present();
-      return;
-    }
-
-    const calculatedPrice = this.databaseService.calculateBasePrice(
-      order.pickupLocation,
-      order.dropoffLocation,
-      order.weight,
-      order.deliveryType,
-      order.urgency,
-      this.transporterId
-    );
-
-    const alert = await this.alertCtrl.create({
-      header: 'Accept Delivery Order',
-      message: `
-        <strong>Order #${order.id}</strong><br>
-        <strong>Items:</strong> ${order.items.map(item => `${item.name} (${item.quantity})`).join(', ')}<br>
-        <strong>Total Weight:</strong> ${order.weight}kg<br>
-        <strong>Distance:</strong> ${order.distance}km<br>
-        <strong>Calculated Price:</strong> ₹${calculatedPrice}
-      `,
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
-        {
-          text: 'Accept',
-          handler: async () => {
-            order.transporterId = this.transporterId;
-            order.accepted = true;
-            this.databaseService.updateOrderForTransporterInLocalStorage(
-              this.transporterId,
-              order.id,
-              { accepted: true }
-            );
-            this.currentLoad += order.weight;
-            this.showToast('Delivery order accepted successfully!');
-
-            const remainingCapacity = this.maxLoad - this.currentLoad;
-            if (remainingCapacity > 0) {
-              this.promptForMoreOrders(remainingCapacity);
-            }
-          },
-        },
-      ]
-    });
-    await alert.present();
-  }
-
-  async promptForMoreOrders(remainingCapacity: number) {
-    const alert = await this.alertCtrl.create({
-      header: 'More Capacity Available',
-      message: `You still have ${remainingCapacity} kg of available capacity. Would you like to accept more orders?`,
-      buttons: [
-        { text: 'No', role: 'cancel' },
-        {
-          text: 'Yes',
-          handler: () => {
-            this.showAvailableOrders(remainingCapacity);
-          },
-        },
-      ],
-    });
-    await alert.present();
-  }
-
-  showAvailableOrders(remainingCapacity: number) {
-    const availableOrders = this.pendingDeliveries.filter(order =>
-      !order.accepted && order.weight <= remainingCapacity
-    );
-
-    if (availableOrders.length === 0) {
-      this.showToast('No more orders fit within your remaining capacity.');
-      return;
-    }
-
-    availableOrders.sort((a, b) => a.distance - b.distance);
-    this.pendingDeliveries = availableOrders;
-  }
-
-  async showToast(message: string) {
+  async showToast(message: string, color: string = 'success') {
     const toast = await this.toastCtrl.create({
       message,
       duration: 3000,
       position: 'bottom',
-      color: 'success'
+      color
     });
     await toast.present();
   }
-
-  async rejectOrder(order: DeliveryOrder) {
-  const alert = await this.alertCtrl.create({
-    header: 'Reject Order',
-    message: `Are you sure you want to reject Order #${order.id}?`,
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      {
-        text: 'Reject',
-        role: 'destructive',
-        handler: async () => {
-          order.rejected = true;
-          this.databaseService.updateOrderForTransporterInLocalStorage(
-            this.transporterId,
-            order.id,
-            { rejected: true }
-          );
-          this.showRejectToast('Order rejected successfully!');
-        },
-      },
-    ]
-  });
-  await alert.present();
-}
-
-async showRejectToast(message: string) {
-  const toast = await this.toastCtrl.create({
-    message,
-    duration: 3000,
-    position: 'bottom',
-    color: 'warning'
-  });
-  await toast.present();
-}
 
   formatDate(dateString: string): string {
     return formatDate(dateString, 'dd MMM yyyy', 'en-US');
@@ -425,5 +363,23 @@ async showRejectToast(message: string) {
       case 'low': return 'checkmark-circle';
       default: return 'help-circle';
     }
+  }
+
+  isRequestAccepted(jobId: number): boolean {
+    return this.acceptedRequests.has(jobId);
+  }
+
+  isRequestRejected(jobId: number): boolean {
+    return this.rejectedRequests.has(jobId);
+  }
+
+  // Getter for template compatibility
+  get pendingDeliveries(): TransportRequest[] {
+    return this.filteredRequests;
+  }
+
+  // Remove urgent requests section since all requests come from backend
+  get unassignedOrders(): any[] {
+    return [];
   }
 }

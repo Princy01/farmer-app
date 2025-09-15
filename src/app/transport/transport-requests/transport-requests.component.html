@@ -1,87 +1,5 @@
 <ion-content class="transport-requests-content">
-  <!-- Urgent Requests Section -->
-  <div class="urgent-section" *ngIf="unassignedOrders.length > 0">
-    <div class="section-header">
-      <h2 class="section-title">
-        <ion-icon name="flash-outline" class="title-icon"></ion-icon>
-        Urgent Requests
-      </h2>
-      <ion-badge color="warning" class="count-badge">{{
-        unassignedOrders.length
-      }}</ion-badge>
-    </div>
-
-    <div class="urgent-cards">
-      <div class="urgent-card" *ngFor="let order of unassignedOrders">
-        <div class="urgent-indicator">
-          <ion-icon name="flash" class="urgent-icon"></ion-icon>
-        </div>
-
-        <div class="card-content">
-          <div class="route-info">
-            <div class="route-item">
-              <ion-icon
-                name="location-outline"
-                class="route-icon pickup-icon"
-              ></ion-icon>
-              <div class="route-details">
-                <span class="route-label">Pickup</span>
-                <p class="route-address">{{ order.pickup }}</p>
-              </div>
-            </div>
-
-            <div class="route-arrow">
-              <ion-icon name="arrow-forward-outline"></ion-icon>
-            </div>
-
-            <div class="route-item">
-              <ion-icon
-                name="flag-outline"
-                class="route-icon delivery-icon"
-              ></ion-icon>
-              <div class="route-details">
-                <span class="route-label">Delivery</span>
-                <p class="route-address">{{ order.delivery }}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="order-details">
-            <div class="detail-item">
-              <ion-icon name="cube-outline" class="detail-icon"></ion-icon>
-              <span>{{ order.load.weight }} kg {{ order.load.type }}</span>
-            </div>
-            <div class="detail-item">
-              <ion-icon name="navigate-outline" class="detail-icon"></ion-icon>
-              <span>{{ order.distance }} km</span>
-            </div>
-            <div class="detail-item">
-              <ion-icon name="calendar-outline" class="detail-icon"></ion-icon>
-              <span>{{ order.requestedDate }}</span>
-            </div>
-          </div>
-
-          <div class="price-section">
-            <span class="price-label">Base Price</span>
-            <span class="price-amount">₹{{ order.basePrice }}</span>
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <ion-button
-            expand="block"
-            class="accept-urgent-button"
-            (click)="acceptUnassignedOrder(order)"
-          >
-            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-            Accept Request
-          </ion-button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Regular Requests Section -->
+  <!-- Transport Requests Section -->
   <div class="regular-section">
     <div class="section-header">
       <h2 class="section-title">Available Requests</h2>
@@ -100,19 +18,19 @@
     </div>
 
     <div class="requests-grid">
-      <div class="request-card" *ngFor="let order of pendingDeliveries">
+      <div class="request-card" *ngFor="let request of pendingDeliveries">
         <div class="card-header">
           <div class="order-info">
-            <h3 class="order-id">Order #{{ order.id }}</h3>
+            <h3 class="order-id">Job #{{ request.job_id }}</h3>
             <ion-chip
               class="urgency-chip"
-              [color]="getUrgencyColor(order.urgency)"
+              [color]="getUrgencyColor(request.urgency)"
             >
               <ion-icon
-                [name]="getUrgencyIcon(order.urgency)"
+                [name]="getUrgencyIcon(request.urgency)"
                 slot="start"
               ></ion-icon>
-              {{ order.urgency }}
+              {{ request.urgency }}
             </ion-chip>
           </div>
         </div>
@@ -126,7 +44,7 @@
               ></ion-icon>
               <div class="location-info">
                 <span class="location-label">Pickup</span>
-                <p class="location-address">{{ order.pickupLocation }}</p>
+                <p class="location-address">{{ request.pickup_location }}</p>
               </div>
             </div>
 
@@ -137,7 +55,7 @@
               ></ion-icon>
               <div class="location-info">
                 <span class="location-label">Delivery</span>
-                <p class="location-address">{{ order.dropoffLocation }}</p>
+                <p class="location-address">{{ request.dropoff_location }}</p>
               </div>
             </div>
           </div>
@@ -148,14 +66,14 @@
                 <ion-icon name="cube-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
                   <span class="spec-label">Weight</span>
-                  <span class="spec-value">{{ order.weight }} kg</span>
+                  <span class="spec-value">{{ request.weight }} kg</span>
                 </div>
               </div>
               <div class="spec-item">
                 <ion-icon name="navigate-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
                   <span class="spec-label">Distance</span>
-                  <span class="spec-value">{{ order.distance }} km</span>
+                  <span class="spec-value">{{ request.distance }} km</span>
                 </div>
               </div>
             </div>
@@ -165,7 +83,7 @@
                 <ion-icon name="pricetag-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
                   <span class="spec-label">Type</span>
-                  <span class="spec-value">{{ order.deliveryType }}</span>
+                  <span class="spec-value">{{ request.delivery_type }}</span>
                 </div>
               </div>
               <div class="spec-item">
@@ -173,7 +91,7 @@
                 <div class="spec-info">
                   <span class="spec-label">Deliver by</span>
                   <span class="spec-value">{{
-                    formatDate(order.deliveryDate)
+                    formatDate(request.delivery_date)
                   }}</span>
                 </div>
               </div>
@@ -181,21 +99,21 @@
           </div>
 
           <div class="price-section">
-            <span class="price-label">Suggested Price</span>
-            <span class="price-amount">₹{{ order.suggestedPrice }}</span>
+            <span class="price-label">Base Price</span>
+            <span class="price-amount">₹{{ request.base_price }}</span>
           </div>
         </div>
 
         <div class="card-footer">
           <div
             class="action-buttons"
-            *ngIf="!order.accepted && !order.rejected"
+            *ngIf="!isRequestAccepted(request.job_id) && !isRequestRejected(request.job_id)"
           >
-            <ion-button class="accept-button" (click)="acceptOrder(order)">
+            <ion-button class="accept-button" (click)="acceptOrder(request)">
               <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
               Accept
             </ion-button>
-            <ion-button class="reject-button" (click)="rejectOrder(order)">
+            <ion-button class="reject-button" (click)="rejectOrder(request)">
               <ion-icon name="close-circle-outline" slot="start"></ion-icon>
               Reject
             </ion-button>
@@ -204,7 +122,7 @@
           <ion-button
             expand="block"
             class="accepted-button"
-            *ngIf="order.accepted"
+            *ngIf="isRequestAccepted(request.job_id)"
             disabled
           >
             <ion-icon name="checkmark-circle" slot="start"></ion-icon>
@@ -214,7 +132,7 @@
           <ion-button
             expand="block"
             class="rejected-button"
-            *ngIf="order.rejected"
+            *ngIf="isRequestRejected(request.job_id)"
             disabled
           >
             <ion-icon name="close-circle" slot="start"></ion-icon>
