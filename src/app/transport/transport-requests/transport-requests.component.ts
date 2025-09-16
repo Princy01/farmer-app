@@ -1,23 +1,26 @@
 import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { AlertController, ToastController, IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { addIcons } from 'ionicons';
 import {
   chevronForwardOutline, funnelOutline, swapVerticalOutline, flashOutline,
   locationOutline, flagOutline, cubeOutline, navigateOutline, calendarOutline,
   pricetagOutline, checkmarkOutline, checkmarkCircleOutline, checkmarkCircle,
-  listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline
+  listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline,
+  settingsOutline, mapOutline
 } from 'ionicons/icons';
 import { FilterModalComponent } from '../filter-modal/filter-modal.component';
 import { SortModalComponent } from '../sort-modal/sort-modal.component';
+import { LocationSelectionModalComponent } from '../location-selection/location-selection.component';
 import { formatDate } from '@angular/common';
 import { TransportRequestService, TransportRequest } from './transport-requests.service';
+import { LocationPreferenceService } from '../location-selection/location-selection.service';
 import { Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-transport-requests',
   standalone: true,
-  imports: [IonicModule, CommonModule, HttpClientModule],
+  imports: [IonicModule, CommonModule],
   templateUrl: './transport-requests.component.html',
   styleUrls: ['./transport-requests.component.scss'],
 })
@@ -30,7 +33,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   // Driver configuration
   transporterId: string = 'T001';
   vehicleId: number = 1; // Default vehicle ID
-  region: string = 'Mumbai'; // Driver's region
 
   // Driver Load Constraints
   minLoad: number = 300;
@@ -48,22 +50,29 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   acceptedRequests = new Set<number>();
   rejectedRequests = new Set<number>();
 
+  // Location preferences
+  hasLocationPreferences = false;
+  locationSummary = '';
+
   private modalController = inject(ModalController);
 
   constructor(
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
-    private transportRequestService: TransportRequestService
+    private transportRequestService: TransportRequestService,
+    private locationPreferenceService: LocationPreferenceService
   ) {
     addIcons({
       chevronForwardOutline, funnelOutline, swapVerticalOutline, flashOutline,
       locationOutline, flagOutline, cubeOutline, navigateOutline, calendarOutline,
       pricetagOutline, checkmarkOutline, checkmarkCircleOutline, checkmarkCircle,
-      listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline
+      listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline,
+      settingsOutline, mapOutline
     });
   }
 
   ngOnInit() {
+    this.setupLocationPreferences();
     this.loadTransportRequests();
     this.startPolling();
   }
@@ -71,6 +80,34 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscription.unsubscribe();
     this.stopPolling();
+  }
+
+  private setupLocationPreferences() {
+    // Subscribe to location preference changes
+    const prefSub = this.locationPreferenceService.preferences$.subscribe(preferences => {
+      this.hasLocationPreferences = this.locationPreferenceService.hasPreferences();
+      this.updateLocationSummary();
+      // Reload requests when preferences change
+      if (this.hasLocationPreferences) {
+        this.loadTransportRequests();
+      }
+    });
+    this.subscription.add(prefSub);
+  }
+
+  private updateLocationSummary() {
+    const preferences = this.locationPreferenceService.getCurrentPreferences();
+    const cityCount = preferences.cities.length;
+    const mandiCount = preferences.mandis.length;
+
+    if (cityCount > 0 || mandiCount > 0) {
+      const parts = [];
+      if (cityCount > 0) parts.push(`${cityCount} cities`);
+      if (mandiCount > 0) parts.push(`${mandiCount} mandis`);
+      this.locationSummary = parts.join(' + ');
+    } else {
+      this.locationSummary = 'All locations';
+    }
   }
 
   private startPolling() {
@@ -86,19 +123,36 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   private loadTransportRequests() {
-    const sub = this.transportRequestService.getTransportRequests(this.region)
-      .subscribe({
-        next: (response) => {
-          this.transportRequests = response.delivery_requests;
-          this.applyFilters();
-        },
-        error: (error) => {
-          console.error('Failed to load transport requests:', error);
-          this.showToast('Failed to load requests. Please try again.', 'danger');
-        }
-      });
+    const preferences = this.locationPreferenceService.getCurrentPreferences();
+
+    const sub = this.transportRequestService.getTransportRequests(
+      preferences.cities.length > 0 ? preferences.cities : undefined,
+      preferences.mandis.length > 0 ? preferences.mandis : undefined
+    ).subscribe({
+      next: (response) => {
+        this.transportRequests = response.delivery_requests;
+        this.applyFilters();
+      },
+      error: (error) => {
+        console.error('Failed to load transport requests:', error);
+        this.showToast('Failed to load requests. Please try again.', 'danger');
+      }
+    });
 
     this.subscription.add(sub);
+  }
+
+  async openLocationPreferences() {
+    const modal = await this.modalController.create({
+      component: LocationSelectionModalComponent
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data) {
+      this.showToast('Location preferences updated successfully!', 'success');
+    }
   }
 
   async acceptOrder(request: TransportRequest) {
@@ -169,7 +223,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     });
     await alert.present();
   }
-
 
   async rejectOrder(request: TransportRequest) {
     // Check if already accepted or rejected
@@ -296,7 +349,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     this.filteredRequests = filteredOrders;
   }
-
 
   async openSortModal() {
     const modal = await this.modalController.create({

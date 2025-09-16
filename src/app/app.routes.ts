@@ -380,6 +380,10 @@ export const routes: Routes = [
       {
         path: 'customer-chat',
         loadComponent: () => import('./transport/customer-chat/customer-chat.component').then((m) => m.CustomerChatComponent),
+      },
+      {
+        path: 'location-selection',
+        loadComponent: () => import('./transport/location-selection/location-selection.component').then((m) => m.LocationSelectionModalComponent),  
       }
     ]
   }

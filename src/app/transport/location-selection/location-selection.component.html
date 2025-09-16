@@ -1,0 +1,131 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Select Preferred Locations</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="location-selection-content">
+  <div class="selection-summary" *ngIf="selectedCities.length > 0 || selectedMandis.length > 0">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Current Selection</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="summary-item" *ngIf="selectedCities.length > 0">
+          <strong>Cities ({{selectedCities.length}}):</strong>
+          <p>{{getSelectedCityNames()}}</p>
+        </div>
+        <div class="summary-item" *ngIf="selectedMandis.length > 0">
+          <strong>Mandis ({{selectedMandis.length}}):</strong>
+          <p>{{getSelectedMandiNames()}}</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Cities Section -->
+  <div class="selection-section">
+    <div class="section-header">
+      <h3>Select Cities</h3>
+      <div class="header-actions">
+        <ion-button size="small" fill="clear" (click)="selectAllCities()">
+          Select All
+        </ion-button>
+        <ion-button size="small" fill="clear" color="danger" (click)="clearAllCities()">
+          Clear All
+        </ion-button>
+      </div>
+    </div>
+
+    <ion-list *ngIf="!isLoading && cities.length > 0">
+      <ion-item *ngFor="let city of cities" button (click)="toggleCity(city.id)">
+        <ion-checkbox
+          slot="start"
+          [checked]="isCitySelected(city.id)"
+          (ionChange)="toggleCity(city.id)"
+        ></ion-checkbox>
+        <ion-label>
+          <h3>{{city.name}}</h3>
+          <p>{{city.state}}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <div class="loading-state" *ngIf="isLoading">
+      <ion-spinner></ion-spinner>
+      <p>Loading cities...</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && cities.length === 0">
+      <ion-icon name="location-outline" class="empty-icon"></ion-icon>
+      <p>No cities available</p>
+    </div>
+  </div>
+
+  <!-- Mandis Section -->
+  <div class="selection-section" *ngIf="selectedCities.length > 0">
+    <div class="section-header">
+      <h3>Select Mandis</h3>
+      <div class="header-actions">
+        <ion-button size="small" fill="clear" (click)="selectAllMandis()">
+          Select All
+        </ion-button>
+        <ion-button size="small" fill="clear" color="danger" (click)="clearAllMandis()">
+          Clear All
+        </ion-button>
+      </div>
+    </div>
+
+    <ion-list *ngIf="!isLoading && mandis.length > 0">
+      <ion-item *ngFor="let mandi of mandis" button (click)="toggleMandi(mandi.id)">
+        <ion-checkbox
+          slot="start"
+          [checked]="isMandiSelected(mandi.id)"
+          (ionChange)="toggleMandi(mandi.id)"
+        ></ion-checkbox>
+        <ion-label>
+          <h3>{{mandi.name}}</h3>
+          <p>{{mandi.city_name}} - {{mandi.location}}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <div class="loading-state" *ngIf="isLoading">
+      <ion-spinner></ion-spinner>
+      <p>Loading mandis...</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && mandis.length === 0">
+      <ion-icon name="business-outline" class="empty-icon"></ion-icon>
+      <p>No mandis available for selected cities</p>
+    </div>
+  </div>
+
+  <div class="info-message" *ngIf="selectedCities.length === 0">
+    <ion-icon name="information-circle-outline" color="primary"></ion-icon>
+    <p>Select cities to see available mandis</p>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="cancel()">Cancel</ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button
+        fill="solid"
+        color="primary"
+        (click)="savePreferences()"
+        [disabled]="selectedCities.length === 0 && selectedMandis.length === 0"
+      >
+        Save Preferences
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

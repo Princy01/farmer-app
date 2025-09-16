@@ -44,12 +44,20 @@ export class TransportRequestService {
     });
   }
 
-  getTransportRequests(region?: string): Observable<{delivery_requests: TransportRequest[]}> {
+  getTransportRequests(cityIds?: number[], mandiIds?: number[]): Observable<{delivery_requests: TransportRequest[]}> {
     const headers = this.getAuthHeaders();
     let url = `${this.apiUrl}/requests/transport-requests`;
 
-    if (region) {
-      url += `?region=${encodeURIComponent(region)}`;
+    const params = [];
+    if (cityIds && cityIds.length > 0) {
+      params.push(`city_ids=${cityIds.join(',')}`);
+    }
+    if (mandiIds && mandiIds.length > 0) {
+      params.push(`mandi_ids=${mandiIds.join(',')}`);
+    }
+
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
     }
 
     return this.http.get<{delivery_requests: TransportRequest[]}>(url, { headers });

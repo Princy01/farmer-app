@@ -714,3 +714,95 @@
 .requests-grid {
   animation: fadeIn 0.5s ease-out;
 }
+
+.preferences-header {
+  padding: 16px;
+  background: var(--ion-color-light);
+  margin-bottom: 16px;
+
+  .preference-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .preference-text {
+      h3 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+      }
+
+      .location-summary {
+        margin: 0;
+        font-size: 14px;
+        color: var(--ion-color-medium);
+      }
+    }
+
+    .preferences-button {
+      --color: var(--ion-color-primary);
+      text-transform: none;
+      font-weight: 500;
+    }
+  }
+
+  .preference-divider {
+    height: 1px;
+    background: var(--ion-color-medium-tint);
+    margin-top: 12px;
+  }
+}
+
+.no-preferences-message {
+  padding: 0 16px;
+  margin-bottom: 16px;
+
+  ion-card {
+    margin: 0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .message-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .message-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    .message-text {
+      flex: 1;
+
+      h4 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--ion-color-medium);
+        line-height: 1.4;
+      }
+    }
+
+    ion-button {
+      text-transform: none;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+  }
+}
+
+.empty-state {
+  .change-location-btn {
+    margin-top: 16px;
+    text-transform: none;
+    font-weight: 500;
+  }
+}

@@ -1,6 +1,48 @@
 <ion-content class="transport-requests-content">
+  <!-- Location Preferences Header -->
+  <div class="preferences-header">
+    <div class="preference-info">
+      <div class="preference-text">
+        <h3>Service Areas</h3>
+        <p class="location-summary">{{locationSummary}}</p>
+      </div>
+      <ion-button
+        fill="clear"
+        size="small"
+        (click)="openLocationPreferences()"
+        class="preferences-button"
+      >
+        <ion-icon name="map-outline" slot="start"></ion-icon>
+        {{hasLocationPreferences ? 'Change' : 'Select'}}
+      </ion-button>
+    </div>
+    <div class="preference-divider"></div>
+  </div>
+
+  <!-- Show message if no location preferences are set -->
+  <div class="no-preferences-message" *ngIf="!hasLocationPreferences">
+    <ion-card>
+      <ion-card-content>
+        <div class="message-content">
+          <ion-icon name="map-outline" color="primary" class="message-icon"></ion-icon>
+          <div class="message-text">
+            <h4>Select Your Service Areas</h4>
+            <p>Choose your preferred cities and mandis to see relevant transport requests.</p>
+          </div>
+          <ion-button
+            color="primary"
+            size="small"
+            (click)="openLocationPreferences()"
+          >
+            Select Areas
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
   <!-- Transport Requests Section -->
-  <div class="regular-section">
+  <div class="regular-section" *ngIf="hasLocationPreferences">
     <div class="section-header">
       <h2 class="section-title">Available Requests</h2>
       <ion-badge color="primary" class="count-badge">{{
@@ -13,8 +55,17 @@
       <h3>No Requests Available</h3>
       <p>
         New delivery requests will appear here when they match your capacity and
-        location.
+        selected locations.
       </p>
+      <ion-button
+        fill="outline"
+        color="primary"
+        (click)="openLocationPreferences()"
+        class="change-location-btn"
+      >
+        <ion-icon name="map-outline" slot="start"></ion-icon>
+        Change Service Areas
+      </ion-button>
     </div>
 
     <div class="requests-grid">
@@ -145,7 +196,7 @@
 </ion-content>
 
 <!-- Filter and Sort Footer -->
-<ion-footer class="filter-footer">
+<ion-footer class="filter-footer" *ngIf="hasLocationPreferences">
   <ion-toolbar class="filter-toolbar">
     <div class="filter-actions">
       <ion-button
