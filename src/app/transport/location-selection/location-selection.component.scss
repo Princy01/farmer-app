@@ -64,6 +64,44 @@
   }
 }
 
+// Search bar styling
+.search-container {
+  padding: 0 8px 16px 8px;
+
+  .custom-searchbar {
+    --background: var(--ion-color-light);
+    --border-radius: 12px;
+    --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    --placeholder-color: var(--ion-color-medium);
+    --color: var(--ion-color-dark);
+    --icon-color: var(--ion-color-medium);
+    --clear-button-color: var(--ion-color-medium);
+
+    &.searchbar-has-focus {
+      --background: var(--ion-color-light-tint);
+      --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
+    }
+
+    .searchbar-input-container {
+      height: 44px;
+    }
+
+    .searchbar-input {
+      font-size: 16px;
+    }
+
+    .searchbar-search-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .searchbar-clear-button {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
 ion-list {
   background: transparent;
 }
@@ -91,7 +129,8 @@ ion-item {
     p {
       font-size: 14px;
       color: var(--ion-color-medium);
-      margin: 0;
+      margin: 2px 0;
+      line-height: 1.3;
     }
   }
 
@@ -102,7 +141,30 @@ ion-item {
   }
 }
 
-.loading-state, .empty-state {
+.branch-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px !important;
+  color: var(--ion-color-medium) !important;
+
+  .detail-icon {
+    font-size: 12px;
+    margin-left: 12px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+.established-year {
+  font-size: 11px !important;
+  color: var(--ion-color-medium-tint) !important;
+  font-weight: 500;
+}
+
+.loading-state, .empty-state, .no-results-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -123,7 +185,26 @@ ion-item {
   p {
     color: var(--ion-color-medium);
     font-size: 16px;
-    margin: 0;
+    margin: 0 0 16px 0;
+  }
+
+  ion-button {
+    text-transform: none;
+    font-weight: 500;
+  }
+}
+
+.no-results-state {
+  padding: 30px 20px;
+
+  .empty-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 14px;
+    margin-bottom: 12px;
   }
 }
 
@@ -157,5 +238,23 @@ ion-footer ion-toolbar {
   ion-button {
     text-transform: none;
     font-weight: 500;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .header-actions {
+      align-self: stretch;
+      justify-content: space-between;
+    }
+  }
+
+  .search-container {
+    padding: 0 4px 16px 4px;
   }
 }

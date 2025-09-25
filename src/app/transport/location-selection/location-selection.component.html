@@ -10,7 +10,7 @@
 </ion-header>
 
 <ion-content class="location-selection-content">
-  <div class="selection-summary" *ngIf="selectedCities.length > 0 || selectedMandis.length > 0">
+  <div class="selection-summary" *ngIf="selectedCities.length > 0 || selectedBranches.length > 0">
     <ion-card>
       <ion-card-header>
         <ion-card-title>Current Selection</ion-card-title>
@@ -20,9 +20,9 @@
           <strong>Cities ({{selectedCities.length}}):</strong>
           <p>{{getSelectedCityNames()}}</p>
         </div>
-        <div class="summary-item" *ngIf="selectedMandis.length > 0">
-          <strong>Mandis ({{selectedMandis.length}}):</strong>
-          <p>{{getSelectedMandiNames()}}</p>
+        <div class="summary-item" *ngIf="selectedBranches.length > 0">
+          <strong>Business Branches ({{selectedBranches.length}}):</strong>
+          <p>{{getSelectedBranchNames()}}</p>
         </div>
       </ion-card-content>
     </ion-card>
@@ -42,16 +42,29 @@
       </div>
     </div>
 
-    <ion-list *ngIf="!isLoading && cities.length > 0">
-      <ion-item *ngFor="let city of cities" button (click)="toggleCity(city.id)">
+    <!-- City Search Bar -->
+    <div class="search-container">
+      <ion-searchbar
+        [(ngModel)]="citySearchTerm"
+        (ionInput)="onCitySearch()"
+        (ionClear)="clearCitySearch()"
+        placeholder="Search cities..."
+        show-clear-button="focus"
+        debounce="300"
+        class="custom-searchbar"
+      ></ion-searchbar>
+    </div>
+
+    <ion-list *ngIf="!isLoading && filteredCities.length > 0">
+      <ion-item *ngFor="let city of filteredCities" button (click)="toggleCity(city.id)">
         <ion-checkbox
           slot="start"
           [checked]="isCitySelected(city.id)"
           (ionChange)="toggleCity(city.id)"
         ></ion-checkbox>
         <ion-label>
-          <h3>{{city.name}}</h3>
-          <p>{{city.state}}</p>
+          <h3>{{city.city_name}}</h3>
+          <p>{{city.state_name}}</p>
         </ion-label>
       </ion-item>
     </ion-list>
@@ -65,50 +78,88 @@
       <ion-icon name="location-outline" class="empty-icon"></ion-icon>
       <p>No cities available</p>
     </div>
+
+    <div class="no-results-state" *ngIf="!isLoading && cities.length > 0 && filteredCities.length === 0">
+      <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+      <p>No cities match your search</p>
+      <ion-button size="small" fill="clear" (click)="clearCitySearch()">
+        Clear Search
+      </ion-button>
+    </div>
   </div>
 
-  <!-- Mandis Section -->
+  <!-- Business Branches Section -->
   <div class="selection-section" *ngIf="selectedCities.length > 0">
     <div class="section-header">
-      <h3>Select Mandis</h3>
+      <h3>Select Business Branches</h3>
       <div class="header-actions">
-        <ion-button size="small" fill="clear" (click)="selectAllMandis()">
+        <ion-button size="small" fill="clear" (click)="selectAllBranches()">
           Select All
         </ion-button>
-        <ion-button size="small" fill="clear" color="danger" (click)="clearAllMandis()">
+        <ion-button size="small" fill="clear" color="danger" (click)="clearAllBranches()">
           Clear All
         </ion-button>
       </div>
     </div>
 
-    <ion-list *ngIf="!isLoading && mandis.length > 0">
-      <ion-item *ngFor="let mandi of mandis" button (click)="toggleMandi(mandi.id)">
+    <!-- Branch Search Bar -->
+    <div class="search-container">
+      <ion-searchbar
+        [(ngModel)]="branchSearchTerm"
+        (ionInput)="onBranchSearch()"
+        (ionClear)="clearBranchSearch()"
+        placeholder="Search business branches..."
+        show-clear-button="focus"
+        debounce="300"
+        class="custom-searchbar"
+      ></ion-searchbar>
+    </div>
+
+    <ion-list *ngIf="!isLoading && filteredBranches.length > 0">
+      <ion-item *ngFor="let branch of filteredBranches" button (click)="toggleBranch(branch.branch_id)">
         <ion-checkbox
           slot="start"
-          [checked]="isMandiSelected(mandi.id)"
-          (ionChange)="toggleMandi(mandi.id)"
+          [checked]="isBranchSelected(branch.branch_id)"
+          (ionChange)="toggleBranch(branch.branch_id)"
         ></ion-checkbox>
         <ion-label>
-          <h3>{{mandi.name}}</h3>
-          <p>{{mandi.city_name}} - {{mandi.location}}</p>
+          <h3>{{branch.shop_name}}</h3>
+          <p>{{branch.address}}</p>
+          <p class="branch-details">
+            <ion-icon name="mail-outline" class="detail-icon"></ion-icon>
+            {{branch.email}}
+            <ion-icon name="call-outline" class="detail-icon"></ion-icon>
+            {{branch.number}}
+          </p>
+          <p class="established-year" *ngIf="branch.established_year">
+            Est. {{branch.established_year}}
+          </p>
         </ion-label>
       </ion-item>
     </ion-list>
 
     <div class="loading-state" *ngIf="isLoading">
       <ion-spinner></ion-spinner>
-      <p>Loading mandis...</p>
+      <p>Loading business branches...</p>
     </div>
 
-    <div class="empty-state" *ngIf="!isLoading && mandis.length === 0">
+    <div class="empty-state" *ngIf="!isLoading && branches.length === 0">
       <ion-icon name="business-outline" class="empty-icon"></ion-icon>
-      <p>No mandis available for selected cities</p>
+      <p>No business branches available for selected cities</p>
+    </div>
+
+    <div class="no-results-state" *ngIf="!isLoading && branches.length > 0 && filteredBranches.length === 0">
+      <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+      <p>No branches match your search</p>
+      <ion-button size="small" fill="clear" (click)="clearBranchSearch()">
+        Clear Search
+      </ion-button>
     </div>
   </div>
 
   <div class="info-message" *ngIf="selectedCities.length === 0">
     <ion-icon name="information-circle-outline" color="primary"></ion-icon>
-    <p>Select cities to see available mandis</p>
+    <p>Select cities to see available business branches</p>
   </div>
 </ion-content>
 
@@ -122,7 +173,7 @@
         fill="solid"
         color="primary"
         (click)="savePreferences()"
-        [disabled]="selectedCities.length === 0 && selectedMandis.length === 0"
+        [disabled]="selectedCities.length === 0 && selectedBranches.length === 0"
       >
         Save Preferences
       </ion-button>

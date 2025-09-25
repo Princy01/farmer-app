@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { AlertController, ToastController, IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 import { addIcons } from 'ionicons';
 import {
   chevronForwardOutline, funnelOutline, swapVerticalOutline, flashOutline,
@@ -20,7 +21,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-transport-requests',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, HttpClientModule],
   templateUrl: './transport-requests.component.html',
   styleUrls: ['./transport-requests.component.scss'],
 })
@@ -32,7 +33,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   // Driver configuration
   transporterId: string = 'T001';
-  vehicleId: number = 1; // Default vehicle ID
+  vehicleId: number = 1;
 
   // Driver Load Constraints
   minLoad: number = 300;
@@ -98,12 +99,12 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   private updateLocationSummary() {
     const preferences = this.locationPreferenceService.getCurrentPreferences();
     const cityCount = preferences.cities.length;
-    const mandiCount = preferences.mandis.length;
+    const branchCount = preferences.branches.length;
 
-    if (cityCount > 0 || mandiCount > 0) {
+    if (cityCount > 0 || branchCount > 0) {
       const parts = [];
       if (cityCount > 0) parts.push(`${cityCount} cities`);
-      if (mandiCount > 0) parts.push(`${mandiCount} mandis`);
+      if (branchCount > 0) parts.push(`${branchCount} branches`);
       this.locationSummary = parts.join(' + ');
     } else {
       this.locationSummary = 'All locations';
@@ -113,7 +114,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   private startPolling() {
     this.pollInterval = setInterval(() => {
       this.loadTransportRequests();
-    }, 10000); // Poll every 10 seconds
+    }, 30000); // Poll every 30 seconds
   }
 
   private stopPolling() {
@@ -127,11 +128,12 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     const sub = this.transportRequestService.getTransportRequests(
       preferences.cities.length > 0 ? preferences.cities : undefined,
-      preferences.mandis.length > 0 ? preferences.mandis : undefined
+      preferences.branches.length > 0 ? preferences.branches : undefined
     ).subscribe({
       next: (response) => {
-        this.transportRequests = response.delivery_requests;
+        this.transportRequests = response.delivery_requests || [];
         this.applyFilters();
+        console.log(`Loaded ${this.transportRequests.length} transport requests`);
       },
       error: (error) => {
         console.error('Failed to load transport requests:', error);
@@ -152,6 +154,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     const { data } = await modal.onDidDismiss();
     if (data) {
       this.showToast('Location preferences updated successfully!', 'success');
+      // The subscription will automatically reload requests when preferences change
     }
   }
 
@@ -179,7 +182,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Use a simple confirmation alert instead of HTML
     const alert = await this.alertCtrl.create({
       header: 'Accept Transport Request',
       message: `Job #${request.job_id}\n\nPickup: ${request.pickup_location}\nDelivery: ${request.dropoff_location}\nWeight: ${request.weight}kg\nDistance: ${request.distance}km\nPrice: ₹${request.base_price}`,
@@ -188,7 +190,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
         {
           text: 'Accept',
           handler: async () => {
-            // Show loading toast
             const loadingToast = await this.toastCtrl.create({
               message: 'Processing request...',
               duration: 2000,
@@ -225,7 +226,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   async rejectOrder(request: TransportRequest) {
-    // Check if already accepted or rejected
     if (this.acceptedRequests.has(request.job_id) || this.rejectedRequests.has(request.job_id)) {
       return;
     }
@@ -327,10 +327,12 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   applyFilters() {
     let filteredOrders = [...this.transportRequests];
 
+    // Apply load capacity filters
     filteredOrders = filteredOrders.filter(order =>
       order.weight >= this.minLoad && order.weight <= this.maxLoad
     );
 
+    // Apply priority filters
     if (this.priorityDeliveries) {
       filteredOrders = filteredOrders.filter(order => order.urgency.toLowerCase() === 'high');
     }
@@ -348,6 +350,11 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
 
     this.filteredRequests = filteredOrders;
+
+    // Apply current sort if any
+    if (this.sortOption) {
+      this.applySort();
+    }
   }
 
   async openSortModal() {
@@ -428,10 +435,5 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   // Getter for template compatibility
   get pendingDeliveries(): TransportRequest[] {
     return this.filteredRequests;
-  }
-
-  // Remove urgent requests section since all requests come from backend
-  get unassignedOrders(): any[] {
-    return [];
   }
 }

@@ -236,6 +236,10 @@ export const routes: Routes = [
         loadComponent: () => import('./buyer/retailer-order-tracking/retailer-order-tracking.component').then((m) => m.RetailerOrderTrackingComponent),
       },
       {
+        path: 'retailer-order-details',
+        loadComponent: () => import('./buyer/retailer-order-details/retailer-order-details.component').then((m) => m.RetailerOrderDetailsComponent),
+      },
+      {
         path: 'RetailerTrends',
         loadComponent: () => import('./buyer/retailer-trends/retailer-trends.component').then((m) => m.RetailerTrendsComponent),
       },
@@ -383,7 +387,7 @@ export const routes: Routes = [
       },
       {
         path: 'location-selection',
-        loadComponent: () => import('./transport/location-selection/location-selection.component').then((m) => m.LocationSelectionModalComponent),  
+        loadComponent: () => import('./transport/location-selection/location-selection.component').then((m) => m.LocationSelectionModalComponent),
       }
     ]
   }

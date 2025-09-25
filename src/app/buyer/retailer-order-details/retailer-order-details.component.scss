@@ -1,0 +1,253 @@
+ion-content {
+  --background: #f8f9fa;
+}
+
+.order-details {
+  .detail-section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      color: var(--ion-color-dark);
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0 0 16px 0;
+      color: var(--ion-color-dark);
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+      color: var(--ion-color-dark);
+    }
+
+    p {
+      margin: 0;
+      color: var(--ion-color-medium);
+      line-height: 1.4;
+    }
+  }
+
+  .order-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      ion-icon {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .order-date {
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+  }
+
+  .progress-section {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+
+    ion-progress-bar {
+      height: 6px;
+      border-radius: 3px;
+      margin-bottom: 8px;
+    }
+
+    .progress-text {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--ion-color-dark);
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+
+  .wholesaler-card {
+    padding: 16px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 12px;
+
+    .wholesaler-info {
+      h4 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+
+  .items-list {
+    .item-card {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 12px;
+      margin-bottom: 12px;
+
+      img {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+        margin-right: 16px;
+      }
+
+      .item-info {
+        flex: 1;
+
+        h4 {
+          margin: 0 0 4px 0;
+          font-weight: 600;
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.85rem;
+          color: var(--ion-color-medium);
+        }
+      }
+
+      .item-total {
+        strong {
+          font-size: 1.1rem;
+          color: var(--ion-color-dark);
+        }
+      }
+    }
+  }
+
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 16px;
+
+    ion-icon {
+      margin-right: 16px;
+      margin-top: 4px;
+      color: #667eea;
+      font-size: 1.2rem;
+    }
+
+    div {
+      flex: 1;
+    }
+  }
+
+  .payment-summary {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 16px;
+    border-radius: 12px;
+
+    .payment-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+
+      &.total {
+        border-top: 2px solid #667eea;
+        padding-top: 12px;
+        margin-top: 12px;
+        font-size: 1.1rem;
+
+        strong {
+          font-weight: 700;
+          color: #667eea;
+        }
+      }
+    }
+
+    .payment-method {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #dee2e6;
+
+      .payment-method-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+
+        ion-icon {
+          margin-right: 8px;
+          color: #667eea;
+          font-size: 1.1rem;
+        }
+      }
+
+      .payment-method-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+
+        .payment-type {
+          display: flex;
+          align-items: center;
+
+          ion-icon {
+            margin-right: 8px;
+            color: #667eea;
+            font-size: 1.2rem;
+          }
+
+          span {
+            font-weight: 500;
+            color: var(--ion-color-dark);
+          }
+        }
+
+        .payment-status {
+          ion-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          }
+        }
+      }
+    }
+  }
+
+  .notes-card {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 16px;
+
+    p {
+      color: #856404;
+      margin: 0;
+    }
+  }
+}

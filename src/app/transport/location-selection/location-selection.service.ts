@@ -1,26 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { map } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
 export interface City {
   id: number;
-  name: string;
-  state: string;
+  city_shortnames: string;
+  city_name: string;
+  state_name: string;
+  state_id: number;
 }
 
-export interface Mandi {
-  id: number;
-  name: string;
-  city_id: number;
-  city_name: string;
-  location: string;
+export interface BusinessBranch {
+  branch_id: number;
+  shop_name: string;
+  address: string;
+  email: string;
+  number: string;
+  established_year: string;
 }
 
 export interface LocationPreference {
   cities: number[];
-  mandis: number[];
+  branches: number[];
 }
 
 @Injectable({
@@ -31,7 +36,7 @@ export class LocationPreferenceService {
   private readonly STORAGE_KEY = 'driver_location_preferences';
 
   // BehaviorSubject to track current preferences
-  private preferencesSubject = new BehaviorSubject<LocationPreference>({ cities: [], mandis: [] });
+  private preferencesSubject = new BehaviorSubject<LocationPreference>({ cities: [], branches: [] });
   public preferences$ = this.preferencesSubject.asObservable();
 
   constructor(private http: HttpClient, private authService: AuthService) {
@@ -49,14 +54,28 @@ export class LocationPreferenceService {
   // Get all available cities
   getCities(): Observable<City[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<City[]>(`${this.apiUrl}/locations/cities`, { headers });
+    return this.http.get<City[]>(`${this.apiUrl}/getAllCities`, { headers });
   }
 
-  // Get mandis for selected cities
-  getMandisByCities(cityIds: number[]): Observable<Mandi[]> {
+  // Get business branches for a selected city
+  getBusinessBranchesByCity(cityId: number): Observable<BusinessBranch[]> {
     const headers = this.getAuthHeaders();
-    const params = cityIds.map(id => `city_ids=${id}`).join('&');
-    return this.http.get<Mandi[]>(`${this.apiUrl}/locations/mandis?${params}`, { headers });
+    return this.http.get<BusinessBranch[]>(`${this.apiUrl}/getAllBusinessBranchesByCity/${cityId}`, { headers });
+  }
+
+  // Get business branches for multiple cities
+  getBusinessBranchesByCities(cityIds: number[]): Observable<{cityId: number, branches: BusinessBranch[]}[]> {
+    const headers = this.getAuthHeaders();
+
+    // Create observables for each city
+    const requests = cityIds.map(cityId =>
+      this.getBusinessBranchesByCity(cityId).pipe(
+        map(branches => ({ cityId, branches }))
+      )
+    );
+
+    // Combine all requests
+    return forkJoin(requests);
   }
 
   // Save preferences to local storage
@@ -82,12 +101,12 @@ export class LocationPreferenceService {
   // Clear all preferences
   clearPreferences(): void {
     localStorage.removeItem(this.STORAGE_KEY);
-    this.preferencesSubject.next({ cities: [], mandis: [] });
+    this.preferencesSubject.next({ cities: [], branches: [] });
   }
 
   // Check if preferences are set
   hasPreferences(): boolean {
     const prefs = this.getCurrentPreferences();
-    return prefs.cities.length > 0 || prefs.mandis.length > 0;
+    return prefs.cities.length > 0 || prefs.branches.length > 0;
   }
 }

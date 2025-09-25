@@ -1,0 +1,136 @@
+<ion-header mode="ios">
+  <ion-toolbar style="--background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --color: white;">
+    <ion-buttons slot="start">
+      <ion-back-button (click)="goBack()" style="--color: white;"></ion-back-button>
+    </ion-buttons>
+    <ion-title style="font-weight: 600; font-size: 1.2rem;">Order Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="order-details" *ngIf="order">
+    <!-- Order Header -->
+    <div class="detail-section">
+      <div class="order-header-info">
+        <h2>{{ order.orderId }}</h2>
+        <ion-badge [color]="getStatusColor(order.status)" class="status-badge">
+          <ion-icon [name]="getStatusIcon(order.status)"></ion-icon>
+          {{ order.status }}
+        </ion-badge>
+      </div>
+      <p class="order-date">Placed on {{ order.placedAt | date: 'medium' }}</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-section" *ngIf="order.status !== 'Cancelled'">
+      <ion-progress-bar [value]="getOrderProgress(order.status)" color="success"></ion-progress-bar>
+      <p class="progress-text">Order {{ order.status }}</p>
+    </div>
+
+    <!-- Wholesaler Info -->
+    <div class="detail-section">
+      <h3>Wholesaler Details</h3>
+      <div class="wholesaler-card">
+        <div class="wholesaler-info">
+          <h4>{{ order.wholesalerName }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items -->
+    <div class="detail-section">
+      <h3>Items Ordered</h3>
+      <div class="items-list">
+        <div class="item-card" *ngFor="let item of order.items">
+          <img [src]="item.imageUrl || 'assets/default-product.png'" alt="{{ item.productName }}">
+          <div class="item-info">
+            <h4>{{ item.productName }}</h4>
+            <p>Qty: {{ item.quantity }} × ₹{{ item.unitPrice }}</p>
+          </div>
+          <div class="item-total">
+            <strong>₹{{ item.total }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery Info -->
+    <div class="detail-section">
+      <h3>Delivery Information</h3>
+      <div class="info-item">
+        <ion-icon name="location-outline"></ion-icon>
+        <div>
+          <h4>Delivery Address</h4>
+          <p>{{ order.deliveryAddress }}</p>
+        </div>
+      </div>
+      <div class="info-item" *ngIf="order.estimatedDelivery">
+        <ion-icon name="time-outline"></ion-icon>
+        <div>
+          <h4>Estimated Delivery</h4>
+          <p>{{ order.estimatedDelivery | date: 'medium' }}</p>
+        </div>
+      </div>
+      <div class="info-item" *ngIf="order.deliveredAt">
+        <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+        <div>
+          <h4>Delivered On</h4>
+          <p>{{ order.deliveredAt | date: 'medium' }}</p>
+        </div>
+      </div>
+      <div class="info-item" *ngIf="order.trackingNumber">
+        <ion-icon name="trail-sign-outline"></ion-icon>
+        <div>
+          <h4>Tracking Number</h4>
+          <p>{{ order.trackingNumber }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Info -->
+    <div class="detail-section">
+      <h3>Payment Summary</h3>
+      <div class="payment-summary">
+        <div class="payment-row">
+          <span>Subtotal</span>
+          <span>₹{{ getSubtotal() }}</span>
+        </div>
+        <div class="payment-row">
+          <span>Delivery Fee</span>
+          <span>₹{{ getDeliveryFee() }}</span>
+        </div>
+        <div class="payment-row">
+          <span>Tax & Fees</span>
+          <span>₹{{ getTaxFee() }}</span>
+        </div>
+        <div class="payment-row total">
+          <strong>Total</strong>
+          <strong>₹{{ order.totalAmount }}</strong>
+        </div>
+        <div class="payment-method">
+          <div class="payment-method-header">
+            <ion-icon name="wallet-outline"></ion-icon>
+            <span>Payment Method</span>
+          </div>
+          <div class="payment-method-details">
+            <div class="payment-type">
+              <ion-icon [name]="getPaymentIcon(order.paymentMethod)"></ion-icon>
+              <span>{{ order.paymentMethod }}</span>
+            </div>
+            <div class="payment-status">
+              <ion-badge color="success">Paid</ion-badge>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Notes -->
+    <div class="detail-section" *ngIf="order.orderNotes">
+      <h3>Order Notes</h3>
+      <div class="notes-card">
+        <p>{{ order.orderNotes }}</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

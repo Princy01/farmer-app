@@ -44,7 +44,7 @@ export class TransportRequestService {
     });
   }
 
-  getTransportRequests(cityIds?: number[], mandiIds?: number[]): Observable<{delivery_requests: TransportRequest[]}> {
+  getTransportRequests(cityIds?: number[], branchIds?: number[]): Observable<{delivery_requests: TransportRequest[]}> {
     const headers = this.getAuthHeaders();
     let url = `${this.apiUrl}/requests/transport-requests`;
 
@@ -52,8 +52,8 @@ export class TransportRequestService {
     if (cityIds && cityIds.length > 0) {
       params.push(`city_ids=${cityIds.join(',')}`);
     }
-    if (mandiIds && mandiIds.length > 0) {
-      params.push(`mandi_ids=${mandiIds.join(',')}`);
+    if (branchIds && branchIds.length > 0) {
+      params.push(`branch_ids=${branchIds.join(',')}`);
     }
 
     if (params.length > 0) {
