@@ -1,0 +1,83 @@
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  margin-left: 16px;
+}
+
+.submit-section {
+  padding: 16px;
+  margin-bottom: 32px;
+}
+
+ion-card {
+  margin: 16px;
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ion-color-primary);
+    font-weight: 600;
+  }
+}
+
+ion-item {
+  --border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+ion-input, ion-select, ion-textarea {
+  --placeholder-color: var(--ion-color-medium);
+}
+
+ion-checkbox {
+  margin-right: 12px;
+}
+
+ion-label.ion-text-wrap {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+// Form section styling
+ion-card-header {
+  padding-bottom: 8px;
+}
+
+ion-card-content {
+  padding-top: 8px;
+}
+
+// Button styling
+ion-button[type="submit"] {
+  --background: var(--ion-color-success);
+  --border-radius: 12px;
+  font-weight: 600;
+  height: 48px;
+}
+
+ion-button[type="submit"]:disabled {
+  --background: var(--ion-color-medium);
+  --color: var(--ion-color-light);
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  ion-card {
+    margin: 8px;
+  }
+
+  .submit-section {
+    padding: 8px;
+  }
+
+  ion-card-title {
+    font-size: 1.1rem;
+  }
+}
+
+// Toast styling
+ion-toast {
+  --border-radius: 8px;
+}

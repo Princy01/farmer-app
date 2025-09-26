@@ -8,7 +8,8 @@ import {
 import { addIcons } from 'ionicons';
 import {
   speedometerOutline, pricetagOutline, carOutline, personOutline, navigateOutline,
-  locationOutline, checkmarkCircleOutline, cashOutline, timeOutline, notificationsOutline, documentTextOutline, checkmarkDoneOutline
+  locationOutline, checkmarkCircleOutline, cashOutline, timeOutline, notificationsOutline,
+  documentTextOutline, checkmarkDoneOutline, personAddOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -32,6 +33,7 @@ export class TransportComponent implements OnInit {
     '/transport/transport-update-rates': 'Update Rates',
     '/transport/manage-vehicles': 'Manage Vehicles',
     '/transport/manage-drivers': 'Manage Drivers',
+    '/transport/driver-registration': 'Driver Registration',
     '/transport/transport-requests': 'Requests',
     '/transport/active-deliveries': 'Active Deliveries',
     '/transport/live-tracking': 'Live Tracking',
@@ -45,9 +47,9 @@ export class TransportComponent implements OnInit {
   constructor(private router: Router) {
     addIcons({
       speedometerOutline, pricetagOutline, carOutline, personOutline, navigateOutline,
-      locationOutline, checkmarkCircleOutline, cashOutline, timeOutline, notificationsOutline, documentTextOutline, checkmarkDoneOutline
+      locationOutline, checkmarkCircleOutline, cashOutline, timeOutline, notificationsOutline,
+      documentTextOutline, checkmarkDoneOutline, personAddOutline
     });
-
     // Listen for route changes
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {

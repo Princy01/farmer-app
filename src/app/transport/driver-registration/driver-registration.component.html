@@ -1,0 +1,866 @@
+<!-- <ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Driver Registration</ion-title>
+  </ion-toolbar>
+</ion-header> -->
+
+<ion-content [fullscreen]="true">
+  <form [formGroup]="driverForm" (ngSubmit)="onSubmit()">
+    <!-- Personal Information -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="person" slot="start"></ion-icon>
+          Personal Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">First Name *</ion-label>
+                <ion-input
+                  formControlName="firstName"
+                  placeholder="Enter first name"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('firstName')">
+                {{ getErrorMessage("firstName") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Last Name *</ion-label>
+                <ion-input
+                  formControlName="lastName"
+                  placeholder="Enter last name"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('lastName')">
+                {{ getErrorMessage("lastName") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Email *</ion-label>
+                <ion-input
+                  formControlName="email"
+                  type="email"
+                  placeholder="Enter email"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('email')">
+                {{ getErrorMessage("email") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Mobile Number *</ion-label>
+                <ion-input
+                  formControlName="phone"
+                  type="tel"
+                  placeholder="Enter 10-digit mobile number"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('phone')">
+                {{ getErrorMessage("phone") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Alternate Mobile</ion-label>
+                <ion-input
+                  formControlName="alternatePhone"
+                  type="tel"
+                  placeholder="Enter alternate mobile number"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('alternatePhone')"
+              >
+                {{ getErrorMessage("alternatePhone") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Date of Birth *</ion-label>
+                <ion-datetime-button
+                  datetime="dateOfBirth"
+                ></ion-datetime-button>
+                <ion-modal [keepContentsMounted]="true">
+                  <ng-template>
+                    <ion-datetime
+                      id="dateOfBirth"
+                      formControlName="dateOfBirth"
+                      presentation="date"
+                      [max]="maxBirthDate"
+                    >
+                    </ion-datetime>
+                  </ng-template>
+                </ion-modal>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('dateOfBirth')">
+                {{ getErrorMessage("dateOfBirth") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Gender *</ion-label>
+                <ion-select
+                  formControlName="gender"
+                  placeholder="Select gender"
+                >
+                  <ion-select-option
+                    *ngFor="let gender of genders"
+                    [value]="gender"
+                  >
+                    {{ gender }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('gender')">
+                {{ getErrorMessage("gender") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Blood Group</ion-label>
+                <ion-select
+                  formControlName="bloodGroup"
+                  placeholder="Select blood group"
+                >
+                  <ion-select-option
+                    *ngFor="let bg of bloodGroups"
+                    [value]="bg"
+                  >
+                    {{ bg }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Identity & License Information -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="card" slot="start"></ion-icon>
+          Identity & License Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Aadhar Number *</ion-label>
+                <ion-input
+                  formControlName="aadharNumber"
+                  placeholder="Enter 12-digit Aadhar number"
+                  maxlength="12"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('aadharNumber')"
+              >
+                {{ getErrorMessage("aadharNumber") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">PAN Number</ion-label>
+                <ion-input
+                  formControlName="panNumber"
+                  placeholder="Enter PAN number (e.g., ABCDE1234F)"
+                  style="text-transform: uppercase"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('panNumber')">
+                {{ getErrorMessage("panNumber") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked"
+                  >Driving License Number *</ion-label
+                >
+                <ion-input
+                  formControlName="licenseNumber"
+                  placeholder="Enter driving license number"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('licenseNumber')"
+              >
+                {{ getErrorMessage("licenseNumber") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">License Type *</ion-label>
+                <ion-select
+                  formControlName="licenseType"
+                  placeholder="Select license type"
+                >
+                  <ion-select-option
+                    *ngFor="let type of licenseTypes"
+                    [value]="type"
+                  >
+                    {{ type }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('licenseType')">
+                {{ getErrorMessage("licenseType") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">License Issue Date *</ion-label>
+                <ion-datetime-button
+                  datetime="licenseIssueDate"
+                ></ion-datetime-button>
+                <ion-modal [keepContentsMounted]="true">
+                  <ng-template>
+                    <ion-datetime
+                      id="licenseIssueDate"
+                      formControlName="licenseIssueDate"
+                      presentation="date"
+                      [max]="maxLicenseIssueDate"
+                    >
+                    </ion-datetime>
+                  </ng-template>
+                </ion-modal>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('licenseIssueDate')"
+              >
+                {{ getErrorMessage("licenseIssueDate") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">License Expiry Date *</ion-label>
+                <ion-datetime-button
+                  datetime="licenseExpiry"
+                ></ion-datetime-button>
+                <ion-modal [keepContentsMounted]="true">
+                  <ng-template>
+                    <ion-datetime
+                      id="licenseExpiry"
+                      formControlName="licenseExpiry"
+                      presentation="date"
+                      [min]="minExpiryDate"
+                    >
+                    </ion-datetime>
+                  </ng-template>
+                </ion-modal>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('licenseExpiry')"
+              >
+                {{ getErrorMessage("licenseExpiry") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Years of Experience *</ion-label>
+                <ion-input
+                  formControlName="experience"
+                  placeholder="Years of driving experience"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('experience')">
+                {{ getErrorMessage("experience") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Languages Known *</ion-label>
+                <ion-select
+                  formControlName="languagesKnown"
+                  multiple="true"
+                  placeholder="Select languages"
+                >
+                  <ion-select-option
+                    *ngFor="let lang of languages"
+                    [value]="lang"
+                  >
+                    {{ lang }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('languagesKnown')"
+              >
+                {{ getErrorMessage("languagesKnown") }}
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Address Information -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="home" slot="start"></ion-icon>
+          Address Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12">
+              <ion-item>
+                <ion-label position="stacked">Current Address *</ion-label>
+                <ion-textarea
+                  formControlName="address"
+                  placeholder="Enter current address"
+                  rows="2"
+                ></ion-textarea>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('address')">
+                {{ getErrorMessage("address") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-label position="stacked">City *</ion-label>
+                <ion-input
+                  formControlName="city"
+                  placeholder="Enter city"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('city')">
+                {{ getErrorMessage("city") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-label position="stacked">State *</ion-label>
+                <ion-select formControlName="state" placeholder="Select state">
+                  <ion-select-option
+                    *ngFor="let state of indianStates"
+                    [value]="state"
+                  >
+                    {{ state }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('state')">
+                {{ getErrorMessage("state") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-label position="stacked">PIN Code *</ion-label>
+                <ion-input
+                  formControlName="pinCode"
+                  placeholder="Enter 6-digit PIN code"
+                  maxlength="6"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('pinCode')">
+                {{ getErrorMessage("pinCode") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12">
+              <ion-item>
+                <ion-label position="stacked">Permanent Address *</ion-label>
+                <ion-textarea
+                  formControlName="permanentAddress"
+                  placeholder="Enter permanent address"
+                  rows="2"
+                ></ion-textarea>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('permanentAddress')"
+              >
+                {{ getErrorMessage("permanentAddress") }}
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Vehicle Information -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="car" slot="start"></ion-icon>
+          Vehicle Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Vehicle Type *</ion-label>
+                <ion-select
+                  formControlName="vehicleType"
+                  placeholder="Select vehicle type"
+                >
+                  <ion-select-option
+                    *ngFor="let type of vehicleTypes"
+                    [value]="type"
+                  >
+                    {{ type }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('vehicleType')">
+                {{ getErrorMessage("vehicleType") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Vehicle Model *</ion-label>
+                <ion-input
+                  formControlName="vehicleModel"
+                  placeholder="Enter vehicle model"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('vehicleModel')"
+              >
+                {{ getErrorMessage("vehicleModel") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked"
+                  >Vehicle Registration Number *</ion-label
+                >
+                <ion-input
+                  formControlName="vehiclePlate"
+                  placeholder="e.g., MH12AB1234"
+                  style="text-transform: uppercase"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('vehiclePlate')"
+              >
+                {{ getErrorMessage("vehiclePlate") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Vehicle Year *</ion-label>
+                <ion-input
+                  formControlName="vehicleYear"
+                  placeholder="Enter manufacturing year"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('vehicleYear')">
+                {{ getErrorMessage("vehicleYear") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Vehicle Color *</ion-label>
+                <ion-input
+                  formControlName="vehicleColor"
+                  placeholder="Enter vehicle color"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('vehicleColor')"
+              >
+                {{ getErrorMessage("vehicleColor") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">RC Number *</ion-label>
+                <ion-input
+                  formControlName="rcNumber"
+                  placeholder="Enter Registration Certificate number"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('rcNumber')">
+                {{ getErrorMessage("rcNumber") }}
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Insurance & Environmental Compliance -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="shield" slot="start"></ion-icon>
+          Insurance & Environmental Compliance
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Insurance Provider *</ion-label>
+                <ion-select
+                  formControlName="insuranceProvider"
+                  placeholder="Select insurance company"
+                >
+                  <ion-select-option
+                    *ngFor="let provider of insuranceProviders"
+                    [value]="provider"
+                  >
+                    {{ provider }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('insuranceProvider')"
+              >
+                {{ getErrorMessage("insuranceProvider") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked"
+                  >Insurance Policy Number *</ion-label
+                >
+                <ion-input
+                  formControlName="insuranceNumber"
+                  placeholder="Enter insurance policy number"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('insuranceNumber')"
+              >
+                {{ getErrorMessage("insuranceNumber") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked"
+                  >Insurance Expiry Date *</ion-label
+                >
+                <ion-datetime-button
+                  datetime="insuranceExpiry"
+                ></ion-datetime-button>
+                <ion-modal [keepContentsMounted]="true">
+                  <ng-template>
+                    <ion-datetime
+                      id="insuranceExpiry"
+                      formControlName="insuranceExpiry"
+                      presentation="date"
+                      [min]="minExpiryDate"
+                    >
+                    </ion-datetime>
+                  </ng-template>
+                </ion-modal>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('insuranceExpiry')"
+              >
+                {{ getErrorMessage("insuranceExpiry") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked"
+                  >PUC Certificate Number *</ion-label
+                >
+                <ion-input
+                  formControlName="pollutionCertificateNumber"
+                  placeholder="Enter PUC certificate number"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('pollutionCertificateNumber')"
+              >
+                {{ getErrorMessage("pollutionCertificateNumber") }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">PUC Expiry Date *</ion-label>
+                <ion-datetime-button
+                  datetime="pollutionExpiry"
+                ></ion-datetime-button>
+                <ion-modal [keepContentsMounted]="true">
+                  <ng-template>
+                    <ion-datetime
+                      id="pollutionExpiry"
+                      formControlName="pollutionExpiry"
+                      presentation="date"
+                      [min]="minExpiryDate"
+                    >
+                    </ion-datetime>
+                  </ng-template>
+                </ion-modal>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('pollutionExpiry')"
+              >
+                {{ getErrorMessage("pollutionExpiry") }}
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Emergency Contact -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="call" slot="start"></ion-icon>
+          Emergency Contact
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-label position="stacked"
+                  >Emergency Contact Name *</ion-label
+                >
+                <ion-input
+                  formControlName="emergencyContact"
+                  placeholder="Enter contact name"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('emergencyContact')"
+              >
+                {{ getErrorMessage("emergencyContact") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-label position="stacked"
+                  >Emergency Contact Phone *</ion-label
+                >
+                <ion-input
+                  formControlName="emergencyPhone"
+                  type="tel"
+                  placeholder="Enter contact phone"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('emergencyPhone')"
+              >
+                {{ getErrorMessage("emergencyPhone") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-label position="stacked">Relationship *</ion-label>
+                <ion-select
+                  formControlName="emergencyRelation"
+                  placeholder="Select relationship"
+                >
+                  <ion-select-option
+                    *ngFor="let relation of relations"
+                    [value]="relation"
+                  >
+                    {{ relation }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('emergencyRelation')"
+              >
+                {{ getErrorMessage("emergencyRelation") }}
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Banking Information -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="card" slot="start"></ion-icon>
+          Banking Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">Bank Account Number *</ion-label>
+                <ion-input
+                  formControlName="bankAccountNumber"
+                  placeholder="Enter bank account number"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('bankAccountNumber')"
+              >
+                {{ getErrorMessage("bankAccountNumber") }}
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="stacked">IFSC Code *</ion-label>
+                <ion-input
+                  formControlName="ifscCode"
+                  placeholder="Enter IFSC code"
+                  style="text-transform: uppercase"
+                ></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('ifscCode')">
+                {{ getErrorMessage("ifscCode") }}
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Verifications & Certifications -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="document" slot="start"></ion-icon>
+          Verifications & Certifications
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-checkbox
+            formControlName="medicalCertificate"
+            slot="start"
+          ></ion-checkbox>
+          <ion-label class="ion-text-wrap">
+            I have a valid medical fitness certificate *
+          </ion-label>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="getErrorMessage('medicalCertificate')"
+        >
+          Medical certificate verification is required
+        </div>
+
+        <ion-item>
+          <ion-checkbox
+            formControlName="policeVerification"
+            slot="start"
+          ></ion-checkbox>
+          <ion-label class="ion-text-wrap">
+            I have completed police verification *
+          </ion-label>
+        </ion-item>
+        <div
+          class="error-message"
+          *ngIf="getErrorMessage('policeVerification')"
+        >
+          Police verification is required
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Terms and Conditions -->
+    <ion-card>
+      <ion-card-content>
+        <ion-item>
+          <ion-checkbox
+            formControlName="termsAccepted"
+            slot="start"
+          ></ion-checkbox>
+          <ion-label class="ion-text-wrap">
+            I agree to the Terms and Conditions, Privacy Policy, and Driver Code
+            of Conduct *
+          </ion-label>
+        </ion-item>
+        <div class="error-message" *ngIf="getErrorMessage('termsAccepted')">
+          You must accept the terms and conditions
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Submit Button -->
+    <div class="submit-section">
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="!driverForm.valid"
+        size="large"
+      >
+        Submit Driver Registration
+      </ion-button>
+    </div>
+  </form>
+
+  <ion-toast
+    [isOpen]="isToastOpen"
+    [message]="toastMessage"
+    duration="3000"
+    (didDismiss)="setToastOpen(false)"
+  >
+  </ion-toast>
+</ion-content>

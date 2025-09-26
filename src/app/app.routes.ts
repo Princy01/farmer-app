@@ -334,6 +334,10 @@ export const routes: Routes = [
         pathMatch: 'full',
       },
       {
+        path: 'driver-registration',
+        loadComponent: () => import('./transport/driver-registration/driver-registration.component').then((m) => m.DriverRegistrationPage), 
+      },
+      {
         path: 'transport-dashboard',
         loadComponent: () => import('./transport/transport-dashboard/transport-dashboard.component').then((m) => m.TransportDashboardComponent),
       },
