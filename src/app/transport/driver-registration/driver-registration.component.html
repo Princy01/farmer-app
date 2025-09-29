@@ -1,11 +1,12 @@
-<!-- <ion-header [translucent]="true">
+<ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title>Driver Registration</ion-title>
   </ion-toolbar>
-</ion-header> -->
+</ion-header>
 
 <ion-content [fullscreen]="true">
   <form [formGroup]="driverForm" (ngSubmit)="onSubmit()">
+
     <!-- Personal Information -->
     <ion-card>
       <ion-card-header>
@@ -20,25 +21,19 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">First Name *</ion-label>
-                <ion-input
-                  formControlName="firstName"
-                  placeholder="Enter first name"
-                ></ion-input>
+                <ion-input formControlName="firstName" placeholder="Enter first name"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('firstName')">
-                {{ getErrorMessage("firstName") }}
+                {{ getErrorMessage('firstName') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Last Name *</ion-label>
-                <ion-input
-                  formControlName="lastName"
-                  placeholder="Enter last name"
-                ></ion-input>
+                <ion-input formControlName="lastName" placeholder="Enter last name"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('lastName')">
-                {{ getErrorMessage("lastName") }}
+                {{ getErrorMessage('lastName') }}
               </div>
             </ion-col>
           </ion-row>
@@ -47,27 +42,19 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Email *</ion-label>
-                <ion-input
-                  formControlName="email"
-                  type="email"
-                  placeholder="Enter email"
-                ></ion-input>
+                <ion-input formControlName="email" type="email" placeholder="Enter email"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('email')">
-                {{ getErrorMessage("email") }}
+                {{ getErrorMessage('email') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Mobile Number *</ion-label>
-                <ion-input
-                  formControlName="phone"
-                  type="tel"
-                  placeholder="Enter 10-digit mobile number"
-                ></ion-input>
+                <ion-input formControlName="phone" type="tel" placeholder="Enter 10-digit mobile number"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('phone')">
-                {{ getErrorMessage("phone") }}
+                {{ getErrorMessage('phone') }}
               </div>
             </ion-col>
           </ion-row>
@@ -76,39 +63,29 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Alternate Mobile</ion-label>
-                <ion-input
-                  formControlName="alternatePhone"
-                  type="tel"
-                  placeholder="Enter alternate mobile number"
-                ></ion-input>
+                <ion-input formControlName="alternatePhone" type="tel" placeholder="Enter alternate mobile number"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('alternatePhone')"
-              >
-                {{ getErrorMessage("alternatePhone") }}
+              <div class="error-message" *ngIf="getErrorMessage('alternatePhone')">
+                {{ getErrorMessage('alternatePhone') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Date of Birth *</ion-label>
-                <ion-datetime-button
-                  datetime="dateOfBirth"
-                ></ion-datetime-button>
+                <ion-datetime-button datetime="dateOfBirth"></ion-datetime-button>
                 <ion-modal [keepContentsMounted]="true">
                   <ng-template>
                     <ion-datetime
                       id="dateOfBirth"
                       formControlName="dateOfBirth"
                       presentation="date"
-                      [max]="maxBirthDate"
-                    >
+                      [max]="maxBirthDate">
                     </ion-datetime>
                   </ng-template>
                 </ion-modal>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('dateOfBirth')">
-                {{ getErrorMessage("dateOfBirth") }}
+                {{ getErrorMessage('dateOfBirth') }}
               </div>
             </ion-col>
           </ion-row>
@@ -117,33 +94,21 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Gender *</ion-label>
-                <ion-select
-                  formControlName="gender"
-                  placeholder="Select gender"
-                >
-                  <ion-select-option
-                    *ngFor="let gender of genders"
-                    [value]="gender"
-                  >
+                <ion-select formControlName="gender" placeholder="Select gender">
+                  <ion-select-option *ngFor="let gender of genders" [value]="gender">
                     {{ gender }}
                   </ion-select-option>
                 </ion-select>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('gender')">
-                {{ getErrorMessage("gender") }}
+                {{ getErrorMessage('gender') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Blood Group</ion-label>
-                <ion-select
-                  formControlName="bloodGroup"
-                  placeholder="Select blood group"
-                >
-                  <ion-select-option
-                    *ngFor="let bg of bloodGroups"
-                    [value]="bg"
-                  >
+                <ion-select formControlName="bloodGroup" placeholder="Select blood group">
+                  <ion-select-option *ngFor="let bg of bloodGroups" [value]="bg">
                     {{ bg }}
                   </ion-select-option>
                 </ion-select>
@@ -168,30 +133,127 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Aadhar Number *</ion-label>
-                <ion-input
-                  formControlName="aadharNumber"
-                  placeholder="Enter 12-digit Aadhar number"
-                  maxlength="12"
-                ></ion-input>
+                <ion-input formControlName="aadharNumber" placeholder="Enter 12-digit Aadhar number" maxlength="12"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('aadharNumber')"
-              >
-                {{ getErrorMessage("aadharNumber") }}
+              <div class="error-message" *ngIf="getErrorMessage('aadharNumber')">
+                {{ getErrorMessage('aadharNumber') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">PAN Number</ion-label>
-                <ion-input
-                  formControlName="panNumber"
-                  placeholder="Enter PAN number (e.g., ABCDE1234F)"
-                  style="text-transform: uppercase"
-                ></ion-input>
+                <ion-input formControlName="panNumber" placeholder="Enter PAN number (e.g., ABCDE1234F)" style="text-transform: uppercase;"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('panNumber')">
-                {{ getErrorMessage("panNumber") }}
+                {{ getErrorMessage('panNumber') }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12">
+              <div class="document-upload">
+                <ion-label>Aadhar Card Document *</ion-label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  (change)="onFileUpload($event, 'Aadhar Card')"
+                  style="display: none"
+                  #aadharFileInput
+                />
+                <ion-button
+                  fill="outline"
+                  (click)="aadharFileInput.click()"
+                  [color]="uploadedDocs['Aadhar Card'] ? 'success' : 'primary'"
+                >
+                  <ion-icon name="cloud-upload" slot="start"></ion-icon>
+                  {{ uploadedDocs['Aadhar Card'] ? 'Change Aadhar PDF' : 'Upload Aadhar PDF' }}
+                </ion-button>
+
+                <div *ngIf="uploadedDocs['Aadhar Card']" class="uploaded-file">
+                  <div class="file-info">
+                    <div class="file-name">{{ uploadedDocs['Aadhar Card'].fileName }}</div>
+                    <div class="file-details">
+                      <div class="verification-status"
+                           [ngClass]="{
+                             'verified': uploadedDocs['Aadhar Card'].isVerified,
+                             'pending': !uploadedDocs['Aadhar Card'].isVerified
+                           }">
+                        <ion-icon [name]="uploadedDocs['Aadhar Card'].isVerified ? 'checkmark-circle' : 'warning-outline'"></ion-icon>
+                        <span>{{ uploadedDocs['Aadhar Card'].isVerified ? 'Verified' : 'Pending Verification' }}</span>
+                      </div>
+                      <div class="sanitization-status" *ngIf="uploadedDocs['Aadhar Card'].sanitized">
+                        <ion-icon name="shield-checkmark"></ion-icon>
+                        <span>Sanitized</span>
+                      </div>
+                      <div class="upload-date">
+                        {{ uploadedDocs['Aadhar Card'].uploadDate | date:'short' }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="file-actions">
+                    <ion-button fill="clear" color="primary" (click)="viewDocument('Aadhar Card')">
+                      <ion-icon name="eye"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" color="danger" (click)="removeDocument('Aadhar Card')">
+                      <ion-icon name="close"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" *ngIf="driverForm.get('panNumber')?.value">
+              <div class="document-upload">
+                <ion-label>PAN Card Document</ion-label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  (change)="onFileUpload($event, 'PAN Card')"
+                  style="display: none"
+                  #panFileInput
+                />
+                <ion-button
+                  fill="outline"
+                  (click)="panFileInput.click()"
+                  [color]="uploadedDocs['PAN Card'] ? 'success' : 'primary'"
+                >
+                  <ion-icon name="cloud-upload" slot="start"></ion-icon>
+                  {{ uploadedDocs['PAN Card'] ? 'Change PAN PDF' : 'Upload PAN PDF' }}
+                </ion-button>
+
+                <div *ngIf="uploadedDocs['PAN Card']" class="uploaded-file">
+                  <div class="file-info">
+                    <div class="file-name">{{ uploadedDocs['PAN Card'].fileName }}</div>
+                    <div class="file-details">
+                      <div class="verification-status"
+                           [ngClass]="{
+                             'verified': uploadedDocs['PAN Card'].isVerified,
+                             'pending': !uploadedDocs['PAN Card'].isVerified
+                           }">
+                        <ion-icon [name]="uploadedDocs['PAN Card'].isVerified ? 'checkmark-circle' : 'warning-outline'"></ion-icon>
+                        <span>{{ uploadedDocs['PAN Card'].isVerified ? 'Verified' : 'Pending Verification' }}</span>
+                      </div>
+                      <div class="sanitization-status" *ngIf="uploadedDocs['PAN Card'].sanitized">
+                        <ion-icon name="shield-checkmark"></ion-icon>
+                        <span>Sanitized</span>
+                      </div>
+                      <div class="upload-date">
+                        {{ uploadedDocs['PAN Card'].uploadDate | date:'short' }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="file-actions">
+                    <ion-button fill="clear" color="primary" (click)="viewDocument('PAN Card')">
+                      <ion-icon name="eye"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" color="danger" (click)="removeDocument('PAN Card')">
+                      <ion-icon name="close"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
               </div>
             </ion-col>
           </ion-row>
@@ -199,38 +261,24 @@
           <ion-row>
             <ion-col size="12" size-md="6">
               <ion-item>
-                <ion-label position="stacked"
-                  >Driving License Number *</ion-label
-                >
-                <ion-input
-                  formControlName="licenseNumber"
-                  placeholder="Enter driving license number"
-                ></ion-input>
+                <ion-label position="stacked">Driving License Number *</ion-label>
+                <ion-input formControlName="licenseNumber" placeholder="Enter driving license number"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('licenseNumber')"
-              >
-                {{ getErrorMessage("licenseNumber") }}
+              <div class="error-message" *ngIf="getErrorMessage('licenseNumber')">
+                {{ getErrorMessage('licenseNumber') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">License Type *</ion-label>
-                <ion-select
-                  formControlName="licenseType"
-                  placeholder="Select license type"
-                >
-                  <ion-select-option
-                    *ngFor="let type of licenseTypes"
-                    [value]="type"
-                  >
+                <ion-select formControlName="licenseType" placeholder="Select license type">
+                  <ion-select-option *ngFor="let type of licenseTypes" [value]="type">
                     {{ type }}
                   </ion-select-option>
                 </ion-select>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('licenseType')">
-                {{ getErrorMessage("licenseType") }}
+                {{ getErrorMessage('licenseType') }}
               </div>
             </ion-col>
           </ion-row>
@@ -239,51 +287,93 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">License Issue Date *</ion-label>
-                <ion-datetime-button
-                  datetime="licenseIssueDate"
-                ></ion-datetime-button>
+                <ion-datetime-button datetime="licenseIssueDate"></ion-datetime-button>
                 <ion-modal [keepContentsMounted]="true">
                   <ng-template>
                     <ion-datetime
                       id="licenseIssueDate"
                       formControlName="licenseIssueDate"
                       presentation="date"
-                      [max]="maxLicenseIssueDate"
-                    >
+                      [max]="maxLicenseIssueDate">
                     </ion-datetime>
                   </ng-template>
                 </ion-modal>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('licenseIssueDate')"
-              >
-                {{ getErrorMessage("licenseIssueDate") }}
+              <div class="error-message" *ngIf="getErrorMessage('licenseIssueDate')">
+                {{ getErrorMessage('licenseIssueDate') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">License Expiry Date *</ion-label>
-                <ion-datetime-button
-                  datetime="licenseExpiry"
-                ></ion-datetime-button>
+                <ion-datetime-button datetime="licenseExpiry"></ion-datetime-button>
                 <ion-modal [keepContentsMounted]="true">
                   <ng-template>
                     <ion-datetime
                       id="licenseExpiry"
                       formControlName="licenseExpiry"
                       presentation="date"
-                      [min]="minExpiryDate"
-                    >
+                      [min]="minExpiryDate">
                     </ion-datetime>
                   </ng-template>
                 </ion-modal>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('licenseExpiry')"
-              >
-                {{ getErrorMessage("licenseExpiry") }}
+              <div class="error-message" *ngIf="getErrorMessage('licenseExpiry')">
+                {{ getErrorMessage('licenseExpiry') }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12">
+              <div class="document-upload">
+                <ion-label>Driving License Document *</ion-label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  (change)="onFileUpload($event, 'Driving License')"
+                  style="display: none"
+                  #licenseFileInput
+                />
+                <ion-button
+                  fill="outline"
+                  (click)="licenseFileInput.click()"
+                  [color]="uploadedDocs['Driving License'] ? 'success' : 'primary'"
+                >
+                  <ion-icon name="cloud-upload" slot="start"></ion-icon>
+                  {{ uploadedDocs['Driving License'] ? 'Change License PDF' : 'Upload License PDF' }}
+                </ion-button>
+
+                <div *ngIf="uploadedDocs['Driving License']" class="uploaded-file">
+                  <div class="file-info">
+                    <div class="file-name">{{ uploadedDocs['Driving License'].fileName }}</div>
+                    <div class="file-details">
+                      <div class="verification-status"
+                           [ngClass]="{
+                             'verified': uploadedDocs['Driving License'].isVerified,
+                             'pending': !uploadedDocs['Driving License'].isVerified
+                           }">
+                        <ion-icon [name]="uploadedDocs['Driving License'].isVerified ? 'checkmark-circle' : 'warning-outline'"></ion-icon>
+                        <span>{{ uploadedDocs['Driving License'].isVerified ? 'Verified' : 'Pending Verification' }}</span>
+                      </div>
+                      <div class="sanitization-status" *ngIf="uploadedDocs['Driving License'].sanitized">
+                        <ion-icon name="shield-checkmark"></ion-icon>
+                        <span>Sanitized</span>
+                      </div>
+                      <div class="upload-date">
+                        {{ uploadedDocs['Driving License'].uploadDate | date:'short' }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="file-actions">
+                    <ion-button fill="clear" color="primary" (click)="viewDocument('Driving License')">
+                      <ion-icon name="eye"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" color="danger" (click)="removeDocument('Driving License')">
+                      <ion-icon name="close"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
               </div>
             </ion-col>
           </ion-row>
@@ -292,36 +382,23 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Years of Experience *</ion-label>
-                <ion-input
-                  formControlName="experience"
-                  placeholder="Years of driving experience"
-                ></ion-input>
+                <ion-input formControlName="experience" placeholder="Years of driving experience"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('experience')">
-                {{ getErrorMessage("experience") }}
+                {{ getErrorMessage('experience') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Languages Known *</ion-label>
-                <ion-select
-                  formControlName="languagesKnown"
-                  multiple="true"
-                  placeholder="Select languages"
-                >
-                  <ion-select-option
-                    *ngFor="let lang of languages"
-                    [value]="lang"
-                  >
+                <ion-select formControlName="languagesKnown" multiple="true" placeholder="Select languages">
+                  <ion-select-option *ngFor="let lang of languages" [value]="lang">
                     {{ lang }}
                   </ion-select-option>
                 </ion-select>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('languagesKnown')"
-              >
-                {{ getErrorMessage("languagesKnown") }}
+              <div class="error-message" *ngIf="getErrorMessage('languagesKnown')">
+                {{ getErrorMessage('languagesKnown') }}
               </div>
             </ion-col>
           </ion-row>
@@ -343,14 +420,10 @@
             <ion-col size="12">
               <ion-item>
                 <ion-label position="stacked">Current Address *</ion-label>
-                <ion-textarea
-                  formControlName="address"
-                  placeholder="Enter current address"
-                  rows="2"
-                ></ion-textarea>
+                <ion-textarea formControlName="address" placeholder="Enter current address" rows="2"></ion-textarea>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('address')">
-                {{ getErrorMessage("address") }}
+                {{ getErrorMessage('address') }}
               </div>
             </ion-col>
           </ion-row>
@@ -359,42 +432,32 @@
             <ion-col size="12" size-md="4">
               <ion-item>
                 <ion-label position="stacked">City *</ion-label>
-                <ion-input
-                  formControlName="city"
-                  placeholder="Enter city"
-                ></ion-input>
+                <ion-input formControlName="city" placeholder="Enter city"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('city')">
-                {{ getErrorMessage("city") }}
+                {{ getErrorMessage('city') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="4">
               <ion-item>
                 <ion-label position="stacked">State *</ion-label>
                 <ion-select formControlName="state" placeholder="Select state">
-                  <ion-select-option
-                    *ngFor="let state of indianStates"
-                    [value]="state"
-                  >
+                  <ion-select-option *ngFor="let state of indianStates" [value]="state">
                     {{ state }}
                   </ion-select-option>
                 </ion-select>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('state')">
-                {{ getErrorMessage("state") }}
+                {{ getErrorMessage('state') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="4">
               <ion-item>
                 <ion-label position="stacked">PIN Code *</ion-label>
-                <ion-input
-                  formControlName="pinCode"
-                  placeholder="Enter 6-digit PIN code"
-                  maxlength="6"
-                ></ion-input>
+                <ion-input formControlName="pinCode" placeholder="Enter 6-digit PIN code" maxlength="6"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('pinCode')">
-                {{ getErrorMessage("pinCode") }}
+                {{ getErrorMessage('pinCode') }}
               </div>
             </ion-col>
           </ion-row>
@@ -403,17 +466,10 @@
             <ion-col size="12">
               <ion-item>
                 <ion-label position="stacked">Permanent Address *</ion-label>
-                <ion-textarea
-                  formControlName="permanentAddress"
-                  placeholder="Enter permanent address"
-                  rows="2"
-                ></ion-textarea>
+                <ion-textarea formControlName="permanentAddress" placeholder="Enter permanent address" rows="2"></ion-textarea>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('permanentAddress')"
-              >
-                {{ getErrorMessage("permanentAddress") }}
+              <div class="error-message" *ngIf="getErrorMessage('permanentAddress')">
+                {{ getErrorMessage('permanentAddress') }}
               </div>
             </ion-col>
           </ion-row>
@@ -435,35 +491,23 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Vehicle Type *</ion-label>
-                <ion-select
-                  formControlName="vehicleType"
-                  placeholder="Select vehicle type"
-                >
-                  <ion-select-option
-                    *ngFor="let type of vehicleTypes"
-                    [value]="type"
-                  >
+                <ion-select formControlName="vehicleType" placeholder="Select vehicle type">
+                  <ion-select-option *ngFor="let type of vehicleTypes" [value]="type">
                     {{ type }}
                   </ion-select-option>
                 </ion-select>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('vehicleType')">
-                {{ getErrorMessage("vehicleType") }}
+                {{ getErrorMessage('vehicleType') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Vehicle Model *</ion-label>
-                <ion-input
-                  formControlName="vehicleModel"
-                  placeholder="Enter vehicle model"
-                ></ion-input>
+                <ion-input formControlName="vehicleModel" placeholder="Enter vehicle model"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('vehicleModel')"
-              >
-                {{ getErrorMessage("vehicleModel") }}
+              <div class="error-message" *ngIf="getErrorMessage('vehicleModel')">
+                {{ getErrorMessage('vehicleModel') }}
               </div>
             </ion-col>
           </ion-row>
@@ -471,32 +515,20 @@
           <ion-row>
             <ion-col size="12" size-md="6">
               <ion-item>
-                <ion-label position="stacked"
-                  >Vehicle Registration Number *</ion-label
-                >
-                <ion-input
-                  formControlName="vehiclePlate"
-                  placeholder="e.g., MH12AB1234"
-                  style="text-transform: uppercase"
-                ></ion-input>
+                <ion-label position="stacked">Vehicle Registration Number *</ion-label>
+                <ion-input formControlName="vehiclePlate" placeholder="e.g., MH12AB1234" style="text-transform: uppercase;"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('vehiclePlate')"
-              >
-                {{ getErrorMessage("vehiclePlate") }}
+              <div class="error-message" *ngIf="getErrorMessage('vehiclePlate')">
+                {{ getErrorMessage('vehiclePlate') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Vehicle Year *</ion-label>
-                <ion-input
-                  formControlName="vehicleYear"
-                  placeholder="Enter manufacturing year"
-                ></ion-input>
+                <ion-input formControlName="vehicleYear" placeholder="Enter manufacturing year"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('vehicleYear')">
-                {{ getErrorMessage("vehicleYear") }}
+                {{ getErrorMessage('vehicleYear') }}
               </div>
             </ion-col>
           </ion-row>
@@ -505,28 +537,85 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Vehicle Color *</ion-label>
-                <ion-input
-                  formControlName="vehicleColor"
-                  placeholder="Enter vehicle color"
-                ></ion-input>
+                <ion-input formControlName="vehicleColor" placeholder="Enter vehicle color"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('vehicleColor')"
-              >
-                {{ getErrorMessage("vehicleColor") }}
+              <div class="error-message" *ngIf="getErrorMessage('vehicleColor')">
+                {{ getErrorMessage('vehicleColor') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
+                <ion-label position="stacked">Load Capacity (in tons) *</ion-label>
+                <ion-input formControlName="loadCapacity" placeholder="e.g., 2.5" step="0.1"></ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="getErrorMessage('loadCapacity')">
+                {{ getErrorMessage('loadCapacity') }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
                 <ion-label position="stacked">RC Number *</ion-label>
-                <ion-input
-                  formControlName="rcNumber"
-                  placeholder="Enter Registration Certificate number"
-                ></ion-input>
+                <ion-input formControlName="rcNumber" placeholder="Enter Registration Certificate number"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('rcNumber')">
-                {{ getErrorMessage("rcNumber") }}
+                {{ getErrorMessage('rcNumber') }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12">
+              <div class="document-upload">
+                <ion-label>RC Document *</ion-label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  (change)="onFileUpload($event, 'RC Document')"
+                  style="display: none"
+                  #rcFileInput
+                />
+                <ion-button
+                  fill="outline"
+                  (click)="rcFileInput.click()"
+                  [color]="uploadedDocs['RC Document'] ? 'success' : 'primary'"
+                >
+                  <ion-icon name="cloud-upload" slot="start"></ion-icon>
+                  {{ uploadedDocs['RC Document'] ? 'Change RC PDF' : 'Upload RC PDF' }}
+                </ion-button>
+
+                <div *ngIf="uploadedDocs['RC Document']" class="uploaded-file">
+                  <div class="file-info">
+                    <div class="file-name">{{ uploadedDocs['RC Document'].fileName }}</div>
+                    <div class="file-details">
+                      <div class="verification-status"
+                           [ngClass]="{
+                             'verified': uploadedDocs['RC Document'].isVerified,
+                             'pending': !uploadedDocs['RC Document'].isVerified
+                           }">
+                        <ion-icon [name]="uploadedDocs['RC Document'].isVerified ? 'checkmark-circle' : 'warning-outline'"></ion-icon>
+                        <span>{{ uploadedDocs['RC Document'].isVerified ? 'Verified' : 'Pending Verification' }}</span>
+                      </div>
+                      <div class="sanitization-status" *ngIf="uploadedDocs['RC Document'].sanitized">
+                        <ion-icon name="shield-checkmark"></ion-icon>
+                        <span>Sanitized</span>
+                      </div>
+                      <div class="upload-date">
+                        {{ uploadedDocs['RC Document'].uploadDate | date:'short' }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="file-actions">
+                    <ion-button fill="clear" color="primary" (click)="viewDocument('RC Document')">
+                      <ion-icon name="eye"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" color="danger" (click)="removeDocument('RC Document')">
+                      <ion-icon name="close"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
               </div>
             </ion-col>
           </ion-row>
@@ -548,40 +637,23 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Insurance Provider *</ion-label>
-                <ion-select
-                  formControlName="insuranceProvider"
-                  placeholder="Select insurance company"
-                >
-                  <ion-select-option
-                    *ngFor="let provider of insuranceProviders"
-                    [value]="provider"
-                  >
+                <ion-select formControlName="insuranceProvider" placeholder="Select insurance company">
+                  <ion-select-option *ngFor="let provider of insuranceProviders" [value]="provider">
                     {{ provider }}
                   </ion-select-option>
                 </ion-select>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('insuranceProvider')"
-              >
-                {{ getErrorMessage("insuranceProvider") }}
+              <div class="error-message" *ngIf="getErrorMessage('insuranceProvider')">
+                {{ getErrorMessage('insuranceProvider') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
-                <ion-label position="stacked"
-                  >Insurance Policy Number *</ion-label
-                >
-                <ion-input
-                  formControlName="insuranceNumber"
-                  placeholder="Enter insurance policy number"
-                ></ion-input>
+                <ion-label position="stacked">Insurance Policy Number *</ion-label>
+                <ion-input formControlName="insuranceNumber" placeholder="Enter insurance policy number"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('insuranceNumber')"
-              >
-                {{ getErrorMessage("insuranceNumber") }}
+              <div class="error-message" *ngIf="getErrorMessage('insuranceNumber')">
+                {{ getErrorMessage('insuranceNumber') }}
               </div>
             </ion-col>
           </ion-row>
@@ -589,46 +661,30 @@
           <ion-row>
             <ion-col size="12" size-md="6">
               <ion-item>
-                <ion-label position="stacked"
-                  >Insurance Expiry Date *</ion-label
-                >
-                <ion-datetime-button
-                  datetime="insuranceExpiry"
-                ></ion-datetime-button>
+                <ion-label position="stacked">Insurance Expiry Date *</ion-label>
+                <ion-datetime-button datetime="insuranceExpiry"></ion-datetime-button>
                 <ion-modal [keepContentsMounted]="true">
                   <ng-template>
                     <ion-datetime
                       id="insuranceExpiry"
                       formControlName="insuranceExpiry"
                       presentation="date"
-                      [min]="minExpiryDate"
-                    >
+                      [min]="minExpiryDate">
                     </ion-datetime>
                   </ng-template>
                 </ion-modal>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('insuranceExpiry')"
-              >
-                {{ getErrorMessage("insuranceExpiry") }}
+              <div class="error-message" *ngIf="getErrorMessage('insuranceExpiry')">
+                {{ getErrorMessage('insuranceExpiry') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
-                <ion-label position="stacked"
-                  >PUC Certificate Number *</ion-label
-                >
-                <ion-input
-                  formControlName="pollutionCertificateNumber"
-                  placeholder="Enter PUC certificate number"
-                ></ion-input>
+                <ion-label position="stacked">PUC Certificate Number *</ion-label>
+                <ion-input formControlName="pollutionCertificateNumber" placeholder="Enter PUC certificate number"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('pollutionCertificateNumber')"
-              >
-                {{ getErrorMessage("pollutionCertificateNumber") }}
+              <div class="error-message" *ngIf="getErrorMessage('pollutionCertificateNumber')">
+                {{ getErrorMessage('pollutionCertificateNumber') }}
               </div>
             </ion-col>
           </ion-row>
@@ -637,26 +693,125 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">PUC Expiry Date *</ion-label>
-                <ion-datetime-button
-                  datetime="pollutionExpiry"
-                ></ion-datetime-button>
+                <ion-datetime-button datetime="pollutionExpiry"></ion-datetime-button>
                 <ion-modal [keepContentsMounted]="true">
                   <ng-template>
                     <ion-datetime
                       id="pollutionExpiry"
                       formControlName="pollutionExpiry"
                       presentation="date"
-                      [min]="minExpiryDate"
-                    >
+                      [min]="minExpiryDate">
                     </ion-datetime>
                   </ng-template>
                 </ion-modal>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('pollutionExpiry')"
-              >
-                {{ getErrorMessage("pollutionExpiry") }}
+              <div class="error-message" *ngIf="getErrorMessage('pollutionExpiry')">
+                {{ getErrorMessage('pollutionExpiry') }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <div class="document-upload">
+                <ion-label>Insurance Document *</ion-label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  (change)="onFileUpload($event, 'Insurance Document')"
+                  style="display: none"
+                  #insuranceFileInput
+                />
+                <ion-button
+                  fill="outline"
+                  (click)="insuranceFileInput.click()"
+                  [color]="uploadedDocs['Insurance Document'] ? 'success' : 'primary'"
+                >
+                  <ion-icon name="cloud-upload" slot="start"></ion-icon>
+                  {{ uploadedDocs['Insurance Document'] ? 'Change Insurance PDF' : 'Upload Insurance PDF' }}
+                </ion-button>
+
+                <div *ngIf="uploadedDocs['Insurance Document']" class="uploaded-file">
+                  <div class="file-info">
+                    <div class="file-name">{{ uploadedDocs['Insurance Document'].fileName }}</div>
+                    <div class="file-details">
+                      <div class="verification-status"
+                           [ngClass]="{
+                             'verified': uploadedDocs['Insurance Document'].isVerified,
+                             'pending': !uploadedDocs['Insurance Document'].isVerified
+                           }">
+                        <ion-icon [name]="uploadedDocs['Insurance Document'].isVerified ? 'checkmark-circle' : 'warning-outline'"></ion-icon>
+                        <span>{{ uploadedDocs['Insurance Document'].isVerified ? 'Verified' : 'Pending Verification' }}</span>
+                      </div>
+                      <div class="sanitization-status" *ngIf="uploadedDocs['Insurance Document'].sanitized">
+                        <ion-icon name="shield-checkmark"></ion-icon>
+                        <span>Sanitized</span>
+                      </div>
+                      <div class="upload-date">
+                        {{ uploadedDocs['Insurance Document'].uploadDate | date:'short' }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="file-actions">
+                    <ion-button fill="clear" color="primary" (click)="viewDocument('Insurance Document')">
+                      <ion-icon name="eye"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" color="danger" (click)="removeDocument('Insurance Document')">
+                      <ion-icon name="close"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <div class="document-upload">
+                <ion-label>PUC Certificate *</ion-label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  (change)="onFileUpload($event, 'PUC Certificate')"
+                  style="display: none"
+                  #pucFileInput
+                />
+                <ion-button
+                  fill="outline"
+                  (click)="pucFileInput.click()"
+                  [color]="uploadedDocs['PUC Certificate'] ? 'success' : 'primary'"
+                >
+                  <ion-icon name="cloud-upload" slot="start"></ion-icon>
+                  {{ uploadedDocs['PUC Certificate'] ? 'Change PUC PDF' : 'Upload PUC PDF' }}
+                </ion-button>
+
+                <div *ngIf="uploadedDocs['PUC Certificate']" class="uploaded-file">
+                  <div class="file-info">
+                    <div class="file-name">{{ uploadedDocs['PUC Certificate'].fileName }}</div>
+                    <div class="file-details">
+                      <div class="verification-status"
+                           [ngClass]="{
+                             'verified': uploadedDocs['PUC Certificate'].isVerified,
+                             'pending': !uploadedDocs['PUC Certificate'].isVerified
+                           }">
+                        <ion-icon [name]="uploadedDocs['PUC Certificate'].isVerified ? 'checkmark-circle' : 'warning-outline'"></ion-icon>
+                        <span>{{ uploadedDocs['PUC Certificate'].isVerified ? 'Verified' : 'Pending Verification' }}</span>
+                      </div>
+                      <div class="sanitization-status" *ngIf="uploadedDocs['PUC Certificate'].sanitized">
+                        <ion-icon name="shield-checkmark"></ion-icon>
+                        <span>Sanitized</span>
+                      </div>
+                      <div class="upload-date">
+                        {{ uploadedDocs['PUC Certificate'].uploadDate | date:'short' }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="file-actions">
+                    <ion-button fill="clear" color="primary" (click)="viewDocument('PUC Certificate')">
+                      <ion-icon name="eye"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" color="danger" (click)="removeDocument('PUC Certificate')">
+                      <ion-icon name="close"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
               </div>
             </ion-col>
           </ion-row>
@@ -677,59 +832,33 @@
           <ion-row>
             <ion-col size="12" size-md="4">
               <ion-item>
-                <ion-label position="stacked"
-                  >Emergency Contact Name *</ion-label
-                >
-                <ion-input
-                  formControlName="emergencyContact"
-                  placeholder="Enter contact name"
-                ></ion-input>
+                <ion-label position="stacked">Emergency Contact Name *</ion-label>
+                <ion-input formControlName="emergencyContact" placeholder="Enter contact name"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('emergencyContact')"
-              >
-                {{ getErrorMessage("emergencyContact") }}
+              <div class="error-message" *ngIf="getErrorMessage('emergencyContact')">
+                {{ getErrorMessage('emergencyContact') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="4">
               <ion-item>
-                <ion-label position="stacked"
-                  >Emergency Contact Phone *</ion-label
-                >
-                <ion-input
-                  formControlName="emergencyPhone"
-                  type="tel"
-                  placeholder="Enter contact phone"
-                ></ion-input>
+                <ion-label position="stacked">Emergency Contact Phone *</ion-label>
+                <ion-input formControlName="emergencyPhone" type="tel" placeholder="Enter contact phone"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('emergencyPhone')"
-              >
-                {{ getErrorMessage("emergencyPhone") }}
+              <div class="error-message" *ngIf="getErrorMessage('emergencyPhone')">
+                {{ getErrorMessage('emergencyPhone') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="4">
               <ion-item>
                 <ion-label position="stacked">Relationship *</ion-label>
-                <ion-select
-                  formControlName="emergencyRelation"
-                  placeholder="Select relationship"
-                >
-                  <ion-select-option
-                    *ngFor="let relation of relations"
-                    [value]="relation"
-                  >
+                <ion-select formControlName="emergencyRelation" placeholder="Select relationship">
+                  <ion-select-option *ngFor="let relation of relations" [value]="relation">
                     {{ relation }}
                   </ion-select-option>
                 </ion-select>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('emergencyRelation')"
-              >
-                {{ getErrorMessage("emergencyRelation") }}
+              <div class="error-message" *ngIf="getErrorMessage('emergencyRelation')">
+                {{ getErrorMessage('emergencyRelation') }}
               </div>
             </ion-col>
           </ion-row>
@@ -751,29 +880,73 @@
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">Bank Account Number *</ion-label>
-                <ion-input
-                  formControlName="bankAccountNumber"
-                  placeholder="Enter bank account number"
-                ></ion-input>
+                <ion-input formControlName="bankAccountNumber" placeholder="Enter bank account number"></ion-input>
               </ion-item>
-              <div
-                class="error-message"
-                *ngIf="getErrorMessage('bankAccountNumber')"
-              >
-                {{ getErrorMessage("bankAccountNumber") }}
+              <div class="error-message" *ngIf="getErrorMessage('bankAccountNumber')">
+                {{ getErrorMessage('bankAccountNumber') }}
               </div>
             </ion-col>
             <ion-col size="12" size-md="6">
               <ion-item>
                 <ion-label position="stacked">IFSC Code *</ion-label>
-                <ion-input
-                  formControlName="ifscCode"
-                  placeholder="Enter IFSC code"
-                  style="text-transform: uppercase"
-                ></ion-input>
+                <ion-input formControlName="ifscCode" placeholder="Enter IFSC code" style="text-transform: uppercase;"></ion-input>
               </ion-item>
               <div class="error-message" *ngIf="getErrorMessage('ifscCode')">
-                {{ getErrorMessage("ifscCode") }}
+                {{ getErrorMessage('ifscCode') }}
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12">
+              <div class="document-upload">
+                <ion-label>Bank Document (Passbook/Statement) *</ion-label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  (change)="onFileUpload($event, 'Bank Document')"
+                  style="display: none"
+                  #bankFileInput
+                />
+                <ion-button
+                  fill="outline"
+                  (click)="bankFileInput.click()"
+                  [color]="uploadedDocs['Bank Document'] ? 'success' : 'primary'"
+                >
+                  <ion-icon name="cloud-upload" slot="start"></ion-icon>
+                  {{ uploadedDocs['Bank Document'] ? 'Change Bank PDF' : 'Upload Bank PDF' }}
+                </ion-button>
+
+                <div *ngIf="uploadedDocs['Bank Document']" class="uploaded-file">
+                  <div class="file-info">
+                    <div class="file-name">{{ uploadedDocs['Bank Document'].fileName }}</div>
+                    <div class="file-details">
+                      <div class="verification-status"
+                           [ngClass]="{
+                             'verified': uploadedDocs['Bank Document'].isVerified,
+                             'pending': !uploadedDocs['Bank Document'].isVerified
+                           }">
+                        <ion-icon [name]="uploadedDocs['Bank Document'].isVerified ? 'checkmark-circle' : 'warning-outline'"></ion-icon>
+                        <span>{{ uploadedDocs['Bank Document'].isVerified ? 'Verified' : 'Pending Verification' }}</span>
+                      </div>
+                      <div class="sanitization-status" *ngIf="uploadedDocs['Bank Document'].sanitized">
+                        <ion-icon name="shield-checkmark"></ion-icon>
+                        <span>Sanitized</span>
+                      </div>
+                      <div class="upload-date">
+                        {{ uploadedDocs['Bank Document'].uploadDate | date:'short' }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="file-actions">
+                    <ion-button fill="clear" color="primary" (click)="viewDocument('Bank Document')">
+                      <ion-icon name="eye"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" color="danger" (click)="removeDocument('Bank Document')">
+                      <ion-icon name="close"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
               </div>
             </ion-col>
           </ion-row>
@@ -791,35 +964,123 @@
       </ion-card-header>
       <ion-card-content>
         <ion-item>
-          <ion-checkbox
-            formControlName="medicalCertificate"
-            slot="start"
-          ></ion-checkbox>
+          <ion-checkbox formControlName="medicalCertificate" slot="start"></ion-checkbox>
           <ion-label class="ion-text-wrap">
             I have a valid medical fitness certificate *
           </ion-label>
         </ion-item>
-        <div
-          class="error-message"
-          *ngIf="getErrorMessage('medicalCertificate')"
-        >
+        <div class="error-message" *ngIf="getErrorMessage('medicalCertificate')">
           Medical certificate verification is required
         </div>
 
-        <ion-item>
-          <ion-checkbox
-            formControlName="policeVerification"
-            slot="start"
-          ></ion-checkbox>
+        <div class="document-upload" style="margin-top: 16px;">
+          <ion-label>Medical Certificate *</ion-label>
+          <input
+            type="file"
+            accept=".pdf"
+            (change)="onFileUpload($event, 'Medical Certificate')"
+            style="display: none"
+            #medicalFileInput
+          />
+          <ion-button
+            fill="outline"
+            (click)="medicalFileInput.click()"
+            [color]="uploadedDocs['Medical Certificate'] ? 'success' : 'primary'"
+          >
+            <ion-icon name="cloud-upload" slot="start"></ion-icon>
+            {{ uploadedDocs['Medical Certificate'] ? 'Change Medical PDF' : 'Upload Medical PDF' }}
+          </ion-button>
+
+          <div *ngIf="uploadedDocs['Medical Certificate']" class="uploaded-file">
+            <div class="file-info">
+              <div class="file-name">{{ uploadedDocs['Medical Certificate'].fileName }}</div>
+              <div class="file-details">
+                <div class="verification-status"
+                     [ngClass]="{
+                       'verified': uploadedDocs['Medical Certificate'].isVerified,
+                       'pending': !uploadedDocs['Medical Certificate'].isVerified
+                     }">
+                  <ion-icon [name]="uploadedDocs['Medical Certificate'].isVerified ? 'checkmark-circle' : 'warning-outline'"></ion-icon>
+                  <span>{{ uploadedDocs['Medical Certificate'].isVerified ? 'Verified' : 'Pending Verification' }}</span>
+                </div>
+                <div class="sanitization-status" *ngIf="uploadedDocs['Medical Certificate'].sanitized">
+                  <ion-icon name="shield-checkmark"></ion-icon>
+                  <span>Sanitized</span>
+                </div>
+                <div class="upload-date">
+                  {{ uploadedDocs['Medical Certificate'].uploadDate | date:'short' }}
+                </div>
+              </div>
+            </div>
+            <div class="file-actions">
+              <ion-button fill="clear" color="primary" (click)="viewDocument('Medical Certificate')">
+                <ion-icon name="eye"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" color="danger" (click)="removeDocument('Medical Certificate')">
+                <ion-icon name="close"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </div>
+
+        <ion-item style="margin-top: 16px;">
+          <ion-checkbox formControlName="policeVerification" slot="start"></ion-checkbox>
           <ion-label class="ion-text-wrap">
             I have completed police verification *
           </ion-label>
         </ion-item>
-        <div
-          class="error-message"
-          *ngIf="getErrorMessage('policeVerification')"
-        >
+        <div class="error-message" *ngIf="getErrorMessage('policeVerification')">
           Police verification is required
+        </div>
+
+        <div class="document-upload" style="margin-top: 16px;">
+          <ion-label>Police Verification Certificate *</ion-label>
+          <input
+            type="file"
+            accept=".pdf"
+            (change)="onFileUpload($event, 'Police Verification')"
+            style="display: none"
+            #policeFileInput
+          />
+          <ion-button
+            fill="outline"
+            (click)="policeFileInput.click()"
+            [color]="uploadedDocs['Police Verification'] ? 'success' : 'primary'"
+          >
+            <ion-icon name="cloud-upload" slot="start"></ion-icon>
+            {{ uploadedDocs['Police Verification'] ? 'Change Police PDF' : 'Upload Police PDF' }}
+          </ion-button>
+
+          <div *ngIf="uploadedDocs['Police Verification']" class="uploaded-file">
+            <div class="file-info">
+              <div class="file-name">{{ uploadedDocs['Police Verification'].fileName }}</div>
+              <div class="file-details">
+                <div class="verification-status"
+                     [ngClass]="{
+                       'verified': uploadedDocs['Police Verification'].isVerified,
+                       'pending': !uploadedDocs['Police Verification'].isVerified
+                     }">
+                  <ion-icon [name]="uploadedDocs['Police Verification'].isVerified ? 'checkmark-circle' : 'warning-outline'"></ion-icon>
+                  <span>{{ uploadedDocs['Police Verification'].isVerified ? 'Verified' : 'Pending Verification' }}</span>
+                </div>
+                <div class="sanitization-status" *ngIf="uploadedDocs['Police Verification'].sanitized">
+                  <ion-icon name="shield-checkmark"></ion-icon>
+                  <span>Sanitized</span>
+                </div>
+                <div class="upload-date">
+                  {{ uploadedDocs['Police Verification'].uploadDate | date:'short' }}
+                </div>
+              </div>
+            </div>
+            <div class="file-actions">
+              <ion-button fill="clear" color="primary" (click)="viewDocument('Police Verification')">
+                <ion-icon name="eye"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" color="danger" (click)="removeDocument('Police Verification')">
+                <ion-icon name="close"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
         </div>
       </ion-card-content>
     </ion-card>
@@ -828,13 +1089,9 @@
     <ion-card>
       <ion-card-content>
         <ion-item>
-          <ion-checkbox
-            formControlName="termsAccepted"
-            slot="start"
-          ></ion-checkbox>
+          <ion-checkbox formControlName="termsAccepted" slot="start"></ion-checkbox>
           <ion-label class="ion-text-wrap">
-            I agree to the Terms and Conditions, Privacy Policy, and Driver Code
-            of Conduct *
+            I agree to the Terms and Conditions, Privacy Policy, and Driver Code of Conduct *
           </ion-label>
         </ion-item>
         <div class="error-message" *ngIf="getErrorMessage('termsAccepted')">
@@ -849,18 +1106,18 @@
         expand="block"
         type="submit"
         [disabled]="!driverForm.valid"
-        size="large"
-      >
+        size="large">
         Submit Driver Registration
       </ion-button>
     </div>
+
   </form>
 
   <ion-toast
     [isOpen]="isToastOpen"
     [message]="toastMessage"
     duration="3000"
-    (didDismiss)="setToastOpen(false)"
-  >
+    (didDismiss)="setToastOpen(false)">
   </ion-toast>
+
 </ion-content>
