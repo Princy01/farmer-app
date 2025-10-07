@@ -335,7 +335,7 @@ export const routes: Routes = [
       },
       {
         path: 'driver-registration',
-        loadComponent: () => import('./transport/driver-registration/driver-registration.component').then((m) => m.DriverRegistrationPage), 
+        loadComponent: () => import('./transport/driver-registration/driver-registration.component').then((m) => m.DriverRegistrationPage),
       },
       {
         path: 'transport-dashboard',
@@ -360,6 +360,10 @@ export const routes: Routes = [
       {
         path: 'assign-driver-modal',
         loadComponent: () => import('./transport/assign-driver-modal/assign-driver-modal.component').then((m) => m.AssignDriverModalComponent),
+      },
+      {
+        path: 'pickup-confirmation',
+        loadComponent: () => import('./transport/pickup-confirmation/pickup-confirmation.component').then((m) => m.PickupConfirmationComponent),
       },
       {
         path: 'delivery-confirmation',

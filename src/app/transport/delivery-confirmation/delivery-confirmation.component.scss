@@ -59,11 +59,10 @@
 
     .status-icon {
       color: rgb(136, 172, 140);
-      transform: scale(1.1);
     }
 
     .status-text {
-      color: rgb(136, 172, 140);
+      color: #333;
       font-weight: 600;
     }
   }
@@ -92,17 +91,18 @@
 
   .progress-line {
     height: 100%;
-    background: #e0e0e0;
-    transition: background 0.3s ease;
+    background: rgb(136, 172, 140);
+    width: 0;
+    transition: width 0.3s ease;
 
     &.active {
-      background: rgb(136, 172, 140);
+      width: 100%;
     }
   }
 }
 
 /* Cards */
-.order-details-card, .otp-card, .notes-card {
+.order-details-card, .otp-card, .notes-card, .items-card {
   margin-bottom: 16px;
   border-radius: 20px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
@@ -160,11 +160,12 @@
   align-items: center;
   gap: 4px;
   background: linear-gradient(135deg, #ff9f43, #ee5a24);
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(238, 90, 36, 0.3);
 
   ion-icon {
     font-size: 1rem;
@@ -179,24 +180,35 @@
 .info-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0;
+  gap: 16px;
+  padding: 16px 0;
   border-bottom: 1px solid #f5f5f5;
 
   &:last-child {
     border-bottom: none;
+    padding-bottom: 0;
   }
 }
 
 .info-icon {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   margin-top: 2px;
-  flex-shrink: 0;
 
-  &.retailer-icon { color: #3498db; }
-  &.location-icon { color: #e74c3c; }
-  &.phone-icon { color: #2ecc71; }
-  &.weight-icon { color: #f39c12; }
+  &.retailer-icon {
+    color: #e74c3c;
+  }
+
+  &.location-icon {
+    color: #3498db;
+  }
+
+  &.phone-icon {
+    color: #2ecc71;
+  }
+
+  &.weight-icon {
+    color: #f39c12;
+  }
 }
 
 .info-details {
@@ -207,7 +219,7 @@
 }
 
 .info-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #666;
   font-weight: 500;
   text-transform: uppercase;
@@ -215,24 +227,170 @@
 }
 
 .info-value {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #333;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.4;
 }
 
 .contact-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
 }
 
 .call-btn {
   --color: #2ecc71;
-  --background: rgba(46, 204, 113, 0.1);
-  --border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  --background-activated: rgba(46, 204, 113, 0.1);
+}
+
+/* QR Scanner Styles */
+.scan-progress {
+  font-size: 0.8rem;
+  color: rgb(136, 172, 140);
+  font-weight: 600;
+}
+
+.scan-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.scan-progress-bar {
+  height: 4px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  margin: 16px 20px;
+  overflow: hidden;
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgb(136, 172, 140), rgb(106, 142, 110));
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+}
+
+.items-list {
+  padding: 0 20px;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #f5f5f5;
+  transition: all 0.3s ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.scanned {
+    background: rgba(46, 204, 113, 0.05);
+    border-radius: 12px;
+    padding: 16px 12px;
+    margin: 8px 0;
+
+    .item-name {
+      color: #2ecc71;
+    }
+
+    .item-icon ion-icon {
+      color: #2ecc71;
+    }
+  }
+}
+
+.item-icon {
+  margin-right: 16px;
+
+  ion-icon {
+    font-size: 1.5rem;
+    color: #ccc;
+    transition: color 0.3s ease;
+
+    &.success {
+      color: #2ecc71;
+    }
+  }
+}
+
+.item-details {
+  flex: 1;
+
+  .item-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 4px 0;
+  }
+
+  .item-info {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0 0 4px 0;
+  }
+
+  .item-qr {
+    font-size: 0.75rem;
+    color: #999;
+    font-family: monospace;
+    margin: 0;
+  }
+}
+
+.item-actions {
+  .verified-icon {
+    color: #2ecc71;
+    font-size: 1.5rem;
+  }
+}
+
+.scan-section {
+  padding: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.scan-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.scan-btn {
+  --border-color: rgb(136, 172, 140);
+  --color: rgb(136, 172, 140);
+  --border-radius: 15px;
+  height: 48px;
+  font-weight: 600;
+
+  &[disabled] {
+    --border-color: #ccc;
+    --color: #ccc;
+  }
+}
+
+.manual-btn {
+  --color: #666;
+  height: 40px;
+}
+
+.all-scanned {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(46, 204, 113, 0.1);
+  border-radius: 12px;
+  color: #2ecc71;
+  font-weight: 600;
+
+  .success-icon {
+    font-size: 1.5rem;
+  }
 }
 
 /* OTP Section */
@@ -249,11 +407,14 @@
 
 .send-otp-btn {
   --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
-  --color: #fff;
+  --color: white;
   --border-radius: 15px;
   height: 48px;
   font-weight: 600;
-  --box-shadow: 0 4px 15px rgba(136, 172, 140, 0.3);
+
+  &[disabled] {
+    --background: #ccc;
+  }
 }
 
 .otp-sent-section {
@@ -265,21 +426,21 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin-bottom: 20px;
   padding: 12px;
   background: rgba(46, 204, 113, 0.1);
   border-radius: 12px;
-  margin-bottom: 24px;
-}
 
-.success-icon {
-  color: #2ecc71;
-  font-size: 1.2rem;
-}
+  .success-icon {
+    color: #2ecc71;
+    font-size: 1.2rem;
+  }
 
-.sent-text {
-  color: #2ecc71;
-  font-weight: 600;
-  font-size: 0.9rem;
+  .sent-text {
+    color: #2ecc71;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
 }
 
 .otp-input-section {
@@ -288,30 +449,29 @@
 
 .otp-label {
   display: block;
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 12px;
   text-align: center;
+  margin-bottom: 16px;
+  color: #666;
+  font-weight: 500;
 }
 
 .otp-inputs {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 16px;
 }
 
 .otp-digit {
   width: 50px;
   height: 50px;
   text-align: center;
-  font-size: 1.2rem;
-  font-weight: 600;
   border: 2px solid #e0e0e0;
   border-radius: 12px;
-  --background: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  background: #fff;
 
-  &:focus-within {
+  &:focus {
     border-color: rgb(136, 172, 140);
   }
 }
@@ -321,15 +481,18 @@
 }
 
 .timer-text {
-  display: block;
-  font-size: 0.8rem;
   color: #666;
+  font-size: 0.85rem;
+  display: block;
   margin-bottom: 8px;
 }
 
 .resend-btn {
   --color: rgb(136, 172, 140);
-  font-size: 0.85rem;
+
+  &[disabled] {
+    --color: #ccc;
+  }
 }
 
 /* Notes Section */
@@ -338,26 +501,24 @@
 }
 
 .notes-input {
-  --background: #f8f9fa;
-  --color: #333;
+  margin-bottom: 16px;
+  --border-color: #e0e0e0;
+  --border-radius: 12px;
   --padding-start: 16px;
   --padding-end: 16px;
   --padding-top: 12px;
   --padding-bottom: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  margin-bottom: 16px;
 }
 
 .quick-notes {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin-top: 16px;
 }
 
 .quick-notes-label {
-  font-size: 0.8rem;
+  display: block;
+  font-size: 0.85rem;
   color: #666;
+  margin-bottom: 8px;
   font-weight: 500;
 }
 
@@ -370,8 +531,8 @@
 .quick-chip {
   --background: rgba(136, 172, 140, 0.1);
   --color: rgb(136, 172, 140);
-  height: 32px;
   cursor: pointer;
+  transition: all 0.3s ease;
 
   &:hover {
     --background: rgba(136, 172, 140, 0.2);
@@ -380,27 +541,19 @@
 
 /* Action Buttons */
 .action-section {
-  margin-bottom: 24px;
+  padding: 20px 0;
 }
 
 .confirm-btn {
   --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
-  --color: #fff;
+  --color: white;
   --border-radius: 15px;
   height: 52px;
   font-weight: 600;
-  font-size: 1rem;
-  --box-shadow: 0 6px 20px rgba(136, 172, 140, 0.4);
   margin-bottom: 16px;
-
-  &:hover:not([disabled]) {
-    transform: translateY(-2px);
-    --box-shadow: 0 8px 24px rgba(136, 172, 140, 0.5);
-  }
 
   &[disabled] {
     --background: #ccc;
-    --box-shadow: none;
   }
 }
 
@@ -413,75 +566,84 @@
   flex: 1;
   --border-color: rgb(136, 172, 140);
   --color: rgb(136, 172, 140);
-  --border-radius: 15px;
+  --border-radius: 12px;
   height: 44px;
-  font-weight: 500;
 }
 
 .report-btn {
-  --border-color: #ff6b6b;
-  --color: #ff6b6b;
+  --border-color: #e74c3c;
+  --color: #e74c3c;
 }
 
 /* Emergency Section */
 .emergency-section {
-  background: rgba(255, 107, 107, 0.05);
-  border: 1px solid rgba(255, 107, 107, 0.1);
-  border-radius: 16px;
   padding: 20px;
   text-align: center;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 20px;
 }
 
 .emergency-text {
   color: #666;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   font-size: 0.9rem;
 }
 
 .emergency-buttons {
   display: flex;
-  gap: 12px;
   justify-content: center;
+  gap: 20px;
 }
 
 .emergency-btn {
-  --color: #ff6b6b;
+  --color: #666;
   font-size: 0.85rem;
 }
 
 /* Success Modal */
 .success-modal {
-  --width: 90%;
-  --max-width: 400px;
-  --border-radius: 20px;
+  --backdrop-opacity: 0.6;
 }
 
 .modal-content {
+  background: white;
+  border-radius: 20px;
   padding: 40px 30px;
   text-align: center;
+  max-width: 400px;
+  margin: auto;
 }
 
 .success-animation {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .success-icon-large {
   font-size: 4rem;
   color: #2ecc71;
-  animation: successPulse 1s ease-out;
+  animation: successPulse 0.6s ease-out;
 }
 
 @keyframes successPulse {
-  0% { transform: scale(0.5); opacity: 0; }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .success-title {
+  color: #2c3e30;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #2c3e30;
-  margin: 0 0 12px 0;
+  margin-bottom: 12px;
 }
 
 .success-message {
@@ -492,10 +654,9 @@
 
 .success-actions .next-delivery-btn {
   --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
-  --color: #fff;
+  --color: white;
   --border-radius: 15px;
   height: 48px;
-  font-weight: 600;
   margin-bottom: 12px;
 }
 
@@ -505,19 +666,19 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .content-container {
-    padding: 12px;
-  }
-
   .status-bar {
-    margin: 0 12px 12px;
     padding: 16px;
-    flex-direction: column;
+    gap: 8px;
   }
 
-  .status-progress {
-    min-width: 100%;
-    margin: 8px 0;
+  .status-item {
+    .status-text {
+      font-size: 0.7rem;
+    }
+  }
+
+  .scan-buttons {
+    flex-direction: column;
   }
 
   .secondary-actions {
@@ -526,6 +687,42 @@
 
   .emergency-buttons {
     flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-container {
+    padding: 12px;
+  }
+
+  .status-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .status-progress {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .item-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    &.scanned {
+      padding: 12px;
+    }
+  }
+
+  .item-icon {
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+
+  .item-actions {
+    align-self: flex-end;
   }
 
   .otp-inputs {
@@ -538,13 +735,88 @@
   }
 }
 
-@media (max-width: 480px) {
-  .quick-note-chips {
-    flex-direction: column;
+/* Pickup Toolbar */
+.pickup-toolbar {
+  --background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  --color: #fff;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+/* Item Status Styles */
+.item-row {
+  &.picked-up {
+    background: rgba(46, 204, 113, 0.05);
+    border-radius: 12px;
+    padding: 16px 12px;
+    margin: 8px 0;
   }
 
-  .quick-chip {
-    width: 100%;
-    justify-content: center;
+  &.damaged {
+    background: rgba(243, 156, 18, 0.05);
+    border-left: 4px solid #f39c12;
   }
+}
+
+.status-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  .status-text {
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+}
+
+.verified-icon {
+  color: #2ecc71;
+  font-size: 1.5rem;
+}
+
+.warning-icon {
+  color: #f39c12;
+  font-size: 1.5rem;
+}
+
+.damage-note {
+  font-size: 0.75rem;
+  color: #f39c12;
+  font-style: italic;
+  margin: 4px 0 0 0;
+  padding: 4px 8px;
+  background: rgba(243, 156, 18, 0.1);
+  border-radius: 6px;
+}
+
+.damage-summary {
+  font-size: 0.8rem;
+  color: #f39c12;
+  font-weight: 600;
+}
+
+.all-picked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(46, 204, 113, 0.1);
+  border-radius: 12px;
+  color: #2ecc71;
+  font-weight: 600;
+  flex-direction: column;
+
+  .success-icon {
+    font-size: 1.5rem;
+  }
+}
+
+.wholesaler-icon {
+  color: #3498db;
+}
+
+/* Priority badge for pickup */
+.priority-badge {
+  background: linear-gradient(135deg, #3498db, #2980b9);
 }

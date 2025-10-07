@@ -93,6 +93,18 @@
 
         <ion-menu-toggle>
           <ion-item
+            routerLink="/transport/pickup-confirmation"
+            [ngClass]="{
+              selected: isActive('/transport/pickup-confirmation')
+            }"
+          >
+            <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+            <ion-label>Pickup Confirmation</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item
             routerLink="/transport/earnings-dashboard"
             [ngClass]="{ selected: isActive('/transport/earnings-dashboard') }"
           >

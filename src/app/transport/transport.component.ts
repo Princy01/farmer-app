@@ -38,6 +38,7 @@ export class TransportComponent implements OnInit {
     '/transport/active-deliveries': 'Active Deliveries',
     '/transport/live-tracking': 'Live Tracking',
     '/transport/delivery-confirmation': 'Confirmation',
+    '/transport/pickup-confirmation': 'Pickup Confirmation',
     '/transport/customer-chat': 'Customer Chat',
     '/transport/earnings-dashboard': 'Earnings & Reports',
     '/transport/delivery-history': 'Delivery History',
