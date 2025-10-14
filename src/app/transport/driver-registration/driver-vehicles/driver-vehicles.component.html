@@ -1,0 +1,288 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Driver Registration - Vehicle Information</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button (click)="onPrevious()"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="driver-registration-content">
+  <!-- Simplified Progress Indicator -->
+<div class="step-indicator">
+  <div class="step-info">
+    <span class="current-step">Step 3 of 5</span>
+    <span class="step-title">Vehicle</span>
+  </div>
+</div>
+
+  <form [formGroup]="vehiclesForm" class="registration-form">
+    <ion-card class="form-section">
+      <ion-card-header>
+        <div class="card-header-content">
+          <ion-card-title>
+            <ion-icon name="car"></ion-icon>
+            Vehicle Information
+          </ion-card-title>
+          <ion-button
+            fill="outline"
+            size="small"
+            (click)="addVehicle()"
+            class="add-vehicle-btn"
+          >
+            <ion-icon name="add" slot="start"></ion-icon>
+            Add Vehicle
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div
+          *ngFor="let vehicle of vehiclesArray.controls; let i = index"
+          class="vehicle-item"
+          [formGroupName]="i"
+        >
+          <div class="vehicle-header">
+            <h3 class="vehicle-title">Vehicle {{ i + 1 }}</h3>
+            <ion-button
+              fill="clear"
+              color="danger"
+              size="small"
+              (click)="removeVehicle(i)"
+              *ngIf="vehiclesArray.length > 1"
+            >
+              <ion-icon name="trash"></ion-icon>
+            </ion-button>
+          </div>
+
+          <div class="form-row">
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">Vehicle Number *</ion-label>
+              <ion-input
+                formControlName="veh_number"
+                placeholder="e.g., KA01AB1234"
+                [class.error]="!!getErrorMessage('veh_number', i)"
+              ></ion-input>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('veh_number', i)"
+              >
+                {{ getErrorMessage("veh_number", i) }}
+              </div>
+            </ion-item>
+
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">Registration Date *</ion-label>
+              <ion-input
+                type="date"
+                formControlName="reg_date"
+                [max]="maxRegistrationDate"
+                [class.error]="!!getErrorMessage('reg_date', i)"
+              ></ion-input>
+              <div class="error-message" *ngIf="getErrorMessage('reg_date', i)">
+                {{ getErrorMessage("reg_date", i) }}
+              </div>
+            </ion-item>
+          </div>
+
+          <div class="form-row">
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">Vehicle Type *</ion-label>
+              <ion-select
+                formControlName="type_id"
+                placeholder="Select vehicle type"
+                [class.error]="!!getErrorMessage('type_id', i)"
+              >
+                <ion-select-option
+                  *ngFor="let type of vehicleTypes"
+                  [value]="type.type_id"
+                >
+                  {{ type.type_name }}
+                </ion-select-option>
+              </ion-select>
+              <div class="error-message" *ngIf="getErrorMessage('type_id', i)">
+                {{ getErrorMessage("type_id", i) }}
+              </div>
+            </ion-item>
+
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">State *</ion-label>
+              <ion-select
+                formControlName="state"
+                placeholder="Select registration state"
+                [class.error]="!!getErrorMessage('state', i)"
+              >
+                <ion-select-option
+                  *ngFor="let state of indianStates"
+                  [value]="state"
+                >
+                  {{ state }}
+                </ion-select-option>
+              </ion-select>
+              <div class="error-message" *ngIf="getErrorMessage('state', i)">
+                {{ getErrorMessage("state", i) }}
+              </div>
+            </ion-item>
+          </div>
+
+          <div class="form-row">
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">Make *</ion-label>
+              <ion-select
+                formControlName="veh_make"
+                placeholder="Select make"
+                [class.error]="!!getErrorMessage('veh_make', i)"
+              >
+                <ion-select-option
+                  *ngFor="let make of vehicleMakes"
+                  [value]="make"
+                >
+                  {{ make }}
+                </ion-select-option>
+              </ion-select>
+              <div class="error-message" *ngIf="getErrorMessage('veh_make', i)">
+                {{ getErrorMessage("veh_make", i) }}
+              </div>
+            </ion-item>
+
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">Model *</ion-label>
+              <ion-input
+                formControlName="veh_model"
+                placeholder="Enter vehicle model"
+                [class.error]="!!getErrorMessage('veh_model', i)"
+              ></ion-input>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('veh_model', i)"
+              >
+                {{ getErrorMessage("veh_model", i) }}
+              </div>
+            </ion-item>
+          </div>
+
+          <div class="form-row">
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">Load Capacity (tons) *</ion-label>
+              <ion-input
+                type="number"
+                formControlName="load_capacity"
+                placeholder="e.g., 5"
+                step="1"
+                min="1"
+                [class.error]="!!getErrorMessage('load_capacity', i)"
+              ></ion-input>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('load_capacity', i)"
+              >
+                {{ getErrorMessage("load_capacity", i) }}
+              </div>
+            </ion-item>
+
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">Fuel Type *</ion-label>
+              <ion-select
+                formControlName="fuel_type"
+                placeholder="Select fuel type"
+                [class.error]="!!getErrorMessage('fuel_type', i)"
+              >
+                <ion-select-option
+                  *ngFor="let fuel of fuelTypes"
+                  [value]="fuel"
+                >
+                  {{ fuel }}
+                </ion-select-option>
+              </ion-select>
+              <div
+                class="error-message"
+                *ngIf="getErrorMessage('fuel_type', i)"
+              >
+                {{ getErrorMessage("fuel_type", i) }}
+              </div>
+            </ion-item>
+          </div>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Kilometers Travelled *</ion-label>
+            <ion-input
+              type="number"
+              formControlName="kms_travelled"
+              placeholder="Enter total kms"
+              min="0"
+              step="0.1"
+              [class.error]="!!getErrorMessage('kms_travelled', i)"
+            ></ion-input>
+            <div
+              class="error-message"
+              *ngIf="getErrorMessage('kms_travelled', i)"
+            >
+              {{ getErrorMessage("kms_travelled", i) }}
+            </div>
+          </ion-item>
+
+          <!-- RC Document Upload -->
+          <div class="upload-section">
+            <div class="upload-item">
+              <label class="upload-label">RC Document *</label>
+              <div class="upload-container">
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  (change)="onFileUpload($event, i)"
+                  class="file-input"
+                  [id]="'rc-upload-' + i"
+                />
+                <label [for]="'rc-upload-' + i" class="upload-button">
+                  <ion-icon name="cloud-upload"></ion-icon>
+                  Choose RC
+                </label>
+                <span class="file-name" [class.uploaded]="hasFile(i)">
+                  {{ getFileName(i) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="vehicle-divider"
+            *ngIf="i < vehiclesArray.length - 1"
+          ></div>
+        </div>
+
+        <div class="no-vehicles" *ngIf="vehiclesArray.length === 0">
+          <ion-icon name="car-outline" class="no-vehicles-icon"></ion-icon>
+          <p>No vehicles added yet</p>
+          <ion-button fill="outline" (click)="addVehicle()">
+            <ion-icon name="add" slot="start"></ion-icon>
+            Add First Vehicle
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </form>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <div class="button-row">
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="previous-btn"
+        (click)="onPrevious()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon name="arrow-back" slot="start"></ion-icon>
+        Previous
+      </ion-button>
+      <ion-button
+        expand="block"
+        class="save-next-btn"
+        (click)="onSaveAndNext()"
+        [disabled]="isSubmitting || vehiclesForm.invalid || vehiclesArray.length === 0"
+      >
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
+        {{ isSubmitting ? "Saving..." : "Save & Next" }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

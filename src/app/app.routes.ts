@@ -333,10 +333,30 @@ export const routes: Routes = [
         redirectTo: 'transport-requests',
         pathMatch: 'full',
       },
-      {
-        path: 'driver-registration',
-        loadComponent: () => import('./transport/driver-registration/driver-registration.component').then((m) => m.DriverRegistrationPage),
-      },
+      // {
+      //   path: 'driver-registration',
+      //   loadComponent: () => import('./transport/driver-registration/driver-registration.component').then((m) => m.DriverRegistrationPage),
+      // },
+    {
+      path: 'driver-registration/basic-info',
+      loadComponent: () => import('./transport/driver-registration/driver-basic-info/driver-basic-info.component').then((m) => m.DriverBasicInfoComponent),
+    },
+    {
+              path: 'driver-registration/documents',
+      loadComponent: () => import('./transport/driver-registration/driver-documents/driver-documents.component').then((m) => m.DriverDocumentsComponent),
+    },
+    {
+              path: 'driver-registration/vehicles',
+      loadComponent: () => import('./transport/driver-registration/driver-vehicles/driver-vehicles.component').then((m) => m.DriverVehiclesComponent),
+    },
+    {
+              path: 'driver-registration/insurance',
+      loadComponent: () => import('./transport/driver-registration/driver-insurance/driver-insurance.component').then((m) => m.DriverInsuranceComponent),
+    },
+    // {
+    //           path: 'driver-registration/review',
+    //   loadComponent: () => import('./transport/driver-registration/review-submit/review-submit.component').then((m) => m.ReviewSubmitComponent),
+    // },
       {
         path: 'transport-dashboard',
         loadComponent: () => import('./transport/transport-dashboard/transport-dashboard.component').then((m) => m.TransportDashboardComponent),

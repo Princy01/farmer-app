@@ -1,0 +1,200 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Driver Registration - Insurance</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button (click)="onPrevious()"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="driver-registration-content">
+ <!-- Simplified Progress Indicator -->
+<div class="step-indicator">
+  <div class="step-info">
+    <span class="current-step">Step 4 of 5</span>
+    <span class="step-title">Vehicle Insurance</span>
+  </div>
+</div>
+
+  <form [formGroup]="insuranceForm" class="registration-form">
+    <!-- Insurance Section -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <div class="card-header-content">
+          <ion-card-title>
+            <ion-icon name="shield-checkmark"></ion-icon>
+            Vehicle Insurance
+          </ion-card-title>
+          <ion-button
+            fill="outline"
+            size="small"
+            (click)="addInsurance()"
+            class="add-insurance-btn"
+            [disabled]="registeredVehicles.length === 0"
+          >
+            <ion-icon name="add" slot="start"></ion-icon>
+            Add Insurance
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div *ngIf="registeredVehicles.length === 0" class="no-vehicles-warning">
+          <ion-icon name="warning" color="warning"></ion-icon>
+          <p>No vehicles found. Please add vehicles first before adding insurance.</p>
+        </div>
+
+        <div
+          *ngFor="let insurance of insurancesArray.controls; let i = index"
+          class="insurance-item"
+          [formGroupName]="i"
+        >
+          <div class="insurance-header">
+            <h3 class="insurance-title">Insurance {{ i + 1 }}</h3>
+            <ion-button
+              fill="clear"
+              color="danger"
+              size="small"
+              (click)="removeInsurance(i)"
+              *ngIf="insurancesArray.length > 1"
+            >
+              <ion-icon name="trash"></ion-icon>
+            </ion-button>
+          </div>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Select Vehicle *</ion-label>
+            <ion-select
+              formControlName="vehicle_id"
+              placeholder="Choose vehicle"
+              [class.error]="getErrorMessage('vehicle_id', i)"
+            >
+              <ion-select-option *ngFor="let vehicle of registeredVehicles" [value]="vehicle.veh_number">
+                {{ getVehicleDisplay(vehicle.veh_number) }}
+              </ion-select-option>
+            </ion-select>
+            <div class="error-message" *ngIf="getErrorMessage('vehicle_id', i)">
+              {{ getErrorMessage('vehicle_id', i) }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Insurance Company *</ion-label>
+            <ion-select
+              formControlName="insurance_company"
+              placeholder="Select insurance company"
+              [class.error]="getErrorMessage('insurance_company', i)"
+            >
+              <ion-select-option *ngFor="let company of insuranceCompanies" [value]="company">
+                {{ company }}
+              </ion-select-option>
+            </ion-select>
+            <div class="error-message" *ngIf="getErrorMessage('insurance_company', i)">
+              {{ getErrorMessage('insurance_company', i) }}
+            </div>
+          </ion-item>
+
+          <div class="form-row">
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">From Date *</ion-label>
+              <ion-input
+                type="date"
+                formControlName="frm_date"
+                [min]="minFromDate"
+                (ionChange)="onFromDateChange(i)"
+                [class.error]="getErrorMessage('frm_date', i)"
+              ></ion-input>
+              <div class="error-message" *ngIf="getErrorMessage('frm_date', i)">
+                {{ getErrorMessage('frm_date', i) }}
+              </div>
+            </ion-item>
+
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">To Date *</ion-label>
+              <ion-input
+                type="date"
+                formControlName="to_date"
+                [min]="getMinToDate(i)"
+                [class.error]="getErrorMessage('to_date', i)"
+              ></ion-input>
+              <div class="error-message" *ngIf="getErrorMessage('to_date', i)">
+                {{ getErrorMessage('to_date', i) }}
+              </div>
+            </ion-item>
+          </div>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Insured Amount (₹) *</ion-label>
+            <ion-input
+              type="number"
+              formControlName="insured_amount"
+              placeholder="Enter insured amount"
+              min="1000"
+              [class.error]="getErrorMessage('insured_amount', i)"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('insured_amount', i)">
+              {{ getErrorMessage('insured_amount', i) }}
+            </div>
+          </ion-item>
+
+          <!-- Insurance Document Upload -->
+          <div class="upload-section">
+            <div class="upload-item">
+              <label class="upload-label">Insurance Document *</label>
+              <div class="upload-container">
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  (change)="onFileUpload($event, i)"
+                  class="file-input"
+                  [id]="'insurance-upload-' + i"
+                >
+                <label [for]="'insurance-upload-' + i" class="upload-button">
+                  <ion-icon name="cloud-upload"></ion-icon>
+                  Choose Document
+                </label>
+                <span class="file-name" [class.uploaded]="hasFile(i)">
+                  {{ getFileName(i) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="insurance-divider" *ngIf="i < insurancesArray.length - 1"></div>
+        </div>
+
+        <div class="no-insurance" *ngIf="insurancesArray.length === 0 && registeredVehicles.length > 0">
+          <ion-icon name="shield-outline" class="no-insurance-icon"></ion-icon>
+          <p>No insurance records added yet</p>
+          <ion-button fill="outline" (click)="addInsurance()">
+            <ion-icon name="add" slot="start"></ion-icon>
+            Add First Insurance
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </form>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <div class="button-row">
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="previous-btn"
+        (click)="onPrevious()"
+      >
+        <ion-icon name="arrow-back" slot="start"></ion-icon>
+        Previous
+      </ion-button>
+      <ion-button
+        expand="block"
+        class="save-next-btn"
+        (click)="onSaveAndNext()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
+        {{ isSubmitting ? 'Saving...' : 'Save & Next' }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

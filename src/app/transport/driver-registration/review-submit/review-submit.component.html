@@ -1,0 +1,326 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Driver Registration - Review & Submit</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button (click)="onPrevious()"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="driver-registration-content">
+  <!-- Simplified Progress Indicator -->
+<div class="step-indicator">
+  <div class="step-info">
+    <span class="current-step">Step 5 of 5</span>
+    <span class="step-title">Review</span>
+  </div>
+</div>
+
+  <!-- Review Summary -->
+  <div class="review-content">
+    <!-- Basic Information Review -->
+    <ion-card class="review-section">
+      <ion-card-header>
+        <div class="section-header">
+          <div class="header-left">
+            <ion-icon name="person" class="section-icon"></ion-icon>
+            <ion-card-title>Basic Information</ion-card-title>
+          </div>
+          <ion-button fill="clear" size="small" (click)="onEdit('basic')">
+            <ion-icon name="create" slot="start"></ion-icon>
+            Edit
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Name:</span>
+            <span class="value">{{ registrationData.driverInfo.first_name }} {{ registrationData.driverInfo.last_name }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Date of Birth:</span>
+            <span class="value">{{ registrationData.driverInfo.dob }} (Age: {{ calculateAge(registrationData.driverInfo.dob) }})</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Email:</span>
+            <span class="value">{{ registrationData.driverInfo.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Contact:</span>
+            <span class="value">{{ registrationData.driverInfo.contact_num }}</span>
+          </div>
+          <div class="info-item" *ngIf="registrationData.driverInfo.addl_contact_num">
+            <span class="label">Alternate Contact:</span>
+            <span class="value">{{ registrationData.driverInfo.addl_contact_num }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">License Number:</span>
+            <span class="value">{{ registrationData.driverInfo.licence_no }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">License Type:</span>
+            <span class="value">{{ registrationData.driverInfo.licence_type }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">License Expiry:</span>
+            <span class="value">{{ registrationData.driverInfo.licence_expiry_date }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Address:</span>
+            <span class="value">{{ registrationData.driverInfo.door_no }}, {{ registrationData.driverInfo.street_name }}, {{ registrationData.driverInfo.town }}, {{ registrationData.driverInfo.state }} - {{ registrationData.driverInfo.pincode }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Aadhar:</span>
+            <span class="value">{{ registrationData.driverInfo.aadhar }}</span>
+          </div>
+          <div class="info-item" *ngIf="registrationData.driverInfo.pan">
+            <span class="label">PAN:</span>
+            <span class="value">{{ registrationData.driverInfo.pan }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Bank Account:</span>
+            <span class="value">{{ registrationData.driverInfo.bank_ac_no }} ({{ registrationData.driverInfo.bank_name }})</span>
+          </div>
+        </div>
+
+        <!-- Uploaded Files -->
+        <div class="files-section" *ngIf="registrationData.driverInfo.aadhar_file || registrationData.driverInfo.pan_file || registrationData.driverInfo.driver_image">
+          <h4>Uploaded Files:</h4>
+          <div class="file-list">
+            <div class="file-item" *ngIf="registrationData.driverInfo.aadhar_file">
+              <ion-icon name="document"></ion-icon>
+              <span>Aadhar: {{ getFileDisplayName(registrationData.driverInfo.aadhar_file) }}</span>
+            </div>
+            <div class="file-item" *ngIf="registrationData.driverInfo.pan_file">
+              <ion-icon name="document"></ion-icon>
+              <span>PAN: {{ getFileDisplayName(registrationData.driverInfo.pan_file) }}</span>
+            </div>
+            <div class="file-item" *ngIf="registrationData.driverInfo.driver_image">
+              <ion-icon name="camera"></ion-icon>
+              <span>Photo: {{ getFileDisplayName(registrationData.driverInfo.driver_image) }}</span>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Documents Review -->
+    <ion-card class="review-section" *ngIf="registrationData.documents.length > 0">
+      <ion-card-header>
+        <div class="section-header">
+          <div class="header-left">
+            <ion-icon name="document-text" class="section-icon"></ion-icon>
+            <ion-card-title>Documents ({{ registrationData.documents.length }})</ion-card-title>
+          </div>
+          <ion-button fill="clear" size="small" (click)="onEdit('documents')">
+            <ion-icon name="create" slot="start"></ion-icon>
+            Edit
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="documents-list">
+          <div class="document-item" *ngFor="let doc of registrationData.documents; let i = index">
+            <div class="document-header">
+              <span class="document-title">Document {{ i + 1 }}</span>
+              <span class="document-type">{{ doc.doc_type }}</span>
+            </div>
+            <div class="document-details">
+              <div class="detail-item">
+                <span class="label">Category:</span>
+                <span class="value">{{ doc.document_category }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Number:</span>
+                <span class="value">{{ doc.document_number }}</span>
+              </div>
+              <div class="detail-item" *ngIf="doc.document_image">
+                <span class="label">File:</span>
+                <span class="value file-name">{{ getFileDisplayName(doc.document_image) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Vehicles Review -->
+    <ion-card class="review-section" *ngIf="registrationData.vehicles.length > 0">
+      <ion-card-header>
+        <div class="section-header">
+          <div class="header-left">
+            <ion-icon name="car" class="section-icon"></ion-icon>
+            <ion-card-title>Vehicles ({{ registrationData.vehicles.length }})</ion-card-title>
+          </div>
+          <ion-button fill="clear" size="small" (click)="onEdit('vehicles')">
+            <ion-icon name="create" slot="start"></ion-icon>
+            Edit
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="vehicles-list">
+          <div class="vehicle-item" *ngFor="let vehicle of registrationData.vehicles; let i = index">
+            <div class="vehicle-header">
+              <span class="vehicle-number">{{ vehicle.veh_number }}</span>
+              <span class="vehicle-type">{{ getVehicleTypeName(vehicle.type_id) }}</span>
+            </div>
+            <div class="vehicle-details">
+              <div class="detail-row">
+                <div class="detail-item">
+                  <span class="label">Make/Model:</span>
+                  <span class="value">{{ vehicle.make }} {{ vehicle.model }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Fuel Type:</span>
+                  <span class="value">{{ vehicle.fuel_type }}</span>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-item">
+                  <span class="label">Load Capacity:</span>
+                  <span class="value">{{ vehicle.load_capacity }} tons</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Kms Travelled:</span>
+                  <span class="value">{{ vehicle.kms_travelled }} km</span>
+                </div>
+              </div>
+              <div class="detail-item" *ngIf="vehicle.rc_document">
+                <span class="label">RC Document:</span>
+                <span class="value file-name">{{ getFileDisplayName(vehicle.rc_document) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Insurance Review -->
+    <ion-card class="review-section" *ngIf="registrationData.insurance.length > 0">
+      <ion-card-header>
+        <div class="section-header">
+          <div class="header-left">
+            <ion-icon name="shield-checkmark" class="section-icon"></ion-icon>
+            <ion-card-title>Insurance ({{ registrationData.insurance.length }})</ion-card-title>
+          </div>
+          <ion-button fill="clear" size="small" (click)="onEdit('insurance')">
+            <ion-icon name="create" slot="start"></ion-icon>
+            Edit
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="insurance-list">
+          <div class="insurance-item" *ngFor="let insurance of registrationData.insurance; let i = index">
+            <div class="insurance-header">
+              <span class="vehicle-number">{{ insurance.vehicle_id }}</span>
+              <span class="insurance-company">{{ insurance.insurance_company }}</span>
+            </div>
+            <div class="insurance-details">
+              <div class="detail-row">
+                <div class="detail-item">
+                  <span class="label">Valid From:</span>
+                  <span class="value">{{ insurance.frm_date }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Valid To:</span>
+                  <span class="value">{{ insurance.to_date }}</span>
+                </div>
+              </div>
+              <div class="detail-item">
+                <span class="label">Insured Amount:</span>
+                <span class="value">₹{{ insurance.insured_amount | number }}</span>
+              </div>
+              <div class="detail-item" *ngIf="insurance.ins_document">
+                <span class="label">Document:</span>
+                <span class="value file-name">{{ getFileDisplayName(insurance.ins_document) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Terms and Conditions -->
+    <ion-card class="terms-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="document-text"></ion-icon>
+          Terms & Conditions
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="terms-content">
+          <p>By submitting this registration, I confirm that:</p>
+          <ul>
+            <li>All information provided is accurate and complete</li>
+            <li>All documents uploaded are genuine and valid</li>
+            <li>I agree to follow all company policies and regulations</li>
+            <li>I understand that false information may result in rejection</li>
+            <li>I consent to verification of the provided information</li>
+          </ul>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <div class="button-row">
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="previous-btn"
+        (click)="onPrevious()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon name="arrow-back" slot="start"></ion-icon>
+        Previous
+      </ion-button>
+      <ion-button
+        expand="block"
+        class="submit-btn"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon name="checkmark-circle" slot="end"></ion-icon>
+        {{ isSubmitting ? 'Submitting...' : 'Submit Registration' }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
+
+<!-- Success Modal -->
+<ion-modal [isOpen]="showSuccessModal" [backdropDismiss]="false" class="success-modal">
+  <ng-template>
+    <div class="modal-wrapper">
+      <div class="modal-content">
+        <div class="success-animation">
+          <ion-icon name="checkmark-circle" color="success" class="success-icon"></ion-icon>
+        </div>
+        <h2 class="success-title">Registration Submitted!</h2>
+        <p class="success-message">
+          Your driver registration has been submitted successfully. You will receive a confirmation email shortly.
+        </p>
+        <div class="next-steps">
+          <h4>Next Steps:</h4>
+          <ul>
+            <li>Wait for document verification (2-3 business days)</li>
+            <li>Complete background check process</li>
+            <li>Attend orientation session if approved</li>
+          </ul>
+        </div>
+        <ion-button
+          expand="block"
+          class="close-btn"
+          (click)="onSuccessClose()"
+        >
+          <ion-icon name="home" slot="start"></ion-icon>
+          Back to Dashboard
+        </ion-button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

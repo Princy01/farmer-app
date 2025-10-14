@@ -1,0 +1,474 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Driver Registration - Basic Information</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/transport"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="driver-registration-content">
+  <!-- Simplified Progress Indicator -->
+<div class="step-indicator">
+  <div class="step-info">
+    <span class="current-step">Step 1 of 5</span>
+    <span class="step-title">Basic Information</span>
+  </div>
+</div>
+
+  <form [formGroup]="basicInfoForm" class="registration-form">
+    <!-- Personal Information -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="person"></ion-icon>
+          Personal Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">First Name *</ion-label>
+            <ion-input
+              formControlName="first_name"
+              placeholder="Enter first name"
+              [class.error]="basicInfoForm.get('first_name')?.invalid && basicInfoForm.get('first_name')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('first_name')">
+              {{ getErrorMessage('first_name') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Last Name *</ion-label>
+            <ion-input
+              formControlName="last_name"
+              placeholder="Enter last name"
+              [class.error]="basicInfoForm.get('last_name')?.invalid && basicInfoForm.get('last_name')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('last_name')">
+              {{ getErrorMessage('last_name') }}
+            </div>
+          </ion-item>
+        </div>
+
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Date of Birth *</ion-label>
+            <ion-input
+              type="date"
+              formControlName="dob"
+              [max]="maxBirthDate"
+              [class.error]="basicInfoForm.get('dob')?.invalid && basicInfoForm.get('dob')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('dob')">
+              {{ getErrorMessage('dob') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Blood Group</ion-label>
+            <ion-select
+              formControlName="blood_group"
+              placeholder="Select blood group"
+            >
+              <ion-select-option *ngFor="let group of bloodGroups" [value]="group">
+                {{ group }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Email *</ion-label>
+            <ion-input
+              type="email"
+              formControlName="email"
+              placeholder="Enter email address"
+              [class.error]="basicInfoForm.get('email')?.invalid && basicInfoForm.get('email')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('email')">
+              {{ getErrorMessage('email') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Contact Number *</ion-label>
+            <ion-input
+              type="tel"
+              formControlName="contact_num"
+              placeholder="Enter mobile number"
+              [class.error]="basicInfoForm.get('contact_num')?.invalid && basicInfoForm.get('contact_num')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('contact_num')">
+              {{ getErrorMessage('contact_num') }}
+            </div>
+          </ion-item>
+        </div>
+
+        <ion-item lines="full" class="form-item">
+          <ion-label position="stacked">Alternate Contact</ion-label>
+          <ion-input
+            type="tel"
+            formControlName="contact_num_addl"
+            placeholder="Enter alternate mobile number"
+            [class.error]="basicInfoForm.get('contact_num_addl')?.invalid && basicInfoForm.get('contact_num_addl')?.touched"
+          ></ion-input>
+          <div class="error-message" *ngIf="getErrorMessage('contact_num_addl')">
+            {{ getErrorMessage('contact_num_addl') }}
+          </div>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- License Information -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="card"></ion-icon>
+          License Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">License Number *</ion-label>
+            <ion-input
+              formControlName="licence_no"
+              placeholder="Enter license number"
+              [class.error]="basicInfoForm.get('licence_no')?.invalid && basicInfoForm.get('licence_no')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('licence_no')">
+              {{ getErrorMessage('licence_no') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">License Type *</ion-label>
+            <ion-select
+              formControlName="licence_type"
+              placeholder="Select license type"
+              [class.error]="basicInfoForm.get('licence_type')?.invalid && basicInfoForm.get('licence_type')?.touched"
+            >
+              <ion-select-option *ngFor="let type of licenseTypes" [value]="type">
+                {{ type }}
+              </ion-select-option>
+            </ion-select>
+            <div class="error-message" *ngIf="getErrorMessage('licence_type')">
+              {{ getErrorMessage('licence_type') }}
+            </div>
+          </ion-item>
+        </div>
+
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">License Issue Date *</ion-label>
+            <ion-input
+              type="date"
+              formControlName="licence_issed_date"
+              [max]="maxLicenseIssueDate"
+              [class.error]="basicInfoForm.get('licence_issed_date')?.invalid && basicInfoForm.get('licence_issed_date')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('licence_issed_date')">
+              {{ getErrorMessage('licence_issed_date') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">License Expiry Date *</ion-label>
+            <ion-input
+              type="date"
+              formControlName="licence_expiry_datedate"
+              [min]="minLicenseExpiryDate"
+              [class.error]="basicInfoForm.get('licence_expiry_datedate')?.invalid && basicInfoForm.get('licence_expiry_datedate')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('licence_expiry_datedate')">
+              {{ getErrorMessage('licence_expiry_datedate') }}
+            </div>
+          </ion-item>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Address Information -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="location"></ion-icon>
+          Address Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Door No *</ion-label>
+            <ion-input
+              formControlName="address_door_no"
+              placeholder="Enter door number"
+              [class.error]="basicInfoForm.get('address_door_no')?.invalid && basicInfoForm.get('address_door_no')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('address_door_no')">
+              {{ getErrorMessage('address_door_no') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Street Name *</ion-label>
+            <ion-input
+              formControlName="address_street"
+              placeholder="Enter street name"
+              [class.error]="basicInfoForm.get('address_street')?.invalid && basicInfoForm.get('address_street')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('address_street')">
+              {{ getErrorMessage('address_street') }}
+            </div>
+          </ion-item>
+        </div>
+
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Town/City *</ion-label>
+            <ion-input
+              formControlName="address_town"
+              placeholder="Enter town/city"
+              [class.error]="basicInfoForm.get('address_town')?.invalid && basicInfoForm.get('address_town')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('address_town')">
+              {{ getErrorMessage('address_town') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">PIN Code *</ion-label>
+            <ion-input
+              formControlName="address_pin_code"
+              placeholder="Enter PIN code"
+              [class.error]="basicInfoForm.get('address_pin_code')?.invalid && basicInfoForm.get('address_pin_code')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('address_pin_code')">
+              {{ getErrorMessage('address_pin_code') }}
+            </div>
+          </ion-item>
+        </div>
+
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">State *</ion-label>
+            <ion-select
+              formControlName="address_state"
+              placeholder="Select state"
+              [class.error]="basicInfoForm.get('address_state')?.invalid && basicInfoForm.get('address_state')?.touched"
+            >
+              <ion-select-option *ngFor="let state of indianStates" [value]="state">
+                {{ state }}
+              </ion-select-option>
+            </ion-select>
+            <div class="error-message" *ngIf="getErrorMessage('address_state')">
+              {{ getErrorMessage('address_state') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Landmark</ion-label>
+            <ion-input
+              formControlName="address_landmark"
+              placeholder="Enter nearby landmark"
+            ></ion-input>
+          </ion-item>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Identity Documents -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="document"></ion-icon>
+          Identity Documents
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Aadhar Number *</ion-label>
+            <ion-input
+              formControlName="aadhar"
+              placeholder="Enter 12-digit Aadhar number"
+              [class.error]="basicInfoForm.get('aadhar')?.invalid && basicInfoForm.get('aadhar')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('aadhar')">
+              {{ getErrorMessage('aadhar') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">PAN Number</ion-label>
+            <ion-input
+              formControlName="pan"
+              placeholder="Enter PAN number"
+              [class.error]="basicInfoForm.get('pan')?.invalid && basicInfoForm.get('pan')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('pan')">
+              {{ getErrorMessage('pan') }}
+            </div>
+          </ion-item>
+        </div>
+
+        <!-- File Upload Section -->
+        <div class="upload-section">
+          <div class="upload-item">
+            <label class="upload-label">Aadhar Document *</label>
+            <div class="upload-container">
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                (change)="onFileUpload($event, 'aadhar')"
+                class="file-input"
+                id="aadhar-upload"
+              />
+              <label for="aadhar-upload" class="upload-button">
+                <ion-icon name="cloud-upload"></ion-icon>
+                Choose Aadhar
+              </label>
+              <span class="file-name" [class.uploaded]="hasFile('aadhar')">
+                {{ getFileName('aadhar') }}
+              </span>
+            </div>
+          </div>
+
+          <div class="upload-item">
+            <label class="upload-label">PAN Document</label>
+            <div class="upload-container">
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                (change)="onFileUpload($event, 'pan')"
+                class="file-input"
+                id="pan-upload"
+              />
+              <label for="pan-upload" class="upload-button">
+                <ion-icon name="cloud-upload"></ion-icon>
+                Choose PAN
+              </label>
+              <span class="file-name" [class.uploaded]="hasFile('pan')">
+                {{ getFileName('pan') }}
+              </span>
+            </div>
+          </div>
+
+          <div class="upload-item">
+            <label class="upload-label">Driver Photo</label>
+            <div class="upload-container">
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png"
+                (change)="onFileUpload($event, 'photo')"
+                class="file-input"
+                id="photo-upload"
+              />
+              <label for="photo-upload" class="upload-button">
+                <ion-icon name="cloud-upload"></ion-icon>
+                Choose Photo
+              </label>
+              <span class="file-name" [class.uploaded]="hasFile('photo')">
+                {{ getFileName('photo') }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Bank Information -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="card"></ion-icon>
+          Bank Information
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Bank Account Number *</ion-label>
+            <ion-input
+              formControlName="bank_ac_no"
+              placeholder="Enter account number"
+              [class.error]="basicInfoForm.get('bank_ac_no')?.invalid && basicInfoForm.get('bank_ac_no')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('bank_ac_no')">
+              {{ getErrorMessage('bank_ac_no') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">IFSC Code *</ion-label>
+            <ion-input
+              formControlName="ifsc"
+              placeholder="Enter IFSC code"
+              [class.error]="basicInfoForm.get('ifsc')?.invalid && basicInfoForm.get('ifsc')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('ifsc')">
+              {{ getErrorMessage('ifsc') }}
+            </div>
+          </ion-item>
+        </div>
+
+        <div class="form-row">
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Bank Name *</ion-label>
+            <ion-input
+              formControlName="bank_name"
+              placeholder="Enter bank name"
+              [class.error]="basicInfoForm.get('bank_name')?.invalid && basicInfoForm.get('bank_name')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('bank_name')">
+              {{ getErrorMessage('bank_name') }}
+            </div>
+          </ion-item>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Branch Name *</ion-label>
+            <ion-input
+              formControlName="bank_branch"
+              placeholder="Enter branch name"
+              [class.error]="basicInfoForm.get('bank_branch')?.invalid && basicInfoForm.get('bank_branch')?.touched"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('bank_branch')">
+              {{ getErrorMessage('bank_branch') }}
+            </div>
+          </ion-item>
+        </div>
+
+        <ion-item lines="full" class="form-item">
+          <ion-label position="stacked">Bank Address *</ion-label>
+          <ion-textarea
+            formControlName="bank_address"
+            placeholder="Enter bank address"
+            rows="3"
+            [class.error]="basicInfoForm.get('bank_address')?.invalid && basicInfoForm.get('bank_address')?.touched"
+          ></ion-textarea>
+          <div class="error-message" *ngIf="getErrorMessage('bank_address')">
+            {{ getErrorMessage('bank_address') }}
+          </div>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+  </form>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <div class="button-row">
+      <ion-button
+        expand="block"
+        class="save-next-btn"
+        (click)="onSaveAndNext()"
+        [disabled]="isSubmitting || basicInfoForm.invalid"
+      >
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
+        {{ isSubmitting ? 'Saving...' : 'Save & Next' }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

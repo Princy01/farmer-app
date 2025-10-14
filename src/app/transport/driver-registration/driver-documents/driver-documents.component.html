@@ -1,0 +1,161 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Driver Registration - Documents</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button (click)="onPrevious()"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="driver-registration-content">
+  <!-- Simplified Progress Indicator -->
+<div class="step-indicator">
+  <div class="step-info">
+    <span class="current-step">Step 2 of 5</span>
+    <span class="step-title">Documents</span>
+  </div>
+</div>
+
+  <form [formGroup]="documentsForm" class="registration-form">
+    <!-- Documents Section -->
+    <ion-card class="form-section">
+      <ion-card-header>
+        <div class="card-header-content">
+          <ion-card-title>
+            <ion-icon name="document-text"></ion-icon>
+            Additional Documents
+          </ion-card-title>
+          <ion-button
+            fill="outline"
+            size="small"
+            (click)="addDocument()"
+            class="add-document-btn"
+          >
+            <ion-icon name="add" slot="start"></ion-icon>
+            Add Document
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div
+          *ngFor="let document of documentsArray.controls; let i = index"
+          class="document-item"
+          [formGroupName]="i"
+        >
+          <div class="document-header">
+            <h3 class="document-title">Document {{ i + 1 }}</h3>
+            <ion-button
+              fill="clear"
+              color="danger"
+              size="small"
+              (click)="removeDocument(i)"
+              *ngIf="documentsArray.length > 1"
+            >
+              <ion-icon name="trash"></ion-icon>
+            </ion-button>
+          </div>
+
+          <div class="form-row">
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">Document Category *</ion-label>
+              <ion-select
+                formControlName="document_category"
+                placeholder="Select category"
+                [class.error]="getErrorMessage('document_category', i)"
+              >
+                <ion-select-option *ngFor="let category of documentCategories" [value]="category">
+                  {{ category }}
+                </ion-select-option>
+              </ion-select>
+              <div class="error-message" *ngIf="getErrorMessage('document_category', i)">
+                {{ getErrorMessage('document_category', i) }}
+              </div>
+            </ion-item>
+
+            <ion-item lines="full" class="form-item">
+              <ion-label position="stacked">Document Type *</ion-label>
+              <ion-select
+                formControlName="doc_type"
+                placeholder="Select type"
+              >
+                <ion-select-option *ngFor="let type of documentTypes" [value]="type">
+                  {{ type }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+
+          <ion-item lines="full" class="form-item">
+            <ion-label position="stacked">Document Number *</ion-label>
+            <ion-input
+              formControlName="document_number"
+              placeholder="Enter document number/ID"
+              [class.error]="getErrorMessage('document_number', i)"
+            ></ion-input>
+            <div class="error-message" *ngIf="getErrorMessage('document_number', i)">
+              {{ getErrorMessage('document_number', i) }}
+            </div>
+          </ion-item>
+
+          <!-- File Upload -->
+          <div class="upload-section">
+            <div class="upload-item">
+              <label class="upload-label">Document File</label>
+              <div class="upload-container">
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  (change)="onFileUpload($event, i)"
+                  class="file-input"
+                  [id]="'document-upload-' + i"
+                >
+                <label [for]="'document-upload-' + i" class="upload-button">
+                  <ion-icon name="cloud-upload"></ion-icon>
+                  Choose File
+                </label>
+                <span class="file-name" [class.uploaded]="hasFile(i)">
+                  {{ getFileName(i) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="document-divider" *ngIf="i < documentsArray.length - 1"></div>
+        </div>
+
+        <div class="no-documents" *ngIf="documentsArray.length === 0">
+          <ion-icon name="document-outline" class="no-docs-icon"></ion-icon>
+          <p>No documents added yet</p>
+          <ion-button fill="outline" (click)="addDocument()">
+            <ion-icon name="add" slot="start"></ion-icon>
+            Add First Document
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </form>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <div class="button-row">
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="previous-btn"
+        (click)="onPrevious()"
+      >
+        <ion-icon name="arrow-back" slot="start"></ion-icon>
+        Previous
+      </ion-button>
+      <ion-button
+        expand="block"
+        class="save-next-btn"
+        (click)="onSaveAndNext()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
+        {{ isSubmitting ? 'Saving...' : 'Save & Next' }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

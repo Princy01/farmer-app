@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { DriverRegistrationComponent } from './driver-registration.component';
+import { ReviewSubmitComponent } from './review-submit.component';
 
-describe('DriverRegistrationComponent', () => {
-  let component: DriverRegistrationComponent;
-  let fixture: ComponentFixture<DriverRegistrationComponent>;
+describe('ReviewSubmitComponent', () => {
+  let component: ReviewSubmitComponent;
+  let fixture: ComponentFixture<ReviewSubmitComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ DriverRegistrationComponent ],
+      declarations: [ ReviewSubmitComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DriverRegistrationComponent);
+    fixture = TestBed.createComponent(ReviewSubmitComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
