@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { 
-  chevronForward, 
-  chevronBack, 
-  checkmarkCircle, 
+import {
+  chevronForward,
+  chevronBack,
+  checkmarkCircle,
   cloudUpload,
   documentText,
   car,
@@ -20,12 +20,12 @@ import {
   calendar,
   informationCircle
 } from 'ionicons/icons';
-import { 
-  DriverService, 
-  DriverInfoRequest, 
+import {
+  DriverService,
+  DriverInfoRequest,
   DriverDocumentRequest,
   DriverVehicle,
-  DriverVehicleInsurance 
+  DriverVehicleInsurance
 } from './driver-registration.service';
 
 interface FormData {
@@ -43,7 +43,7 @@ interface FormData {
   imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule]
 })
 export class DriverRegistrationComponent implements OnInit {
-  currentStep = 5 ;
+  currentStep = 3;
   totalSteps = 5;
   today = new Date().toISOString();
 
@@ -101,6 +101,7 @@ export class DriverRegistrationComponent implements OnInit {
     this.driverInfoForm = this.fb.group({
       first_name: ['', [Validators.required]],
       last_name: ['', [Validators.required]],
+      dob: ['', [Validators.required]],
       licence_no: ['', [Validators.required]],
       licence_issued_date: ['', [Validators.required]],
       licence_expiry_date: ['', [Validators.required]],
@@ -116,11 +117,11 @@ export class DriverRegistrationComponent implements OnInit {
       email: ['', [Validators.email]],
       aadhar: ['', [Validators.required, Validators.pattern(/^\d{12}$/)]],
       pan: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
-      bank_ac_no: [''],
-      bank_name: [''],
-      bank_branch: [''],
-      ifsc: ['', [Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)]],
-      bank_address: [''],
+      bank_ac_no: ['', [Validators.required]],
+      bank_name: ['', [Validators.required]],
+      bank_branch: ['', [Validators.required]],
+      ifsc: ['', [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)]],
+      bank_address: ['', [Validators.required]],
       status: ['active', [Validators.required]]
     });
 
@@ -159,7 +160,7 @@ export class DriverRegistrationComponent implements OnInit {
 
   async nextStep() {
     const currentForm = this.getCurrentForm();
-    
+
     if (currentForm && currentForm.invalid) {
       await this.showToast('Please fill all required fields correctly', 'warning');
       this.markFormGroupTouched(currentForm);
@@ -220,10 +221,11 @@ export class DriverRegistrationComponent implements OnInit {
 
   saveDriverInfo(loading: HTMLIonLoadingElement) {
     const formValue = this.driverInfoForm.value;
-    
+
     const driverInfo: DriverInfoRequest = {
       first_name: formValue.first_name,
       last_name: formValue.last_name,
+      dob: this.formatDate(formValue.dob),
       licence_no: formValue.licence_no,
       licence_issued_date: this.formatDate(formValue.licence_issued_date),
       licence_expiry_date: this.formatDate(formValue.licence_expiry_date),
@@ -434,12 +436,12 @@ export class DriverRegistrationComponent implements OnInit {
     this.currentStep = 1;
     this.driverId = null;
     this.vehicleId = null;
-    
+
     this.driverInfoForm.reset({ status: 'active' });
     this.documentsForm.reset();
     this.vehicleForm.reset();
     this.insuranceForm.reset();
-    
+
     this.formData = {
       driverInfo: {},
       documents: {},
@@ -552,8 +554,8 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   onDateChange(event: any, controlName: string, formGroup: FormGroup) {
-  formGroup.patchValue({
-    [controlName]: event.detail.value
-  });
-}
+    formGroup.patchValue({
+      [controlName]: event.detail.value
+    });
+  }
 }

@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 export interface DriverInfoRequest {
   first_name: string;
   last_name: string;
+  dob: string;
   licence_no: string;
   licence_issued_date: string;
   licence_expiry_date: string;
@@ -106,6 +107,7 @@ export class DriverService {
    * @param driverInfo Driver personal and contact details
    * @returns Observable with driver_id
    */
+
   addDriver(driverInfo: DriverInfoRequest): Observable<DriverResponse> {
     return this.http.post<DriverResponse>(
       `${this.baseUrl}/AddADriver`,
