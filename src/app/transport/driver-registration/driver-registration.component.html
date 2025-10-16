@@ -506,34 +506,6 @@
             <ion-row>
               <ion-col size="12" size-md="6">
                 <div class="form-field">
-                  <ion-label class="field-label">Town *</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'address_town')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="address_town"
-                      placeholder="Enter town"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'address_town')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "address_town") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
                   <ion-label class="field-label">State *</ion-label>
                   <ion-item
                     [class.error-item]="
@@ -542,10 +514,26 @@
                     lines="none"
                     class="custom-item"
                   >
-                    <ion-input
+                    <ion-select
                       formControlName="address_state"
-                      placeholder="Enter state"
-                    ></ion-input>
+                      placeholder="Select state"
+                      interface="action-sheet"
+                      (ionChange)="
+                        onStateChange(
+                          $event,
+                          driverInfoForm,
+                          'address_state',
+                          'address_town'
+                        )
+                      "
+                    >
+                      <ion-select-option
+                        *ngFor="let state of states"
+                        [value]="state.state_shortname"
+                      >
+                        {{ state.state_name }} ({{ state.state_shortname }})
+                      </ion-select-option>
+                    </ion-select>
                   </ion-item>
                   <div
                     *ngIf="hasError(driverInfoForm, 'address_state')"
@@ -556,6 +544,43 @@
                       class="error-icon"
                     ></ion-icon>
                     {{ getErrorMessage(driverInfoForm, "address_state") }}
+                  </div>
+                </div>
+              </ion-col>
+
+              <ion-col size="12" size-md="6">
+                <div class="form-field">
+                  <ion-label class="field-label">Town/City *</ion-label>
+                  <ion-item
+                    [class.error-item]="
+                      hasError(driverInfoForm, 'address_town')
+                    "
+                    lines="none"
+                    class="custom-item"
+                  >
+                    <ion-select
+                      formControlName="address_town"
+                      placeholder="Select town/city"
+                      interface="action-sheet"
+                      [disabled]="!cities.length"
+                    >
+                      <ion-select-option
+                        *ngFor="let city of cities"
+                        [value]="city.city_name"
+                      >
+                        {{ city.city_name }} ({{ city.city_shortname }})
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                  <div
+                    *ngIf="hasError(driverInfoForm, 'address_town')"
+                    class="error-text"
+                  >
+                    <ion-icon
+                      name="information-circle"
+                      class="error-icon"
+                    ></ion-icon>
+                    {{ getErrorMessage(driverInfoForm, "address_town") }}
                   </div>
                 </div>
               </ion-col>
@@ -1085,67 +1110,12 @@
                       placeholder="Select state"
                       interface="action-sheet"
                     >
-                      <ion-select-option value="AP"
-                        >Andhra Pradesh</ion-select-option
+                      <ion-select-option
+                        *ngFor="let state of states"
+                        [value]="state.state_shortname"
                       >
-                      <ion-select-option value="AR"
-                        >Arunachal Pradesh</ion-select-option
-                      >
-                      <ion-select-option value="AS">Assam</ion-select-option>
-                      <ion-select-option value="BR">Bihar</ion-select-option>
-                      <ion-select-option value="CT"
-                        >Chhattisgarh</ion-select-option
-                      >
-                      <ion-select-option value="GA">Goa</ion-select-option>
-                      <ion-select-option value="GJ">Gujarat</ion-select-option>
-                      <ion-select-option value="HR">Haryana</ion-select-option>
-                      <ion-select-option value="HP"
-                        >Himachal Pradesh</ion-select-option
-                      >
-                      <ion-select-option value="JK"
-                        >Jammu and Kashmir</ion-select-option
-                      >
-                      <ion-select-option value="JH"
-                        >Jharkhand</ion-select-option
-                      >
-                      <ion-select-option value="KA"
-                        >Karnataka</ion-select-option
-                      >
-                      <ion-select-option value="KL">Kerala</ion-select-option>
-                      <ion-select-option value="MP"
-                        >Madhya Pradesh</ion-select-option
-                      >
-                      <ion-select-option value="MH"
-                        >Maharashtra</ion-select-option
-                      >
-                      <ion-select-option value="MN">Manipur</ion-select-option>
-                      <ion-select-option value="ML"
-                        >Meghalaya</ion-select-option
-                      >
-                      <ion-select-option value="MZ">Mizoram</ion-select-option>
-                      <ion-select-option value="NL">Nagaland</ion-select-option>
-                      <ion-select-option value="OR">Odisha</ion-select-option>
-                      <ion-select-option value="PB">Punjab</ion-select-option>
-                      <ion-select-option value="RJ"
-                        >Rajasthan</ion-select-option
-                      >
-                      <ion-select-option value="SK">Sikkim</ion-select-option>
-                      <ion-select-option value="TN"
-                        >Tamil Nadu</ion-select-option
-                      >
-                      <ion-select-option value="TG"
-                        >Telangana</ion-select-option
-                      >
-                      <ion-select-option value="TR">Tripura</ion-select-option>
-                      <ion-select-option value="UP"
-                        >Uttar Pradesh</ion-select-option
-                      >
-                      <ion-select-option value="UT"
-                        >Uttarakhand</ion-select-option
-                      >
-                      <ion-select-option value="WB"
-                        >West Bengal</ion-select-option
-                      >
+                        {{ state.state_name }} ({{ state.state_shortname }})
+                      </ion-select-option>
                     </ion-select>
                   </ion-item>
                   <div

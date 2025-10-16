@@ -25,7 +25,9 @@ import {
   DriverInfoRequest,
   DriverDocumentRequest,
   DriverVehicle,
-  DriverVehicleInsurance
+  DriverVehicleInsurance,
+  State,
+  City
 } from './driver-registration.service';
 
 interface FormData {
@@ -43,9 +45,12 @@ interface FormData {
   imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule]
 })
 export class DriverRegistrationComponent implements OnInit {
-  currentStep = 3;
+  currentStep = 5;
   totalSteps = 5;
   today = new Date().toISOString();
+  states: State[] = [];
+  cities: City[] = [];
+  selectedStateId: number | null = null;
 
   // Form groups
   driverInfoForm!: FormGroup;
@@ -94,6 +99,7 @@ export class DriverRegistrationComponent implements OnInit {
 
   ngOnInit() {
     this.initializeForms();
+    this.loadStates();
   }
 
   initializeForms() {
@@ -558,4 +564,27 @@ export class DriverRegistrationComponent implements OnInit {
       [controlName]: event.detail.value
     });
   }
+
+  loadStates() {
+  this.driverService.getStates().subscribe({
+    next: (states) => { this.states = states; },
+    error: () => { this.states = []; }
+  });
+}
+
+onStateChange(event: any, formGroup: FormGroup, stateField: string, cityField: string) {
+  const stateShortName = event.detail.value;
+  const selectedState = this.states.find(s => s.state_shortname === stateShortName);
+  if (selectedState) {
+    this.selectedStateId = selectedState.id;
+    this.driverService.getCitiesOfState(selectedState.id).subscribe({
+      next: (cities) => { this.cities = cities; },
+      error: () => { this.cities = []; }
+    });
+    formGroup.patchValue({ [cityField]: '' }); // Reset city/town field
+  } else {
+    this.cities = [];
+    formGroup.patchValue({ [cityField]: '' });
+  }
+}
 }

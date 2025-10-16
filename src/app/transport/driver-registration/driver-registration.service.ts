@@ -88,25 +88,31 @@ export interface InsuranceResponse {
   message: string;
 }
 
+export interface State {
+  id: number;
+  state_name: string;
+  state_shortname: string;
+}
+
+export interface City {
+  id: number;
+  city_shortname: string;
+  city_name: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DriverService {
   private baseUrl = 'http://localhost:3000';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json'
     });
   }
-
-  /**
-   * Step 1: Add Driver Basic Information
-   * @param driverInfo Driver personal and contact details
-   * @returns Observable with driver_id
-   */
 
   addDriver(driverInfo: DriverInfoRequest): Observable<DriverResponse> {
     return this.http.post<DriverResponse>(
@@ -116,11 +122,6 @@ export class DriverService {
     );
   }
 
-  /**
-   * Step 2: Upload Driver Documents
-   * @param documents Driver document images in base64 format
-   * @returns Observable with upload status
-   */
   addDriverDocument(documents: DriverDocumentRequest): Observable<DocumentResponse> {
     return this.http.post<DocumentResponse>(
       `${this.baseUrl}/AddADriverDocument`,
@@ -129,11 +130,6 @@ export class DriverService {
     );
   }
 
-  /**
-   * Step 3: Add Driver Vehicle Information
-   * @param vehicleData Vehicle details
-   * @returns Observable with vehicle_id
-   */
   addDriverVehicle(vehicleData: DriverVehicle): Observable<VehicleResponse> {
     return this.http.post<VehicleResponse>(
       `${this.baseUrl}/AddADriverVehicle`,
@@ -142,11 +138,7 @@ export class DriverService {
     );
   }
 
-  /**
-   * Step 4: Add Vehicle Insurance Information
-   * @param insuranceData Insurance details
-   * @returns Observable with success message
-   */
+
   addDriverVehicleInsurance(insuranceData: DriverVehicleInsurance): Observable<InsuranceResponse> {
     return this.http.post<InsuranceResponse>(
       `${this.baseUrl}/AddADriverInsurance`,
@@ -155,10 +147,6 @@ export class DriverService {
     );
   }
 
-  /**
-   * Get all drivers (optional - for listing)
-   * @returns Observable with array of drivers
-   */
   getAllDrivers(): Observable<any[]> {
     return this.http.get<any[]>(
       `${this.baseUrl}/GetDrivers`,
@@ -166,11 +154,6 @@ export class DriverService {
     );
   }
 
-  /**
-   * Get driver by ID (optional - for details)
-   * @param driverId Driver ID
-   * @returns Observable with driver details
-   */
   getDriverById(driverId: number): Observable<any> {
     return this.http.get<any>(
       `${this.baseUrl}/GetDriverById/${driverId}`,
@@ -178,12 +161,6 @@ export class DriverService {
     );
   }
 
-  /**
-   * Update driver information (optional)
-   * @param driverId Driver ID
-   * @param driverData Updated driver data
-   * @returns Observable with success message
-   */
   updateDriver(driverId: number, driverData: Partial<DriverInfoRequest>): Observable<any> {
     return this.http.put<any>(
       `${this.baseUrl}/UpdateDriver`,
@@ -192,15 +169,24 @@ export class DriverService {
     );
   }
 
-  /**
-   * Delete driver (optional)
-   * @param driverId Driver ID
-   * @returns Observable with success message
-   */
   deleteDriver(driverId: number): Observable<any> {
     return this.http.delete<any>(
       `${this.baseUrl}/DeleteDriver/${driverId}`,
       { headers: this.getHeaders() }
     );
   }
+
+  getStates(): Observable<State[]> {
+    return this.http.get<State[]>(
+      `${this.baseUrl}/getStates`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  getCitiesOfState(stateId: number): Observable<City[]> {
+  return this.http.get<City[]>(
+    `${this.baseUrl}/getAllCitiesOfState/${stateId}`,
+    { headers: this.getHeaders() }
+  );
+}
 }
