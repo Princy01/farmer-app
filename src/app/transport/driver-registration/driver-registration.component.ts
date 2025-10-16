@@ -2,13 +2,37 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
-import { DriverService, CompleteDriverRequest, DriverInfoRequest, DocumentType, DriverVehicleInfo, VehicleInsuranceInfo } from './driver-registration.service';
+import { addIcons } from 'ionicons';
+import { 
+  chevronForward, 
+  chevronBack, 
+  checkmarkCircle, 
+  cloudUpload,
+  documentText,
+  car,
+  shield,
+  person,
+  call,
+  mail,
+  card,
+  business,
+  location,
+  calendar,
+  informationCircle
+} from 'ionicons/icons';
+import { 
+  DriverService, 
+  DriverInfoRequest, 
+  DriverDocumentRequest,
+  DriverVehicle,
+  DriverVehicleInsurance 
+} from './driver-registration.service';
 
-interface DriverFormData {
-  basicInfo: DriverInfoRequest;
-  documents: DocumentType;
-  vehicle: DriverVehicleInfo;
-  insurance: VehicleInsuranceInfo;
+interface FormData {
+  driverInfo: Partial<DriverInfoRequest>;
+  documents: Partial<DriverDocumentRequest>;
+  vehicle: Partial<DriverVehicle>;
+  insurance: Partial<DriverVehicleInsurance>;
 }
 
 @Component({
@@ -19,24 +43,27 @@ interface DriverFormData {
   imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule]
 })
 export class DriverRegistrationComponent implements OnInit {
-  currentStep = 1;
+  currentStep = 5 ;
   totalSteps = 5;
-
-  // Add date properties for template
   today = new Date().toISOString();
-  tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString();
 
-  basicInfoForm!: FormGroup;
+  // Form groups
+  driverInfoForm!: FormGroup;
   documentsForm!: FormGroup;
   vehicleForm!: FormGroup;
   insuranceForm!: FormGroup;
 
-  formData: DriverFormData = {
-    basicInfo: {} as DriverInfoRequest,
-    documents: {} as DocumentType,
-    vehicle: {} as DriverVehicleInfo,
-    insurance: {} as VehicleInsuranceInfo
+  // Stored form data
+  formData: FormData = {
+    driverInfo: {},
+    documents: {},
+    vehicle: {},
+    insurance: {}
   };
+
+  // Store IDs after creation
+  driverId: number | null = null;
+  vehicleId: number | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -44,64 +71,84 @@ export class DriverRegistrationComponent implements OnInit {
     private alertController: AlertController,
     private loadingController: LoadingController,
     private toastController: ToastController
-  ) {}
+  ) {
+    // Register icons
+    addIcons({
+      'chevron-forward': chevronForward,
+      'chevron-back': chevronBack,
+      'checkmark-circle': checkmarkCircle,
+      'cloud-upload': cloudUpload,
+      'document-text': documentText,
+      'car': car,
+      'shield': shield,
+      'person': person,
+      'call': call,
+      'mail': mail,
+      'card': card,
+      'business': business,
+      'location': location,
+      'calendar': calendar,
+      'information-circle': informationCircle
+    });
+  }
 
   ngOnInit() {
     this.initializeForms();
   }
 
   initializeForms() {
-    // Basic Info Form - ALL FIELDS REQUIRED
-    this.basicInfoForm = this.fb.group({
+    // Step 1: Driver Basic Information
+    this.driverInfoForm = this.fb.group({
       first_name: ['', [Validators.required]],
       last_name: ['', [Validators.required]],
       licence_no: ['', [Validators.required]],
       licence_issued_date: ['', [Validators.required]],
       licence_expiry_date: ['', [Validators.required]],
       licence_type: ['', [Validators.required]],
-      address_door_no: ['', [Validators.required]],
+      address_door_no: [''],
       address_street: ['', [Validators.required]],
       address_town: ['', [Validators.required]],
       address_state: ['', [Validators.required]],
       address_pin_code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
-      address_landmark: ['', [Validators.required]],
+      address_landmark: [''],
       contact_num: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      contact_num_addl: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      email: ['', [Validators.required, Validators.email]],
+      contact_num_addl: [''],
+      email: ['', [Validators.email]],
       aadhar: ['', [Validators.required, Validators.pattern(/^\d{12}$/)]],
       pan: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
-      bank_ac_no: ['', [Validators.required]],
-      bank_name: ['', [Validators.required]],
-      bank_branch: ['', [Validators.required]],
-      ifsc: ['', [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)]],
-      bank_address: ['', [Validators.required]],
-      status: ['active']
+      bank_ac_no: [''],
+      bank_name: [''],
+      bank_branch: [''],
+      ifsc: ['', [Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)]],
+      bank_address: [''],
+      status: ['active', [Validators.required]]
     });
 
-    // Documents Form - ALL FIELDS REQUIRED
+    // Step 2: Documents
     this.documentsForm = this.fb.group({
-      aadhar_img: ['', [Validators.required]],
-      pan_img: ['', [Validators.required]],
-      driver_img: ['', [Validators.required]],
-      insurance_img: ['', [Validators.required]],
-      rc_img: ['', [Validators.required]],
-      license_img: ['', [Validators.required]]
+      aadhar_img: [''],
+      pan_img: [''],
+      driver_img: [''],
+      insurance_img: [''],
+      rc_img: [''],
+      license_img: ['']
     });
 
-    // Vehicle Form - ALL FIELDS REQUIRED
+    // Step 3: Vehicle Information
     this.vehicleForm = this.fb.group({
       veh_number: ['', [Validators.required]],
       reg_date: ['', [Validators.required]],
       state: ['', [Validators.required]],
-      type_id: [null, [Validators.required, Validators.min(1)]],
+      type_id: [null, [Validators.required]],
       veh_make: ['', [Validators.required]],
       veh_model: ['', [Validators.required]],
       load_capacity: [null, [Validators.required, Validators.min(1)]],
       fuel_type: ['', [Validators.required]],
-      kms_travelled: [null, [Validators.required, Validators.min(0)]]
+      rc_document: [''],
+      kms_travelled: [0, [Validators.min(0)]]
     });
 
-    // Insurance Form - ALL FIELDS REQUIRED
+    // Step 4: Insurance Information
     this.insuranceForm = this.fb.group({
       frm_date: ['', [Validators.required]],
       to_date: ['', [Validators.required]],
@@ -112,18 +159,15 @@ export class DriverRegistrationComponent implements OnInit {
 
   async nextStep() {
     const currentForm = this.getCurrentForm();
-
+    
     if (currentForm && currentForm.invalid) {
       await this.showToast('Please fill all required fields correctly', 'warning');
       this.markFormGroupTouched(currentForm);
       return;
     }
 
+    // Save current step data and proceed
     this.saveCurrentStepData();
-
-    if (this.currentStep < this.totalSteps) {
-      this.currentStep++;
-    }
   }
 
   previousStep() {
@@ -134,7 +178,7 @@ export class DriverRegistrationComponent implements OnInit {
 
   getCurrentForm(): FormGroup | null {
     switch (this.currentStep) {
-      case 1: return this.basicInfoForm;
+      case 1: return this.driverInfoForm;
       case 2: return this.documentsForm;
       case 3: return this.vehicleForm;
       case 4: return this.insuranceForm;
@@ -142,96 +186,212 @@ export class DriverRegistrationComponent implements OnInit {
     }
   }
 
-  saveCurrentStepData() {
+  async saveCurrentStepData() {
+    const loading = await this.loadingController.create({
+      message: 'Saving...',
+      spinner: 'crescent'
+    });
+
+    await loading.present();
+
     switch (this.currentStep) {
       case 1:
-        this.formData.basicInfo = this.prepareBasicInfoData();
+        this.saveDriverInfo(loading);
         break;
       case 2:
-        this.formData.documents = this.documentsForm.value;
+        if (this.hasDocuments()) {
+          this.saveDocuments(loading);
+        } else {
+          await loading.dismiss();
+          this.currentStep++;
+        }
         break;
       case 3:
-        this.formData.vehicle = this.prepareVehicleData();
+        this.saveVehicle(loading);
         break;
       case 4:
-        this.formData.insurance = this.prepareInsuranceData();
+        this.saveInsurance(loading);
+        break;
+      default:
+        await loading.dismiss();
         break;
     }
   }
 
-  prepareBasicInfoData(): DriverInfoRequest {
-    const formValue = this.basicInfoForm.value;
-
-    // Convert date objects to strings in YYYY-MM-DD format
-    const licenceIssuedDate = formValue.licence_issued_date ?
-      new Date(formValue.licence_issued_date).toISOString().split('T')[0] : '';
-    const licenceExpiryDate = formValue.licence_expiry_date ?
-      new Date(formValue.licence_expiry_date).toISOString().split('T')[0] : '';
-
-    return {
-      ...formValue,
-      licence_issued_date: licenceIssuedDate,
-      licence_expiry_date: licenceExpiryDate
+  saveDriverInfo(loading: HTMLIonLoadingElement) {
+    const formValue = this.driverInfoForm.value;
+    
+    const driverInfo: DriverInfoRequest = {
+      first_name: formValue.first_name,
+      last_name: formValue.last_name,
+      licence_no: formValue.licence_no,
+      licence_issued_date: this.formatDate(formValue.licence_issued_date),
+      licence_expiry_date: this.formatDate(formValue.licence_expiry_date),
+      licence_type: formValue.licence_type,
+      address_door_no: formValue.address_door_no || '',
+      address_street: formValue.address_street,
+      address_town: formValue.address_town,
+      address_state: formValue.address_state,
+      address_pin_code: formValue.address_pin_code,
+      address_landmark: formValue.address_landmark || '',
+      contact_num: formValue.contact_num,
+      contact_num_addl: formValue.contact_num_addl || '',
+      email: formValue.email || '',
+      aadhar: formValue.aadhar,
+      pan: formValue.pan.toUpperCase(),
+      bank_ac_no: formValue.bank_ac_no || '',
+      bank_name: formValue.bank_name || '',
+      bank_branch: formValue.bank_branch || '',
+      ifsc: formValue.ifsc ? formValue.ifsc.toUpperCase() : '',
+      bank_address: formValue.bank_address || '',
+      status: formValue.status
     };
+
+    this.driverService.addDriver(driverInfo).subscribe({
+      next: (response) => {
+        this.driverId = response.driver_id;
+        this.formData.driverInfo = driverInfo;
+        loading.dismiss();
+        this.showToast('Driver information saved successfully', 'success');
+        this.currentStep++;
+      },
+      error: (error) => {
+        loading.dismiss();
+        const errorMsg = error.error?.error || 'Failed to save driver information';
+        this.showToast(errorMsg, 'danger');
+      }
+    });
   }
 
-  prepareVehicleData(): DriverVehicleInfo {
+  saveDocuments(loading: HTMLIonLoadingElement) {
+    if (!this.driverId) {
+      loading.dismiss();
+      this.showToast('Driver ID not found. Please complete step 1 first.', 'danger');
+      return;
+    }
+
+    const formValue = this.documentsForm.value;
+    const documents: DriverDocumentRequest = {
+      driver_id: this.driverId,
+      aadhar_img: formValue.aadhar_img || '',
+      pan_img: formValue.pan_img || '',
+      driver_img: formValue.driver_img || '',
+      insurance_img: formValue.insurance_img || '',
+      rc_img: formValue.rc_img || '',
+      license_img: formValue.license_img || ''
+    };
+
+    this.driverService.addDriverDocument(documents).subscribe({
+      next: (response) => {
+        this.formData.documents = documents;
+        loading.dismiss();
+        this.showToast(response.message || 'Documents uploaded successfully', 'success');
+        this.currentStep++;
+      },
+      error: (error) => {
+        loading.dismiss();
+        const errorMsg = error.error?.error || 'Failed to upload documents';
+        this.showToast(errorMsg, 'warning');
+        // Don't block progression - documents are optional
+        this.currentStep++;
+      }
+    });
+  }
+
+  saveVehicle(loading: HTMLIonLoadingElement) {
+    if (!this.driverId) {
+      loading.dismiss();
+      this.showToast('Driver ID not found. Please complete step 1 first.', 'danger');
+      return;
+    }
+
     const formValue = this.vehicleForm.value;
-
-    // Convert date to string format
-    const regDate = formValue.reg_date ?
-      new Date(formValue.reg_date).toISOString().split('T')[0] : '';
-
-    return {
-      ...formValue,
-      reg_date: regDate,
+    const vehicle: DriverVehicle = {
+      veh_number: formValue.veh_number.toUpperCase(),
+      reg_date: this.formatDate(formValue.reg_date),
+      state: formValue.state,
       type_id: Number(formValue.type_id),
+      veh_make: formValue.veh_make,
+      veh_model: formValue.veh_model,
+      driver_id: this.driverId,
       load_capacity: Number(formValue.load_capacity),
-      kms_travelled: Number(formValue.kms_travelled)
+      fuel_type: formValue.fuel_type,
+      rc_document: formValue.rc_document || '',
+      kms_travelled: Number(formValue.kms_travelled) || 0
     };
+
+    this.driverService.addDriverVehicle(vehicle).subscribe({
+      next: (response) => {
+        this.vehicleId = response.vehicle_id;
+        this.formData.vehicle = vehicle;
+        loading.dismiss();
+        this.showToast('Vehicle information saved successfully', 'success');
+        this.currentStep++;
+      },
+      error: (error) => {
+        loading.dismiss();
+        const errorMsg = error.error?.error || 'Failed to save vehicle information';
+        this.showToast(errorMsg, 'danger');
+      }
+    });
   }
 
-  prepareInsuranceData(): VehicleInsuranceInfo {
+  saveInsurance(loading: HTMLIonLoadingElement) {
+    if (!this.vehicleId || !this.driverId) {
+      loading.dismiss();
+      this.showToast('Vehicle ID not found. Please complete step 3 first.', 'danger');
+      return;
+    }
+
     const formValue = this.insuranceForm.value;
-
-    // Convert dates to string format
-    const frmDate = formValue.frm_date ?
-      new Date(formValue.frm_date).toISOString().split('T')[0] : '';
-    const toDate = formValue.to_date ?
-      new Date(formValue.to_date).toISOString().split('T')[0] : '';
-
-    return {
-      ...formValue,
-      frm_date: frmDate,
-      to_date: toDate,
-      amt_insured: Number(formValue.amt_insured)
+    const insurance: DriverVehicleInsurance = {
+      vehicle_id: this.vehicleId,
+      frm_date: this.formatDate(formValue.frm_date),
+      to_date: this.formatDate(formValue.to_date),
+      ins_company: formValue.ins_company,
+      amt_insured: Number(formValue.amt_insured),
+      driver_id: this.driverId
     };
+
+    this.driverService.addDriverVehicleInsurance(insurance).subscribe({
+      next: () => {
+        this.formData.insurance = insurance;
+        loading.dismiss();
+        this.showToast('Insurance information saved successfully', 'success');
+        this.currentStep++;
+      },
+      error: (error) => {
+        loading.dismiss();
+        const errorMsg = error.error?.error || 'Failed to save insurance information';
+        this.showToast(errorMsg, 'danger');
+      }
+    });
   }
 
   async onFileSelected(event: any, fieldName: string) {
     const file = event.target.files[0];
-    if (file) {
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        await this.showToast('File size should be less than 5MB', 'warning');
-        return;
-      }
+    if (!file) return;
 
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        await this.showToast('Please select an image file', 'warning');
-        return;
-      }
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      await this.showToast('File size should be less than 5MB', 'warning');
+      return;
+    }
 
-      try {
-        const base64 = await this.convertToBase64(file);
-        this.documentsForm.patchValue({
-          [fieldName]: base64
-        });
-        await this.showToast('File uploaded successfully', 'success');
-      } catch (error) {
-        await this.showToast('Error uploading file', 'danger');
-      }
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      await this.showToast('Please select an image file', 'warning');
+      return;
+    }
+
+    try {
+      const base64 = await this.convertToBase64(file);
+      this.documentsForm.patchValue({
+        [fieldName]: base64
+      });
+      await this.showToast(`${this.getDocumentLabel(fieldName)} uploaded`, 'success');
+    } catch (error) {
+      await this.showToast('Error uploading file', 'danger');
     }
   }
 
@@ -241,7 +401,7 @@ export class DriverRegistrationComponent implements OnInit {
       reader.readAsDataURL(file);
       reader.onload = () => {
         const result = reader.result as string;
-        const base64 = result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+        const base64 = result.split(',')[1];
         resolve(base64);
       };
       reader.onerror = error => reject(error);
@@ -249,81 +409,43 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   async submitForm() {
-    const loading = await this.loadingController.create({
-      message: 'Submitting driver registration...',
-      spinner: 'crescent'
-    });
-    await loading.present();
-
-    try {
-      // Save current step data
-      this.saveCurrentStepData();
-
-      // Prepare payload matching backend structure
-      const payload: CompleteDriverRequest = {
-        driver_info: this.formData.basicInfo,
-        documents: this.formData.documents,
-        vehicle: this.formData.vehicle,
-        insurance: this.formData.insurance
-      };
-
-      console.log('Submitting payload:', payload);
-
-      const response = await this.driverService.addCompleteDriver(payload).toPromise();
-
-      await loading.dismiss();
-      await this.showSuccessAlert(response);
-      this.resetForm();
-
-    } catch (error: any) {
-      await loading.dismiss();
-      console.error('Submission error:', error);
-
-      const errorMessage = error.error?.error || error.message || 'Unknown error occurred';
-      await this.showErrorAlert(errorMessage);
-    }
+    await this.showSuccessAlert();
   }
 
-  async showSuccessAlert(response: any) {
+  async showSuccessAlert() {
     const alert = await this.alertController.create({
-      header: 'Registration Successful!',
+      header: 'Registration Complete!',
       message: `
-        Driver registered successfully!
-        Driver ID: ${response.driver_id}
-        ${response.vehicle_id ? `Vehicle ID: ${response.vehicle_id}` : ''}
-        ${response.uploaded_documents?.length ? `Documents uploaded: ${response.uploaded_documents.join(', ')}` : ''}
+        Driver registered successfully!<br><br>
+        <strong>Driver ID:</strong> ${this.driverId}<br>
+        <strong>Vehicle ID:</strong> ${this.vehicleId || 'N/A'}<br>
       `,
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
-
-  async showErrorAlert(errorMessage: string) {
-    const alert = await this.alertController.create({
-      header: 'Registration Failed',
-      message: `Error: ${errorMessage}`,
-      buttons: ['OK']
+      buttons: [{
+        text: 'OK',
+        handler: () => {
+          this.resetForm();
+        }
+      }]
     });
     await alert.present();
   }
 
   resetForm() {
     this.currentStep = 1;
-    this.basicInfoForm.reset();
+    this.driverId = null;
+    this.vehicleId = null;
+    
+    this.driverInfoForm.reset({ status: 'active' });
     this.documentsForm.reset();
     this.vehicleForm.reset();
     this.insuranceForm.reset();
-
-    // Reset form data
+    
     this.formData = {
-      basicInfo: {} as DriverInfoRequest,
-      documents: {} as DocumentType,
-      vehicle: {} as DriverVehicleInfo,
-      insurance: {} as VehicleInsuranceInfo
+      driverInfo: {},
+      documents: {},
+      vehicle: {},
+      insurance: {}
     };
-
-    // Set default status
-    this.basicInfoForm.patchValue({ status: 'active' });
   }
 
   markFormGroupTouched(formGroup: FormGroup) {
@@ -338,53 +460,100 @@ export class DriverRegistrationComponent implements OnInit {
       message,
       duration: 3000,
       color,
-      position: 'top'
+      position: 'top',
+      cssClass: 'custom-toast'
     });
-    toast.present();
+    await toast.present();
   }
 
   getStepTitle(): string {
-    switch (this.currentStep) {
-      case 1: return 'Basic Information';
-      case 2: return 'Document Upload';
-      case 3: return 'Vehicle Information';
-      case 4: return 'Insurance Information';
-      case 5: return 'Review & Submit';
-      default: return '';
-    }
+    const titles = [
+      '',
+      'Driver Information',
+      'Document Upload',
+      'Vehicle Details',
+      'Insurance Information',
+      'Review & Submit'
+    ];
+    return titles[this.currentStep] || '';
   }
 
-  // Helper method to check if a field has errors
+  getStepIcon(): string {
+    const icons = ['', 'person', 'document-text', 'car', 'shield', 'checkmark-circle'];
+    return icons[this.currentStep] || '';
+  }
+
   hasError(formGroup: FormGroup, fieldName: string): boolean {
     const field = formGroup.get(fieldName);
     return !!(field && field.invalid && field.touched);
   }
 
-  // Helper method to get error message
   getErrorMessage(formGroup: FormGroup, fieldName: string): string {
     const field = formGroup.get(fieldName);
-    if (field?.errors) {
-      if (field.errors['required']) return `${fieldName.replace('_', ' ')} is required`;
-      if (field.errors['email']) return 'Please enter a valid email';
-      if (field.errors['min']) return `${fieldName.replace('_', ' ')} must be greater than 0`;
-      if (field.errors['pattern']) {
-        switch (fieldName) {
-          case 'contact_num':
-          case 'contact_num_addl':
-            return 'Contact number must be 10 digits';
-          case 'aadhar':
-            return 'Aadhar number must be 12 digits';
-          case 'pan':
-            return 'PAN must be in format: AAAAA9999A';
-          case 'ifsc':
-            return 'IFSC code must be in format: AAAA0999999';
-          case 'address_pin_code':
-            return 'Pin code must be 6 digits';
-          default:
-            return 'Invalid format';
-        }
-      }
+    if (!field?.errors) return '';
+
+    if (field.errors['required']) return `${this.formatFieldName(fieldName)} is required`;
+    if (field.errors['email']) return 'Please enter a valid email';
+    if (field.errors['min']) return `Value must be greater than ${field.errors['min'].min}`;
+    if (field.errors['pattern']) {
+      return this.getPatternError(fieldName);
     }
-    return '';
+    return 'Invalid input';
   }
+
+  private getPatternError(fieldName: string): string {
+    const patterns: { [key: string]: string } = {
+      'contact_num': 'Contact number must be 10 digits',
+      'contact_num_addl': 'Contact number must be 10 digits',
+      'aadhar': 'Aadhar number must be 12 digits',
+      'pan': 'PAN must be in format: AAAAA9999A',
+      'ifsc': 'IFSC code must be in format: AAAA0999999',
+      'address_pin_code': 'Pin code must be 6 digits'
+    };
+    return patterns[fieldName] || 'Invalid format';
+  }
+
+  private formatFieldName(fieldName: string): string {
+    return fieldName
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  private formatDate(date: string): string {
+    if (!date) return '';
+    return new Date(date).toISOString().split('T')[0];
+  }
+
+  private hasDocuments(): boolean {
+    const formValue = this.documentsForm.value;
+    return Object.values(formValue).some(value => value !== '');
+  }
+
+  private getDocumentLabel(fieldName: string): string {
+    const labels: { [key: string]: string } = {
+      'aadhar_img': 'Aadhar Document',
+      'pan_img': 'PAN Document',
+      'driver_img': 'Driver Photo',
+      'insurance_img': 'Insurance Document',
+      'rc_img': 'RC Document',
+      'license_img': 'License Document'
+    };
+    return labels[fieldName] || 'Document';
+  }
+
+  getFormValue(step: number): any {
+    switch (step) {
+      case 1: return this.formData.driverInfo;
+      case 2: return this.formData.documents;
+      case 3: return this.formData.vehicle;
+      case 4: return this.formData.insurance;
+      default: return {};
+    }
+  }
+
+  onDateChange(event: any, controlName: string, formGroup: FormGroup) {
+  formGroup.patchValue({
+    [controlName]: event.detail.value
+  });
+}
 }

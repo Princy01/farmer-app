@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+// Driver Info Request Interface
 export interface DriverInfoRequest {
   first_name: string;
   last_name: string;
@@ -28,7 +29,9 @@ export interface DriverInfoRequest {
   status: string;
 }
 
-export interface DocumentType {
+// Driver Document Request Interface
+export interface DriverDocumentRequest {
+  driver_id: number;
   aadhar_img: string;
   pan_img: string;
   driver_img: string;
@@ -37,30 +40,51 @@ export interface DocumentType {
   license_img: string;
 }
 
-export interface DriverVehicleInfo {
+// Driver Vehicle Interface
+export interface DriverVehicle {
   veh_number: string;
   reg_date: string;
   state: string;
   type_id: number;
   veh_make: string;
   veh_model: string;
+  driver_id: number;
   load_capacity: number;
   fuel_type: string;
+  rc_document: string;
   kms_travelled: number;
 }
 
-export interface VehicleInsuranceInfo {
+// Vehicle Insurance Interface
+export interface DriverVehicleInsurance {
+  vehicle_id: number;
   frm_date: string;
   to_date: string;
   ins_company: string;
   amt_insured: number;
+  driver_id: number;
 }
 
-export interface CompleteDriverRequest {
-  driver_info: DriverInfoRequest;
-  documents: DocumentType;
-  vehicle: DriverVehicleInfo;
-  insurance: VehicleInsuranceInfo;
+// Response Interfaces
+export interface DriverResponse {
+  message: string;
+  driver_id: number;
+}
+
+export interface VehicleResponse {
+  message: string;
+  vehicle_id: number;
+}
+
+export interface DocumentResponse {
+  message: string;
+  uploaded: number;
+  failed?: number;
+  error?: string;
+}
+
+export interface InsuranceResponse {
+  message: string;
 }
 
 @Injectable({
@@ -71,39 +95,110 @@ export class DriverService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders() {
+  private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json'
     });
   }
 
-  addCompleteDriver(driverData: CompleteDriverRequest): Observable<any> {
-    return this.http.post(`${this.baseUrl}/AddCompleteDriver`, driverData, {
-      headers: this.getHeaders()
-    });
+  /**
+   * Step 1: Add Driver Basic Information
+   * @param driverInfo Driver personal and contact details
+   * @returns Observable with driver_id
+   */
+  addDriver(driverInfo: DriverInfoRequest): Observable<DriverResponse> {
+    return this.http.post<DriverResponse>(
+      `${this.baseUrl}/AddADriver`,
+      driverInfo,
+      { headers: this.getHeaders() }
+    );
   }
 
-  addDriver(driverInfo: DriverInfoRequest): Observable<any> {
-    return this.http.post(`${this.baseUrl}/AddADriver`, driverInfo, {
-      headers: this.getHeaders()
-    });
+  /**
+   * Step 2: Upload Driver Documents
+   * @param documents Driver document images in base64 format
+   * @returns Observable with upload status
+   */
+  addDriverDocument(documents: DriverDocumentRequest): Observable<DocumentResponse> {
+    return this.http.post<DocumentResponse>(
+      `${this.baseUrl}/AddADriverDocument`,
+      documents,
+      { headers: this.getHeaders() }
+    );
   }
 
-  addDriverVehicle(vehicleData: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/AddADriverVehicle`, vehicleData, {
-      headers: this.getHeaders()
-    });
+  /**
+   * Step 3: Add Driver Vehicle Information
+   * @param vehicleData Vehicle details
+   * @returns Observable with vehicle_id
+   */
+  addDriverVehicle(vehicleData: DriverVehicle): Observable<VehicleResponse> {
+    return this.http.post<VehicleResponse>(
+      `${this.baseUrl}/AddADriverVehicle`,
+      vehicleData,
+      { headers: this.getHeaders() }
+    );
   }
 
-  addDriverDocument(documentData: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/AddADriverDocument`, documentData, {
-      headers: this.getHeaders()
-    });
+  /**
+   * Step 4: Add Vehicle Insurance Information
+   * @param insuranceData Insurance details
+   * @returns Observable with success message
+   */
+  addDriverVehicleInsurance(insuranceData: DriverVehicleInsurance): Observable<InsuranceResponse> {
+    return this.http.post<InsuranceResponse>(
+      `${this.baseUrl}/AddADriverInsurance`,
+      insuranceData,
+      { headers: this.getHeaders() }
+    );
   }
 
-  addDriverInsurance(insuranceData: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/AddADriverInsurance`, insuranceData, {
-      headers: this.getHeaders()
-    });
+  /**
+   * Get all drivers (optional - for listing)
+   * @returns Observable with array of drivers
+   */
+  getAllDrivers(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.baseUrl}/GetDrivers`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /**
+   * Get driver by ID (optional - for details)
+   * @param driverId Driver ID
+   * @returns Observable with driver details
+   */
+  getDriverById(driverId: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.baseUrl}/GetDriverById/${driverId}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /**
+   * Update driver information (optional)
+   * @param driverId Driver ID
+   * @param driverData Updated driver data
+   * @returns Observable with success message
+   */
+  updateDriver(driverId: number, driverData: Partial<DriverInfoRequest>): Observable<any> {
+    return this.http.put<any>(
+      `${this.baseUrl}/UpdateDriver`,
+      { driver_id: driverId, ...driverData },
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /**
+   * Delete driver (optional)
+   * @param driverId Driver ID
+   * @returns Observable with success message
+   */
+  deleteDriver(driverId: number): Observable<any> {
+    return this.http.delete<any>(
+      `${this.baseUrl}/DeleteDriver/${driverId}`,
+      { headers: this.getHeaders() }
+    );
   }
 }
