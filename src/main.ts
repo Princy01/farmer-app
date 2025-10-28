@@ -9,6 +9,10 @@ import { authInterceptor } from './app/interceptors/auth.interceptor';
 
 import { defineCustomElements } from '@ionic/core/loader';
 
+import { TRANSLATE_PROVIDERS } from './app/translate.config';
+import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+
 // Call it before bootstrapping
 defineCustomElements(window);
 
@@ -20,5 +24,14 @@ bootstrapApplication(AppComponent, {
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
+    provideTranslateService({
+      loader: provideTranslateHttpLoader({
+        prefix: './assets/i18n/',
+        suffix: '.json'
+      }),
+      fallbackLang: 'en',
+      lang: 'en'
+      }
+    )
   ],
 });
