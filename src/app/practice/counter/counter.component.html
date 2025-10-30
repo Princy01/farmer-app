@@ -1,0 +1,14 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Practice Counter</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="center">
+    <h2>Count: {{count}}</h2>
+    <ion-button (click)="increment()">+</ion-button>
+    <ion-button color="danger" (click)="decrement()">-</ion-button>
+    <ion-button color="medium" (click)="reset()">Reset</ion-button>
+  </div>
+</ion-content>

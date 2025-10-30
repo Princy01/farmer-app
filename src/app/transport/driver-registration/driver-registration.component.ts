@@ -45,8 +45,8 @@ interface FormData {
   imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule]
 })
 export class DriverRegistrationComponent implements OnInit {
-  currentStep = 5;
-  totalSteps = 5;
+  currentStep = 4;
+  totalSteps = 4;
   today = new Date().toISOString();
   states: State[] = [];
   cities: City[] = [];
@@ -137,30 +137,29 @@ export class DriverRegistrationComponent implements OnInit {
       pan_img: [''],
       driver_img: [''],
       insurance_img: [''],
-      rc_img: [''],
-      license_img: ['']
+      rc_img: ['', [Validators.required]],
+      license_img: ['', [Validators.required]]
     });
-
     // Step 3: Vehicle Information
     this.vehicleForm = this.fb.group({
       veh_number: ['', [Validators.required]],
       reg_date: ['', [Validators.required]],
       state: ['', [Validators.required]],
       type_id: [null, [Validators.required]],
-      veh_make: ['', [Validators.required]],
-      veh_model: ['', [Validators.required]],
+      veh_make: [''],
+      veh_model: [''],
       load_capacity: [null, [Validators.required, Validators.min(1)]],
       fuel_type: ['', [Validators.required]],
       rc_document: [''],
-      kms_travelled: [0, [Validators.min(0)]]
+      kms_travelled: [0]
     });
 
     // Step 4: Insurance Information
     this.insuranceForm = this.fb.group({
-      frm_date: ['', [Validators.required]],
-      to_date: ['', [Validators.required]],
-      ins_company: ['', [Validators.required]],
-      amt_insured: [null, [Validators.required, Validators.min(1)]]
+      frm_date: [''],
+      to_date: [''],
+      ins_company: [''],
+      amt_insured: [null]
     });
   }
 
@@ -188,7 +187,7 @@ export class DriverRegistrationComponent implements OnInit {
       case 1: return this.driverInfoForm;
       case 2: return this.documentsForm;
       case 3: return this.vehicleForm;
-      case 4: return this.insuranceForm;
+      // case 4: return this.insuranceForm;
       default: return null;
     }
   }
@@ -216,9 +215,9 @@ export class DriverRegistrationComponent implements OnInit {
       case 3:
         this.saveVehicle(loading);
         break;
-      case 4:
-        this.saveInsurance(loading);
-        break;
+      // case 4:
+      //   this.saveInsurance(loading);
+      //   break;
       default:
         await loading.dismiss();
         break;
@@ -285,8 +284,8 @@ export class DriverRegistrationComponent implements OnInit {
       pan_img: formValue.pan_img || '',
       driver_img: formValue.driver_img || '',
       insurance_img: formValue.insurance_img || '',
-      rc_img: formValue.rc_img || '',
-      license_img: formValue.license_img || ''
+      rc_img: formValue.rc_img,
+      license_img: formValue.license_img
     };
 
     this.driverService.addDriverDocument(documents).subscribe({
@@ -480,7 +479,7 @@ export class DriverRegistrationComponent implements OnInit {
       'Driver Information',
       'Document Upload',
       'Vehicle Details',
-      'Insurance Information',
+      // 'Insurance Information',
       'Review & Submit'
     ];
     return titles[this.currentStep] || '';
@@ -554,7 +553,7 @@ export class DriverRegistrationComponent implements OnInit {
       case 1: return this.formData.driverInfo;
       case 2: return this.formData.documents;
       case 3: return this.formData.vehicle;
-      case 4: return this.formData.insurance;
+      // case 4: return this.formData.insurance;
       default: return {};
     }
   }
@@ -566,25 +565,25 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   loadStates() {
-  this.driverService.getStates().subscribe({
-    next: (states) => { this.states = states; },
-    error: () => { this.states = []; }
-  });
-}
-
-onStateChange(event: any, formGroup: FormGroup, stateField: string, cityField: string) {
-  const stateShortName = event.detail.value;
-  const selectedState = this.states.find(s => s.state_shortname === stateShortName);
-  if (selectedState) {
-    this.selectedStateId = selectedState.id;
-    this.driverService.getCitiesOfState(selectedState.id).subscribe({
-      next: (cities) => { this.cities = cities; },
-      error: () => { this.cities = []; }
+    this.driverService.getStates().subscribe({
+      next: (states) => { this.states = states; },
+      error: () => { this.states = []; }
     });
-    formGroup.patchValue({ [cityField]: '' }); // Reset city/town field
-  } else {
-    this.cities = [];
-    formGroup.patchValue({ [cityField]: '' });
   }
-}
+
+  onStateChange(event: any, formGroup: FormGroup, stateField: string, cityField: string) {
+    const stateShortName = event.detail.value;
+    const selectedState = this.states.find(s => s.state_shortname === stateShortName);
+    if (selectedState) {
+      this.selectedStateId = selectedState.id;
+      this.driverService.getCitiesOfState(selectedState.id).subscribe({
+        next: (cities) => { this.cities = cities; },
+        error: () => { this.cities = []; }
+      });
+      formGroup.patchValue({ [cityField]: '' }); // Reset city/town field
+    } else {
+      this.cities = [];
+      formGroup.patchValue({ [cityField]: '' });
+    }
+  }
 }

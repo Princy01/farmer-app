@@ -804,7 +804,7 @@
           <div>
             <ion-card-title>Document Upload</ion-card-title>
             <ion-card-subtitle
-              >Upload required documents (Optional, Images only, max 5MB
+              >Upload required documents (Images only, max 5MB
               each)</ion-card-subtitle
             >
           </div>
@@ -815,7 +815,7 @@
         <form [formGroup]="documentsForm">
           <ion-grid class="form-grid">
             <ion-row>
-              <ion-col size="12" size-md="6">
+              <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">Aadhar Document</ion-label>
                   <div class="file-upload-container">
@@ -914,7 +914,7 @@
                     </div>
                   </div>
                 </div>
-              </ion-col>
+              </ion-col> -->
 
               <ion-col size="12" size-md="6">
                 <div class="form-field">
@@ -948,9 +948,9 @@
                   </div>
                 </div>
               </ion-col>
-            </ion-row>
+            <!-- </ion-row>
 
-            <ion-row>
+            <ion-row> -->
               <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">RC Document</ion-label>
@@ -984,7 +984,7 @@
                 </div>
               </ion-col>
 
-              <ion-col size="12" size-md="6">
+              <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">Insurance Document</ion-label>
                   <div class="file-upload-container">
@@ -1015,7 +1015,7 @@
                     </div>
                   </div>
                 </div>
-              </ion-col>
+              </ion-col> -->
             </ion-row>
           </ion-grid>
         </form>
@@ -1214,6 +1214,18 @@
                       <ion-select-option value="Electric"
                         >Electric</ion-select-option
                       >
+                      <ion-select-option value="CNG+Petrol"
+                        >CNG + Petrol</ion-select-option
+                      >
+                      <ion-select-option value="Electric+Petrol"
+                        >Electric + Petrol</ion-select-option
+                      >
+                      <ion-select-option value="CNG+Diesel"
+                        >CNG + Diesel</ion-select-option
+                      >
+                      <ion-select-option value="Electric+Diesel"
+                        >Electric + Diesel</ion-select-option
+                      >
                     </ion-select>
                   </ion-item>
                   <div
@@ -1229,7 +1241,7 @@
                 </div>
               </ion-col>
 
-              <ion-col size="12" size-md="6">
+              <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">Vehicle Make *</ion-label>
                   <ion-item
@@ -1279,7 +1291,7 @@
                     {{ getErrorMessage(vehicleForm, "veh_model") }}
                   </div>
                 </div>
-              </ion-col>
+              </ion-col> -->
 
               <ion-col size="12" size-md="6">
                 <div class="form-field">
@@ -1297,7 +1309,7 @@
                 </div>
               </ion-col>
 
-              <ion-col size="12" size-md="6">
+              <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">KMs Travelled</ion-label>
                   <ion-item
@@ -1312,7 +1324,7 @@
                     ></ion-input>
                   </ion-item>
                 </div>
-              </ion-col>
+              </ion-col> -->
             </ion-row>
           </ion-grid>
         </form>
@@ -1321,7 +1333,7 @@
   </div>
 
   <!-- Step 4: Insurance Information -->
-  <div *ngIf="currentStep === 4" class="step-container">
+  <!-- <div *ngIf="currentStep === 4" class="step-container">
     <ion-card class="form-card">
       <ion-card-header>
         <div class="card-header-content">
@@ -1338,9 +1350,9 @@
       <ion-card-content>
         <form [formGroup]="insuranceForm">
           <ion-grid class="form-grid">
-            <ion-row>
-              <!-- Insurance From Date -->
-              <ion-col size="12" size-md="6">
+            <ion-row> -->
+  <!-- Insurance From Date -->
+  <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label"
                     >Insurance From Date *</ion-label
@@ -1367,10 +1379,10 @@
                     {{ getErrorMessage(insuranceForm, "frm_date") }}
                   </div>
                 </div>
-              </ion-col>
+              </ion-col> -->
 
-              <!-- Insurance To Date -->
-              <ion-col size="12" size-md="6">
+  <!-- Insurance To Date -->
+  <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">Insurance To Date *</ion-label>
                   <ion-item
@@ -1398,7 +1410,6 @@
                 </div>
               </ion-col>
             </ion-row>
-            <!-- ...rest unchanged... -->
             <ion-row>
               <ion-col size="12" size-md="6">
                 <div class="form-field">
@@ -1494,10 +1505,10 @@
         </form>
       </ion-card-content>
     </ion-card>
-  </div>
+  </div> -->
 
   <!-- Step 5: Review & Submit -->
-  <div *ngIf="currentStep === 5" class="step-container">
+  <div *ngIf="currentStep === 4" class="step-container">
     <ion-card class="form-card review-card">
       <ion-card-header>
         <div class="card-header-content">
@@ -1579,13 +1590,13 @@
                 formData.vehicle.veh_number
               }}</span>
             </div>
-            <div class="review-item">
+            <!-- <div class="review-item">
               <span class="review-label">Make & Model:</span>
               <span class="review-value"
                 >{{ formData.vehicle.veh_make }}
                 {{ formData.vehicle.veh_model }}</span
               >
-            </div>
+            </div> -->
             <div class="review-item">
               <span class="review-label">Registration Date:</span>
               <span class="review-value">{{ formData.vehicle.reg_date }}</span>
@@ -1614,7 +1625,7 @@
         </div>
 
         <!-- Insurance Info Review -->
-        <div class="review-section">
+        <!-- <div class="review-section">
           <div class="review-header">
             <ion-icon name="shield" class="review-icon"></ion-icon>
             <h3>Insurance Information</h3>
@@ -1640,7 +1651,7 @@
               >
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- Documents Review -->
         <div class="review-section">
@@ -1649,7 +1660,7 @@
             <h3>Documents Uploaded</h3>
           </div>
           <div class="review-content">
-            <div class="document-status">
+            <!-- <div class="document-status">
               <ion-icon
                 [name]="
                   formData.documents.aadhar_img
@@ -1687,7 +1698,7 @@
                 "
               ></ion-icon>
               <span>Driver Photo</span>
-            </div>
+            </div> -->
             <div class="document-status">
               <ion-icon
                 [name]="
@@ -1716,7 +1727,7 @@
               ></ion-icon>
               <span>RC Document</span>
             </div>
-            <div class="document-status">
+            <!-- <div class="document-status">
               <ion-icon
                 [name]="
                   formData.documents.insurance_img
@@ -1730,7 +1741,7 @@
                 "
               ></ion-icon>
               <span>Insurance Document</span>
-            </div>
+            </div> -->
           </div>
         </div>
       </ion-card-content>
