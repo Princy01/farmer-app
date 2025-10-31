@@ -13,13 +13,14 @@ import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { MenuService } from '../services/menu.service'; // Adjust path if needed
+import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule, TranslatePipe, TranslateDirective]
 })
 
 export class HomePage {

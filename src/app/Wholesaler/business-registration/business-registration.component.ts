@@ -8,11 +8,12 @@ import { State, City, Location, BusinessType, BusinessCategory, BusinessRegistra
 import { AuthService } from 'src/app/auth/auth.service';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
+import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-business-registration',
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule],
+  imports: [CommonModule, IonicModule, ReactiveFormsModule, TranslatePipe, TranslateDirective],
   templateUrl: './business-registration.component.html',
   styleUrls: ['./business-registration.component.scss'],
 })
@@ -98,7 +99,7 @@ export class BusinessRegistrationComponent implements OnInit {
         this.form.get('location_id')?.setValue(null);
       }
     });
-    
+
     this.form.get('city_id')?.valueChanges.subscribe((cityId) => {
       if (cityId) {
         this.fetchLocations(cityId);

@@ -6,13 +6,14 @@ import { WholesalerApiService, OrderFullDetails } from '../services/wholesaler-a
 import { AuthService } from 'src/app/auth/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-order-details',
   templateUrl: './order-details.component.html',
   styleUrls: ['./order-details.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule, TranslatePipe, TranslateDirective]
 })
 export class OrderDetailsComponent implements OnInit {
   orderId!: number;
