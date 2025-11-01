@@ -124,5 +124,80 @@
   "Confirmed": "पुष्ट",
   "Shipped": "भेजा गया",
   "Delivered": "डिलीवर हुआ",
-  "Cancelled": "रद्द किया गया"
+  "Cancelled": "रद्द किया गया",
+
+
+  "BUSINESS_FORM": {
+    "PAGE_TITLE": "व्यवसाय विवरण",
+    "SHOP_NAME": "दुकान का नाम",
+    "SHOP_NAME_PLACEHOLDER": "दुकान का नाम दर्ज करें",
+    "PHONE_NUMBER": "फ़ोन नंबर",
+    "PHONE_PLACEHOLDER": "10 अंकों का फ़ोन नंबर दर्ज करें",
+    "STATE": "राज्य",
+    "SELECT_STATE": "राज्य चुनें",
+    "CITY": "शहर",
+    "SELECT_CITY": "शहर चुनें",
+    "LOCATION": "स्थान",
+    "SELECT_LOCATION": "स्थान चुनें",
+    "ADDRESS": "पता",
+    "ADDRESS_PLACEHOLDER": "पूरा पता दर्ज करें",
+    "EMAIL": "ईमेल",
+    "EMAIL_PLACEHOLDER": "ईमेल पता दर्ज करें",
+    "GST_NUMBER": "जीएसटी नंबर",
+    "GST_PLACEHOLDER": "जीएसटी नंबर दर्ज करें",
+    "PAN": "पैन नंबर",
+    "PAN_PLACEHOLDER": "पैन नंबर दर्ज करें",
+    "ESTABLISHED_YEAR": "स्थापना वर्ष",
+    "YEAR_PLACEHOLDER": "वर्ष दर्ज करें (जैसे 2020)",
+    "SAVE_LOCATION": "स्थान सहेजें",
+    "UPDATE_LOCATION": "स्थान अपडेट करें"
+  },
+
+
+  "PRODUCTS_IN_BRANCH": {
+    "TITLE": "शाखा में उत्पाद:",
+    "ADD_PRODUCT": "उत्पाद जोड़ें",
+    "SEARCH_PLACEHOLDER": "उत्पाद खोजें",
+    "PRICE": "कीमत",
+    "STOCK": "माल",
+    "REMOVE": "हटाएं",
+    "NO_PRODUCTS": "इस शाखा के लिए कोई उत्पाद नहीं मिला।"
+  },
+
+
+  "ADD_PRODUCT": {
+    "PAGE_TITLE": "उत्पाद जोड़ें",
+    "NOT_FOUND_TEXT": "क्या आपको वह उत्पाद नहीं मिल रहा जिसकी आप तलाश कर रहे हैं?",
+    "RECOMMEND_NEW": "नया सुझाव दें",
+    "SEARCH_PLACEHOLDER": "उत्पाद खोजें",
+    "PRODUCT_NAME": "उत्पाद का नाम",
+    "PRODUCT_NAME_PLACEHOLDER": "उत्पाद का नाम दर्ज करें",
+    "CATEGORY": "श्रेणी",
+    "SELECT_CATEGORY": "श्रेणी चुनें",
+    "PRICE": "मूल्य (₹ प्रति 10 किग्रा)",
+    "PRICE_PLACEHOLDER": "मूल्य दर्ज करें",
+    "RECOMMEND_BUTTON": "उत्पाद सुझाएँ",
+    "BACK_TO_LIST": "उत्पाद सूची पर वापस जाएँ",
+    "ADD_SELECTED": "चयनित उत्पाद जोड़ें"
+  },
+
+
+  "ADD_STOCK": {
+    "PAGE_TITLE": "स्टॉक जोड़ें",
+    "CLOSE": "बंद करें",
+    "BRANCH": "शाखा",
+    "SELECT_BRANCH": "शाखा चुनें",
+    "PRODUCT": "उत्पाद",
+    "SELECT_PRODUCT": "उत्पाद चुनें",
+    "QUALITY": "क्वालिटी",
+    "SELECT_QUALITY": "क्वालिटी चुनो",
+    "WASTAGE": "नुकसान",
+    "STOCK_RECEIVED": "मिला हुआ स्टॉक",
+    "STOCK_CARRIED_FORWARD": "बचा हुआ स्टॉक",
+    "PRICE_PER_UNIT": "प्रति इकाई मूल्य",
+    "SAVE": "सहेजें",
+    "UNIT_KG": "किलो"
+  }
+
+
 }

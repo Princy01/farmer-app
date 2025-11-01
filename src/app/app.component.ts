@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
-import { TranslateService, TranslatePipe, TranslateDirective } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet, TranslatePipe, TranslateDirective ],
+  imports: [IonApp, IonRouterOutlet, TranslatePipe ],
 })
 export class AppComponent {
 

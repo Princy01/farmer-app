@@ -8,12 +8,12 @@ import { State, City, Location, BusinessType, BusinessCategory, BusinessRegistra
 import { AuthService } from 'src/app/auth/auth.service';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
-import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-business-registration',
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule, TranslatePipe, TranslateDirective],
+  imports: [CommonModule, IonicModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './business-registration.component.html',
   styleUrls: ['./business-registration.component.scss'],
 })

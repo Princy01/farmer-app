@@ -1,4 +1,5 @@
-{
+  {
+  "WHOLESALER_HOME":{
   "Go4u": "Go4u",
   "Menu": "Menu",
   "Profile": "Profile",
@@ -15,9 +16,10 @@
   "Refreshing...": "Refreshing...",
   "Total Quantity": "Total Quantity",
   "Orders placed": "Orders placed",
-  "Loading more items...": "Loading more items...",
+  "Loading more items...": "Loading more items..."
+},
 
-
+  "BUSINESS_LOCATION": {
   "Business Locations": "Business Locations",
   "Add New Location": "Add New Location",
   "Location": "Location",
@@ -36,9 +38,11 @@
   "Modify": "Modify",
   "No Business Locations": "No Business Locations",
   "You haven't added any business locations yet. Click the button above to add your first location.": "You haven't added any business locations yet. Click the button above to add your first location.",
-  "Loading your business locations...": "Loading your business locations...",
+  "Loading your business locations...": "Loading your business locations..."
+  },
 
 
+"UPDATE_BUSINESS": {
  "Update Business": "Update Business",
   "Update your business details": "Update your business details",
   "Email Address": "Email Address",
@@ -50,9 +54,11 @@
   "Business Status": "Business Status",
   "Active": "Active",
   "Inactive": "Inactive",
-  "Updating...": "Updating...",
+  "Updating...": "Updating..."
+  },
 
 
+  "BUSINESS_REGISTRATION": {
   "Business Registration": "Business Registration",
   "Registration Number": "Registration Number",
   "Enter registration number": "Enter registration number",
@@ -99,10 +105,11 @@
   "Please enter a valid PAN number (e.g., ABCDE1234F)": "Please enter a valid PAN number (e.g., ABCDE1234F)",
   "Privileged User": "Privileged User",
   "Active Status": "Active Status",
-  "Submit Registration": "Submit Registration",
+  "Submit Registration": "Submit Registration"
+  },
 
 
-
+  "ORDER_DETAILS": {
   "Order": "Order",
   "Status": "Status",
   "Retailer Information": "Retailer Information",
@@ -125,4 +132,82 @@
   "Shipped": "Shipped",
   "Delivered": "Delivered",
   "Cancelled": "Cancelled"
+  },
+
+
+  "ADD_BUSINESS_FORM": {
+    "PAGE_TITLE": "Business Details",
+    "SHOP_NAME": "Shop Name",
+    "SHOP_NAME_PLACEHOLDER": "Enter shop name",
+    "PHONE_NUMBER": "Phone Number",
+    "PHONE_PLACEHOLDER": "Enter 10-digit phone number",
+    "STATE": "State",
+    "SELECT_STATE": "Select state",
+    "CITY": "City",
+    "SELECT_CITY": "Select city",
+    "LOCATION": "Location",
+    "SELECT_LOCATION": "Select location",
+    "ADDRESS": "Address",
+    "ADDRESS_PLACEHOLDER": "Enter complete address",
+    "EMAIL": "Email",
+    "EMAIL_PLACEHOLDER": "Enter email address",
+    "GST_NUMBER": "GST Number",
+    "GST_PLACEHOLDER": "Enter GST number",
+    "PAN": "PAN Number",
+    "PAN_PLACEHOLDER": "Enter PAN number",
+    "ESTABLISHED_YEAR": "Established Year",
+    "YEAR_PLACEHOLDER": "Enter year (e.g., 2020)",
+    "SAVE_LOCATION": "Save Location",
+    "UPDATE_LOCATION": "Update Location"
+  },
+
+
+
+  "PRODUCTS_IN_BRANCH": {
+    "TITLE": "Products in",
+    "ADD_PRODUCT": "Add Product",
+    "SEARCH_PLACEHOLDER": "Search products",
+    "PRICE": "Price",
+    "STOCK": "Stock",
+    "REMOVE": "Remove",
+    "NO_PRODUCTS": "No products found for this branch."
+  },
+
+
+  "ADD_PRODUCT": {
+    "PAGE_TITLE": "Add Product",
+    "NOT_FOUND_TEXT": "Don't see the product you are looking for?",
+    "RECOMMEND_NEW": "Recommend New",
+    "SEARCH_PLACEHOLDER": "Search products",
+    "PRODUCT_NAME": "Product Name",
+    "PRODUCT_NAME_PLACEHOLDER": "Enter product name",
+    "CATEGORY": "Category",
+    "SELECT_CATEGORY": "Select category",
+    "PRICE": "Price (₹ per 10Kg)",
+    "PRICE_PLACEHOLDER": "Enter price",
+    "RECOMMEND_BUTTON": "Recommend Product",
+    "BACK_TO_LIST": "Back to Product List",
+    "ADD_SELECTED": "Add Selected Products"
+  },
+
+  
+  "ADD_STOCK": {
+    "PAGE_TITLE": "Add Stock",
+    "CLOSE": "Close",
+    "BRANCH": "Branch",
+    "SELECT_BRANCH": "Select branch",
+    "PRODUCT": "Product",
+    "SELECT_PRODUCT": "Select product",
+    "QUALITY": "Quality",
+    "SELECT_QUALITY": "Select quality",
+    "WASTAGE": "Wastage",
+    "STOCK_RECEIVED": "Stock Received",
+    "STOCK_CARRIED_FORWARD": "Stock Carried Forward",
+    "PRICE_PER_UNIT": "Price per Unit",
+    "SAVE": "Save",
+    "UNIT_KG": "Kg"
+  }
+
+
+
 }

@@ -9,6 +9,7 @@ import { save, arrowBack } from 'ionicons/icons';
 import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch } from './add-business.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { BusinessBranchWithNames } from '../business-locations/business-locations.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
         selector: 'app-add-business-location',
@@ -18,7 +19,8 @@ import { BusinessBranchWithNames } from '../business-locations/business-location
         imports: [
                 CommonModule,
                 ReactiveFormsModule,
-                IonicModule
+                IonicModule,
+                TranslatePipe,
         ]
 })
 export class AddBusinessLocationComponent implements OnInit {

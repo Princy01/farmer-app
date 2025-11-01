@@ -5,13 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { StockService, BusinessBranchWithNames, AddStockPayload } from 'src/app/Wholesaler/services/stock.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-add-stock',
   templateUrl: './add-stock.component.html',
   styleUrls: ['./add-stock.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule],
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
 })
 export class AddStockComponent {
   stockData: any = {

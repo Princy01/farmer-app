@@ -7,6 +7,7 @@ import { AddProductModalComponent } from '../add-product-modal/add-product-modal
 import { addIcons } from 'ionicons';
 import { add, trash, remove, arrowBack } from 'ionicons/icons'
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface Product {
   id: number;
@@ -21,7 +22,7 @@ interface Product {
   templateUrl: './branch-products.component.html',
   styleUrls: ['./branch-products.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule]
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe]
 })
 export class BranchProductsComponent implements OnInit {
   branchId: number | null = null;

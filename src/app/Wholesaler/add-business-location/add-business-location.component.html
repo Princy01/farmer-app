@@ -5,7 +5,7 @@
         defaultHref="/wholesaler/business-locations"
       ></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ pageTitle }}</ion-title>
+    <ion-title>{{ 'BUSINESS_FORM.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -14,17 +14,18 @@
     <form [formGroup]="businessForm" (ngSubmit)="onSubmit()">
 
       <!-- Shop Name -->
-
       <ion-item
         [class.ion-invalid]="
           businessForm.get('shopName')?.invalid &&
           businessForm.get('shopName')?.touched
         "
       >
-        <ion-label position="stacked">Shop Name *</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.SHOP_NAME' | translate }} *
+        </ion-label>
         <ion-input
           formControlName="shopName"
-          placeholder="Enter shop name"
+          [placeholder]="'BUSINESS_FORM.SHOP_NAME_PLACEHOLDER' | translate"
           type="text"
           [disabled]="isEditMode"
         >
@@ -34,17 +35,19 @@
         {{ getErrorMessage("shopName") }}
       </div>
 
-      <!-- Phone Number (editable in edit mode) -->
+      <!-- Phone Number -->
       <ion-item
         [class.ion-invalid]="
           businessForm.get('number')?.invalid &&
           businessForm.get('number')?.touched
         "
       >
-        <ion-label position="stacked">Phone Number *</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.PHONE_NUMBER' | translate }} *
+        </ion-label>
         <ion-input
           formControlName="number"
-          placeholder="Enter 10-digit phone number"
+          [placeholder]="'BUSINESS_FORM.PHONE_PLACEHOLDER' | translate"
           type="tel"
           [disabled]="false"
         >
@@ -61,10 +64,12 @@
           businessForm.get('state')?.touched
         "
       >
-        <ion-label position="stacked">State *</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.STATE' | translate }} *
+        </ion-label>
         <ion-select
           formControlName="state"
-          placeholder="Select state"
+          [placeholder]="'BUSINESS_FORM.SELECT_STATE' | translate"
           [disabled]="isEditMode"
         >
           <ion-select-option *ngFor="let state of states" [value]="state.id">
@@ -82,10 +87,12 @@
           businessForm.get('city')?.invalid && businessForm.get('city')?.touched
         "
       >
-        <ion-label position="stacked">City *</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.CITY' | translate }} *
+        </ion-label>
         <ion-select
           formControlName="city"
-          placeholder="Select city"
+          [placeholder]="'BUSINESS_FORM.SELECT_CITY' | translate"
           [disabled]="isEditMode"
         >
           <ion-select-option *ngFor="let city of cities" [value]="city.id">
@@ -97,17 +104,19 @@
         {{ getErrorMessage("city") }}
       </div>
 
-      <!-- Location (editable in edit mode) -->
+      <!-- Location -->
       <ion-item
         [class.ion-invalid]="
           businessForm.get('location')?.invalid &&
           businessForm.get('location')?.touched
         "
       >
-        <ion-label position="stacked">Location *</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.LOCATION' | translate }} *
+        </ion-label>
         <ion-select
           formControlName="location"
-          placeholder="Select location"
+          [placeholder]="'BUSINESS_FORM.SELECT_LOCATION' | translate"
           [disabled]="false"
         >
           <ion-select-option
@@ -122,17 +131,19 @@
         {{ getErrorMessage("location") }}
       </div>
 
-      <!-- Address (editable in edit mode) -->
+      <!-- Address -->
       <ion-item
         [class.ion-invalid]="
           businessForm.get('address')?.invalid &&
           businessForm.get('address')?.touched
         "
       >
-        <ion-label position="stacked">Address *</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.ADDRESS' | translate }} *
+        </ion-label>
         <ion-textarea
           formControlName="address"
-          placeholder="Enter complete address"
+          [placeholder]="'BUSINESS_FORM.ADDRESS_PLACEHOLDER' | translate"
           rows="3"
           [disabled]="false"
         >
@@ -142,17 +153,19 @@
         {{ getErrorMessage("address") }}
       </div>
 
-      <!-- Email (editable in edit mode) -->
+      <!-- Email -->
       <ion-item
         [class.ion-invalid]="
           businessForm.get('email')?.invalid &&
           businessForm.get('email')?.touched
         "
       >
-        <ion-label position="stacked">Email *</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.EMAIL' | translate }} *
+        </ion-label>
         <ion-input
           formControlName="email"
-          placeholder="Enter email address"
+          [placeholder]="'BUSINESS_FORM.EMAIL_PLACEHOLDER' | translate"
           type="email"
           [disabled]="false"
         >
@@ -169,10 +182,12 @@
           businessForm.get('gstNumber')?.touched
         "
       >
-        <ion-label position="stacked">GST Number *</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.GST_NUMBER' | translate }} *
+        </ion-label>
         <ion-input
           formControlName="gstNumber"
-          placeholder="Enter GST number"
+          [placeholder]="'BUSINESS_FORM.GST_PLACEHOLDER' | translate"
           type="text"
           [disabled]="isEditMode"
         >
@@ -188,10 +203,12 @@
           businessForm.get('pan')?.invalid && businessForm.get('pan')?.touched
         "
       >
-        <ion-label position="stacked">PAN Number *</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.PAN' | translate }} *
+        </ion-label>
         <ion-input
           formControlName="pan"
-          placeholder="Enter PAN number"
+          [placeholder]="'BUSINESS_FORM.PAN_PLACEHOLDER' | translate"
           type="text"
           [disabled]="isEditMode"
         >
@@ -208,10 +225,12 @@
           businessForm.get('establishedYear')?.touched
         "
       >
-        <ion-label position="stacked">Established Year</ion-label>
+        <ion-label position="stacked">
+          {{ 'BUSINESS_FORM.ESTABLISHED_YEAR' | translate }}
+        </ion-label>
         <ion-input
           formControlName="establishedYear"
-          placeholder="Enter year (e.g., 2020)"
+          [placeholder]="'BUSINESS_FORM.YEAR_PLACEHOLDER' | translate"
           type="text"
           [disabled]="isEditMode"
         >
@@ -230,7 +249,7 @@
         [disabled]="businessForm.invalid"
       >
         <ion-icon name="save" slot="start"></ion-icon>
-        {{ isEditMode ? "Update Location" : "Save Location" }}
+        {{ isEditMode ? ('BUSINESS_FORM.UPDATE_LOCATION' | translate) : ('BUSINESS_FORM.SAVE_LOCATION' | translate) }}
       </ion-button>
     </form>
   </div>

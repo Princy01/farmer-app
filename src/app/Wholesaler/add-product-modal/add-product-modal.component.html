@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Add Product</ion-title>
+    <ion-title>{{ 'ADD_PRODUCT.PAGE_TITLE' | translate }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="close()">
         <ion-icon name="close"></ion-icon>
@@ -11,17 +11,26 @@
 
 <ion-content>
   <div class="modal-content">
+    <!-- Recommend Link -->
     <div class="recommend-link" *ngIf="!showAddNew">
       <ion-text color="medium">
-        Don't see the product you are looking for?
-        <a (click)="showAddNew = true" style="color: #3880ff; cursor: pointer; text-decoration: underline;">
-          Recommend New
+        {{ 'ADD_PRODUCT.NOT_FOUND_TEXT' | translate }}
+        <a
+          (click)="showAddNew = true"
+          style="color: #3880ff; cursor: pointer; text-decoration: underline;"
+        >
+          {{ 'ADD_PRODUCT.RECOMMEND_NEW' | translate }}
         </a>
       </ion-text>
     </div>
 
+    <!-- Product Search List -->
     <div *ngIf="!showAddNew">
-      <ion-searchbar [(ngModel)]="searchTerm" placeholder="Search products"></ion-searchbar>
+      <ion-searchbar
+        [(ngModel)]="searchTerm"
+        [placeholder]="'ADD_PRODUCT.SEARCH_PLACEHOLDER' | translate"
+      ></ion-searchbar>
+
       <ion-list>
         <ion-item *ngFor="let prod of filteredProducts()">
           <ion-checkbox slot="start" [(ngModel)]="prod.selected"></ion-checkbox>
@@ -33,26 +42,54 @@
       </ion-list>
     </div>
 
+    <!-- Recommend New Product Form -->
     <div *ngIf="showAddNew" class="new-section">
       <ion-item>
-        <ion-label position="stacked">Product Name</ion-label>
-        <ion-input [(ngModel)]="newProduct.name" placeholder="Enter product name"></ion-input>
+        <ion-label position="stacked">{{ 'ADD_PRODUCT.PRODUCT_NAME' | translate }}</ion-label>
+        <ion-input
+          [(ngModel)]="newProduct.name"
+          [placeholder]="'ADD_PRODUCT.PRODUCT_NAME_PLACEHOLDER' | translate"
+        ></ion-input>
       </ion-item>
+
       <ion-item>
-        <ion-label position="stacked">Category</ion-label>
-        <ion-select [(ngModel)]="newProduct.category" placeholder="Select category">
-          <ion-select-option *ngFor="let cat of categories" [value]="cat">{{ cat }}</ion-select-option>
+        <ion-label position="stacked">{{ 'ADD_PRODUCT.CATEGORY' | translate }}</ion-label>
+        <ion-select
+          [(ngModel)]="newProduct.category"
+          [placeholder]="'ADD_PRODUCT.SELECT_CATEGORY' | translate"
+        >
+          <ion-select-option *ngFor="let cat of categories" [value]="cat">
+            {{ cat }}
+          </ion-select-option>
         </ion-select>
       </ion-item>
+
       <ion-item>
-        <ion-label position="stacked">Price (₹ per 10Kg)</ion-label>
-        <ion-input type="number" [(ngModel)]="newProduct.price" placeholder="Enter price"></ion-input>
+        <ion-label position="stacked">{{ 'ADD_PRODUCT.PRICE' | translate }}</ion-label>
+        <ion-input
+          type="number"
+          [(ngModel)]="newProduct.price"
+          [placeholder]="'ADD_PRODUCT.PRICE_PLACEHOLDER' | translate"
+        ></ion-input>
       </ion-item>
-      <ion-button expand="block" color="success" (click)="addNew()" style="margin-top: 16px;">
-        Recommend Product
+
+      <ion-button
+        expand="block"
+        color="success"
+        (click)="addNew()"
+        style="margin-top: 16px;"
+      >
+        {{ 'ADD_PRODUCT.RECOMMEND_BUTTON' | translate }}
       </ion-button>
-      <ion-button expand="block" fill="clear" color="medium" (click)="showAddNew = false" style="margin-top: 8px;">
-        Back to Product List
+
+      <ion-button
+        expand="block"
+        fill="clear"
+        color="medium"
+        (click)="showAddNew = false"
+        style="margin-top: 8px;"
+      >
+        {{ 'ADD_PRODUCT.BACK_TO_LIST' | translate }}
       </ion-button>
     </div>
   </div>
@@ -60,8 +97,13 @@
 
 <ion-footer *ngIf="!showAddNew">
   <ion-toolbar>
-    <ion-button expand="block" color="success" (click)="addSelected()" [disabled]="!hasSelectedProducts()">
-      Add Selected Products
+    <ion-button
+      expand="block"
+      color="success"
+      (click)="addSelected()"
+      [disabled]="!hasSelectedProducts()"
+    >
+      {{ 'ADD_PRODUCT.ADD_SELECTED' | translate }}
     </ion-button>
   </ion-toolbar>
 </ion-footer>

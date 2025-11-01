@@ -16,12 +16,12 @@ import {
 } from 'ionicons/icons';
 import { BusinessUpdateService, BusinessUpdateRequest } from './business-update.service';
 import { AuthService } from '../../auth/auth.service';
-import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-business-update',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule, TranslatePipe, TranslateDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule, TranslatePipe],
   templateUrl: './business-update.component.html',
   styleUrls: ['./business-update.component.scss'],
 })

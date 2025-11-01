@@ -4,13 +4,14 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { AddProductService, ProductAll } from './add-product.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-add-product-modal',
   templateUrl: './add-product-modal.component.html',
   styleUrls: ['./add-product-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule]
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe]
 })
 export class AddProductModalComponent {
   searchTerm: string = '';

@@ -12,14 +12,14 @@ import {
 
 import { BusinessLocationsService, BusinessBranchWithNames } from './business-locations.service';
 import { AuthService } from 'src/app/auth/auth.service';
-import { TranslatePipe, TranslateDirective } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-business-locations',
   templateUrl: './business-locations.component.html',
   styleUrls: ['./business-locations.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, TranslatePipe, TranslateDirective]
+  imports: [CommonModule, FormsModule, IonicModule, TranslatePipe]
 })
 export class BusinessLocationsComponent implements OnInit {
   businessLocations: BusinessBranchWithNames[] = [];
