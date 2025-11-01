@@ -1,821 +1,845 @@
 <ion-content class="main-content">
-  <!-- Progress Section -->
-  <div class="progress-section">
-    <div class="progress-container">
-      <ion-progress-bar
-        [value]="currentStep / totalSteps"
-        color="primary"
-        class="custom-progress"
-      >
-      </ion-progress-bar>
-      <div class="step-info">
-        <div class="step-number">
-          <ion-icon [name]="getStepIcon()" class="step-icon"></ion-icon>
-          <span class="step-text"
-            >Step {{ currentStep }} of {{ totalSteps }}</span
-          >
+  <!-- Loading state while checking registration -->
+  <div *ngIf="isCheckingRegistration" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Checking registration status...</p>
+  </div>
+
+  <!-- Show form only when not checking and not registered -->
+  <div *ngIf="!isCheckingRegistration">
+    <!-- Progress Section -->
+    <div class="progress-section">
+      <div class="progress-container">
+        <ion-progress-bar
+          [value]="currentStep / totalSteps"
+          color="primary"
+          class="custom-progress"
+        >
+        </ion-progress-bar>
+        <div class="step-info">
+          <div class="step-number">
+            <ion-icon [name]="getStepIcon()" class="step-icon"></ion-icon>
+            <span class="step-text"
+              >Step {{ currentStep }} of {{ totalSteps }}</span
+            >
+          </div>
+          <h2 class="step-title">{{ getStepTitle() }}</h2>
         </div>
-        <h2 class="step-title">{{ getStepTitle() }}</h2>
       </div>
     </div>
-  </div>
 
-  <!-- Step 1: Driver Information -->
-  <div *ngIf="currentStep === 1" class="step-container">
-    <ion-card class="form-card">
-      <ion-card-header>
-        <div class="card-header-content">
-          <ion-icon name="person" class="header-icon"></ion-icon>
-          <div>
-            <ion-card-title>Personal Details</ion-card-title>
-            <ion-card-subtitle
-              >Enter driver's basic information</ion-card-subtitle
-            >
+    <!-- Step 1: Driver Information -->
+    <div *ngIf="currentStep === 1" class="step-container">
+      <ion-card class="form-card">
+        <ion-card-header>
+          <div class="card-header-content">
+            <ion-icon name="person" class="header-icon"></ion-icon>
+            <div>
+              <ion-card-title>Personal Details</ion-card-title>
+              <ion-card-subtitle
+                >Enter driver's basic information</ion-card-subtitle
+              >
+            </div>
           </div>
-        </div>
-      </ion-card-header>
+        </ion-card-header>
 
-      <ion-card-content>
-        <form [formGroup]="driverInfoForm">
-          <!-- Personal Information -->
-          <div class="section-divider">
-            <ion-icon name="person" class="section-icon"></ion-icon>
-            <span class="section-title">Personal Information</span>
-          </div>
+        <ion-card-content>
+          <form [formGroup]="driverInfoForm">
+            <!-- Personal Information -->
+            <div class="section-divider">
+              <ion-icon name="person" class="section-icon"></ion-icon>
+              <span class="section-title">Personal Information</span>
+            </div>
 
-          <ion-grid class="form-grid">
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">First Name *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'first_name')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="first_name"
-                      placeholder="Enter first name"
-                      type="text"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'first_name')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "first_name") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Last Name *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'last_name')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="last_name"
-                      placeholder="Enter last name"
-                      type="text"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'last_name')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "last_name") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Date of Birth *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'dob')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="dob"
-                      type="date"
-                      [max]="today"
-                      placeholder="Select date"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'dob')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "dob") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-
-          <!-- License Information -->
-          <div class="section-divider">
-            <ion-icon name="card" class="section-icon"></ion-icon>
-            <span class="section-title">License Information</span>
-          </div>
-
-          <ion-grid class="form-grid">
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">License Number *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'licence_no')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="licence_no"
-                      placeholder="Enter license number"
-                      type="text"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'licence_no')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "licence_no") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">License Type *</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'licence_type')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-select
-                      formControlName="licence_type"
-                      placeholder="Select license type"
-                      interface="action-sheet"
-                    >
-                      <ion-select-option value="2W"
-                        >2 Wheeler</ion-select-option
-                      >
-                      <ion-select-option value="LMV"
-                        >Light Motor Vehicle</ion-select-option
-                      >
-                      <ion-select-option value="HMV"
-                        >Heavy Motor Vehicle</ion-select-option
-                      >
-                      <ion-select-option value="TRANSPORT"
-                        >Transport Vehicle</ion-select-option
-                      >
-                    </ion-select>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'licence_type')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "licence_type") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-
-            <ion-row>
-              <!-- License Issued Date -->
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label"
-                    >License Issued Date *</ion-label
-                  >
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'licence_issued_date')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="licence_issued_date"
-                      type="date"
-                      [max]="today"
-                      placeholder="Select date"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'licence_issued_date')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "licence_issued_date") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <!-- License Expiry Date -->
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label"
-                    >License Expiry Date *</ion-label
-                  >
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'licence_expiry_date')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="licence_expiry_date"
-                      type="date"
-                      [min]="today"
-                      placeholder="Select date"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'licence_expiry_date')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "licence_expiry_date") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-
-          <!-- Contact Information -->
-          <div class="section-divider">
-            <ion-icon name="call" class="section-icon"></ion-icon>
-            <span class="section-title">Contact Information</span>
-          </div>
-
-          <ion-grid class="form-grid">
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Contact Number *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'contact_num')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="contact_num"
-                      type="tel"
-                      placeholder="Enter 10-digit number"
-                      maxlength="10"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'contact_num')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "contact_num") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Additional Contact</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'contact_num_addl')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="contact_num_addl"
-                      type="tel"
-                      placeholder="Enter 10-digit number"
-                      maxlength="10"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'contact_num_addl')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "contact_num_addl") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-
-            <ion-row>
-              <ion-col size="12">
-                <div class="form-field">
-                  <ion-label class="field-label">Email</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'email')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="email"
-                      type="email"
-                      placeholder="Enter email address"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'email')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "email") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-
-          <!-- Identity Information -->
-          <div class="section-divider">
-            <ion-icon name="card" class="section-icon"></ion-icon>
-            <span class="section-title">Identity Information</span>
-          </div>
-
-          <ion-grid class="form-grid">
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Aadhar Number *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'aadhar')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="aadhar"
-                      placeholder="Enter 12-digit Aadhar"
-                      type="text"
-                      maxlength="12"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'aadhar')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "aadhar") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">PAN Number *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'pan')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="pan"
-                      placeholder="Enter PAN (AAAAA9999A)"
-                      type="text"
-                      maxlength="10"
-                      style="text-transform: uppercase"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'pan')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "pan") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-
-          <!-- Address Information -->
-          <div class="section-divider">
-            <ion-icon name="location" class="section-icon"></ion-icon>
-            <span class="section-title">Address Information</span>
-          </div>
-
-          <ion-grid class="form-grid">
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Door Number</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'address_door_no')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="address_door_no"
-                      placeholder="Enter door number"
-                    ></ion-input>
-                  </ion-item>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Street *</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'address_street')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="address_street"
-                      placeholder="Enter street"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'address_street')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "address_street") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">State *</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'address_state')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-select
-                      formControlName="address_state"
-                      placeholder="Select state"
-                      interface="action-sheet"
-                      (ionChange)="
-                        onStateChange(
-                          $event,
-                          driverInfoForm,
-                          'address_state',
-                          'address_town'
-                        )
+            <ion-grid class="form-grid">
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">First Name *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'first_name')
                       "
+                      lines="none"
+                      class="custom-item"
                     >
-                      <ion-select-option
-                        *ngFor="let state of states"
-                        [value]="state.state_shortname"
+                      <ion-input
+                        formControlName="first_name"
+                        placeholder="Enter first name"
+                        type="text"
                       >
-                        {{ state.state_name }} ({{ state.state_shortname }})
-                      </ion-select-option>
-                    </ion-select>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'address_state')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "address_state") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Town/City *</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'address_town')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-select
-                      formControlName="address_town"
-                      placeholder="Select town/city"
-                      interface="action-sheet"
-                      [disabled]="!cities.length"
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'first_name')"
+                      class="error-text"
                     >
-                      <ion-select-option
-                        *ngFor="let city of cities"
-                        [value]="city.city_name"
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "first_name") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Last Name *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(driverInfoForm, 'last_name')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="last_name"
+                        placeholder="Enter last name"
+                        type="text"
                       >
-                        {{ city.city_name }} ({{ city.city_shortname }})
-                      </ion-select-option>
-                    </ion-select>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'address_town')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "address_town") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Pin Code *</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'address_pin_code')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="address_pin_code"
-                      placeholder="Enter 6-digit pin code"
-                      type="text"
-                      maxlength="6"
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'last_name')"
+                      class="error-text"
                     >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'address_pin_code')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "address_pin_code") }}
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "last_name") }}
+                    </div>
                   </div>
-                </div>
-              </ion-col>
+                </ion-col>
 
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Landmark</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'address_landmark')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="address_landmark"
-                      placeholder="Enter landmark"
-                    ></ion-input>
-                  </ion-item>
-                </div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Date of Birth *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(driverInfoForm, 'dob')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="dob"
+                        type="date"
+                        [max]="today"
+                        placeholder="Select date"
+                      ></ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'dob')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "dob") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
 
-          <!-- Bank Information (Required) -->
-          <div class="section-divider">
-            <ion-icon name="business" class="section-icon"></ion-icon>
-            <span class="section-title">Bank Information</span>
+            <!-- License Information -->
+            <div class="section-divider">
+              <ion-icon name="card" class="section-icon"></ion-icon>
+              <span class="section-title">License Information</span>
+            </div>
+
+            <ion-grid class="form-grid">
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">License Number *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'licence_no')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="licence_no"
+                        placeholder="Enter license number"
+                        type="text"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'licence_no')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "licence_no") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">License Type *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'licence_type')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-select
+                        formControlName="licence_type"
+                        placeholder="Select license type"
+                        interface="action-sheet"
+                      >
+                        <ion-select-option value="2W"
+                          >2 Wheeler</ion-select-option
+                        >
+                        <ion-select-option value="LMV"
+                          >Light Motor Vehicle</ion-select-option
+                        >
+                        <ion-select-option value="HMV"
+                          >Heavy Motor Vehicle</ion-select-option
+                        >
+                        <ion-select-option value="TRANSPORT"
+                          >Transport Vehicle</ion-select-option
+                        >
+                      </ion-select>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'licence_type')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "licence_type") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <!-- License Issued Date -->
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label"
+                      >License Issued Date *</ion-label
+                    >
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'licence_issued_date')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="licence_issued_date"
+                        type="date"
+                        [max]="today"
+                        placeholder="Select date"
+                      ></ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'licence_issued_date')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{
+                        getErrorMessage(driverInfoForm, "licence_issued_date")
+                      }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <!-- License Expiry Date -->
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label"
+                      >License Expiry Date *</ion-label
+                    >
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'licence_expiry_date')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="licence_expiry_date"
+                        type="date"
+                        [min]="today"
+                        placeholder="Select date"
+                      ></ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'licence_expiry_date')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{
+                        getErrorMessage(driverInfoForm, "licence_expiry_date")
+                      }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <!-- Contact Information -->
+            <div class="section-divider">
+              <ion-icon name="call" class="section-icon"></ion-icon>
+              <span class="section-title">Contact Information</span>
+            </div>
+
+            <ion-grid class="form-grid">
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Contact Number *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'contact_num')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="contact_num"
+                        type="tel"
+                        placeholder="Enter 10-digit number"
+                        maxlength="10"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'contact_num')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "contact_num") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label"
+                      >Additional Contact</ion-label
+                    >
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'contact_num_addl')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="contact_num_addl"
+                        type="tel"
+                        placeholder="Enter 10-digit number"
+                        maxlength="10"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'contact_num_addl')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "contact_num_addl") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12">
+                  <div class="form-field">
+                    <ion-label class="field-label">Email</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(driverInfoForm, 'email')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="email"
+                        type="email"
+                        placeholder="Enter email address"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'email')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "email") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <!-- Identity Information -->
+            <div class="section-divider">
+              <ion-icon name="card" class="section-icon"></ion-icon>
+              <span class="section-title">Identity Information</span>
+            </div>
+
+            <ion-grid class="form-grid">
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Aadhar Number *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(driverInfoForm, 'aadhar')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="aadhar"
+                        placeholder="Enter 12-digit Aadhar"
+                        type="text"
+                        maxlength="12"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'aadhar')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "aadhar") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">PAN Number *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(driverInfoForm, 'pan')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="pan"
+                        placeholder="Enter PAN (AAAAA9999A)"
+                        type="text"
+                        maxlength="10"
+                        style="text-transform: uppercase"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'pan')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "pan") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <!-- Address Information -->
+            <div class="section-divider">
+              <ion-icon name="location" class="section-icon"></ion-icon>
+              <span class="section-title">Address Information</span>
+            </div>
+
+            <ion-grid class="form-grid">
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Door Number</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'address_door_no')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="address_door_no"
+                        placeholder="Enter door number"
+                      ></ion-input>
+                    </ion-item>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Street *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'address_street')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="address_street"
+                        placeholder="Enter street"
+                      ></ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'address_street')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "address_street") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">State *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'address_state')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-select
+                        formControlName="address_state"
+                        placeholder="Select state"
+                        interface="action-sheet"
+                        (ionChange)="
+                          onStateChange(
+                            $event,
+                            driverInfoForm,
+                            'address_state',
+                            'address_town'
+                          )
+                        "
+                      >
+                        <ion-select-option
+                          *ngFor="let state of states"
+                          [value]="state.state_shortname"
+                        >
+                          {{ state.state_name }} ({{ state.state_shortname }})
+                        </ion-select-option>
+                      </ion-select>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'address_state')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "address_state") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Town/City *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'address_town')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-select
+                        formControlName="address_town"
+                        placeholder="Select town/city"
+                        interface="action-sheet"
+                        [disabled]="!cities.length"
+                      >
+                        <ion-select-option
+                          *ngFor="let city of cities"
+                          [value]="city.city_name"
+                        >
+                          {{ city.city_name }} ({{ city.city_shortname }})
+                        </ion-select-option>
+                      </ion-select>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'address_town')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "address_town") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Pin Code *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'address_pin_code')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="address_pin_code"
+                        placeholder="Enter 6-digit pin code"
+                        type="text"
+                        maxlength="6"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'address_pin_code')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "address_pin_code") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Landmark</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'address_landmark')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="address_landmark"
+                        placeholder="Enter landmark"
+                      ></ion-input>
+                    </ion-item>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
+            <!-- Bank Information (Required) -->
+            <div class="section-divider">
+              <ion-icon name="business" class="section-icon"></ion-icon>
+              <span class="section-title">Bank Information</span>
+            </div>
+
+            <ion-grid class="form-grid">
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label"
+                      >Bank Account Number *</ion-label
+                    >
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'bank_ac_no')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="bank_ac_no"
+                        placeholder="Enter account number"
+                      ></ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'bank_ac_no')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "bank_ac_no") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Bank Name *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(driverInfoForm, 'bank_name')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="bank_name"
+                        placeholder="Enter bank name"
+                      ></ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'bank_name')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "bank_name") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Bank Branch *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'bank_branch')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="bank_branch"
+                        placeholder="Enter branch name"
+                      ></ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'bank_branch')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "bank_branch") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">IFSC Code *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(driverInfoForm, 'ifsc')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="ifsc"
+                        placeholder="Enter IFSC code"
+                        style="text-transform: uppercase"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'ifsc')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "ifsc") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+
+              <ion-row>
+                <ion-col size="12">
+                  <div class="form-field">
+                    <ion-label class="field-label">Bank Address *</ion-label>
+                    <ion-item
+                      [class.error-item]="
+                        hasError(driverInfoForm, 'bank_address')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-textarea
+                        formControlName="bank_address"
+                        placeholder="Enter bank address"
+                        rows="3"
+                        auto-grow="true"
+                      >
+                      </ion-textarea>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(driverInfoForm, 'bank_address')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(driverInfoForm, "bank_address") }}
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </form>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Step 2: Document Upload -->
+    <div *ngIf="currentStep === 2" class="step-container">
+      <ion-card class="form-card">
+        <ion-card-header>
+          <div class="card-header-content">
+            <ion-icon name="document-text" class="header-icon"></ion-icon>
+            <div>
+              <ion-card-title>Document Upload</ion-card-title>
+              <ion-card-subtitle
+                >Upload required documents (Images only, max 5MB
+                each)</ion-card-subtitle
+              >
+            </div>
           </div>
+        </ion-card-header>
 
-          <ion-grid class="form-grid">
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label"
-                    >Bank Account Number *</ion-label
-                  >
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'bank_ac_no')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="bank_ac_no"
-                      placeholder="Enter account number"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'bank_ac_no')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "bank_ac_no") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Bank Name *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'bank_name')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="bank_name"
-                      placeholder="Enter bank name"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'bank_name')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "bank_name") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Bank Branch *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'bank_branch')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="bank_branch"
-                      placeholder="Enter branch name"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'bank_branch')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "bank_branch") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">IFSC Code *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(driverInfoForm, 'ifsc')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="ifsc"
-                      placeholder="Enter IFSC code"
-                      style="text-transform: uppercase"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'ifsc')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "ifsc") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-
-            <ion-row>
-              <ion-col size="12">
-                <div class="form-field">
-                  <ion-label class="field-label">Bank Address *</ion-label>
-                  <ion-item
-                    [class.error-item]="
-                      hasError(driverInfoForm, 'bank_address')
-                    "
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-textarea
-                      formControlName="bank_address"
-                      placeholder="Enter bank address"
-                      rows="3"
-                      auto-grow="true"
-                    >
-                    </ion-textarea>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(driverInfoForm, 'bank_address')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(driverInfoForm, "bank_address") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </form>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- Step 2: Document Upload -->
-  <div *ngIf="currentStep === 2" class="step-container">
-    <ion-card class="form-card">
-      <ion-card-header>
-        <div class="card-header-content">
-          <ion-icon name="document-text" class="header-icon"></ion-icon>
-          <div>
-            <ion-card-title>Document Upload</ion-card-title>
-            <ion-card-subtitle
-              >Upload required documents (Images only, max 5MB
-              each)</ion-card-subtitle
-            >
-          </div>
-        </div>
-      </ion-card-header>
-
-      <ion-card-content>
-        <form [formGroup]="documentsForm">
-          <ion-grid class="form-grid">
-            <ion-row>
-              <!-- <ion-col size="12" size-md="6">
+        <ion-card-content>
+          <form [formGroup]="documentsForm">
+            <ion-grid class="form-grid">
+              <ion-row>
+                <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">Aadhar Document</ion-label>
                   <div class="file-upload-container">
@@ -916,75 +940,75 @@
                 </div>
               </ion-col> -->
 
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">License Document</ion-label>
-                  <div class="file-upload-container">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onFileSelected($event, 'license_img')"
-                      class="file-input"
-                      id="license-upload"
-                    />
-                    <label for="license-upload" class="file-label">
-                      <ion-icon
-                        name="cloud-upload"
-                        class="upload-icon"
-                      ></ion-icon>
-                      <span class="upload-text">Choose License Image</span>
-                      <span class="upload-hint">PNG, JPG up to 5MB</span>
-                    </label>
-                    <div
-                      *ngIf="documentsForm.get('license_img')?.value"
-                      class="upload-success"
-                    >
-                      <ion-icon
-                        name="checkmark-circle"
-                        class="success-icon"
-                      ></ion-icon>
-                      <span>File uploaded</span>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">License Document</ion-label>
+                    <div class="file-upload-container">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        (change)="onFileSelected($event, 'license_img')"
+                        class="file-input"
+                        id="license-upload"
+                      />
+                      <label for="license-upload" class="file-label">
+                        <ion-icon
+                          name="cloud-upload"
+                          class="upload-icon"
+                        ></ion-icon>
+                        <span class="upload-text">Choose License Image</span>
+                        <span class="upload-hint">PNG, JPG up to 5MB</span>
+                      </label>
+                      <div
+                        *ngIf="documentsForm.get('license_img')?.value"
+                        class="upload-success"
+                      >
+                        <ion-icon
+                          name="checkmark-circle"
+                          class="success-icon"
+                        ></ion-icon>
+                        <span>File uploaded</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </ion-col>
-            <!-- </ion-row>
+                </ion-col>
+                <!-- </ion-row>
 
             <ion-row> -->
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">RC Document</ion-label>
-                  <div class="file-upload-container">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onFileSelected($event, 'rc_img')"
-                      class="file-input"
-                      id="rc-upload"
-                    />
-                    <label for="rc-upload" class="file-label">
-                      <ion-icon
-                        name="cloud-upload"
-                        class="upload-icon"
-                      ></ion-icon>
-                      <span class="upload-text">Choose RC Image</span>
-                      <span class="upload-hint">PNG, JPG up to 5MB</span>
-                    </label>
-                    <div
-                      *ngIf="documentsForm.get('rc_img')?.value"
-                      class="upload-success"
-                    >
-                      <ion-icon
-                        name="checkmark-circle"
-                        class="success-icon"
-                      ></ion-icon>
-                      <span>File uploaded</span>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">RC Document</ion-label>
+                    <div class="file-upload-container">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        (change)="onFileSelected($event, 'rc_img')"
+                        class="file-input"
+                        id="rc-upload"
+                      />
+                      <label for="rc-upload" class="file-label">
+                        <ion-icon
+                          name="cloud-upload"
+                          class="upload-icon"
+                        ></ion-icon>
+                        <span class="upload-text">Choose RC Image</span>
+                        <span class="upload-hint">PNG, JPG up to 5MB</span>
+                      </label>
+                      <div
+                        *ngIf="documentsForm.get('rc_img')?.value"
+                        class="upload-success"
+                      >
+                        <ion-icon
+                          name="checkmark-circle"
+                          class="success-icon"
+                        ></ion-icon>
+                        <span>File uploaded</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </ion-col>
+                </ion-col>
 
-              <!-- <ion-col size="12" size-md="6">
+                <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">Insurance Document</ion-label>
                   <div class="file-upload-container">
@@ -1016,232 +1040,236 @@
                   </div>
                 </div>
               </ion-col> -->
-            </ion-row>
-          </ion-grid>
-        </form>
-      </ion-card-content>
-    </ion-card>
-  </div>
+              </ion-row>
+            </ion-grid>
+          </form>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
-  <!-- Step 3: Vehicle Information -->
-  <div *ngIf="currentStep === 3" class="step-container">
-    <ion-card class="form-card">
-      <ion-card-header>
-        <div class="card-header-content">
-          <ion-icon name="car" class="header-icon"></ion-icon>
-          <div>
-            <ion-card-title>Vehicle Information</ion-card-title>
-            <ion-card-subtitle>Enter vehicle details</ion-card-subtitle>
+    <!-- Step 3: Vehicle Information -->
+    <div *ngIf="currentStep === 3" class="step-container">
+      <ion-card class="form-card">
+        <ion-card-header>
+          <div class="card-header-content">
+            <ion-icon name="car" class="header-icon"></ion-icon>
+            <div>
+              <ion-card-title>Vehicle Information</ion-card-title>
+              <ion-card-subtitle>Enter vehicle details</ion-card-subtitle>
+            </div>
           </div>
-        </div>
-      </ion-card-header>
+        </ion-card-header>
 
-      <ion-card-content>
-        <form [formGroup]="vehicleForm">
-          <ion-grid class="form-grid">
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Vehicle Number *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'veh_number')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="veh_number"
-                      placeholder="Enter vehicle number"
-                      style="text-transform: uppercase"
+        <ion-card-content>
+          <form [formGroup]="vehicleForm">
+            <ion-grid class="form-grid">
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Vehicle Number *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(vehicleForm, 'veh_number')"
+                      lines="none"
+                      class="custom-item"
                     >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(vehicleForm, 'veh_number')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(vehicleForm, "veh_number") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Registration Date *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'reg_date')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="reg_date"
-                      type="date"
-                      [max]="today"
-                      placeholder="Select date"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(vehicleForm, 'reg_date')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(vehicleForm, "reg_date") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">State *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'state')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-select
-                      formControlName="state"
-                      placeholder="Select state"
-                      interface="action-sheet"
+                      <ion-input
+                        formControlName="veh_number"
+                        placeholder="Enter vehicle number"
+                        style="text-transform: uppercase"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(vehicleForm, 'veh_number')"
+                      class="error-text"
                     >
-                      <ion-select-option
-                        *ngFor="let state of states"
-                        [value]="state.state_shortname"
-                      >
-                        {{ state.state_name }} ({{ state.state_shortname }})
-                      </ion-select-option>
-                    </ion-select>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(vehicleForm, 'state')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(vehicleForm, "state") }}
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(vehicleForm, "veh_number") }}
+                    </div>
                   </div>
-                </div>
-              </ion-col>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Vehicle Type *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'type_id')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-select
-                      formControlName="type_id"
-                      placeholder="Select vehicle type"
-                      interface="action-sheet"
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label"
+                      >Registration Date *</ion-label
                     >
-                      <ion-select-option value="1">Truck</ion-select-option>
-                      <ion-select-option value="2">Van</ion-select-option>
-                      <ion-select-option value="3">Tempo</ion-select-option>
-                      <ion-select-option value="4">Other</ion-select-option>
-                    </ion-select>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(vehicleForm, 'type_id')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(vehicleForm, "type_id") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label"
-                    >Load Capacity (kg) *</ion-label
-                  >
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'load_capacity')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="load_capacity"
-                      type="number"
-                      placeholder="Enter load capacity"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(vehicleForm, 'load_capacity')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(vehicleForm, "load_capacity") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Fuel Type *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'fuel_type')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-select
-                      formControlName="fuel_type"
-                      placeholder="Select fuel type"
-                      interface="action-sheet"
+                    <ion-item
+                      [class.error-item]="hasError(vehicleForm, 'reg_date')"
+                      lines="none"
+                      class="custom-item"
                     >
-                      <ion-select-option value="Petrol"
-                        >Petrol</ion-select-option
-                      >
-                      <ion-select-option value="Diesel"
-                        >Diesel</ion-select-option
-                      >
-                      <ion-select-option value="CNG">CNG</ion-select-option>
-                      <ion-select-option value="Electric"
-                        >Electric</ion-select-option
-                      >
-                      <ion-select-option value="CNG+Petrol"
-                        >CNG + Petrol</ion-select-option
-                      >
-                      <ion-select-option value="Electric+Petrol"
-                        >Electric + Petrol</ion-select-option
-                      >
-                      <ion-select-option value="CNG+Diesel"
-                        >CNG + Diesel</ion-select-option
-                      >
-                      <ion-select-option value="Electric+Diesel"
-                        >Electric + Diesel</ion-select-option
-                      >
-                    </ion-select>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(vehicleForm, 'fuel_type')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(vehicleForm, "fuel_type") }}
+                      <ion-input
+                        formControlName="reg_date"
+                        type="date"
+                        [max]="today"
+                        placeholder="Select date"
+                      ></ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(vehicleForm, 'reg_date')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(vehicleForm, "reg_date") }}
+                    </div>
                   </div>
-                </div>
-              </ion-col>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">State *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(vehicleForm, 'state')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-select
+                        formControlName="state"
+                        placeholder="Select state"
+                        interface="action-sheet"
+                      >
+                        <ion-select-option
+                          *ngFor="let state of states"
+                          [value]="state.state_shortname"
+                        >
+                          {{ state.state_name }} ({{ state.state_shortname }})
+                        </ion-select-option>
+                      </ion-select>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(vehicleForm, 'state')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(vehicleForm, "state") }}
+                    </div>
+                  </div>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Vehicle Type *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(vehicleForm, 'type_id')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-select
+                        formControlName="type_id"
+                        placeholder="Select vehicle type"
+                        interface="action-sheet"
+                      >
+                        <ion-select-option value="1">Truck</ion-select-option>
+                        <ion-select-option value="2">Van</ion-select-option>
+                        <ion-select-option value="3">Tempo</ion-select-option>
+                        <ion-select-option value="4">Other</ion-select-option>
+                      </ion-select>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(vehicleForm, 'type_id')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(vehicleForm, "type_id") }}
+                    </div>
+                  </div>
+                </ion-col>
 
-              <!-- <ion-col size="12" size-md="6">
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label"
+                      >Load Capacity (kg) *</ion-label
+                    >
+                    <ion-item
+                      [class.error-item]="
+                        hasError(vehicleForm, 'load_capacity')
+                      "
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="load_capacity"
+                        type="number"
+                        placeholder="Enter load capacity"
+                      ></ion-input>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(vehicleForm, 'load_capacity')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(vehicleForm, "load_capacity") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">Fuel Type *</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(vehicleForm, 'fuel_type')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-select
+                        formControlName="fuel_type"
+                        placeholder="Select fuel type"
+                        interface="action-sheet"
+                      >
+                        <ion-select-option value="Petrol"
+                          >Petrol</ion-select-option
+                        >
+                        <ion-select-option value="Diesel"
+                          >Diesel</ion-select-option
+                        >
+                        <ion-select-option value="CNG">CNG</ion-select-option>
+                        <ion-select-option value="Electric"
+                          >Electric</ion-select-option
+                        >
+                        <ion-select-option value="CNG+Petrol"
+                          >CNG + Petrol</ion-select-option
+                        >
+                        <ion-select-option value="Electric+Petrol"
+                          >Electric + Petrol</ion-select-option
+                        >
+                        <ion-select-option value="CNG+Diesel"
+                          >CNG + Diesel</ion-select-option
+                        >
+                        <ion-select-option value="Electric+Diesel"
+                          >Electric + Diesel</ion-select-option
+                        >
+                      </ion-select>
+                    </ion-item>
+                    <div
+                      *ngIf="hasError(vehicleForm, 'fuel_type')"
+                      class="error-text"
+                    >
+                      <ion-icon
+                        name="information-circle"
+                        class="error-icon"
+                      ></ion-icon>
+                      {{ getErrorMessage(vehicleForm, "fuel_type") }}
+                    </div>
+                  </div>
+                </ion-col>
+
+                <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">Vehicle Make *</ion-label>
                   <ion-item
@@ -1293,23 +1321,23 @@
                 </div>
               </ion-col> -->
 
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">RC Document</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'rc_document')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="rc_document"
-                      placeholder="Enter RC document details"
-                    ></ion-input>
-                  </ion-item>
-                </div>
-              </ion-col>
+                <ion-col size="12" size-md="6">
+                  <div class="form-field">
+                    <ion-label class="field-label">RC Document</ion-label>
+                    <ion-item
+                      [class.error-item]="hasError(vehicleForm, 'rc_document')"
+                      lines="none"
+                      class="custom-item"
+                    >
+                      <ion-input
+                        formControlName="rc_document"
+                        placeholder="Enter RC document details"
+                      ></ion-input>
+                    </ion-item>
+                  </div>
+                </ion-col>
 
-              <!-- <ion-col size="12" size-md="6">
+                <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">KMs Travelled</ion-label>
                   <ion-item
@@ -1325,15 +1353,15 @@
                   </ion-item>
                 </div>
               </ion-col> -->
-            </ion-row>
-          </ion-grid>
-        </form>
-      </ion-card-content>
-    </ion-card>
-  </div>
+              </ion-row>
+            </ion-grid>
+          </form>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
-  <!-- Step 4: Insurance Information -->
-  <!-- <div *ngIf="currentStep === 4" class="step-container">
+    <!-- Step 4: Insurance Information -->
+    <!-- <div *ngIf="currentStep === 4" class="step-container">
     <ion-card class="form-card">
       <ion-card-header>
         <div class="card-header-content">
@@ -1351,8 +1379,8 @@
         <form [formGroup]="insuranceForm">
           <ion-grid class="form-grid">
             <ion-row> -->
-  <!-- Insurance From Date -->
-  <!-- <ion-col size="12" size-md="6">
+    <!-- Insurance From Date -->
+    <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label"
                     >Insurance From Date *</ion-label
@@ -1381,8 +1409,8 @@
                 </div>
               </ion-col> -->
 
-  <!-- Insurance To Date -->
-  <!-- <ion-col size="12" size-md="6">
+    <!-- Insurance To Date -->
+    <!-- <ion-col size="12" size-md="6">
                 <div class="form-field">
                   <ion-label class="field-label">Insurance To Date *</ion-label>
                   <ion-item
@@ -1507,125 +1535,133 @@
     </ion-card>
   </div> -->
 
-  <!-- Step 5: Review & Submit -->
-  <div *ngIf="currentStep === 4" class="step-container">
-    <ion-card class="form-card review-card">
-      <ion-card-header>
-        <div class="card-header-content">
-          <ion-icon name="checkmark-circle" class="header-icon"></ion-icon>
-          <div>
-            <ion-card-title>Review & Submit</ion-card-title>
-            <ion-card-subtitle
-              >Please review all information before
-              submitting</ion-card-subtitle
-            >
-          </div>
-        </div>
-      </ion-card-header>
-
-      <ion-card-content>
-        <!-- Driver Info Review -->
-        <div class="review-section">
-          <div class="review-header">
-            <ion-icon name="person" class="review-icon"></ion-icon>
-            <h3>Driver Information</h3>
-          </div>
-          <div class="review-content">
-            <div class="review-item">
-              <span class="review-label">Name:</span>
-              <span class="review-value"
-                >{{ formData.driverInfo.first_name }}
-                {{ formData.driverInfo.last_name }}</span
+    <!-- Step 5: Review & Submit -->
+    <div *ngIf="currentStep === 4" class="step-container">
+      <ion-card class="form-card review-card">
+        <ion-card-header>
+          <div class="card-header-content">
+            <ion-icon name="checkmark-circle" class="header-icon"></ion-icon>
+            <div>
+              <ion-card-title>Review & Submit</ion-card-title>
+              <ion-card-subtitle
+                >Please review all information before
+                submitting</ion-card-subtitle
               >
             </div>
-            <div class="review-item">
-              <span class="review-label">License:</span>
-              <span class="review-value"
-                >{{ formData.driverInfo.licence_no }} ({{
-                  formData.driverInfo.licence_type
-                }})</span
-              >
-            </div>
-            <div class="review-item">
-              <span class="review-label">Contact:</span>
-              <span class="review-value">{{
-                formData.driverInfo.contact_num
-              }}</span>
-            </div>
-            <div class="review-item" *ngIf="formData.driverInfo.email">
-              <span class="review-label">Email:</span>
-              <span class="review-value">{{ formData.driverInfo.email }}</span>
-            </div>
-            <div class="review-item">
-              <span class="review-label">Aadhar:</span>
-              <span class="review-value">{{ formData.driverInfo.aadhar }}</span>
-            </div>
-            <div class="review-item">
-              <span class="review-label">PAN:</span>
-              <span class="review-value">{{ formData.driverInfo.pan }}</span>
-            </div>
-            <div class="review-item">
-              <span class="review-label">Address:</span>
-              <span class="review-value">
-                {{ formData.driverInfo.address_door_no }}
-                {{ formData.driverInfo.address_street }},
-                {{ formData.driverInfo.address_town }},
-                {{ formData.driverInfo.address_state }} -
-                {{ formData.driverInfo.address_pin_code }}
-              </span>
-            </div>
           </div>
-        </div>
+        </ion-card-header>
 
-        <!-- Vehicle Info Review -->
-        <div class="review-section">
-          <div class="review-header">
-            <ion-icon name="car" class="review-icon"></ion-icon>
-            <h3>Vehicle Information</h3>
-          </div>
-          <div class="review-content">
-            <div class="review-item">
-              <span class="review-label">Vehicle Number:</span>
-              <span class="review-value">{{
-                formData.vehicle.veh_number
-              }}</span>
+        <ion-card-content>
+          <!-- Driver Info Review -->
+          <div class="review-section">
+            <div class="review-header">
+              <ion-icon name="person" class="review-icon"></ion-icon>
+              <h3>Driver Information</h3>
             </div>
-            <!-- <div class="review-item">
+            <div class="review-content">
+              <div class="review-item">
+                <span class="review-label">Name:</span>
+                <span class="review-value"
+                  >{{ formData.driverInfo.first_name }}
+                  {{ formData.driverInfo.last_name }}</span
+                >
+              </div>
+              <div class="review-item">
+                <span class="review-label">License:</span>
+                <span class="review-value"
+                  >{{ formData.driverInfo.licence_no }} ({{
+                    formData.driverInfo.licence_type
+                  }})</span
+                >
+              </div>
+              <div class="review-item">
+                <span class="review-label">Contact:</span>
+                <span class="review-value">{{
+                  formData.driverInfo.contact_num
+                }}</span>
+              </div>
+              <div class="review-item" *ngIf="formData.driverInfo.email">
+                <span class="review-label">Email:</span>
+                <span class="review-value">{{
+                  formData.driverInfo.email
+                }}</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">Aadhar:</span>
+                <span class="review-value">{{
+                  formData.driverInfo.aadhar
+                }}</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">PAN:</span>
+                <span class="review-value">{{ formData.driverInfo.pan }}</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">Address:</span>
+                <span class="review-value">
+                  {{ formData.driverInfo.address_door_no }}
+                  {{ formData.driverInfo.address_street }},
+                  {{ formData.driverInfo.address_town }},
+                  {{ formData.driverInfo.address_state }} -
+                  {{ formData.driverInfo.address_pin_code }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vehicle Info Review -->
+          <div class="review-section">
+            <div class="review-header">
+              <ion-icon name="car" class="review-icon"></ion-icon>
+              <h3>Vehicle Information</h3>
+            </div>
+            <div class="review-content">
+              <div class="review-item">
+                <span class="review-label">Vehicle Number:</span>
+                <span class="review-value">{{
+                  formData.vehicle.veh_number
+                }}</span>
+              </div>
+              <!-- <div class="review-item">
               <span class="review-label">Make & Model:</span>
               <span class="review-value"
                 >{{ formData.vehicle.veh_make }}
                 {{ formData.vehicle.veh_model }}</span
               >
             </div> -->
-            <div class="review-item">
-              <span class="review-label">Registration Date:</span>
-              <span class="review-value">{{ formData.vehicle.reg_date }}</span>
-            </div>
-            <div class="review-item">
-              <span class="review-label">State:</span>
-              <span class="review-value">{{ formData.vehicle.state }}</span>
-            </div>
-            <div class="review-item">
-              <span class="review-label">Fuel Type:</span>
-              <span class="review-value">{{ formData.vehicle.fuel_type }}</span>
-            </div>
-            <div class="review-item">
-              <span class="review-label">Load Capacity:</span>
-              <span class="review-value"
-                >{{ formData.vehicle.load_capacity }} kg</span
-              >
-            </div>
-            <div class="review-item" *ngIf="formData.vehicle.kms_travelled">
-              <span class="review-label">KMs Travelled:</span>
-              <span class="review-value"
-                >{{ formData.vehicle.kms_travelled }} km</span
-              >
+              <div class="review-item">
+                <span class="review-label">Registration Date:</span>
+                <span class="review-value">{{
+                  formData.vehicle.reg_date
+                }}</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">State:</span>
+                <span class="review-value">{{ formData.vehicle.state }}</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">Fuel Type:</span>
+                <span class="review-value">{{
+                  formData.vehicle.fuel_type
+                }}</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">Load Capacity:</span>
+                <span class="review-value"
+                  >{{ formData.vehicle.load_capacity }} kg</span
+                >
+              </div>
+              <div class="review-item" *ngIf="formData.vehicle.kms_travelled">
+                <span class="review-label">KMs Travelled:</span>
+                <span class="review-value"
+                  >{{ formData.vehicle.kms_travelled }} km</span
+                >
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Insurance Info Review -->
-        <!-- <div class="review-section">
+          <!-- Insurance Info Review -->
+          <!-- <div class="review-section">
           <div class="review-header">
             <ion-icon name="shield" class="review-icon"></ion-icon>
             <h3>Insurance Information</h3>
@@ -1653,14 +1689,14 @@
           </div>
         </div> -->
 
-        <!-- Documents Review -->
-        <div class="review-section">
-          <div class="review-header">
-            <ion-icon name="document-text" class="review-icon"></ion-icon>
-            <h3>Documents Uploaded</h3>
-          </div>
-          <div class="review-content">
-            <!-- <div class="document-status">
+          <!-- Documents Review -->
+          <div class="review-section">
+            <div class="review-header">
+              <ion-icon name="document-text" class="review-icon"></ion-icon>
+              <h3>Documents Uploaded</h3>
+            </div>
+            <div class="review-content">
+              <!-- <div class="document-status">
               <ion-icon
                 [name]="
                   formData.documents.aadhar_img
@@ -1699,35 +1735,35 @@
               ></ion-icon>
               <span>Driver Photo</span>
             </div> -->
-            <div class="document-status">
-              <ion-icon
-                [name]="
-                  formData.documents.license_img
-                    ? 'checkmark-circle'
-                    : 'close-circle'
-                "
-                [class]="
-                  formData.documents.license_img
-                    ? 'doc-uploaded'
-                    : 'doc-missing'
-                "
-              ></ion-icon>
-              <span>License Document</span>
-            </div>
-            <div class="document-status">
-              <ion-icon
-                [name]="
-                  formData.documents.rc_img
-                    ? 'checkmark-circle'
-                    : 'close-circle'
-                "
-                [class]="
-                  formData.documents.rc_img ? 'doc-uploaded' : 'doc-missing'
-                "
-              ></ion-icon>
-              <span>RC Document</span>
-            </div>
-            <!-- <div class="document-status">
+              <div class="document-status">
+                <ion-icon
+                  [name]="
+                    formData.documents.license_img
+                      ? 'checkmark-circle'
+                      : 'close-circle'
+                  "
+                  [class]="
+                    formData.documents.license_img
+                      ? 'doc-uploaded'
+                      : 'doc-missing'
+                  "
+                ></ion-icon>
+                <span>License Document</span>
+              </div>
+              <div class="document-status">
+                <ion-icon
+                  [name]="
+                    formData.documents.rc_img
+                      ? 'checkmark-circle'
+                      : 'close-circle'
+                  "
+                  [class]="
+                    formData.documents.rc_img ? 'doc-uploaded' : 'doc-missing'
+                  "
+                ></ion-icon>
+                <span>RC Document</span>
+              </div>
+              <!-- <div class="document-status">
               <ion-icon
                 [name]="
                   formData.documents.insurance_img
@@ -1742,40 +1778,41 @@
               ></ion-icon>
               <span>Insurance Document</span>
             </div> -->
+            </div>
           </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
-  <!-- Navigation Buttons -->
-  <div class="navigation-buttons">
-    <ion-button
-      *ngIf="currentStep > 1"
-      fill="outline"
-      (click)="previousStep()"
-      class="nav-btn prev-btn"
-    >
-      <ion-icon name="chevron-back" slot="start"></ion-icon>
-      Previous
-    </ion-button>
+    <!-- Navigation Buttons -->
+    <div class="navigation-buttons">
+      <ion-button
+        *ngIf="currentStep > 1"
+        fill="outline"
+        (click)="previousStep()"
+        class="nav-btn prev-btn"
+      >
+        <ion-icon name="chevron-back" slot="start"></ion-icon>
+        Previous
+      </ion-button>
 
-    <ion-button
-      *ngIf="currentStep < 5"
-      (click)="nextStep()"
-      class="nav-btn next-btn"
-    >
-      Save & Next
-      <ion-icon name="chevron-forward" slot="end"></ion-icon>
-    </ion-button>
+      <ion-button
+        *ngIf="currentStep < 5"
+        (click)="nextStep()"
+        class="nav-btn next-btn"
+      >
+        Save & Next
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-button>
 
-    <ion-button
-      *ngIf="currentStep === 5"
-      (click)="submitForm()"
-      class="nav-btn submit-btn"
-    >
-      <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-      Complete Registration
-    </ion-button>
+      <ion-button
+        *ngIf="currentStep === 5"
+        (click)="submitForm()"
+        class="nav-btn submit-btn"
+      >
+        <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+        Complete Registration
+      </ion-button>
+    </div>
   </div>
 </ion-content>

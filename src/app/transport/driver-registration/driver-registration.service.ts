@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/auth/auth.service';
 
 // Driver Info Request Interface
 export interface DriverInfoRequest {
@@ -104,14 +106,26 @@ export interface City {
   providedIn: 'root'
 })
 export class DriverService {
-  private baseUrl = 'http://localhost:3000';
+  private baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
 
   private getHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
     return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
+  }
+
+  checkDriverExists(): Observable<boolean> {
+    return this.http.get<boolean>(
+      `${this.baseUrl}/getDriverExists`,
+      { headers: this.getHeaders() }
+    );
   }
 
   addDriver(driverInfo: DriverInfoRequest): Observable<DriverResponse> {

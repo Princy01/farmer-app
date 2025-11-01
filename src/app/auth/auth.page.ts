@@ -172,7 +172,7 @@ export class LoginPage {
               this.router.navigate(['/buyer/business-registration']);
               break;
             case 'driver':
-              this.router.navigate(['/transport/transport-dashboard']);
+              this.router.navigate(['/transport/driver-registration']);
               break;
             default:
               console.error('Unknown role:', userRole);

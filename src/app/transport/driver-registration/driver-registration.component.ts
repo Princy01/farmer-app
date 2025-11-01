@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   chevronForward,
@@ -29,6 +30,7 @@ import {
   State,
   City
 } from './driver-registration.service';
+import { AuthService } from 'src/app/auth/auth.service';
 
 interface FormData {
   driverInfo: Partial<DriverInfoRequest>;
@@ -70,9 +72,15 @@ export class DriverRegistrationComponent implements OnInit {
   driverId: number | null = null;
   vehicleId: number | null = null;
 
+  // User authentication
+  currentUserId: number | null = null;
+  isCheckingRegistration = true;
+
   constructor(
     private fb: FormBuilder,
+    private router: Router,
     private driverService: DriverService,
+    private authService: AuthService,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private toastController: ToastController
@@ -98,8 +106,119 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.initializeForms();
-    this.loadStates();
+    this.checkAuthAndInitialize();
+  }
+
+  private async checkAuthAndInitialize() {
+    // Check if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    // Check if user has driver role
+    if (!this.authService.hasRole('driver')) {
+      this.showUnauthorizedError();
+      return;
+    }
+
+    // Get current user ID
+    this.currentUserId = this.authService.getUserId();
+
+    if (!this.currentUserId) {
+      this.showAuthError();
+      return;
+    }
+
+    console.log('Driver registration initialized for user ID:', this.currentUserId);
+
+    // Check if driver is already registered
+    await this.checkDriverRegistration();
+  }
+
+  private async checkDriverRegistration() {
+    const loading = await this.loadingController.create({
+      message: 'Checking registration status...',
+      spinner: 'crescent'
+    });
+
+    await loading.present();
+
+    this.driverService.checkDriverExists().subscribe({
+      next: async (exists) => {
+        await loading.dismiss();
+        this.isCheckingRegistration = false;
+
+        if (exists) {
+          // Driver already registered, navigate to dashboard
+          console.log('Driver already registered, redirecting to dashboard');
+          await this.showAlreadyRegisteredAlert();
+        } else {
+          // Driver not registered, show registration form
+          console.log('Driver not registered, showing registration form');
+          this.initializeForms();
+          this.loadStates();
+        }
+      },
+      error: async (error) => {
+        await loading.dismiss();
+        this.isCheckingRegistration = false;
+        console.error('Error checking driver registration:', error);
+
+        // On error, show registration form to be safe
+        await this.showToast('Could not verify registration status. Please proceed with registration.', 'warning');
+        this.initializeForms();
+        this.loadStates();
+      }
+    });
+  }
+
+  private async showAlreadyRegisteredAlert() {
+    const alert = await this.alertController.create({
+      header: 'Already Registered',
+      message: 'You have already completed the driver registration. Redirecting to dashboard...',
+      buttons: [{
+        text: 'OK',
+        handler: () => {
+          this.router.navigate(['/transport/transport-dashboard']);
+        }
+      }],
+      backdropDismiss: false
+    });
+    await alert.present();
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertController.create({
+      header: 'Authentication Error',
+      message: 'Your session has expired. Please login again.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async showUnauthorizedError() {
+    const alert = await this.alertController.create({
+      header: 'Access Denied',
+      message: 'You do not have permission to access this page. Only drivers can register.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   initializeForms() {
@@ -164,6 +283,12 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   async nextStep() {
+    // Check authentication before proceeding
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
     const currentForm = this.getCurrentForm();
 
     if (currentForm && currentForm.invalid) {
@@ -416,6 +541,11 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   async submitForm() {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
     await this.showSuccessAlert();
   }
 
@@ -424,6 +554,7 @@ export class DriverRegistrationComponent implements OnInit {
       header: 'Registration Complete!',
       message: `
         Driver registered successfully!<br><br>
+        <strong>User ID:</strong> ${this.currentUserId}<br>
         <strong>Driver ID:</strong> ${this.driverId}<br>
         <strong>Vehicle ID:</strong> ${this.vehicleId || 'N/A'}<br>
       `,
@@ -431,6 +562,7 @@ export class DriverRegistrationComponent implements OnInit {
         text: 'OK',
         handler: () => {
           this.resetForm();
+          this.router.navigate(['/transport/transport-dashboard']);
         }
       }]
     });
