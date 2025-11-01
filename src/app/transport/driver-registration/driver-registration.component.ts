@@ -19,7 +19,7 @@ import {
   business,
   location,
   calendar,
-  informationCircle
+  informationCircle, expand, trash, closeCircle
 } from 'ionicons/icons';
 import {
   DriverService,
@@ -27,10 +27,15 @@ import {
   DriverDocumentRequest,
   DriverVehicle,
   DriverVehicleInsurance,
+  DriverInfoResponse,
+  DriverVehicleResponse,
+  DriverDocumentResponse,
+  DriverVehicleInsuranceResponse,
   State,
   City
 } from './driver-registration.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { forkJoin, firstValueFrom } from 'rxjs';
 
 interface FormData {
   driverInfo: Partial<DriverInfoRequest>;
@@ -47,7 +52,7 @@ interface FormData {
   imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule]
 })
 export class DriverRegistrationComponent implements OnInit {
-  currentStep = 4;
+  currentStep = 1;
   totalSteps = 4;
   today = new Date().toISOString();
   states: State[] = [];
@@ -68,13 +73,45 @@ export class DriverRegistrationComponent implements OnInit {
     insurance: {}
   };
 
-  // Store IDs after creation
-  driverId: number | null = null;
+  // Key IDs - driver_id is user_id
+  driverId: number | null = null; // This is the user_id
   vehicleId: number | null = null;
+  documentIds: Map<string, number> = new Map(); // doc_type -> document_id
+  insuranceId: number | null = null;
 
-  // User authentication
-  currentUserId: number | null = null;
+  // Update mode flags
+  isUpdateMode = false;
+  existingData: {
+    driverInfo: DriverInfoResponse | null;
+    vehicles: DriverVehicleResponse[];
+    documents: DriverDocumentResponse[];
+    insurance: DriverVehicleInsuranceResponse[];
+  } = {
+      driverInfo: null,
+      vehicles: [],
+      documents: [],
+      insurance: []
+    };
+
+  imagePreviewUrls: {
+    aadhar_img: string | null;
+    pan_img: string | null;
+    driver_img: string | null;
+    insurance_img: string | null;
+    rc_img: string | null;
+    license_img: string | null;
+  } = {
+      aadhar_img: null,
+      pan_img: null,
+      driver_img: null,
+      insurance_img: null,
+      rc_img: null,
+      license_img: null
+    };
+
+  // Loading state
   isCheckingRegistration = true;
+  isLoadingExistingData = false;
 
   constructor(
     private fb: FormBuilder,
@@ -85,7 +122,6 @@ export class DriverRegistrationComponent implements OnInit {
     private loadingController: LoadingController,
     private toastController: ToastController
   ) {
-    // Register icons
     addIcons({
       'chevron-forward': chevronForward,
       'chevron-back': chevronBack,
@@ -101,89 +137,265 @@ export class DriverRegistrationComponent implements OnInit {
       'business': business,
       'location': location,
       'calendar': calendar,
-      'information-circle': informationCircle
+      'information-circle': informationCircle,
+      'trash': trash,
+      'close-circle': closeCircle
     });
   }
 
   ngOnInit() {
+    this.initializeForms();
     this.checkAuthAndInitialize();
+  }
+
+  ionViewWillEnter() {
+    // Ionic lifecycle - called when entering the page
+    console.log('Driver registration page entered');
+  }
+
+  ionViewDidEnter() {
+    // Ionic lifecycle - called after page animation completes
+    console.log('Driver registration page animation complete');
   }
 
   private async checkAuthAndInitialize() {
     // Check if user is authenticated
     if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
+      await this.showAuthError();
       return;
     }
 
-    // Check if user has driver role
     if (!this.authService.hasRole('driver')) {
-      this.showUnauthorizedError();
+      await this.showUnauthorizedError();
       return;
     }
 
-    // Get current user ID
-    this.currentUserId = this.authService.getUserId();
-
-    if (!this.currentUserId) {
-      this.showAuthError();
+    // Get user_id which is the driver_id
+    this.driverId = this.authService.getUserId();
+    if (!this.driverId) {
+      await this.showAuthError();
       return;
     }
 
-    console.log('Driver registration initialized for user ID:', this.currentUserId);
+    console.log('Driver registration initialized for driver_id (user_id):', this.driverId);
 
-    // Check if driver is already registered
-    await this.checkDriverRegistration();
+    // Load states for dropdown
+    this.loadStates();
+
+    // Check registration status
+    await this.checkDriverRegistrationStatus();
   }
 
-  private async checkDriverRegistration() {
+  private async checkDriverRegistrationStatus() {
     const loading = await this.loadingController.create({
       message: 'Checking registration status...',
-      spinner: 'crescent'
+      spinner: 'crescent',
+      cssClass: 'custom-loading'
     });
 
     await loading.present();
 
-    this.driverService.checkDriverExists().subscribe({
-      next: async (exists) => {
+    forkJoin({
+      exists: this.driverService.checkDriverExists(),
+      completed: this.driverService.checkDriverRegistrationCompleted()
+    }).subscribe({
+      next: async (result) => {
         await loading.dismiss();
         this.isCheckingRegistration = false;
 
-        if (exists) {
-          // Driver already registered, navigate to dashboard
-          console.log('Driver already registered, redirecting to dashboard');
-          await this.showAlreadyRegisteredAlert();
+        console.log('Registration check:', result);
+
+        if (!result.exists) {
+          // New registration - fresh start
+          console.log('New driver registration');
+          this.isUpdateMode = false;
+          await this.showToast('Starting new driver registration', 'primary');
+        } else if (result.completed) {
+          // Registration already completed
+          console.log('Driver registration already completed');
+          this.router.navigate(['/transport/transport-dashboard']);
         } else {
-          // Driver not registered, show registration form
-          console.log('Driver not registered, showing registration form');
-          this.initializeForms();
-          this.loadStates();
+          // Registration incomplete - load existing data
+          console.log('Driver registration incomplete - resuming');
+          this.isUpdateMode = true;
+          await this.loadExistingData();
         }
       },
       error: async (error) => {
         await loading.dismiss();
         this.isCheckingRegistration = false;
-        console.error('Error checking driver registration:', error);
-
-        // On error, show registration form to be safe
-        await this.showToast('Could not verify registration status. Please proceed with registration.', 'warning');
-        this.initializeForms();
-        this.loadStates();
+        console.error('Error checking driver registration status:', error);
+        await this.showToast('Could not verify registration status. Starting fresh.', 'warning');
+        this.isUpdateMode = false;
       }
     });
   }
 
-  private async showAlreadyRegisteredAlert() {
+  private async loadExistingData() {
+    if (!this.driverId) return;
+
+    this.isLoadingExistingData = true;
+    const loading = await this.loadingController.create({
+      message: 'Loading your data...',
+      spinner: 'circles',
+      cssClass: 'custom-loading'
+    });
+
+    await loading.present();
+
+    try {
+      // Load all existing data in parallel
+      const [driverInfo, vehicles, documents, insurance] = await Promise.all([
+        firstValueFrom(this.driverService.getDriverInfo()),
+        firstValueFrom(this.driverService.getDriverVehicles(this.driverId)),
+        firstValueFrom(this.driverService.getDriverDocuments(this.driverId)),
+        firstValueFrom(this.driverService.getDriverInsurance(this.driverId))
+      ]);
+
+      // Store existing data
+      this.existingData.driverInfo = driverInfo;
+      this.existingData.vehicles = vehicles || [];
+      this.existingData.documents = documents || [];
+      this.existingData.insurance = insurance || [];
+
+      // Pre-fill forms with existing data
+      if (driverInfo) {
+        this.prefillDriverInfo(driverInfo);
+      }
+
+      if (vehicles && vehicles.length > 0) {
+        this.vehicleId = vehicles[0].vehicle_id;
+        this.prefillVehicleInfo(vehicles[0]);
+      }
+
+      if (documents && documents.length > 0) {
+        this.prefillDocuments(documents);
+      }
+
+      if (insurance && insurance.length > 0) {
+        this.insuranceId = insurance[0].insurance_id;
+        this.prefillInsurance(insurance[0]);
+      }
+
+      await loading.dismiss();
+      this.isLoadingExistingData = false;
+
+      await this.showIncompleteRegistrationAlert();
+    } catch (error) {
+      await loading.dismiss();
+      this.isLoadingExistingData = false;
+      console.error('Error loading existing data:', error);
+      await this.showToast('Could not load some existing data', 'warning');
+    }
+  }
+
+  private prefillDriverInfo(data: DriverInfoResponse) {
+    this.driverInfoForm.patchValue({
+      first_name: data.first_name || '',
+      last_name: data.last_name || '',
+      dob: data.dob || '',
+      licence_no: data.licence_no || '',
+      licence_issued_date: data.licence_issued_date || '',
+      licence_expiry_date: data.licence_expiry_date || '',
+      licence_type: data.licence_type || '',
+      address_door_no: data.address_door_no || '',
+      address_street: data.address_street || '',
+      address_town: data.address_town || '',
+      address_state: data.address_state || '',
+      address_pin_code: data.address_pin_code || '',
+      address_landmark: data.address_landmark || '',
+      contact_num: data.contact_num || '',
+      contact_num_addl: data.contact_num_addl || '',
+      email: data.email || '',
+      aadhar: data.aadhar || '',
+      pan: data.pan || '',
+      bank_ac_no: data.bank_ac_no || '',
+      bank_name: data.bank_name || '',
+      bank_branch: data.bank_branch || '',
+      ifsc: data.ifsc || '',
+      bank_address: data.bank_address || '',
+      status: data.status || 'active'
+    });
+
+    // Load cities if state is set
+    if (data.address_state) {
+      const state = this.states.find(s => s.state_shortname === data.address_state);
+      if (state) {
+        this.selectedStateId = state.id;
+        this.driverService.getCitiesOfState(state.id).subscribe({
+          next: (cities) => {
+            this.cities = cities;
+          }
+        });
+      }
+    }
+  }
+
+  private prefillVehicleInfo(data: DriverVehicleResponse) {
+    this.vehicleForm.patchValue({
+      veh_number: data.veh_number || '',
+      reg_date: data.reg_date || '',
+      state: data.state || '',
+      type_id: data.type_id || null,
+      veh_make: data.veh_make || '',
+      veh_model: data.veh_model || '',
+      load_capacity: data.load_capacity || null,
+      fuel_type: data.fuel_type || '',
+      rc_document: data.rc_document || '',
+      kms_travelled: data.kms_travelled || 0
+    });
+    console.log(this.vehicleForm.value)
+  }
+
+
+
+  // Update prefillDocuments to set preview URLs
+  private prefillDocuments(documents: DriverDocumentResponse[]) {
+    documents.forEach(doc => {
+      const fieldMap: { [key: string]: string } = {
+        'aadhar': 'aadhar_img',
+        'pan': 'pan_img',
+        'driver_image': 'driver_img',
+        'insurance': 'insurance_img',
+        'rc_document': 'rc_img',
+        'license': 'license_img'
+      };
+
+      const fieldName = fieldMap[doc.doc_type];
+      if (fieldName) {
+        const base64Image = doc.doc_image;
+        const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+
+        this.documentsForm.patchValue({
+          [fieldName]: base64Image
+        });
+        this.imagePreviewUrls[fieldName as keyof typeof this.imagePreviewUrls] = imageUrl;
+        this.documentIds.set(doc.doc_type, doc.document_id);
+      }
+    });
+  }
+
+  private prefillInsurance(data: DriverVehicleInsuranceResponse) {
+    this.insuranceForm.patchValue({
+      frm_date: data.frm_date || '',
+      to_date: data.to_date || '',
+      ins_company: data.ins_company || '',
+      amt_insured: data.amt_insured || null
+    });
+  }
+
+
+
+  private async showIncompleteRegistrationAlert() {
     const alert = await this.alertController.create({
-      header: 'Already Registered',
-      message: 'You have already completed the driver registration. Redirecting to dashboard...',
+      header: 'Resume Registration',
+      message: 'You have started the registration process. Your existing data has been loaded. Please complete all remaining steps.',
       buttons: [{
-        text: 'OK',
-        handler: () => {
-          this.router.navigate(['/transport/transport-dashboard']);
-        }
+        text: 'Continue',
+        cssClass: 'primary-button'
       }],
-      backdropDismiss: false
+      backdropDismiss: false,
+      cssClass: 'custom-alert'
     });
     await alert.present();
   }
@@ -192,15 +404,15 @@ export class DriverRegistrationComponent implements OnInit {
     const alert = await this.alertController.create({
       header: 'Authentication Error',
       message: 'Your session has expired. Please login again.',
-      buttons: [
-        {
-          text: 'OK',
-          handler: () => {
-            this.authService.logout();
-            this.router.navigate(['/login']);
-          }
+      buttons: [{
+        text: 'OK',
+        handler: () => {
+          this.authService.logout();
+          this.router.navigate(['/login']);
         }
-      ]
+      }],
+      backdropDismiss: false,
+      cssClass: 'custom-alert'
     });
     await alert.present();
   }
@@ -209,14 +421,14 @@ export class DriverRegistrationComponent implements OnInit {
     const alert = await this.alertController.create({
       header: 'Access Denied',
       message: 'You do not have permission to access this page. Only drivers can register.',
-      buttons: [
-        {
-          text: 'OK',
-          handler: () => {
-            this.router.navigate(['/login']);
-          }
+      buttons: [{
+        text: 'OK',
+        handler: () => {
+          this.router.navigate(['/login']);
         }
-      ]
+      }],
+      backdropDismiss: false,
+      cssClass: 'custom-alert'
     });
     await alert.present();
   }
@@ -224,10 +436,10 @@ export class DriverRegistrationComponent implements OnInit {
   initializeForms() {
     // Step 1: Driver Basic Information
     this.driverInfoForm = this.fb.group({
-      first_name: ['', [Validators.required]],
-      last_name: ['', [Validators.required]],
+      first_name: ['', [Validators.required, Validators.minLength(2)]],
+      last_name: ['', [Validators.required, Validators.minLength(2)]],
       dob: ['', [Validators.required]],
-      licence_no: ['', [Validators.required]],
+      licence_no: ['', [Validators.required, Validators.minLength(5)]],
       licence_issued_date: ['', [Validators.required]],
       licence_expiry_date: ['', [Validators.required]],
       licence_type: ['', [Validators.required]],
@@ -238,7 +450,7 @@ export class DriverRegistrationComponent implements OnInit {
       address_pin_code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
       address_landmark: [''],
       contact_num: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      contact_num_addl: [''],
+      contact_num_addl: ['', [Validators.pattern(/^\d{10}$/)]],
       email: ['', [Validators.email]],
       aadhar: ['', [Validators.required, Validators.pattern(/^\d{12}$/)]],
       pan: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
@@ -259,9 +471,10 @@ export class DriverRegistrationComponent implements OnInit {
       rc_img: ['', [Validators.required]],
       license_img: ['', [Validators.required]]
     });
+
     // Step 3: Vehicle Information
     this.vehicleForm = this.fb.group({
-      veh_number: ['', [Validators.required]],
+      veh_number: ['', [Validators.required, Validators.minLength(5)]],
       reg_date: ['', [Validators.required]],
       state: ['', [Validators.required]],
       type_id: [null, [Validators.required]],
@@ -283,22 +496,30 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   async nextStep() {
-    // Check authentication before proceeding
     if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
+      await this.showAuthError();
       return;
     }
 
     const currentForm = this.getCurrentForm();
-
-    if (currentForm && currentForm.invalid) {
-      await this.showToast('Please fill all required fields correctly', 'warning');
-      this.markFormGroupTouched(currentForm);
+    if (!currentForm) {
+      await this.showToast('Form not found', 'danger');
       return;
     }
 
-    // Save current step data and proceed
-    this.saveCurrentStepData();
+    // Validate form
+    if (currentForm.invalid) {
+      this.markFormGroupTouched(currentForm);
+      const invalidFields = this.getInvalidFields(currentForm);
+      const errorMessage = invalidFields.length > 0
+        ? `Please fill the following fields correctly: ${invalidFields.join(', ')}`
+        : 'Please fill all required fields correctly';
+      await this.showToast(errorMessage, 'warning');
+      return;
+    }
+
+    // Save current step data
+    await this.saveCurrentStepData();
   }
 
   previousStep() {
@@ -312,97 +533,133 @@ export class DriverRegistrationComponent implements OnInit {
       case 1: return this.driverInfoForm;
       case 2: return this.documentsForm;
       case 3: return this.vehicleForm;
-      // case 4: return this.insuranceForm;
+      case 4: return this.insuranceForm;
       default: return null;
     }
+  }
+
+  private getInvalidFields(formGroup: FormGroup): string[] {
+    const invalidFields: string[] = [];
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      if (control && control.invalid && control.errors?.['required']) {
+        invalidFields.push(this.formatFieldName(key));
+      }
+    });
+    return invalidFields;
   }
 
   async saveCurrentStepData() {
     const loading = await this.loadingController.create({
       message: 'Saving...',
-      spinner: 'crescent'
+      spinner: 'crescent',
+      cssClass: 'custom-loading'
     });
 
     await loading.present();
 
-    switch (this.currentStep) {
-      case 1:
-        this.saveDriverInfo(loading);
-        break;
-      case 2:
-        if (this.hasDocuments()) {
-          this.saveDocuments(loading);
-        } else {
+    try {
+      switch (this.currentStep) {
+        case 1:
+          await this.saveDriverInfo(loading);
+          break;
+        case 2:
+          await this.saveDocuments(loading);
+          break;
+        case 3:
+          await this.saveVehicle(loading);
+          break;
+        case 4:
+          await this.saveInsurance(loading);
+          break;
+        default:
           await loading.dismiss();
-          this.currentStep++;
-        }
-        break;
-      case 3:
-        this.saveVehicle(loading);
-        break;
-      // case 4:
-      //   this.saveInsurance(loading);
-      //   break;
-      default:
-        await loading.dismiss();
-        break;
+          break;
+      }
+    } catch (error) {
+      await loading.dismiss();
+      console.error('Error saving step data:', error);
+      await this.showToast('An error occurred while saving', 'danger');
     }
   }
 
-  saveDriverInfo(loading: HTMLIonLoadingElement) {
-    const formValue = this.driverInfoForm.value;
+  async saveDriverInfo(loading: HTMLIonLoadingElement) {
+    if (!this.driverId) {
+      await loading.dismiss();
+      await this.showToast('Driver ID not found', 'danger');
+      return;
+    }
 
+    const formValue = this.driverInfoForm.value;
     const driverInfo: DriverInfoRequest = {
-      first_name: formValue.first_name,
-      last_name: formValue.last_name,
+      first_name: formValue.first_name.trim(),
+      last_name: formValue.last_name.trim(),
       dob: this.formatDate(formValue.dob),
-      licence_no: formValue.licence_no,
+      licence_no: formValue.licence_no.trim(),
       licence_issued_date: this.formatDate(formValue.licence_issued_date),
       licence_expiry_date: this.formatDate(formValue.licence_expiry_date),
       licence_type: formValue.licence_type,
-      address_door_no: formValue.address_door_no || '',
-      address_street: formValue.address_street,
+      address_door_no: formValue.address_door_no?.trim() || '',
+      address_street: formValue.address_street.trim(),
       address_town: formValue.address_town,
       address_state: formValue.address_state,
       address_pin_code: formValue.address_pin_code,
-      address_landmark: formValue.address_landmark || '',
+      address_landmark: formValue.address_landmark?.trim() || '',
       contact_num: formValue.contact_num,
       contact_num_addl: formValue.contact_num_addl || '',
-      email: formValue.email || '',
+      email: formValue.email?.trim() || '',
       aadhar: formValue.aadhar,
-      pan: formValue.pan.toUpperCase(),
-      bank_ac_no: formValue.bank_ac_no || '',
-      bank_name: formValue.bank_name || '',
-      bank_branch: formValue.bank_branch || '',
-      ifsc: formValue.ifsc ? formValue.ifsc.toUpperCase() : '',
-      bank_address: formValue.bank_address || '',
+      pan: formValue.pan.toUpperCase().trim(),
+      bank_ac_no: formValue.bank_ac_no.trim(),
+      bank_name: formValue.bank_name.trim(),
+      bank_branch: formValue.bank_branch.trim(),
+      ifsc: formValue.ifsc.toUpperCase().trim(),
+      bank_address: formValue.bank_address.trim(),
       status: formValue.status
     };
 
-    this.driverService.addDriver(driverInfo).subscribe({
-      next: (response) => {
-        this.driverId = response.driver_id;
+    // Decide whether to ADD or UPDATE
+    const hasExistingData = this.isUpdateMode && this.existingData.driverInfo !== null;
+
+    const request$ = hasExistingData
+      ? this.driverService.updateDriverInfo(this.driverId, driverInfo)
+      : this.driverService.addDriver(driverInfo);
+
+    request$.subscribe({
+      next: async (response) => {
         this.formData.driverInfo = driverInfo;
-        loading.dismiss();
-        this.showToast('Driver information saved successfully', 'success');
+        await loading.dismiss();
+        await this.showToast(
+          hasExistingData ? 'Driver info updated successfully' : 'Driver info saved successfully',
+          'success'
+        );
         this.currentStep++;
       },
-      error: (error) => {
-        loading.dismiss();
-        const errorMsg = error.error?.error || 'Failed to save driver information';
-        this.showToast(errorMsg, 'danger');
+      error: async (error) => {
+        await loading.dismiss();
+        const errorMsg = error.error?.error || error.error?.message || 'Failed to save driver information';
+        await this.showToast(errorMsg, 'danger');
+        console.error('Driver info save error:', error);
       }
     });
   }
 
-  saveDocuments(loading: HTMLIonLoadingElement) {
+  async saveDocuments(loading: HTMLIonLoadingElement) {
     if (!this.driverId) {
-      loading.dismiss();
-      this.showToast('Driver ID not found. Please complete step 1 first.', 'danger');
+      await loading.dismiss();
+      await this.showToast('Driver ID not found. Please complete step 1 first.', 'danger');
       return;
     }
 
     const formValue = this.documentsForm.value;
+
+    // Check if required documents are uploaded
+    if (!formValue.rc_img || !formValue.license_img) {
+      await loading.dismiss();
+      await this.showToast('Please upload RC and License documents', 'warning');
+      return;
+    }
+
     const documents: DriverDocumentRequest = {
       driver_id: this.driverId,
       aadhar_img: formValue.aadhar_img || '',
@@ -413,69 +670,91 @@ export class DriverRegistrationComponent implements OnInit {
       license_img: formValue.license_img
     };
 
+    // For documents, we always use ADD (backend handles upsert logic)
+    // Or if you want to update individual documents, you'd need to check each document type
     this.driverService.addDriverDocument(documents).subscribe({
-      next: (response) => {
+      next: async (response) => {
         this.formData.documents = documents;
-        loading.dismiss();
-        this.showToast(response.message || 'Documents uploaded successfully', 'success');
+        await loading.dismiss();
+        await this.showToast(response.message || 'Documents uploaded successfully', 'success');
         this.currentStep++;
       },
-      error: (error) => {
-        loading.dismiss();
-        const errorMsg = error.error?.error || 'Failed to upload documents';
-        this.showToast(errorMsg, 'warning');
-        // Don't block progression - documents are optional
-        this.currentStep++;
+      error: async (error) => {
+        await loading.dismiss();
+        const errorMsg = error.error?.error || error.error?.message || 'Failed to upload documents';
+        await this.showToast(errorMsg, 'danger');
+        console.error('Documents upload error:', error);
       }
     });
   }
 
-  saveVehicle(loading: HTMLIonLoadingElement) {
+  async saveVehicle(loading: HTMLIonLoadingElement) {
     if (!this.driverId) {
-      loading.dismiss();
-      this.showToast('Driver ID not found. Please complete step 1 first.', 'danger');
+      await loading.dismiss();
+      await this.showToast('Driver ID not found. Please complete step 1 first.', 'danger');
       return;
     }
 
     const formValue = this.vehicleForm.value;
     const vehicle: DriverVehicle = {
-      veh_number: formValue.veh_number.toUpperCase(),
+      veh_number: formValue.veh_number.toUpperCase().trim(),
       reg_date: this.formatDate(formValue.reg_date),
       state: formValue.state,
       type_id: Number(formValue.type_id),
-      veh_make: formValue.veh_make,
-      veh_model: formValue.veh_model,
+      veh_make: formValue.veh_make?.trim() || '',
+      veh_model: formValue.veh_model?.trim() || '',
       driver_id: this.driverId,
       load_capacity: Number(formValue.load_capacity),
       fuel_type: formValue.fuel_type,
-      rc_document: formValue.rc_document || '',
+      rc_document: formValue.rc_document?.trim() || '',
       kms_travelled: Number(formValue.kms_travelled) || 0
     };
 
-    this.driverService.addDriverVehicle(vehicle).subscribe({
-      next: (response) => {
-        this.vehicleId = response.vehicle_id;
+    // Decide whether to ADD or UPDATE
+    const hasExistingVehicle = this.isUpdateMode && this.existingData.vehicles.length > 0;
+
+    const request$ = hasExistingVehicle && this.vehicleId
+      ? this.driverService.updateDriverVehicle(this.vehicleId, vehicle)
+      : this.driverService.addDriverVehicle(vehicle);
+
+    request$.subscribe({
+      next: async (response: any) => {
+        if (!hasExistingVehicle && response.vehicle_id) {
+          this.vehicleId = response.vehicle_id;
+        }
         this.formData.vehicle = vehicle;
-        loading.dismiss();
-        this.showToast('Vehicle information saved successfully', 'success');
+        await loading.dismiss();
+        await this.showToast(
+          hasExistingVehicle ? 'Vehicle updated successfully' : 'Vehicle saved successfully',
+          'success'
+        );
         this.currentStep++;
       },
-      error: (error) => {
-        loading.dismiss();
-        const errorMsg = error.error?.error || 'Failed to save vehicle information';
-        this.showToast(errorMsg, 'danger');
+      error: async (error) => {
+        await loading.dismiss();
+        const errorMsg = error.error?.error || error.error?.message || 'Failed to save vehicle information';
+        await this.showToast(errorMsg, 'danger');
+        console.error('Vehicle save error:', error);
       }
     });
   }
 
-  saveInsurance(loading: HTMLIonLoadingElement) {
+  async saveInsurance(loading: HTMLIonLoadingElement) {
     if (!this.vehicleId || !this.driverId) {
-      loading.dismiss();
-      this.showToast('Vehicle ID not found. Please complete step 3 first.', 'danger');
+      await loading.dismiss();
+      await this.showToast('Vehicle ID not found. Please complete step 3 first.', 'danger');
       return;
     }
 
     const formValue = this.insuranceForm.value;
+
+    // Check if insurance data is provided
+    if (!formValue.frm_date || !formValue.to_date || !formValue.ins_company) {
+      await loading.dismiss();
+      await this.showToast('Please fill insurance details', 'warning');
+      return;
+    }
+
     const insurance: DriverVehicleInsurance = {
       vehicle_id: this.vehicleId,
       frm_date: this.formatDate(formValue.frm_date),
@@ -485,17 +764,29 @@ export class DriverRegistrationComponent implements OnInit {
       driver_id: this.driverId
     };
 
-    this.driverService.addDriverVehicleInsurance(insurance).subscribe({
-      next: () => {
+    // Decide whether to ADD or UPDATE
+    const hasExistingInsurance = this.isUpdateMode && this.existingData.insurance.length > 0;
+
+    const request$ = hasExistingInsurance && this.insuranceId
+      ? this.driverService.updateDriverVehicleInsurance(this.insuranceId, insurance)
+      : this.driverService.addDriverVehicleInsurance(insurance);
+
+    request$.subscribe({
+      next: async () => {
         this.formData.insurance = insurance;
-        loading.dismiss();
-        this.showToast('Insurance information saved successfully', 'success');
-        this.currentStep++;
+        await loading.dismiss();
+        await this.showToast(
+          hasExistingInsurance ? 'Insurance updated successfully' : 'Insurance saved successfully',
+          'success'
+        );
+        // Registration complete
+        await this.submitForm();
       },
-      error: (error) => {
-        loading.dismiss();
-        const errorMsg = error.error?.error || 'Failed to save insurance information';
-        this.showToast(errorMsg, 'danger');
+      error: async (error) => {
+        await loading.dismiss();
+        const errorMsg = error.error?.error || error.error?.message || 'Failed to save insurance information';
+        await this.showToast(errorMsg, 'danger');
+        console.error('Insurance save error:', error);
       }
     });
   }
@@ -507,24 +798,54 @@ export class DriverRegistrationComponent implements OnInit {
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       await this.showToast('File size should be less than 5MB', 'warning');
+      event.target.value = '';
       return;
     }
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
       await this.showToast('Please select an image file', 'warning');
+      event.target.value = '';
       return;
     }
 
+    const loading = await this.loadingController.create({
+      message: 'Uploading...',
+      spinner: 'circles',
+      cssClass: 'custom-loading'
+    });
+
+    await loading.present();
+
     try {
+      // Create preview URL
+      const previewUrl = await this.createImagePreview(file);
+      this.imagePreviewUrls[fieldName as keyof typeof this.imagePreviewUrls] = previewUrl;
+
+      // Convert to base64 for storage
       const base64 = await this.convertToBase64(file);
       this.documentsForm.patchValue({
         [fieldName]: base64
       });
+      this.documentsForm.get(fieldName)?.markAsTouched();
+      await loading.dismiss();
       await this.showToast(`${this.getDocumentLabel(fieldName)} uploaded`, 'success');
     } catch (error) {
+      await loading.dismiss();
       await this.showToast('Error uploading file', 'danger');
+      event.target.value = '';
     }
+  }
+
+  createImagePreview(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = error => reject(error);
+    });
   }
 
   convertToBase64(file: File): Promise<string> {
@@ -542,7 +863,7 @@ export class DriverRegistrationComponent implements OnInit {
 
   async submitForm() {
     if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
+      await this.showAuthError();
       return;
     }
 
@@ -552,45 +873,25 @@ export class DriverRegistrationComponent implements OnInit {
   async showSuccessAlert() {
     const alert = await this.alertController.create({
       header: 'Registration Complete!',
-      message: `
-        Driver registered successfully!<br><br>
-        <strong>User ID:</strong> ${this.currentUserId}<br>
-        <strong>Driver ID:</strong> ${this.driverId}<br>
-        <strong>Vehicle ID:</strong> ${this.vehicleId || 'N/A'}<br>
-      `,
+      message: `Driver registered successfully!\n\nDriver ID: ${this.driverId}\nVehicle ID: ${this.vehicleId || 'N/A'}`,
       buttons: [{
-        text: 'OK',
+        text: 'Go to Dashboard',
+        cssClass: 'primary-button',
         handler: () => {
-          this.resetForm();
           this.router.navigate(['/transport/transport-dashboard']);
         }
-      }]
+      }],
+      backdropDismiss: false,
+      cssClass: 'success-alert'
     });
     await alert.present();
-  }
-
-  resetForm() {
-    this.currentStep = 1;
-    this.driverId = null;
-    this.vehicleId = null;
-
-    this.driverInfoForm.reset({ status: 'active' });
-    this.documentsForm.reset();
-    this.vehicleForm.reset();
-    this.insuranceForm.reset();
-
-    this.formData = {
-      driverInfo: {},
-      documents: {},
-      vehicle: {},
-      insurance: {}
-    };
   }
 
   markFormGroupTouched(formGroup: FormGroup) {
     Object.keys(formGroup.controls).forEach(key => {
       const control = formGroup.get(key);
       control?.markAsTouched();
+      control?.markAsDirty();
     });
   }
 
@@ -600,7 +901,13 @@ export class DriverRegistrationComponent implements OnInit {
       duration: 3000,
       color,
       position: 'top',
-      cssClass: 'custom-toast'
+      cssClass: 'custom-toast',
+      buttons: [
+        {
+          text: 'Dismiss',
+          role: 'cancel'
+        }
+      ]
     });
     await toast.present();
   }
@@ -611,43 +918,44 @@ export class DriverRegistrationComponent implements OnInit {
       'Driver Information',
       'Document Upload',
       'Vehicle Details',
-      // 'Insurance Information',
-      'Review & Submit'
+      'Insurance Details'
     ];
     return titles[this.currentStep] || '';
   }
 
   getStepIcon(): string {
-    const icons = ['', 'person', 'document-text', 'car', 'shield', 'checkmark-circle'];
+    const icons = ['', 'person', 'document-text', 'car', 'shield'];
     return icons[this.currentStep] || '';
   }
 
-  hasError(formGroup: FormGroup, fieldName: string): boolean {
+  hasError(formGroup: FormGroup | null, fieldName: string): boolean {
+    if (!formGroup) return false;
     const field = formGroup.get(fieldName);
-    return !!(field && field.invalid && field.touched);
+    return !!(field && field.invalid && (field.touched || field.dirty));
   }
 
-  getErrorMessage(formGroup: FormGroup, fieldName: string): string {
+  getErrorMessage(formGroup: FormGroup | null, fieldName: string): string {
+    if (!formGroup) return '';
     const field = formGroup.get(fieldName);
     if (!field?.errors) return '';
 
     if (field.errors['required']) return `${this.formatFieldName(fieldName)} is required`;
     if (field.errors['email']) return 'Please enter a valid email';
-    if (field.errors['min']) return `Value must be greater than ${field.errors['min'].min}`;
-    if (field.errors['pattern']) {
-      return this.getPatternError(fieldName);
-    }
+    if (field.errors['minLength']) return `Minimum ${field.errors['minLength'].requiredLength} characters required`;
+    if (field.errors['min']) return `Value must be at least ${field.errors['min'].min}`;
+    if (field.errors['pattern']) return this.getPatternError(fieldName);
+
     return 'Invalid input';
   }
 
   private getPatternError(fieldName: string): string {
     const patterns: { [key: string]: string } = {
-      'contact_num': 'Contact number must be 10 digits',
-      'contact_num_addl': 'Contact number must be 10 digits',
-      'aadhar': 'Aadhar number must be 12 digits',
-      'pan': 'PAN must be in format: AAAAA9999A',
-      'ifsc': 'IFSC code must be in format: AAAA0999999',
-      'address_pin_code': 'Pin code must be 6 digits'
+      'contact_num': 'Contact number must be exactly 10 digits',
+      'contact_num_addl': 'Contact number must be exactly 10 digits',
+      'aadhar': 'Aadhar number must be exactly 12 digits',
+      'pan': 'PAN must be in format: AAAAA9999A (e.g., ABCDE1234F)',
+      'ifsc': 'IFSC code must be in format: AAAA0999999 (e.g., SBIN0001234)',
+      'address_pin_code': 'Pin code must be exactly 6 digits'
     };
     return patterns[fieldName] || 'Invalid format';
   }
@@ -661,11 +969,6 @@ export class DriverRegistrationComponent implements OnInit {
   private formatDate(date: string): string {
     if (!date) return '';
     return new Date(date).toISOString().split('T')[0];
-  }
-
-  private hasDocuments(): boolean {
-    const formValue = this.documentsForm.value;
-    return Object.values(formValue).some(value => value !== '');
   }
 
   private getDocumentLabel(fieldName: string): string {
@@ -685,12 +988,13 @@ export class DriverRegistrationComponent implements OnInit {
       case 1: return this.formData.driverInfo;
       case 2: return this.formData.documents;
       case 3: return this.formData.vehicle;
-      // case 4: return this.formData.insurance;
+      case 4: return this.formData.insurance;
       default: return {};
     }
   }
 
-  onDateChange(event: any, controlName: string, formGroup: FormGroup) {
+  onDateChange(event: any, controlName: string, formGroup: FormGroup | null) {
+    if (!formGroup) return;
     formGroup.patchValue({
       [controlName]: event.detail.value
     });
@@ -698,24 +1002,117 @@ export class DriverRegistrationComponent implements OnInit {
 
   loadStates() {
     this.driverService.getStates().subscribe({
-      next: (states) => { this.states = states; },
-      error: () => { this.states = []; }
+      next: (states) => {
+        this.states = states;
+      },
+      error: (error) => {
+        console.error('Error loading states:', error);
+        this.states = [];
+        this.showToast('Failed to load states', 'warning');
+      }
     });
   }
 
-  onStateChange(event: any, formGroup: FormGroup, stateField: string, cityField: string) {
+  onStateChange(event: any, formGroup: FormGroup | null, stateField: string, cityField: string) {
+    if (!formGroup) return;
+
     const stateShortName = event.detail.value;
     const selectedState = this.states.find(s => s.state_shortname === stateShortName);
+
     if (selectedState) {
       this.selectedStateId = selectedState.id;
       this.driverService.getCitiesOfState(selectedState.id).subscribe({
-        next: (cities) => { this.cities = cities; },
-        error: () => { this.cities = []; }
+        next: (cities) => {
+          this.cities = cities;
+          if (cities.length === 0) {
+            this.showToast('No cities found for selected state', 'warning');
+          }
+        },
+        error: (error) => {
+          console.error('Error loading cities:', error);
+          this.cities = [];
+          this.showToast('Failed to load cities', 'warning');
+        }
       });
       formGroup.patchValue({ [cityField]: '' }); // Reset city/town field
     } else {
       this.cities = [];
       formGroup.patchValue({ [cityField]: '' });
     }
+  }
+
+  // Helper methods for UI
+  isStepComplete(step: number): boolean {
+    switch (step) {
+      case 1: return this.driverInfoForm.valid;
+      case 2: return this.documentsForm.valid;
+      case 3: return this.vehicleForm.valid;
+      case 4: return this.insuranceForm.valid;
+      default: return false;
+    }
+  }
+
+  canNavigateToStep(step: number): boolean {
+    // Can navigate to completed steps or current step
+    for (let i = 1; i < step; i++) {
+      if (!this.isStepComplete(i)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  goToStep(step: number) {
+    if (this.canNavigateToStep(step)) {
+      this.currentStep = step;
+    } else {
+      this.showToast('Please complete previous steps first', 'warning');
+    }
+  }
+
+  getProgressPercentage(): number {
+    return (this.currentStep / this.totalSteps) * 100;
+  }
+
+  isDocumentUploaded(fieldName: string): boolean {
+    const value = this.documentsForm.get(fieldName)?.value;
+    return !!value;
+  }
+
+  async clearDocument(fieldName: string) {
+    const alert = await this.alertController.create({
+      header: 'Clear Document',
+      message: `Are you sure you want to clear ${this.getDocumentLabel(fieldName)}?`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Clear',
+          cssClass: 'danger-button',
+          handler: () => {
+            this.documentsForm.patchValue({
+              [fieldName]: ''
+            });
+            this.imagePreviewUrls[fieldName as keyof typeof this.imagePreviewUrls] = null;
+            this.showToast(`${this.getDocumentLabel(fieldName)} cleared`, 'success');
+          }
+        }
+      ],
+      cssClass: 'custom-alert'
+    });
+    await alert.present();
+  }
+
+
+
+  // Ionic lifecycle hooks
+  ionViewWillLeave() {
+    console.log('Leaving driver registration page');
+  }
+
+  ionViewDidLeave() {
+    console.log('Left driver registration page');
   }
 }
