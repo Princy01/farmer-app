@@ -197,7 +197,96 @@
     "PRICE_PER_UNIT": "प्रति इकाई मूल्य",
     "SAVE": "सहेजें",
     "UNIT_KG": "किलो"
-  }
+  },
 
+
+
+  "MARKET_COMPARISON": {
+    "PAGE_TITLE": "बाज़ार तुलना",
+    "SELECT_MANDIS": "मंडी चुनें",
+    "SELECT_MANDIS_PLACEHOLDER": "एक या अधिक मंडियाँ चुनें",
+    "SELECT_PRODUCTS": "उत्पाद चुनें",
+    "SELECT_PRODUCTS_PLACEHOLDER": "एक या अधिक उत्पाद चुनें",
+    "PRICE_COMPARISON_HEADING": "विभिन्न बाजारों में मूल्य तुलना"
+  },
+
+
+"MARKET_OPPORTUNITIES": {
+    "PAGE_TITLE": "बाज़ार के अवसर",
+    "LOADING": "बाज़ार के अवसर लोड हो रहे हैं...",
+    "TRY_AGAIN": "फिर से प्रयास करें",
+    "RECENT_BULK_ORDERS": "हाल के बड़े ऑर्डर",
+    "TOTAL": "कुल",
+    "ITEMS": "वस्तुएँ",
+    "AT": "पर",
+    "OFFER": "ऑफ़र भेजें",
+    "TOP_RETAILERS": "सबसे ज़्यादा खरीदने वाले ग्राहक",
+    "TOTAL_QUANTITY": "कुल मात्रा",
+    "TOTAL_ORDER_VALUE": "कुल ऑर्डर मूल्य"
+  },
+
+
+  "MAKE_OFFER": {
+    "TITLE": "प्रस्ताव दें",
+    "CLOSE": "बंद करें",
+    "OFFER_PRICE": "प्रस्तावित मूल्य (₹)",
+    "MESSAGE": "संदेश (वैकल्पिक)",
+    "SUBMIT": "प्रस्ताव भेजें"
+  },
+
+
+
+  "ORDERS_RECEIVED": {
+    "PAGE_TITLE": "मिले हुए ऑर्डर",
+    "SEARCH_PLACEHOLDER": "ग्राहक ऑर्डर खोजें...",
+    "PULL_TO_REFRESH": "रीफ़्रेश करने के लिए खींचें",
+    "REFRESHING": "रीफ़्रेश हो रहा है...",
+    "ORDER_LABEL": "ऑर्डर",
+    "TOTAL_AMOUNT": "कुल राशि",
+    "VIEW_DETAILS": "ऑर्डर देखें",
+    "NO_ORDERS_TITLE": "कोई ऑर्डर नहीं मिला",
+    "NO_ORDERS_DESC": "आपके मानदंडों से मेल खाते कोई ग्राहक ऑर्डर नहीं हैं",
+    "FILTER_ALL": "सभी ऑर्डर",
+    "FILTER_PRICE_LOW": "कीमत ↑",
+    "FILTER_PRICE_HIGH": "कीमत ↓",
+    "FILTER_BULK": "थोक ऑर्डर",
+    "FILTER_PRODUCT": "उत्पाद के अनुसार"
+  },
+
+
+  "PAST_ORDERS": {
+  "PAGE_TITLE": "पूर्ण किए गए ऑर्डर",
+  "FILTER_ORDERS": "ऑर्डर फ़िल्टर करें",
+  "FILTER_ALL": "सभी ऑर्डर",
+  "FILTER_1DAY": "1 दिन पहले",
+  "FILTER_2DAYS": "2 दिन पहले",
+  "FILTER_3DAYS": "3 दिन पहले",
+  "FILTER_4DAYS": "4 दिन पहले",
+  "FILTER_CUSTOM": "कस्टम खोज",
+  "LOADING": "ऑर्डर लोड हो रहे हैं...",
+  "LOAD_ERROR": "ऑर्डर लोड करने में विफल",
+  "TRY_AGAIN": "पुनः प्रयास करें",
+  "NO_ORDERS": "कोई पूर्ण ऑर्डर नहीं मिला",
+  "ORDER_LABEL": "ऑर्डर",
+  "TOTAL": "कुल राशि",
+  "QUANTITY": "मात्रा",
+  "MAX_PRICE": "अधिकतम कीमत",
+  "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+  "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
+  "OK": "ठीक है",
+  "ACCESS_DENIED": "एक्सेस अस्वीकृत",
+  "NO_PERMISSION": "आपके पास इस पेज को देखने की अनुमति नहीं है।",
+  "TRY_LATER": "कृपया बाद में पुनः प्रयास करें।",
+  "UNEXPECTED_ERROR": "अप्रत्याशित त्रुटि",
+  "DISMISS": "बंद करें",
+  "RETRY": "पुनः प्रयास करें",
+  "CUSTOM_DATE_RANGE": "कस्टम तिथि सीमा",
+  "START_DATE": "शुरुआत की तिथि",
+  "END_DATE": "समाप्ति की तिथि",
+  "CANCEL": "रद्द करें",
+  "FILTER": "फ़िल्टर करें",
+  "SELECT_DATES": "कृपया शुरुआत और समाप्ति दोनों तिथियां चुनें",
+  "NO_ORDERS_IN_RANGE": "चयनित तिथि सीमा में कोई ऑर्डर नहीं मिला"
+}
 
 }

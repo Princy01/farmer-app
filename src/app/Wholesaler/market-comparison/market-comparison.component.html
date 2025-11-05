@@ -5,31 +5,43 @@
         <ion-icon name="chevron-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Trends</ion-title>
+    <ion-title>{{ 'MARKET_COMPARISON.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 
   <div class="filters-container">
     <ion-list>
       <ion-item>
-        <ion-label>Select Mandis</ion-label>
-        <ion-select multiple="true" [(ngModel)]="selectedMandis" (ionChange)="onMandiChange($event)">
+        <ion-label>{{ 'MARKET_COMPARISON.SELECT_MANDIS' | translate }}</ion-label>
+        <ion-select
+          multiple="true"
+          [(ngModel)]="selectedMandis"
+          (ionChange)="onMandiChange($event)"
+          [placeholder]="'MARKET_COMPARISON.SELECT_MANDIS_PLACEHOLDER' | translate"
+        >
           <ion-select-option *ngFor="let mandi of availableMandis" [value]="mandi">
-            {{mandi}}
+            {{ mandi }}
           </ion-select-option>
         </ion-select>
       </ion-item>
+
       <ion-item>
-        <ion-label>Select Products</ion-label>
-        <ion-select multiple="true" [(ngModel)]="selectedProducts" (ionChange)="onProductChange($event)">
+        <ion-label>{{ 'MARKET_COMPARISON.SELECT_PRODUCTS' | translate }}</ion-label>
+        <ion-select
+          multiple="true"
+          [(ngModel)]="selectedProducts"
+          (ionChange)="onProductChange($event)"
+          [placeholder]="'MARKET_COMPARISON.SELECT_PRODUCTS_PLACEHOLDER' | translate"
+        >
           <ion-select-option *ngFor="let product of availableProducts" [value]="product">
-            {{product}}
+            {{ product }}
           </ion-select-option>
         </ion-select>
       </ion-item>
     </ion-list>
   </div>
+
   <div class="chart-container">
-    <h3>Price Comparison Across Markets</h3>
+    <h3>{{ 'MARKET_COMPARISON.PRICE_COMPARISON_HEADING' | translate }}</h3>
     <apx-chart
       [series]="priceComparisonOptions.series"
       [chart]="priceComparisonOptions.chart"

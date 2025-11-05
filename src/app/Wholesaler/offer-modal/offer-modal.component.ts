@@ -4,13 +4,14 @@ import { IonicModule, ModalController, AlertController, LoadingController } from
 import { FormsModule } from '@angular/forms';
 import { BulkOrder, WholesalerApiService, CreateOfferRequest } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-offer-modal',
   templateUrl: './offer-modal.component.html',
   styleUrls: ['./offer-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule]
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe]
 })
 export class OfferModalComponent implements OnInit {
   @Input() order!: BulkOrder;

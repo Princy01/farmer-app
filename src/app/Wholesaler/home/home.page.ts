@@ -3,11 +3,12 @@ import { IonicModule, NavController, MenuController, ActionSheetController, Load
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import {
-  chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
+  chatbubblesOutline, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
   chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
   trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
   homeOutline, business, list, cubeOutline, time, analytics, pulse, bulb, logOutOutline,
-  businessOutline, bulbOutline, createOutline
+  businessOutline, bulbOutline, createOutline, notificationsOutline,
+  receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline
 } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
@@ -33,6 +34,9 @@ export class HomePage {
   private itemsPerPage = 5; // Show 5 items per page
   isInfiniteScrollEnabled = true;
 
+  isSearching = false;
+  private searchTimeout: any;
+
   constructor(
     private navCtrl: NavController,
     private router: Router,
@@ -45,10 +49,11 @@ export class HomePage {
     public menuService: MenuService,
   ) {
     addIcons({
-      chatbubblesSharp, notificationsCircleSharp, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
+      chatbubblesOutline, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
       chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
       trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
-      homeOutline, businessOutline, list, cubeOutline, time, analytics, pulse, bulbOutline, logOutOutline, createOutline
+      homeOutline, businessOutline, list, cubeOutline, time, analytics, pulse, bulbOutline, logOutOutline, createOutline,
+      notificationsOutline, receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline
     });
   }
 
@@ -791,17 +796,36 @@ export class HomePage {
   }
 
   searchItems(event: any) {
-    const searchTerm = event.target.value.toLowerCase();
+    const searchTerm = event.target.value?.toLowerCase() || '';
 
-    if (searchTerm.trim() === '') {
-      // If search is empty, show current loaded items
-      this.filteredItems = [...this.items];
-    } else {
-      // Search in all available data, not just loaded items
-      this.filteredItems = this.allDummyData.filter(item =>
-        item.name.toLowerCase().includes(searchTerm)
-      );
+    // Clear previous timeout to implement debouncing
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
     }
+
+    // Set searching state for UI feedback
+    this.isSearching = searchTerm.trim() !== '';
+
+    // Debounce search for better performance (waits 300ms after user stops typing)
+    this.searchTimeout = setTimeout(() => {
+      if (searchTerm.trim() === '') {
+        // If search is empty, show all items
+        this.filteredItems = [...this.items];
+        this.isSearching = false;
+      } else {
+        // Filter items based on search term
+        this.filteredItems = this.allDummyData.filter(item => {
+          const name = item.name?.toLowerCase() || '';
+          const qty = item.qty?.toString() || '';
+          const orders = item.orders?.toString() || '';
+
+          // Search in multiple fields
+          return name.includes(searchTerm) ||
+            qty.includes(searchTerm) ||
+            orders.includes(searchTerm);
+        });
+      }
+    }, 300); // 300ms debounce delay
   }
 
   async toggleMenu() {
@@ -809,6 +833,11 @@ export class HomePage {
   }
 
   viewDetails(item: any) {
+    // Add haptic feedback (if device supports)
+    if ('vibrate' in navigator) {
+      navigator.vibrate(10);
+    }
+
     // Navigate to product details page with product data
     this.router.navigate(['/wholesaler/product-details'], {
       queryParams: {
@@ -821,6 +850,23 @@ export class HomePage {
       }
     });
   }
+
+  ngAfterViewInit() {
+    // Trigger staggered animation
+    const items = document.querySelectorAll('ion-item');
+    items.forEach((item, index) => {
+      (item as HTMLElement).style.animationDelay = `${index * 0.05}s`;
+    });
+  }
+
+  //Cleanup on destroy
+  ngOnDestroy() {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+  }
+
+
   openProfile() {
     this.navCtrl.navigateForward('/profile');
   }

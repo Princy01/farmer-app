@@ -1,56 +1,320 @@
-ion-content {
-  .ion-item {
-    margin-bottom: 16px;
+.modal-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+
+  .page-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .title-icon {
+      font-size: 1.5rem;
+    }
   }
 
-  ion-select {
-    width: 100%;
-    margin-top: 11px;
+  .close-btn {
+    --color: white;
+    font-size: 1.8rem;
   }
 }
 
-ion-header {
-  ion-toolbar {
-    ion-title {
-      font-weight: 600;
-    }
-    ion-buttons {
-      ion-button {
+.modal-content-wrapper {
+  --background: #f8f9fa;
+}
+
+.content-container {
+  padding: 1rem;
+}
+
+.modern-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  margin: 0 0 1rem 0;
+  overflow: visible;
+
+  .card-header {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 1.25rem 1.5rem;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .header-icon {
+        font-size: 1.5rem;
         color: var(--ion-color-primary);
+      }
+
+      .card-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+
+  .card-content {
+    padding: 1.5rem;
+    overflow: visible;
+  }
+}
+
+// Form Styles
+.form-container {
+  .form-group {
+    margin-bottom: 1.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+      font-size: 0.95rem;
+
+      .label-icon {
+        font-size: 1.1rem;
+        color: var(--ion-color-primary);
+      }
+    }
+
+    .input-wrapper {
+      background: white;
+      border: 2px solid var(--ion-color-light);
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      transition: all 0.3s ease;
+
+      &:focus-within {
+        border-color: var(--ion-color-primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .custom-select {
+        --padding-start: 0;
+        --padding-end: 0;
+        --background: transparent;
+        font-size: 1rem;
       }
     }
   }
 }
 
-.stepper {
+// Stepper Styles
+.stepper-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 40px;
+  gap: 0.75rem;
+  background: white;
+  border: 2px solid var(--ion-color-light);
+  border-radius: 12px;
+  padding: 0.5rem;
+
+  .stepper-btn {
+    --padding-start: 0.5rem;
+    --padding-end: 0.5rem;
+    margin: 0;
+    height: 2.5rem;
+    width: 2.5rem;
+
+    ion-icon {
+      font-size: 2rem;
+    }
+
+    &.decrement {
+      --color: var(--ion-color-danger);
+    }
+
+    &.increment {
+      --color: var(--ion-color-success);
+    }
+  }
+
+  .stepper-value-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    min-width: 100px;
+
+    .stepper-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+      line-height: 1;
+    }
+
+    .stepper-unit {
+      font-size: 0.75rem;
+      color: var(--ion-color-medium);
+      margin-top: 0.25rem;
+      font-weight: 500;
+    }
+
+    &.price {
+      flex-direction: row;
+      gap: 0.25rem;
+
+      .currency {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--ion-color-primary);
+      }
+
+      .stepper-value {
+        font-size: 1.8rem;
+      }
+    }
+  }
+
+  .bulk-btn {
+    --border-color: var(--ion-color-primary);
+    --color: var(--ion-color-primary);
+    --padding-start: 0.75rem;
+    --padding-end: 0.75rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    height: 2.5rem;
+
+    ion-icon {
+      font-size: 1rem;
+    }
+  }
 }
 
-.stepper-value {
-  min-width: 60px;
-  text-align: center;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+// Footer Styles
+.modal-footer {
+  .footer-content {
+    padding: 1rem 1.5rem;
+    background: white;
+    border-top: 1px solid var(--ion-color-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    .stock-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .summary-label {
+        font-size: 0.85rem;
+        color: var(--ion-color-medium);
+      }
+
+      .summary-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--ion-color-primary);
+      }
+    }
+
+    .save-stock-btn {
+      --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --color: white;
+      font-weight: 600;
+      height: 3rem;
+      flex-shrink: 0;
+
+      &[disabled] {
+        --background: var(--ion-color-medium);
+        --color: var(--ion-color-light);
+      }
+    }
+  }
 }
 
-ion-item {
-  margin-bottom: 16px;
-  align-items: center;
+.bottom-spacing {
+  height: 1rem;
 }
 
-ion-select {
-  width: 100%;
-  margin-top: 8px;
+// Animations
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
-ion-button {
-  margin-top: 8px;
+.stepper-btn:active {
+  animation: pulse 0.3s ease;
+}
+
+// Mobile Responsive
+@media (max-width: 768px) {
+  .modal-footer .footer-content {
+    flex-direction: column;
+    gap: 1rem;
+
+    .save-stock-btn {
+      width: 100%;
+    }
+  }
+
+  .stepper-wrapper {
+    flex-wrap: wrap;
+
+    .stepper-value-box {
+      min-width: 80px;
+    }
+
+    .bulk-btn {
+      flex: 1 1 100%;
+      margin-top: 0.5rem;
+    }
+  }
+
+  .content-container {
+    padding: 0.5rem;
+  }
+
+  .modern-card .card-content {
+    padding: 1rem;
+  }
+}
+
+// Small mobile screens
+@media (max-width: 480px) {
+  .stepper-wrapper {
+    .stepper-btn {
+      height: 2rem;
+      width: 2rem;
+
+      ion-icon {
+        font-size: 1.5rem;
+      }
+    }
+
+    .stepper-value-box {
+      padding: 0.5rem 0.75rem;
+
+      .stepper-value {
+        font-size: 1.2rem;
+      }
+
+      &.price .stepper-value {
+        font-size: 1.5rem;
+      }
+    }
+  }
 }

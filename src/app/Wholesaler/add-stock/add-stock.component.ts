@@ -6,6 +6,24 @@ import { StockService, BusinessBranchWithNames, AddStockPayload } from 'src/app/
 import { AuthService } from 'src/app/auth/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
+import { addIcons } from 'ionicons';
+import {
+  cubeOutline,
+  closeCircleOutline,
+  businessOutline,
+  storefrontOutline,
+  starOutline,
+  analyticsOutline,
+  trashOutline,
+  removeCircle,
+  addCircle,
+  flashOutline,
+  arrowDownCircleOutline,
+  syncOutline,
+  cashOutline,
+  pricetagOutline,
+  checkmarkCircleOutline
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-add-stock',
@@ -41,6 +59,23 @@ export class AddStockComponent {
     private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {
+     addIcons({
+      cubeOutline,
+      closeCircleOutline,
+      businessOutline,
+      storefrontOutline,
+      starOutline,
+      analyticsOutline,
+      trashOutline,
+      removeCircle,
+      addCircle,
+      flashOutline,
+      arrowDownCircleOutline,
+      syncOutline,
+      cashOutline,
+      pricetagOutline,
+      checkmarkCircleOutline
+    });
     this.loadBranches();
   }
 

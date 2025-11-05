@@ -1,109 +1,201 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>{{ 'ADD_PRODUCT.PAGE_TITLE' | translate }}</ion-title>
+<ion-header mode="ios">
+  <ion-toolbar class="modal-toolbar">
+    <ion-title class="page-title">
+      <ion-icon name="cube-outline" class="title-icon"></ion-icon>
+      {{ 'ADD_PRODUCT.PAGE_TITLE' | translate }}
+    </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="close()">
-        <ion-icon name="close"></ion-icon>
+      <ion-button (click)="close()" class="close-btn">
+        <ion-icon name="close-circle-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <div class="modal-content">
-    <!-- Recommend Link -->
-    <div class="recommend-link" *ngIf="!showAddNew">
-      <ion-text color="medium">
-        {{ 'ADD_PRODUCT.NOT_FOUND_TEXT' | translate }}
-        <a
-          (click)="showAddNew = true"
-          style="color: #3880ff; cursor: pointer; text-decoration: underline;"
-        >
-          {{ 'ADD_PRODUCT.RECOMMEND_NEW' | translate }}
-        </a>
-      </ion-text>
+<ion-content class="modal-content-wrapper">
+  <div class="content-container">
+    <!-- Recommend Link Banner -->
+    <div class="info-banner" *ngIf="!showAddNew">
+      <ion-card class="modern-card info-card">
+        <ion-card-content class="card-content">
+          <div class="info-content">
+            <ion-icon name="information-circle-outline" class="info-icon"></ion-icon>
+            <div class="info-text">
+              <p>{{ 'ADD_PRODUCT.NOT_FOUND_TEXT' | translate }}</p>
+              <a (click)="showAddNew = true" class="recommend-link">
+                <ion-icon name="add-circle-outline"></ion-icon>
+                {{ 'ADD_PRODUCT.RECOMMEND_NEW' | translate }}
+              </a>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
     </div>
 
     <!-- Product Search List -->
-    <div *ngIf="!showAddNew">
-      <ion-searchbar
-        [(ngModel)]="searchTerm"
-        [placeholder]="'ADD_PRODUCT.SEARCH_PLACEHOLDER' | translate"
-      ></ion-searchbar>
+    <div *ngIf="!showAddNew" class="search-section">
+      <!-- Search Bar Card -->
+      <ion-card class="modern-card search-card">
+        <ion-card-content class="card-content">
+          <div class="search-wrapper">
+            <!-- <ion-icon name="search-outline" class="search-icon"></ion-icon> -->
+            <ion-searchbar
+              [(ngModel)]="searchTerm"
+              [placeholder]="'ADD_PRODUCT.SEARCH_PLACEHOLDER' | translate"
+              class="custom-searchbar"
+            ></ion-searchbar>
+          </div>
+        </ion-card-content>
+      </ion-card>
 
-      <ion-list>
-        <ion-item *ngFor="let prod of filteredProducts()">
-          <ion-checkbox slot="start" [(ngModel)]="prod.selected"></ion-checkbox>
-          <ion-label>
-            <strong>{{ prod.product_name }}</strong>
-            <span class="product-meta">({{ prod.cat_name }})</span>
-          </ion-label>
-        </ion-item>
-      </ion-list>
+      <!-- Products List Card -->
+      <ion-card class="modern-card products-card">
+        <div class="card-header">
+          <div class="header-content">
+            <ion-icon name="list-outline" class="header-icon"></ion-icon>
+            <h2 class="card-title">Available Products</h2>
+          </div>
+          <div class="products-count-badge" *ngIf="filteredProducts().length > 0">
+            {{ filteredProducts().length }} {{ filteredProducts().length === 1 ? 'item' : 'items' }}
+          </div>
+        </div>
+        <ion-card-content class="card-content">
+          <div class="products-list" *ngIf="filteredProducts().length > 0">
+            <div class="product-item" *ngFor="let prod of filteredProducts()">
+              <div class="product-checkbox">
+                <ion-checkbox [(ngModel)]="prod.selected" class="custom-checkbox"></ion-checkbox>
+              </div>
+              <div class="product-info">
+                <div class="product-details">
+                  <h3 class="product-name">{{ prod.product_name }}</h3>
+                  <p class="product-category">
+                    <ion-icon name="pricetag-outline" class="category-icon"></ion-icon>
+                    {{ prod.cat_name }}
+                  </p>
+                </div>
+                <div class="product-badge">
+                  <ion-icon name="checkmark-circle" *ngIf="prod.selected"></ion-icon>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="filteredProducts().length === 0">
+            <ion-icon name="cube-outline" class="empty-icon"></ion-icon>
+            <p class="empty-text">No products found</p>
+            <p class="empty-subtext">Try adjusting your search terms</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
     </div>
 
     <!-- Recommend New Product Form -->
-    <div *ngIf="showAddNew" class="new-section">
-      <ion-item>
-        <ion-label position="stacked">{{ 'ADD_PRODUCT.PRODUCT_NAME' | translate }}</ion-label>
-        <ion-input
-          [(ngModel)]="newProduct.name"
-          [placeholder]="'ADD_PRODUCT.PRODUCT_NAME_PLACEHOLDER' | translate"
-        ></ion-input>
-      </ion-item>
+    <div *ngIf="showAddNew" class="form-section">
+      <ion-card class="modern-card form-card">
+        <div class="card-header">
+          <div class="header-content">
+            <ion-icon name="add-circle-outline" class="header-icon"></ion-icon>
+            <h2 class="card-title">Recommend New Product</h2>
+          </div>
+        </div>
+        <ion-card-content class="card-content">
+          <div class="form-container">
+            <!-- Product Name -->
+            <div class="form-group">
+              <ion-label class="form-label">
+                <ion-icon name="cube-outline" class="label-icon"></ion-icon>
+                {{ 'ADD_PRODUCT.PRODUCT_NAME' | translate }}
+              </ion-label>
+              <div class="input-wrapper">
+                <ion-input
+                  [(ngModel)]="newProduct.name"
+                  [placeholder]="'ADD_PRODUCT.PRODUCT_NAME_PLACEHOLDER' | translate"
+                  class="custom-input"
+                ></ion-input>
+              </div>
+            </div>
 
-      <ion-item>
-        <ion-label position="stacked">{{ 'ADD_PRODUCT.CATEGORY' | translate }}</ion-label>
-        <ion-select
-          [(ngModel)]="newProduct.category"
-          [placeholder]="'ADD_PRODUCT.SELECT_CATEGORY' | translate"
-        >
-          <ion-select-option *ngFor="let cat of categories" [value]="cat">
-            {{ cat }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
+            <!-- Category -->
+            <div class="form-group">
+              <ion-label class="form-label">
+                <ion-icon name="pricetags-outline" class="label-icon"></ion-icon>
+                {{ 'ADD_PRODUCT.CATEGORY' | translate }}
+              </ion-label>
+              <div class="input-wrapper">
+                <ion-select
+                  [(ngModel)]="newProduct.category"
+                  [placeholder]="'ADD_PRODUCT.SELECT_CATEGORY' | translate"
+                  class="custom-select"
+                  interface="action-sheet"
+                >
+                  <ion-select-option *ngFor="let cat of categories" [value]="cat">
+                    {{ cat }}
+                  </ion-select-option>
+                </ion-select>
+              </div>
+            </div>
 
-      <ion-item>
-        <ion-label position="stacked">{{ 'ADD_PRODUCT.PRICE' | translate }}</ion-label>
-        <ion-input
-          type="number"
-          [(ngModel)]="newProduct.price"
-          [placeholder]="'ADD_PRODUCT.PRICE_PLACEHOLDER' | translate"
-        ></ion-input>
-      </ion-item>
+            <!-- Price -->
+            <div class="form-group">
+              <ion-label class="form-label">
+                <ion-icon name="cash-outline" class="label-icon"></ion-icon>
+                {{ 'ADD_PRODUCT.PRICE' | translate }}
+              </ion-label>
+              <div class="input-wrapper price-input">
+                <span class="currency-symbol">₹</span>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="newProduct.price"
+                  [placeholder]="'ADD_PRODUCT.PRICE_PLACEHOLDER' | translate"
+                  class="custom-input"
+                ></ion-input>
+              </div>
+            </div>
 
-      <ion-button
-        expand="block"
-        color="success"
-        (click)="addNew()"
-        style="margin-top: 16px;"
-      >
-        {{ 'ADD_PRODUCT.RECOMMEND_BUTTON' | translate }}
-      </ion-button>
+            <!-- Action Buttons -->
+            <div class="form-actions">
+              <ion-button
+                expand="block"
+                class="recommend-btn"
+                (click)="addNew()"
+              >
+                <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+                {{ 'ADD_PRODUCT.RECOMMEND_BUTTON' | translate }}
+              </ion-button>
 
-      <ion-button
-        expand="block"
-        fill="clear"
-        color="medium"
-        (click)="showAddNew = false"
-        style="margin-top: 8px;"
-      >
-        {{ 'ADD_PRODUCT.BACK_TO_LIST' | translate }}
-      </ion-button>
+              <ion-button
+                expand="block"
+                fill="outline"
+                class="back-btn-form"
+                (click)="showAddNew = false"
+              >
+                <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+                {{ 'ADD_PRODUCT.BACK_TO_LIST' | translate }}
+              </ion-button>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
     </div>
+
+    <!-- Bottom Spacing -->
+    <div class="bottom-spacing"></div>
   </div>
 </ion-content>
 
-<ion-footer *ngIf="!showAddNew">
-  <ion-toolbar>
+<ion-footer class="modal-footer" *ngIf="!showAddNew">
+  <div class="footer-content">
+    <div class="selection-summary">
+      <span class="selection-label">Selected Items</span>
+      <span class="selection-count">{{ getSelectedCount() }}</span>
+    </div>
     <ion-button
-      expand="block"
-      color="success"
+      class="add-selected-btn"
       (click)="addSelected()"
       [disabled]="!hasSelectedProducts()"
     >
+      <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
       {{ 'ADD_PRODUCT.ADD_SELECTED' | translate }}
     </ion-button>
-  </ion-toolbar>
+  </div>
 </ion-footer>

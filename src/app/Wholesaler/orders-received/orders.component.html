@@ -4,20 +4,25 @@
       <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
     </ion-buttons>
 
-    <ion-title *ngIf="!isSearchVisible">Orders Received</ion-title>
-    <ion-searchbar *ngIf="isSearchVisible"
+    <ion-title *ngIf="!isSearchVisible">
+      {{ 'ORDERS_RECEIVED.PAGE_TITLE' | translate }}
+    </ion-title>
+
+    <ion-searchbar
+      *ngIf="isSearchVisible"
       [(ngModel)]="searchTerm"
       (ionInput)="handleSearch($event)"
       animated="true"
-      placeholder="Search orders..."
+      [placeholder]="'ORDERS_RECEIVED.SEARCH_PLACEHOLDER' | translate"
       show-clear-button="always">
     </ion-searchbar>
 
     <ion-buttons slot="end">
       <ion-button (click)="toggleSearch()">
-        <ion-icon [name]="isSearchVisible ? 'close-outline' : 'search-outline'"
-                 color="dark"
-                 slot="icon-only">
+        <ion-icon
+          [name]="isSearchVisible ? 'close-outline' : 'search-outline'"
+          color="dark"
+          slot="icon-only">
         </ion-icon>
       </ion-button>
     </ion-buttons>
@@ -26,7 +31,7 @@
   <ion-toolbar class="filter-toolbar" mode="ios">
     <ion-segment [value]="selectedFilter" (ionChange)="handleFilterChange($event)" scrollable>
       <ion-segment-button *ngFor="let filter of filterOptions" [value]="filter.value">
-        <ion-label>{{filter.name}}</ion-label>
+        <ion-label>{{ filter.name | translate }}</ion-label>
       </ion-segment-button>
     </ion-segment>
   </ion-toolbar>
@@ -36,9 +41,9 @@
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content
       pullingIcon="chevron-down-circle-outline"
-      pullingText="Pull to refresh"
+      [pullingText]="'ORDERS_RECEIVED.PULL_TO_REFRESH' | translate"
       refreshingSpinner="circular"
-      refreshingText="Refreshing...">
+      [refreshingText]="'ORDERS_RECEIVED.REFRESHING' | translate">
     </ion-refresher-content>
   </ion-refresher>
 
@@ -47,7 +52,9 @@
       <div class="order-card">
         <div class="order-header">
           <div class="order-id">
-            <span class="label">Order #{{order.id}}</span>
+            <span class="label">
+              {{ 'ORDERS_RECEIVED.ORDER_LABEL' | translate }} #{{ order.id }}
+            </span>
           </div>
           <ion-button fill="clear" size="small">
             <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
@@ -59,14 +66,15 @@
           <div class="divider"></div>
           <div class="order-footer">
             <div class="total">
-              <span class="label">Total Amount</span>
-              <span class="amount">₹{{order.total}}</span>
+              <span class="label">{{ 'ORDERS_RECEIVED.TOTAL_AMOUNT' | translate }}</span>
+              <span class="amount">₹{{ order.total }}</span>
             </div>
-            <ion-button fill="solid"
-                      size="small"
-                      class="custom-button"
-                      (click)="viewDetails(order)">
-              View Details
+            <ion-button
+              fill="solid"
+              size="small"
+              class="custom-button"
+              (click)="viewDetails(order)">
+              {{ 'ORDERS_RECEIVED.VIEW_DETAILS' | translate }}
               <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
             </ion-button>
           </div>
@@ -78,7 +86,7 @@
   <!-- No Orders Message -->
   <div class="no-orders" *ngIf="filteredOrders.length === 0">
     <ion-icon name="receipt-outline" size="large"></ion-icon>
-    <h2>No Orders Found</h2>
-    <p>There are no orders matching your criteria</p>
+    <h2>{{ 'ORDERS_RECEIVED.NO_ORDERS_TITLE' | translate }}</h2>
+    <p>{{ 'ORDERS_RECEIVED.NO_ORDERS_DESC' | translate }}</p>
   </div>
 </ion-content>

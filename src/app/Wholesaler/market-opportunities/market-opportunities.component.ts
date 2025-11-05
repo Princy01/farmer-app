@@ -8,13 +8,14 @@ import { addIcons } from 'ionicons';
 import { add, listOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-market-opportunities',
   templateUrl: './market-opportunities.component.html',
   styleUrls: ['./market-opportunities.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule, TranslatePipe]
 })
 export class MarketOpportunitiesComponent implements OnInit {
   isLoading = false;

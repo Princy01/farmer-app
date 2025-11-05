@@ -10,6 +10,7 @@ import { catchError, finalize, of } from 'rxjs';
 import { GroupedPriceComparison, WholesellerPrice } from './market-comparison.service';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface ProductPrices {
   [key: string]: number;
@@ -24,7 +25,7 @@ interface MarketPrices {
   templateUrl: './market-comparison.component.html',
   styleUrls: ['./market-comparison.component.scss'],
   standalone: true,
-  imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule]
+  imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule, TranslatePipe]
 })
 export class MarketComparisonComponent implements OnInit {
   priceComparisonOptions: any;

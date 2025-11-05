@@ -47,6 +47,10 @@ export class AddProductModalComponent {
     return this.products.some(p => p.selected);
   }
 
+  getSelectedCount(): number {
+    return this.products.filter(p => p.selected).length;
+  }
+
   addSelected() {
     const selectedProducts = this.products.filter(p => p.selected);
     if (selectedProducts.length > 0) {

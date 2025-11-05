@@ -27,10 +27,6 @@ export const routes: Routes = [
     loadComponent: () => import('./Wholesaler/order-details/order-details.component').then(m => m.OrderDetailsComponent)
   },
   {
-    path: 'wholesaler/for-sale',
-    loadComponent: () => import('./Wholesaler/for-sale/for-sale.component').then((m) => m.ForSaleComponent),
-  },
-  {
     path: 'wholesaler/past-orders',
     loadComponent: () => import('./Wholesaler/past-orders/past-orders.component').then((m) => m.PastOrdersComponent),
   },

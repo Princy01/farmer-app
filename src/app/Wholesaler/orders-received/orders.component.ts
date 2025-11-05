@@ -11,6 +11,7 @@ import {
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 enum OrderFilter {
   DATE = 'date',
@@ -25,16 +26,16 @@ enum OrderFilter {
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
 })
 
 export class OrdersComponent {
   filterOptions = [
-    { name: 'All Orders', value: OrderFilter.DATE },
-    { name: 'Price ↑', value: OrderFilter.PRICE_LOW },
-    { name: 'Price ↓', value: OrderFilter.PRICE_HIGH },
-    { name: 'Bulk Orders', value: OrderFilter.BULK },
-    { name: 'By Product', value: OrderFilter.PRODUCT }
+    { name: 'ORDERS_RECEIVED.FILTER_ALL', value: OrderFilter.DATE },
+    { name: 'ORDERS_RECEIVED.FILTER_PRICE_LOW', value: OrderFilter.PRICE_LOW },
+    { name: 'ORDERS_RECEIVED.FILTER_PRICE_HIGH', value: OrderFilter.PRICE_HIGH },
+    { name: 'ORDERS_RECEIVED.FILTER_BULK', value: OrderFilter.BULK },
+    { name: 'ORDERS_RECEIVED.FILTER_PRODUCT', value: OrderFilter.PRODUCT }
   ];
 
   selectedFilter = OrderFilter.DATE;

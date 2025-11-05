@@ -7,6 +7,7 @@ import { addIcons } from 'ionicons';
 import { alertCircleOutline, closeCircleOutline } from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface OrderItem {
   order_item_id: number;
@@ -25,18 +26,30 @@ interface OrderItemDetails {
   created_at?: string;
 }
 
+interface FilterOption {
+  value: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-past-orders',
   templateUrl: './past-orders.component.html',
   styleUrls: ['./past-orders.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
 })
 export class PastOrdersComponent implements AfterViewInit {
   @ViewChild(IonContent) content!: IonContent;
 
   completedOrders: OrderItemDetails[] = [];
-  filters = ['All Orders', '1 day ago', '2 days ago', '3 days ago', '4 days ago', 'Custom search'];
+  filters: FilterOption[] = [
+    { value: 'all', label: 'PAST_ORDERS.FILTER_ALL' },
+    { value: '1day', label: 'PAST_ORDERS.FILTER_1DAY' },
+    { value: '2days', label: 'PAST_ORDERS.FILTER_2DAYS' },
+    { value: '3days', label: 'PAST_ORDERS.FILTER_3DAYS' },
+    { value: '4days', label: 'PAST_ORDERS.FILTER_4DAYS' },
+    { value: 'custom', label: 'PAST_ORDERS.FILTER_CUSTOM' }
+  ];
   selectedFilter: string | null = null;
   selectedOrderId: number | null = null;
   isLoading = false;
@@ -56,7 +69,8 @@ export class PastOrdersComponent implements AfterViewInit {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) {
     addIcons({ alertCircleOutline, closeCircleOutline });
   }
@@ -84,11 +98,11 @@ export class PastOrdersComponent implements AfterViewInit {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('PAST_ORDERS.AUTH_ERROR'),
+      message: this.translate.instant('PAST_ORDERS.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('PAST_ORDERS.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -101,11 +115,11 @@ export class PastOrdersComponent implements AfterViewInit {
 
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('PAST_ORDERS.ACCESS_DENIED'),
+      message: this.translate.instant('PAST_ORDERS.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('PAST_ORDERS.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -122,7 +136,7 @@ export class PastOrdersComponent implements AfterViewInit {
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Loading orders...',
+      message: this.translate.instant('PAST_ORDERS.LOADING'),
       spinner: 'circular'
     });
 
@@ -140,7 +154,7 @@ export class PastOrdersComponent implements AfterViewInit {
           this.isLoading = false;
 
           if (orders.length === 0) {
-            this.showToast('No completed orders found');
+            this.showToast(this.translate.instant('PAST_ORDERS.NO_ORDERS'));
           }
         },
         error: async (error) => {
@@ -155,14 +169,20 @@ export class PastOrdersComponent implements AfterViewInit {
             return;
           }
 
-          this.showError('Failed to load orders', 'Please try again later.');
+          this.showError(
+            this.translate.instant('PAST_ORDERS.LOAD_ERROR'),
+            this.translate.instant('PAST_ORDERS.TRY_LATER')
+          );
         }
       });
     } catch (error) {
       await loading.dismiss();
       this.isLoading = false;
       this.hasError = true;
-      this.showError('Unexpected error', 'Please try again later');
+      this.showError(
+        this.translate.instant('PAST_ORDERS.UNEXPECTED_ERROR'),
+        this.translate.instant('PAST_ORDERS.TRY_LATER')
+      );
     }
   }
 
@@ -182,11 +202,11 @@ export class PastOrdersComponent implements AfterViewInit {
       message,
       buttons: [
         {
-          text: 'Dismiss',
+          text: this.translate.instant('PAST_ORDERS.DISMISS'),
           role: 'cancel'
         },
         {
-          text: 'Retry',
+          text: this.translate.instant('PAST_ORDERS.RETRY'),
           handler: () => {
             this.loadCompletedOrders();
           }
@@ -197,26 +217,26 @@ export class PastOrdersComponent implements AfterViewInit {
   }
 
   async applyFilter(filter: string) {
-    if (!filter || filter === 'All Orders') {
-      this.selectedFilter = 'All Orders';
+    if (!filter || filter === 'all') {
+      this.selectedFilter = 'all';
       this.completedOrders = this.originalOrders;
       return;
     }
 
     switch (filter) {
-      case '1 day ago':
+      case '1day':
         await this.loadCompletedOrders(1);
         break;
-      case '2 days ago':
+      case '2days':
         await this.loadCompletedOrders(2);
         break;
-      case '3 days ago':
+      case '3days':
         await this.loadCompletedOrders(3);
         break;
-      case '4 days ago':
+      case '4days':
         await this.loadCompletedOrders(4);
         break;
-      case 'Custom search':
+      case 'custom':
         await this.showCustomDateFilter();
         break;
       default:
@@ -226,34 +246,34 @@ export class PastOrdersComponent implements AfterViewInit {
 
   private async showCustomDateFilter() {
     const alert = await this.alertCtrl.create({
-      header: 'Custom Date Range',
+      header: this.translate.instant('PAST_ORDERS.CUSTOM_DATE_RANGE'),
       inputs: [
         {
           name: 'startDate',
           type: 'date',
-          label: 'Start Date'
+          label: this.translate.instant('PAST_ORDERS.START_DATE')
         },
         {
           name: 'endDate',
           type: 'date',
-          label: 'End Date'
+          label: this.translate.instant('PAST_ORDERS.END_DATE')
         }
       ],
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('PAST_ORDERS.CANCEL'),
           role: 'cancel',
           handler: () => {
             // Reset to All Orders if user cancels
-            this.selectedFilter = 'All Orders';
+            this.selectedFilter = 'all';
             this.completedOrders = this.originalOrders;
           }
         },
         {
-        text: 'Filter',
-          handler: (data:any) => {
+          text: this.translate.instant('PAST_ORDERS.FILTER'),
+          handler: (data: any) => {
             if (!data.startDate || !data.endDate) {
-              this.selectedFilter = 'All Orders';
+              this.selectedFilter = 'all';
               return false;
             }
             this.filterByDateRange(new Date(data.startDate), new Date(data.endDate));
@@ -268,8 +288,8 @@ export class PastOrdersComponent implements AfterViewInit {
 
   private filterByDateRange(startDate: Date, endDate: Date) {
     if (!startDate || !endDate) {
-      this.showToast('Please select both start and end dates');
-      this.selectedFilter = 'All Orders';
+      this.showToast(this.translate.instant('PAST_ORDERS.SELECT_DATES'));
+      this.selectedFilter = 'all';
       this.completedOrders = this.originalOrders;
       return;
     }
@@ -280,7 +300,7 @@ export class PastOrdersComponent implements AfterViewInit {
     });
 
     if (this.completedOrders.length === 0) {
-      this.showToast('No orders found in selected date range');
+      this.showToast(this.translate.instant('PAST_ORDERS.NO_ORDERS_IN_RANGE'));
     }
   }
 

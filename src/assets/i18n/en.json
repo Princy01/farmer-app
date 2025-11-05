@@ -136,7 +136,7 @@
 
 
   "ADD_BUSINESS_FORM": {
-    "PAGE_TITLE": "Business Details",
+    "PAGE_TITLE": "Add Business Location",
     "SHOP_NAME": "Shop Name",
     "SHOP_NAME_PLACEHOLDER": "Enter shop name",
     "PHONE_NUMBER": "Phone Number",
@@ -190,7 +190,7 @@
     "ADD_SELECTED": "Add Selected Products"
   },
 
-  
+
   "ADD_STOCK": {
     "PAGE_TITLE": "Add Stock",
     "CLOSE": "Close",
@@ -206,7 +206,99 @@
     "PRICE_PER_UNIT": "Price per Unit",
     "SAVE": "Save",
     "UNIT_KG": "Kg"
-  }
+  },
+
+
+
+
+  "MARKET_COMPARISON": {
+    "PAGE_TITLE": "Market Comparison",
+    "SELECT_MANDIS": "Select Mandis",
+    "SELECT_MANDIS_PLACEHOLDER": "Choose one or more mandis",
+    "SELECT_PRODUCTS": "Select Products",
+    "SELECT_PRODUCTS_PLACEHOLDER": "Choose one or more products",
+    "PRICE_COMPARISON_HEADING": "Price Comparison Across Markets"
+  },
+
+
+  "MARKET_OPPORTUNITIES": {
+    "PAGE_TITLE": "Market Opportunities",
+    "LOADING": "Loading market opportunities...",
+    "TRY_AGAIN": "Try Again",
+    "RECENT_BULK_ORDERS": "Recent Bulk Orders",
+    "TOTAL": "Total",
+    "ITEMS": "Items",
+    "AT": "at",
+    "OFFER": "Offer",
+    "TOP_RETAILERS": "Top Retailers",
+    "TOTAL_QUANTITY": "Total Quantity",
+    "TOTAL_ORDER_VALUE": "Total Order Value"
+  },
+
+
+
+  "MAKE_OFFER": {
+    "TITLE": "Make Offer",
+    "CLOSE": "Close",
+    "OFFER_PRICE": "Offer Price (₹)",
+    "MESSAGE": "Message (Optional)",
+    "SUBMIT": "Submit Offer"
+  },
+
+
+
+  "ORDERS_RECEIVED": {
+    "PAGE_TITLE": "Orders Received",
+    "SEARCH_PLACEHOLDER": "Search orders...",
+    "PULL_TO_REFRESH": "Pull to refresh",
+    "REFRESHING": "Refreshing...",
+    "ORDER_LABEL": "Order",
+    "TOTAL_AMOUNT": "Total Amount",
+    "VIEW_DETAILS": "View Details",
+    "NO_ORDERS_TITLE": "No Orders Found",
+    "NO_ORDERS_DESC": "There are no orders matching your criteria",
+    "FILTER_ALL": "All Orders",
+    "FILTER_PRICE_LOW": "Price ↑",
+    "FILTER_PRICE_HIGH": "Price ↓",
+    "FILTER_BULK": "Bulk Orders",
+    "FILTER_PRODUCT": "By Product"
+  },
+
+
+  "PAST_ORDERS": {
+  "PAGE_TITLE": "Orders Completed",
+  "FILTER_ORDERS": "Filter Orders",
+  "FILTER_ALL": "All Orders",
+  "FILTER_1DAY": "1 day ago",
+  "FILTER_2DAYS": "2 days ago",
+  "FILTER_3DAYS": "3 days ago",
+  "FILTER_4DAYS": "4 days ago",
+  "FILTER_CUSTOM": "Custom search",
+  "LOADING": "Loading orders...",
+  "LOAD_ERROR": "Failed to load orders",
+  "TRY_AGAIN": "Try Again",
+  "NO_ORDERS": "No completed orders found",
+  "ORDER_LABEL": "Order",
+  "TOTAL": "Total",
+  "QUANTITY": "Quantity",
+  "MAX_PRICE": "Max Price",
+  "AUTH_ERROR": "Authentication Error",
+  "SESSION_EXPIRED": "Your session has expired. Please login again.",
+  "OK": "OK",
+  "ACCESS_DENIED": "Access Denied",
+  "NO_PERMISSION": "You do not have permission to access this page.",
+  "TRY_LATER": "Please try again later.",
+  "UNEXPECTED_ERROR": "Unexpected error",
+  "DISMISS": "Dismiss",
+  "RETRY": "Retry",
+  "CUSTOM_DATE_RANGE": "Custom Date Range",
+  "START_DATE": "Start Date",
+  "END_DATE": "End Date",
+  "CANCEL": "Cancel",
+  "FILTER": "Filter",
+  "SELECT_DATES": "Please select both start and end dates",
+  "NO_ORDERS_IN_RANGE": "No orders found in selected date range"
+}
 
 
 

@@ -5,7 +5,7 @@
         defaultHref="/wholesaler/business-locations"
       ></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ 'BUSINESS_FORM.PAGE_TITLE' | translate }}</ion-title>
+    <ion-title>{{ 'ADD_BUSINESS_FORM.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -21,17 +21,19 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.SHOP_NAME' | translate }} *
+          {{ 'ADD_BUSINESS_FORM.SHOP_NAME' | translate }}
         </ion-label>
         <ion-input
           formControlName="shopName"
-          [placeholder]="'BUSINESS_FORM.SHOP_NAME_PLACEHOLDER' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.SHOP_NAME_PLACEHOLDER' | translate"
           type="text"
           [disabled]="isEditMode"
+          required
         >
         </ion-input>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('shopName')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("shopName") }}
       </div>
 
@@ -43,17 +45,19 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.PHONE_NUMBER' | translate }} *
+          {{ 'ADD_BUSINESS_FORM.PHONE_NUMBER' | translate }}
         </ion-label>
         <ion-input
           formControlName="number"
-          [placeholder]="'BUSINESS_FORM.PHONE_PLACEHOLDER' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.PHONE_PLACEHOLDER' | translate"
           type="tel"
           [disabled]="false"
+          required
         >
         </ion-input>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('number')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("number") }}
       </div>
 
@@ -65,12 +69,14 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.STATE' | translate }} *
+          {{ 'ADD_BUSINESS_FORM.STATE' | translate }}
         </ion-label>
         <ion-select
           formControlName="state"
-          [placeholder]="'BUSINESS_FORM.SELECT_STATE' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.SELECT_STATE' | translate"
           [disabled]="isEditMode"
+          interface="popover"
+          required
         >
           <ion-select-option *ngFor="let state of states" [value]="state.id">
             {{ state.state_name }}
@@ -78,6 +84,7 @@
         </ion-select>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('state')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("state") }}
       </div>
 
@@ -88,12 +95,14 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.CITY' | translate }} *
+          {{ 'ADD_BUSINESS_FORM.CITY' | translate }}
         </ion-label>
         <ion-select
           formControlName="city"
-          [placeholder]="'BUSINESS_FORM.SELECT_CITY' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.SELECT_CITY' | translate"
           [disabled]="isEditMode"
+          interface="popover"
+          required
         >
           <ion-select-option *ngFor="let city of cities" [value]="city.id">
             {{ city.city_name }}
@@ -101,6 +110,7 @@
         </ion-select>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('city')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("city") }}
       </div>
 
@@ -112,12 +122,14 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.LOCATION' | translate }} *
+          {{ 'ADD_BUSINESS_FORM.LOCATION' | translate }}
         </ion-label>
         <ion-select
           formControlName="location"
-          [placeholder]="'BUSINESS_FORM.SELECT_LOCATION' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.SELECT_LOCATION' | translate"
           [disabled]="false"
+          interface="popover"
+          required
         >
           <ion-select-option
             *ngFor="let location of locations"
@@ -128,6 +140,7 @@
         </ion-select>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('location')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("location") }}
       </div>
 
@@ -139,17 +152,19 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.ADDRESS' | translate }} *
+          {{ 'ADD_BUSINESS_FORM.ADDRESS' | translate }}
         </ion-label>
         <ion-textarea
           formControlName="address"
-          [placeholder]="'BUSINESS_FORM.ADDRESS_PLACEHOLDER' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.ADDRESS_PLACEHOLDER' | translate"
           rows="3"
           [disabled]="false"
+          required
         >
         </ion-textarea>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('address')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("address") }}
       </div>
 
@@ -161,17 +176,19 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.EMAIL' | translate }} *
+          {{ 'ADD_BUSINESS_FORM.EMAIL' | translate }}
         </ion-label>
         <ion-input
           formControlName="email"
-          [placeholder]="'BUSINESS_FORM.EMAIL_PLACEHOLDER' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.EMAIL_PLACEHOLDER' | translate"
           type="email"
           [disabled]="false"
+          required
         >
         </ion-input>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('email')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("email") }}
       </div>
 
@@ -183,17 +200,19 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.GST_NUMBER' | translate }} *
+          {{ 'ADD_BUSINESS_FORM.GST_NUMBER' | translate }}
         </ion-label>
         <ion-input
           formControlName="gstNumber"
-          [placeholder]="'BUSINESS_FORM.GST_PLACEHOLDER' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.GST_PLACEHOLDER' | translate"
           type="text"
           [disabled]="isEditMode"
+          required
         >
         </ion-input>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('gstNumber')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("gstNumber") }}
       </div>
 
@@ -204,17 +223,19 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.PAN' | translate }} *
+          {{ 'ADD_BUSINESS_FORM.PAN' | translate }}
         </ion-label>
         <ion-input
           formControlName="pan"
-          [placeholder]="'BUSINESS_FORM.PAN_PLACEHOLDER' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.PAN_PLACEHOLDER' | translate"
           type="text"
           [disabled]="isEditMode"
+          required
         >
         </ion-input>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('pan')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("pan") }}
       </div>
 
@@ -226,17 +247,18 @@
         "
       >
         <ion-label position="stacked">
-          {{ 'BUSINESS_FORM.ESTABLISHED_YEAR' | translate }}
+          {{ 'ADD_BUSINESS_FORM.ESTABLISHED_YEAR' | translate }}
         </ion-label>
         <ion-input
           formControlName="establishedYear"
-          [placeholder]="'BUSINESS_FORM.YEAR_PLACEHOLDER' | translate"
+          [placeholder]="'ADD_BUSINESS_FORM.YEAR_PLACEHOLDER' | translate"
           type="text"
           [disabled]="isEditMode"
         >
         </ion-input>
       </ion-item>
       <div class="error-message" *ngIf="getErrorMessage('establishedYear')">
+        <ion-icon name="alert-circle-outline"></ion-icon>
         {{ getErrorMessage("establishedYear") }}
       </div>
 
@@ -248,8 +270,8 @@
         class="submit-btn"
         [disabled]="businessForm.invalid"
       >
-        <ion-icon name="save" slot="start"></ion-icon>
-        {{ isEditMode ? ('BUSINESS_FORM.UPDATE_LOCATION' | translate) : ('BUSINESS_FORM.SAVE_LOCATION' | translate) }}
+        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+        {{ isEditMode ? ('ADD_BUSINESS_FORM.UPDATE_LOCATION' | translate) : ('ADD_BUSINESS_FORM.SAVE_LOCATION' | translate) }}
       </ion-button>
     </form>
   </div>
