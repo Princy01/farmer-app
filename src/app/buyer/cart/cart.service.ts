@@ -10,6 +10,7 @@ export interface CartItem {
   product_id: number;
   product_name: string;
   wholesaler_id: number;
+  image_path: string;
   wholesaler_name: string;
   unit_id: number;
   unit_name: string;

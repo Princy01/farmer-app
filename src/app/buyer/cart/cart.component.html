@@ -37,7 +37,7 @@
               <div class="product-info-section">
                 <div class="product-image-container">
                   <img
-                    [src]="'assets/img/' + item.product_name + '.png'"
+                    [src]="item.image_path || 'assets/img/' + item.product_name + '.png'"
                     [alt]="item.product_name"
                     class="product-image"
                   />
