@@ -8,7 +8,7 @@ import { State, City, Location, BusinessType, BusinessCategory, BusinessRegistra
 import { AuthService } from 'src/app/auth/auth.service';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-business-registration',
@@ -31,7 +31,8 @@ export class BusinessRegistrationComponent implements OnInit {
     private businessRegistrationService: BusinessRegistrationService,
     private authService: AuthService,
     private wholesalerApiService: WholesalerApiService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {
     this.form = this.fb.group({
       bid: [null],
@@ -116,7 +117,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.businessCategories = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: 'Failed to load business categories',
+          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_CATEGORIES_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -130,7 +131,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.businessTypes = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: 'Failed to load business types',
+          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_TYPES_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -144,7 +145,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.states = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: 'Failed to load states',
+          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_STATES_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -158,7 +159,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.cities = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: 'Failed to load cities',
+          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_CITIES_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -172,7 +173,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.locations = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: 'Failed to load locations',
+          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_LOCATIONS_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -192,7 +193,7 @@ export class BusinessRegistrationComponent implements OnInit {
       this.businessRegistrationService.addNewBusiness(payload).subscribe({
         next: async (res) => {
           const toast = await this.toastCtrl.create({
-            message: 'Business registered successfully!',
+            message: this.translate.instant('BUSINESS_REGISTRATION.REGISTRATION_SUCCESS'),
             duration: 2000,
             color: 'success',
           });
@@ -201,7 +202,7 @@ export class BusinessRegistrationComponent implements OnInit {
         },
         error: async (err) => {
           const toast = await this.toastCtrl.create({
-            message: err?.error?.error || 'Failed to register business',
+            message: err?.error?.error || this.translate.instant('BUSINESS_REGISTRATION.REGISTRATION_FAILED'),
             duration: 2000,
             color: 'danger',
           });
@@ -211,7 +212,7 @@ export class BusinessRegistrationComponent implements OnInit {
     } else {
       this.form.markAllAsTouched();
       const toast = await this.toastCtrl.create({
-        message: 'Please fix the errors in the form.',
+        message: this.translate.instant('BUSINESS_REGISTRATION.FIX_ERRORS'),
         duration: 2000,
         color: 'danger',
       });

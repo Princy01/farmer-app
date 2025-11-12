@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
     </ion-buttons>
-    <ion-title class="header-title">TRENDS</ion-title>
+    <ion-title class="header-title">{{ 'TRENDS.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -12,28 +12,28 @@
     <ion-card (click)="navigateTo('sales-trends')">
       <ion-card-content>
         <ion-icon name="bar-chart-outline"></ion-icon>
-        <p>Sales Trends</p>
+        <p>{{ 'TRENDS.SALES_TRENDS' | translate }}</p>
       </ion-card-content>
     </ion-card>
 
     <ion-card (click)="navigateTo('demand-trends')">
       <ion-card-content>
         <ion-icon name="analytics-outline"></ion-icon>
-        <p>Demand Trends</p>
+        <p>{{ 'TRENDS.DEMAND_TRENDS' | translate }}</p>
       </ion-card-content>
     </ion-card>
 
     <ion-card (click)="navigateTo('stock-insights')">
       <ion-card-content>
         <ion-icon name="cube-outline"></ion-icon>
-        <p>Stock Insights</p>
+        <p>{{ 'TRENDS.STOCK_INSIGHTS' | translate }}</p>
       </ion-card-content>
     </ion-card>
 
     <ion-card (click)="navigateTo('market-comparison')">
       <ion-card-content>
         <ion-icon name="podium-outline"></ion-icon>
-        <p>Market Comparison</p>
+        <p>{{ 'TRENDS.MARKET_COMPARISON' | translate }}</p>
       </ion-card-content>
     </ion-card>
   </div>

@@ -6,7 +6,7 @@ import { WholesalerApiService, OrderFullDetails } from '../services/wholesaler-a
 import { AuthService } from 'src/app/auth/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-order-details',
@@ -26,7 +26,8 @@ export class OrderDetailsComponent implements OnInit {
     private router: Router,
     private wholesalerService: WholesalerApiService,
     private alertCtrl: AlertController,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) { }
 
   ngOnInit() {
@@ -52,11 +53,11 @@ export class OrderDetailsComponent implements OnInit {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('ORDER_DETAILS.AUTH_ERROR'),
+      message: this.translate.instant('ORDER_DETAILS.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('ORDER_DETAILS.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -69,11 +70,11 @@ export class OrderDetailsComponent implements OnInit {
 
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('ORDER_DETAILS.ACCESS_DENIED'),
+      message: this.translate.instant('ORDER_DETAILS.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('ORDER_DETAILS.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -85,18 +86,18 @@ export class OrderDetailsComponent implements OnInit {
 
   getStatusLabel(statusId: number): string {
     const statusMap: { [key: number]: string } = {
-      1: 'Processing',
-      2: 'Confirmed',
-      3: 'Payment Pending',
-      4: 'Rejected',
-      5: 'Successful',
-      6: 'Cancelled',
-      7: 'Returned',
-      8: 'Processing',
-      9: 'Return Requested',
-      10: 'Rejected'
+      1: this.translate.instant('ORDER_DETAILS.STATUS_PROCESSING'),
+      2: this.translate.instant('ORDER_DETAILS.STATUS_CONFIRMED'),
+      3: this.translate.instant('ORDER_DETAILS.STATUS_PAYMENT_PENDING'),
+      4: this.translate.instant('ORDER_DETAILS.STATUS_REJECTED'),
+      5: this.translate.instant('ORDER_DETAILS.STATUS_SUCCESSFUL'),
+      6: this.translate.instant('ORDER_DETAILS.STATUS_CANCELLED'),
+      7: this.translate.instant('ORDER_DETAILS.STATUS_RETURNED'),
+      8: this.translate.instant('ORDER_DETAILS.STATUS_PROCESSING'),
+      9: this.translate.instant('ORDER_DETAILS.STATUS_RETURN_REQUESTED'),
+      10: this.translate.instant('ORDER_DETAILS.STATUS_REJECTED')
     };
-    return statusMap[statusId] || 'Unknown';
+    return statusMap[statusId] || this.translate.instant('ORDER_DETAILS.STATUS_UNKNOWN');
   }
 
   loadOrderDetails() {
@@ -142,11 +143,11 @@ export class OrderDetailsComponent implements OnInit {
 
   private async showOrderAccessError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You are not authorized to view this order.',
+      header: this.translate.instant('ORDER_DETAILS.ACCESS_DENIED'),
+      message: this.translate.instant('ORDER_DETAILS.ORDER_ACCESS_DENIED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('ORDER_DETAILS.OK'),
           handler: () => {
             this.router.navigate(['/wholesaler/orders']);
           }
@@ -158,15 +159,15 @@ export class OrderDetailsComponent implements OnInit {
 
   private async showGenericError() {
     const alert = await this.alertCtrl.create({
-      header: 'Error',
-      message: 'Failed to load order details. Please try again later.',
+      header: this.translate.instant('ORDER_DETAILS.ERROR'),
+      message: this.translate.instant('ORDER_DETAILS.LOAD_ERROR'),
       buttons: [
         {
-          text: 'Dismiss',
+          text: this.translate.instant('ORDER_DETAILS.DISMISS'),
           role: 'cancel'
         },
         {
-          text: 'Retry',
+          text: this.translate.instant('ORDER_DETAILS.RETRY'),
           handler: () => {
             this.loadOrderDetails();
           }

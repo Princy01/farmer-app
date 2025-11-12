@@ -18,6 +18,7 @@ import {
 } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface WarehouseData {
   products: string[];
@@ -33,7 +34,7 @@ interface StockData {
   templateUrl: './stock-insights.component.html',
   styleUrls: ['./stock-insights.component.scss'],
   standalone: true,
-  imports: [IonicModule, NgApexchartsModule, CommonModule, FormsModule],
+  imports: [IonicModule, NgApexchartsModule, CommonModule, FormsModule, TranslatePipe],
 })
 
 export class StockInsightsComponent implements OnInit {
@@ -79,7 +80,8 @@ export class StockInsightsComponent implements OnInit {
     private toastController: ToastController,
     private alertCtrl: AlertController,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) {
     addIcons({
       warningOutline,
@@ -114,11 +116,11 @@ export class StockInsightsComponent implements OnInit {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('STOCK_INSIGHTS.AUTH_ERROR'),
+      message: this.translate.instant('STOCK_INSIGHTS.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('STOCK_INSIGHTS.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -129,14 +131,13 @@ export class StockInsightsComponent implements OnInit {
     await alert.present();
   }
 
-  // unauthorized error handler
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('STOCK_INSIGHTS.ACCESS_DENIED'),
+      message: this.translate.instant('STOCK_INSIGHTS.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('STOCK_INSIGHTS.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -165,7 +166,7 @@ export class StockInsightsComponent implements OnInit {
             this.selectedWarehouse = mandis[0];
             this.initializeData();
           } else {
-            this.error = 'No mandis available for your account';
+            this.error = this.translate.instant('STOCK_INSIGHTS.NO_MANDIS');
           }
         },
         error: async (error) => {
@@ -176,8 +177,8 @@ export class StockInsightsComponent implements OnInit {
             return;
           }
 
-          this.error = 'Failed to load mandi list. Please try again.';
-          this.showErrorToast(this.error);
+          this.error = this.translate.instant('STOCK_INSIGHTS.LOAD_MANDI_ERROR');
+          this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.LOAD_MANDI_ERROR'));
         },
         complete: () => {
           loading.dismiss();
@@ -187,8 +188,8 @@ export class StockInsightsComponent implements OnInit {
     } catch (error) {
       loading.dismiss();
       this.isLoading = false;
-      this.error = 'An unexpected error occurred';
-      this.showErrorToast(this.error);
+      this.error = this.translate.instant('STOCK_INSIGHTS.UNEXPECTED_ERROR');
+      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.UNEXPECTED_ERROR'));
     }
   }
 
@@ -211,7 +212,7 @@ export class StockInsightsComponent implements OnInit {
   async showLoading() {
     this.isLoading = true;
     const loading = await this.loadingController.create({
-      message: 'Loading data...',
+      message: this.translate.instant('STOCK_INSIGHTS.LOADING_MESSAGE'),
       spinner: 'crescent'
     });
     await loading.present();
@@ -259,12 +260,12 @@ export class StockInsightsComponent implements OnInit {
               return;
             }
 
-            this.showErrorToast('Failed to fetch low stock alerts');
+            this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.LOAD_LOW_STOCK_ERROR'));
           }
         });
     } catch (error) {
       loading.dismiss();
-      this.showErrorToast('An error occurred while fetching alerts');
+      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_ALERTS'));
     }
   }
 
@@ -295,12 +296,12 @@ export class StockInsightsComponent implements OnInit {
               return;
             }
 
-            this.showErrorToast('Failed to fetch slow moving products');
+            this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.LOAD_SLOW_MOVING_ERROR'));
           }
         });
     } catch (error) {
       loading.dismiss();
-      this.showErrorToast('An error occurred while fetching slow moving products');
+      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_SLOW_MOVING'));
     }
   }
 
@@ -331,12 +332,12 @@ export class StockInsightsComponent implements OnInit {
               return;
             }
 
-            this.showErrorToast('Failed to fetch stock data');
+            this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.LOAD_STOCK_ERROR'));
           }
         });
     } catch (error) {
       loading.dismiss();
-      this.showErrorToast('An error occurred while fetching stock data');
+      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_STOCK'));
     }
   }
 

@@ -38,7 +38,6 @@
       <ion-card class="modern-card search-card">
         <ion-card-content class="card-content">
           <div class="search-wrapper">
-            <!-- <ion-icon name="search-outline" class="search-icon"></ion-icon> -->
             <ion-searchbar
               [(ngModel)]="searchTerm"
               [placeholder]="'ADD_PRODUCT.SEARCH_PLACEHOLDER' | translate"
@@ -53,10 +52,10 @@
         <div class="card-header">
           <div class="header-content">
             <ion-icon name="list-outline" class="header-icon"></ion-icon>
-            <h2 class="card-title">Available Products</h2>
+            <h2 class="card-title">{{ 'ADD_PRODUCT.AVAILABLE_PRODUCTS' | translate }}</h2>
           </div>
           <div class="products-count-badge" *ngIf="filteredProducts().length > 0">
-            {{ filteredProducts().length }} {{ filteredProducts().length === 1 ? 'item' : 'items' }}
+            {{ filteredProducts().length }} {{ filteredProducts().length === 1 ? ('ADD_PRODUCT.ITEM' | translate) : ('ADD_PRODUCT.ITEMS' | translate) }}
           </div>
         </div>
         <ion-card-content class="card-content">
@@ -82,8 +81,8 @@
 
           <div class="empty-state" *ngIf="filteredProducts().length === 0">
             <ion-icon name="cube-outline" class="empty-icon"></ion-icon>
-            <p class="empty-text">No products found</p>
-            <p class="empty-subtext">Try adjusting your search terms</p>
+            <p class="empty-text">{{ 'ADD_PRODUCT.NO_PRODUCTS_FOUND' | translate }}</p>
+            <p class="empty-subtext">{{ 'ADD_PRODUCT.ADJUST_SEARCH' | translate }}</p>
           </div>
         </ion-card-content>
       </ion-card>
@@ -95,7 +94,7 @@
         <div class="card-header">
           <div class="header-content">
             <ion-icon name="add-circle-outline" class="header-icon"></ion-icon>
-            <h2 class="card-title">Recommend New Product</h2>
+            <h2 class="card-title">{{ 'ADD_PRODUCT.RECOMMEND_NEW_PRODUCT' | translate }}</h2>
           </div>
         </div>
         <ion-card-content class="card-content">
@@ -186,7 +185,7 @@
 <ion-footer class="modal-footer" *ngIf="!showAddNew">
   <div class="footer-content">
     <div class="selection-summary">
-      <span class="selection-label">Selected Items</span>
+      <span class="selection-label">{{ 'ADD_PRODUCT.SELECTED_ITEMS' | translate }}</span>
       <span class="selection-count">{{ getSelectedCount() }}</span>
     </div>
     <ion-button

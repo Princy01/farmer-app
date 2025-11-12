@@ -8,7 +8,7 @@ import { addIcons } from 'ionicons';
 import { add, listOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-market-opportunities',
@@ -30,7 +30,8 @@ export class MarketOpportunitiesComponent implements OnInit {
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {
     addIcons({ listOutline });
   }
@@ -57,11 +58,11 @@ export class MarketOpportunitiesComponent implements OnInit {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('MARKET_OPPORTUNITIES.AUTH_ERROR'),
+      message: this.translate.instant('MARKET_OPPORTUNITIES.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('MARKET_OPPORTUNITIES.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -75,11 +76,11 @@ export class MarketOpportunitiesComponent implements OnInit {
   // unauthorized error handler
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('MARKET_OPPORTUNITIES.ACCESS_DENIED'),
+      message: this.translate.instant('MARKET_OPPORTUNITIES.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('MARKET_OPPORTUNITIES.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -96,7 +97,7 @@ export class MarketOpportunitiesComponent implements OnInit {
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Loading market opportunities...',
+      message: this.translate.instant('MARKET_OPPORTUNITIES.LOADING'),
       spinner: 'circular',
     });
 
@@ -118,8 +119,8 @@ export class MarketOpportunitiesComponent implements OnInit {
             return;
           }
 
-          this.error = 'Failed to load bulk orders. Please try again.';
-          this.showErrorToast('Failed to load bulk orders');
+          this.error = this.translate.instant('MARKET_OPPORTUNITIES.LOAD_BULK_ORDERS_ERROR');
+          this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.LOAD_BULK_ORDERS_ERROR'));
         }
       });
 
@@ -141,16 +142,16 @@ export class MarketOpportunitiesComponent implements OnInit {
             return;
           }
 
-          this.error = 'Failed to load top retailers. Please try again.';
-          this.showErrorToast('Failed to load top retailers');
+          this.error = this.translate.instant('MARKET_OPPORTUNITIES.LOAD_TOP_RETAILERS_ERROR');
+          this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.LOAD_TOP_RETAILERS_ERROR'));
         }
       });
     } catch (err) {
       this.isLoading = false;
       loading.dismiss();
       console.error('Failed to load data:', err);
-      this.error = 'Failed to load market opportunities. Please try again.';
-      this.showErrorToast('Failed to load market opportunities');
+      this.error = this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR');
+      this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR'));
     }
   }
 
@@ -185,7 +186,7 @@ export class MarketOpportunitiesComponent implements OnInit {
 
       if (data?.success) {
         const toast = await this.toastCtrl.create({
-          message: `Offer #${data.offer_id} submitted successfully!`,
+          message: `${this.translate.instant('MARKET_OPPORTUNITIES.OFFER_SUBMITTED')} #${data.offer_id}`,
           duration: 2000,
           color: 'success',
           position: 'bottom'
@@ -194,12 +195,12 @@ export class MarketOpportunitiesComponent implements OnInit {
       }
     } catch (error) {
       console.error('Error presenting modal:', error);
-      this.showErrorToast('Error opening offer modal');
+      this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.OFFER_ERROR'));
     }
   }
 
   getTopRetailersTitle(): string {
-    return 'Top 5 Retailers by Order Volume';
+    return this.translate.instant('MARKET_OPPORTUNITIES.TOP_RETAILERS_TITLE');
   }
 
   async handleRefresh(event: any) {

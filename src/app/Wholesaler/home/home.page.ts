@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { MenuService } from '../services/menu.service'; // Adjust path if needed
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-home',
@@ -47,6 +47,8 @@ export class HomePage {
     private alertCtrl: AlertController,
     private authService: AuthService,
     public menuService: MenuService,
+    private translate: TranslateService
+
   ) {
     addIcons({
       chatbubblesOutline, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
@@ -79,14 +81,12 @@ export class HomePage {
     }
   }
 
-  // authentication check
   private checkAuthAndLoadData() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-    // Check if user has wholesaler role
     const userRole = this.authService.getUserRole();
     if (!this.authService.hasRole('wholesaler')) {
       this.showUnauthorizedError();
@@ -152,9 +152,9 @@ export class HomePage {
           this.loadMoreItems();
 
           const alert = await this.alertCtrl.create({
-            header: 'Notice',
-            message: 'Unable to connect to server. Showing sample data.',
-            buttons: ['OK']
+            header: this.translate.instant('HOME.NOTICE'),
+            message: this.translate.instant('HOME.UNABLE_TO_CONNECT'),
+            buttons: [this.translate.instant('HOME.OK')]
           });
           await alert.present();
         }
@@ -169,9 +169,9 @@ export class HomePage {
       this.loadMoreItems();
 
       const alert = await this.alertCtrl.create({
-        header: 'Notice',
-        message: 'Showing sample data for demonstration.',
-        buttons: ['OK']
+        header: this.translate.instant('HOME.NOTICE'),
+        message: this.translate.instant('HOME.SHOWING_SAMPLE_DATA'),
+        buttons: [this.translate.instant('HOME.OK')]
       });
       await alert.present();
     }
@@ -179,366 +179,21 @@ export class HomePage {
 
   private getDummyData() {
     return [
-      {
-        name: 'Tomatoes',
-        qty: 150,
-        orders: 75,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 1
-      },
-      {
-        name: 'Onions',
-        qty: 200,
-        orders: 120,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 2
-      },
-      {
-        name: 'Potatoes',
-        qty: 300,
-        orders: 180,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 3
-      },
-      {
-        name: 'Carrots',
-        qty: 100,
-        orders: 60,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 4
-      },
-      {
-        name: 'Cabbage',
-        qty: 80,
-        orders: 45,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 5
-      },
-      {
-        name: 'Cauliflower',
-        qty: 120,
-        orders: 70,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 6
-      },
-      {
-        name: 'Green Beans',
-        qty: 90,
-        orders: 50,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 7
-      },
-      {
-        name: 'Bell Peppers',
-        qty: 60,
-        orders: 35,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 8
-      },
-      {
-        name: 'Spinach',
-        qty: 75,
-        orders: 40,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 9
-      },
-      {
-        name: 'Broccoli',
-        qty: 85,
-        orders: 55,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 10
-      },
-      {
-        name: 'Lettuce',
-        qty: 65,
-        orders: 30,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 11
-      },
-      {
-        name: 'Cucumber',
-        qty: 110,
-        orders: 85,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 12
-      },
-      {
-        name: 'Radish',
-        qty: 45,
-        orders: 25,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 13
-      },
-      {
-        name: 'Sweet Corn',
-        qty: 95,
-        orders: 60,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 14
-      },
-      {
-        name: 'Peas',
-        qty: 70,
-        orders: 45,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 15
-      },
-      {
-        name: 'Tomatoes',
-        qty: 150,
-        orders: 75,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 1
-      },
-      {
-        name: 'Onions',
-        qty: 200,
-        orders: 120,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 2
-      },
-      {
-        name: 'Potatoes',
-        qty: 300,
-        orders: 180,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 3
-      },
-      {
-        name: 'Carrots',
-        qty: 100,
-        orders: 60,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 4
-      },
-      {
-        name: 'Cabbage',
-        qty: 80,
-        orders: 45,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 5
-      },
-      {
-        name: 'Cauliflower',
-        qty: 120,
-        orders: 70,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 6
-      },
-      {
-        name: 'Green Beans',
-        qty: 90,
-        orders: 50,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 7
-      },
-      {
-        name: 'Bell Peppers',
-        qty: 60,
-        orders: 35,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 8
-      },
-      {
-        name: 'Spinach',
-        qty: 75,
-        orders: 40,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 9
-      },
-      {
-        name: 'Broccoli',
-        qty: 85,
-        orders: 55,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 10
-      },
-      {
-        name: 'Lettuce',
-        qty: 65,
-        orders: 30,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 11
-      },
-      {
-        name: 'Cucumber',
-        qty: 110,
-        orders: 85,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 12
-      },
-      {
-        name: 'Radish',
-        qty: 45,
-        orders: 25,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 13
-      },
-      {
-        name: 'Sweet Corn',
-        qty: 95,
-        orders: 60,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 14
-      },
-      {
-        name: 'Peas',
-        qty: 70,
-        orders: 45,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 15
-      },
-      {
-        name: 'Tomatoes',
-        qty: 150,
-        orders: 75,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 1
-      },
-      {
-        name: 'Onions',
-        qty: 200,
-        orders: 120,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 2
-      },
-      {
-        name: 'Potatoes',
-        qty: 300,
-        orders: 180,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 3
-      },
-      {
-        name: 'Carrots',
-        qty: 100,
-        orders: 60,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 4
-      },
-      {
-        name: 'Cabbage',
-        qty: 80,
-        orders: 45,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 5
-      },
-      {
-        name: 'Cauliflower',
-        qty: 120,
-        orders: 70,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 6
-      },
-      {
-        name: 'Green Beans',
-        qty: 90,
-        orders: 50,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 7
-      },
-      {
-        name: 'Bell Peppers',
-        qty: 60,
-        orders: 35,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 8
-      },
-      {
-        name: 'Spinach',
-        qty: 75,
-        orders: 40,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 9
-      },
-      {
-        name: 'Broccoli',
-        qty: 85,
-        orders: 55,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 10
-      },
-      {
-        name: 'Lettuce',
-        qty: 65,
-        orders: 30,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 11
-      },
-      {
-        name: 'Cucumber',
-        qty: 110,
-        orders: 85,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 12
-      },
-      {
-        name: 'Radish',
-        qty: 45,
-        orders: 25,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 13
-      },
-      {
-        name: 'Sweet Corn',
-        qty: 95,
-        orders: 60,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 14
-      },
-      {
-        name: 'Peas',
-        qty: 70,
-        orders: 45,
-        wholeseller_id: 1,
-        mandi_id: 1,
-        product_id: 15
-      }
+      { name: 'Tomatoes', qty: 150, orders: 75, wholeseller_id: 1, mandi_id: 1, product_id: 1 },
+      { name: 'Onions', qty: 200, orders: 120, wholeseller_id: 1, mandi_id: 1, product_id: 2 },
+      { name: 'Potatoes', qty: 300, orders: 180, wholeseller_id: 1, mandi_id: 1, product_id: 3 },
+      { name: 'Carrots', qty: 100, orders: 60, wholeseller_id: 1, mandi_id: 1, product_id: 4 },
+      { name: 'Cabbage', qty: 80, orders: 45, wholeseller_id: 1, mandi_id: 1, product_id: 5 },
+      { name: 'Cauliflower', qty: 120, orders: 70, wholeseller_id: 1, mandi_id: 1, product_id: 6 },
+      { name: 'Green Beans', qty: 90, orders: 50, wholeseller_id: 1, mandi_id: 1, product_id: 7 },
+      { name: 'Bell Peppers', qty: 60, orders: 35, wholeseller_id: 1, mandi_id: 1, product_id: 8 },
+      { name: 'Spinach', qty: 75, orders: 40, wholeseller_id: 1, mandi_id: 1, product_id: 9 },
+      { name: 'Broccoli', qty: 85, orders: 55, wholeseller_id: 1, mandi_id: 1, product_id: 10 },
+      { name: 'Lettuce', qty: 65, orders: 30, wholeseller_id: 1, mandi_id: 1, product_id: 11 },
+      { name: 'Cucumber', qty: 110, orders: 85, wholeseller_id: 1, mandi_id: 1, product_id: 12 },
+      { name: 'Radish', qty: 45, orders: 25, wholeseller_id: 1, mandi_id: 1, product_id: 13 },
+      { name: 'Sweet Corn', qty: 95, orders: 60, wholeseller_id: 1, mandi_id: 1, product_id: 14 },
+      { name: 'Peas', qty: 70, orders: 45, wholeseller_id: 1, mandi_id: 1, product_id: 15 }
     ];
   }
 
@@ -666,11 +321,11 @@ export class HomePage {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('HOME.AUTH_ERROR'),
+      message: this.translate.instant('HOME.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('HOME.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -681,16 +336,15 @@ export class HomePage {
     await alert.present();
   }
 
-  // unauthorized error handler
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('HOME.ACCESS_DENIED'),
+      message: this.translate.instant('HOME.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('HOME.OK'),
           handler: () => {
-            this.router.navigate(['/login']); // Or appropriate page
+            this.router.navigate(['/login']);
           }
         }
       ]
@@ -698,7 +352,8 @@ export class HomePage {
     await alert.present();
   }
 
-  // Menu functions
+  // MENU FUNCTIONS
+
   openMenu() {
     this.menuService.openMenu();
   }
@@ -763,15 +418,15 @@ export class HomePage {
 
   async logout() {
     const alert = await this.alertCtrl.create({
-      header: 'Logout',
-      message: 'Are you sure you want to logout?',
+      header: this.translate.instant('HOME.LOGOUT'),
+      message: this.translate.instant('HOME.LOGOUT_CONFIRMATION'),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('HOME.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Logout',
+          text: this.translate.instant('HOME.LOGOUT'),
           handler: async () => {
             await this.closeMenu();
             this.authService.logout();
@@ -838,7 +493,6 @@ export class HomePage {
       navigator.vibrate(10);
     }
 
-    // Navigate to product details page with product data
     this.router.navigate(['/wholesaler/product-details'], {
       queryParams: {
         productId: item.product_id,

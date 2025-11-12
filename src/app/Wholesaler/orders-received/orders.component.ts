@@ -11,7 +11,7 @@ import {
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 enum OrderFilter {
   DATE = 'date',
@@ -51,7 +51,8 @@ export class OrdersComponent {
     private alertCtrl: AlertController,
     private modalCtrl: ModalController,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
 
   ) {
     addIcons({
@@ -83,11 +84,11 @@ export class OrdersComponent {
 
    private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('ORDERS_RECEIVED.AUTH_ERROR'),
+      message: this.translate.instant('ORDERS_RECEIVED.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('ORDERS_RECEIVED.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -100,13 +101,13 @@ export class OrdersComponent {
 
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('ORDERS_RECEIVED.ACCESS_DENIED'),
+      message: this.translate.instant('ORDERS_RECEIVED.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('ORDERS_RECEIVED.OK'),
           handler: () => {
-            this.router.navigate(['/login']); // Or appropriate page
+            this.router.navigate(['/login']);
           }
         }
       ]
@@ -147,7 +148,7 @@ export class OrdersComponent {
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Loading orders...',
+      message: this.translate.instant('ORDERS_RECEIVED.LOADING'),
       spinner: 'circular'
     });
 
@@ -175,15 +176,15 @@ export class OrdersComponent {
           }
 
           const alert = await this.alertCtrl.create({
-            header: 'Error',
-            message: 'Failed to load orders. Please try again later.',
+            header: this.translate.instant('ORDERS_RECEIVED.ERROR'),
+            message: this.translate.instant('ORDERS_RECEIVED.LOAD_ERROR'),
             buttons: [
               {
-                text: 'Dismiss',
+                text: this.translate.instant('ORDERS_RECEIVED.DISMISS'),
                 role: 'cancel'
               },
               {
-                text: 'Retry',
+                text: this.translate.instant('ORDERS_RECEIVED.RETRY'),
                 handler: () => {
                   this.loadOrders();
                 }
@@ -196,9 +197,9 @@ export class OrdersComponent {
     } catch (err) {
       loading.dismiss();
       const alert = await this.alertCtrl.create({
-        header: 'Error',
-        message: 'An unexpected error occurred.',
-        buttons: ['OK']
+        header: this.translate.instant('ORDERS_RECEIVED.ERROR'),
+        message: this.translate.instant('ORDERS_RECEIVED.UNEXPECTED_ERROR'),
+        buttons: [this.translate.instant('ORDERS_RECEIVED.OK')]
       });
       await alert.present();
     }

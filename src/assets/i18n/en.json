@@ -16,7 +16,24 @@
   "Refreshing...": "Refreshing...",
   "Total Quantity": "Total Quantity",
   "Orders placed": "Orders placed",
-  "Loading more items...": "Loading more items..."
+  "Loading more items...": "Loading more items...",
+   "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "OK": "OK",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You do not have permission to access this page.",
+    "LOADING_INVENTORY": "Loading inventory...",
+    "NOTICE": "Notice",
+    "UNABLE_TO_CONNECT": "Unable to connect to server. Showing sample data.",
+    "SHOWING_SAMPLE_DATA": "Showing sample data for demonstration.",
+    "ERROR": "Error",
+    "LOAD_ERROR": "Failed to load inventory. Please try again later.",
+    "DISMISS": "Dismiss",
+    "RETRY": "Retry",
+    "UNEXPECTED_ERROR": "An unexpected error occurred.",
+    "LOGOUT": "Logout",
+    "LOGOUT_CONFIRMATION": "Are you sure you want to logout?",
+    "CANCEL": "Cancel"
 },
 
   "BUSINESS_LOCATION": {
@@ -38,23 +55,47 @@
   "Modify": "Modify",
   "No Business Locations": "No Business Locations",
   "You haven't added any business locations yet. Click the button above to add your first location.": "You haven't added any business locations yet. Click the button above to add your first location.",
-  "Loading your business locations...": "Loading your business locations..."
+  "Loading your business locations...": "Loading your business locations...",
+    "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "OK": "OK",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You do not have permission to access this page.",
+    "LOADING": "Loading locations...",
+    "ERROR": "Error",
+    "LOAD_ERROR": "Failed to load locations. Please try again later.",
+    "UNEXPECTED_ERROR": "An unexpected error occurred.",
+    "ADD_LOCATION": "Add Location",
+    "NO_LOCATIONS": "No business locations found",
+    "NO_LOCATIONS_MESSAGE": "Add your first business location to get started"
   },
 
 
-"UPDATE_BUSINESS": {
- "Update Business": "Update Business",
-  "Update your business details": "Update your business details",
-  "Email Address": "Email Address",
-  "Enter business email": "Enter business email",
-  "Mobile Number": "Mobile Number",
-  "Enter mobile number": "Enter mobile number",
-  "Business Address": "Business Address",
-  "Enter complete business address": "Enter complete business address",
-  "Business Status": "Business Status",
-  "Active": "Active",
-  "Inactive": "Inactive",
-  "Updating...": "Updating..."
+"BUSINESS_UPDATE": {
+    "PAGE_TITLE": "Update Business",
+    "SUBTITLE": "Update your business details",
+    "EMAIL_LABEL": "Email Address",
+    "EMAIL_PLACEHOLDER": "Enter business email",
+    "MOBILE_LABEL": "Mobile Number",
+    "MOBILE_PLACEHOLDER": "Enter mobile number",
+    "ADDRESS_LABEL": "Business Address",
+    "ADDRESS_PLACEHOLDER": "Enter complete business address",
+    "BUSINESS_STATUS_LABEL": "Business Status",
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "UPDATE_BUTTON": "Update Business",
+    "UPDATING": "Updating...",
+    "ACCESS_DENIED": "Access denied. Only wholesalers can access this page.",
+    "FILL_REQUIRED_FIELDS": "Please fill in all required fields correctly",
+    "UPDATE_SUCCESS": "Business updated successfully!",
+    "UPDATE_FAILED": "Failed to update business. Please try again.",
+    "SESSION_EXPIRED": "Session expired. Please login again.",
+    "CONNECTION_ERROR": "Cannot connect to server. Please check your internet connection.",
+    "EMAIL_REQUIRED": "Email is required",
+    "INVALID_EMAIL": "Please enter a valid email address",
+    "MOBILE_NUMBER_REQUIRED": "Mobile number is required",
+    "INVALID_MOBILE": "Please enter a valid mobile number (10-15 digits)",
+    "ADDRESS_REQUIRED": "Address is required"
   },
 
 
@@ -105,7 +146,16 @@
   "Please enter a valid PAN number (e.g., ABCDE1234F)": "Please enter a valid PAN number (e.g., ABCDE1234F)",
   "Privileged User": "Privileged User",
   "Active Status": "Active Status",
-  "Submit Registration": "Submit Registration"
+  "Submit Registration": "Submit Registration",
+   "LOAD_CATEGORIES_ERROR": "Failed to load business categories",
+    "LOAD_TYPES_ERROR": "Failed to load business types",
+    "LOAD_STATES_ERROR": "Failed to load states",
+    "LOAD_CITIES_ERROR": "Failed to load cities",
+    "LOAD_LOCATIONS_ERROR": "Failed to load locations",
+    "REGISTRATION_SUCCESS": "Business registered successfully!",
+    "REGISTRATION_FAILED": "Failed to register business",
+    "FIX_ERRORS": "Please fix the errors in the form."
+
   },
 
 
@@ -131,22 +181,42 @@
   "Confirmed": "Confirmed",
   "Shipped": "Shipped",
   "Delivered": "Delivered",
-  "Cancelled": "Cancelled"
+  "Cancelled": "Cancelled",
+  "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "OK": "OK",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You do not have permission to access this page.",
+    "ORDER_ACCESS_DENIED": "You are not authorized to view this order.",
+    "ERROR": "Error",
+    "LOAD_ERROR": "Failed to load order details. Please try again later.",
+    "DISMISS": "Dismiss",
+    "RETRY": "Retry",
+    "STATUS_PROCESSING": "Processing",
+    "STATUS_CONFIRMED": "Confirmed",
+    "STATUS_PAYMENT_PENDING": "Payment Pending",
+    "STATUS_REJECTED": "Rejected",
+    "STATUS_SUCCESSFUL": "Successful",
+    "STATUS_CANCELLED": "Cancelled",
+    "STATUS_RETURNED": "Returned",
+    "STATUS_RETURN_REQUESTED": "Return Requested",
+    "STATUS_UNKNOWN": "Unknown"
   },
 
 
   "ADD_BUSINESS_FORM": {
     "PAGE_TITLE": "Add Business Location",
+    "EDIT_PAGE_TITLE": "Edit Business Location",
     "SHOP_NAME": "Shop Name",
     "SHOP_NAME_PLACEHOLDER": "Enter shop name",
     "PHONE_NUMBER": "Phone Number",
     "PHONE_PLACEHOLDER": "Enter 10-digit phone number",
     "STATE": "State",
-    "SELECT_STATE": "Select state",
+    "SELECT_STATE": "Select State",
     "CITY": "City",
-    "SELECT_CITY": "Select city",
+    "SELECT_CITY": "Select City",
     "LOCATION": "Location",
-    "SELECT_LOCATION": "Select location",
+    "SELECT_LOCATION": "Select Location",
     "ADDRESS": "Address",
     "ADDRESS_PLACEHOLDER": "Enter complete address",
     "EMAIL": "Email",
@@ -155,10 +225,33 @@
     "GST_PLACEHOLDER": "Enter GST number",
     "PAN": "PAN Number",
     "PAN_PLACEHOLDER": "Enter PAN number",
+    "PRIVILEGED_USER": "Privileged User",
+    "BUSINESS_TYPE": "Business Type",
     "ESTABLISHED_YEAR": "Established Year",
     "YEAR_PLACEHOLDER": "Enter year (e.g., 2020)",
+    "ACTIVE_STATUS": "Active Status",
     "SAVE_LOCATION": "Save Location",
-    "UPDATE_LOCATION": "Update Location"
+    "UPDATE_LOCATION": "Update Location",
+    "FIELD_REQUIRED": "{{field}} is required",
+    "INVALID_EMAIL": "Please enter a valid email address",
+    "INVALID_PHONE": "Please enter a valid 10-digit phone number",
+    "INVALID_GST": "Please enter a valid GST number (e.g., 22AAAAA0000A1Z5)",
+    "INVALID_PAN": "Please enter a valid PAN number (e.g., AAAAA0000A)",
+    "INVALID_YEAR": "Please enter a valid 4-digit year",
+    "INVALID_VALUE": "Please enter a valid value",
+    "FILL_REQUIRED_FIELDS": "Please fill all required fields correctly",
+    "CREATING_LOCATION": "Creating business location...",
+    "UPDATING_LOCATION": "Updating business location...",
+    "CREATE_SUCCESS": "Business location created successfully",
+    "CREATE_ERROR": "Failed to create business location. Please try again.",
+    "UPDATE_SUCCESS": "Business location updated successfully",
+    "UPDATE_ERROR": "Failed to update business location. Please try again.",
+    "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again.",
+    "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You don't have permission to access this page.",
+    "OK": "OK"
   },
 
 
@@ -170,42 +263,64 @@
     "PRICE": "Price",
     "STOCK": "Stock",
     "REMOVE": "Remove",
-    "NO_PRODUCTS": "No products found for this branch."
+    "NO_PRODUCTS": "No products found for this branch.",
+    "NO_PRODUCTS_MESSAGE": "Add products to this branch to get started",
+    "PRODUCT_NAME": "Product Name",
+    "CATEGORY": "Category",
+    "PRODUCT_ADDED": "Product added successfully",
+    "PRODUCT_REMOVED": "Product removed successfully"
   },
 
 
   "ADD_PRODUCT": {
-    "PAGE_TITLE": "Add Product",
-    "NOT_FOUND_TEXT": "Don't see the product you are looking for?",
-    "RECOMMEND_NEW": "Recommend New",
-    "SEARCH_PLACEHOLDER": "Search products",
+    "PAGE_TITLE": "Add Products",
+    "NOT_FOUND_TEXT": "Can't find what you're looking for?",
+    "RECOMMEND_NEW": "Recommend a new product",
+    "SEARCH_PLACEHOLDER": "Search products by name or category...",
+    "AVAILABLE_PRODUCTS": "Available Products",
+    "ITEM": "item",
+    "ITEMS": "items",
+    "NO_PRODUCTS_FOUND": "No products found",
+    "ADJUST_SEARCH": "Try adjusting your search terms",
+    "RECOMMEND_NEW_PRODUCT": "Recommend New Product",
     "PRODUCT_NAME": "Product Name",
     "PRODUCT_NAME_PLACEHOLDER": "Enter product name",
     "CATEGORY": "Category",
     "SELECT_CATEGORY": "Select category",
-    "PRICE": "Price (₹ per 10Kg)",
+    "PRICE": "Price",
     "PRICE_PLACEHOLDER": "Enter price",
     "RECOMMEND_BUTTON": "Recommend Product",
     "BACK_TO_LIST": "Back to Product List",
-    "ADD_SELECTED": "Add Selected Products"
+    "SELECTED_ITEMS": "Selected Items",
+    "ADD_SELECTED": "Add Selected Products",
+    "NO_SELECTION": "Please select at least one product",
+    "NAME_REQUIRED": "Product name is required",
+    "CATEGORY_REQUIRED": "Category is required",
+    "PRICE_REQUIRED": "Please enter a valid price"
   },
 
 
   "ADD_STOCK": {
     "PAGE_TITLE": "Add Stock",
-    "CLOSE": "Close",
+    "BUSINESS_DETAILS": "Business Details",
     "BRANCH": "Branch",
-    "SELECT_BRANCH": "Select branch",
+    "SELECT_BRANCH": "Select Branch",
     "PRODUCT": "Product",
-    "SELECT_PRODUCT": "Select product",
+    "SELECT_PRODUCT": "Select Product",
     "QUALITY": "Quality",
-    "SELECT_QUALITY": "Select quality",
+    "SELECT_QUALITY": "Select Quality",
+    "STOCK_INFORMATION": "Stock Information",
     "WASTAGE": "Wastage",
     "STOCK_RECEIVED": "Stock Received",
     "STOCK_CARRIED_FORWARD": "Stock Carried Forward",
+    "UNIT_KG": "kg",
+    "ADD_FIFTY": "+50",
+    "PRICING": "Pricing",
     "PRICE_PER_UNIT": "Price per Unit",
-    "SAVE": "Save",
-    "UNIT_KG": "Kg"
+    "READY_TO_ADD": "Ready to Add Stock",
+    "SAVE": "Save Stock",
+    "SUCCESS_MESSAGE": "Stock added successfully",
+    "ERROR_MESSAGE": "Failed to add stock"
   },
 
 
@@ -217,7 +332,19 @@
     "SELECT_MANDIS_PLACEHOLDER": "Choose one or more mandis",
     "SELECT_PRODUCTS": "Select Products",
     "SELECT_PRODUCTS_PLACEHOLDER": "Choose one or more products",
-    "PRICE_COMPARISON_HEADING": "Price Comparison Across Markets"
+    "PRICE_COMPARISON_HEADING": "Price Comparison Across Markets",
+    "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "OK": "OK",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You do not have permission to access this page.",
+    "LOADING": "Loading price data...",
+    "UNABLE_TO_FETCH": "Unable to fetch real-time data. Using stored data.",
+    "DATA_UPDATED": "Price data updated successfully!",
+    "ERROR_FETCHING": "Error fetching data. Using fallback data.",
+    "PRICE_LABEL": "Price (₹/kg)",
+    "PRODUCTS_LABEL": "Products",
+    "PRICE_FORMAT": "₹{0}/kg"
   },
 
 
@@ -232,7 +359,18 @@
     "OFFER": "Offer",
     "TOP_RETAILERS": "Top Retailers",
     "TOTAL_QUANTITY": "Total Quantity",
-    "TOTAL_ORDER_VALUE": "Total Order Value"
+    "TOTAL_ORDER_VALUE": "Total Order Value",
+    "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "OK": "OK",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You do not have permission to access this page.",
+    "LOAD_BULK_ORDERS_ERROR": "Failed to load bulk orders. Please try again.",
+    "LOAD_TOP_RETAILERS_ERROR": "Failed to load top retailers. Please try again.",
+    "LOAD_ERROR": "Failed to load market opportunities. Please try again.",
+    "OFFER_SUBMITTED": "Offer submitted successfully!",
+    "OFFER_ERROR": "Error opening offer modal",
+    "TOP_RETAILERS_TITLE": "Top 5 Retailers by Order Volume"
   },
 
 
@@ -242,7 +380,17 @@
     "CLOSE": "Close",
     "OFFER_PRICE": "Offer Price (₹)",
     "MESSAGE": "Message (Optional)",
-    "SUBMIT": "Submit Offer"
+    "SUBMIT": "Submit Offer",
+    "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "OK": "OK",
+    "SUBMITTING": "Submitting offer...",
+    "VALIDATION_ERROR": "Validation Error",
+    "INVALID_PRICE": "Please enter a valid offer price",
+    "INVALID_DATE": "Please select a delivery date",
+    "ERROR": "Error",
+    "SUBMIT_ERROR": "Failed to submit offer. Please try again.",
+    "UNEXPECTED_ERROR": "An unexpected error occurred."
   },
 
 
@@ -261,7 +409,18 @@
     "FILTER_PRICE_LOW": "Price ↑",
     "FILTER_PRICE_HIGH": "Price ↓",
     "FILTER_BULK": "Bulk Orders",
-    "FILTER_PRODUCT": "By Product"
+    "FILTER_PRODUCT": "By Product",
+    "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "OK": "OK",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You do not have permission to access this page.",
+    "LOADING": "Loading orders...",
+    "ERROR": "Error",
+    "LOAD_ERROR": "Failed to load orders. Please try again later.",
+    "UNEXPECTED_ERROR": "An unexpected error occurred.",
+    "DISMISS": "Dismiss",
+    "RETRY": "Retry"
   },
 
 
@@ -391,6 +550,72 @@
     "PRICE": "Price",
     "UPDATE": "Update",
     "NO_STOCK": "No stock added yet for today."
+  },
+
+
+
+  "STOCK_INSIGHTS": {
+    "PAGE_TITLE": "Trends",
+    "LOADING": "Loading data...",
+    "LOADING_MESSAGE": "Loading data...",
+
+    "SEGMENT_STOCK_LEVELS": "Stock Levels",
+    "SEGMENT_LOW_STOCK": "Low Stock",
+    "SEGMENT_SLOW_MOVING": "Slow Moving",
+
+    "SELECT_WAREHOUSE": "Select Warehouse/Mandi",
+    "STOCK_LEVELS_TITLE": "Stock Levels",
+
+    "LOW_STOCK_HEADER": "Low Stock Alerts",
+    "TOTAL_LABEL": "Total",
+    "CURRENT_STOCK": "Current Stock",
+
+    "SLOW_MOVING_HEADER": "Slow Moving Products",
+    "DAYS_IN_STOCK": "days in stock",
+    "LOCATION": "Location",
+    "WEEKLY_SALES": "Weekly Sales",
+
+    "KG_UNIT": "kg",
+
+    "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You do not have permission to access this page.",
+    "OK": "OK",
+
+    "NO_MANDIS": "No mandis available for your account",
+    "LOAD_MANDI_ERROR": "Failed to load mandi list. Please try again.",
+    "LOAD_STOCK_ERROR": "Failed to fetch stock data",
+    "LOAD_LOW_STOCK_ERROR": "Failed to fetch low stock alerts",
+    "LOAD_SLOW_MOVING_ERROR": "Failed to fetch slow moving products",
+    "UNEXPECTED_ERROR": "An unexpected error occurred",
+    "ERROR_FETCHING_ALERTS": "An error occurred while fetching alerts",
+    "ERROR_FETCHING_SLOW_MOVING": "An error occurred while fetching slow moving products",
+    "ERROR_FETCHING_STOCK": "An error occurred while fetching stock data",
+
+    "RETRY": "Retry",
+    "CLOSE": "Close"
+  },
+
+
+   "TRENDS": {
+    "PAGE_TITLE": "Trends",
+    "SALES_TRENDS": "Sales Trends",
+    "DEMAND_TRENDS": "Demand Trends",
+    "STOCK_INSIGHTS": "Stock Insights",
+    "MARKET_COMPARISON": "Market Comparison"
+  },
+
+
+  "UPDATE_STOCK": {
+    "PAGE_TITLE": "Update Stock",
+    "CLOSE": "Close",
+    "STOCK_TO_DEDUCT": "Stock to Deduct",
+    "UPDATE": "Update",
+    "INVALID_AMOUNT": "Please enter a valid amount to deduct",
+    "STOCK_EXCEEDS": "Deducted stock cannot be more than current stock",
+    "UPDATE_SUCCESS": "Stock updated successfully",
+    "UPDATE_FAILED": "Failed to update stock"
   }
 
 

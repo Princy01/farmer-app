@@ -9,7 +9,7 @@ import { save, arrowBack } from 'ionicons/icons';
 import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch } from './add-business.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { BusinessBranchWithNames } from '../business-locations/business-locations.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
         selector: 'app-add-business-location',
@@ -34,19 +34,19 @@ export class AddBusinessLocationComponent implements OnInit {
         businessTypes: BusinessType[] = [];
 
         fieldLabels: { [key: string]: string } = {
-                shopName: 'Shop Name',
-                number: 'Phone Number',
-                location: 'Location',
-                state: 'State',
-                city: 'City',
-                address: 'Address',
-                email: 'Email',
-                gstNumber: 'GST Number',
-                pan: 'PAN Number',
-                privilegedUser: 'Privileged User',
-                b_type_id: 'Business Type',
-                establishedYear: 'Established Year',
-                active_status: 'Active Status'
+                shopName: 'ADD_BUSINESS_FORM.SHOP_NAME',
+                number: 'ADD_BUSINESS_FORM.PHONE_NUMBER',
+                location: 'ADD_BUSINESS_FORM.LOCATION',
+                state: 'ADD_BUSINESS_FORM.STATE',
+                city: 'ADD_BUSINESS_FORM.CITY',
+                address: 'ADD_BUSINESS_FORM.ADDRESS',
+                email: 'ADD_BUSINESS_FORM.EMAIL',
+                gstNumber: 'ADD_BUSINESS_FORM.GST_NUMBER',
+                pan: 'ADD_BUSINESS_FORM.PAN',
+                privilegedUser: 'ADD_BUSINESS_FORM.PRIVILEGED_USER',
+                b_type_id: 'ADD_BUSINESS_FORM.BUSINESS_TYPE',
+                establishedYear: 'ADD_BUSINESS_FORM.ESTABLISHED_YEAR',
+                active_status: 'ADD_BUSINESS_FORM.ACTIVE_STATUS'
         };
 
         constructor(
@@ -57,7 +57,8 @@ export class AddBusinessLocationComponent implements OnInit {
                 private toastController: ToastController,
                 private loadingController: LoadingController,
                 private alertController: AlertController,
-                private authService: AuthService
+                private authService: AuthService,
+                private translate: TranslateService
         ) {
                 addIcons({ save, arrowBack });
 
@@ -93,7 +94,7 @@ export class AddBusinessLocationComponent implements OnInit {
 
                                 this.isEditMode = true;
                                 this.locationId = +params['locationId'];
-                                this.pageTitle = 'Edit Business Location';
+                                this.pageTitle = this.translate.instant('ADD_BUSINESS_FORM.EDIT_PAGE_TITLE');
                                 this.loadLocationData();
                         }
                 });
@@ -122,11 +123,11 @@ export class AddBusinessLocationComponent implements OnInit {
 
         async showAuthError() {
                 const alert = await this.alertController.create({
-                        header: 'Authentication Error',
-                        message: 'Your session has expired. Please login again.',
+                        header: this.translate.instant('ADD_BUSINESS_FORM.AUTH_ERROR'),
+                        message: this.translate.instant('ADD_BUSINESS_FORM.SESSION_EXPIRED'),
                         buttons: [
                                 {
-                                        text: 'OK',
+                                        text: this.translate.instant('ADD_BUSINESS_FORM.OK'),
                                         handler: () => {
                                                 this.authService.logout();
                                                 this.router.navigate(['/login']);
@@ -139,11 +140,11 @@ export class AddBusinessLocationComponent implements OnInit {
 
         async showUnauthorizedError() {
                 const alert = await this.alertController.create({
-                        header: 'Access Denied',
-                        message: 'You do not have permission to access this page.',
+                        header: this.translate.instant('ADD_BUSINESS_FORM.ACCESS_DENIED'),
+                        message: this.translate.instant('ADD_BUSINESS_FORM.NO_PERMISSION'),
                         buttons: [
                                 {
-                                        text: 'OK',
+                                        text: this.translate.instant('ADD_BUSINESS_FORM.OK'),
                                         handler: () => {
                                                 this.router.navigate(['/login']);
                                         }
@@ -222,7 +223,9 @@ export class AddBusinessLocationComponent implements OnInit {
         async onSubmit() {
                 if (this.businessForm.valid) {
                         const loading = await this.loadingController.create({
-                                message: this.isEditMode ? 'Updating location...' : 'Creating location...'
+                                message: this.isEditMode ?
+                                        this.translate.instant('ADD_BUSINESS_FORM.UPDATING_LOCATION') :
+                                        this.translate.instant('ADD_BUSINESS_FORM.CREATING_LOCATION')
                         });
                         await loading.present();
 
@@ -258,36 +261,54 @@ export class AddBusinessLocationComponent implements OnInit {
                                         this.addBusinessService.modifyBusinessBranch(formData).subscribe({
                                                 next: async () => {
                                                         loading.dismiss();
-                                                        await this.showToast('Business location updated successfully!', 'success');
+                                                        await this.showToast(
+                                                                this.translate.instant('ADD_BUSINESS_FORM.UPDATE_SUCCESS'),
+                                                                'success'
+                                                        );
                                                         this.router.navigate(['/wholesaler/business-locations']);
                                                 },
                                                 error: async (error: any) => {
                                                         loading.dismiss();
                                                         console.error('Update error:', error);
-                                                        await this.showToast('Error updating location. Please try again.', 'danger');
+                                                        await this.showToast(
+                                                                this.translate.instant('ADD_BUSINESS_FORM.UPDATE_ERROR'),
+                                                                'danger'
+                                                        );
                                                 }
                                         });
                                 } else {
                                         this.addBusinessService.createBusinessBranch(formData).subscribe({
                                                 next: async () => {
                                                         loading.dismiss();
-                                                        await this.showToast('Business location created successfully!', 'success');
+                                                        await this.showToast(
+                                                                this.translate.instant('ADD_BUSINESS_FORM.CREATE_SUCCESS'),
+                                                                'success'
+                                                        );
                                                         this.router.navigate(['/wholesaler/business-locations']);
                                                 },
                                                 error: async (error: any) => {
                                                         loading.dismiss();
                                                         console.error('Create error:', error);
-                                                        await this.showToast('Error creating location. Please try again.', 'danger');
+                                                        await this.showToast(
+                                                                this.translate.instant('ADD_BUSINESS_FORM.CREATE_ERROR'),
+                                                                'danger'
+                                                        );
                                                 }
                                         });
                                 }
                         } catch (error) {
                                 loading.dismiss();
                                 console.error('Unexpected error:', error);
-                                await this.showToast('An unexpected error occurred.', 'danger');
+                                await this.showToast(
+                                        this.translate.instant('ADD_BUSINESS_FORM.UNEXPECTED_ERROR'),
+                                        'danger'
+                                );
                         }
                 } else {
-                        await this.showToast('Please fill in all required fields correctly.', 'warning');
+                        await this.showToast(
+                                this.translate.instant('ADD_BUSINESS_FORM.FILL_REQUIRED_FIELDS'),
+                                'warning'
+                        );
                         this.markFormGroupTouched();
                 }
         }
@@ -310,27 +331,27 @@ export class AddBusinessLocationComponent implements OnInit {
 
         getErrorMessage(fieldName: string): string {
                 const control = this.businessForm.get(fieldName);
-                const fieldLabel = this.fieldLabels[fieldName] || fieldName;
+                const fieldLabel = this.translate.instant(this.fieldLabels[fieldName] || fieldName);
 
                 if (control?.errors && control?.touched) {
                         if (control.errors['required']) {
-                                return `${fieldLabel} is required`;
+                                return this.translate.instant('ADD_BUSINESS_FORM.FIELD_REQUIRED', { field: fieldLabel });
                         }
                         if (control.errors['email']) {
-                                return 'Please enter a valid email address';
+                                return this.translate.instant('ADD_BUSINESS_FORM.INVALID_EMAIL');
                         }
                         if (control.errors['pattern']) {
                                 switch (fieldName) {
                                         case 'number':
-                                                return 'Please enter a valid 10-digit phone number';
+                                                return this.translate.instant('ADD_BUSINESS_FORM.INVALID_PHONE');
                                         case 'gstNumber':
-                                                return 'Please enter a valid GST number';
+                                                return this.translate.instant('ADD_BUSINESS_FORM.INVALID_GST');
                                         case 'pan':
-                                                return 'Please enter a valid PAN number';
+                                                return this.translate.instant('ADD_BUSINESS_FORM.INVALID_PAN');
                                         case 'establishedYear':
-                                                return 'Please enter a valid year';
+                                                return this.translate.instant('ADD_BUSINESS_FORM.INVALID_YEAR');
                                         default:
-                                                return 'Please enter a valid value';
+                                                return this.translate.instant('ADD_BUSINESS_FORM.INVALID_VALUE');
                                 }
                         }
                 }

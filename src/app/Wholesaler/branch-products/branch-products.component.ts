@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { ModalController } from '@ionic/angular';
 import { AddProductModalComponent } from '../add-product-modal/add-product-modal.component';
 import { addIcons } from 'ionicons';
 import { add, trash, remove, arrowBack } from 'ionicons/icons'
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface Product {
   id: number;
@@ -40,7 +40,13 @@ export class BranchProductsComponent implements OnInit {
     );
   }
 
-  constructor(private route: ActivatedRoute, private modalCtrl: ModalController, private router: Router) {
+  constructor(
+    private route: ActivatedRoute,
+    private modalCtrl: ModalController,
+    private router: Router,
+    private toastCtrl: ToastController,
+    private translate: TranslateService
+  ) {
     addIcons({ add, trash, remove, arrowBack });
   }
 
@@ -62,8 +68,16 @@ export class BranchProductsComponent implements OnInit {
     ];
   }
 
-  removeProduct(index: number) {
+  async removeProduct(index: number) {
     this.products.splice(index, 1);
+
+    const toast = await this.toastCtrl.create({
+      message: this.translate.instant('BRANCH_PRODUCTS.PRODUCT_REMOVED'),
+      duration: 2000,
+      color: 'success',
+      position: 'bottom'
+    });
+    await toast.present();
   }
 
   async addProduct() {
@@ -81,6 +95,14 @@ export class BranchProductsComponent implements OnInit {
         price: 0,
         stock: 0
       });
+
+      const toast = await this.toastCtrl.create({
+        message: this.translate.instant('BRANCH_PRODUCTS.PRODUCT_ADDED'),
+        duration: 2000,
+        color: 'success',
+        position: 'bottom'
+      });
+      await toast.present();
     }
   }
 

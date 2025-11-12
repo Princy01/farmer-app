@@ -20,7 +20,7 @@
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="business-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Business Details</h2>
+          <h2 class="card-title">{{ 'ADD_STOCK.BUSINESS_DETAILS' | translate }}</h2>
         </div>
       </div>
       <ion-card-content class="card-content">
@@ -93,7 +93,7 @@
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="analytics-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Stock Information</h2>
+          <h2 class="card-title">{{ 'ADD_STOCK.STOCK_INFORMATION' | translate }}</h2>
         </div>
       </div>
       <ion-card-content class="card-content">
@@ -118,7 +118,7 @@
               </ion-button>
               <ion-button fill="outline" class="bulk-btn" (click)="addFifty('wastage')">
                 <ion-icon name="flash-outline" slot="start"></ion-icon>
-                +50
+                {{ 'ADD_STOCK.ADD_FIFTY' | translate }}
               </ion-button>
             </div>
           </div>
@@ -142,7 +142,7 @@
               </ion-button>
               <ion-button fill="outline" class="bulk-btn" (click)="addFifty('stockReceived')">
                 <ion-icon name="flash-outline" slot="start"></ion-icon>
-                +50
+                {{ 'ADD_STOCK.ADD_FIFTY' | translate }}
               </ion-button>
             </div>
           </div>
@@ -166,7 +166,7 @@
               </ion-button>
               <ion-button fill="outline" class="bulk-btn" (click)="addFifty('stockCarriedForward')">
                 <ion-icon name="flash-outline" slot="start"></ion-icon>
-                +50
+                {{ 'ADD_STOCK.ADD_FIFTY' | translate }}
               </ion-button>
             </div>
           </div>
@@ -180,7 +180,7 @@
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="cash-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Pricing</h2>
+          <h2 class="card-title">{{ 'ADD_STOCK.PRICING' | translate }}</h2>
         </div>
       </div>
       <ion-card-content class="card-content">
@@ -205,7 +205,7 @@
               </ion-button>
               <ion-button fill="outline" class="bulk-btn" (click)="addFifty('pricePerUnit')">
                 <ion-icon name="flash-outline" slot="start"></ion-icon>
-                +50
+                {{ 'ADD_STOCK.ADD_FIFTY' | translate }}
               </ion-button>
             </div>
           </div>
@@ -222,9 +222,9 @@
 <ion-footer class="modal-footer">
   <div class="footer-content">
     <div class="stock-summary">
-      <span class="summary-label">Ready to Add Stock</span>
+      <span class="summary-label">{{ 'ADD_STOCK.READY_TO_ADD' | translate }}</span>
       <span class="summary-value" *ngIf="stockData.stockReceived > 0">
-        {{ stockData.stockReceived }} kg
+        {{ stockData.stockReceived }} {{ 'ADD_STOCK.UNIT_KG' | translate }}
       </span>
     </div>
     <ion-button

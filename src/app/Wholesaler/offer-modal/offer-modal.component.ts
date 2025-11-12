@@ -4,7 +4,7 @@ import { IonicModule, ModalController, AlertController, LoadingController } from
 import { FormsModule } from '@angular/forms';
 import { BulkOrder, WholesalerApiService, CreateOfferRequest } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-offer-modal',
@@ -25,7 +25,8 @@ export class OfferModalComponent implements OnInit {
     private wholesalerService: WholesalerApiService,
     private authService: AuthService,
     private alertCtrl: AlertController,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private translate: TranslateService
   ) {}
 
   ngOnInit() {
@@ -43,17 +44,17 @@ export class OfferModalComponent implements OnInit {
     }
 
     if (this.offerPrice <= 0) {
-      await this.showValidationError('Please enter a valid offer price');
+      await this.showValidationError(this.translate.instant('OFFER_MODAL.INVALID_PRICE'));
       return;
     }
 
     if (!this.proposedDeliveryDate) {
-      await this.showValidationError('Please select a delivery date');
+      await this.showValidationError(this.translate.instant('OFFER_MODAL.INVALID_DATE'));
       return;
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Submitting offer...',
+      message: this.translate.instant('OFFER_MODAL.SUBMITTING'),
       spinner: 'circular',
     });
 
@@ -92,24 +93,24 @@ export class OfferModalComponent implements OnInit {
             return;
           }
 
-          await this.showErrorAlert('Failed to submit offer. Please try again.');
+          await this.showErrorAlert(this.translate.instant('OFFER_MODAL.SUBMIT_ERROR'));
         }
       });
     } catch (err) {
       this.isSubmitting = false;
       loading.dismiss();
       console.error('Unexpected error:', err);
-      await this.showErrorAlert('An unexpected error occurred.');
+      await this.showErrorAlert(this.translate.instant('OFFER_MODAL.UNEXPECTED_ERROR'));
     }
   }
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('OFFER_MODAL.AUTH_ERROR'),
+      message: this.translate.instant('OFFER_MODAL.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('OFFER_MODAL.OK'),
           handler: () => {
             this.authService.logout();
             this.modalCtrl.dismiss();
@@ -122,18 +123,18 @@ export class OfferModalComponent implements OnInit {
 
   private async showValidationError(message: string) {
     const alert = await this.alertCtrl.create({
-      header: 'Validation Error',
+      header: this.translate.instant('OFFER_MODAL.VALIDATION_ERROR'),
       message: message,
-      buttons: ['OK']
+      buttons: [this.translate.instant('OFFER_MODAL.OK')]
     });
     await alert.present();
   }
 
   private async showErrorAlert(message: string) {
     const alert = await this.alertCtrl.create({
-      header: 'Error',
+      header: this.translate.instant('OFFER_MODAL.ERROR'),
       message: message,
-      buttons: ['OK']
+      buttons: [this.translate.instant('OFFER_MODAL.OK')]
     });
     await alert.present();
   }

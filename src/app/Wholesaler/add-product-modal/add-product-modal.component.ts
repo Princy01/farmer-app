@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { AddProductService, ProductAll } from './add-product.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-add-product-modal',
@@ -22,7 +22,12 @@ export class AddProductModalComponent {
 
   newProduct = { name: '', category: '', price: 0 };
 
-  constructor(private modalCtrl: ModalController, private addProductService: AddProductService) {}
+  constructor(
+    private modalCtrl: ModalController,
+    private addProductService: AddProductService,
+    private toastCtrl: ToastController,
+    private translate: TranslateService
+  ) {}
 
   ngOnInit() {
     this.addProductService.getAllProductsForAdmin().subscribe((data) => {
@@ -51,30 +56,49 @@ export class AddProductModalComponent {
     return this.products.filter(p => p.selected).length;
   }
 
-  addSelected() {
+  async addSelected() {
     const selectedProducts = this.products.filter(p => p.selected);
     if (selectedProducts.length > 0) {
       this.modalCtrl.dismiss(selectedProducts);
+    } else {
+      await this.showToast(this.translate.instant('ADD_PRODUCT.NO_SELECTION'), 'warning');
     }
   }
 
-  addNew() {
-    if (
-      this.newProduct.name.trim() &&
-      this.newProduct.category.trim() &&
-      this.newProduct.price > 0
-    ) {
-      const prod = {
-        product_id: Date.now(),
-        product_name: this.newProduct.name,
-        cat_id: 0,
-        cat_name: this.newProduct.category,
-        image_path: null,
-        active_status: 1,
-        nutrition_factor: '',
-        price: this.newProduct.price
-      };
-      this.modalCtrl.dismiss([prod]);
+  async addNew() {
+    if (!this.newProduct.name.trim()) {
+      await this.showToast(this.translate.instant('ADD_PRODUCT.NAME_REQUIRED'), 'warning');
+      return;
     }
+    if (!this.newProduct.category.trim()) {
+      await this.showToast(this.translate.instant('ADD_PRODUCT.CATEGORY_REQUIRED'), 'warning');
+      return;
+    }
+    if (this.newProduct.price <= 0) {
+      await this.showToast(this.translate.instant('ADD_PRODUCT.PRICE_REQUIRED'), 'warning');
+      return;
+    }
+
+    const prod = {
+      product_id: Date.now(),
+      product_name: this.newProduct.name,
+      cat_id: 0,
+      cat_name: this.newProduct.category,
+      image_path: null,
+      active_status: 1,
+      nutrition_factor: '',
+      price: this.newProduct.price
+    };
+    this.modalCtrl.dismiss([prod]);
+  }
+
+  async showToast(message: string, color: string) {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2000,
+      color,
+      position: 'bottom'
+    });
+    await toast.present();
   }
 }

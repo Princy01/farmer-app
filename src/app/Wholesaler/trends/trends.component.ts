@@ -4,11 +4,12 @@ import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { barChartOutline, analyticsOutline, cubeOutline, podiumOutline } from 'ionicons/icons';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-trends',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, TranslatePipe],
   templateUrl: './trends.component.html',
   styleUrls: ['./trends.component.scss'],
 })

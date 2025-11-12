@@ -18,7 +18,7 @@
   "Loading more items...": "और आइटम लोड हो रहे हैं...",
 
 
-
+  "BUSINESS_LOCATIONS": {
   "Business Locations": "व्यवसाय स्थान",
   "Add New Location": "नया स्थान जोड़ें",
   "Location": "स्थान",
@@ -38,7 +38,19 @@
   "No Business Locations": "कोई व्यवसाय स्थान नहीं",
   "You haven't added any business locations yet. Click the button above to add your first location.": "आपने अभी तक कोई व्यवसाय स्थान नहीं जोड़ा है। ऊपर दिए गए बटन पर क्लिक करके पहला स्थान जोड़ें।",
   "Loading your business locations...": "आपके व्यवसाय स्थान लोड हो रहे हैं...",
-
+    "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
+    "OK": "ठीक है",
+    "ACCESS_DENIED": "प्रवेश अस्वीकृत",
+    "NO_PERMISSION": "आपको इस पेज तक पहुंच की अनुमति नहीं है।",
+    "LOADING": "स्थान लोड हो रहे हैं...",
+    "ERROR": "त्रुटि",
+    "LOAD_ERROR": "स्थान लोड करने में विफल। कृपया बाद में पुनः प्रयास करें।",
+    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई।",
+    "ADD_LOCATION": "स्थान जोड़ें",
+    "NO_LOCATIONS": "कोई व्यवसाय स्थान नहीं मिला",
+    "NO_LOCATIONS_MESSAGE": "शुरू करने के लिए अपना पहला व्यवसाय स्थान जोड़ें"
+  },
 
 "Update Business": "व्यवसाय अपडेट करें",
   "Update your business details": "अपने व्यवसाय की जानकारी अपडेट करें",
@@ -101,6 +113,14 @@
   "Privileged User": "विशेष उपयोगकर्ता",
   "Active Status": "सक्रिय स्थिति",
   "Submit Registration": "पंजीकरण सबमिट करें",
+   "LOAD_CATEGORIES_ERROR": "व्यवसाय श्रेणियाँ लोड करने में विफल",
+    "LOAD_TYPES_ERROR": "व्यवसाय प्रकार लोड करने में विफल",
+    "LOAD_STATES_ERROR": "राज्यों की सूची लोड करने में विफल",
+    "LOAD_CITIES_ERROR": "शहरों की सूची लोड करने में विफल",
+    "LOAD_LOCATIONS_ERROR": "स्थान लोड करने में विफल",
+    "REGISTRATION_SUCCESS": "व्यवसाय सफलतापूर्वक पंजीकृत हो गया!",
+    "REGISTRATION_FAILED": "व्यवसाय पंजीकरण में विफल",
+    "FIX_ERRORS": "कृपया फ़ॉर्म में त्रुटियाँ सुधारें।",
 
 
   "Order": "ऑर्डर",
@@ -125,10 +145,31 @@
   "Shipped": "भेजा गया",
   "Delivered": "डिलीवर हुआ",
   "Cancelled": "रद्द किया गया",
+   "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
+    "OK": "ठीक है",
+    "ACCESS_DENIED": "प्रवेश अस्वीकृत",
+    "NO_PERMISSION": "आपको इस पेज तक पहुंच की अनुमति नहीं है।",
+    "ORDER_ACCESS_DENIED": "आपको इस ऑर्डर को देखने की अनुमति नहीं है।",
+    "ERROR": "त्रुटि",
+    "LOAD_ERROR": "ऑर्डर विवरण लोड करने में विफल। कृपया बाद में पुनः प्रयास करें।",
+    "DISMISS": "बंद करें",
+    "RETRY": "पुनः प्रयास करें",
+    "STATUS_PROCESSING": "प्रोसेस में है",
+    "STATUS_CONFIRMED": "पुष्ट किया गया",
+    "STATUS_PAYMENT_PENDING": "भुगतान लंबित",
+    "STATUS_REJECTED": "अस्वीकृत",
+    "STATUS_SUCCESSFUL": "सफल",
+    "STATUS_CANCELLED": "रद्द किया गया",
+    "STATUS_RETURNED": "वापस किया गया",
+    "STATUS_RETURN_REQUESTED": "वापसी का अनुरोध किया गया",
+    "STATUS_UNKNOWN": "अज्ञात स्थिति",
 
 
-  "BUSINESS_FORM": {
-    "PAGE_TITLE": "व्यवसाय विवरण",
+
+  "ADD_BUSINESS_FORM": {
+    "PAGE_TITLE": "व्यवसाय स्थान जोड़ें",
+    "EDIT_PAGE_TITLE": "व्यवसाय स्थान संपादित करें",
     "SHOP_NAME": "दुकान का नाम",
     "SHOP_NAME_PLACEHOLDER": "दुकान का नाम दर्ज करें",
     "PHONE_NUMBER": "फ़ोन नंबर",
@@ -147,10 +188,33 @@
     "GST_PLACEHOLDER": "जीएसटी नंबर दर्ज करें",
     "PAN": "पैन नंबर",
     "PAN_PLACEHOLDER": "पैन नंबर दर्ज करें",
+    "PRIVILEGED_USER": "विशेषाधिकार प्राप्त उपयोगकर्ता",
+    "BUSINESS_TYPE": "व्यवसाय का प्रकार",
     "ESTABLISHED_YEAR": "स्थापना वर्ष",
     "YEAR_PLACEHOLDER": "वर्ष दर्ज करें (जैसे 2020)",
+    "ACTIVE_STATUS": "सक्रिय स्थिति",
     "SAVE_LOCATION": "स्थान सहेजें",
-    "UPDATE_LOCATION": "स्थान अपडेट करें"
+    "UPDATE_LOCATION": "स्थान अपडेट करें",
+    "FIELD_REQUIRED": "{{field}} आवश्यक है",
+    "INVALID_EMAIL": "कृपया मान्य ईमेल पता दर्ज करें",
+    "INVALID_PHONE": "कृपया मान्य 10 अंकों का फ़ोन नंबर दर्ज करें",
+    "INVALID_GST": "कृपया मान्य जीएसटी नंबर दर्ज करें (उदा. 22AAAAA0000A1Z5)",
+    "INVALID_PAN": "कृपया मान्य पैन नंबर दर्ज करें (उदा. AAAAA0000A)",
+    "INVALID_YEAR": "कृपया मान्य 4 अंकों का वर्ष दर्ज करें",
+    "INVALID_VALUE": "कृपया मान्य मान दर्ज करें",
+    "FILL_REQUIRED_FIELDS": "कृपया सभी आवश्यक फ़ील्ड सही तरीके से भरें",
+    "CREATING_LOCATION": "व्यवसाय स्थान बनाया जा रहा है...",
+    "UPDATING_LOCATION": "व्यवसाय स्थान अपडेट किया जा रहा है...",
+    "CREATE_SUCCESS": "व्यवसाय स्थान सफलतापूर्वक बनाया गया",
+    "CREATE_ERROR": "व्यवसाय स्थान बनाने में विफल। कृपया पुनः प्रयास करें।",
+    "UPDATE_SUCCESS": "व्यवसाय स्थान सफलतापूर्वक अपडेट किया गया",
+    "UPDATE_ERROR": "व्यवसाय स्थान अपडेट करने में विफल। कृपया पुनः प्रयास करें।",
+    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई। कृपया पुनः प्रयास करें।",
+    "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
+    "ACCESS_DENIED": "प्रवेश अस्वीकृत",
+    "NO_PERMISSION": "आपको इस पृष्ठ तक पहुंच की अनुमति नहीं है।",
+    "OK": "ठीक है"
   },
 
 
@@ -161,42 +225,64 @@
     "PRICE": "कीमत",
     "STOCK": "माल",
     "REMOVE": "हटाएं",
-    "NO_PRODUCTS": "इस शाखा के लिए कोई उत्पाद नहीं मिला।"
+    "NO_PRODUCTS": "इस शाखा के लिए कोई उत्पाद नहीं मिला।",
+    "NO_PRODUCTS_MESSAGE": "शुरू करने के लिए इस शाखा में उत्पाद जोड़ें",
+    "PRODUCT_NAME": "उत्पाद का नाम",
+    "CATEGORY": "श्रेणी",
+    "PRODUCT_ADDED": "उत्पाद सफलतापूर्वक जोड़ा गया",
+    "PRODUCT_REMOVED": "उत्पाद सफलतापूर्वक हटाया गया"
   },
 
 
   "ADD_PRODUCT": {
     "PAGE_TITLE": "उत्पाद जोड़ें",
-    "NOT_FOUND_TEXT": "क्या आपको वह उत्पाद नहीं मिल रहा जिसकी आप तलाश कर रहे हैं?",
-    "RECOMMEND_NEW": "नया सुझाव दें",
-    "SEARCH_PLACEHOLDER": "उत्पाद खोजें",
+    "NOT_FOUND_TEXT": "क्या आप वह नहीं ढूंढ पा रहे हैं जिसकी आपको तलाश है?",
+    "RECOMMEND_NEW": "नया उत्पाद सुझाएं",
+    "SEARCH_PLACEHOLDER": "नाम या श्रेणी से उत्पाद खोजें...",
+    "AVAILABLE_PRODUCTS": "उपलब्ध उत्पाद",
+    "ITEM": "वस्तु",
+    "ITEMS": "वस्तुएँ",
+    "NO_PRODUCTS_FOUND": "कोई उत्पाद नहीं मिला",
+    "ADJUST_SEARCH": "कृपया अपने खोज शब्दों को समायोजित करें",
+    "RECOMMEND_NEW_PRODUCT": "नया उत्पाद सुझाएं",
     "PRODUCT_NAME": "उत्पाद का नाम",
     "PRODUCT_NAME_PLACEHOLDER": "उत्पाद का नाम दर्ज करें",
     "CATEGORY": "श्रेणी",
     "SELECT_CATEGORY": "श्रेणी चुनें",
-    "PRICE": "मूल्य (₹ प्रति 10 किग्रा)",
+    "PRICE": "मूल्य",
     "PRICE_PLACEHOLDER": "मूल्य दर्ज करें",
-    "RECOMMEND_BUTTON": "उत्पाद सुझाएँ",
-    "BACK_TO_LIST": "उत्पाद सूची पर वापस जाएँ",
-    "ADD_SELECTED": "चयनित उत्पाद जोड़ें"
+    "RECOMMEND_BUTTON": "उत्पाद सुझाएं",
+    "BACK_TO_LIST": "उत्पाद सूची पर वापस जाएं",
+    "SELECTED_ITEMS": "चयनित वस्तुएँ",
+    "ADD_SELECTED": "चयनित उत्पाद जोड़ें",
+    "NO_SELECTION": "कृपया कम से कम एक उत्पाद चुनें",
+    "NAME_REQUIRED": "उत्पाद का नाम आवश्यक है",
+    "CATEGORY_REQUIRED": "श्रेणी आवश्यक है",
+    "PRICE_REQUIRED": "कृपया एक मान्य मूल्य दर्ज करें"
   },
 
 
   "ADD_STOCK": {
     "PAGE_TITLE": "स्टॉक जोड़ें",
-    "CLOSE": "बंद करें",
+    "BUSINESS_DETAILS": "व्यवसाय विवरण",
     "BRANCH": "शाखा",
     "SELECT_BRANCH": "शाखा चुनें",
     "PRODUCT": "उत्पाद",
     "SELECT_PRODUCT": "उत्पाद चुनें",
-    "QUALITY": "क्वालिटी",
-    "SELECT_QUALITY": "क्वालिटी चुनो",
-    "WASTAGE": "नुकसान",
-    "STOCK_RECEIVED": "मिला हुआ स्टॉक",
-    "STOCK_CARRIED_FORWARD": "बचा हुआ स्टॉक",
+    "QUALITY": "गुणवत्ता",
+    "SELECT_QUALITY": "गुणवत्ता चुनें",
+    "STOCK_INFORMATION": "स्टॉक जानकारी",
+    "WASTAGE": "नुकसान/बर्बादी",
+    "STOCK_RECEIVED": "प्राप्त स्टॉक",
+    "STOCK_CARRIED_FORWARD": "आगे बढ़ाया गया स्टॉक",
+    "UNIT_KG": "किलो",
+    "ADD_FIFTY": "+50",
+    "PRICING": "मूल्य निर्धारण",
     "PRICE_PER_UNIT": "प्रति इकाई मूल्य",
-    "SAVE": "सहेजें",
-    "UNIT_KG": "किलो"
+    "READY_TO_ADD": "स्टॉक जोड़ने के लिए तैयार",
+    "SAVE": "स्टॉक सहेजें",
+    "SUCCESS_MESSAGE": "स्टॉक सफलतापूर्वक जोड़ा गया",
+    "ERROR_MESSAGE": "स्टॉक जोड़ने में विफल"
   },
 
 
@@ -222,7 +308,18 @@
     "OFFER": "ऑफ़र भेजें",
     "TOP_RETAILERS": "सबसे ज़्यादा खरीदने वाले ग्राहक",
     "TOTAL_QUANTITY": "कुल मात्रा",
-    "TOTAL_ORDER_VALUE": "कुल ऑर्डर मूल्य"
+    "TOTAL_ORDER_VALUE": "कुल ऑर्डर मूल्य",
+    "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
+    "OK": "ठीक है",
+    "ACCESS_DENIED": "प्रवेश अस्वीकृत",
+    "NO_PERMISSION": "आपको इस पेज तक पहुंच की अनुमति नहीं है।",
+    "LOAD_BULK_ORDERS_ERROR": "बड़े ऑर्डर लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "LOAD_TOP_RETAILERS_ERROR": "सबसे ज़्यादा खरीदने वाले ग्राहक लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "LOAD_ERROR": "बाज़ार के अवसर लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "OFFER_SUBMITTED": "ऑफर सफलतापूर्वक जमा किया गया!",
+    "OFFER_ERROR": "ऑफर विंडो खोलने में त्रुटि",
+    "TOP_RETAILERS_TITLE": "ऑर्डर मात्रा के आधार पर 5 सबसे ज़्यादा खरीदने वाले ग्राहक"
   },
 
 
@@ -231,7 +328,17 @@
     "CLOSE": "बंद करें",
     "OFFER_PRICE": "प्रस्तावित मूल्य (₹)",
     "MESSAGE": "संदेश (वैकल्पिक)",
-    "SUBMIT": "प्रस्ताव भेजें"
+    "SUBMIT": "प्रस्ताव भेजें",
+    "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
+    "OK": "ठीक है",
+    "SUBMITTING": "ऑफर जमा किया जा रहा है...",
+    "VALIDATION_ERROR": "मान्यता त्रुटि",
+    "INVALID_PRICE": "कृपया एक मान्य ऑफर मूल्य दर्ज करें",
+    "INVALID_DATE": "कृपया डिलीवरी तिथि चुनें",
+    "ERROR": "त्रुटि",
+    "SUBMIT_ERROR": "ऑफर जमा करने में विफल। कृपया पुनः प्रयास करें।",
+    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई।"
   },
 
 
@@ -250,7 +357,18 @@
     "FILTER_PRICE_LOW": "कीमत ↑",
     "FILTER_PRICE_HIGH": "कीमत ↓",
     "FILTER_BULK": "थोक ऑर्डर",
-    "FILTER_PRODUCT": "उत्पाद के अनुसार"
+    "FILTER_PRODUCT": "उत्पाद के अनुसार",
+    "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
+    "OK": "ठीक है",
+    "ACCESS_DENIED": "प्रवेश अस्वीकृत",
+    "NO_PERMISSION": "आपको इस पेज तक पहुंच की अनुमति नहीं है।",
+    "LOADING": "ऑर्डर लोड हो रहे हैं...",
+    "ERROR": "त्रुटि",
+    "LOAD_ERROR": "ऑर्डर लोड करने में विफल। कृपया बाद में पुनः प्रयास करें।",
+    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई।",
+    "DISMISS": "बंद करें",
+    "RETRY": "पुनः प्रयास करें"
   },
 
 
@@ -379,7 +497,75 @@
   "PRICE": "कीमत",
   "UPDATE": "अपडेट करें",
   "NO_STOCK": "आज के लिए अभी तक कोई स्टॉक नहीं जोड़ा गया है।"
-}
+},
+
+
+
+  "STOCK_INSIGHTS": {
+    "PAGE_TITLE": "रुझान",
+    "LOADING": "डेटा लोड हो रहा है...",
+    "LOADING_MESSAGE": "कृपया प्रतीक्षा करें, डेटा लोड हो रहा है...",
+
+    "SEGMENT_STOCK_LEVELS": "स्टॉक स्तर",
+    "SEGMENT_LOW_STOCK": "कम स्टॉक",
+    "SEGMENT_SLOW_MOVING": "धीमी गति से बिकने वाला",
+
+    "SELECT_WAREHOUSE": "वेयरहाउस/मंडी चुनें",
+    "STOCK_LEVELS_TITLE": "स्टॉक स्तर",
+
+    "LOW_STOCK_HEADER": "कम स्टॉक अलर्ट",
+    "TOTAL_LABEL": "कुल",
+    "CURRENT_STOCK": "वर्तमान स्टॉक",
+
+    "SLOW_MOVING_HEADER": "धीमी गति से बिकने वाले उत्पाद",
+    "DAYS_IN_STOCK": "दिनों से स्टॉक में",
+    "LOCATION": "स्थान",
+    "WEEKLY_SALES": "साप्ताहिक बिक्री",
+
+    "KG_UNIT": "किलो",
+
+    "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
+    "ACCESS_DENIED": "प्रवेश अस्वीकृत",
+    "NO_PERMISSION": "आपको इस पेज तक पहुंच की अनुमति नहीं है।",
+    "OK": "ठीक है",
+
+    "NO_MANDIS": "आपके खाते के लिए कोई मंडी उपलब्ध नहीं है",
+    "LOAD_MANDI_ERROR": "मंडी सूची लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "LOAD_STOCK_ERROR": "स्टॉक डेटा प्राप्त करने में विफल",
+    "LOAD_LOW_STOCK_ERROR": "कम स्टॉक अलर्ट प्राप्त करने में विफल",
+    "LOAD_SLOW_MOVING_ERROR": "धीमी गति से बिकने वाले उत्पाद प्राप्त करने में विफल",
+    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई",
+    "ERROR_FETCHING_ALERTS": "अलर्ट प्राप्त करते समय त्रुटि हुई",
+    "ERROR_FETCHING_SLOW_MOVING": "धीमी गति से बिकने वाले उत्पाद प्राप्त करते समय त्रुटि हुई",
+    "ERROR_FETCHING_STOCK": "स्टॉक डेटा प्राप्त करते समय त्रुटि हुई",
+
+    "RETRY": "पुनः प्रयास करें",
+    "CLOSE": "बंद करें"
+  },
+
+
+  "TRENDS": {
+    "PAGE_TITLE": "रुझान",
+    "SALES_TRENDS": "बिक्री रुझान",
+    "DEMAND_TRENDS": "मांग रुझान",
+    "STOCK_INSIGHTS": "स्टॉक विश्लेषण",
+    "MARKET_COMPARISON": "बाज़ार तुलना"
+  },
+
+
+  "UPDATE_STOCK": {
+    "PAGE_TITLE": "स्टॉक अपडेट करें",
+    "CLOSE": "बंद करें",
+    "STOCK_TO_DEDUCT": "कटौती करने वाला स्टॉक",
+    "UPDATE": "अपडेट करें",
+    "INVALID_AMOUNT": "कृपया कटौती के लिए मान्य मात्रा दर्ज करें",
+    "STOCK_EXCEEDS": "कटौती की गई मात्रा वर्तमान स्टॉक से अधिक नहीं हो सकती",
+    "UPDATE_SUCCESS": "स्टॉक सफलतापूर्वक अपडेट किया गया",
+    "UPDATE_FAILED": "स्टॉक अपडेट करने में विफल रहा"
+  }
+
+
 
 
 

@@ -10,7 +10,7 @@ import { catchError, finalize, of } from 'rxjs';
 import { GroupedPriceComparison, WholesellerPrice } from './market-comparison.service';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface ProductPrices {
   [key: string]: number;
@@ -49,8 +49,8 @@ export class MarketComparisonComponent implements OnInit {
     private toastController: ToastController,
     private alertCtrl: AlertController,
     private router: Router,
-    private authService: AuthService
-
+    private authService: AuthService,
+    private translate: TranslateService
   ) {
     addIcons({ chevronBackOutline });
   }
@@ -65,22 +65,21 @@ export class MarketComparisonComponent implements OnInit {
       return;
     }
 
-    //Check if user has wholesaler role
     if (!this.authService.hasRole('wholesaler')) {
       this.showUnauthorizedError();
       return;
     }
 
-      this.initializeCharts();
+    this.initializeCharts();
   }
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('MARKET_COMPARISON.AUTH_ERROR'),
+      message: this.translate.instant('MARKET_COMPARISON.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('MARKET_COMPARISON.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -91,14 +90,13 @@ export class MarketComparisonComponent implements OnInit {
     await alert.present();
   }
 
-  // Unauthorized error handler
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('MARKET_COMPARISON.ACCESS_DENIED'),
+      message: this.translate.instant('MARKET_COMPARISON.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('MARKET_COMPARISON.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -111,7 +109,7 @@ export class MarketComparisonComponent implements OnInit {
   async showLoading() {
     this.isLoading = true;
     const loading = await this.loadingController.create({
-      message: 'Loading price data...',
+      message: this.translate.instant('MARKET_COMPARISON.LOADING'),
       spinner: 'crescent'
     });
     await loading.present();
@@ -135,14 +133,14 @@ export class MarketComparisonComponent implements OnInit {
 
   onMandiChange(event: any) {
     if (this.selectedMandis.length && this.selectedProducts.length) {
-      this.useRealData = true;  // Reset to try real data again
+      this.useRealData = true;
       this.updateChart();
     }
   }
 
   onProductChange(event: any) {
     if (this.selectedMandis.length && this.selectedProducts.length) {
-      this.useRealData = true;  // Reset to try real data again
+      this.useRealData = true;
       this.updateChart();
     }
   }
@@ -158,19 +156,17 @@ export class MarketComparisonComponent implements OnInit {
       try {
         const productIds = this.selectedProducts.map(name => this.getProductId(name));
 
-        // Call service without wholesaler ID - backend will get user_id from JWT
         this.marketComparisonService.getWholesellerPriceComparison(productIds)
           .pipe(
             catchError(error => {
               console.error('API Error:', error);
 
-              // Handle authentication errors
               if (error.status === 401) {
                 this.showAuthError();
                 return of(null);
               }
 
-              this.showToast('Unable to fetch real-time data. Using stored data.');
+              this.showToast(this.translate.instant('MARKET_COMPARISON.UNABLE_TO_FETCH'));
               this.useRealData = false;
               return of(null);
             }),
@@ -182,7 +178,7 @@ export class MarketComparisonComponent implements OnInit {
           .subscribe(data => {
             if (data) {
               this.updateChartWithRealData(data);
-              this.showToast('Price data updated successfully!', 'success');
+              this.showToast(this.translate.instant('MARKET_COMPARISON.DATA_UPDATED'), 'success');
             } else {
               this.useRealData = false;
               this.updateChartWithFallbackData();
@@ -193,7 +189,7 @@ export class MarketComparisonComponent implements OnInit {
         this.isLoading = false;
         this.useRealData = false;
         this.updateChartWithFallbackData();
-        this.showToast('Error fetching data. Using fallback data.');
+        this.showToast(this.translate.instant('MARKET_COMPARISON.ERROR_FETCHING'));
       }
     } else {
       this.updateChartWithFallbackData();
@@ -264,10 +260,10 @@ export class MarketComparisonComponent implements OnInit {
       colors: ['#008FFB', '#00E396', '#FEB019'],
       xaxis: {
         categories: this.selectedProducts,
-        title: { text: 'Products' }
+        title: { text: this.translate.instant('MARKET_COMPARISON.PRODUCTS_LABEL') }
       },
       yaxis: {
-        title: { text: 'Price (₹/kg)' },
+        title: { text: this.translate.instant('MARKET_COMPARISON.PRICE_LABEL') },
         labels: {
           formatter: (val: number) => `₹${val}`
         }
@@ -314,7 +310,6 @@ export class MarketComparisonComponent implements OnInit {
       event.target.complete();
     }
   }
-
 
   goBack() {
     this.router.navigate(['/wholesaler/home']);

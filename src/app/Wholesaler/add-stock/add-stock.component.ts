@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { StockService, BusinessBranchWithNames, AddStockPayload } from 'src/app/Wholesaler/services/stock.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import {
   cubeOutline,
@@ -57,7 +57,8 @@ export class AddStockComponent {
     private modalCtrl: ModalController,
     private toastCtrl: ToastController,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
   ) {
      addIcons({
       cubeOutline,
@@ -107,7 +108,6 @@ export class AddStockComponent {
   }
 
   addStock() {
-    // Use snake_case keys for payload
     const payload: AddStockPayload = {
       product_id: this.stockData.productId,
       quality: this.stockData.quality,
@@ -122,7 +122,7 @@ export class AddStockComponent {
     this.stockService.addStock(payload).subscribe({
       next: async () => {
         const toast = await this.toastCtrl.create({
-          message: 'Stock added successfully',
+          message: this.translate.instant('ADD_STOCK.SUCCESS_MESSAGE'),
           duration: 2000,
           color: 'success'
         });
@@ -131,7 +131,7 @@ export class AddStockComponent {
       },
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: 'Failed to add stock',
+          message: this.translate.instant('ADD_STOCK.ERROR_MESSAGE'),
           duration: 2000,
           color: 'danger'
         });

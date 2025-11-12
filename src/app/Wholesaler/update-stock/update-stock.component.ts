@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { StockService } from 'src/app/Wholesaler/services/stock.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-update-stock',
   templateUrl: './update-stock.component.html',
   styleUrls: ['./update-stock.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule],
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
 })
 export class UpdateStockComponent implements OnInit {
   @Input() stockItem: any;
@@ -20,7 +21,8 @@ export class UpdateStockComponent implements OnInit {
   constructor(
     private stockService: StockService,
     private modalCtrl: ModalController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private translate: TranslateService
   ) { }
 
   ngOnInit() { }
@@ -28,7 +30,7 @@ export class UpdateStockComponent implements OnInit {
   async updateStock() {
     if (this.stockToDeduct == null || this.stockToDeduct < 0) {
       const toast = await this.toastCtrl.create({
-        message: 'Please enter a valid amount to deduct',
+        message: this.translate.instant('UPDATE_STOCK.INVALID_AMOUNT'),
         duration: 2000,
         color: 'danger'
       });
@@ -39,7 +41,7 @@ export class UpdateStockComponent implements OnInit {
     const updatedStock = (this.stockItem.current_stock ?? this.stockItem.currentStock) - this.stockToDeduct;
     if (updatedStock < 0) {
       const toast = await this.toastCtrl.create({
-        message: 'Deducted stock cannot be more than current stock',
+        message: this.translate.instant('UPDATE_STOCK.STOCK_EXCEEDS'),
         duration: 2000,
         color: 'danger'
       });
@@ -57,7 +59,7 @@ export class UpdateStockComponent implements OnInit {
     this.stockService.updateStock(payload).subscribe({
       next: async () => {
         const toast = await this.toastCtrl.create({
-          message: 'Stock updated successfully',
+          message: this.translate.instant('UPDATE_STOCK.UPDATE_SUCCESS'),
           duration: 2000,
           color: 'success'
         });
@@ -66,7 +68,7 @@ export class UpdateStockComponent implements OnInit {
       },
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: 'Failed to update stock',
+          message: this.translate.instant('UPDATE_STOCK.UPDATE_FAILED'),
           duration: 2000,
           color: 'danger'
         });
