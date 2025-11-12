@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable, catchError, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -32,6 +32,10 @@ export interface DriverInfoRequest {
   status: string;
 }
 
+export interface DriverInfoResponse extends DriverInfoRequest {
+  driver_id: number;
+}
+
 // Driver Document Request Interface
 export interface DriverDocumentRequest {
   driver_id: number;
@@ -41,6 +45,14 @@ export interface DriverDocumentRequest {
   insurance_img: string;
   rc_img: string;
   license_img: string;
+}
+
+export interface DriverDocumentResponse {
+  document_id: number;
+  driver_id: number;
+  doc_type: string;
+  doc_image: string;
+  created_at: string;
 }
 
 // Driver Vehicle Interface
@@ -58,6 +70,10 @@ export interface DriverVehicle {
   kms_travelled: number;
 }
 
+export interface DriverVehicleResponse extends DriverVehicle {
+  vehicle_id: number;
+}
+
 // Vehicle Insurance Interface
 export interface DriverVehicleInsurance {
   vehicle_id: number;
@@ -66,6 +82,11 @@ export interface DriverVehicleInsurance {
   ins_company: string;
   amt_insured: number;
   driver_id: number;
+}
+
+export interface DriverVehicleInsuranceResponse extends DriverVehicleInsurance {
+  insurance_id: number;
+  created_at?: string;
 }
 
 // Response Interfaces
@@ -108,7 +129,7 @@ export interface City {
 export class DriverService {
   private baseUrl = environment.apiUrl;
 
-constructor(
+  constructor(
     private http: HttpClient,
     private authService: AuthService
   ) { }
@@ -121,6 +142,7 @@ constructor(
     });
   }
 
+  // Check if driver exists (user_id based)
   checkDriverExists(): Observable<boolean> {
     return this.http.get<boolean>(
       `${this.baseUrl}/getDriverExists`,
@@ -128,6 +150,69 @@ constructor(
     );
   }
 
+  // Check if driver registration is completed
+  checkDriverRegistrationCompleted(): Observable<boolean> {
+    return this.http.get<{ is_completed: boolean }>(
+      `${this.baseUrl}/getDriverRegistrationStatus`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      map(response => response.is_completed)
+    );
+  }
+
+  // Get driver info (user_id based - returns driver data or null)
+  getDriverInfo(): Observable<DriverInfoResponse | null> {
+    return this.http.get<DriverInfoResponse>(
+      `${this.baseUrl}/getDriverInfo`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.log('No driver info found:', error);
+        return of(null);
+      })
+    );
+  }
+
+  // Get vehicles by driver_id (which is user_id)
+  getDriverVehicles(driverId: number): Observable<DriverVehicleResponse[]> {
+    return this.http.get<DriverVehicleResponse[]>(
+      `${this.baseUrl}/getDriverVehiclesByDriverId/${driverId}`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.log('No vehicles found:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // Get documents by driver_id (which is user_id)
+  getDriverDocuments(driverId: number): Observable<DriverDocumentResponse[]> {
+    return this.http.get<DriverDocumentResponse[]>(
+      `${this.baseUrl}/getDriverDocuments/${driverId}`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.log('No documents found:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // Get insurance by driver_id (which is user_id)
+  getDriverInsurance(driverId: number): Observable<DriverVehicleInsuranceResponse[]> {
+    return this.http.get<DriverVehicleInsuranceResponse[]>(
+      `${this.baseUrl}/getDriverVehicleInsuranceByDriverId/${driverId}`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.log('No insurance found:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // ADD methods
   addDriver(driverInfo: DriverInfoRequest): Observable<DriverResponse> {
     return this.http.post<DriverResponse>(
       `${this.baseUrl}/AddADriver`,
@@ -152,7 +237,6 @@ constructor(
     );
   }
 
-
   addDriverVehicleInsurance(insuranceData: DriverVehicleInsurance): Observable<InsuranceResponse> {
     return this.http.post<InsuranceResponse>(
       `${this.baseUrl}/AddADriverInsurance`,
@@ -161,35 +245,40 @@ constructor(
     );
   }
 
-  getAllDrivers(): Observable<any[]> {
-    return this.http.get<any[]>(
-      `${this.baseUrl}/GetDrivers`,
-      { headers: this.getHeaders() }
-    );
-  }
-
-  getDriverById(driverId: number): Observable<any> {
-    return this.http.get<any>(
-      `${this.baseUrl}/GetDriverById/${driverId}`,
-      { headers: this.getHeaders() }
-    );
-  }
-
-  updateDriver(driverId: number, driverData: Partial<DriverInfoRequest>): Observable<any> {
+  // UPDATE methods
+  updateDriverInfo(driverId: number, driverInfo: DriverInfoRequest): Observable<any> {
     return this.http.put<any>(
-      `${this.baseUrl}/UpdateDriver`,
-      { driver_id: driverId, ...driverData },
+      `${this.baseUrl}/updateDriverInfo/${driverId}`,
+      driverInfo,
       { headers: this.getHeaders() }
     );
   }
 
-  deleteDriver(driverId: number): Observable<any> {
-    return this.http.delete<any>(
-      `${this.baseUrl}/DeleteDriver/${driverId}`,
+  updateDriverVehicle(vehicleId: number, vehicleData: DriverVehicle): Observable<any> {
+    return this.http.put<any>(
+      `${this.baseUrl}/updateDriverVehicle/${vehicleId}`,
+      vehicleData,
       { headers: this.getHeaders() }
     );
   }
 
+  updateDriverDocument(documentId: number, documentData: any): Observable<any> {
+    return this.http.put<any>(
+      `${this.baseUrl}/updateDriverDocument/${documentId}`,
+      documentData,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  updateDriverVehicleInsurance(insuranceId: number, insuranceData: DriverVehicleInsurance): Observable<any> {
+    return this.http.put<any>(
+      `${this.baseUrl}/updateDriverInsurance/${insuranceId}`,
+      insuranceData,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  // Other methods
   getStates(): Observable<State[]> {
     return this.http.get<State[]>(
       `${this.baseUrl}/getStates`,
@@ -198,9 +287,9 @@ constructor(
   }
 
   getCitiesOfState(stateId: number): Observable<City[]> {
-  return this.http.get<City[]>(
-    `${this.baseUrl}/getAllCitiesOfState/${stateId}`,
-    { headers: this.getHeaders() }
-  );
-}
+    return this.http.get<City[]>(
+      `${this.baseUrl}/getAllCitiesOfState/${stateId}`,
+      { headers: this.getHeaders() }
+    );
+  }
 }
