@@ -9,6 +9,7 @@ import { SalesTrendsService, SalesTrend, TopSellingProduct } from './sales-trend
 import { catchError, finalize, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface ProductData {
   name: string;
@@ -21,7 +22,7 @@ interface ProductData {
   templateUrl: './sales-trends.component.html',
   styleUrls: ['./sales-trends.component.scss'],
   standalone: true,
-  imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule],
+  imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule, TranslatePipe],
 })
 export class SalesTrendsComponent implements OnInit {
   selectedView: string = 'trends';
@@ -40,7 +41,8 @@ export class SalesTrendsComponent implements OnInit {
     private loadingController: LoadingController,
     private alertCtrl: AlertController,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) {
     addIcons({ chevronBackOutline });
   }
@@ -49,25 +51,21 @@ export class SalesTrendsComponent implements OnInit {
     this.checkAuthAndLoadData();
   }
 
-  // authentication check
   private checkAuthAndLoadData() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-    // Check if user has wholesaler role
     if (!this.authService.hasRole('wholesaler')) {
       this.showUnauthorizedError();
       return;
     }
 
-    // Set initial data
     this.selectedView = 'trends';
     this.selectedPeriod = 'monthly';
     this.selectedMetric = 'volume';
 
-    // Initialize charts after a brief delay to ensure template is ready
     setTimeout(() => {
       this.initializeCharts();
     }, 0);
@@ -75,11 +73,11 @@ export class SalesTrendsComponent implements OnInit {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('SALES_TRENDS.AUTH_ERROR'),
+      message: this.translate.instant('SALES_TRENDS.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('SALES_TRENDS.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -90,14 +88,13 @@ export class SalesTrendsComponent implements OnInit {
     await alert.present();
   }
 
-  // unauthorized error handler
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('SALES_TRENDS.ACCESS_DENIED'),
+      message: this.translate.instant('SALES_TRENDS.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('SALES_TRENDS.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -110,7 +107,7 @@ export class SalesTrendsComponent implements OnInit {
   async showLoading() {
     this.isLoading = true;
     const loading = await this.loadingController.create({
-      message: 'Loading data...',
+      message: this.translate.instant('SALES_TRENDS.LOADING'),
       spinner: 'crescent'
     });
     await loading.present();
@@ -196,7 +193,7 @@ export class SalesTrendsComponent implements OnInit {
             return of([]);
           }
 
-          this.errorMessage = 'Failed to fetch real data. Falling back to dummy data.';
+          this.errorMessage = this.translate.instant('SALES_TRENDS.FALLBACK_ERROR');
           this.useRealData = false;
           const dummyData = this.getDataForPeriod(this.selectedPeriod);
           return of(dummyData.values.map((value, index) => ({
@@ -230,11 +227,11 @@ export class SalesTrendsComponent implements OnInit {
     this.chartOptions = {
       series: [
         {
-          name: 'Total Revenue',
+          name: this.translate.instant('SALES_TRENDS.TOTAL_REVENUE'),
           data: data.map(item => item.total_revenue)
         },
         {
-          name: 'Total Orders',
+          name: this.translate.instant('SALES_TRENDS.TOTAL_ORDERS'),
           data: data.map(item => item.total_orders)
         }
       ],
@@ -253,7 +250,7 @@ export class SalesTrendsComponent implements OnInit {
       yaxis: [
         {
           title: {
-            text: 'Revenue (₹)'
+            text: this.translate.instant('SALES_TRENDS.REVENUE_LABEL')
           },
           labels: {
             formatter: (value: number) => `₹${(value / 1000).toFixed(0)}K`
@@ -262,7 +259,7 @@ export class SalesTrendsComponent implements OnInit {
         {
           opposite: true,
           title: {
-            text: 'Orders'
+            text: this.translate.instant('SALES_TRENDS.ORDERS_LABEL')
           },
           labels: {
             formatter: (value: number) => `${Math.round(value)}`
@@ -270,7 +267,9 @@ export class SalesTrendsComponent implements OnInit {
         }
       ],
       title: {
-        text: `${this.capitalize(this.selectedPeriod)} Sales Trends`,
+        text: this.translate.instant('SALES_TRENDS.SALES_TRENDS_TITLE', {
+          period: this.translate.instant(`SALES_TRENDS.PERIOD_${this.selectedPeriod.toUpperCase()}`)
+        }),
         align: 'center',
         style: {
           fontSize: '16px'
@@ -313,7 +312,7 @@ export class SalesTrendsComponent implements OnInit {
             return of([]);
           }
 
-          this.errorMessage = 'Failed to fetch top products data. Falling back to dummy data.';
+          this.errorMessage = this.translate.instant('SALES_TRENDS.TOP_PRODUCTS_ERROR');
           this.useRealData = false;
           return of(this.getTopProductsForPeriod(this.selectedPeriod).map(item => ({
             product_id: 0,
@@ -345,7 +344,9 @@ export class SalesTrendsComponent implements OnInit {
 
       this.topProductsOptions = {
         series: [{
-          name: isVolume ? 'Sales Volume' : 'Sales Revenue',
+          name: isVolume ?
+            this.translate.instant('SALES_TRENDS.SALES_VOLUME') :
+            this.translate.instant('SALES_TRENDS.SALES_REVENUE'),
           data: sortedData.map(item => isVolume ? item.volume : item.price)
         }],
         chart: {
@@ -391,7 +392,7 @@ export class SalesTrendsComponent implements OnInit {
         xaxis: {
           categories: sortedData.map(item => item.name),
           title: {
-            text: 'Products & Mandi Location',
+            text: this.translate.instant('SALES_TRENDS.PRODUCTS_MANDI'),
             offsetY: 70,
             style: {
               fontSize: '14px'
@@ -407,7 +408,9 @@ export class SalesTrendsComponent implements OnInit {
         },
         yaxis: {
           title: {
-            text: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)'
+            text: isVolume ?
+              this.translate.instant('SALES_TRENDS.VOLUME_KG') :
+              this.translate.instant('SALES_TRENDS.REVENUE_RUPEES')
           },
           labels: {
             formatter: (value: number) => isVolume ?
@@ -420,7 +423,12 @@ export class SalesTrendsComponent implements OnInit {
           '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
         ],
         title: {
-          text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
+          text: this.translate.instant('SALES_TRENDS.TOP_PRODUCTS_TITLE', {
+            metric: isVolume ?
+              this.translate.instant('SALES_TRENDS.VOLUME') :
+              this.translate.instant('SALES_TRENDS.REVENUE'),
+            period: this.translate.instant(`SALES_TRENDS.PERIOD_${this.selectedPeriod.toUpperCase()}`)
+          }),
           align: 'center',
           style: {
             fontSize: '16px'
@@ -442,19 +450,19 @@ export class SalesTrendsComponent implements OnInit {
     const isVolume = this.selectedMetric === 'volume';
     console.log('Top Products:', products);
 
-    // Sort products by volume or revenue
     const sortedData = [...products].sort((a, b) =>
       isVolume ?
         (b.total_quantity_kg || 0) - (a.total_quantity_kg || 0) :
         (b.total_price || 0) - (a.total_price || 0)
     );
 
-    // Take top 10 products
     const top10Products = sortedData.slice(0, 10);
 
     this.topProductsOptions = {
       series: [{
-        name: isVolume ? 'Sales Volume (kg)' : 'Sales Revenue (₹)',
+        name: isVolume ?
+          this.translate.instant('SALES_TRENDS.VOLUME_KG') :
+          this.translate.instant('SALES_TRENDS.REVENUE_RUPEES'),
         data: top10Products.map(item =>
           isVolume ? item.total_quantity_kg : item.total_price
         )
@@ -504,7 +512,7 @@ export class SalesTrendsComponent implements OnInit {
           `${item.product_name || 'Unknown'} (${item.mandi_name || 'Unknown Mandi'})`
         ),
         title: {
-          text: 'Products',
+          text: this.translate.instant('SALES_TRENDS.PRODUCTS'),
           offsetY: 70,
           style: {
             fontSize: '14px'
@@ -520,7 +528,9 @@ export class SalesTrendsComponent implements OnInit {
       },
       yaxis: {
         title: {
-          text: isVolume ? 'Sales Volume (kg)' : 'Revenue (₹)'
+          text: isVolume ?
+            this.translate.instant('SALES_TRENDS.VOLUME_KG') :
+            this.translate.instant('SALES_TRENDS.REVENUE_RUPEES')
         },
         labels: {
           formatter: (value: number) => isVolume ?
@@ -533,7 +543,12 @@ export class SalesTrendsComponent implements OnInit {
         '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
       ],
       title: {
-        text: `Top Products by ${isVolume ? 'Volume' : 'Revenue'} - ${this.capitalize(this.selectedPeriod)}`,
+        text: this.translate.instant('SALES_TRENDS.TOP_PRODUCTS_TITLE', {
+          metric: isVolume ?
+            this.translate.instant('SALES_TRENDS.VOLUME') :
+            this.translate.instant('SALES_TRENDS.REVENUE'),
+          period: this.translate.instant(`SALES_TRENDS.PERIOD_${this.selectedPeriod.toUpperCase()}`)
+        }),
         align: 'center',
         style: {
           fontSize: '16px'

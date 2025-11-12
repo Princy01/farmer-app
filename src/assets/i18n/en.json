@@ -298,7 +298,100 @@
   "FILTER": "Filter",
   "SELECT_DATES": "Please select both start and end dates",
   "NO_ORDERS_IN_RANGE": "No orders found in selected date range"
-}
+},
+
+
+  "PRODUCT_DETAILS": {
+    "TITLE": "Product Details",
+    "QUANTITY_INFO": "Quantity Information",
+    "TOTAL_COMBINED": "Total Combined Quantity",
+    "MANDI_WISE": "Mandi-wise Distribution",
+    "ORDER_STATS": "Order Statistics",
+    "TOTAL_ORDERS": "Total Orders",
+    "LAST_7_DAYS": "Last 7 Days",
+    "LAST_30_DAYS": "Last 30 Days",
+    "LAST_6_MONTHS": "Last 6 Months",
+    "LAST_YEAR": "Last Year",
+    "QUICK_ACTIONS": "Quick Actions",
+    "UPDATE_STOCK": "Update Stock",
+    "EDIT_PRICE": "Edit Price",
+    "SET_DISCOUNT": "Set Discount",
+    "MARK_OUT_OF_STOCK": "Mark Out of Stock"
+  },
+
+"RESTOCK_RECS": {
+    "PAGE_TITLE": "Restock Recommendations",
+    "LOADING_RECOMMENDATIONS": "Loading recommendations...",
+    "LOAD_ERROR": "Failed to load restocking recommendations. Please try again.",
+    "TRY_AGAIN": "Try Again",
+    "TRY_LATER": "Please try again later.",
+    "AVAILABLE_STOCK": "Available Stock",
+    "LOW_STOCK": "Low Stock",
+    "RESTOCK_SOON": "Restock Soon",
+    "STOCK_SUFFICIENT": "Stock Sufficient",
+    "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You don't have permission to view this page.",
+    "ERROR_TITLE": "Error",
+    "UNEXPECTED_ERROR": "Unexpected Error",
+    "OK": "OK",
+    "DISMISS": "Dismiss",
+    "RETRY": "Retry"
+  },
+
+
+
+  "SALES_TRENDS": {
+    "PAGE_TITLE": "Trends",
+    "SALES_TRENDS": "Sales Trends",
+    "TOP_PRODUCTS": "Top Products",
+    "SELECT_PERIOD": "Select Period",
+    "WEEKLY": "Weekly",
+    "MONTHLY": "Monthly",
+    "QUARTERLY": "Quarterly",
+    "YEARLY": "Yearly",
+    "VIEW_BY": "View By",
+    "BY_VOLUME": "By Volume (kg)",
+    "BY_REVENUE": "By Revenue (₹)",
+    "TOTAL_REVENUE": "Total Revenue",
+    "TOTAL_ORDERS": "Total Orders",
+    "REVENUE_LABEL": "Revenue (₹)",
+    "ORDERS_LABEL": "Orders",
+    "SALES_VOLUME": "Sales Volume",
+    "SALES_REVENUE": "Sales Revenue",
+    "PRODUCTS_MANDI": "Products & Mandi Location",
+    "PRODUCTS": "Products",
+    "VOLUME_KG": "Sales Volume (kg)",
+    "REVENUE_RUPEES": "Sales Revenue (₹)",
+    "VOLUME": "Volume",
+    "REVENUE": "Revenue",
+    "SALES_TRENDS_TITLE": "{{period}} Sales Trends",
+    "TOP_PRODUCTS_TITLE": "Top Products by {{metric}} - {{period}}",
+    "PERIOD_WEEKLY": "Weekly",
+    "PERIOD_MONTHLY": "Monthly",
+    "PERIOD_QUARTERLY": "Quarterly",
+    "PERIOD_YEARLY": "Yearly",
+    "AUTH_ERROR": "Authentication Error",
+    "SESSION_EXPIRED": "Your session has expired. Please login again.",
+    "ACCESS_DENIED": "Access Denied",
+    "NO_PERMISSION": "You do not have permission to access this page.",
+    "OK": "OK",
+    "LOADING": "Loading data...",
+    "FALLBACK_ERROR": "Failed to fetch real data. Falling back to dummy data.",
+    "TOP_PRODUCTS_ERROR": "Failed to fetch top products data. Falling back to dummy data."
+  },
+
+
+
+  "STOCK_DASHBOARD": {
+    "PAGE_TITLE": "Today's Stock",
+    "BRANCH_LABEL": "Branch",
+    "CURRENT_STOCK": "Current Stock",
+    "PRICE": "Price",
+    "UPDATE": "Update",
+    "NO_STOCK": "No stock added yet for today."
+  }
 
 
 

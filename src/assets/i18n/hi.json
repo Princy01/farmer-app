@@ -287,6 +287,101 @@
   "FILTER": "फ़िल्टर करें",
   "SELECT_DATES": "कृपया शुरुआत और समाप्ति दोनों तिथियां चुनें",
   "NO_ORDERS_IN_RANGE": "चयनित तिथि सीमा में कोई ऑर्डर नहीं मिला"
+},
+
+
+ "PRODUCT_DETAILS": {
+    "TITLE": "उत्पाद जानकारी",
+    "QUANTITY_INFO": "मात्रा जानकारी",
+    "TOTAL_COMBINED": "कुल संयुक्त मात्रा",
+    "MANDI_WISE": "मंडी अनुसार मात्रा",
+    "ORDER_STATS": "ऑर्डर जानकारी",
+    "TOTAL_ORDERS": "कुल ऑर्डर",
+    "LAST_7_DAYS": "पिछले 7 दिन",
+    "LAST_30_DAYS": "पिछले 30 दिन",
+    "LAST_6_MONTHS": "पिछले 6 महीने",
+    "LAST_YEAR": "पिछला वर्ष",
+    "QUICK_ACTIONS": "त्वरित क्रियाएँ",
+    "UPDATE_STOCK": "स्टॉक अपडेट करें",
+    "EDIT_PRICE": "मूल्य बदलें",
+    "SET_DISCOUNT": "छूट लगाएं",
+    "MARK_OUT_OF_STOCK": "स्टॉक समाप्त के रूप में चिह्नित करें"
+  },
+
+
+  "RESTOCK_RECS": {
+  "PAGE_TITLE": "पुनः स्टॉक सुझाव",
+  "LOADING_RECOMMENDATIONS": "सुझाव लोड हो रहे हैं...",
+  "LOAD_ERROR": "पुनः स्टॉक सुझाव लोड नहीं हो सके। कृपया दोबारा प्रयास करें।",
+  "TRY_AGAIN": "फिर से कोशिश करें",
+  "TRY_LATER": "कृपया कुछ समय बाद फिर से प्रयास करें।",
+  "AVAILABLE_STOCK": "मौजूदा स्टॉक",
+  "LOW_STOCK": "स्टॉक कम है",
+  "RESTOCK_SOON": "जल्द स्टॉक भरें",
+  "STOCK_SUFFICIENT": "स्टॉक पर्याप्त है",
+  "AUTH_ERROR": "लॉगिन त्रुटि",
+  "SESSION_EXPIRED": "आपका लॉगिन समय समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
+  "ACCESS_DENIED": "पहुँच नहीं मिली",
+  "NO_PERMISSION": "आपको इस पेज को देखने की अनुमति नहीं है।",
+  "ERROR_TITLE": "गलती",
+  "UNEXPECTED_ERROR": "अनपेक्षित त्रुटि",
+  "OK": "ठीक है",
+  "DISMISS": "बंद करें",
+  "RETRY": "फिर प्रयास करें"
+},
+
+
+"SALES_TRENDS": {
+  "PAGE_TITLE": "रुझान",
+  "SALES_TRENDS": "बिक्री रुझान",
+  "TOP_PRODUCTS": "सबसे ज्यादा बिकने वाले उत्पाद",
+  "SELECT_PERIOD": "समय अवधि चुनें",
+  "WEEKLY": "साप्ताहिक",
+  "MONTHLY": "मासिक",
+  "QUARTERLY": "त्रैमासिक",
+  "YEARLY": "वार्षिक",
+  "VIEW_BY": "देखें अनुसार",
+  "BY_VOLUME": "मात्रा के अनुसार (किलो)",
+  "BY_REVENUE": "आय के अनुसार (₹)",
+  "TOTAL_REVENUE": "कुल आय",
+  "TOTAL_ORDERS": "कुल ऑर्डर",
+  "REVENUE_LABEL": "आय (₹)",
+  "ORDERS_LABEL": "ऑर्डर",
+  "SALES_VOLUME": "बिक्री मात्रा",
+  "SALES_REVENUE": "बिक्री से आय",
+  "PRODUCTS_MANDI": "उत्पाद और मंडी स्थान",
+  "PRODUCTS": "उत्पाद",
+  "VOLUME_KG": "बिक्री मात्रा (किलो)",
+  "REVENUE_RUPEES": "बिक्री आय (₹)",
+  "VOLUME": "मात्रा",
+  "REVENUE": "आय",
+  "SALES_TRENDS_TITLE": "{{period}} बिक्री रुझान",
+  "TOP_PRODUCTS_TITLE": "{{metric}} के अनुसार शीर्ष उत्पाद - {{period}}",
+  "PERIOD_WEEKLY": "साप्ताहिक",
+  "PERIOD_MONTHLY": "मासिक",
+  "PERIOD_QUARTERLY": "त्रैमासिक",
+  "PERIOD_YEARLY": "वार्षिक",
+  "AUTH_ERROR": "लॉगिन त्रुटि",
+  "SESSION_EXPIRED": "आपका लॉगिन समय समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
+  "ACCESS_DENIED": "पहुँच अस्वीकार की गई",
+  "NO_PERMISSION": "आपको इस पेज तक पहुँच की अनुमति नहीं है।",
+  "OK": "ठीक है",
+  "LOADING": "डेटा लोड हो रहा है...",
+  "FALLBACK_ERROR": "वास्तविक डेटा नहीं मिला। डमी डेटा दिखाया जा रहा है।",
+  "TOP_PRODUCTS_ERROR": "शीर्ष उत्पादों का डेटा नहीं मिला। डमी डेटा दिखाया जा रहा है।"
+},
+
+
+"STOCK_DASHBOARD": {
+  "PAGE_TITLE": "आज का स्टॉक",
+  "BRANCH_LABEL": "शाखा",
+  "CURRENT_STOCK": "मौजूदा स्टॉक",
+  "PRICE": "कीमत",
+  "UPDATE": "अपडेट करें",
+  "NO_STOCK": "आज के लिए अभी तक कोई स्टॉक नहीं जोड़ा गया है।"
 }
+
+
+
 
 }

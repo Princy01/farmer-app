@@ -18,9 +18,7 @@ import {
   storefrontOutline,
   cardOutline
 } from 'ionicons/icons';
-import { CartService } from './cart.service';
-import { CartResponse } from './cart.service';
-import { AuthService } from 'src/app/auth/auth.service';
+import { CartService, CartItem, AddCartItemRequest } from './cart.service';
 
 @Component({
   selector: 'app-cart',
@@ -31,10 +29,10 @@ import { AuthService } from 'src/app/auth/auth.service';
 })
 export class CartComponent implements OnInit, OnDestroy {
   cartForm: FormGroup;
-  cartDetails: CartResponse['cart_details'] | null = null;
-  cartProducts: CartResponse['products'] = [];
+  cartProducts: CartItem[] = [];
   discount = 0;
   isLoading: boolean = false;
+  selectedDate: string = '';
 
   private subscriptions: Subscription[] = [];
 
@@ -42,7 +40,6 @@ export class CartComponent implements OnInit, OnDestroy {
     private router: Router,
     private fb: FormBuilder,
     private cartService: CartService,
-    private authService: AuthService,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController
@@ -61,286 +58,125 @@ export class CartComponent implements OnInit, OnDestroy {
       cardOutline
     });
 
+    // Initialize with today's date
+    this.selectedDate = new Date().toISOString().split('T')[0];
+
     this.cartForm = this.fb.group({
       discountCode: [''],
-      deliveryDate: ['']
     });
   }
 
   ngOnInit() {
-    this.checkAuthAndLoadCart();
+    this.loadCartItems();
+    this.subscribeToCartChanges();
   }
 
   ngOnDestroy() {
-    // Clean up subscriptions
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.cartService.clearPendingOperations();
   }
 
-  private checkAuthAndLoadCart() {
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
-      return;
-    }
 
-    if (!this.authService.hasRole('retailer')) {
-      this.showUnauthorizedError();
-      return;
-    }
-
-    this.loadCart();
+  private subscribeToCartChanges(): void {
+    const cartSub = this.cartService.cartItems$.subscribe(
+      (items) => {
+        this.cartProducts = items;
+        console.log('Cart items updated:', items);
+      }
+    );
+    this.subscriptions.push(cartSub);
   }
 
-  private async showAuthError() {
-    const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
-      buttons: [
-        {
-          text: 'OK',
-          handler: () => {
-            this.authService.logout();
-            this.router.navigate(['/login']);
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
 
-  private async showUnauthorizedError() {
-    const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
-      buttons: [
-        {
-          text: 'OK',
-          handler: () => {
-            this.router.navigate(['/login']);
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  goBack() {
-    this.router.navigate(['/buyer/buyer-home']);
-  }
-
-  async loadCart() {
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
-      return;
-    }
-
+  async loadCartItems(): Promise<void> {
+    this.isLoading = true;
     const loading = await this.loadingCtrl.create({
       message: 'Loading cart...',
-      spinner: 'circular'
+      spinner: 'dots'
     });
+    await loading.present();
 
-    try {
-      await loading.present();
-      this.isLoading = true;
+    this.cartService.getCartItems(this.selectedDate).subscribe({
+      next: (items) => {
+        this.cartProducts = items;
+        console.log('Cart loaded:', items);
+      },
+      error: async (error) => {
+        console.error('Error loading cart:', error);
+        await this.showToast('Failed to load cart items', 'danger');
+      },
+      complete: async () => {
+        this.isLoading = false;
+        await loading.dismiss();
+      }
+    });
+  }
 
-      const subscription = this.cartService.getCart().subscribe({
-        next: (response) => {
-          console.log('Cart loaded:', response);
-          this.cartDetails = response.cart_details;
-          this.cartProducts = response.products;
-          loading.dismiss();
-          this.isLoading = false;
-        },
-        error: async (error) => {
-          loading.dismiss();
-          this.isLoading = false;
+  async increaseQuantity(index: number): Promise<void> {
+  if (this.isLoading) return;
 
-          if (error.status === 401) {
-            this.showAuthError();
-            return;
-          }
+  const item = this.cartProducts[index];
+  const newQuantity = item.quantity + 1;
 
-          console.error('Error loading cart:', error);
-          const alert = await this.alertCtrl.create({
-            header: 'Error',
-            message: 'Failed to load cart. Please try again.',
-            buttons: [
-              {
-                text: 'Dismiss',
-                role: 'cancel'
-              },
-              {
-                text: 'Retry',
-                handler: () => {
-                  this.loadCart();
-                }
-              }
-            ]
-          });
-          await alert.present();
-        }
-      });
+  this.isLoading = true;
 
-      this.subscriptions.push(subscription);
-    } catch (err) {
-      loading.dismiss();
+  this.cartService.updateItemQuantity(item.selected_id, newQuantity).subscribe({
+    next: async () => {
+      // Update local state immediately for better UX
+      this.cartProducts[index].quantity = newQuantity;
+      await this.showToast('Quantity updated', 'success');
+      // Refresh cart to sync with backend
+      this.loadCartItems();
+    },
+    error: async (error) => {
+      console.error('Error updating quantity:', error);
+      await this.showToast('Failed to update quantity', 'danger');
       this.isLoading = false;
-      const alert = await this.alertCtrl.create({
-        header: 'Error',
-        message: 'An unexpected error occurred.',
-        buttons: ['OK']
-      });
-      await alert.present();
     }
+  });
+}
+
+  async decreaseQuantity(index: number): Promise<void> {
+  if (this.isLoading) return;
+
+  const item = this.cartProducts[index];
+
+  if (item.quantity <= 1) {
+    await this.confirmRemoveItem(index);
+    return;
   }
 
-  getTotalPrice(): number {
-    return this.cartProducts.reduce((total, item) =>
-      total + (item.latest_wholesaler_price * item.quantity), 0
-    );
-  }
+  const newQuantity = item.quantity - 1;
+  this.isLoading = true;
 
-  async increaseQuantity(index: number) {
-    if (!this.cartDetails || this.isLoading) return;
-
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
-      return;
-    }
-
-    const product = this.cartProducts[index];
-    const newQuantity = product.quantity + 1;
-
-    console.log('Increasing quantity for product:', product.product_id, 'from', product.quantity, 'to', newQuantity);
-
-    this.isLoading = true;
-
-    try {
-      const subscription = this.cartService.updateProductQuantity(
-        this.cartDetails.cart_id,
-        product.product_id,
-        newQuantity
-      ).subscribe({
-        next: (response) => {
-          console.log('Quantity increase successful:', response);
-          this.cartDetails = response.cart_details;
-          this.cartProducts = response.products || [];
-          this.isLoading = false;
-        },
-        error: async (error) => {
-          console.error('Error increasing quantity:', error);
-          this.isLoading = false;
-
-          if (error.message?.includes('already in progress')) {
-            return; // Silently ignore concurrent requests
-          }
-
-          if (error.status === 401) {
-            this.showAuthError();
-            return;
-          }
-
-          const alert = await this.alertCtrl.create({
-            header: 'Error',
-            message: 'Failed to update quantity. Please try again.',
-            buttons: [
-              {
-                text: 'OK',
-                handler: () => {
-                  this.loadCart(); // Reload to sync state
-                }
-              }
-            ]
-          });
-          await alert.present();
-        }
-      });
-
-      this.subscriptions.push(subscription);
-    } catch (err) {
+  this.cartService.updateItemQuantity(item.selected_id, newQuantity).subscribe({
+    next: async () => {
+      // Update local state immediately for better UX
+      this.cartProducts[index].quantity = newQuantity;
+      await this.showToast('Quantity updated', 'success');
+      // Refresh cart to sync with backend
+      this.loadCartItems();
+    },
+    error: async (error) => {
+      console.error('Error updating quantity:', error);
+      await this.showToast('Failed to update quantity', 'danger');
       this.isLoading = false;
-      console.error('Unexpected error:', err);
     }
+  });
+}
+
+
+  async removeItem(index: number): Promise<void> {
+    await this.confirmRemoveItem(index);
   }
 
-  async decreaseQuantity(index: number) {
-    if (!this.cartDetails || this.isLoading) return;
 
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
-      return;
-    }
+  private async confirmRemoveItem(index: number): Promise<void> {
+    const item = this.cartProducts[index];
 
-    const product = this.cartProducts[index];
-    if (product.quantity <= 1) return;
-
-    const newQuantity = product.quantity - 1;
-
-    console.log('Decreasing quantity for product:', product.product_id, 'from', product.quantity, 'to', newQuantity);
-
-    this.isLoading = true;
-
-    try {
-      const subscription = this.cartService.updateProductQuantity(
-        this.cartDetails.cart_id,
-        product.product_id,
-        newQuantity
-      ).subscribe({
-        next: (response) => {
-          console.log('Quantity decrease successful:', response);
-          this.cartDetails = response.cart_details;
-          this.cartProducts = response.products || [];
-          this.isLoading = false;
-        },
-        error: async (error) => {
-          console.error('Error decreasing quantity:', error);
-          this.isLoading = false;
-
-          if (error.message?.includes('already in progress')) {
-            return; // Silently ignore concurrent requests
-          }
-
-          if (error.status === 401) {
-            this.showAuthError();
-            return;
-          }
-
-          const alert = await this.alertCtrl.create({
-            header: 'Error',
-            message: 'Failed to update quantity. Please try again.',
-            buttons: [
-              {
-                text: 'OK',
-                handler: () => {
-                  this.loadCart(); // Reload to sync state
-                }
-              }
-            ]
-          });
-          await alert.present();
-        }
-      });
-
-      this.subscriptions.push(subscription);
-    } catch (err) {
-      this.isLoading = false;
-      console.error('Unexpected error:', err);
-    }
-  }
-
-  async removeItem(index: number) {
-    if (!this.cartDetails) return;
-
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
-      return;
-    }
-
-    const product = this.cartProducts[index];
-
-    const confirmAlert = await this.alertCtrl.create({
+    const alert = await this.alertCtrl.create({
       header: 'Remove Item',
-      message: `Are you sure you want to remove "${product.product_name}" from your cart?`,
+      message: `Are you sure you want to remove ${item.product_name} from your cart?`,
       buttons: [
         {
           text: 'Cancel',
@@ -348,154 +184,125 @@ export class CartComponent implements OnInit, OnDestroy {
         },
         {
           text: 'Remove',
-          cssClass: 'danger-button',
-          handler: async () => {
-            await this.performItemRemoval(product.product_id, product.product_name);
+          role: 'destructive',
+          handler: () => {
+            this.executeRemoveItem(item.selected_id);
           }
         }
       ]
     });
 
-    await confirmAlert.present();
+    await alert.present();
   }
 
-  private async performItemRemoval(productId: number, productName: string) {
-    if (!this.cartDetails) return;
 
-    const loading = await this.loadingCtrl.create({
-      message: 'Removing item...',
-      spinner: 'circular'
+  private async executeRemoveItem(selectedId: number): Promise<void> {
+    this.isLoading = true;
+
+    this.cartService.deleteCartItem(selectedId).subscribe({
+      next: async () => {
+        await this.showToast('Item removed from cart', 'success');
+        // Refresh cart to sync with backend
+        this.loadCartItems();
+      },
+      error: async (error) => {
+        console.error('Error removing item:', error);
+        await this.showToast('Failed to remove item', 'danger');
+        this.isLoading = false;
+      }
     });
-
-    try {
-      await loading.present();
-
-      console.log('Removing item:', {
-        cartId: this.cartDetails.cart_id,
-        productId: productId
-      });
-
-      const subscription = this.cartService.removeCartItem(
-        this.cartDetails.cart_id,
-        productId
-      ).subscribe({
-        next: (response) => {
-          console.log('Item removed successfully:', response);
-
-          this.cartProducts = response.products || [];
-          this.cartDetails = response.cart_details;
-
-          loading.dismiss();
-          this.showSuccessToast(`${productName} removed from cart`);
-        },
-        error: async (error) => {
-          loading.dismiss();
-          console.error('Error removing item:', error);
-
-          if (error.message?.includes('already in progress')) {
-            return; // Silently ignore concurrent requests
-          }
-
-          if (error.status === 401) {
-            this.showAuthError();
-            return;
-          }
-
-          let errorMessage = 'Failed to remove item. Please try again.';
-          if (error.error && error.error.message) {
-            errorMessage = error.error.message;
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-
-          const alert = await this.alertCtrl.create({
-            header: 'Error',
-            message: errorMessage,
-            buttons: [
-              {
-                text: 'OK',
-                handler: () => {
-                  this.loadCart(); // Reload to sync state
-                }
-              }
-            ]
-          });
-          await alert.present();
-        }
-      });
-
-      this.subscriptions.push(subscription);
-    } catch (err) {
-      loading.dismiss();
-      console.error('Unexpected error:', err);
-
-      const alert = await this.alertCtrl.create({
-        header: 'Error',
-        message: 'An unexpected error occurred.',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
   }
 
-  private async showSuccessToast(message: string) {
-    const toast = await this.toastCtrl.create({
-      message: message,
-      duration: 2000,
-      position: 'bottom',
-      color: 'success'
-    });
-    await toast.present();
-  }
 
-  applyDiscount() {
-    const code = this.cartForm.get('discountCode')?.value;
-    const validCodes: { [key: string]: number } = {
-      'SAVE10': 10,
-      'FRESH20': 20
-    };
+  async applyDiscount(): Promise<void> {
+    const discountCode = this.cartForm.get('discountCode')?.value?.trim();
 
-    this.discount = validCodes[code] ? (this.getTotalPrice() * validCodes[code]) / 100 : 0;
-  }
-
-  checkout() {
-    if (!this.cartDetails) return;
-
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
+    if (!discountCode) {
+      await this.showToast('Please enter a discount code', 'warning');
       return;
     }
 
-    this.router.navigate(['/buyer/checkout'], {
-      state: {
-        cartItems: this.cartProducts,
-        totalPrice: this.getTotalPrice() - this.discount,
-        deliveryDate: this.cartForm.get('deliveryDate')?.value,
-        retailer: {
-          id: this.cartDetails.retailer_id,
-          name: this.cartDetails.retailer_name,
-          address: this.cartDetails.retailer_address,
-          state: this.cartDetails.retailer_state_name,
-          location: this.cartDetails.retailer_location_name
-        },
-        wholeseller: this.cartDetails.wholeseller_id ? {
-          id: this.cartDetails.wholeseller_id,
-          name: this.cartDetails.wholeseller_name
-        } : null
-      }
-    });
+    // Mock discount logic - replace with actual API call
+    const discountMap: { [key: string]: number } = {
+      'SAVE10': 10,
+      'FRESH20': 20,
+      'WELCOME15': 15
+    };
+
+    const discountAmount = discountMap[discountCode.toUpperCase()];
+
+    if (discountAmount) {
+      this.discount = discountAmount;
+      await this.showToast(`Discount of ₹${discountAmount} applied!`, 'success');
+    } else {
+      await this.showToast('Invalid discount code', 'danger');
+    }
   }
 
-  async handleRefresh(event: any) {
-    try {
-      if (!this.authService.isAuthenticated()) {
-        this.showAuthError();
-        return;
-      }
 
-      await this.loadCart();
-    } finally {
-      event.target.complete();
+  getTotalPrice(): number {
+    return this.cartProducts.reduce((total, item) => {
+      return total + (item.price * item.quantity);
+    }, 0);
+  }
+
+
+  async checkout(): Promise<void> {
+    if (this.cartProducts.length === 0) {
+      await this.showToast('Your cart is empty', 'warning');
+      return;
     }
+
+    const alert = await this.alertCtrl.create({
+      header: 'Confirm Order',
+      message: `Total Amount: ₹${this.getTotalPrice() - this.discount}`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Confirm',
+          handler: async () => {
+            await this.processCheckout();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+
+  private async processCheckout(): Promise<void> {
+    const loading = await this.loadingCtrl.create({
+      message: 'Processing order...',
+      spinner: 'dots'
+    });
+    await loading.present();
+
+    // TODO: Implement actual checkout API call
+    setTimeout(async () => {
+      await loading.dismiss();
+      await this.showToast('Order placed successfully!', 'success');
+      this.cartService.clearCart();
+      this.router.navigate(['/buyer/orders']);
+    }, 2000);
+  }
+
+
+  goBack(): void {
+    this.router.navigate(['/buyer/buyer-home']);
+  }
+
+
+  private async showToast(message: string, color: string = 'dark'): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2000,
+      color,
+      position: 'bottom'
+    });
+    await toast.present();
   }
 }

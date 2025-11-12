@@ -1,76 +1,42 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap, finalize } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
-interface CartProduct {
+export interface CartItem {
+  selected_id: number;
   product_id: number;
   product_name: string;
-  quantity: number;
+  wholesaler_id: number;
+  wholesaler_name: string;
   unit_id: number;
   unit_name: string;
-  price_while_added: number;
-  latest_wholesaler_price: number;
-  price_updated_at?: string;
-  is_active: boolean;
+  price: number;
+  quantity: number;
+  is_deleted: boolean;
 }
 
-interface CartDetails {
-  cart_id: number;
-  retailer_id: number;
-  retailer_name?: string;
-  retailer_address?: string;
-  retailer_state_name?: string;
-  retailer_state_shortname?: string;
-  retailer_location_name?: string;
-  wholeseller_id?: number;
-  wholeseller_name?: string;
-  cart_status: number;
+export interface AddCartItemRequest {
+  wholesaler_id: number;
+  product_id: number;
+  quantity: number;
+  unit_id: number;
+  price: number;
 }
 
-interface ApiResponse<T> {
-  status: 'success' | 'error';
-  data?: T;
-  message?: string;
+export interface UpdateCartItemRequest {
+  selected_item_id: number;
+  quantity: number;
 }
 
-export interface CartResponse {
-  cart_details: CartDetails;
-  products: CartProduct[];
+export interface GetCartRequest {
+  doe: string; // Date of entry in format YYYY-MM-DD
 }
 
-export interface CreateCartRequest {
-  retailer_id: number;
-  wholeseller_id?: number;
-  products: Array<{
-    product_id: number;
-    quantity: number;
-    unit_id: number;
-    price_while_added: number;
-    latest_wholesaler_price: number;
-    price_updated_at?: string;
-    wholeseller_id: number;
-    is_active: boolean;
-  }>;
-  device_info?: any;
-  cart_status?: number;
-}
-
-export interface UpdateCartRequest {
-  cart_id: number;
-  products: Array<{
-    product_id: number;
-    product_name: string;
-    quantity: number;
-    unit_id: number;
-    unit_name: string;
-    price_while_added: number;
-    latest_wholesaler_price: number;
-    price_updated_at?: string;
-    is_active: boolean;
-  }>;
+export interface DeleteCartItemRequest {
+  product_id: number; // selected_id from backend
 }
 
 @Injectable({
@@ -78,13 +44,15 @@ export interface UpdateCartRequest {
 })
 export class CartService {
   private apiUrl = environment.apiUrl;
-  private cartSubject = new BehaviorSubject<CartResponse | null>(null);
-  cart$ = this.cartSubject.asObservable();
+  private cartItemsSubject = new BehaviorSubject<CartItem[]>([]);
+  cartItems$ = this.cartItemsSubject.asObservable();
 
-  // Track pending operations to prevent concurrent requests
   private pendingOperations = new Set<string>();
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
@@ -94,177 +62,192 @@ export class CartService {
     });
   }
 
-  private createOperationKey(operation: string, cartId: number, productId?: number): string {
-    return `${operation}-${cartId}-${productId || 'all'}`;
+  private createOperationKey(operation: string, itemId?: number): string {
+    return `${operation}-${itemId || 'all'}`;
   }
 
-  getCart(): Observable<CartResponse> {
+  /**
+   * Get cart items for a specific date
+   * @param doe Date in format YYYY-MM-DD (defaults to today)
+   */
+  getCartItems(doe?: string): Observable<CartItem[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<ApiResponse<CartResponse>>(`${this.apiUrl}/getCartitems/1`, { headers }).pipe(
-      map((response: ApiResponse<CartResponse>) => {
-        if (response.status === 'error') {
-          throw new Error(response.message);
-        }
-        console.log('Cart fetched successfully:', response.data);
-        this.cartSubject.next(response.data!);
-        return response.data!;
+
+    // Default to today's date if not provided
+    const dateOfEntry = doe || new Date().toISOString().split('T')[0];
+
+    const payload: GetCartRequest = {
+      doe: dateOfEntry
+    };
+
+    console.log('Fetching cart items for date:', dateOfEntry);
+
+    return this.http.post<CartItem[]>(
+      `${this.apiUrl}/GetSelectedItemsFromCart`,
+      payload,
+      { headers }
+    ).pipe(
+      tap((items) => {
+        console.log('Cart items fetched successfully:', items);
+        // Filter out deleted items
+        const activeItems = items.filter(item => !item.is_deleted);
+        this.cartItemsSubject.next(activeItems);
       }),
+      map((items) => items.filter(item => !item.is_deleted)),
       catchError(error => {
-        console.error('Error fetching cart:', error);
-        throw error;
+        console.error('Error fetching cart items:', error);
+        this.cartItemsSubject.next([]);
+        return throwError(() => error);
       })
     );
   }
 
-  createCart(cartData: CreateCartRequest): Observable<CartResponse> {
-    const headers = this.getAuthHeaders();
-    return this.http.post<ApiResponse<CartResponse>>(`${this.apiUrl}/InsertCartDetails`, cartData, { headers }).pipe(
-      map((response: ApiResponse<CartResponse>) => {
-        if (response.status === 'error') {
-          throw new Error(response.message);
-        }
-        this.cartSubject.next(response.data!);
-        return response.data!;
-      }),
-      catchError(error => {
-        console.error('Error creating cart:', error);
-        throw error;
-      })
-    );
+  addItemToCart(item: AddCartItemRequest): Observable<any> {
+  const operationKey = this.createOperationKey('add', item.product_id);
+
+  if (this.pendingOperations.has(operationKey)) {
+    console.log('Add operation already in progress, skipping...');
+    return throwError(() => new Error('Add operation already in progress'));
   }
 
-  updateCart(updateData: UpdateCartRequest): Observable<CartResponse> {
-    const operationKey = this.createOperationKey('update', updateData.cart_id);
+  this.pendingOperations.add(operationKey);
+  const headers = this.getAuthHeaders();
 
-    // Prevent concurrent operations
+  console.log('Adding item to cart:', item);
+
+  return this.http.post<{ message: string; selected_id: number }>(
+    `${this.apiUrl}/AddSelectedItemToCart`,
+    item,
+    { headers }
+  ).pipe(
+    tap((response) => {
+      console.log('Item added successfully:', response);
+      console.log('Selected ID:', response.selected_id);
+    }),
+    catchError(error => {
+      console.error('Error adding item to cart:', error);
+      return throwError(() => error);
+    }),
+    finalize(() => {
+      this.pendingOperations.delete(operationKey);
+    })
+  );
+}
+
+
+  updateItemQuantity(selectedItemId: number, quantity: number): Observable<any> {
+  const operationKey = this.createOperationKey('update', selectedItemId);
+
+  if (this.pendingOperations.has(operationKey)) {
+    console.log('Update operation already in progress, skipping...');
+    return throwError(() => new Error('Update operation already in progress'));
+  }
+
+  this.pendingOperations.add(operationKey);
+  const headers = this.getAuthHeaders();
+
+  const updateRequest: UpdateCartItemRequest = {
+    selected_item_id: selectedItemId,
+    quantity: quantity
+  };
+
+  console.log('=== Updating Item Quantity ===');
+  console.log('Request Payload:', JSON.stringify(updateRequest, null, 2));
+
+  return this.http.post<{ message: string; selected_item_id: number; new_quantity: number }>(
+    `${this.apiUrl}/UpdateCartItemQuantity`,
+    updateRequest,
+    { headers }
+  ).pipe(
+    tap((response) => {
+      console.log('=== Item Updated Successfully ===');
+      console.log('Response:', response);
+    }),
+    catchError(error => {
+      console.error('=== Error Updating Item ===');
+      console.error('Error:', error);
+      return throwError(() => error);
+    }),
+    finalize(() => {
+      this.pendingOperations.delete(operationKey);
+    })
+  );
+}
+
+
+  deleteCartItem(selectedId: number): Observable<any> {
+    const operationKey = this.createOperationKey('delete', selectedId);
+
     if (this.pendingOperations.has(operationKey)) {
-      console.log('Update already in progress, skipping...');
-      return throwError(() => new Error('Update already in progress'));
+      console.log('Delete operation already in progress, skipping...');
+      return throwError(() => new Error('Delete operation already in progress'));
     }
 
     this.pendingOperations.add(operationKey);
     const headers = this.getAuthHeaders();
 
-    // Ensure clean data structure
-    const requestPayload = {
-      cart_id: updateData.cart_id,
-      products: updateData.products.map(product => ({
-        product_id: product.product_id,
-        product_name: product.product_name,
-        quantity: product.quantity,
-        unit_id: product.unit_id,
-        unit_name: product.unit_name,
-        price_while_added: product.price_while_added,
-        latest_wholesaler_price: product.latest_wholesaler_price,
-        price_updated_at: product.price_updated_at || undefined,
-        is_active: product.is_active
-      }))
+    const payload: DeleteCartItemRequest = {
+      product_id: selectedId // Backend expects product_id but uses it as selected_id
     };
 
-    console.log('Sending update request:', requestPayload);
+    console.log('Deleting cart item:', selectedId);
 
-    return this.http.post<ApiResponse<CartResponse>>(`${this.apiUrl}/UpdateCart`, requestPayload, { headers }).pipe(
-      tap(response => console.log('Raw update response:', response)),
-      map((response: ApiResponse<CartResponse>) => {
-        if (response.status === 'error') {
-          throw new Error(response.message);
-        }
-        console.log('Update successful, updating cart subject:', response.data);
-        this.cartSubject.next(response.data!);
-        return response.data!;
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/DeleteSelectedItemFromCart`,
+      payload,
+      { headers }
+    ).pipe(
+      tap((response) => {
+        console.log('Item deleted successfully:', response);
+
+        // Update local state by removing the item
+        const currentItems = this.cartItemsSubject.value;
+        const updatedItems = currentItems.filter(item => item.selected_id !== selectedId);
+        this.cartItemsSubject.next(updatedItems);
       }),
       catchError(error => {
-        console.error('Error updating cart:', error);
-        throw error;
+        console.error('Error deleting cart item:', error);
+        return throwError(() => error);
       }),
       finalize(() => {
         this.pendingOperations.delete(operationKey);
-        console.log('Update operation completed for:', operationKey);
       })
     );
   }
 
-  // UPDATED: Actually remove the product from the array instead of just marking as inactive
-  removeCartItem(cartId: number, productId: number): Observable<CartResponse> {
-    const operationKey = this.createOperationKey('remove', cartId, productId);
-
-    if (this.pendingOperations.has(operationKey)) {
-      console.log('Remove operation already in progress, skipping...');
-      return throwError(() => new Error('Remove operation already in progress'));
-    }
-
-    const currentCart = this.cartSubject.value;
-    if (!currentCart) {
-      return throwError(() => new Error('No cart data available'));
-    }
-
-    console.log('Removing product:', productId, 'from cart:', cartId);
-    console.log('Current cart products before removal:', currentCart.products);
-
-    // FIXED: Completely remove the product from the array instead of setting is_active to false
-    const updatedProducts = currentCart.products.filter(product => product.product_id !== productId);
-
-    console.log('Updated products after removal (filtered out product):', updatedProducts);
-
-    // If no products left, we still need to update with empty array
-    return this.updateCart({
-      cart_id: cartId,
-      products: updatedProducts
-    }).pipe(
-      tap(response => {
-        console.log('Item removal successful:', response);
-        console.log('Products in database after removal:', response.products);
-      })
-    );
+  /**
+   * Get current cart items from the BehaviorSubject
+   */
+  getCurrentCartItems(): CartItem[] {
+    return this.cartItemsSubject.value;
   }
 
-  updateProductQuantity(cartId: number, productId: number, newQuantity: number): Observable<CartResponse> {
-    const operationKey = this.createOperationKey('quantity', cartId, productId);
-
-    if (this.pendingOperations.has(operationKey)) {
-      console.log('Quantity update already in progress, skipping...');
-      return throwError(() => new Error('Quantity update already in progress'));
-    }
-
-    const currentCart = this.cartSubject.value;
-    if (!currentCart) {
-      return throwError(() => new Error('No cart data available'));
-    }
-
-    console.log('Updating quantity for product:', productId, 'to:', newQuantity);
-    console.log('Current cart products before quantity update:', currentCart.products);
-
-    // Update quantity for the specific product
-    const updatedProducts = currentCart.products.map(product => ({
-      product_id: product.product_id,
-      product_name: product.product_name,
-      quantity: product.product_id === productId ? newQuantity : product.quantity,
-      unit_id: product.unit_id,
-      unit_name: product.unit_name,
-      price_while_added: product.price_while_added,
-      latest_wholesaler_price: product.latest_wholesaler_price,
-      price_updated_at: product.price_updated_at || undefined,
-      is_active: product.is_active
-    }));
-
-    console.log('Updated products for quantity change:', updatedProducts);
-
-    return this.updateCart({
-      cart_id: cartId,
-      products: updatedProducts
-    }).pipe(
-      tap(response => {
-        console.log('Quantity update successful:', response);
-      })
-    );
+  /**
+   * Get total price of all items in cart
+   */
+  getTotalPrice(): number {
+    const items = this.cartItemsSubject.value;
+    return items.reduce((total, item) => total + (item.price * item.quantity), 0);
   }
 
-  getCurrentCart(): CartResponse | null {
-    return this.cartSubject.value;
+  /**
+   * Get total item count
+   */
+  getTotalItemCount(): number {
+    return this.cartItemsSubject.value.length;
   }
 
-  // Method to clear pending operations (useful for cleanup)
+  /**
+   * Clear pending operations
+   */
   clearPendingOperations(): void {
     this.pendingOperations.clear();
+  }
+
+  /**
+   * Clear cart items from local state
+   */
+  clearCart(): void {
+    this.cartItemsSubject.next([]);
   }
 }

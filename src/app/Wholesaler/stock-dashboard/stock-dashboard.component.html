@@ -1,32 +1,36 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Today's Stock</ion-title>
+    <ion-title>{{ 'STOCK_DASHBOARD.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-item>
-  <ion-label>Branch</ion-label>
-  <ion-select [(ngModel)]="selectedBranchId" (ionChange)="loadTodayStock()">
-    <ion-select-option *ngFor="let branch of branches" [value]="branch.branch_id">
-      {{ branch.shop_name }} - {{ branch.location_name }}, {{ branch.city_name }}
-    </ion-select-option>
-  </ion-select>
-</ion-item>
+    <ion-label>{{ 'STOCK_DASHBOARD.BRANCH_LABEL' | translate }}</ion-label>
+    <ion-select [(ngModel)]="selectedBranchId" (ionChange)="loadTodayStock()">
+      <ion-select-option *ngFor="let branch of branches" [value]="branch.branch_id">
+        {{ branch.shop_name }} - {{ branch.location_name }}, {{ branch.city_name }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
 
   <ion-list *ngIf="todayStock.length > 0; else noStock">
     <ion-item *ngFor="let item of todayStock">
       <ion-label>
         <h2>{{ item.product_name }}</h2>
-        <p>Current Stock: {{ item.current_stock }}</p>
-        <p>Price: ₹{{ item.price_per_unit }}</p>
+        <p>{{ 'STOCK_DASHBOARD.CURRENT_STOCK' | translate }}: {{ item.current_stock }}</p>
+        <p>{{ 'STOCK_DASHBOARD.PRICE' | translate }}: ₹{{ item.price_per_unit }}</p>
       </ion-label>
-      <ion-button fill="outline" (click)="openUpdateStock(item)">Update</ion-button>
+      <ion-button fill="outline" (click)="openUpdateStock(item)">
+        {{ 'STOCK_DASHBOARD.UPDATE' | translate }}
+      </ion-button>
     </ion-item>
   </ion-list>
 
   <ng-template #noStock>
-    <ion-text class="ion-padding">No stock added yet for today.</ion-text>
+    <ion-text class="ion-padding">
+      {{ 'STOCK_DASHBOARD.NO_STOCK' | translate }}
+    </ion-text>
   </ng-template>
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">

@@ -5,7 +5,8 @@
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Product Details</ion-title>
+
+    <ion-title>{{ 'PRODUCT_DETAILS.TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -35,20 +36,20 @@
       <ion-card-header>
         <ion-card-title>
           <ion-icon name="cube-outline"></ion-icon>
-          Quantity Information
+          {{ 'PRODUCT_DETAILS.QUANTITY_INFO' | translate }}
         </ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <div class="total-quantity-section">
           <div class="total-quantity-item">
-            <span class="label">Total Combined Quantity</span>
+            <span class="label">{{ 'PRODUCT_DETAILS.TOTAL_COMBINED' | translate }}</span>
             <span class="value large">{{ quantityInfo.totalCombinedQuantity }} kg</span>
           </div>
         </div>
 
         <!-- Mandi-wise Quantity Distribution -->
         <div class="mandi-section" *ngIf="quantityInfo.mandiWiseQuantity.length > 1">
-          <h4>Mandi-wise Distribution</h4>
+          <h4>{{ 'PRODUCT_DETAILS.MANDI_WISE' | translate }}</h4>
           <div class="mandi-grid">
             <div class="mandi-item" *ngFor="let mandi of quantityInfo.mandiWiseQuantity">
               <div class="mandi-info">
@@ -71,30 +72,30 @@
       <ion-card-header>
         <ion-card-title>
           <ion-icon name="bar-chart-outline"></ion-icon>
-          Order Statistics
+          {{ 'PRODUCT_DETAILS.ORDER_STATS' | translate }}
         </ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <div class="orders-grid">
           <div class="order-stat-item">
             <span class="number">{{ orderStats.totalOrdersPlaced }}</span>
-            <span class="label">Total Orders</span>
+            <span class="label">{{ 'PRODUCT_DETAILS.TOTAL_ORDERS' | translate }}</span>
           </div>
           <div class="order-stat-item">
             <span class="number">{{ orderStats.last7Days }}</span>
-            <span class="label">Last 7 Days</span>
+            <span class="label">{{ 'PRODUCT_DETAILS.LAST_7_DAYS' | translate }}</span>
           </div>
           <div class="order-stat-item">
             <span class="number">{{ orderStats.last30Days }}</span>
-            <span class="label">Last 30 Days</span>
+            <span class="label">{{ 'PRODUCT_DETAILS.LAST_30_DAYS' | translate }}</span>
           </div>
           <div class="order-stat-item">
             <span class="number">{{ orderStats.last6Months }}</span>
-            <span class="label">Last 6 Months</span>
+            <span class="label">{{ 'PRODUCT_DETAILS.LAST_6_MONTHS' | translate }}</span>
           </div>
           <div class="order-stat-item">
             <span class="number">{{ orderStats.lastYear }}</span>
-            <span class="label">Last Year</span>
+            <span class="label">{{ 'PRODUCT_DETAILS.LAST_YEAR' | translate }}</span>
           </div>
         </div>
       </ion-card-content>
@@ -105,31 +106,30 @@
       <ion-card-header>
         <ion-card-title>
           <ion-icon name="flash-outline"></ion-icon>
-          Quick Actions
+          {{ 'PRODUCT_DETAILS.QUICK_ACTIONS' | translate }}
         </ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <div class="actions-grid">
           <ion-button expand="block" fill="outline" (click)="updateStock()">
             <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-            Update Stock
+            {{ 'PRODUCT_DETAILS.UPDATE_STOCK' | translate }}
           </ion-button>
 
           <ion-button expand="block" fill="outline" (click)="editPrice()">
             <ion-icon name="pricetag-outline" slot="start"></ion-icon>
-            Edit Price
+            {{ 'PRODUCT_DETAILS.EDIT_PRICE' | translate }}
           </ion-button>
 
           <ion-button expand="block" fill="outline" (click)="setDiscount()">
             <ion-icon name="gift-outline" slot="start"></ion-icon>
-            Set Discount
+            {{ 'PRODUCT_DETAILS.SET_DISCOUNT' | translate }}
           </ion-button>
 
           <ion-button expand="block" fill="outline" color="warning" (click)="markOutOfStock()">
             <ion-icon name="close-circle-outline" slot="start"></ion-icon>
-            Mark Out of Stock
+            {{ 'PRODUCT_DETAILS.MARK_OUT_OF_STOCK' | translate }}
           </ion-button>
-
         </div>
       </ion-card-content>
     </ion-card>

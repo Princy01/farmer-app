@@ -2,22 +2,23 @@ import { Component, OnInit } from '@angular/core';
 import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { arrowBack, cubeOutline, barChartOutline, flashOutline, addCircleOutline, pricetagOutline, giftOutline, closeCircleOutline, listOutline } from 'ionicons/icons';
+import { arrowBack, cubeOutline, barChartOutline, flashOutline, addCircleOutline, pricetagOutline, giftOutline, closeCircleOutline } from 'ionicons/icons';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-product-details',
   templateUrl: './product-details.component.html',
   styleUrls: ['./product-details.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
 })
 export class ProductDetailsComponent implements OnInit {
   productData: any = {};
-  productId: string = '';
-  wholesellerId: string = '';
-  mandiId: string = '';
+  productId = '';
+  wholesellerId = '';
+  mandiId = '';
 
   // Extended product information
   productInfo = {
@@ -29,7 +30,7 @@ export class ProductDetailsComponent implements OnInit {
   // Combined quantity data
   quantityInfo = {
     totalCombinedQuantity: 0,
-    mandiWiseQuantity: [] as Array<{mandiId: number, mandiName: string, quantity: number}>
+    mandiWiseQuantity: [] as Array<{ mandiId: number, mandiName: string, quantity: number }>
   };
 
   // Order statistics
@@ -46,9 +47,10 @@ export class ProductDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private translate: TranslateService
   ) {
-    addIcons({ arrowBack, cubeOutline, barChartOutline, flashOutline, addCircleOutline, pricetagOutline, giftOutline, closeCircleOutline, listOutline });
+    addIcons({ arrowBack, cubeOutline, barChartOutline, flashOutline, addCircleOutline, pricetagOutline, giftOutline, closeCircleOutline });
   }
 
   ngOnInit() {
@@ -113,27 +115,27 @@ export class ProductDetailsComponent implements OnInit {
   // Quick Actions
   async updateStock() {
     const alert = await this.alertCtrl.create({
-      header: 'Update Stock',
-      message: 'Enter the new stock quantity',
+      header: this.translate.instant('PRODUCT_DETAILS.UPDATE_STOCK_HEADER'),
+      message: this.translate.instant('PRODUCT_DETAILS.UPDATE_STOCK_MESSAGE'),
       inputs: [
         {
           name: 'quantity',
           type: 'number',
-          placeholder: 'Stock Quantity',
+          placeholder: this.translate.instant('PRODUCT_DETAILS.STOCK_QUANTITY_PLACEHOLDER'),
           value: this.quantityInfo.totalCombinedQuantity
         }
       ],
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('PRODUCT_DETAILS.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Update',
+          text: this.translate.instant('PRODUCT_DETAILS.UPDATE'),
           handler: async (data) => {
             if (data.quantity && data.quantity > 0) {
               const loading = await this.loadingCtrl.create({
-                message: 'Updating stock...'
+                message: this.translate.instant('PRODUCT_DETAILS.UPDATING_STOCK')
               });
               await loading.present();
 
@@ -144,7 +146,7 @@ export class ProductDetailsComponent implements OnInit {
                 await loading.dismiss();
 
                 const toast = await this.toastCtrl.create({
-                  message: 'Stock updated successfully!',
+                  message: this.translate.instant('PRODUCT_DETAILS.STOCK_UPDATED_SUCCESS'),
                   duration: 2000,
                   color: 'success'
                 });
@@ -160,27 +162,27 @@ export class ProductDetailsComponent implements OnInit {
 
   async editPrice() {
     const alert = await this.alertCtrl.create({
-      header: 'Edit Price',
-      message: 'Enter the new price per unit',
+      header: this.translate.instant('PRODUCT_DETAILS.EDIT_PRICE_HEADER'),
+      message: this.translate.instant('PRODUCT_DETAILS.EDIT_PRICE_MESSAGE'),
       inputs: [
         {
           name: 'price',
           type: 'number',
-          placeholder: 'Price per kg',
+          placeholder: this.translate.instant('PRODUCT_DETAILS.PRICE_PLACEHOLDER'),
           value: this.productInfo.pricePerUnit
         }
       ],
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('PRODUCT_DETAILS.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Update',
+          text: this.translate.instant('PRODUCT_DETAILS.UPDATE'),
           handler: async (data) => {
             if (data.price && data.price > 0) {
               const loading = await this.loadingCtrl.create({
-                message: 'Updating price...'
+                message: this.translate.instant('PRODUCT_DETAILS.UPDATING_PRICE')
               });
               await loading.present();
 
@@ -189,7 +191,7 @@ export class ProductDetailsComponent implements OnInit {
                 await loading.dismiss();
 
                 const toast = await this.toastCtrl.create({
-                  message: 'Price updated successfully!',
+                  message: this.translate.instant('PRODUCT_DETAILS.PRICE_UPDATED_SUCCESS'),
                   duration: 2000,
                   color: 'success'
                 });
@@ -205,31 +207,34 @@ export class ProductDetailsComponent implements OnInit {
 
   async setDiscount() {
     const alert = await this.alertCtrl.create({
-      header: 'Set Discount',
-      message: 'Enter discount percentage',
+      header: this.translate.instant('PRODUCT_DETAILS.SET_DISCOUNT_HEADER'),
+      message: this.translate.instant('PRODUCT_DETAILS.SET_DISCOUNT_MESSAGE'),
       inputs: [
         {
           name: 'discount',
           type: 'number',
-          placeholder: 'Discount %',
+          placeholder: this.translate.instant('PRODUCT_DETAILS.DISCOUNT_PLACEHOLDER'),
           min: 0,
           max: 50
         }
       ],
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('PRODUCT_DETAILS.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Apply',
+          text: this.translate.instant('PRODUCT_DETAILS.APPLY'),
           handler: async (data) => {
             if (data.discount && data.discount >= 0) {
               const discountAmount = (this.productInfo.pricePerUnit * data.discount) / 100;
               const newPrice = this.productInfo.pricePerUnit - discountAmount;
 
               const toast = await this.toastCtrl.create({
-                message: `Discount of ${data.discount}% applied! New price: ₹${newPrice.toFixed(2)}`,
+                message: this.translate.instant('PRODUCT_DETAILS.DISCOUNT_APPLIED', {
+                  discount: data.discount,
+                  price: newPrice.toFixed(2)
+                }),
                 duration: 3000,
                 color: 'success'
               });
@@ -244,18 +249,18 @@ export class ProductDetailsComponent implements OnInit {
 
   async markOutOfStock() {
     const alert = await this.alertCtrl.create({
-      header: 'Confirm',
-      message: 'Are you sure you want to mark this product as out of stock?',
+      header: this.translate.instant('PRODUCT_DETAILS.CONFIRM'),
+      message: this.translate.instant('PRODUCT_DETAILS.OUT_OF_STOCK_MESSAGE'),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('PRODUCT_DETAILS.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Confirm',
+          text: this.translate.instant('PRODUCT_DETAILS.CONFIRM'),
           handler: async () => {
             const toast = await this.toastCtrl.create({
-              message: 'Product marked as out of stock',
+              message: this.translate.instant('PRODUCT_DETAILS.MARKED_OUT_OF_STOCK'),
               duration: 2000,
               color: 'warning'
             });

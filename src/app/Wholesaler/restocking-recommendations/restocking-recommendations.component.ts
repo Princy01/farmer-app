@@ -3,15 +3,15 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { alertCircle } from 'ionicons/icons';
-import { WholesalerApiService } from '../services/wholesaler-api.service';
-import { RestockProduct } from '../services/wholesaler-api.service';
+import { WholesalerApiService, RestockProduct } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-restocking-recommendations',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, TranslatePipe],
   templateUrl: './restocking-recommendations.component.html',
   styleUrls: ['./restocking-recommendations.component.scss']
 })
@@ -25,7 +25,8 @@ export class RestockingRecommendationsComponent implements OnInit {
     private router: Router,
     private alertCtrl: AlertController,
     private authService: AuthService,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private translate: TranslateService
   ) {
     addIcons({ alertCircle });
   }
@@ -34,14 +35,12 @@ export class RestockingRecommendationsComponent implements OnInit {
     this.checkAuthAndLoadData();
   }
 
-  // authentication check
   private checkAuthAndLoadData() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-    // Check if user has wholesaler role
     if (!this.authService.hasRole('wholesaler')) {
       this.showUnauthorizedError();
       return;
@@ -52,11 +51,11 @@ export class RestockingRecommendationsComponent implements OnInit {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('RESTOCK_RECS.AUTH_ERROR'),
+      message: this.translate.instant('RESTOCK_RECS.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('RESTOCK_RECS.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -67,14 +66,13 @@ export class RestockingRecommendationsComponent implements OnInit {
     await alert.present();
   }
 
-  // unauthorized error handler
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('RESTOCK_RECS.ACCESS_DENIED'),
+      message: this.translate.instant('RESTOCK_RECS.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('RESTOCK_RECS.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -91,7 +89,7 @@ export class RestockingRecommendationsComponent implements OnInit {
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Loading restocking recommendations...',
+      message: this.translate.instant('RESTOCK_RECS.LOADING_RECOMMENDATIONS'),
       spinner: 'circular',
     });
 
@@ -100,7 +98,6 @@ export class RestockingRecommendationsComponent implements OnInit {
       this.isLoading = true;
       this.error = null;
 
-      // Call service without wholesaler ID - backend will get user_id from JWT
       this.wholesalerService.getRestockingRecommendations().subscribe({
         next: (data) => {
           this.products = data;
@@ -112,23 +109,22 @@ export class RestockingRecommendationsComponent implements OnInit {
           this.isLoading = false;
           loading.dismiss();
 
-          // Handle authentication errors
           if (error.status === 401) {
             this.showAuthError();
             return;
           }
 
-          this.error = 'Failed to load recommendations. Please try again.';
+          this.error = this.translate.instant('RESTOCK_RECS.LOAD_ERROR');
           this.showErrorAlert();
         }
       });
-    } catch (err) {
+    } catch {
       loading.dismiss();
       this.isLoading = false;
       const alert = await this.alertCtrl.create({
-        header: 'Error',
-        message: 'An unexpected error occurred.',
-        buttons: ['OK']
+        header: this.translate.instant('RESTOCK_RECS.UNEXPECTED_ERROR'),
+        message: this.translate.instant('RESTOCK_RECS.TRY_LATER'),
+        buttons: [this.translate.instant('RESTOCK_RECS.OK')]
       });
       await alert.present();
     }
@@ -136,18 +132,16 @@ export class RestockingRecommendationsComponent implements OnInit {
 
   private async showErrorAlert() {
     const alert = await this.alertCtrl.create({
-      header: 'Error',
-      message: 'Failed to load restocking recommendations. Please try again.',
+      header: this.translate.instant('RESTOCK_RECS.ERROR_TITLE'),
+      message: this.translate.instant('RESTOCK_RECS.LOAD_ERROR'),
       buttons: [
         {
-          text: 'Dismiss',
+          text: this.translate.instant('RESTOCK_RECS.DISMISS'),
           role: 'cancel'
         },
         {
-          text: 'Retry',
-          handler: () => {
-            this.loadRestockingRecommendations();
-          }
+          text: this.translate.instant('RESTOCK_RECS.RETRY'),
+          handler: () => this.loadRestockingRecommendations()
         }
       ]
     });
@@ -155,9 +149,9 @@ export class RestockingRecommendationsComponent implements OnInit {
   }
 
   getBadgeText(ratio: number): string {
-    if (ratio < 2) return 'Low Stock';
-    if (ratio < 4) return 'Restock Soon';
-    return 'Stock Sufficient';
+    if (ratio < 2) return this.translate.instant('RESTOCK_RECS.LOW_STOCK');
+    if (ratio < 4) return this.translate.instant('RESTOCK_RECS.RESTOCK_SOON');
+    return this.translate.instant('RESTOCK_RECS.STOCK_SUFFICIENT');
   }
 
   getBadgeColor(product: RestockProduct): string {

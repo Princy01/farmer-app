@@ -15,14 +15,12 @@
 </ion-header>
 
 <ion-content class="cart-content">
-  <!-- ADDED: Loading spinner overlay -->
   <div class="loading-overlay" *ngIf="isLoading">
     <ion-spinner name="dots" color="primary"></ion-spinner>
     <p class="loading-text">Updating cart...</p>
   </div>
 
   <ng-container *ngIf="cartProducts.length > 0; else emptyCart">
-    <!-- Cart Items Section -->
     <div class="cart-items-section">
       <div class="section-header">
         <h2 class="section-title">
@@ -36,7 +34,6 @@
         <div class="cart-list">
           <ion-card *ngFor="let item of cartProducts; let i = index" class="cart-item-card">
             <div class="card-content-wrapper">
-              <!-- Product Info Section -->
               <div class="product-info-section">
                 <div class="product-image-container">
                   <img
@@ -49,26 +46,15 @@
 
                 <div class="product-details">
                   <h3 class="product-name">{{ item.product_name }}</h3>
-                  <div class="price-info">
-                    <span class="unit-price">₹{{ item.latest_wholesaler_price }}/{{ item.unit_name }}</span>
-                    <span class="total-price">₹{{ item.latest_wholesaler_price * item.quantity }}</span>
-                  </div>
-
-                  <div class="price-alert" *ngIf="item.price_while_added !== item.latest_wholesaler_price">
-                    <ion-icon name="alert-circle-outline" class="alert-icon"></ion-icon>
-                    <span class="alert-text">Price updated</span>
-                  </div>
                 </div>
               </div>
 
-              <!-- Quantity Controls Section with Ion Grid -->
               <div class="quantity-controls-section">
                 <ion-grid class="quantity-grid">
                   <ion-row class="quantity-row">
                     <!-- Quantity Controls Column -->
                     <ion-col size="9" size-sm="10" size-md="10" size-lg="2" class="quantity-col">
                       <div class="quantity-controls">
-                        <!-- UPDATED: Added loading state and better disabled logic -->
                         <ion-button
                           class="qty-btn decrease-btn"
                           fill="clear"
@@ -83,7 +69,6 @@
                           <span class="quantity-unit">{{ item.unit_name }}</span>
                         </div>
 
-                        <!-- UPDATED: Added loading state -->
                         <ion-button
                           class="qty-btn increase-btn"
                           fill="clear"
@@ -95,9 +80,7 @@
                       </div>
                     </ion-col>
 
-                    <!-- Remove Button Column -->
                     <ion-col size="3" size-sm="2" size-md="2" size-lg="2" class="remove-col">
-                      <!-- UPDATED: Added loading state -->
                       <ion-button
                         fill="clear"
                         class="remove-btn"
@@ -114,7 +97,6 @@
           </ion-card>
         </div>
 
-        <!-- Discount Section -->
         <ion-card class="discount-card">
           <div class="card-header">
             <h3 class="card-title">
@@ -150,30 +132,9 @@
             <span class="discount-text">Discount applied: -₹{{ discount }}</span>
           </div>
         </ion-card>
-
-        <!-- Delivery Date Section -->
-        <ion-card class="delivery-card">
-          <div class="card-header">
-            <h3 class="card-title">
-              <ion-icon name="calendar-outline" class="card-icon"></ion-icon>
-              Delivery Date
-            </h3>
-          </div>
-
-          <ion-item class="delivery-input" lines="none">
-            <ion-input
-              formControlName="deliveryDate"
-              type="datetime-local"
-              placeholder="Select delivery date"
-              class="delivery-field"
-              [disabled]="isLoading"
-            ></ion-input>
-          </ion-item>
-        </ion-card>
       </form>
     </div>
 
-    <!-- Order Summary -->
     <div class="order-summary-section">
       <ion-card class="summary-card">
         <div class="summary-header">
@@ -202,7 +163,6 @@
     </div>
   </ng-container>
 
-  <!-- Empty Cart Message -->
   <ng-template #emptyCart>
     <div class="empty-cart">
       <div class="empty-cart-content">
@@ -221,11 +181,9 @@
     </div>
   </ng-template>
 
-  <!-- Bottom spacing for checkout button -->
   <div class="bottom-spacing" *ngIf="cartProducts.length > 0"></div>
 </ion-content>
 
-<!-- Checkout Footer -->
 <ion-footer *ngIf="cartProducts.length > 0" class="checkout-footer">
   <div class="checkout-container">
     <div class="checkout-info">
@@ -238,7 +196,6 @@
       </div>
     </div>
 
-    <!-- UPDATED: Added loading state -->
     <ion-button
       class="checkout-btn"
       expand="block"

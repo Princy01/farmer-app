@@ -6,7 +6,7 @@ import { addIcons } from 'ionicons';
 import { chevronBack, close, search, heart, funnelOutline, swapVerticalOutline, heartOutline, cartOutline, alertCircleOutline, star } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import { BuyerApiService, Product, ProductAll, Category } from '../services/buyer-api.service';
-import { CartService, CreateCartRequest } from '../cart/cart.service';
+import { CartService, AddCartItemRequest } from '../cart/cart.service';
 import { AuthService } from '../../auth/auth.service';
 import { catchError, finalize, switchMap, tap } from 'rxjs';
 import { of } from 'rxjs';
@@ -90,207 +90,129 @@ export class CategoryPageComponent implements OnInit {
     addIcons({ chevronBack, close, search, heart, alertCircleOutline, funnelOutline, swapVerticalOutline, heartOutline, cartOutline, star });
   }
 
+
   async addToCart(wholesaler: any, event?: Event) {
-  if (event) {
-    event.stopPropagation();
-  }
-
-  if (!this.authService.isAuthenticated()) {
-    const alert = await this.alertCtrl.create({
-      header: 'Authentication Required',
-      message: 'Please login to add items to cart.',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Login',
-          handler: () => {
-            this.router.navigate(['/auth/login']);
-          }
-        }
-      ]
-    });
-    await alert.present();
-    return;
-  }
-
-  if (!this.selectedProduct) {
-    const alert = await this.alertCtrl.create({
-      header: 'Error',
-      message: 'No product selected.',
-      buttons: ['OK']
-    });
-    await alert.present();
-    return;
-  }
-
-  const loading = await this.loadingCtrl.create({
-    message: 'Adding to cart...',
-    spinner: 'circular'
-  });
-
-  try {
-    await loading.present();
-
-    // FIXED: Handle both string and number return types
-    const userIdFromAuth = this.authService.getUserId();
-    if (!userIdFromAuth) {
-      throw new Error('Unable to get retailer ID');
+    if (event) {
+      event.stopPropagation();
     }
 
-    // Convert to number regardless of input type
-    const retailerId = typeof userIdFromAuth === 'string'
-      ? parseInt(userIdFromAuth, 10)
-      : Number(userIdFromAuth);
-
-    if (isNaN(retailerId)) {
-      throw new Error('Invalid retailer ID');
-    }
-
-    // Simple cart request - let backend handle existing cart logic
-    const cartRequest: CreateCartRequest = {
-      retailer_id: retailerId,
-      wholeseller_id: wholesaler.id,
-      products: [
-        {
-          product_id: this.selectedProduct.product_id,
-          quantity: 1,
-          unit_id: 1,
-          price_while_added: wholesaler.price,
-          latest_wholesaler_price: wholesaler.price,
-          price_updated_at: new Date().toISOString(),
-          wholeseller_id: wholesaler.id,
-          is_active: true
-        }
-      ],
-      device_info: {
-        platform: 'web',
-        timestamp: new Date().toISOString()
-      },
-      cart_status: 0
-    };
-
-    console.log('Cart request payload:', JSON.stringify(cartRequest, null, 2));
-
-    this.cartService.createCart(cartRequest).subscribe({
-      next: async (response) => {
-        loading.dismiss();
-
-        const alert = await this.alertCtrl.create({
-          header: 'Success',
-          message: `${this.selectedProduct?.product_name} added to cart successfully!`,
-          buttons: [
-            {
-              text: 'Continue Shopping',
-              role: 'cancel'
-            },
-            {
-              text: 'View Cart',
-              handler: () => {
-                this.router.navigate(['/buyer/cart']);
-              }
-            }
-          ]
-        });
-        await alert.present();
-      },
-      error: async (error) => {
-        loading.dismiss();
-        console.error('Error adding to cart:', error);
-
-        // Handle specific error messages from backend
-        let errorMessage = 'Failed to add item to cart. Please try again.';
-
-        if (error.error && error.error.message) {
-          errorMessage = error.error.message;
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-
-        const alert = await this.alertCtrl.create({
-          header: 'Error',
-          message: errorMessage,
-          buttons: ['OK']
-        });
-        await alert.present();
-      }
-    });
-
-  } catch (error) {
-    loading.dismiss();
-    console.error('Error adding to cart:', error);
-
-    const alert = await this.alertCtrl.create({
-      header: 'Error',
-      message: 'Failed to add item to cart. Please try again.',
-      buttons: ['OK']
-    });
-    await alert.present();
-  }
-}
-
-  private createNewCart(wholesaler: any, retailerId: number, loading: HTMLIonLoadingElement, existingCartRequest?: CreateCartRequest) {
-  const cartRequest = existingCartRequest || {
-    retailer_id: retailerId,
-    wholeseller_id: wholesaler.id || 1,
-    products: [
-      {
-        product_id: this.selectedProduct!.product_id,
-        quantity: 1,
-        unit_id: 1,
-        price_while_added: wholesaler.price,
-        latest_wholesaler_price: wholesaler.price,
-        price_updated_at: new Date().toISOString(),
-        wholeseller_id: wholesaler.id || 1,
-        is_active: true
-      }
-    ],
-    device_info: {
-      platform: 'web',
-      timestamp: new Date().toISOString()
-    },
-    cart_status: 0
-  };
-
-  console.log('Cart request payload:', JSON.stringify(cartRequest, null, 2));
-
-  this.cartService.createCart(cartRequest).subscribe({
-    next: async (response) => {
-      loading.dismiss();
-
+    // Check authentication
+    if (!this.authService.isAuthenticated()) {
       const alert = await this.alertCtrl.create({
-        header: 'Success',
-        message: `${this.selectedProduct?.product_name} added to cart successfully!`,
+        header: 'Authentication Required',
+        message: 'Please login to add items to cart.',
         buttons: [
           {
-            text: 'Continue Shopping',
+            text: 'Cancel',
             role: 'cancel'
           },
           {
-            text: 'View Cart',
+            text: 'Login',
             handler: () => {
-              this.router.navigate(['/buyer/cart']);
+              this.router.navigate(['/login']);
             }
           }
         ]
       });
       await alert.present();
-    },
-    error: async (error) => {
-      loading.dismiss();
-      console.error('Error creating cart:', error);
+      return;
+    }
+
+    // Check if product is selected
+    if (!this.selectedProduct) {
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: 'No product selected.',
+        buttons: ['OK']
+      });
+      await alert.present();
+      return;
+    }
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Adding to cart...',
+      spinner: 'circular'
+    });
+
+    try {
+      await loading.present();
+
+      if (wholesaler.price < 0) {
+        const alert = await this.alertCtrl.create({
+          header: 'Error',
+          message: 'Invalid price for this item.',
+          buttons: ['OK']
+        });
+        await alert.present();
+        return;
+      }
+
+      const cartRequest: AddCartItemRequest = {
+        wholesaler_id: wholesaler.id,
+        product_id: this.selectedProduct.product_id,
+        quantity: 1,
+        unit_id: 1, // Default unit, adjust if you have unit selection
+        price: wholesaler.price
+      };
+
+      console.log('Adding to cart:', cartRequest);
+
+      this.cartService.addItemToCart(cartRequest).subscribe({
+        next: async (response) => {
+          await loading.dismiss();
+          console.log('Item added to cart:', response);
+
+          const alert = await this.alertCtrl.create({
+            header: 'Success',
+            message: `${this.selectedProduct?.product_name} added to cart successfully!`,
+            buttons: [
+              {
+                text: 'Continue Shopping',
+                role: 'cancel'
+              },
+              {
+                text: 'View Cart',
+                handler: () => {
+                  this.router.navigate(['/buyer/cart']);
+                }
+              }
+            ]
+          });
+          await alert.present();
+        },
+        error: async (error) => {
+          await loading.dismiss();
+          console.error('Error adding to cart:', error);
+
+          let errorMessage = 'Failed to add item to cart. Please try again.';
+
+          if (error.error && error.error.message) {
+            errorMessage = error.error.message;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
+          const alert = await this.alertCtrl.create({
+            header: 'Error',
+            message: errorMessage,
+            buttons: ['OK']
+          });
+          await alert.present();
+        }
+      });
+
+    } catch (error) {
+      await loading.dismiss();
+      console.error('Error adding to cart:', error);
 
       const alert = await this.alertCtrl.create({
         header: 'Error',
-        message: error.message || 'Failed to add item to cart. Please try again.',
+        message: 'Failed to add item to cart. Please try again.',
         buttons: ['OK']
       });
       await alert.present();
     }
-  });
-}
+  }
 
   ngOnInit() {
     this.route.params.pipe(
@@ -363,7 +285,7 @@ export class CategoryPageComponent implements OnInit {
     });
   }
 
-    loadAllProducts() {
+  loadAllProducts() {
     this.loadingProducts = true;
     this.errorLoadingProducts = false;
 
@@ -474,7 +396,6 @@ export class CategoryPageComponent implements OnInit {
     this.productsList = [];
     this.filteredAndSortedItems = [];
   }
-
 
   toggleFavorite(wholesaler: any) {
     wholesaler.favorite = !wholesaler.favorite;
