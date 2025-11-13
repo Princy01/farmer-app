@@ -12,6 +12,7 @@ import {
   personAddOutline, locationOutline, mapOutline
 } from 'ionicons/icons';
 import { AuthService, UserRegistration, LoginCredentials, Location, State, City } from './auth.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 enum UserRole {
   Admin = 1,
@@ -23,7 +24,7 @@ enum UserRole {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule, TranslatePipe],
   templateUrl: './auth.page.html',
   styleUrls: ['./auth.page.scss'],
 })
@@ -42,16 +43,17 @@ export class LoginPage {
   isLoadingLocations = false;
 
   userRoles = [
-    { id: UserRole.Wholesaler, name: 'Wholesaler' },
-    { id: UserRole.Retailer, name: 'Retailer' },
-    { id: UserRole.Driver, name: 'Driver' }
+    { id: UserRole.Wholesaler, name: 'AUTH.ROLE_WHOLESALER' },
+    { id: UserRole.Retailer, name: 'AUTH.ROLE_RETAILER' },
+    { id: UserRole.Driver, name: 'AUTH.ROLE_DRIVER' }
   ];
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private authService: AuthService,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private translate: TranslateService
   ) {
     addIcons({
       eye, eyeOff, eyeOutline, eyeOffOutline,
@@ -155,7 +157,7 @@ export class LoginPage {
     this.authService.login(credentials).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.presentToast('Login successful', 'success');
+        this.presentToast(this.translate.instant('AUTH.LOGIN_SUCCESS'), 'success');
 
         const userRole = this.authService.getUserRole();
 
@@ -176,7 +178,7 @@ export class LoginPage {
               break;
             default:
               console.error('Unknown role:', userRole);
-              this.presentToast('Unable to access your account. Please contact support.', 'danger');
+              this.presentToast(this.translate.instant('AUTH.UNKNOWN_ROLE_ERROR'), 'danger');
           }
         }, 1000);
       },
@@ -184,15 +186,15 @@ export class LoginPage {
         this.isLoading = false;
         console.error('Login failed:', error);
 
-        let errorMessage = 'Unable to log in. Please check your credentials and try again.';
+        let errorMessage = this.translate.instant('AUTH.LOGIN_ERROR');
 
         if (error.error && error.error.error) {
           if (error.error.error.includes('invalid credentials') ||
             error.error.error.includes('Login failed')) {
-            errorMessage = 'Invalid email/phone or password.';
+            errorMessage = this.translate.instant('AUTH.INVALID_CREDENTIALS');
           }
         } else if (error.status === 0) {
-          errorMessage = 'Cannot connect to the server. Please check your internet connection.';
+          errorMessage = this.translate.instant('AUTH.CONNECTION_ERROR');
         }
 
         this.presentToast(errorMessage, 'danger');
@@ -227,7 +229,7 @@ export class LoginPage {
     this.authService.registerUser(userData).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.presentToast('Registration successful! Please login.', 'success');
+        this.presentToast(this.translate.instant('AUTH.REGISTER_SUCCESS'), 'success');
 
         // Reset the form and return to login mode
         this.registerForm.reset({
@@ -246,18 +248,18 @@ export class LoginPage {
         this.isLoading = false;
         console.error('Registration failed:', error);
 
-        let errorMessage = 'Unable to create your account. Please try again later.';
+        let errorMessage = this.translate.instant('AUTH.REGISTER_ERROR');
 
         if (error.error && typeof error.error === 'object' && error.error.error) {
           if (error.error.error.includes('already exists')) {
-            errorMessage = 'An account with this email or phone number already exists.';
+            errorMessage = this.translate.instant('AUTH.USER_EXISTS_ERROR');
           } else if (error.error.error.includes('Invalid email')) {
-            errorMessage = 'Please enter a valid email address.';
+            errorMessage = this.translate.instant('AUTH.INVALID_EMAIL_ERROR');
           }
         } else if (error.status === 0) {
-          errorMessage = 'Cannot connect to the server. Please check your internet connection.';
+          errorMessage = this.translate.instant('AUTH.CONNECTION_ERROR');
         } else if (error.status === 400) {
-          errorMessage = 'Please check your information and try again.';
+          errorMessage = this.translate.instant('AUTH.VALIDATION_ERROR');
         }
 
         this.presentToast(errorMessage, 'danger');
@@ -275,7 +277,7 @@ export class LoginPage {
       error: (error) => {
         console.error('Failed to load states:', error);
         this.isLoadingStates = false;
-        this.presentToast('Failed to load states. Please try again.', 'danger');
+        this.presentToast(this.translate.instant('AUTH.LOAD_STATES_ERROR'), 'danger');
       }
     });
   }
@@ -290,7 +292,7 @@ export class LoginPage {
       error: (error) => {
         console.error('Failed to load cities:', error);
         this.isLoadingCities = false;
-        this.presentToast('Failed to load cities. Please try again.', 'danger');
+        this.presentToast(this.translate.instant('AUTH.LOAD_CITIES_ERROR'), 'danger');
       }
     });
   }
@@ -305,7 +307,7 @@ export class LoginPage {
       error: (error) => {
         console.error('Failed to load locations:', error);
         this.isLoadingLocations = false;
-        this.presentToast('Failed to load locations. Please try again.', 'danger');
+        this.presentToast(this.translate.instant('AUTH.LOAD_LOCATIONS_ERROR'), 'danger');
       }
     });
   }

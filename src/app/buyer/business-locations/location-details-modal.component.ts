@@ -4,6 +4,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
 import { BusinessBranchWithNames } from './business-locations.service';
 import { addIcons } from 'ionicons';
 import { call, mail, business, location, card, time, pulse, close } from 'ionicons/icons';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-location-details-modal',
@@ -27,7 +28,7 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="business" slot="start" color="primary"></ion-icon>
               <ion-label>
-                <h3>Shop Name</h3>
+                <h3>{{ 'LOCATION_DETAILS.SHOP_NAME' | translate }}</h3>
                 <p>{{ location.shop_name }}</p>
               </ion-label>
             </ion-item>
@@ -35,7 +36,7 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="call" slot="start" color="primary"></ion-icon>
               <ion-label>
-                <h3>Contact Number</h3>
+                <h3>{{ 'LOCATION_DETAILS.CONTACT_NUMBER' | translate }}</h3>
                 <p>{{ location.number }}</p>
               </ion-label>
             </ion-item>
@@ -43,7 +44,7 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="mail" slot="start" color="secondary"></ion-icon>
               <ion-label>
-                <h3>Email Address</h3>
+                <h3>{{ 'LOCATION_DETAILS.EMAIL_ADDRESS' | translate }}</h3>
                 <p>{{ location.email }}</p>
               </ion-label>
             </ion-item>
@@ -51,11 +52,11 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="location" slot="start" color="primary"></ion-icon>
               <ion-label>
-                <h3>Location Details</h3>
+                <h3>{{ 'LOCATION_DETAILS.LOCATION_DETAILS' | translate }}</h3>
                 <p>
-                  Location: {{ location.location_name }},
-                  State: {{ location.state_name }},
-                  City: {{ location.city_name }}
+                  {{ 'LOCATION_DETAILS.LOCATION' | translate }}: {{ location.location_name }},
+                  {{ 'LOCATION_DETAILS.STATE' | translate }}: {{ location.state_name }},
+                  {{ 'LOCATION_DETAILS.CITY' | translate }}: {{ location.city_name }}
                 </p>
               </ion-label>
             </ion-item>
@@ -63,7 +64,7 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="business" slot="start" color="success"></ion-icon>
               <ion-label>
-                <h3>Full Address</h3>
+                <h3>{{ 'LOCATION_DETAILS.FULL_ADDRESS' | translate }}</h3>
                 <p>{{ location.address }}</p>
               </ion-label>
             </ion-item>
@@ -71,7 +72,7 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="card" slot="start" color="danger"></ion-icon>
               <ion-label>
-                <h3>GST Number</h3>
+                <h3>{{ 'LOCATION_DETAILS.GST_NUMBER' | translate }}</h3>
                 <p>{{ location.gst_num }}</p>
               </ion-label>
             </ion-item>
@@ -79,7 +80,7 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="card" slot="start" color="medium"></ion-icon>
               <ion-label>
-                <h3>PAN Number</h3>
+                <h3>{{ 'LOCATION_DETAILS.PAN_NUMBER' | translate }}</h3>
                 <p>{{ location.pan_num }}</p>
               </ion-label>
             </ion-item>
@@ -87,15 +88,15 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="business" slot="start" color="primary"></ion-icon>
               <ion-label>
-                <h3>Privileged User</h3>
-                <p>{{ location.privilege_user ? 'Yes' : 'No' }}</p>
+                <h3>{{ 'LOCATION_DETAILS.PRIVILEGED_USER' | translate }}</h3>
+                <p>{{ location.privilege_user ? ('LOCATION_DETAILS.YES' | translate) : ('LOCATION_DETAILS.NO' | translate) }}</p>
               </ion-label>
             </ion-item>
 
             <ion-item *ngIf="location.established_year">
               <ion-icon name="time" slot="start" color="secondary"></ion-icon>
               <ion-label>
-                <h3>Established Year</h3>
+                <h3>{{ 'LOCATION_DETAILS.ESTABLISHED_YEAR' | translate }}</h3>
                 <p>{{ location.established_year }}</p>
               </ion-label>
             </ion-item>
@@ -103,15 +104,15 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="pulse" slot="start" color="success"></ion-icon>
               <ion-label>
-                <h3>Status</h3>
-                <p>{{ location.active_status ? 'Active' : 'Inactive' }}</p>
+                <h3>{{ 'LOCATION_DETAILS.STATUS' | translate }}</h3>
+                <p>{{ location.active_status ? ('LOCATION_DETAILS.ACTIVE' | translate) : ('LOCATION_DETAILS.INACTIVE' | translate) }}</p>
               </ion-label>
             </ion-item>
 
             <ion-item>
               <ion-icon name="time" slot="start" color="medium"></ion-icon>
               <ion-label>
-                <h3>Created</h3>
+                <h3>{{ 'LOCATION_DETAILS.CREATED' | translate }}</h3>
                 <p>{{ location.created_at | date:'medium' }}</p>
               </ion-label>
             </ion-item>
@@ -119,7 +120,7 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
             <ion-item>
               <ion-icon name="time" slot="start" color="warning"></ion-icon>
               <ion-label>
-                <h3>Last Updated</h3>
+                <h3>{{ 'LOCATION_DETAILS.LAST_UPDATED' | translate }}</h3>
                 <p>{{ location.updated_at | date:'medium' }}</p>
               </ion-label>
             </ion-item>
@@ -158,7 +159,8 @@ import { call, mail, business, location, card, time, pulse, close } from 'ionico
   standalone: true,
   imports: [
     CommonModule,
-    IonicModule
+    IonicModule,
+    TranslatePipe
   ]
 })
 export class LocationDetailsModalComponent {

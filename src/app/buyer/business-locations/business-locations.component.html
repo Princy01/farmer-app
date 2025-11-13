@@ -5,7 +5,7 @@
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title class="page-title">Business Locations</ion-title>
+    <ion-title class="page-title">{{ 'BUSINESS_LOCATIONS.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -21,7 +21,7 @@
           (click)="addNewLocation()"
         >
           <ion-icon name="add" slot="start"></ion-icon>
-          Add New Location
+          {{ 'BUSINESS_LOCATIONS.ADD_NEW' | translate }}
         </ion-button>
       </div>
 
@@ -48,29 +48,29 @@
                     slot="start"
                   ></ion-icon>
                   <ion-label>
-                    <h3>Location: {{ location.location_name }}, State: {{ location.state_name }}, City: {{ location.city_name }}</h3>
+                    <h3>{{ 'BUSINESS_LOCATIONS.LOCATION_LABEL' | translate }}: {{ location.location_name }}, {{ 'BUSINESS_LOCATIONS.STATE_LABEL' | translate }}: {{ location.state_name }}, {{ 'BUSINESS_LOCATIONS.CITY_LABEL' | translate }}: {{ location.city_name }}</h3>
                     <p>{{ location.address }}</p>
                   </ion-label>
                 </ion-item>
 
                 <ion-item>
                   <ion-label>
-                    <p><strong>Contact:</strong> {{ location.number }}</p>
-                    <p><strong>Email:</strong> {{ location.email }}</p>
+                    <p><strong>{{ 'BUSINESS_LOCATIONS.CONTACT' | translate }}:</strong> {{ location.number }}</p>
+                    <p><strong>{{ 'BUSINESS_LOCATIONS.EMAIL' | translate }}:</strong> {{ location.email }}</p>
                   </ion-label>
                 </ion-item>
 
                 <ion-item>
                   <ion-label>
-                    <p><strong>Status:</strong> {{ location.active_status ? 'Active' : 'Inactive' }}</p>
-                    <p><strong>Privileged:</strong> {{ location.privilege_user ? 'Yes' : 'No' }}</p>
+                    <p><strong>{{ 'BUSINESS_LOCATIONS.STATUS' | translate }}:</strong> {{ location.active_status ? ('BUSINESS_LOCATIONS.ACTIVE' | translate) : ('BUSINESS_LOCATIONS.INACTIVE' | translate) }}</p>
+                    <p><strong>{{ 'BUSINESS_LOCATIONS.PRIVILEGED' | translate }}:</strong> {{ location.privilege_user ? ('BUSINESS_LOCATIONS.YES' | translate) : ('BUSINESS_LOCATIONS.NO' | translate) }}</p>
                   </ion-label>
                 </ion-item>
 
                 <ion-item>
                   <ion-label>
-                    <p><strong>Created:</strong> {{ location.created_at | date:'short' }}</p>
-                    <p><strong>Updated:</strong> {{ location.updated_at | date:'short' }}</p>
+                    <p><strong>{{ 'BUSINESS_LOCATIONS.CREATED' | translate }}:</strong> {{ location.created_at | date:'short' }}</p>
+                    <p><strong>{{ 'BUSINESS_LOCATIONS.UPDATED' | translate }}:</strong> {{ location.updated_at | date:'short' }}</p>
                   </ion-label>
                 </ion-item>
               </ion-list>
@@ -82,7 +82,7 @@
                   (click)="viewLocationDetails(location)"
                 >
                   <ion-icon name="eye" slot="start"></ion-icon>
-                  View Details
+                  {{ 'BUSINESS_LOCATIONS.VIEW_DETAILS' | translate }}
                 </ion-button>
 
                 <ion-button color="tertiary"
@@ -91,7 +91,7 @@
                   (click)="modifyLocation(location)"
                 >
                   <ion-icon name="create" slot="start"></ion-icon>
-                  Modify
+                  {{ 'BUSINESS_LOCATIONS.MODIFY' | translate }}
                 </ion-button>
               </div>
             </ion-card-content>
@@ -102,10 +102,9 @@
         <ng-template #noLocations>
           <div class="no-locations">
             <ion-icon name="business" class="no-locations-icon"></ion-icon>
-            <h2>No Business Locations</h2>
+            <h2>{{ 'BUSINESS_LOCATIONS.NO_LOCATIONS_TITLE' | translate }}</h2>
             <p>
-              You haven't added any business locations yet. Click the button
-              above to add your first location.
+              {{ 'BUSINESS_LOCATIONS.NO_LOCATIONS_MESSAGE' | translate }}
             </p>
           </div>
         </ng-template>
@@ -114,7 +113,7 @@
       <!-- Loading state -->
       <div *ngIf="isLoading" class="loading-container">
         <ion-spinner name="circular"></ion-spinner>
-        <p>Loading your business locations...</p>
+        <p>{{ 'BUSINESS_LOCATIONS.LOADING_MESSAGE' | translate }}</p>
       </div>
     </div>
   </div>

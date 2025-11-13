@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ToastController } from '@ionic/angular';
-import { ModalController } from '@ionic/angular';
+import { IonicModule, ToastController, ModalController } from '@ionic/angular';
 import { AddProductModalComponent } from '../add-product-modal/add-product-modal.component';
 import { addIcons } from 'ionicons';
 import { add, trash, remove, arrowBack } from 'ionicons/icons'
@@ -72,7 +71,7 @@ export class BranchProductsComponent implements OnInit {
     this.products.splice(index, 1);
 
     const toast = await this.toastCtrl.create({
-      message: this.translate.instant('BRANCH_PRODUCTS.PRODUCT_REMOVED'),
+      message: this.translate.instant('PRODUCTS_IN_BRANCH.PRODUCT_REMOVED'),
       duration: 2000,
       color: 'success',
       position: 'bottom'
@@ -97,7 +96,7 @@ export class BranchProductsComponent implements OnInit {
       });
 
       const toast = await this.toastCtrl.create({
-        message: this.translate.instant('BRANCH_PRODUCTS.PRODUCT_ADDED'),
+        message: this.translate.instant('PRODUCTS_IN_BRANCH.PRODUCT_ADDED'),
         duration: 2000,
         color: 'success',
         position: 'bottom'

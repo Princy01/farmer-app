@@ -13,13 +13,14 @@ import {
 import { BusinessLocationsService, BusinessBranchWithNames } from './business-locations.service';
 import { LocationDetailsModalComponent } from './location-details-modal.component';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-business-locations',
   templateUrl: './business-locations.component.html',
   styleUrls: ['./business-locations.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule]
+  imports: [CommonModule, FormsModule, IonicModule, TranslatePipe]
 })
 export class BusinessLocationsComponent implements OnInit {
   businessLocations: BusinessBranchWithNames[] = [];
@@ -32,7 +33,8 @@ export class BusinessLocationsComponent implements OnInit {
     private loadingController: LoadingController,
     private modalController: ModalController,
     private actionSheetController: ActionSheetController,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) {
     addIcons({
       add, location, business, create, eye, home, list, cube, time,
@@ -65,11 +67,11 @@ export class BusinessLocationsComponent implements OnInit {
 
   private async showAuthError() {
     const alert = await this.alertController.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('BUSINESS_LOCATIONS.AUTH_ERROR'),
+      message: this.translate.instant('BUSINESS_LOCATIONS.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('BUSINESS_LOCATIONS.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -82,11 +84,11 @@ export class BusinessLocationsComponent implements OnInit {
 
   private async showUnauthorizedError() {
     const alert = await this.alertController.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('BUSINESS_LOCATIONS.ACCESS_DENIED'),
+      message: this.translate.instant('BUSINESS_LOCATIONS.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('BUSINESS_LOCATIONS.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -99,7 +101,7 @@ export class BusinessLocationsComponent implements OnInit {
   async loadBusinessLocations() {
     this.isLoading = true;
     const loading = await this.loadingController.create({
-      message: 'Loading locations...'
+      message: this.translate.instant('BUSINESS_LOCATIONS.LOADING')
     });
     await loading.present();
 
@@ -131,9 +133,9 @@ export class BusinessLocationsComponent implements OnInit {
           }
 
           const alert = await this.alertController.create({
-            header: 'Error',
-            message: 'Failed to load locations. Please try again later.',
-            buttons: ['OK']
+            header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),
+            message: this.translate.instant('BUSINESS_LOCATIONS.LOAD_ERROR'),
+            buttons: [this.translate.instant('BUSINESS_LOCATIONS.OK')]
           });
           await alert.present();
         },
@@ -149,9 +151,9 @@ export class BusinessLocationsComponent implements OnInit {
       console.error('Unexpected error:', error);
 
       const alert = await this.alertController.create({
-        header: 'Error',
-        message: 'An unexpected error occurred.',
-        buttons: ['OK']
+        header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),
+        message: this.translate.instant('BUSINESS_LOCATIONS.UNEXPECTED_ERROR'),
+        buttons: [this.translate.instant('BUSINESS_LOCATIONS.OK')]
       });
       await alert.present();
     }
