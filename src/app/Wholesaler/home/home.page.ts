@@ -152,9 +152,9 @@ export class HomePage {
           this.loadMoreItems();
 
           const alert = await this.alertCtrl.create({
-            header: this.translate.instant('HOME.NOTICE'),
-            message: this.translate.instant('HOME.UNABLE_TO_CONNECT'),
-            buttons: [this.translate.instant('HOME.OK')]
+            header: this.translate.instant('WHOLESALER_HOME.NOTICE'),
+            message: this.translate.instant('WHOLESALER_HOME.UNABLE_TO_CONNECT'),
+            buttons: [this.translate.instant('WHOLESALER_HOME.OK')]
           });
           await alert.present();
         }
@@ -169,9 +169,9 @@ export class HomePage {
       this.loadMoreItems();
 
       const alert = await this.alertCtrl.create({
-        header: this.translate.instant('HOME.NOTICE'),
-        message: this.translate.instant('HOME.SHOWING_SAMPLE_DATA'),
-        buttons: [this.translate.instant('HOME.OK')]
+        header: this.translate.instant('WHOLESALER_HOME.NOTICE'),
+        message: this.translate.instant('WHOLESALER_HOME.SHOWING_SAMPLE_DATA'),
+        buttons: [this.translate.instant('WHOLESALER_HOME.OK')]
       });
       await alert.present();
     }
@@ -321,11 +321,11 @@ export class HomePage {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: this.translate.instant('HOME.AUTH_ERROR'),
-      message: this.translate.instant('HOME.SESSION_EXPIRED'),
+      header: this.translate.instant('WHOLESALER_HOME.AUTH_ERROR'),
+      message: this.translate.instant('WHOLESALER_HOME.SESSION_EXPIRED'),
       buttons: [
         {
-          text: this.translate.instant('HOME.OK'),
+          text: this.translate.instant('WHOLESALER_HOME.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -338,11 +338,11 @@ export class HomePage {
 
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: this.translate.instant('HOME.ACCESS_DENIED'),
-      message: this.translate.instant('HOME.NO_PERMISSION'),
+      header: this.translate.instant('WHOLESALER_HOME.ACCESS_DENIED'),
+      message: this.translate.instant('WHOLESALER_HOME.NO_PERMISSION'),
       buttons: [
         {
-          text: this.translate.instant('HOME.OK'),
+          text: this.translate.instant('WHOLESALER_HOME.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -418,15 +418,15 @@ export class HomePage {
 
   async logout() {
     const alert = await this.alertCtrl.create({
-      header: this.translate.instant('HOME.LOGOUT'),
-      message: this.translate.instant('HOME.LOGOUT_CONFIRMATION'),
+      header: this.translate.instant('WHOLESALER_HOME.LOGOUT'),
+      message: this.translate.instant('WHOLESALER_HOME.LOGOUT_CONFIRMATION'),
       buttons: [
         {
-          text: this.translate.instant('HOME.CANCEL'),
+          text: this.translate.instant('WHOLESALER_HOME.CANCEL'),
           role: 'cancel'
         },
         {
-          text: this.translate.instant('HOME.LOGOUT'),
+          text: this.translate.instant('WHOLESALER_HOME.LOGOUT'),
           handler: async () => {
             await this.closeMenu();
             this.authService.logout();

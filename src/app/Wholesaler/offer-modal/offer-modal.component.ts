@@ -44,17 +44,17 @@ export class OfferModalComponent implements OnInit {
     }
 
     if (this.offerPrice <= 0) {
-      await this.showValidationError(this.translate.instant('OFFER_MODAL.INVALID_PRICE'));
+      await this.showValidationError(this.translate.instant('MAKE_OFFER.INVALID_PRICE'));
       return;
     }
 
     if (!this.proposedDeliveryDate) {
-      await this.showValidationError(this.translate.instant('OFFER_MODAL.INVALID_DATE'));
+      await this.showValidationError(this.translate.instant('MAKE_OFFER.INVALID_DATE'));
       return;
     }
 
     const loading = await this.loadingCtrl.create({
-      message: this.translate.instant('OFFER_MODAL.SUBMITTING'),
+      message: this.translate.instant('MAKE_OFFER.SUBMITTING'),
       spinner: 'circular',
     });
 
@@ -93,24 +93,24 @@ export class OfferModalComponent implements OnInit {
             return;
           }
 
-          await this.showErrorAlert(this.translate.instant('OFFER_MODAL.SUBMIT_ERROR'));
+          await this.showErrorAlert(this.translate.instant('MAKE_OFFER.SUBMIT_ERROR'));
         }
       });
     } catch (err) {
       this.isSubmitting = false;
       loading.dismiss();
       console.error('Unexpected error:', err);
-      await this.showErrorAlert(this.translate.instant('OFFER_MODAL.UNEXPECTED_ERROR'));
+      await this.showErrorAlert(this.translate.instant('MAKE_OFFER.UNEXPECTED_ERROR'));
     }
   }
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: this.translate.instant('OFFER_MODAL.AUTH_ERROR'),
-      message: this.translate.instant('OFFER_MODAL.SESSION_EXPIRED'),
+      header: this.translate.instant('MAKE_OFFER.AUTH_ERROR'),
+      message: this.translate.instant('MAKE_OFFER.SESSION_EXPIRED'),
       buttons: [
         {
-          text: this.translate.instant('OFFER_MODAL.OK'),
+          text: this.translate.instant('MAKE_OFFER.OK'),
           handler: () => {
             this.authService.logout();
             this.modalCtrl.dismiss();
@@ -123,18 +123,18 @@ export class OfferModalComponent implements OnInit {
 
   private async showValidationError(message: string) {
     const alert = await this.alertCtrl.create({
-      header: this.translate.instant('OFFER_MODAL.VALIDATION_ERROR'),
+      header: this.translate.instant('MAKE_OFFER.VALIDATION_ERROR'),
       message: message,
-      buttons: [this.translate.instant('OFFER_MODAL.OK')]
+      buttons: [this.translate.instant('MAKE_OFFER.OK')]
     });
     await alert.present();
   }
 
   private async showErrorAlert(message: string) {
     const alert = await this.alertCtrl.create({
-      header: this.translate.instant('OFFER_MODAL.ERROR'),
+      header: this.translate.instant('MAKE_OFFER.ERROR'),
       message: message,
-      buttons: [this.translate.instant('OFFER_MODAL.OK')]
+      buttons: [this.translate.instant('MAKE_OFFER.OK')]
     });
     await alert.present();
   }

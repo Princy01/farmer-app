@@ -1,4 +1,5 @@
 {
+  "WHOLESALER_HOME":{
   "Go4u": "गो4यू",
   "Menu": "मेनू",
   "Profile": "प्रोफ़ाइल",
@@ -13,12 +14,16 @@
   "Logout": "लॉग आउट",
   "Pull to refresh": "रीफ़्रेश करने के लिए नीचे खींचें",
   "Refreshing...": "रीफ़्रेश किया जा रहा है...",
+  "Search items...": "आइटम खोजें...",
   "Total Quantity": "कुल मात्रा",
   "Orders placed": "किए गए ऑर्डर",
-  "Loading more items...": "और आइटम लोड हो रहे हैं...",
+   "No items found": "कोई आइटम नहीं मिला",
+    "Try adjusting your search": "अपनी खोज बदलकर देखें",
+  "Loading more items...": "और आइटम लोड हो रहे हैं..."
+  },
 
 
-  "BUSINESS_LOCATIONS": {
+  "WHOLESALER_BUSINESS_LOCATIONS": {
   "Business Locations": "व्यवसाय स्थान",
   "Add New Location": "नया स्थान जोड़ें",
   "Location": "स्थान",
@@ -52,20 +57,34 @@
     "NO_LOCATIONS_MESSAGE": "शुरू करने के लिए अपना पहला व्यवसाय स्थान जोड़ें"
   },
 
-"Update Business": "व्यवसाय अपडेट करें",
-  "Update your business details": "अपने व्यवसाय की जानकारी अपडेट करें",
-  "Email Address": "ईमेल पता",
-  "Enter business email": "व्यवसाय का ईमेल दर्ज करें",
-  "Mobile Number": "मोबाइल नंबर",
-  "Enter mobile number": "मोबाइल नंबर दर्ज करें",
-  "Business Address": "व्यवसाय का पता",
-  "Enter complete business address": "पूरा व्यवसाय पता दर्ज करें",
-  "Business Status": "व्यवसाय की स्थिति",
-  "Active": "सक्रिय",
-  "Inactive": "निष्क्रिय",
-  "Updating...": "अपडेट किया जा रहा है...",
+"WHOLESALER_BUSINESS_UPDATE":{
+    "PAGE_TITLE": "व्यवसाय अपडेट करें",
+    "SUBTITLE": "नीचे अपने व्यवसाय विवरण संशोधित करें",
+    "EMAIL_LABEL": "ईमेल",
+    "EMAIL_PLACEHOLDER": "अपना ईमेल दर्ज करें",
+    "MOBILE_LABEL": "मोबाइल नंबर",
+    "MOBILE_PLACEHOLDER": "अपना मोबाइल नंबर दर्ज करें",
+    "ADDRESS_LABEL": "पता",
+    "ADDRESS_PLACEHOLDER": "अपना पूरा पता दर्ज करें",
+    "BUSINESS_STATUS_LABEL": "व्यवसाय की सक्रिय स्थिति",
+    "ACTIVE": "सक्रिय",
+    "INACTIVE": "निष्क्रिय",
+    "UPDATE_BUTTON": "व्यवसाय अपडेट करें",
+    "UPDATING": "अपडेट किया जा रहा है...",
+    "ACCESS_DENIED": "पहुँच अस्वीकृत। केवल होलसेलर ही व्यवसाय विवरण अपडेट कर सकते हैं।",
+    "FILL_REQUIRED_FIELDS": "कृपया सभी आवश्यक फ़ील्ड भरें।",
+    "UPDATE_SUCCESS": "व्यवसाय विवरण सफलतापूर्वक अपडेट हो गए!",
+    "UPDATE_FAILED": "व्यवसाय विवरण अपडेट करने में विफल।",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉग इन करें।",
+    "CONNECTION_ERROR": "सर्वर से कनेक्ट नहीं हो सका। कृपया अपना इंटरनेट कनेक्शन जाँचें।",
+    "EMAIL_REQUIRED": "ईमेल आवश्यक है।",
+    "INVALID_EMAIL": "अमान्य ईमेल प्रारूप।",
+    "MOBILE_NUMBER_REQUIRED": "मोबाइल नंबर आवश्यक है।",
+    "INVALID_MOBILE": "अमान्य मोबाइल नंबर। 10–15 अंक दर्ज करें।",
+    "ADDRESS_REQUIRED": "पता आवश्यक है।"
+},
 
-
+"WHOLESALER_BUSINESS_REGISTRATION": {
 "Business Registration": "व्यवसाय पंजीकरण",
   "Registration Number": "पंजीकरण नंबर",
   "Enter registration number": "पंजीकरण नंबर दर्ज करें",
@@ -120,9 +139,12 @@
     "LOAD_LOCATIONS_ERROR": "स्थान लोड करने में विफल",
     "REGISTRATION_SUCCESS": "व्यवसाय सफलतापूर्वक पंजीकृत हो गया!",
     "REGISTRATION_FAILED": "व्यवसाय पंजीकरण में विफल",
-    "FIX_ERRORS": "कृपया फ़ॉर्म में त्रुटियाँ सुधारें।",
+    "FIX_ERRORS": "कृपया फ़ॉर्म में त्रुटियाँ सुधारें।"
+},
 
 
+
+  "ORDER_DETAILS": {
   "Order": "ऑर्डर",
   "Status": "स्थिति",
   "Retailer Information": "रिटेलर जानकारी",
@@ -163,7 +185,8 @@
     "STATUS_CANCELLED": "रद्द किया गया",
     "STATUS_RETURNED": "वापस किया गया",
     "STATUS_RETURN_REQUESTED": "वापसी का अनुरोध किया गया",
-    "STATUS_UNKNOWN": "अज्ञात स्थिति",
+    "STATUS_UNKNOWN": "अज्ञात स्थिति"
+  },
 
 
 
@@ -293,7 +316,18 @@
     "SELECT_MANDIS_PLACEHOLDER": "एक या अधिक मंडियाँ चुनें",
     "SELECT_PRODUCTS": "उत्पाद चुनें",
     "SELECT_PRODUCTS_PLACEHOLDER": "एक या अधिक उत्पाद चुनें",
-    "PRICE_COMPARISON_HEADING": "विभिन्न बाजारों में मूल्य तुलना"
+    "PRICE_COMPARISON_HEADING": "विभिन्न बाजारों में मूल्य तुलना",
+    "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
+    "OK": "ठीक है",
+    "ACCESS_DENIED": "एक्सेस अस्वीकृत",
+    "NO_PERMISSION": "आपको इस पेज को देखने की अनुमति नहीं है।",
+    "LOADING": "डेटा लोड हो रहा है...",
+    "UNABLE_TO_FETCH": "मार्केट तुलना डेटा प्राप्त नहीं किया जा सका।",
+    "DATA_UPDATED": "मार्केट तुलना डेटा सफलतापूर्वक अपडेट किया गया!",
+    "ERROR_FETCHING": "मार्केट डेटा प्राप्त करने में त्रुटि। फ़ॉलबैक डेटा दिखाया जा रहा है।",
+    "PRODUCTS_LABEL": "उत्पाद",
+    "PRICE_LABEL": "कीमत (₹/किग्रा)"
   },
 
 
@@ -320,6 +354,13 @@
     "OFFER_SUBMITTED": "ऑफर सफलतापूर्वक जमा किया गया!",
     "OFFER_ERROR": "ऑफर विंडो खोलने में त्रुटि",
     "TOP_RETAILERS_TITLE": "ऑर्डर मात्रा के आधार पर 5 सबसे ज़्यादा खरीदने वाले ग्राहक"
+  },
+
+  "RETAILER_PRODUCTS": {
+    "TITLE_SUFFIX": "के उत्पाद",
+    "CLOSE": "बंद करें",
+    "QUANTITY": "मात्रा",
+    "VALUE": "मूल्य"
   },
 
 
@@ -796,8 +837,37 @@
   "ITEMS_COUNT": "वस्तुएँ",
   "NO_PRODUCTS_FOUND": "कोई उत्पाद नहीं मिला",
   "ADD_FIRST_PRODUCT": "अपना पहला उत्पाद जोड़ें"
+  },
+
+  "BUSINESS_UPDATE": {
+    "PAGE_TITLE": "व्यवसाय अपडेट करें",
+    "CARD_TITLE": "व्यवसाय अपडेट",
+    "CARD_SUBTITLE": "अपने व्यवसाय विवरण अपडेट करें",
+    "EMAIL_LABEL": "व्यवसाय ईमेल पता *",
+    "EMAIL_PLACEHOLDER": "अपना व्यवसाय ईमेल दर्ज करें",
+    "MOBILE_LABEL": "व्यवसाय मोबाइल नंबर *",
+    "MOBILE_PLACEHOLDER": "व्यवसाय मोबाइल नंबर दर्ज करें",
+    "MOBILE_HELPER": "10-15 अंकों का मोबाइल नंबर",
+    "ADDRESS_LABEL": "व्यवसाय पता *",
+    "ADDRESS_PLACEHOLDER": "पूरा व्यवसाय पता दर्ज करें",
+    "STATUS_LABEL": "व्यवसाय स्थिति",
+    "STATUS_ACTIVE": "व्यवसाय सक्रिय",
+    "STATUS_INACTIVE": "व्यवसाय निष्क्रिय",
+    "SUBMIT": "व्यवसाय अपडेट करें",
+    "SUBMITTING": "अपडेट हो रहा है...",
+    "ERROR_REQUIRED_EMAIL": "ईमेल आवश्यक है",
+    "ERROR_INVALID_EMAIL": "कृपया मान्य ईमेल पता दर्ज करें",
+    "ERROR_REQUIRED_MOBILE": "मोबाइल नंबर आवश्यक है",
+    "ERROR_INVALID_MOBILE": "कृपया मान्य मोबाइल नंबर दर्ज करें (10-15 अंक)",
+    "ERROR_REQUIRED_ADDRESS": "पता आवश्यक है",
+    "ERROR_AUTH_REQUIRED": "इस पृष्ठ का उपयोग करने के लिए कृपया लॉगिन करें।",
+    "ERROR_ROLE_DENIED": "पहुंच अस्वीकृत। केवल खुदरा विक्रेता इस पृष्ठ का उपयोग कर सकते हैं।",
+    "ERROR_FORM_INVALID": "कृपया सभी आवश्यक फ़ील्ड सही तरीके से भरें",
+    "LOADING_UPDATE": "व्यवसाय अपडेट हो रहा है...",
+    "SUCCESS_UPDATE": "व्यवसाय सफलतापूर्वक अपडेट हुआ!",
+    "ERROR_UPDATE_FAILED": "व्यवसाय अपडेट करने में विफल। कृपया पुनः प्रयास करें।",
+    "ERROR_SESSION_EXPIRED": "सत्र समाप्त हो गया। कृपया फिर से लॉगिन करें।",
+    "ERROR_NO_CONNECTION": "सर्वर से कनेक्ट नहीं हो पा रहा है। कृपया अपना इंटरनेट कनेक्शन जांचें।"
   }
-
-
 
 }

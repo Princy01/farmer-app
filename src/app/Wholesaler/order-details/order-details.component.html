@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button color="dark" defaultHref="/wholesaler/orders"></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ 'Order' | translate }} #{{orderId}}</ion-title>
+    <ion-title>{{ 'ORDER_DETAILS.Order' | translate }} #{{orderId}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -14,11 +14,11 @@
     <!-- Order Status -->
     <ion-card>
       <ion-card-header>
-        <ion-card-subtitle>{{ 'Status' | translate }}</ion-card-subtitle>
+        <ion-card-subtitle>{{ 'ORDER_DETAILS.Status' | translate }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <div class="status-chip" [class]="getStatusLabel(orderDetails.order_status).toLowerCase()">
-          {{ getStatusLabel(orderDetails.order_status) | translate }}
+          {{ ORDER_DETAILS.getStatusLabel(orderDetails.order_status) | translate }}
         </div>
       </ion-card-content>
     </ion-card>
@@ -26,13 +26,13 @@
     <!-- Retailer Info -->
     <ion-card>
       <ion-card-header>
-        <ion-card-subtitle>{{ 'Retailer Information' | translate }}</ion-card-subtitle>
+        <ion-card-subtitle>{{ 'ORDER_DETAILS.Retailer Information' | translate }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <ion-item lines="none">
           <ion-label>
             <h2>{{orderDetails.shop_name}}</h2>
-            <p>{{ 'Retailer ID' | translate }}: {{orderDetails.retailer_id}}</p>
+            <p>{{ 'ORDER_DETAILS.Retailer ID' | translate }}: {{orderDetails.retailer_id}}</p>
           </ion-label>
         </ion-item>
       </ion-card-content>
@@ -41,16 +41,16 @@
     <!-- Order Items -->
     <ion-card>
       <ion-card-header>
-        <ion-card-subtitle>{{ 'Order Items' | translate }}</ion-card-subtitle>
+        <ion-card-subtitle>{{ 'ORDER_DETAILS.Order Items' | translate }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <ion-list>
           <ion-item *ngFor="let item of orderDetails.products">
             <ion-label>
               <h2>{{item.product_name}}</h2>
-              <p>{{ 'Category' | translate }}: {{item.category_name}}</p>
-              <p>{{ 'Quantity' | translate }}: {{item.quantity}} {{item.unit_name}}</p>
-              <p>{{ 'Price' | translate }}: ₹{{item.max_price}}/{{item.unit_name}}</p>
+              <p>{{ 'ORDER_DETAILS.Category' | translate }}: {{item.category_name}}</p>
+              <p>{{ 'ORDER_DETAILS.Quantity' | translate }}: {{item.quantity}} {{item.unit_name}}</p>
+              <p>{{ 'ORDER_DETAILS.Price' | translate }}: ₹{{item.max_price}}/{{item.unit_name}}</p>
             </ion-label>
           </ion-item>
         </ion-list>
@@ -60,31 +60,31 @@
     <!-- Order Summary -->
     <ion-card>
       <ion-card-header>
-        <ion-card-subtitle>{{ 'Order Summary' | translate }}</ion-card-subtitle>
+        <ion-card-subtitle>{{ 'ORDER_DETAILS.Order Summary' | translate }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <div class="summary-item">
-          <span>{{ 'Order Date' | translate }}</span>
+          <span>{{ 'ORDER_DETAILS.Order Date' | translate }}</span>
           <span>{{orderDetails.date_of_order | date:'medium'}}</span>
         </div>
         <div class="summary-item" *ngIf="orderDetails.actual_delivery_date">
-          <span>{{ 'Delivery Date' | translate }}</span>
+          <span>{{ 'ORDER_DETAILS.Delivery Date' | translate }}</span>
           <span>{{orderDetails.actual_delivery_date | date:'medium'}}</span>
         </div>
         <div class="summary-item">
-          <span>{{ 'Total Amount' | translate }}</span>
+          <span>{{ 'ORDER_DETAILS.Total Amount' | translate }}</span>
           <span>₹{{orderDetails.total_order_amount | number:'1.2-2'}}</span>
         </div>
         <div class="summary-item">
-          <span>{{ 'Discount' | translate }}</span>
+          <span>{{ 'ORDER_DETAILS.Discount' | translate }}</span>
           <span>₹{{orderDetails.discount_amount | number:'1.2-2'}}</span>
         </div>
         <div class="summary-item">
-          <span>{{ 'Tax Amount' | translate }}</span>
+          <span>{{ 'ORDER_DETAILS.Tax Amount' | translate }}</span>
           <span>₹{{orderDetails.tax_amount | number:'1.2-2'}}</span>
         </div>
         <div class="summary-item final-amount">
-          <span>{{ 'Final Amount' | translate }}</span>
+          <span>{{ 'ORDER_DETAILS.Final Amount' | translate }}</span>
           <span>₹{{orderDetails.final_amount | number:'1.2-2'}}</span>
         </div>
       </ion-card-content>
@@ -98,7 +98,7 @@
         {{ 'Failed to load order details. Please try again.' | translate }}
       </div>
       <ion-button expand="block" (click)="loadOrderDetails()">
-        {{ 'Retry' | translate }}
+        {{ 'ORDER_DETAILS.Retry' | translate }}
       </ion-button>
     </ion-card-content>
   </ion-card>

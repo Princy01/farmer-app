@@ -137,6 +137,7 @@ export interface TopRetailer {
   retailer_name: string;
   total_quantity: number;
   total_order_value: number;
+  products: RetailerProduct[];
 }
 
 export interface CreateOfferRequest {

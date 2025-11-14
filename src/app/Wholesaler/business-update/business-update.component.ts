@@ -64,7 +64,7 @@ export class BusinessUpdatePage implements OnInit {
 
     // Check if user is a wholesaler
     if (!this.authService.hasRole('wholesaler')) {
-      this.presentToast(this.translate.instant('BUSINESS_UPDATE.ACCESS_DENIED'), 'danger');
+      this.presentToast(this.translate.instant('WHOLESALER_BUSINESS_UPDATE.ACCESS_DENIED'), 'danger');
       this.router.navigate(['/auth']);
       return;
     }
@@ -73,12 +73,12 @@ export class BusinessUpdatePage implements OnInit {
   async onUpdateBusiness() {
     if (this.businessForm.invalid) {
       this.businessForm.markAllAsTouched();
-      this.presentToast(this.translate.instant('BUSINESS_UPDATE.FILL_REQUIRED_FIELDS'), 'warning');
+      this.presentToast(this.translate.instant('WHOLESALER_BUSINESS_UPDATE.FILL_REQUIRED_FIELDS'), 'warning');
       return;
     }
 
     const loading = await this.loadingController.create({
-      message: this.translate.instant('BUSINESS_UPDATE.UPDATING'),
+      message: this.translate.instant('WHOLESALER_BUSINESS_UPDATE.UPDATING'),
       spinner: 'crescent'
     });
     await loading.present();
@@ -97,7 +97,7 @@ export class BusinessUpdatePage implements OnInit {
       next: (response) => {
         this.isLoading = false;
         loading.dismiss();
-        this.presentToast(this.translate.instant('BUSINESS_UPDATE.UPDATE_SUCCESS'), 'success');
+        this.presentToast(this.translate.instant('WHOLESALER_BUSINESS_UPDATE.UPDATE_SUCCESS'), 'success');
 
         // Navigate back to wholesaler dashboard or previous page
         setTimeout(() => {
@@ -108,17 +108,17 @@ export class BusinessUpdatePage implements OnInit {
         this.isLoading = false;
         loading.dismiss();
 
-        let errorMessage = this.translate.instant('BUSINESS_UPDATE.UPDATE_FAILED');
+        let errorMessage = this.translate.instant('WHOLESALER_BUSINESS_UPDATE.UPDATE_FAILED');
 
         if (error.error && error.error.error) {
           errorMessage = error.error.error;
         } else if (error.status === 401) {
-          errorMessage = this.translate.instant('BUSINESS_UPDATE.SESSION_EXPIRED');
+          errorMessage = this.translate.instant('WHOLESALER_BUSINESS_UPDATE.SESSION_EXPIRED');
           this.authService.logout();
           this.router.navigate(['/auth']);
           return;
         } else if (error.status === 0) {
-          errorMessage = this.translate.instant('BUSINESS_UPDATE.CONNECTION_ERROR');
+          errorMessage = this.translate.instant('WHOLESALER_BUSINESS_UPDATE.CONNECTION_ERROR');
         }
 
         this.presentToast(errorMessage, 'danger');
@@ -145,13 +145,13 @@ export class BusinessUpdatePage implements OnInit {
     const field = this.businessForm.get(fieldName);
     if (field?.errors && field.touched) {
       if (field.errors['required']) {
-        return this.translate.instant(`BUSINESS_UPDATE.${this.getFieldKey(fieldName)}_REQUIRED`);
+        return this.translate.instant(`WHOLESALER_BUSINESS_UPDATE.${this.getFieldKey(fieldName)}_REQUIRED`);
       }
       if (field.errors['email']) {
-        return this.translate.instant('BUSINESS_UPDATE.INVALID_EMAIL');
+        return this.translate.instant('WHOLESALER_BUSINESS_UPDATE.INVALID_EMAIL');
       }
       if (field.errors['pattern']) {
-        return this.translate.instant('BUSINESS_UPDATE.INVALID_MOBILE');
+        return this.translate.instant('WHOLESALER_BUSINESS_UPDATE.INVALID_MOBILE');
       }
     }
     return '';

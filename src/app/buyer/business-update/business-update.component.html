@@ -5,7 +5,7 @@
         <ion-icon name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Update Business</ion-title>
+    <ion-title>{{ 'BUSINESS_UPDATE.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -15,9 +15,9 @@
       <ion-card-header>
         <ion-card-title>
           <ion-icon name="business-outline"></ion-icon>
-          Business Update
+          {{ 'BUSINESS_UPDATE.CARD_TITLE' | translate }}
         </ion-card-title>
-        <ion-card-subtitle>Update your business details</ion-card-subtitle>
+        <ion-card-subtitle>{{ 'BUSINESS_UPDATE.CARD_SUBTITLE' | translate }}</ion-card-subtitle>
       </ion-card-header>
 
       <ion-card-content>
@@ -28,15 +28,15 @@
             fill="outline"
             class="form-item"
             [class.ion-invalid]="isFieldInvalid('email')">
-            <ion-label position="stacked">Business Email Address *</ion-label>
+            <ion-label position="stacked">{{ 'BUSINESS_UPDATE.EMAIL_LABEL' | translate }}</ion-label>
             <ion-input
               formControlName="email"
               type="email"
-              placeholder="Enter your business email">
+              [placeholder]="'BUSINESS_UPDATE.EMAIL_PLACEHOLDER' | translate">
               <ion-icon name="mail-outline" slot="start"></ion-icon>
             </ion-input>
             <ion-note slot="error" *ngIf="isFieldInvalid('email')">
-              {{ getErrorMessage('email') }}
+              {{ getErrorMessage('email') | translate }}
             </ion-note>
           </ion-item>
 
@@ -45,17 +45,17 @@
             fill="outline"
             class="form-item"
             [class.ion-invalid]="isFieldInvalid('mobile_number')">
-            <ion-label position="stacked">Business Mobile Number *</ion-label>
+            <ion-label position="stacked">{{ 'BUSINESS_UPDATE.MOBILE_LABEL' | translate }}</ion-label>
             <ion-input
               formControlName="mobile_number"
               type="tel"
-              placeholder="Enter business mobile number">
+              [placeholder]="'BUSINESS_UPDATE.MOBILE_PLACEHOLDER' | translate">
               <ion-icon name="call-outline" slot="start"></ion-icon>
             </ion-input>
             <ion-note slot="error" *ngIf="isFieldInvalid('mobile_number')">
-              {{ getErrorMessage('mobile_number') }}
+              {{ getErrorMessage('mobile_number') | translate }}
             </ion-note>
-            <ion-note slot="helper">10-15 digit mobile number</ion-note>
+            <ion-note slot="helper">{{ 'BUSINESS_UPDATE.MOBILE_HELPER' | translate }}</ion-note>
           </ion-item>
 
           <!-- Address -->
@@ -63,21 +63,21 @@
             fill="outline"
             class="form-item"
             [class.ion-invalid]="isFieldInvalid('address')">
-            <ion-label position="stacked">Business Address *</ion-label>
+            <ion-label position="stacked">{{ 'BUSINESS_UPDATE.ADDRESS_LABEL' | translate }}</ion-label>
             <ion-textarea
               formControlName="address"
               rows="3"
-              placeholder="Enter complete retailer business address">
+              [placeholder]="'BUSINESS_UPDATE.ADDRESS_PLACEHOLDER' | translate">
               <ion-icon name="location-outline" slot="start"></ion-icon>
             </ion-textarea>
             <ion-note slot="error" *ngIf="isFieldInvalid('address')">
-              {{ getErrorMessage('address') }}
+              {{ getErrorMessage('address') | translate }}
             </ion-note>
           </ion-item>
 
           <!-- Active Status -->
           <ion-item fill="outline" class="form-item">
-            <ion-label>Business Status</ion-label>
+            <ion-label>{{ 'BUSINESS_UPDATE.STATUS_LABEL' | translate }}</ion-label>
             <ion-toggle
               formControlName="is_active"
               color="success"
@@ -86,7 +86,7 @@
             <ion-note slot="helper">
               <ion-icon [name]="businessForm.value.is_active ? 'checkmark-circle-outline' : 'close-circle-outline'"
                         [color]="businessForm.value.is_active ? 'success' : 'danger'"></ion-icon>
-              {{ businessForm.value.is_active ? 'Business Active' : 'Business Inactive' }}
+              {{ businessForm.value.is_active ? ('BUSINESS_UPDATE.STATUS_ACTIVE' | translate) : ('BUSINESS_UPDATE.STATUS_INACTIVE' | translate) }}
             </ion-note>
           </ion-item>
 
@@ -97,8 +97,8 @@
             [disabled]="businessForm.invalid || isLoading"
             class="submit-button">
             <ion-icon name="save-outline" slot="start"></ion-icon>
-            <span *ngIf="!isLoading">Update Business</span>
-            <span *ngIf="isLoading">Updating...</span>
+            <span *ngIf="!isLoading">{{ 'BUSINESS_UPDATE.SUBMIT' | translate }}</span>
+            <span *ngIf="isLoading">{{ 'BUSINESS_UPDATE.SUBMITTING' | translate }}</span>
           </ion-button>
         </form>
       </ion-card-content>

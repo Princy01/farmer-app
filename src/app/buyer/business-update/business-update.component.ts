@@ -16,11 +16,13 @@ import {
 } from 'ionicons/icons';
 import { BusinessUpdateService, BusinessUpdateRequest } from './business-update.service';
 import { AuthService } from '../../auth/auth.service';
+import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-business-update',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule, TranslateModule],
   templateUrl: './business-update.component.html',
   styleUrls: ['./business-update.component.scss'],
 })
@@ -35,7 +37,8 @@ export class BusinessUpdateComponent implements OnInit {
     private authService: AuthService,
     private toastController: ToastController,
     private loadingController: LoadingController,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService // <-- Inject TranslateService
   ) {
     addIcons({
       businessOutline,
@@ -61,13 +64,13 @@ export class BusinessUpdateComponent implements OnInit {
 
     // Check if user is authenticated and is a retailer
     if (!this.authService.isAuthenticated()) {
-      this.presentToast('Please login to access this page.', 'danger');
+      this.presentToast(this.translate.instant('BUSINESS_UPDATE.ERROR_AUTH_REQUIRED'), 'danger');
       this.router.navigate(['/auth']);
       return;
     }
 
     if (!this.authService.hasRole('retailer')) {
-      this.presentToast('Access denied. Only retailers can access this page.', 'danger');
+      this.presentToast(this.translate.instant('BUSINESS_UPDATE.ERROR_ROLE_DENIED'), 'danger');
       this.router.navigate(['/auth']);
       return;
     }
@@ -76,12 +79,12 @@ export class BusinessUpdateComponent implements OnInit {
   async onUpdateBusiness() {
     if (this.businessForm.invalid) {
       this.businessForm.markAllAsTouched();
-      this.presentToast('Please fill in all required fields correctly', 'warning');
+      this.presentToast(this.translate.instant('BUSINESS_UPDATE.ERROR_FORM_INVALID'), 'warning');
       return;
     }
 
     const loading = await this.loadingController.create({
-      message: 'Updating retailer business...',
+      message: this.translate.instant('BUSINESS_UPDATE.LOADING_UPDATE'),
       spinner: 'crescent'
     });
     await loading.present();
@@ -99,7 +102,7 @@ export class BusinessUpdateComponent implements OnInit {
       next: (response) => {
         this.isLoading = false;
         loading.dismiss();
-        this.presentToast('Retailer business updated successfully!', 'success');
+        this.presentToast(this.translate.instant('BUSINESS_UPDATE.SUCCESS_UPDATE'), 'success');
 
         // Navigate back to retailer home/dashboard
         setTimeout(() => {
@@ -110,17 +113,17 @@ export class BusinessUpdateComponent implements OnInit {
         this.isLoading = false;
         loading.dismiss();
 
-        let errorMessage = 'Failed to update retailer business. Please try again.';
+        let errorMessage = this.translate.instant('BUSINESS_UPDATE.ERROR_UPDATE_FAILED');
 
         if (error.error && error.error.error) {
           errorMessage = error.error.error;
         } else if (error.status === 401) {
-          errorMessage = 'Session expired. Please login again.';
+          errorMessage = this.translate.instant('BUSINESS_UPDATE.ERROR_SESSION_EXPIRED');
           this.authService.logout();
           this.router.navigate(['/auth']);
           return;
         } else if (error.status === 0) {
-          errorMessage = 'Cannot connect to server. Please check your internet connection.';
+          errorMessage = this.translate.instant('BUSINESS_UPDATE.ERROR_NO_CONNECTION');
         }
 
         this.presentToast(errorMessage, 'danger');
@@ -139,7 +142,6 @@ export class BusinessUpdateComponent implements OnInit {
   }
 
   goBack() {
-    // Navigate back to retailer home instead of wholesaler home
     this.router.navigate(['/buyer/buyer-home']);
   }
 
@@ -148,13 +150,13 @@ export class BusinessUpdateComponent implements OnInit {
     const field = this.businessForm.get(fieldName);
     if (field?.errors && field.touched) {
       if (field.errors['required']) {
-        return `${this.getFieldLabel(fieldName)} is required`;
+        return this.translate.instant(`BUSINESS_UPDATE.ERROR_REQUIRED_${fieldName.toUpperCase()}`);
       }
       if (field.errors['email']) {
-        return 'Please enter a valid email address';
+        return this.translate.instant('BUSINESS_UPDATE.ERROR_INVALID_EMAIL');
       }
       if (field.errors['pattern']) {
-        return 'Please enter a valid mobile number (10-15 digits)';
+        return this.translate.instant('BUSINESS_UPDATE.ERROR_INVALID_MOBILE');
       }
     }
     return '';
@@ -162,9 +164,9 @@ export class BusinessUpdateComponent implements OnInit {
 
   private getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
-      'email': 'Email',
-      'mobile_number': 'Mobile number',
-      'address': 'Address'
+      'email': this.translate.instant('BUSINESS_UPDATE.EMAIL_LABEL'),
+      'mobile_number': this.translate.instant('BUSINESS_UPDATE.MOBILE_LABEL'),
+      'address': this.translate.instant('BUSINESS_UPDATE.ADDRESS_LABEL')
     };
     return labels[fieldName] || fieldName.replace('_', ' ');
   }

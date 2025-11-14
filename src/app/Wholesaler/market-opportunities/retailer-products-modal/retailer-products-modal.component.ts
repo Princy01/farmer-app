@@ -2,17 +2,22 @@ import { Component, Input, OnInit } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { TopRetailer } from '../../services/wholesaler-api.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-retailer-products-modal',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, TranslatePipe],
   template: `
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ retailer.retailer_name }}'s Products</ion-title>
+        <ion-title>
+          {{ retailer.retailer_name }} {{ 'RETAILER_PRODUCTS.TITLE_SUFFIX' | translate }}
+        </ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="dismiss()">Close</ion-button>
+          <ion-button (click)="dismiss()">
+            {{ 'RETAILER_PRODUCTS.CLOSE' | translate }}
+          </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -20,15 +25,16 @@ import { TopRetailer } from '../../services/wholesaler-api.service';
     <ion-content class="ion-padding">
       <ion-list>
         <ion-item *ngFor="let product of retailer.products">
-          <!-- <ion-thumbnail slot="start">
-            <img [src]="'assets/products/' + product.product_id + '.jpg'"
-                 [alt]="product.product_name"
-                 onError="this.src='assets/default-product.jpg'">
-          </ion-thumbnail> -->
           <ion-label>
             <h2>{{ product.product_name }}</h2>
-            <p>Quantity: {{ product.quantity | number:'1.0-2' }} kg</p>
-            <p>Value: ₹{{ product.order_value | number:'1.2-2' }}</p>
+            <p>
+              {{ 'RETAILER_PRODUCTS.QUANTITY' | translate }}:
+              {{ product.quantity | number:'1.0-2' }} kg
+            </p>
+            <p>
+              {{ 'RETAILER_PRODUCTS.VALUE' | translate }}:
+              ₹{{ product.order_value | number:'1.2-2' }}
+            </p>
           </ion-label>
         </ion-item>
       </ion-list>
@@ -38,7 +44,7 @@ import { TopRetailer } from '../../services/wholesaler-api.service';
 export class RetailerProductsModalComponent implements OnInit {
   @Input() retailer!: TopRetailer;
 
-  constructor(private modalCtrl: ModalController) {}
+  constructor(private modalCtrl: ModalController, private translate: TranslateService) {}
 
   ngOnInit() {
     console.log('Retailer data:', this.retailer);

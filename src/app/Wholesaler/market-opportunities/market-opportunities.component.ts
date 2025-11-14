@@ -7,6 +7,7 @@ import { OfferModalComponent } from '../offer-modal/offer-modal.component';
 import { addIcons } from 'ionicons';
 import { add, listOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
+import { RetailerProductsModalComponent } from './retailer-products-modal/retailer-products-modal.component';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -21,8 +22,55 @@ export class MarketOpportunitiesComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
   bulkOrders: BulkOrder[] = [];
-  topRetailers: TopRetailer[] = [];
+  // topRetailers: TopRetailer[] = [];
 
+  // Example hardcoded TopRetailer[] data
+topRetailers: TopRetailer[] = [
+  {
+    retailer_id: 1,
+    retailer_name: 'FreshMart',
+    total_quantity: 1200,
+    total_order_value: 250000,
+    products: [
+      {
+        product_id: 101,
+        product_name: 'Tomato',
+        unit_id: 1,
+        quantity: 500,
+        order_value: 60000
+      },
+      {
+        product_id: 102,
+        product_name: 'Potato',
+        unit_id: 1,
+        quantity: 700,
+        order_value: 80000
+      }
+    ]
+  },
+  {
+    retailer_id: 2,
+    retailer_name: 'GreenGrocers',
+    total_quantity: 900,
+    total_order_value: 180000,
+    products: [
+      {
+        product_id: 103,
+        product_name: 'Onion',
+        unit_id: 1,
+        quantity: 400,
+        order_value: 50000
+      },
+      {
+        product_id: 104,
+        product_name: 'Carrot',
+        unit_id: 1,
+        quantity: 500,
+        order_value: 70000
+      }
+    ]
+  }
+];
   constructor(
     private wholesalerService: WholesalerApiService,
     private modalCtrl: ModalController,
@@ -40,14 +88,12 @@ export class MarketOpportunitiesComponent implements OnInit {
     this.checkAuthAndLoadData();
   }
 
-  // authentication check
   private checkAuthAndLoadData() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-    // Check if user has wholesaler role
     if (!this.authService.hasRole('wholesaler')) {
       this.showUnauthorizedError();
       return;
@@ -73,7 +119,6 @@ export class MarketOpportunitiesComponent implements OnInit {
     await alert.present();
   }
 
-  // unauthorized error handler
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('MARKET_OPPORTUNITIES.ACCESS_DENIED'),
@@ -127,7 +172,7 @@ export class MarketOpportunitiesComponent implements OnInit {
       // Load top retailers using JWT
       this.wholesalerService.getTopRetailers().subscribe({
         next: (data) => {
-          this.topRetailers = data;
+          // this.topRetailers = data;
           console.log('Top retailers:', this.topRetailers);
           this.isLoading = false;
           loading.dismiss();
@@ -174,7 +219,7 @@ export class MarketOpportunitiesComponent implements OnInit {
     try {
       const modal = await this.modalCtrl.create({
         component: OfferModalComponent,
-        componentProps: { order }, // Removed wholesalerId as it will use JWT
+        componentProps: { order },
         breakpoints: [0, 0.5, 0.8],
         initialBreakpoint: 0.8
       });
@@ -211,6 +256,17 @@ export class MarketOpportunitiesComponent implements OnInit {
     }
   }
 
+  async openRetailerProductsModal(retailer: TopRetailer) {
+    console.log('Opening products modal for retailer:', retailer);
+    const modal = await this.modalCtrl.create({
+      component: RetailerProductsModalComponent,
+      componentProps: { retailer },
+      breakpoints: [0, 0.5, 0.8],
+      initialBreakpoint: 0.8
+    });
+    await modal.present();
+  }
+console=console
   goBack() {
     this.router.navigate(['/wholesaler/home']);
   }

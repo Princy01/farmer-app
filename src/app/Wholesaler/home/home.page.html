@@ -7,7 +7,7 @@
     </ion-buttons>
 
     <ion-title>
-      {{ 'Go4u' | translate }}
+      {{ 'WHOLESALER_HOME.Go4u' | translate }}
     </ion-title>
 
     <ion-buttons slot="end">
@@ -33,7 +33,7 @@
 <ion-menu side="start" menuId="main-menu" contentId="main-content">
   <ion-header>
     <ion-toolbar>
-      <ion-title>{{ 'Menu' | translate }}</ion-title>
+      <ion-title>{{ 'WHOLESALER_HOME.Menu' | translate }}</ion-title>
       <ion-buttons slot="end">
         <ion-button (click)="closeMenu()">
           <ion-icon name="close-outline"></ion-icon>
@@ -46,43 +46,43 @@
     <ion-list>
       <ion-item button (click)="navigateToProfile()" lines="none">
         <ion-icon name="person-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'Profile' | translate }}</ion-label>
+        <ion-label>{{ 'WHOLESALER_HOME.Profile' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToBusinessLocations()" lines="none">
         <ion-icon name="business-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'Business Locations' | translate }}</ion-label>
+        <ion-label>{{ 'WHOLESALER_HOME.Business Locations' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToUpdateBusiness()" lines="none">
         <ion-icon name="create-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'Update Business' | translate }}</ion-label>
+        <ion-label>{{ 'WHOLESALER_HOME.Update Business' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToMyOrders()" lines="none">
         <ion-icon name="receipt-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'Orders Received' | translate }}</ion-label>
+        <ion-label>{{ 'WHOLESALER_HOME.Orders Received' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToStockDashboard()" lines="none">
         <ion-icon name="cube-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'Stock Dashboard' | translate }}</ion-label>
+        <ion-label>{{ 'WHOLESALER_HOME.Stock Dashboard' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToPastOrders()" lines="none">
         <ion-icon name="time-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'Past Orders' | translate }}</ion-label>
+        <ion-label>{{ 'WHOLESALER_HOME.Past Orders' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToRestockingRecommendations()" lines="none">
         <ion-icon name="bulb-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'Restocking Recommendations' | translate }}</ion-label>
+        <ion-label>{{ 'WHOLESALER_HOME.Restocking Recommendations' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToMarketOpportunities()" lines="none">
         <ion-icon name="analytics-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'Market Opportunities' | translate }}</ion-label>
+        <ion-label>{{ 'WHOLESALER_HOME.Market Opportunities' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToSettings()" lines="none">
         <ion-icon name="settings-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'Settings' | translate }}</ion-label>
+        <ion-label>{{ 'WHOLESALER_HOME.Settings' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="logout()" lines="none">
         <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
-        <ion-label color="danger">{{ 'Logout' | translate }}</ion-label>
+        <ion-label color="danger">{{ 'WHOLESALER_HOME.Logout' | translate }}</ion-label>
       </ion-item>
     </ion-list>
   </ion-content>
@@ -93,16 +93,16 @@
     <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
       <ion-refresher-content
         pullingIcon="chevron-down-circle-outline"
-        pullingText="{{ 'Pull to refresh' | translate }}"
+        pullingText="{{ 'WHOLESALER_HOME.Pull to refresh' | translate }}"
         refreshingSpinner="circular"
-        refreshingText="{{ 'Refreshing...' | translate }}"
+        refreshingText="{{ 'WHOLESALER_HOME.Refreshing...' | translate }}"
       >
       </ion-refresher-content>
     </ion-refresher>
 
     <div class="search-wrapper">
       <ion-searchbar
-        [placeholder]="'Search items...' | translate"
+        [placeholder]="'WHOLESALER_HOME.Search items...' | translate"
         (ionInput)="searchItems($event)"
         mode="ios"
       ></ion-searchbar>
@@ -112,8 +112,8 @@
       <ion-item *ngFor="let item of filteredItems" lines="none" (click)="viewDetails(item)">
         <ion-label>
           <h2>{{ item.name }}</h2>
-          <p>{{ 'Total Quantity' | translate }}: {{ item.qty }} kg</p>
-          <p>{{ 'Orders placed' | translate }}: {{ item.orders }} kg</p>
+          <p>{{ 'WHOLESALER_HOME.Total Quantity' | translate }}: {{ item.qty }} kg</p>
+          <p>{{ 'WHOLESALER_HOME.Orders placed' | translate }}: {{ item.orders }} kg</p>
         </ion-label>
         <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
       </ion-item>
@@ -121,8 +121,8 @@
 
     <div class="empty-state" *ngIf="filteredItems && filteredItems.length === 0">
       <ion-icon name="search-outline"></ion-icon>
-      <h3>{{ 'No items found' | translate }}</h3>
-      <p>{{ 'Try adjusting your search' | translate }}</p>
+      <h3>{{ 'WHOLESALER_HOME.No items found' | translate }}</h3>
+      <p>{{ 'WHOLESALER_HOME.Try adjusting your search' | translate }}</p>
     </div>
 
     <ion-infinite-scroll
@@ -131,7 +131,7 @@
       [disabled]="!isInfiniteScrollEnabled">
       <ion-infinite-scroll-content
         loadingSpinner="bubbles"
-        loadingText="{{ 'Loading more items...' | translate }}">
+        loadingText="{{ 'WHOLESALER_HOME.Loading more items...' | translate }}">
       </ion-infinite-scroll-content>
     </ion-infinite-scroll>
   </div>

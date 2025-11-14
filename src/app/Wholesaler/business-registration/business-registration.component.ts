@@ -117,7 +117,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.businessCategories = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_CATEGORIES_ERROR'),
+          message: this.translate.instant('WHOLESALER_WHOLESALER_BUSINESS_REGISTRATION.LOAD_CATEGORIES_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -131,7 +131,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.businessTypes = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_TYPES_ERROR'),
+          message: this.translate.instant('WHOLESALER_BUSINESS_REGISTRATION.LOAD_TYPES_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -145,7 +145,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.states = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_STATES_ERROR'),
+          message: this.translate.instant('WHOLESALER_BUSINESS_REGISTRATION.LOAD_STATES_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -159,7 +159,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.cities = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_CITIES_ERROR'),
+          message: this.translate.instant('WHOLESALER_BUSINESS_REGISTRATION.LOAD_CITIES_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -173,7 +173,7 @@ export class BusinessRegistrationComponent implements OnInit {
       next: (data) => (this.locations = data),
       error: async () => {
         const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.LOAD_LOCATIONS_ERROR'),
+          message: this.translate.instant('WHOLESALER_BUSINESS_REGISTRATION.LOAD_LOCATIONS_ERROR'),
           duration: 2000,
           color: 'danger',
         });
@@ -193,7 +193,7 @@ export class BusinessRegistrationComponent implements OnInit {
       this.businessRegistrationService.addNewBusiness(payload).subscribe({
         next: async (res) => {
           const toast = await this.toastCtrl.create({
-            message: this.translate.instant('BUSINESS_REGISTRATION.REGISTRATION_SUCCESS'),
+            message: this.translate.instant('WHOLESALER_BUSINESS_REGISTRATION.REGISTRATION_SUCCESS'),
             duration: 2000,
             color: 'success',
           });
@@ -202,7 +202,7 @@ export class BusinessRegistrationComponent implements OnInit {
         },
         error: async (err) => {
           const toast = await this.toastCtrl.create({
-            message: err?.error?.error || this.translate.instant('BUSINESS_REGISTRATION.REGISTRATION_FAILED'),
+            message: err?.error?.error || this.translate.instant('WHOLESALER_BUSINESS_REGISTRATION.REGISTRATION_FAILED'),
             duration: 2000,
             color: 'danger',
           });
@@ -212,7 +212,7 @@ export class BusinessRegistrationComponent implements OnInit {
     } else {
       this.form.markAllAsTouched();
       const toast = await this.toastCtrl.create({
-        message: this.translate.instant('BUSINESS_REGISTRATION.FIX_ERRORS'),
+        message: this.translate.instant('WHOLESALER_BUSINESS_REGISTRATION.FIX_ERRORS'),
         duration: 2000,
         color: 'danger',
       });

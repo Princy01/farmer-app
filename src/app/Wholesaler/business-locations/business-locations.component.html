@@ -5,7 +5,7 @@
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'Business Locations' | translate }}</ion-title>
+    <ion-title>{{ 'WHOLESALER_BUSINESS_LOCATIONS.Business Locations' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -21,7 +21,7 @@
           (click)="addNewLocation()"
         >
           <ion-icon name="add" slot="start"></ion-icon>
-          {{ 'Add New Location' | translate }}
+          {{ 'WHOLESALER_BUSINESS_LOCATIONS.Add New Location' | translate }}
         </ion-button>
       </div>
 
@@ -53,9 +53,9 @@
                     color="primary"
                     style="margin-right: 4px"
                   ></ion-icon>
-                  <strong>{{ 'Location' | translate }}:</strong> {{ location.location_name }}
-                  <strong>, {{ 'City' | translate }}:</strong> {{ location.city_name }}
-                  <strong>, {{ 'State' | translate }}:</strong> {{ location.state_name }}
+                  <strong>{{ 'WHOLESALER_BUSINESS_LOCATIONS.Location' | translate }}:</strong> {{ location.location_name }}
+                  <strong>, {{ 'WHOLESALER_BUSINESS_LOCATIONS.City' | translate }}:</strong> {{ location.city_name }}
+                  <strong>, {{ 'WHOLESALER_BUSINESS_LOCATIONS.State' | translate }}:</strong> {{ location.state_name }}
                 </div>
                 <div>
                   <ion-icon
@@ -64,7 +64,7 @@
                     color="success"
                     style="margin-right: 4px"
                   ></ion-icon>
-                  <strong>{{ 'Full Address' | translate }}:</strong> {{ location.address }}
+                  <strong>{{ 'WHOLESALER_BUSINESS_LOCATIONS.Full Address' | translate }}:</strong> {{ location.address }}
                 </div>
                 <div>
                   <ion-icon
@@ -73,7 +73,7 @@
                     color="danger"
                     style="margin-right: 4px"
                   ></ion-icon>
-                  <strong>{{ 'GST Number' | translate }}:</strong> {{ location.gst_num }}
+                  <strong>{{ 'WHOLESALER_BUSINESS_LOCATIONS.GST Number' | translate }}:</strong> {{ location.gst_num }}
                 </div>
                 <div>
                   <ion-icon
@@ -82,7 +82,7 @@
                     color="medium"
                     style="margin-right: 4px"
                   ></ion-icon>
-                  <strong>{{ 'PAN Number' | translate }}:</strong> {{ location.pan_num }}
+                  <strong>{{ 'WHOLESALER_BUSINESS_LOCATIONS.PAN Number' | translate }}:</strong> {{ location.pan_num }}
                 </div>
                 <div *ngIf="location.established_year">
                   <ion-icon
@@ -91,7 +91,7 @@
                     color="secondary"
                     style="margin-right: 4px"
                   ></ion-icon>
-                  <strong>{{ 'Established' | translate }}:</strong> {{ location.established_year }}
+                  <strong>{{ 'WHOLESALER_BUSINESS_LOCATIONS.Established' | translate }}:</strong> {{ location.established_year }}
                 </div>
                 <div>
                   <ion-icon
@@ -100,7 +100,7 @@
                     color="primary"
                     style="margin-right: 4px"
                   ></ion-icon>
-                  <strong>{{ 'Contact' | translate }}:</strong> {{ location.number }}
+                  <strong>{{ 'WHOLESALER_BUSINESS_LOCATIONS.Contact' | translate }}:</strong> {{ location.number }}
                 </div>
                 <div>
                   <ion-icon
@@ -109,7 +109,7 @@
                     color="secondary"
                     style="margin-right: 4px"
                   ></ion-icon>
-                  <strong>{{ 'Email' | translate }}:</strong> {{ location.email }}
+                  <strong>{{ 'WHOLESALER_BUSINESS_LOCATIONS.Email' | translate }}:</strong> {{ location.email }}
                 </div>
                 <div>
                   <ion-icon
@@ -118,8 +118,8 @@
                     color="success"
                     style="margin-right: 4px"
                   ></ion-icon>
-                  <strong>{{ 'Status' | translate }}:</strong>
-                  {{ location.active_status ? ('Active' | translate) : ('Inactive' | translate) }}
+                  <strong>{{ 'WHOLESALER_BUSINESS_LOCATIONS.Status' | translate }}:</strong>
+                  {{ location.active_status ? ('WHOLESALER_BUSINESS_LOCATIONS.Active' | translate) : ('WHOLESALER_BUSINESS_LOCATIONS.Inactive' | translate) }}
                 </div>
               </div>
               <div class="action-buttons" style="margin-top: 8px">
@@ -130,7 +130,7 @@
                   (click)="viewProducts(location)"
                 >
                   <ion-icon name="cube" slot="start"></ion-icon>
-                  {{ 'View Products' | translate }}
+                  {{ 'WHOLESALER_BUSINESS_LOCATIONS.View Products' | translate }}
                 </ion-button>
                 <ion-button
                   size="small"
@@ -139,7 +139,7 @@
                   (click)="modifyLocation(location)"
                 >
                   <ion-icon name="create" slot="start"></ion-icon>
-                  {{ 'Modify' | translate }}
+                  {{ 'WHOLESALER_BUSINESS_LOCATIONS.Modify' | translate }}
                 </ion-button>
               </div>
             </ion-card-content>
@@ -149,9 +149,9 @@
         <ng-template #noLocations>
           <div class="no-locations">
             <ion-icon name="business" class="no-locations-icon"></ion-icon>
-            <h2>{{ 'No Business Locations' | translate }}</h2>
+            <h2>{{ 'WHOLESALER_BUSINESS_LOCATIONS.No Business Locations' | translate }}</h2>
             <p>
-              {{ "You haven't added any business locations yet. Click the button above to add your first location." | translate }}
+              {{ "WHOLESALER_BUSINESS_LOCATIONS.You haven't added any business locations yet. Click the button above to add your first location." | translate }}
             </p>
           </div>
         </ng-template>
@@ -159,7 +159,7 @@
 
       <div *ngIf="isLoading" class="loading-container">
         <ion-spinner name="circular"></ion-spinner>
-        <p>{{ 'Loading your business locations...' | translate }}</p>
+        <p>{{ 'WHOLESALER_BUSINESS_LOCATIONS.Loading your business locations...' | translate }}</p>
       </div>
     </div>
   </div>

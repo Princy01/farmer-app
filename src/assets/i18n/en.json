@@ -14,8 +14,11 @@
   "Logout": "Logout",
   "Pull to refresh": "Pull to refresh",
   "Refreshing...": "Refreshing...",
+  "Search items...": "Search items...",
   "Total Quantity": "Total Quantity",
   "Orders placed": "Orders placed",
+  "No items found": "No items found",
+  "Try adjusting your search": "Try adjusting your search",
   "Loading more items...": "Loading more items...",
    "AUTH_ERROR": "Authentication Error",
     "SESSION_EXPIRED": "Your session has expired. Please login again.",
@@ -36,7 +39,7 @@
     "CANCEL": "Cancel"
 },
 
-  "BUSINESS_LOCATION": {
+  "WHOLESALER_BUSINESS_LOCATIONS": {
   "Business Locations": "Business Locations",
   "Add New Location": "Add New Location",
   "Location": "Location",
@@ -71,7 +74,7 @@
   },
 
 
-"BUSINESS_UPDATE": {
+"WHOLESALER_BUSINESS_UPDATE": {
     "PAGE_TITLE": "Update Business",
     "SUBTITLE": "Update your business details",
     "EMAIL_LABEL": "Email Address",
@@ -99,7 +102,7 @@
   },
 
 
-  "BUSINESS_REGISTRATION": {
+  "WHOLESALER_BUSINESS_REGISTRATION": {
   "Business Registration": "Business Registration",
   "Registration Number": "Registration Number",
   "Enter registration number": "Enter registration number",
@@ -379,6 +382,12 @@
     "TOP_RETAILERS_TITLE": "Top 5 Retailers by Order Volume"
   },
 
+  "RETAILER_PRODUCTS": {
+    "TITLE_SUFFIX": "'s Products",
+    "CLOSE": "Close",
+    "QUANTITY": "Quantity",
+    "VALUE": "Value"
+  },
 
 
   "MAKE_OFFER": {
@@ -845,7 +854,40 @@
     "ERROR_LOAD_STATES": "Failed to load states",
     "ERROR_LOAD_CITIES": "Failed to load cities",
     "ERROR_LOAD_LOCATIONS": "Failed to load locations"
-  }
+  },
+
+
+
+  "BUSINESS_UPDATE": {
+    "PAGE_TITLE": "Update Business",
+    "CARD_TITLE": "Business Update",
+    "CARD_SUBTITLE": "Update your business details",
+    "EMAIL_LABEL": "Business Email Address *",
+    "EMAIL_PLACEHOLDER": "Enter your business email",
+    "MOBILE_LABEL": "Business Mobile Number *",
+    "MOBILE_PLACEHOLDER": "Enter business mobile number",
+    "MOBILE_HELPER": "10-15 digit mobile number",
+    "ADDRESS_LABEL": "Business Address *",
+    "ADDRESS_PLACEHOLDER": "Enter complete retailer business address",
+    "STATUS_LABEL": "Business Status",
+    "STATUS_ACTIVE": "Business Active",
+    "STATUS_INACTIVE": "Business Inactive",
+    "SUBMIT": "Update Business",
+    "SUBMITTING": "Updating...",
+    "ERROR_REQUIRED_EMAIL": "Email is required",
+    "ERROR_INVALID_EMAIL": "Please enter a valid email address",
+    "ERROR_REQUIRED_MOBILE": "Mobile number is required",
+    "ERROR_INVALID_MOBILE": "Please enter a valid mobile number (10-15 digits)",
+    "ERROR_REQUIRED_ADDRESS": "Address is required",
+    "ERROR_AUTH_REQUIRED": "Please login to access this page.",
+    "ERROR_ROLE_DENIED": "Access denied. Only retailers can access this page.",
+    "ERROR_FORM_INVALID": "Please fill in all required fields correctly",
+    "LOADING_UPDATE": "Updating retailer business...",
+    "SUCCESS_UPDATE": "Retailer business updated successfully!",
+    "ERROR_UPDATE_FAILED": "Failed to update retailer business. Please try again.",
+    "ERROR_SESSION_EXPIRED": "Session expired. Please login again.",
+    "ERROR_NO_CONNECTION": "Cannot connect to server. Please check your internet connection."
+}
 
 
 
