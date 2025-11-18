@@ -22,7 +22,7 @@
     <ion-searchbar
       [(ngModel)]="searchQuery"
       (ionInput)="onSearch()"
-      placeholder="Search..."
+      [placeholder]="'CATEGORY.SEARCH_PLACEHOLDER' | translate"
     ></ion-searchbar>
   </ion-toolbar>
 </ion-header>
@@ -35,15 +35,15 @@
         <!-- Loading State for Categories -->
         <div *ngIf="loadingCategories" class="ion-text-center ion-padding">
           <ion-spinner></ion-spinner>
-          <p>Loading categories...</p>
+          <p>{{ 'CATEGORY.LOADING_CATEGORIES' | translate }}</p>
         </div>
 
         <!-- Error State for Categories -->
         <div *ngIf="errorLoadingCategories" class="ion-padding">
           <ion-text color="danger">
-            <p>Failed to load categories</p>
+            <p>{{ 'CATEGORY.ERROR_LOADING_CATEGORIES' | translate }}</p>
           </ion-text>
-          <ion-button (click)="ngOnInit()">Retry</ion-button>
+          <ion-button (click)="ngOnInit()">{{ 'CATEGORY.RETRY' | translate }}</ion-button>
         </div>
 
         <!-- Categories List -->
@@ -70,7 +70,7 @@
                   [alt]="categoryName"
                 />
                 <div class="subcategory-name">
-                  <b>All {{ categoryName }}</b>
+                  <b>{{ 'CATEGORY.ALL' | translate }} {{ categoryName }}</b>
                 </div>
               </div>
             </ion-item>
@@ -110,7 +110,7 @@
         <!-- Loading indicator -->
         <div class="loading-container" *ngIf="loadingProducts">
           <ion-spinner name="circular"></ion-spinner>
-          <p>Loading products...</p>
+          <p>{{ 'CATEGORY.LOADING_PRODUCTS' | translate }}</p>
         </div>
 
         <!-- Error message -->
@@ -120,7 +120,7 @@
             color="danger"
             size="large"
           ></ion-icon>
-          <p>Failed to load products. Please try again.</p>
+          <p>{{ 'CATEGORY.ERROR_LOADING_PRODUCTS' | translate }}</p>
           <ion-button
             (click)="
               selectSubcategory({
@@ -129,7 +129,7 @@
               })
             "
           >
-            Retry
+            {{ 'CATEGORY.RETRY' | translate }}
           </ion-button>
         </div>
 
@@ -186,11 +186,11 @@
             </ion-card-header>
             <ion-card-content>
               <p>
-                {{ selectedProduct.description || "No description available." }}
+                {{ selectedProduct.description || ('CATEGORY.NO_DESCRIPTION' | translate) }}
               </p>
               <p>
-                <b>Nutrition:</b>
-                {{ selectedProduct.nutrition_factor || "N/A" }}
+                <b>{{ 'CATEGORY.NUTRITION' | translate }}</b>
+                {{ selectedProduct.nutrition_factor || ('CATEGORY.NA' | translate) }}
               </p>
             </ion-card-content>
           </ion-card>
@@ -212,9 +212,9 @@
                 ></ion-icon>
               </ion-card-header>
               <ion-card-content>
-                <p><b>Quantity:</b> {{ wholesaler.quantity }} Kg</p>
-                <p><b>Price:</b> ₹{{ wholesaler.price }}</p>
-                <p><b>Distance:</b> {{ wholesaler.distance }}</p>
+                <p><b>{{ 'CATEGORY.QUANTITY' | translate }}</b> {{ wholesaler.quantity }} Kg</p>
+                <p><b>{{ 'CATEGORY.PRICE' | translate }}</b> ₹{{ wholesaler.price }}</p>
+                <p><b>{{ 'CATEGORY.DISTANCE' | translate }}</b> {{ wholesaler.distance }}</p>
                 <div
                   style="
                     display: flex;
@@ -227,7 +227,7 @@
                     size="small"
                     (click)="addToCart(wholesaler, $event)"
                   >
-                    Add to Cart
+                    {{ 'CATEGORY.ADD_TO_CART' | translate }}
                   </ion-button>
                   <span
                     style="
@@ -254,7 +254,7 @@
           *ngIf="!selectedProduct && filteredAndSortedItems.length > 0"
           style="text-align: center; margin-top: 24px"
         >
-          <ion-text color="medium">Select a product to view details.</ion-text>
+          <ion-text color="medium">{{ 'CATEGORY.SELECT_PRODUCT' | translate }}</ion-text>
         </div>
       </ion-col>
     </ion-row>
@@ -264,9 +264,9 @@
   <ng-template #noItems>
     <div class="no-items">
       <ion-icon name="alert-circle-outline"></ion-icon>
-      <p>No items found matching your filters.</p>
+      <p>{{ 'CATEGORY.NO_ITEMS_FOUND' | translate }}</p>
       <ion-button (click)="clearFilters()"
-        >Clear Filters</ion-button
+        >{{ 'CATEGORY.CLEAR_FILTERS' | translate }}</ion-button
       >
     </div>
   </ng-template>
@@ -277,10 +277,10 @@
   <ion-toolbar class="toolbar-container">
     <ion-buttons class="button-group">
       <ion-button class="filter-button" (click)="openFilterModal()">
-        <ion-icon name="funnel-outline"></ion-icon> Filter
+        <ion-icon name="funnel-outline"></ion-icon> {{ 'CATEGORY.FILTER' | translate }}
       </ion-button>
       <ion-button class="sort-button" (click)="openSortModal()">
-        <ion-icon name="swap-vertical-outline"></ion-icon> Sort
+        <ion-icon name="swap-vertical-outline"></ion-icon> {{ 'CATEGORY.SORT' | translate }}
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -296,57 +296,50 @@
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Filter</ion-title>
+        <ion-title>{{ 'CATEGORY.FILTER' | translate }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="closeFilterModal()">Close</ion-button>
+          <ion-button (click)="closeFilterModal()">{{ 'CATEGORY.CLOSE' | translate }}</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content>
       <ion-list>
-        <!-- Price Range Filter -->
-        <!-- <ion-item>
-          <ion-label>Price Range:<br> ₹{{ priceRangeMin }} - ₹{{ priceRangeMax }}</ion-label>
-          <ion-range [dualKnobs]="true" [(ngModel)]="priceRangeValues" min="0" max="150" step="5" (ionChange)="updatePriceRange($event)">
-          </ion-range>
-        </ion-item> -->
-
         <!-- Availability -->
         <ion-item>
-          <ion-label>In Stock</ion-label>
+          <ion-label>{{ 'CATEGORY.IN_STOCK' | translate }}</ion-label>
           <ion-toggle [(ngModel)]="availability"></ion-toggle>
         </ion-item>
 
         <!-- Quantity-Based Discount -->
         <ion-item>
-          <ion-label>Discount Available</ion-label>
+          <ion-label>{{ 'CATEGORY.DISCOUNT_AVAILABLE' | translate }}</ion-label>
           <ion-toggle [(ngModel)]="quantityDiscount"></ion-toggle>
         </ion-item>
 
         <!-- Delivery Time -->
         <ion-item>
-          <ion-label>Delivery Time</ion-label>
+          <ion-label>{{ 'CATEGORY.DELIVERY_TIME' | translate }}</ion-label>
           <ion-select [(ngModel)]="deliveryTime" interface="popover">
-            <ion-select-option value="any">Any</ion-select-option>
-            <ion-select-option value="same-day">Same Day</ion-select-option>
-            <ion-select-option value="1-3 days">1-3 Days</ion-select-option>
-            <ion-select-option value="1 week">Up to 1 Week</ion-select-option>
+            <ion-select-option value="any">{{ 'CATEGORY.DELIVERY_ANY' | translate }}</ion-select-option>
+            <ion-select-option value="same-day">{{ 'CATEGORY.DELIVERY_SAME_DAY' | translate }}</ion-select-option>
+            <ion-select-option value="1-3 days">{{ 'CATEGORY.DELIVERY_1_3_DAYS' | translate }}</ion-select-option>
+            <ion-select-option value="1 week">{{ 'CATEGORY.DELIVERY_1_WEEK' | translate }}</ion-select-option>
           </ion-select>
         </ion-item>
 
         <!-- Organic / Non-Organic -->
         <ion-item>
-          <ion-label>Organic</ion-label>
+          <ion-label>{{ 'CATEGORY.ORGANIC' | translate }}</ion-label>
           <ion-segment [(ngModel)]="organic">
-            <ion-segment-button value="true">Yes</ion-segment-button>
-            <ion-segment-button value="false">No</ion-segment-button>
-            <ion-segment-button value="null">Any</ion-segment-button>
+            <ion-segment-button value="true">{{ 'CATEGORY.YES' | translate }}</ion-segment-button>
+            <ion-segment-button value="false">{{ 'CATEGORY.NO' | translate }}</ion-segment-button>
+            <ion-segment-button value="null">{{ 'CATEGORY.ANY' | translate }}</ion-segment-button>
           </ion-segment>
         </ion-item>
 
         <!-- Seller Ratings -->
         <ion-item>
-          <ion-label>Seller Rating: {{ sellerRatings }}⭐</ion-label>
+          <ion-label>{{ 'CATEGORY.SELLER_RATING' | translate }}: {{ sellerRatings }}⭐</ion-label>
           <ion-range
             [(ngModel)]="sellerRatings"
             min="0"
@@ -357,7 +350,7 @@
 
         <!-- Minimum Order Quantity -->
         <ion-item class="min-order-item">
-          <ion-label>Min. Order Quantity</ion-label>
+          <ion-label>{{ 'CATEGORY.MIN_ORDER_QUANTITY' | translate }}</ion-label>
           <ion-input
             type="number"
             [(ngModel)]="minimumOrderQuantity"
@@ -367,7 +360,7 @@
       </ion-list>
       <ion-footer>
         <ion-button expand="full" (click)="applyFilters(); closeFilterModal()"
-          >Apply</ion-button
+          >{{ 'CATEGORY.APPLY' | translate }}</ion-button
         >
       </ion-footer>
     </ion-content>
@@ -384,9 +377,9 @@
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Sort</ion-title>
+        <ion-title>{{ 'CATEGORY.SORT' | translate }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="closeSortModal()">Close</ion-button>
+          <ion-button (click)="closeSortModal()">{{ 'CATEGORY.CLOSE' | translate }}</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -397,28 +390,20 @@
           [(ngModel)]="sortOption"
           (ionChange)="applySort()"
         >
-          <!-- <ion-item lines="none" class="radio-item">
-            <ion-label>Price - Low to High</ion-label>
-            <ion-radio slot="end" value="price-asc"></ion-radio>
-          </ion-item>
           <ion-item lines="none" class="radio-item">
-            <ion-label>Price - High to Low</ion-label>
-            <ion-radio slot="end" value="price-desc"></ion-radio>
-          </ion-item> -->
-          <ion-item lines="none" class="radio-item">
-            <ion-label>Name (A to Z)</ion-label>
+            <ion-label>{{ 'CATEGORY.NAME_ASC' | translate }}</ion-label>
             <ion-radio slot="end" value="name-asc"></ion-radio>
           </ion-item>
           <ion-item lines="none" class="radio-item">
-            <ion-label>Name (Z to A)</ion-label>
+            <ion-label>{{ 'CATEGORY.NAME_DESC' | translate }}</ion-label>
             <ion-radio slot="end" value="name-desc"></ion-radio>
           </ion-item>
           <ion-item lines="none" class="radio-item">
-            <ion-label>Discount</ion-label>
+            <ion-label>{{ 'CATEGORY.DISCOUNT' | translate }}</ion-label>
             <ion-radio slot="end" value="discount"></ion-radio>
           </ion-item>
           <ion-item lines="none" class="radio-item">
-            <ion-label>Customer Rating</ion-label>
+            <ion-label>{{ 'CATEGORY.CUSTOMER_RATING' | translate }}</ion-label>
             <ion-radio slot="end" value="rating"></ion-radio>
           </ion-item>
         </ion-radio-group>

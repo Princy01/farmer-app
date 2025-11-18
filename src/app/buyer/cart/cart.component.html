@@ -5,7 +5,7 @@
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title class="cart-title">My Cart</ion-title>
+    <ion-title class="cart-title">{{ 'CART.TITLE' | translate }}</ion-title>
     <ion-buttons slot="end">
       <ion-badge class="cart-count" *ngIf="cartProducts.length > 0">
         {{ cartProducts.length }}
@@ -17,7 +17,7 @@
 <ion-content class="cart-content">
   <div class="loading-overlay" *ngIf="isLoading">
     <ion-spinner name="dots" color="primary"></ion-spinner>
-    <p class="loading-text">Updating cart...</p>
+    <p class="loading-text">{{ 'CART.UPDATING_CART' | translate }}</p>
   </div>
 
   <ng-container *ngIf="cartProducts.length > 0; else emptyCart">
@@ -25,9 +25,9 @@
       <div class="section-header">
         <h2 class="section-title">
           <ion-icon name="cart-outline" class="section-icon"></ion-icon>
-          Cart Items
+          {{ 'CART.CART_ITEMS' | translate }}
         </h2>
-        <span class="items-count">{{ cartProducts.length }} items</span>
+        <span class="items-count">{{ cartProducts.length }} {{ 'CART.ITEMS' | translate }}</span>
       </div>
 
       <form [formGroup]="cartForm">
@@ -52,7 +52,6 @@
               <div class="quantity-controls-section">
                 <ion-grid class="quantity-grid">
                   <ion-row class="quantity-row">
-                    <!-- Quantity Controls Column -->
                     <ion-col size="9" size-sm="10" size-md="10" size-lg="2" class="quantity-col">
                       <div class="quantity-controls">
                         <ion-button
@@ -101,7 +100,7 @@
           <div class="card-header">
             <h3 class="card-title">
               <ion-icon name="pricetag-outline" class="card-icon"></ion-icon>
-              Apply Discount Code
+              {{ 'CART.APPLY_DISCOUNT' | translate }}
             </h3>
           </div>
 
@@ -109,7 +108,7 @@
             <ion-item class="discount-input" lines="none">
               <ion-input
                 formControlName="discountCode"
-                placeholder="Enter discount code"
+                [placeholder]="'CART.ENTER_DISCOUNT_CODE' | translate"
                 class="discount-field"
                 [disabled]="isLoading"
               ></ion-input>
@@ -119,17 +118,17 @@
               (click)="applyDiscount()"
               [disabled]="isLoading"
             >
-              Apply
+              {{ 'CART.APPLY' | translate }}
             </ion-button>
           </div>
 
           <div class="discount-suggestions" *ngIf="!discount">
-            <p class="suggestions-text">Try: SAVE10, FRESH20</p>
+            <p class="suggestions-text">{{ 'CART.TRY_CODES' | translate }}</p>
           </div>
 
           <div class="discount-applied" *ngIf="discount > 0">
             <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-            <span class="discount-text">Discount applied: -₹{{ discount }}</span>
+            <span class="discount-text">{{ 'CART.DISCOUNT_APPLIED' | translate }}: -₹{{ discount }}</span>
           </div>
         </ion-card>
       </form>
@@ -138,24 +137,24 @@
     <div class="order-summary-section">
       <ion-card class="summary-card">
         <div class="summary-header">
-          <h3 class="summary-title">Order Summary</h3>
+          <h3 class="summary-title">{{ 'CART.ORDER_SUMMARY' | translate }}</h3>
         </div>
 
         <div class="summary-details">
           <div class="summary-row">
-            <span class="summary-label">Subtotal</span>
+            <span class="summary-label">{{ 'CART.SUBTOTAL' | translate }}</span>
             <span class="summary-value">₹{{ getTotalPrice() }}</span>
           </div>
 
           <div class="summary-row" *ngIf="discount > 0">
-            <span class="summary-label discount-label">Discount</span>
+            <span class="summary-label discount-label">{{ 'CART.DISCOUNT' | translate }}</span>
             <span class="summary-value discount-value">-₹{{ discount }}</span>
           </div>
 
           <div class="summary-divider"></div>
 
           <div class="summary-row total-row">
-            <span class="summary-label total-label">Total</span>
+            <span class="summary-label total-label">{{ 'CART.TOTAL' | translate }}</span>
             <span class="summary-value total-value">₹{{ getTotalPrice() - discount }}</span>
           </div>
         </div>
@@ -167,15 +166,15 @@
     <div class="empty-cart">
       <div class="empty-cart-content">
         <ion-icon name="cart-outline" class="empty-icon"></ion-icon>
-        <h3 class="empty-title">Your cart is empty</h3>
-        <p class="empty-subtitle">Add some products to get started</p>
+        <h3 class="empty-title">{{ 'CART.EMPTY_TITLE' | translate }}</h3>
+        <p class="empty-subtitle">{{ 'CART.EMPTY_SUBTITLE' | translate }}</p>
         <ion-button
           class="continue-shopping-btn"
           (click)="goBack()"
           [disabled]="isLoading"
         >
           <ion-icon name="storefront-outline" slot="start"></ion-icon>
-          Continue Shopping
+          {{ 'CART.CONTINUE_SHOPPING' | translate }}
         </ion-button>
       </div>
     </div>
@@ -188,11 +187,11 @@
   <div class="checkout-container">
     <div class="checkout-info">
       <div class="total-info">
-        <span class="total-label">Total Amount</span>
+        <span class="total-label">{{ 'CART.TOTAL_AMOUNT' | translate }}</span>
         <span class="total-amount">₹{{ getTotalPrice() - discount }}</span>
       </div>
       <div class="items-info">
-        <span class="items-count">{{ cartProducts.length }} items</span>
+        <span class="items-count">{{ cartProducts.length }} {{ 'CART.ITEMS' | translate }}</span>
       </div>
     </div>
 
@@ -203,7 +202,7 @@
       [disabled]="isLoading"
     >
       <ion-icon name="card-outline" slot="start"></ion-icon>
-      Proceed to Checkout
+      {{ 'CART.PROCEED_TO_CHECKOUT' | translate }}
     </ion-button>
   </div>
 </ion-footer>

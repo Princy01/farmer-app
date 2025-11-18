@@ -18,7 +18,7 @@
       </ion-card-header>
       <ion-card-content>
         <div class="status-chip" [class]="getStatusLabel(orderDetails.order_status).toLowerCase()">
-          {{ ORDER_DETAILS.getStatusLabel(orderDetails.order_status) | translate }}
+          {{ getStatusLabel(orderDetails.order_status) | translate }}
         </div>
       </ion-card-content>
     </ion-card>

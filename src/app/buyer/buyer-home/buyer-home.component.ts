@@ -5,6 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 import { BuyerApiService } from '../services/buyer-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { addIcons } from 'ionicons';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
   personCircleOutline,
   locationOutline,
@@ -34,7 +35,7 @@ interface Category {
 @Component({
   selector: 'app-buyer-home',
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterModule],
+  imports: [CommonModule, IonicModule, RouterModule, TranslateModule],
   templateUrl: './buyer-home.component.html',
   styleUrls: ['./buyer-home.component.scss'],
 })
@@ -51,7 +52,8 @@ export class BuyerHomeComponent {
     private menuCtrl: MenuController,
     private buyerApiService: BuyerApiService,
     private authService: AuthService,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private translate: TranslateService
   ) {
     addIcons({
       personCircleOutline,
@@ -101,11 +103,9 @@ export class BuyerHomeComponent {
   }
 
   onImageError(event: any) {
-    // Set a default image when category image fails to load
     event.target.src = '';
   }
 
-  // Menu functions
   openMenu() {
     this.menuCtrl.open('buyer-menu');
   }
@@ -114,7 +114,6 @@ export class BuyerHomeComponent {
     this.menuCtrl.close('buyer-menu');
   }
 
-  // Navigation functions
   async navigateToProfile() {
     await this.closeMenu();
     this.router.navigate(['/buyer/profile']);
@@ -135,7 +134,6 @@ export class BuyerHomeComponent {
     this.router.navigate(['/buyer/business-update']);
   }
 
-
   async navigateToSettings() {
     await this.closeMenu();
     this.router.navigate(['/buyer/settings']);
@@ -145,15 +143,15 @@ export class BuyerHomeComponent {
     await this.closeMenu();
 
     const alert = await this.alertCtrl.create({
-      header: 'Confirm Logout',
-      message: 'Are you sure you want to logout?',
+      header: this.translate.instant('BUYER_HOME.LOGOUT_CONFIRM_HEADER'),
+      message: this.translate.instant('BUYER_HOME.LOGOUT_CONFIRM_MESSAGE'),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('BUYER_HOME.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Logout',
+          text: this.translate.instant('BUYER_HOME.LOGOUT'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);

@@ -11,11 +11,12 @@ import { AuthService } from '../../auth/auth.service';
 import { catchError, finalize, switchMap, tap } from 'rxjs';
 import { of } from 'rxjs';
 import { Location } from '@angular/common';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-category-page',
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule],
+  imports: [CommonModule, IonicModule, FormsModule, TranslateModule],
   templateUrl: './category.component.html',
   styleUrls: ['./category.component.scss'],
 })
@@ -85,7 +86,9 @@ export class CategoryPageComponent implements OnInit {
     private cartService: CartService,
     private authService: AuthService,
     private alertCtrl: AlertController,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private translate: TranslateService
+
   ) {
     addIcons({ chevronBack, close, search, heart, alertCircleOutline, funnelOutline, swapVerticalOutline, heartOutline, cartOutline, star });
   }
@@ -99,15 +102,15 @@ export class CategoryPageComponent implements OnInit {
     // Check authentication
     if (!this.authService.isAuthenticated()) {
       const alert = await this.alertCtrl.create({
-        header: 'Authentication Required',
-        message: 'Please login to add items to cart.',
+        header: this.translate.instant('CATEGORY.AUTH_REQUIRED'),
+        message: this.translate.instant('CATEGORY.LOGIN_TO_ADD'),
         buttons: [
           {
-            text: 'Cancel',
+            text: this.translate.instant('CATEGORY.CANCEL'),
             role: 'cancel'
           },
           {
-            text: 'Login',
+            text: this.translate.instant('CATEGORY.LOGIN'),
             handler: () => {
               this.router.navigate(['/login']);
             }
@@ -121,16 +124,16 @@ export class CategoryPageComponent implements OnInit {
     // Check if product is selected
     if (!this.selectedProduct) {
       const alert = await this.alertCtrl.create({
-        header: 'Error',
-        message: 'No product selected.',
-        buttons: ['OK']
+        header: this.translate.instant('CATEGORY.ERROR'),
+        message: this.translate.instant('CATEGORY.NO_PRODUCT_SELECTED'),
+        buttons: [this.translate.instant('CATEGORY.OK')]
       });
       await alert.present();
       return;
     }
 
     const loading = await this.loadingCtrl.create({
-      message: 'Adding to cart...',
+      message: this.translate.instant('CATEGORY.ADDING_TO_CART'),
       spinner: 'circular'
     });
 
@@ -139,9 +142,9 @@ export class CategoryPageComponent implements OnInit {
 
       if (wholesaler.price < 0) {
         const alert = await this.alertCtrl.create({
-          header: 'Error',
-          message: 'Invalid price for this item.',
-          buttons: ['OK']
+          header: this.translate.instant('CATEGORY.ERROR'),
+          message: this.translate.instant('CATEGORY.INVALID_PRICE'),
+          buttons: [this.translate.instant('CATEGORY.OK')]
         });
         await alert.present();
         return;
@@ -163,15 +166,15 @@ export class CategoryPageComponent implements OnInit {
           console.log('Item added to cart:', response);
 
           const alert = await this.alertCtrl.create({
-            header: 'Success',
-            message: `${this.selectedProduct?.product_name} added to cart successfully!`,
+            header: this.translate.instant('CATEGORY.SUCCESS'),
+            message: this.translate.instant('CATEGORY.ADDED_TO_CART', { product: this.selectedProduct?.product_name }),
             buttons: [
               {
-                text: 'Continue Shopping',
+                text: this.translate.instant('CATEGORY.CONTINUE_SHOPPING'),
                 role: 'cancel'
               },
               {
-                text: 'View Cart',
+                text: this.translate.instant('CATEGORY.VIEW_CART'),
                 handler: () => {
                   this.router.navigate(['/buyer/cart']);
                 }
@@ -184,7 +187,7 @@ export class CategoryPageComponent implements OnInit {
           await loading.dismiss();
           console.error('Error adding to cart:', error);
 
-          let errorMessage = 'Failed to add item to cart. Please try again.';
+          let errorMessage = this.translate.instant('CATEGORY.FAILED_ADD_TO_CART');
 
           if (error.error && error.error.message) {
             errorMessage = error.error.message;
@@ -193,9 +196,9 @@ export class CategoryPageComponent implements OnInit {
           }
 
           const alert = await this.alertCtrl.create({
-            header: 'Error',
+            header: this.translate.instant('CATEGORY.ERROR'),
             message: errorMessage,
-            buttons: ['OK']
+            buttons: [this.translate.instant('CATEGORY.OK')]
           });
           await alert.present();
         }
@@ -206,9 +209,9 @@ export class CategoryPageComponent implements OnInit {
       console.error('Error adding to cart:', error);
 
       const alert = await this.alertCtrl.create({
-        header: 'Error',
-        message: 'Failed to add item to cart. Please try again.',
-        buttons: ['OK']
+        header: this.translate.instant('CATEGORY.ERROR'),
+        message: this.translate.instant('CATEGORY.FAILED_ADD_TO_CART'),
+        buttons: [this.translate.instant('CATEGORY.OK')]
       });
       await alert.present();
     }

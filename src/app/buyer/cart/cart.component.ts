@@ -20,6 +20,7 @@ import {
   cardOutline
 } from 'ionicons/icons';
 import { CartService, CartItem, AddCartItemRequest } from './cart.service';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 
 interface QuantityUpdate {
   index: number;
@@ -30,7 +31,7 @@ interface QuantityUpdate {
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule],
+  imports: [CommonModule, IonicModule, ReactiveFormsModule, TranslateModule],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss']
 })
@@ -51,7 +52,8 @@ export class CartComponent implements OnInit, OnDestroy {
     private cartService: CartService,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private translate: TranslateService
   ) {
     addIcons({
       trashOutline,
@@ -91,7 +93,7 @@ export class CartComponent implements OnInit, OnDestroy {
   private setupQuantityDebounce(): void {
     const quantitySub = this.quantityUpdateSubject.pipe(
       debounceTime(800), // Wait 800ms after last change
-      distinctUntilChanged((prev, curr) => 
+      distinctUntilChanged((prev, curr) =>
         prev.selectedId === curr.selectedId && prev.quantity === curr.quantity
       )
     ).subscribe(async (update) => {
@@ -124,7 +126,7 @@ export class CartComponent implements OnInit, OnDestroy {
   async loadCartItems(): Promise<void> {
     this.isLoading = true;
     const loading = await this.loadingCtrl.create({
-      message: 'Loading cart...',
+      message: this.translate.instant('CART.LOADING_CART'),
       spinner: 'dots'
     });
     await loading.present();
@@ -136,7 +138,7 @@ export class CartComponent implements OnInit, OnDestroy {
       },
       error: async (error) => {
         console.error('Error loading cart:', error);
-        await this.showToast('Failed to load cart items', 'danger');
+        await this.showToast(this.translate.instant('CART.FAILED_LOAD'), 'danger');
       },
       complete: async () => {
         this.isLoading = false;
@@ -187,13 +189,13 @@ export class CartComponent implements OnInit, OnDestroy {
 
     this.cartService.updateItemQuantity(update.selectedId, update.quantity).subscribe({
       next: async () => {
-        await this.showToast('Quantity updated', 'success');
+        await this.showToast(this.translate.instant('CART.QUANTITY_UPDATED'), 'success');
         // Refresh cart to sync with backend
         this.loadCartItems();
       },
       error: async (error) => {
         console.error('Error updating quantity:', error);
-        await this.showToast('Failed to update quantity', 'danger');
+        await this.showToast(this.translate.instant('CART.FAILED_UPDATE_QUANTITY'), 'danger');
         // Revert the optimistic update
         this.loadCartItems();
       }
@@ -208,15 +210,15 @@ export class CartComponent implements OnInit, OnDestroy {
     const item = this.cartProducts[index];
 
     const alert = await this.alertCtrl.create({
-      header: 'Remove Item',
-      message: `Are you sure you want to remove ${item.product_name} from your cart?`,
+      header: this.translate.instant('CART.REMOVE_ITEM_HEADER'),
+      message: this.translate.instant('CART.REMOVE_ITEM_MESSAGE', { product: item.product_name }),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('CART.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Remove',
+          text: this.translate.instant('CART.REMOVE'),
           role: 'destructive',
           handler: () => {
             this.deleteItemSubject.next(item.selected_id);
@@ -233,13 +235,13 @@ export class CartComponent implements OnInit, OnDestroy {
 
     this.cartService.deleteCartItem(selectedId).subscribe({
       next: async () => {
-        await this.showToast('Item removed from cart', 'success');
+        await this.showToast(this.translate.instant('CART.ITEM_REMOVED'), 'success');
         // Refresh cart to sync with backend
         this.loadCartItems();
       },
       error: async (error) => {
         console.error('Error removing item:', error);
-        await this.showToast('Failed to remove item', 'danger');
+        await this.showToast(this.translate.instant('CART.FAILED_REMOVE_ITEM'), 'danger');
         this.isLoading = false;
         // Reload to revert optimistic update
         this.loadCartItems();
@@ -251,7 +253,7 @@ export class CartComponent implements OnInit, OnDestroy {
     const discountCode = this.cartForm.get('discountCode')?.value?.trim();
 
     if (!discountCode) {
-      await this.showToast('Please enter a discount code', 'warning');
+      await this.showToast(this.translate.instant('CART.ENTER_CODE'), 'warning');
       return;
     }
 
@@ -265,9 +267,9 @@ export class CartComponent implements OnInit, OnDestroy {
 
     if (discountAmount) {
       this.discount = discountAmount;
-      await this.showToast(`Discount of ₹${discountAmount} applied!`, 'success');
+      await this.showToast(this.translate.instant('CART.DISCOUNT_APPLIED_MSG', { amount: discountAmount }), 'success');
     } else {
-      await this.showToast('Invalid discount code', 'danger');
+      await this.showToast(this.translate.instant('CART.INVALID_CODE'), 'danger');
     }
   }
 
@@ -279,20 +281,20 @@ export class CartComponent implements OnInit, OnDestroy {
 
   async checkout(): Promise<void> {
     if (this.cartProducts.length === 0) {
-      await this.showToast('Your cart is empty', 'warning');
+      await this.showToast(this.translate.instant('CART.EMPTY_CART'), 'warning');
       return;
     }
 
     const alert = await this.alertCtrl.create({
-      header: 'Confirm Order',
-      message: `Total Amount: ₹${this.getTotalPrice() - this.discount}`,
+      header: this.translate.instant('CART.CONFIRM_ORDER_HEADER'),
+      message: this.translate.instant('CART.CONFIRM_ORDER_MESSAGE', { total: this.getTotalPrice() - this.discount }),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('CART.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Confirm',
+          text: this.translate.instant('CART.CONFIRM'),
           handler: async () => {
             await this.processCheckout();
           }
@@ -305,15 +307,14 @@ export class CartComponent implements OnInit, OnDestroy {
 
   private async processCheckout(): Promise<void> {
     const loading = await this.loadingCtrl.create({
-      message: 'Processing order...',
+      message: this.translate.instant('CART.PROCESSING_ORDER'),
       spinner: 'dots'
     });
     await loading.present();
 
-    // TODO: Implement actual checkout API call
     setTimeout(async () => {
       await loading.dismiss();
-      await this.showToast('Order placed successfully!', 'success');
+      await this.showToast(this.translate.instant('CART.ORDER_PLACED'), 'success');
       this.cartService.clearCart();
       this.router.navigate(['/buyer/orders']);
     }, 2000);
