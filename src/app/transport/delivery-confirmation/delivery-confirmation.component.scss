@@ -926,3 +926,25 @@ ion-card {
     border-color: #6b7280 !important;
   }
 }
+.otp-box-group {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.otp-box {
+  width: 40px;
+  height: 48px;
+  font-size: 2rem;
+  text-align: center;
+  border: 2px solid #3880ff;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.otp-box:focus {
+  border-color: #3dc2ff;
+  background: #e7f4ff;
+}

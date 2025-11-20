@@ -40,7 +40,10 @@
 
       <div class="delivery-info">
         <div class="info-row">
-          <ion-icon name="storefront" class="info-icon retailer-icon"></ion-icon>
+          <ion-icon
+            name="storefront"
+            class="info-icon retailer-icon"
+          ></ion-icon>
           <div class="info-details">
             <span class="info-label">Deliver To</span>
             <span class="info-value">{{ retailerName }}</span>
@@ -77,10 +80,7 @@
       </div>
 
       <div class="items-list">
-        <div
-          *ngFor="let item of deliveryItems; let i = index"
-          class="item-row"
-        >
+        <div *ngFor="let item of deliveryItems; let i = index" class="item-row">
           <div class="item-details">
             <h4 class="item-name">{{ item.name }}</h4>
             <div class="item-quantities">
@@ -103,7 +103,9 @@
           <ion-icon name="key" class="header-icon"></ion-icon>
           <div class="header-info">
             <h3 class="card-title">Delivery Verification</h3>
-            <span class="otp-instruction">Get OTP from customer to confirm delivery</span>
+            <span class="otp-instruction"
+              >Get OTP from customer to confirm delivery</span
+            >
           </div>
         </div>
       </div>
@@ -115,7 +117,9 @@
             <ion-icon name="information-circle" class="info-icon"></ion-icon>
             <div class="step-text">
               <h4>Step 1: Generate OTP</h4>
-              <p>Click below to generate OTP that will be sent to customer's app</p>
+              <p>
+                Click below to generate OTP that will be sent to customer's app
+              </p>
             </div>
           </div>
           <ion-button
@@ -125,7 +129,7 @@
             [disabled]="isGeneratingOTP"
           >
             <ion-icon name="key" slot="start"></ion-icon>
-            {{ isGeneratingOTP ? 'Generating...' : 'Generate OTP' }}
+            {{ isGeneratingOTP ? "Generating..." : "Generate OTP" }}
           </ion-button>
         </div>
 
@@ -135,7 +139,10 @@
             <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
             <div class="step-text">
               <h4>Step 2: Get OTP from Customer</h4>
-              <p>OTP has been sent to customer's app. Ask them for the 4-digit code.</p>
+              <p>
+                OTP has been sent to customer's app. Ask them for the
+                <strong>6-digit</strong> code.
+              </p>
             </div>
           </div>
 
@@ -146,16 +153,26 @@
 
           <div class="otp-input-container">
             <div class="otp-inputs">
-              <ion-input
-                *ngFor="let digit of otpDigits; let i = index"
-                [(ngModel)]="otpDigits[i]"
-                (ionInput)="onOtpInput($event, i)"
-                (keydown)="onOtpKeydown($event, i)"
-                class="otp-digit"
-                type="number"
-                maxlength="1"
-                #otpInput
-              ></ion-input>
+              <div class="otp-box-group">
+                <input
+                  *ngFor="let i of [0, 1, 2, 3, 4, 5]; let index = index"
+                  class="otp-box"
+                  type="text"
+                  maxlength="1"
+                  pattern="[0-9]*"
+                  inputmode="numeric"
+                  [value]="otpDigits[index] || ''"
+                  (input)="onOtpBoxInput($event, index)"
+                  (keydown)="onOtpBoxKeydown($event, index)"
+                  [disabled]="isVerifyingOTP"
+                  autocomplete="one-time-code"
+                  (paste)="onOtpBoxPaste($event)"
+                />
+              </div>
+            </div>
+            <div *ngIf="otpError" class="otp-error-message">
+              <ion-icon name="warning" color="danger"></ion-icon>
+              <span>{{ otpError }}</span>
             </div>
             <div class="otp-actions">
               <ion-button
@@ -165,9 +182,10 @@
                 [disabled]="!isOtpComplete() || isVerifyingOTP"
               >
                 <ion-icon name="checkmark-done" slot="start"></ion-icon>
-                {{ isVerifyingOTP ? 'Verifying...' : 'Verify & Confirm Delivery' }}
+                {{
+                  isVerifyingOTP ? "Verifying..." : "Verify & Confirm Delivery"
+                }}
               </ion-button>
-
               <ion-button
                 fill="outline"
                 expand="block"
@@ -180,17 +198,30 @@
               </ion-button>
             </div>
           </div>
+          <ion-toast
+            [isOpen]="!!otpError"
+            [message]="otpError"
+            [duration]="3000"
+            color="danger"
+            (didDismiss)="otpError = ''"
+          ></ion-toast>
 
           <div class="otp-help">
             <ion-icon name="help-circle"></ion-icon>
-            <span>Customer should see the OTP in their app under "Active Orders"</span>
+            <span
+              >Customer should see the OTP in their app under "Active
+              Orders"</span
+            >
           </div>
         </div>
 
         <!-- Delivery Confirmed -->
         <div *ngIf="deliveryConfirmed" class="delivery-confirmed-step">
           <div class="success-message">
-            <ion-icon name="checkmark-circle" class="success-icon-large"></ion-icon>
+            <ion-icon
+              name="checkmark-circle"
+              class="success-icon-large"
+            ></ion-icon>
             <h3>Delivery Confirmed!</h3>
             <p>Order has been successfully delivered and verified.</p>
           </div>
@@ -232,11 +263,7 @@
     <div class="emergency-section" *ngIf="!deliveryConfirmed">
       <h4 class="emergency-title">Need Help?</h4>
       <div class="emergency-buttons">
-        <ion-button
-          fill="clear"
-          class="support-btn"
-          (click)="callSupport()"
-        >
+        <ion-button fill="clear" class="support-btn" (click)="callSupport()">
           <ion-icon name="headset" slot="start"></ion-icon>
           Call Support
         </ion-button>
@@ -284,15 +311,21 @@
     <div class="modal-wrapper">
       <div class="modal-content">
         <div class="success-animation">
-          <ion-icon name="checkmark-circle" class="success-icon-large"></ion-icon>
+          <ion-icon
+            name="checkmark-circle"
+            class="success-icon-large"
+          ></ion-icon>
         </div>
         <h2 class="success-title">Delivery Completed!</h2>
         <p class="success-message">
-          Order #{{ orderId }} has been successfully delivered and confirmed by the customer.
+          Order #{{ orderId }} has been successfully delivered and confirmed by
+          the customer.
         </p>
         <div class="delivery-summary">
           <p><strong>Delivered to:</strong> {{ retailerName }}</p>
-          <p><strong>Time:</strong> {{ deliveryCompletedTime | date:'short' }}</p>
+          <p>
+            <strong>Time:</strong> {{ deliveryCompletedTime | date : "short" }}
+          </p>
         </div>
         <div class="success-actions">
           <ion-button

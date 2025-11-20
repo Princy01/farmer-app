@@ -13,6 +13,6 @@ export class AppComponent {
     this.translate.addLangs(['en', 'hi']);
     this.translate.setFallbackLang('en');
     const lang = localStorage.getItem('appLang') || 'en';
-    this.translate.use('hi');
+    this.translate.use('lang');
   }
 }

@@ -382,7 +382,7 @@ export const routes: Routes = [
         loadComponent: () => import('./transport/pickup-confirmation/pickup-confirmation.component').then((m) => m.PickupConfirmationComponent),
       },
       {
-        path: 'delivery-confirmation',
+  path: 'delivery-confirmation/:jobId/:orderId',
         loadComponent: () => import('./transport/delivery-confirmation/delivery-confirmation.component').then((m) => m.DeliveryConfirmationComponent),
       },
       {

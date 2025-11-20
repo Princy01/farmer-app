@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
-import { IonicModule, IonContent } from '@ionic/angular';
+import { Component, OnInit, OnDestroy, ViewChild, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { IonicModule, IonContent, LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
@@ -33,16 +33,8 @@ import {
   carOutline,
   warningOutline
 } from 'ionicons/icons';
-
-interface DeliveryItem {
-  id: string;
-  name: string;
-  quantity: number;
-  weight: string;
-  qrCode: string;
-  unit: string;
-  pickupCondition: 'good' | 'damaged' | 'not_checked';
-}
+import { AuthService } from 'src/app/auth/auth.service';
+import { DeliveryService, DeliveryDetails, DeliveryItem } from './delivery-confirmation.service';
 
 interface DeliveryIssueType {
   id: string;
@@ -55,29 +47,34 @@ interface DeliveryIssueType {
   standalone: true,
   templateUrl: './delivery-confirmation.component.html',
   styleUrls: ['./delivery-confirmation.component.scss'],
-  imports: [IonicModule, FormsModule, CommonModule]
+  imports: [IonicModule, FormsModule, CommonModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   // Core Properties
-  orderId: string = 'ORD-2024-001';
-  retailerName: string = 'Green Valley Retail Store';
-  retailerPhone: string = '+91 98765 43210';
-  deliveryAddress: string = 'Shop No. 15, Green Market\nSector 21, Navi Mumbai - 400709';
+  jobId: number | null = null;
+  orderId: number | null = null;
+  driverId: number | null = null;
+  retailerName: string = '';
+  retailerPhone: string = '';
+  deliveryAddress: string = '';
 
   // OTP Properties
   otpGenerated: boolean = false;
-  otpDigits: string[] = ['', '', '', ''];
-  otpTimer: number = 600; // 10 minutes in seconds
+  otpDigits: string = '';
+  otpError: string = '';
+  otpTimer: number = 600;
   otpResendTimer: number = 30;
   isOtpResendDisabled: boolean = true;
   isGeneratingOTP: boolean = false;
   isVerifyingOTP: boolean = false;
-  generatedOTP: string = '';
+  generatedOTP: string = ''; // For testing/debugging from backend response
 
   // Delivery Properties
   deliveryConfirmed: boolean = false;
   deliveryNotes: string = '';
   deliveryCompletedTime: Date = new Date();
+  deliveryItems: DeliveryItem[] = [];
 
   // Modal Controls
   showSuccessModal: boolean = false;
@@ -91,37 +88,6 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   timerInterval: any;
   resendTimerInterval: any;
 
-  // Sample delivery items - removed deliveryCondition and deliveryNotes
-  deliveryItems: DeliveryItem[] = [
-    {
-      id: '1',
-      name: 'Fresh Tomatoes',
-      quantity: 10,
-      weight: '10 kg',
-      qrCode: 'TOM001_BATCH_20241003',
-      unit: 'kg',
-      pickupCondition: 'good'
-    },
-    {
-      id: '2',
-      name: 'Organic Potatoes',
-      quantity: 15,
-      weight: '15 kg',
-      qrCode: 'POT002_BATCH_20241003',
-      unit: 'kg',
-      pickupCondition: 'good'
-    },
-    {
-      id: '3',
-      name: 'Fresh Onions',
-      quantity: 8,
-      weight: '8 kg',
-      qrCode: 'ONI003_BATCH_20241003',
-      unit: 'kg',
-      pickupCondition: 'good'
-    }
-  ];
-
   deliveryIssueTypes: DeliveryIssueType[] = [
     { id: 'customer_absent', label: 'Customer Not Available', icon: 'person-outline' },
     { id: 'wrong_address', label: 'Wrong/Unclear Address', icon: 'location-outline' },
@@ -131,7 +97,15 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     { id: 'other', label: 'Other Issue', icon: 'help-circle-outline' }
   ];
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private authService: AuthService,
+    private deliveryService: DeliveryService,
+    private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
     addIcons({
       'chevron-back': chevronBack,
       'checkmark-done-circle': checkmarkDoneCircle,
@@ -163,125 +137,167 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
-    // Initialize component
+  async ngOnInit() {
+    // Check authentication
+    if (!this.authService.isAuthenticated()) {
+      await this.showAuthError();
+      return;
+    }
+    this.driverId = this.authService.getUserId();
+
+    // Get job_id and order_id from route params
+    this.jobId = +this.route.snapshot.paramMap.get('jobId')! || null;
+    this.orderId = +this.route.snapshot.paramMap.get('orderId')! || null;
+
+    if (!this.jobId || !this.orderId) {
+      await this.showToast('Invalid delivery details. Redirecting...', 'danger');
+      this.router.navigate(['/transport/transport-dashboard']);
+      return;
+    }
+
+    // Load delivery details and validate assignment
+    await this.loadDeliveryDetails();
   }
 
   ngOnDestroy() {
     this.clearTimers();
   }
 
-  // OTP Methods
-  async generateOTP() {
-    this.isGeneratingOTP = true;
+  private async loadDeliveryDetails() {
+    const loading = await this.loadingCtrl.create({ message: 'Loading delivery details...' });
+    await loading.present();
 
     try {
-      // Simulate API call to generate OTP
-      await this.delay(1500);
+      const details: DeliveryDetails = await this.deliveryService.getDeliveryDetails(this.jobId!, this.orderId!).toPromise();
 
-      // Generate 4-digit OTP
-      this.generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
-      this.otpGenerated = true;
+      // Validate assignment to logged-in driver
+      if (details.assigned_driver_id !== this.driverId) {
+        await loading.dismiss();
+        await this.showToast('This delivery is not assigned to you.', 'danger');
+        this.router.navigate(['/transport/transport-dashboard']);
+        return;
+      }
 
-      // Start OTP timer
-      this.startOtpTimer();
-      this.startResendTimer();
-
-      console.log('Generated OTP:', this.generatedOTP); // For testing
+      // Populate component properties
+      this.retailerName = details.retailer_name;
+      this.retailerPhone = details.retailer_phone;
+      this.deliveryAddress = details.delivery_address;
+      this.deliveryItems = details.items;
+      this.orderId = details.order_id; // Update if needed
 
     } catch (error) {
+      console.error('Error loading delivery details:', error);
+      await this.showToast('Failed to load delivery details.', 'danger');
+      this.router.navigate(['/transport/transport-dashboard']);
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
+  // OTP Methods
+  async generateOTP() {
+    if (!this.jobId || !this.orderId) return;
+
+    this.isGeneratingOTP = true;
+    const loading = await this.loadingCtrl.create({ message: 'Generating OTP...' });
+    await loading.present();
+
+    try {
+      const response = await this.deliveryService.generateOTP({ job_id: this.jobId, order_id: this.orderId }).toPromise();
+      this.generatedOTP = response.otp_code; // For testing/debugging
+      this.otpGenerated = true;
+      this.startOtpTimer();
+      this.startResendTimer();
+      await this.showToast('OTP sent to retailer.', 'success');
+    } catch (error) {
       console.error('Error generating OTP:', error);
+      await this.showToast('Failed to generate OTP.', 'danger');
     } finally {
       this.isGeneratingOTP = false;
+      await loading.dismiss();
     }
   }
 
   async regenerateOTP() {
-    this.isGeneratingOTP = true;
     this.clearTimers();
-
-    try {
-      await this.delay(1000);
-
-      // Generate new OTP
-      this.generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
-      this.otpTimer = 600; // Reset to 10 minutes
-      this.otpDigits = ['', '', '', ''];
-
-      // Restart timers
-      this.startOtpTimer();
-      this.startResendTimer();
-
-      console.log('New OTP:', this.generatedOTP); // For testing
-
-    } catch (error) {
-      console.error('Error regenerating OTP:', error);
-    } finally {
-      this.isGeneratingOTP = false;
-    }
+    this.otpDigits = '';
+    this.otpError = '';
+    await this.generateOTP();
   }
 
   async verifyOTP() {
+    if (!this.isOtpComplete() || !this.jobId || !this.orderId) return;
+
     this.isVerifyingOTP = true;
-    const enteredOTP = this.otpDigits.join('');
+    const loading = await this.loadingCtrl.create({ message: 'Verifying delivery...' });
+    await loading.present();
 
     try {
-      await this.delay(1500);
+      await this.deliveryService.confirmDelivery({
+        job_id: this.jobId,
+        order_id: this.orderId,
+        otp: this.otpDigits,
+        notes: this.deliveryNotes
+      }).toPromise();
 
-      if (enteredOTP === this.generatedOTP) {
-        // OTP is correct
-        this.deliveryConfirmed = true;
-        this.deliveryCompletedTime = new Date();
-        this.clearTimers();
-        this.showSuccessModal = true;
-      } else {
-        // OTP is incorrect
-        this.showOTPError();
-      }
+      this.deliveryConfirmed = true;
+      this.deliveryCompletedTime = new Date();
+      this.clearTimers();
+      this.showSuccessModal = true;
+      await this.showToast('Delivery confirmed successfully!', 'success');
     } catch (error) {
-      console.error('Error verifying OTP:', error);
+      console.error('Error confirming delivery:', error);
+      this.showOTPError();
     } finally {
       this.isVerifyingOTP = false;
+      await loading.dismiss();
     }
   }
 
-  showOTPError() {
-    // Reset OTP digits
-    this.otpDigits = ['', '', '', ''];
-
-    // You can show a toast or alert here
-    console.log('Invalid OTP entered');
-  }
-
-  // OTP Input Handlers
-  onOtpInput(event: any, index: number) {
-    const value = event.target.value;
-
-    if (value && value.length === 1 && /^\d$/.test(value)) {
-      this.otpDigits[index] = value;
-
-      // Move to next input
-      if (index < 3) {
-        const nextInput = document.querySelectorAll('.otp-digit')[index + 1] as HTMLElement;
-        if (nextInput) {
-          nextInput.focus();
-        }
-      }
+  onOtpBoxInput(event: any, index: number) {
+    const inputEl = event.target as HTMLInputElement;
+    const sanitized = inputEl.value.replace(/\D/g, '').slice(0, 1);
+    inputEl.value = sanitized;
+    // Clear any existing error when user starts typing
+    if (this.otpError) this.otpError = '';
+    // Update the otpDigits string
+    const digits = this.otpDigits.split('');
+    digits[index] = sanitized;
+    this.otpDigits = digits.join('');
+    // Move focus to next box if filled
+    if (sanitized && index < 5) {
+      const nextInput = document.querySelectorAll('.otp-box')[index + 1] as HTMLElement;
+      if (nextInput) nextInput.focus();
     }
   }
 
-  onOtpKeydown(event: any, index: number) {
+  onOtpBoxKeydown(event: KeyboardEvent, index: number) {
     // Handle backspace
     if (event.key === 'Backspace' && !this.otpDigits[index] && index > 0) {
-      const prevInput = document.querySelectorAll('.otp-digit')[index - 1] as HTMLElement;
-      if (prevInput) {
-        prevInput.focus();
-      }
+      const prevInput = document.querySelectorAll('.otp-box')[index - 1] as HTMLElement;
+      if (prevInput) prevInput.focus();
     }
   }
 
   isOtpComplete(): boolean {
-    return this.otpDigits.every(digit => digit !== '');
+    return this.otpDigits.length === 6 && /^\d{6}$/.test(this.otpDigits);
+  }
+
+  showOTPError() {
+    this.otpDigits = '';  // Reset the string
+    this.otpError = 'Invalid OTP entered. Please check and try again.';  // Set error message
+    console.log('Invalid OTP entered');
+    setTimeout(() => {
+      const firstInput = document.querySelector('.otp-box') as HTMLElement;
+      if (firstInput) firstInput.focus();
+    }, 0);
+  }
+
+  otpExpired() {
+    this.clearTimers();
+    this.otpGenerated = false;
+    this.otpDigits = '';  // Reset the string
+    console.log('OTP expired');
   }
 
   // Timer Methods
@@ -316,11 +332,16 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     }
   }
 
-  otpExpired() {
-    this.clearTimers();
-    this.otpGenerated = false;
-    this.otpDigits = ['', '', '', ''];
-    console.log('OTP expired');
+  onOtpBoxPaste(event: ClipboardEvent) {
+    event.preventDefault();
+    const pasted = event.clipboardData?.getData('text')?.replace(/\D/g, '').slice(0, 6) || '';
+    this.otpDigits = pasted.padEnd(6, '');  // Pad to 6 characters
+    // Optionally, move focus to last filled box
+    const lastFilled = pasted.length > 0 ? pasted.length - 1 : 0;
+    setTimeout(() => {
+      const input = document.querySelectorAll('.otp-box')[lastFilled] as HTMLElement;
+      if (input) input.focus();
+    }, 0);
   }
 
   formatTime(seconds: number): string {
@@ -335,7 +356,6 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
       'Generate New OTP';
   }
 
-  // Helper Methods - removed getTotalItems() and getTotalWeight()
   getConditionText(condition: string): string {
     switch (condition) {
       case 'good': return 'Good Condition';
@@ -412,5 +432,25 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   // Utility Methods
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertCtrl.create({
+      header: 'Authentication Required',
+      message: 'Please log in to access this page.',
+      buttons: ['OK']
+    });
+    await alert.present();
+    this.router.navigate(['/auth/login']);
+  }
+
+  private async showToast(message: string, color: string = 'primary') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'top'
+    });
+    await toast.present();
   }
 }
