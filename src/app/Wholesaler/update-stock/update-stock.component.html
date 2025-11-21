@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar class="update-stock-toolbar">
     <ion-title>{{ 'UPDATE_STOCK.PAGE_TITLE' | translate }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="close()">{{ 'UPDATE_STOCK.CLOSE' | translate }}</ion-button>
@@ -13,7 +13,7 @@
     <ion-input type="number" [(ngModel)]="stockToDeduct"></ion-input>
   </ion-item>
 
-  <ion-button expand="block" class="ion-margin-top" (click)="updateStock()">
+  <ion-button color = "tertiary" expand="block" class="ion-margin-top" (click)="updateStock()">
     {{ 'UPDATE_STOCK.UPDATE' | translate }}
   </ion-button>
 </ion-content>

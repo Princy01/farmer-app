@@ -1,8 +1,18 @@
+ .update-stock-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  --border-color: transparent;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
 ion-content {
   .ion-item {
     margin-bottom: 12px;
     align-items: center;
   }
+
 
   ion-text {
     font-weight: 500;

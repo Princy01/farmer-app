@@ -168,8 +168,13 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     await loading.present();
 
     try {
-      const details: DeliveryDetails = await this.deliveryService.getDeliveryDetails(this.jobId!, this.orderId!).toPromise();
-
+      const details = await this.deliveryService.getDeliveryDetails(this.jobId!, this.orderId!).toPromise();
+      if (!details) {
+        await loading.dismiss();
+        await this.showToast('No delivery details found.', 'danger');
+        this.router.navigate(['/transport/transport-dashboard']);
+        return;
+      }
       // Validate assignment to logged-in driver
       if (details.assigned_driver_id !== this.driverId) {
         await loading.dismiss();
@@ -204,14 +209,16 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
     try {
       const response = await this.deliveryService.generateOTP({ job_id: this.jobId, order_id: this.orderId }).toPromise();
-      this.generatedOTP = response.otp_code; // For testing/debugging
-      this.otpGenerated = true;
-      this.startOtpTimer();
-      this.startResendTimer();
-      await this.showToast('OTP sent to retailer.', 'success');
-    } catch (error) {
-      console.error('Error generating OTP:', error);
-      await this.showToast('Failed to generate OTP.', 'danger');
+      if (response) {
+        this.generatedOTP = response.otp_code; // For testing/debugging
+        this.otpGenerated = true;
+        this.startOtpTimer();
+        this.startResendTimer();
+        await this.showToast('OTP sent to retailer.', 'success');
+      }
+      else {
+        await this.showToast('Failed to generate OTP.', 'danger');
+      }
     } finally {
       this.isGeneratingOTP = false;
       await loading.dismiss();

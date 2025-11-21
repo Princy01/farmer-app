@@ -1,87 +1,244 @@
-ion-toolbar:first-child {
-  --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
-  --border-width: 0;
+.past-orders-content {
+  --background: #f8f9fa;
 }
 
-ion-title {
+.past-orders-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  --border-color: transparent;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.page-title {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Container and Cards */
+.card-section {
+  padding: 0 1rem 1rem 1rem;
+
+  &:first-child {
+    padding-top: 1rem;
+  }
+}
+
+.modern-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  margin: 0 0 1rem 0;
+  overflow: visible;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 24px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+}
+
+.card-header {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-icon {
+  font-size: 1.5rem;
+  color: #667eea;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.order-total {
+  font-size: 1.2rem;
   font-weight: 700;
-  font-size: 1rem;
-  font-family: 'Georgia', 'Times', serif;
+  color: #667eea;
 }
 
-// .custom-title {
-//   font-weight: 700;
-//       font-size: 1rem;
-//       font-family: 'Georgia', 'Times', serif;
-// }
+.card-content {
+  padding: 1.5rem;
+  overflow: visible;
+}
 
-.custom-badge {
-    --background: rgb(150, 235, 85);
-    --color: white;  /* Text color inside the badge */
-        // --font-weight: bold;
+/* Filter Card Specific */
+.filter-card {
+  .card-content {
+    padding: 1rem;
+  }
+
+  ion-item {
+    --background: #f8f9fa;
+    --border-color: rgba(102, 126, 234, 0.1);
+    --highlight-height: 2px;
+    --highlight-color-focused: #667eea;
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --padding-top: 0.75rem;
+    --padding-bottom: 0.75rem;
+    margin-bottom: 0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    transition: all 0.3s ease;
+
+    &:hover {
+      --background: white;
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+      transform: translateY(-1px);
     }
 
-      ion-button {
-        --color: rgb(245, 240, 230);
-      }
+    &:focus-within {
+      --background: white;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+  }
 
-.filters {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 15px;
-      }
+  ion-label {
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
 
-      ion-item {
-        width: 100%;
-      }
+  ion-select {
+    &::part(icon) {
+      color: #667eea;
+    }
 
-      ion-card {
-        background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
-        text-align: center;
-        text-transform: uppercase;
-        font-family: "Poppins", sans-serif;
-        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    &::part(text) {
+      color: var(--ion-color-dark);
+    }
+  }
+}
 
-        &:hover {
-          transform: translateY(-5px);
-          box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+/* Loading and Error States */
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0;
+
+  .loading-text, .error-text {
+    margin-top: 1rem;
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+  }
+
+  .error-icon {
+    color: #ff6b6b;
+  }
+
+  .retry-btn {
+    --border-color: #667eea;
+    --color: #667eea;
+    margin-top: 1rem;
+  }
+}
+
+/* Orders Container */
+.orders-container {
+  padding: 0 1rem 1rem 1rem;
+}
+
+.no-orders {
+  text-align: center;
+  padding: 2rem 0;
+
+  .empty-icon {
+    font-size: 3rem;
+    color: var(--ion-color-medium);
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+  }
+}
+
+/* Order Details */
+.order-details {
+  ion-list {
+    background: transparent;
+    padding: 0;
+
+    ion-item {
+      --background: rgba(102, 126, 234, 0.05);
+      --border-color: rgba(102, 126, 234, 0.1);
+      --padding-start: 1rem;
+      --padding-end: 1rem;
+      --padding-top: 0.75rem;
+      --padding-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+
+      ion-label {
+        h3 {
+          margin: 0 0 0.5rem 0;
+          font-weight: 600;
+          color: var(--ion-color-dark);
         }
 
-        // &.selected {
-        //   background: #007bff;
-        //   color: white;
-        // }
-
-        &:hover::before {
-          content: "";
-          position: absolute;
-          top: -10px;
-          left: -10px;
-          right: -10px;
-          bottom: -10px;
-          background: rgba(0, 123, 255, 0.1);
-          filter: blur(15px);
-          z-index: -1;
-          border-radius: 16px;
+        p {
+          margin: 0.25rem 0;
+          color: var(--ion-color-medium);
+          font-size: 0.85rem;
         }
       }
+    }
+  }
+}
 
-      ion-card-title{
-        font-size: 1.5rem;
-      }
+.expand-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+  padding: 1rem 0;
 
+  ion-icon {
+    font-size: 1rem;
+  }
+}
 
-      .fixed-button {
-        position: fixed;
-        bottom: 20px; /* Distance from the bottom */
-        left: 20px; /* Distance from the left */
-        z-index: 1000; /* Ensures it's above other content */
-        transition: transform 0.3s ease-in-out;
-      }
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card-section, .orders-container {
+    padding: 0 0.5rem 0.5rem 0.5rem;
+  }
 
-      .fixed-button:hover {
-        transform: rotate(360deg);
-      }
+  .card-content {
+    padding: 1rem;
+  }
+
+  .filter-card .card-content {
+    padding: 0.5rem;
+  }
+
+  .order-details ion-list ion-item {
+    --padding-start: 0.5rem;
+    --padding-end: 0.5rem;
+  }
+}

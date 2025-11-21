@@ -3,3 +3,12 @@ ion-badge {
         padding: 6px 10px;
         border-radius: 8px;
       }
+      
+.restocking-recommendations-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  --border-color: transparent;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}

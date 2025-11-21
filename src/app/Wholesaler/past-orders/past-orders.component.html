@@ -1,83 +1,87 @@
-<ion-header>
-  <ion-toolbar mode="ios">
+<ion-header class="ion-no-border">
+  <ion-toolbar class="past-orders-toolbar" mode="ios">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
+      <ion-back-button defaultHref="/wholesaler/home" color="light"></ion-back-button>
     </ion-buttons>
-    <ion-title class="ion-text-center custom-title">{{ 'PAST_ORDERS.PAGE_TITLE' | translate }}</ion-title>
+    <ion-title class="page-title">{{ 'PAST_ORDERS.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [scrollEvents]="true">
-  <!-- Filter Dropdown -->
-  <ion-row>
-    <ion-col size="12" class="filters">
-      <ion-item>
-        <ion-label>{{ 'PAST_ORDERS.FILTER_ORDERS' | translate }}</ion-label>
-        <ion-select [(ngModel)]="selectedFilter" (ionChange)="applyFilter($event.detail.value)" [disabled]="isLoading">
-          <ion-select-option *ngFor="let filter of filters" [value]="filter.value">
-            {{ filter.label | translate }}
-          </ion-select-option>
-        </ion-select>
-        <ion-button fill="clear" slot="end" (click)="applyFilter('all')"
-                    *ngIf="selectedFilter && selectedFilter !== 'all'">
-          <ion-icon name="close-circle-outline"></ion-icon>
-        </ion-button>
-      </ion-item>
-    </ion-col>
-  </ion-row>
+<ion-content class="past-orders-content" [scrollEvents]="true">
+  <!-- Filter Dropdown in Modern Card -->
+  <div class="card-section">
+    <ion-card class="modern-card filter-card">
+      <div class="card-header">
+        <div class="header-content">
+          <ion-icon name="filter-outline" class="header-icon"></ion-icon>
+          <h2 class="card-title">{{ 'PAST_ORDERS.FILTER_ORDERS' | translate }}</h2>
+        </div>
+      </div>
+      <ion-card-content class="card-content">
+        <ion-item [class.ion-invalid]="false">
+          <ion-label position="stacked">{{ 'PAST_ORDERS.FILTER_ORDERS' | translate }}</ion-label>
+          <ion-select [(ngModel)]="selectedFilter" (ionChange)="applyFilter($event.detail.value)" [disabled]="isLoading">
+            <ion-select-option *ngFor="let filter of filters" [value]="filter.value">
+              {{ filter.label | translate }}
+            </ion-select-option>
+          </ion-select>
+          <ion-button fill="clear" slot="end" (click)="applyFilter('all')" *ngIf="selectedFilter && selectedFilter !== 'all'">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+  </div>
 
   <!-- Loading State -->
-  <ion-row *ngIf="isLoading">
-    <ion-col class="ion-text-center">
-      <ion-spinner name="circular"></ion-spinner>
-      <p>{{ 'PAST_ORDERS.LOADING' | translate }}</p>
-    </ion-col>
-  </ion-row>
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="circular"></ion-spinner>
+    <p class="loading-text">{{ 'PAST_ORDERS.LOADING' | translate }}</p>
+  </div>
 
   <!-- Error State -->
-  <ion-row *ngIf="hasError">
-    <ion-col class="ion-text-center">
-      <ion-icon name="alert-circle-outline" color="danger" size="large"></ion-icon>
-      <p>{{ 'PAST_ORDERS.LOAD_ERROR' | translate }}</p>
-      <ion-button (click)="loadCompletedOrders()" fill="clear">
-        {{ 'PAST_ORDERS.TRY_AGAIN' | translate }}
-      </ion-button>
-    </ion-col>
-  </ion-row>
+  <div class="error-container" *ngIf="hasError">
+    <ion-icon name="alert-circle-outline" color="danger" size="large" class="error-icon"></ion-icon>
+    <p class="error-text">{{ 'PAST_ORDERS.LOAD_ERROR' | translate }}</p>
+    <ion-button (click)="loadCompletedOrders()" fill="outline" class="retry-btn">
+      {{ 'PAST_ORDERS.TRY_AGAIN' | translate }}
+    </ion-button>
+  </div>
 
-  <!-- Orders Grid -->
-  <ion-row *ngIf="!isLoading && !hasError">
-    <ion-col size="12">
-      <ion-grid>
-        <ion-row>
-          <!-- No Orders Message -->
-          <ion-col size="12" *ngIf="completedOrders.length === 0" class="ion-text-center">
-            <p>{{ 'PAST_ORDERS.NO_ORDERS' | translate }}</p>
-          </ion-col>
+  <!-- Orders List in Modern Cards -->
+  <div class="orders-container" *ngIf="!isLoading && !hasError">
+    <!-- No Orders Message -->
+    <div class="no-orders" *ngIf="completedOrders.length === 0">
+      <ion-icon name="receipt-outline" size="large" class="empty-icon"></ion-icon>
+      <h2>{{ 'PAST_ORDERS.NO_ORDERS' | translate }}</h2>
+    </div>
 
-          <ion-col size="12" *ngFor="let order of completedOrders; trackBy: trackById">
-            <ion-card (click)="viewOrderDetails(order)">
-              <ion-card-header>
-                <ion-card-title>{{ 'PAST_ORDERS.ORDER_LABEL' | translate }} #{{ order.order_id }}</ion-card-title>
-                <ion-card-subtitle>{{ 'PAST_ORDERS.TOTAL' | translate }}: ₹{{ order.total_order_amount }}</ion-card-subtitle>
-              </ion-card-header>
-
-              <!-- Order Details (Only shown if selected) -->
-              <ion-card-content *ngIf="selectedOrderId === order.order_id">
-                <ion-list>
-                  <ion-item *ngFor="let item of order.order_items">
-                    <ion-label>
-                      <h3>{{ item.product_name }}</h3>
-                      <p>{{ 'PAST_ORDERS.QUANTITY' | translate }}: {{ item.quantity }} {{ item.unit_name }}</p>
-                      <p>{{ 'PAST_ORDERS.MAX_PRICE' | translate }}: ₹{{ item.max_item_price }}</p>
-                    </ion-label>
-                  </ion-item>
-                </ion-list>
-              </ion-card-content>
-            </ion-card>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-col>
-  </ion-row>
+    <ion-card class="modern-card" *ngFor="let order of completedOrders; trackBy: trackById" (click)="viewOrderDetails(order)">
+      <div class="card-header">
+        <div class="header-content">
+          <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
+          <h2 class="card-title">{{ 'PAST_ORDERS.ORDER_LABEL' | translate }} #{{ order.order_id }}</h2>
+        </div>
+        <div class="order-total">₹{{ order.total_order_amount }}</div>
+      </div>
+      <ion-card-content class="card-content">
+        <!-- Order Details (Expandable) -->
+        <div class="order-details" *ngIf="selectedOrderId === order.order_id">
+          <ion-list>
+            <ion-item *ngFor="let item of order.order_items">
+              <ion-label>
+                <h3>{{ item.product_name }}</h3>
+                <p>{{ 'PAST_ORDERS.QUANTITY' | translate }}: {{ item.quantity }} {{ item.unit_name }}</p>
+                <p>{{ 'PAST_ORDERS.MAX_PRICE' | translate }}: ₹{{ item.max_item_price }}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+        <div class="expand-hint" *ngIf="selectedOrderId !== order.order_id">
+          <ion-icon name="chevron-down-outline"></ion-icon>
+          <span>{{ 'PAST_ORDERS.TAP_TO_EXPAND' | translate }}</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

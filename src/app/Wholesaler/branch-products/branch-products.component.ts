@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, ToastController, ModalController } from '@ionic/angular';
 import { AddProductModalComponent } from '../add-product-modal/add-product-modal.component';
 import { addIcons } from 'ionicons';
-import { add, trash, remove, arrowBack } from 'ionicons/icons'
+import { chevronBack, storefrontOutline, addOutline, searchOutline, cubeOutline, pricetagOutline, cashOutline, layersOutline, trashOutline } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -46,8 +46,17 @@ export class BranchProductsComponent implements OnInit {
     private toastCtrl: ToastController,
     private translate: TranslateService
   ) {
-    addIcons({ add, trash, remove, arrowBack });
-  }
+addIcons({
+  chevronBack,
+  storefrontOutline,
+  addOutline,
+  searchOutline,
+  cubeOutline,
+  pricetagOutline,
+  cashOutline,
+  layersOutline,
+  trashOutline
+});  }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {

@@ -1,10 +1,10 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar mode="ios">
+  <ion-toolbar class="orders-toolbar" mode="ios">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/wholesaler/home" color="dark"></ion-back-button>
+      <ion-back-button defaultHref="/wholesaler/home" color="light"></ion-back-button>
     </ion-buttons>
 
-    <ion-title *ngIf="!isSearchVisible">
+    <ion-title *ngIf="!isSearchVisible" class="page-title">
       {{ 'ORDERS_RECEIVED.PAGE_TITLE' | translate }}
     </ion-title>
 
@@ -37,7 +37,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="orders-content">
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content
       pullingIcon="chevron-down-circle-outline"
@@ -47,46 +47,47 @@
     </ion-refresher-content>
   </ion-refresher>
 
-  <div class="orders-container">
-    <div class="order-wrapper" *ngFor="let order of filteredOrders">
-      <div class="order-card">
-        <div class="order-header">
-          <div class="order-id">
-            <span class="label">
-              {{ 'ORDERS_RECEIVED.ORDER_LABEL' | translate }} #{{ order.id }}
-            </span>
+  <div class="container">
+    <!-- Orders List in Modern Cards -->
+    <div class="orders-container" *ngIf="filteredOrders.length > 0">
+      <ion-card class="modern-card" *ngFor="let order of filteredOrders">
+        <div class="card-header">
+          <div class="header-content">
+            <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
+            <h2 class="card-title">{{ 'ORDERS_RECEIVED.ORDER_LABEL' | translate }} #{{ order.id }}</h2>
           </div>
           <ion-button fill="clear" size="small">
             <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
           </ion-button>
         </div>
-
-        <div class="order-content">
-          <div class="items" [innerHTML]="order.items"></div>
-          <div class="divider"></div>
-          <div class="order-footer">
-            <div class="total">
-              <span class="label">{{ 'ORDERS_RECEIVED.TOTAL_AMOUNT' | translate }}</span>
-              <span class="amount">₹{{ order.total }}</span>
+        <ion-card-content class="card-content">
+          <div class="order-content">
+            <div class="items" [innerHTML]="order.items"></div>
+            <div class="divider"></div>
+            <div class="order-footer">
+              <div class="total">
+                <span class="label">{{ 'ORDERS_RECEIVED.TOTAL_AMOUNT' | translate }}</span>
+                <span class="amount">₹{{ order.total }}</span>
+              </div>
+              <ion-button
+                fill="solid"
+                size="small"
+                class="view-details-btn"
+                (click)="viewDetails(order)">
+                {{ 'ORDERS_RECEIVED.VIEW_DETAILS' | translate }}
+                <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+              </ion-button>
             </div>
-            <ion-button
-              fill="solid"
-              size="small"
-              class="custom-button"
-              (click)="viewDetails(order)">
-              {{ 'ORDERS_RECEIVED.VIEW_DETAILS' | translate }}
-              <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
-            </ion-button>
           </div>
-        </div>
-      </div>
+        </ion-card-content>
+      </ion-card>
     </div>
-  </div>
 
-  <!-- No Orders Message -->
-  <div class="no-orders" *ngIf="filteredOrders.length === 0">
-    <ion-icon name="receipt-outline" size="large"></ion-icon>
-    <h2>{{ 'ORDERS_RECEIVED.NO_ORDERS_TITLE' | translate }}</h2>
-    <p>{{ 'ORDERS_RECEIVED.NO_ORDERS_DESC' | translate }}</p>
+    <!-- No Orders Message -->
+    <div class="no-orders" *ngIf="filteredOrders.length === 0">
+      <ion-icon name="receipt-outline" size="large" class="empty-icon"></ion-icon>
+      <h2>{{ 'ORDERS_RECEIVED.NO_ORDERS_TITLE' | translate }}</h2>
+      <p>{{ 'ORDERS_RECEIVED.NO_ORDERS_DESC' | translate }}</p>
+    </div>
   </div>
 </ion-content>

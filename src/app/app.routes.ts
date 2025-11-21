@@ -333,26 +333,26 @@ export const routes: Routes = [
         path: 'driver-registration',
         loadComponent: () => import('./transport/driver-registration/driver-registration.component').then((m) => m.DriverRegistrationComponent),
       },
-    // {
-    //   path: 'driver-registration/basic-info',
-    //   loadComponent: () => import('./transport/driver-registration/driver-basic-info/driver-basic-info.component').then((m) => m.DriverBasicInfoComponent),
-    // },
-    // {
-    //           path: 'driver-registration/documents',
-    //   loadComponent: () => import('./transport/driver-registration/driver-documents/driver-documents.component').then((m) => m.DriverDocumentsComponent),
-    // },
-    // {
-    //           path: 'driver-registration/vehicles',
-    //   loadComponent: () => import('./transport/driver-registration/driver-vehicles/driver-vehicles.component').then((m) => m.DriverVehiclesComponent),
-    // },
-    // {
-    //           path: 'driver-registration/insurance',
-    //   loadComponent: () => import('./transport/driver-registration/driver-insurance/driver-insurance.component').then((m) => m.DriverInsuranceComponent),
-    // },
-    // {
-    //           path: 'driver-registration/review',
-    //   loadComponent: () => import('./transport/driver-registration/review-submit/review-submit.component').then((m) => m.ReviewSubmitComponent),
-    // },
+      // {
+      //   path: 'driver-registration/basic-info',
+      //   loadComponent: () => import('./transport/driver-registration/driver-basic-info/driver-basic-info.component').then((m) => m.DriverBasicInfoComponent),
+      // },
+      // {
+      //           path: 'driver-registration/documents',
+      //   loadComponent: () => import('./transport/driver-registration/driver-documents/driver-documents.component').then((m) => m.DriverDocumentsComponent),
+      // },
+      // {
+      //           path: 'driver-registration/vehicles',
+      //   loadComponent: () => import('./transport/driver-registration/driver-vehicles/driver-vehicles.component').then((m) => m.DriverVehiclesComponent),
+      // },
+      // {
+      //           path: 'driver-registration/insurance',
+      //   loadComponent: () => import('./transport/driver-registration/driver-insurance/driver-insurance.component').then((m) => m.DriverInsuranceComponent),
+      // },
+      // {
+      //           path: 'driver-registration/review',
+      //   loadComponent: () => import('./transport/driver-registration/review-submit/review-submit.component').then((m) => m.ReviewSubmitComponent),
+      // },
       {
         path: 'transport-dashboard',
         loadComponent: () => import('./transport/transport-dashboard/transport-dashboard.component').then((m) => m.TransportDashboardComponent),
@@ -381,8 +381,12 @@ export const routes: Routes = [
         path: 'pickup-confirmation',
         loadComponent: () => import('./transport/pickup-confirmation/pickup-confirmation.component').then((m) => m.PickupConfirmationComponent),
       },
+      //     {
+      // path: 'delivery-confirmation/:jobId/:orderId',
+      //       loadComponent: () => import('./transport/delivery-confirmation/delivery-confirmation.component').then((m) => m.DeliveryConfirmationComponent),
+      //     },
       {
-  path: 'delivery-confirmation/:jobId/:orderId',
+        path: 'delivery-confirmation',
         loadComponent: () => import('./transport/delivery-confirmation/delivery-confirmation.component').then((m) => m.DeliveryConfirmationComponent),
       },
       {

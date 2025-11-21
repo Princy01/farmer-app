@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { alertCircleOutline, closeCircleOutline } from 'ionicons/icons';
+import { filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, chevronDownOutline } from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -72,7 +72,7 @@ export class PastOrdersComponent implements AfterViewInit {
     private authService: AuthService,
     private translate: TranslateService
   ) {
-    addIcons({ alertCircleOutline, closeCircleOutline });
+    addIcons({ filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, chevronDownOutline });
   }
 
   ngAfterViewInit() {

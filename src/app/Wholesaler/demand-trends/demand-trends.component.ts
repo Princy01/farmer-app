@@ -17,7 +17,7 @@ interface ProductData {
 @Component({
   template: `
     <ion-content>
-    <ion-toolbar>
+    <ion-toolbar class="demand-trends-toolbar">
     <ion-buttons slot="start">
       <ion-button  color="dark" (click)="goToTrends()">
         <ion-icon name="chevron-back-outline"></ion-icon>
@@ -112,6 +112,16 @@ interface ProductData {
     .full-height {
       height: 100%;
     }
+
+    .demand-trends-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  --border-color: transparent;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
 
     .sidebar {
       background: #f5f5f5;
@@ -218,9 +228,9 @@ interface ProductData {
 })
 export class DemandTrendsComponent implements OnInit {
   constructor(private navController: NavController) {
-    addIcons({ chevronBackOutline})
-   }
-   goToTrends() {
+    addIcons({ chevronBackOutline })
+  }
+  goToTrends() {
     this.navController.navigateBack('/wholesaler/trends'); // Change the path as per your route
   }
 
@@ -388,7 +398,7 @@ export class DemandTrendsComponent implements OnInit {
 
   private getLastXMonths(count: number): string[] {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentMonth = new Date().getMonth();
     const result = [];
 
