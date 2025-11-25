@@ -285,40 +285,29 @@ export class CartComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('CART.CONFIRM_ORDER_HEADER'),
-      message: this.translate.instant('CART.CONFIRM_ORDER_MESSAGE', { total: this.getTotalPrice() - this.discount }),
-      buttons: [
-        {
-          text: this.translate.instant('CART.CANCEL'),
-          role: 'cancel'
-        },
-        {
-          text: this.translate.instant('CART.CONFIRM'),
-          handler: async () => {
-            await this.processCheckout();
-          }
-        }
-      ]
+    this.router.navigate(['/buyer/checkout'], {
+      state: {
+        cartItems: this.cartProducts,
+        discount: this.discount,
+        totalPrice: this.getTotalPrice() - this.discount
+      }
     });
-
-    await alert.present();
   }
 
-  private async processCheckout(): Promise<void> {
-    const loading = await this.loadingCtrl.create({
-      message: this.translate.instant('CART.PROCESSING_ORDER'),
-      spinner: 'dots'
-    });
-    await loading.present();
+  // private async processCheckout(): Promise<void> {
+  //   const loading = await this.loadingCtrl.create({
+  //     message: this.translate.instant('CART.PROCESSING_ORDER'),
+  //     spinner: 'dots'
+  //   });
+  //   await loading.present();
 
-    setTimeout(async () => {
-      await loading.dismiss();
-      await this.showToast(this.translate.instant('CART.ORDER_PLACED'), 'success');
-      this.cartService.clearCart();
-      this.router.navigate(['/buyer/orders']);
-    }, 2000);
-  }
+  //   setTimeout(async () => {
+  //     await loading.dismiss();
+  //     await this.showToast(this.translate.instant('CART.ORDER_PLACED'), 'success');
+  //     this.cartService.clearCart();
+  //     this.router.navigate(['/buyer/orders']);
+  //   }, 2000);
+  // }
 
   goBack(): void {
     this.router.navigate(['/buyer/buyer-home']);

@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface OrderItem {
   productName: string;
@@ -30,7 +32,7 @@ interface Order {
 @Component({
   selector: 'app-retailer-order-tracking',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, TranslatePipe],
   templateUrl: './retailer-order-tracking.component.html',
   styleUrls: ['./retailer-order-tracking.component.scss'],
 })
@@ -40,7 +42,7 @@ export class RetailerOrderTrackingComponent implements OnInit {
   selectedFilter: string = 'all';
   isLoading: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private translate: TranslateService) {}
 
   ngOnInit() {
     this.loadOrders();
@@ -264,5 +266,23 @@ export class RetailerOrderTrackingComponent implements OnInit {
       'Cancelled': 0
     };
     return progressMap[status] || 0;
+  }
+
+  getTranslatedStatus(status: string): string {
+    const key = 'RETAILER_ORDER_DETAILS.STATUS_' + status.toUpperCase().replace(/\s+/g, '_');
+    return this.translate.instant(key);
+  }
+
+  getTranslatedFilterLabel(filter: string): string {
+    const key = 'RETAILER_ORDER_TRACKING.FILTER_' + filter.toUpperCase();
+    return this.translate.instant(key);
+  }
+
+  getNoOrdersMessage(filter: string): string {
+    if (filter === 'all') {
+      return this.translate.instant('RETAILER_ORDER_TRACKING.NO_ORDERS_DESC_ALL');
+    } else {
+      return this.translate.instant('RETAILER_ORDER_TRACKING.NO_ORDERS_DESC_FILTER', { filter: this.getTranslatedFilterLabel(filter) });
+    }
   }
 }

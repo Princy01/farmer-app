@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/buyer/buyer-home" style="--color: white;"></ion-back-button>
     </ion-buttons>
-    <ion-title style="font-weight: 600; font-size: 1.2rem;">My Orders</ion-title>
+    <ion-title style="font-weight: 600; font-size: 1.2rem;">{{ 'RETAILER_ORDER_TRACKING.PAGE_TITLE' | translate }}</ion-title>
     <ion-buttons slot="end">
       <ion-button fill="clear" (click)="loadOrders()">
         <ion-icon name="refresh-outline" style="color: white;"></ion-icon>
@@ -22,16 +22,16 @@
   <div class="filter-tabs" *ngIf="!isLoading">
     <ion-segment [value]="selectedFilter" (ionChange)="onSegmentChange($event)">
       <ion-segment-button value="all">
-        <ion-label>All</ion-label>
+        <ion-label>{{ 'RETAILER_ORDER_TRACKING.FILTER_ALL' | translate }}</ion-label>
       </ion-segment-button>
       <ion-segment-button value="active">
-        <ion-label>Active</ion-label>
+        <ion-label>{{ 'RETAILER_ORDER_TRACKING.FILTER_ACTIVE' | translate }}</ion-label>
       </ion-segment-button>
       <ion-segment-button value="delivered">
-        <ion-label>Delivered</ion-label>
+        <ion-label>{{ 'RETAILER_ORDER_TRACKING.FILTER_DELIVERED' | translate }}</ion-label>
       </ion-segment-button>
       <ion-segment-button value="cancelled">
-        <ion-label>Cancelled</ion-label>
+        <ion-label>{{ 'RETAILER_ORDER_TRACKING.FILTER_CANCELLED' | translate }}</ion-label>
       </ion-segment-button>
     </ion-segment>
   </div>
@@ -51,7 +51,7 @@
           </div>
           <ion-badge [color]="getStatusColor(order.status)" class="status-badge">
             <ion-icon [name]="getStatusIcon(order.status)"></ion-icon>
-            {{ order.status }}
+            {{ getTranslatedStatus(order.status) }}
           </ion-badge>
         </div>
 
@@ -72,7 +72,7 @@
 
         <!-- Items Summary -->
         <div class="items-summary">
-          <div class="items-count">{{ getTotalItems(order) }} items</div>
+          <div class="items-count">{{ getTotalItems(order) }} {{ 'RETAILER_ORDER_TRACKING.ITEMS' | translate }}</div>
           <div class="order-total">₹{{ order.totalAmount }}</div>
         </div>
 
@@ -80,11 +80,11 @@
         <div class="delivery-footer" *ngIf="order.estimatedDelivery || order.deliveredAt">
           <div class="delivery-time" *ngIf="order.estimatedDelivery && order.status !== 'Delivered' && order.status !== 'Cancelled'">
             <ion-icon name="time-outline"></ion-icon>
-            <span>Est. {{ order.estimatedDelivery | date: 'MMM dd' }}</span>
+            <span>{{ 'RETAILER_ORDER_TRACKING.EST_DELIVERY' | translate: { date: (order.estimatedDelivery | date: 'MMM dd') } }}</span>
           </div>
           <div class="delivered-time" *ngIf="order.deliveredAt">
             <ion-icon name="checkmark-circle" color="success"></ion-icon>
-            <span>{{ order.deliveredAt | date: 'MMM dd' }}</span>
+            <span>{{ 'RETAILER_ORDER_TRACKING.DELIVERED_ON' | translate: { date: (order.deliveredAt | date: 'MMM dd') } }}</span>
           </div>
         </div>
       </div>
@@ -95,16 +95,15 @@
       <div class="empty-illustration">
         <ion-icon name="basket-outline"></ion-icon>
       </div>
-      <h3>No {{ selectedFilter === 'all' ? '' : selectedFilter }} orders</h3>
-      <p *ngIf="selectedFilter === 'all'">You haven't placed any orders yet. Start shopping to see your orders here.</p>
-      <p *ngIf="selectedFilter !== 'all'">No {{ selectedFilter }} orders found. Try a different filter.</p>
+      <h3>{{ 'RETAILER_ORDER_TRACKING.NO_ORDERS' | translate: { filter: getTranslatedFilterLabel(selectedFilter) } }}</h3>
+      <p>{{ getNoOrdersMessage(selectedFilter) }}</p>
       <ion-button
         *ngIf="selectedFilter === 'all'"
         fill="solid"
         routerLink="/buyer/buyer-home"
         class="cta-button">
         <ion-icon name="storefront-outline" slot="start"></ion-icon>
-        Browse Products
+        {{ 'RETAILER_ORDER_TRACKING.BROWSE_PRODUCTS' | translate }}
       </ion-button>
     </div>
   </div>

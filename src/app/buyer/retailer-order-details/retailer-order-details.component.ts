@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface OrderItem {
   productName: string;
@@ -30,14 +32,14 @@ interface Order {
 @Component({
   selector: 'app-retailer-order-details',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, TranslatePipe],
   templateUrl: './retailer-order-details.component.html',
   styleUrls: ['./retailer-order-details.component.scss'],
 })
 export class RetailerOrderDetailsComponent implements OnInit {
   order!: Order;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private translate: TranslateService) {}
 
   ngOnInit() {
     // Get order from navigation state
@@ -126,6 +128,16 @@ export class RetailerOrderDetailsComponent implements OnInit {
       'Net Banking': 'globe-outline'
     };
     return paymentIcons[paymentMethod] || 'card-outline';
+  }
+
+  getTranslatedStatus(status: string): string {
+    const key = 'RETAILER_ORDER_DETAILS.STATUS_' + status.toUpperCase().replace(/\s+/g, '_');
+    return this.translate.instant(key);
+  }
+
+  getTranslatedPaymentMethod(paymentMethod: string): string {
+    const key = 'RETAILER_ORDER_DETAILS.PAYMENT_' + paymentMethod.toUpperCase().replace(/\s+/g, '_');
+    return this.translate.instant(key);
   }
 
   contactWholesaler() {

@@ -5,7 +5,7 @@
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title class="page-title">Transport Options</ion-title>
+    <ion-title class="page-title">{{ 'RIDE.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -13,9 +13,9 @@
   <!-- Hero Section -->
   <div class="hero-section">
     <div class="hero-content">
-      <h1 class="hero-title">Choose Your Delivery</h1>
+      <h1 class="hero-title">{{ 'RIDE.HERO_TITLE' | translate }}</h1>
       <p class="hero-subtitle">
-        Select delivery method, timing, and preferences for your order
+        {{ 'RIDE.HERO_SUBTITLE' | translate }}
       </p>
     </div>
   </div>
@@ -25,7 +25,7 @@
     <div class="section-container">
       <div class="section-header">
         <ion-icon name="car-outline" class="section-icon"></ion-icon>
-        <h2 class="section-title">Delivery Method</h2>
+        <h2 class="section-title">{{ 'RIDE.DELIVERY_METHOD' | translate }}</h2>
       </div>
 
       <ion-grid class="options-grid">
@@ -43,17 +43,17 @@
                     class="option-icon"
                   ></ion-icon>
                 </div>
-                <div class="badge standard-badge">Economical</div>
+                <div class="badge standard-badge">{{ 'RIDE.ECONOMICAL' | translate }}</div>
               </div>
-              <h3 class="card-title">Standard Delivery</h3>
+              <h3 class="card-title">{{ 'RIDE.STANDARD_DELIVERY' | translate }}</h3>
               <div class="transport-features">
                 <div class="feature-item">
                   <ion-icon name="time-outline" class="feature-icon"></ion-icon>
-                  <span>3-5 business days</span>
+                  <span>{{ 'RIDE.STANDARD_TIME' | translate }}</span>
                 </div>
                 <div class="feature-item">
                   <ion-icon name="cash-outline" class="feature-icon"></ion-icon>
-                  <span>₹9/km</span>
+                  <span>{{ 'RIDE.STANDARD_RATE' | translate }}</span>
                 </div>
               </div>
             </div>
@@ -69,17 +69,17 @@
                 <div class="icon-container express-icon">
                   <ion-icon name="car-outline" class="option-icon"></ion-icon>
                 </div>
-                <div class="badge express-badge">Fast</div>
+                <div class="badge express-badge">{{ 'RIDE.FAST' | translate }}</div>
               </div>
-              <h3 class="card-title">Express Delivery</h3>
+              <h3 class="card-title">{{ 'RIDE.EXPRESS_DELIVERY' | translate }}</h3>
               <div class="transport-features">
                 <div class="feature-item">
                   <ion-icon name="time-outline" class="feature-icon"></ion-icon>
-                  <span>1-2 business days</span>
+                  <span>{{ 'RIDE.EXPRESS_TIME' | translate }}</span>
                 </div>
                 <div class="feature-item">
                   <ion-icon name="cash-outline" class="feature-icon"></ion-icon>
-                  <span>₹18/km</span>
+                  <span>{{ 'RIDE.EXPRESS_RATE' | translate }}</span>
                 </div>
               </div>
             </div>
@@ -98,17 +98,9 @@
               <div class="premium-overlay" *ngIf="!isPremiumUser">
                 <div class="premium-badge-top">
                   <ion-icon name="star-outline" class="premium-star"></ion-icon>
-                  <span>FOR PREMIUM USERS</span>
+                  <span>{{ 'RIDE.FOR_PREMIUM_USERS' | translate }}</span>
                 </div>
               </div>
-
-              <!-- Lock Overlay for Non-Premium Users -->
-              <!-- <div class="lock-overlay" *ngIf="!isPremiumUser">
-      <div class="lock-content">
-        <ion-icon name="lock-closed-outline" class="lock-icon"></ion-icon>
-        <span class="lock-text">Premium Only</span>
-      </div>
-    </div> -->
 
               <div class="card-header">
                 <div class="icon-container priority-icon">
@@ -117,17 +109,17 @@
                     class="option-icon"
                   ></ion-icon>
                 </div>
-                <div class="badge priority-badge">Premium</div>
+                <div class="badge priority-badge">{{ 'RIDE.PREMIUM' | translate }}</div>
               </div>
-              <h3 class="card-title">Priority Delivery</h3>
+              <h3 class="card-title">{{ 'RIDE.PRIORITY_DELIVERY' | translate }}</h3>
               <div class="transport-features">
                 <div class="feature-item">
                   <ion-icon name="time-outline" class="feature-icon"></ion-icon>
-                  <span>Same day (4-6 hrs)</span>
+                  <span>{{ 'RIDE.PRIORITY_TIME' | translate }}</span>
                 </div>
                 <div class="feature-item">
                   <ion-icon name="cash-outline" class="feature-icon"></ion-icon>
-                  <span>₹27/km</span>
+                  <span>{{ 'RIDE.PRIORITY_RATE' | translate }}</span>
                 </div>
               </div>
 
@@ -140,7 +132,7 @@
                   (click)="upgradeToPremium($event)"
                 >
                   <ion-icon name="star-outline" slot="start"></ion-icon>
-                  Upgrade to Premium
+                  {{ 'RIDE.UPGRADE_TO_PREMIUM' | translate }}
                 </ion-button>
               </div>
             </div>
@@ -153,48 +145,48 @@
     <div class="section-container" *ngIf="selectedTransportType">
       <div class="section-header">
         <ion-icon name="settings-outline" class="section-icon"></ion-icon>
-        <h2 class="section-title">Delivery Preferences</h2>
+        <h2 class="section-title">{{ 'RIDE.DELIVERY_PREFERENCES' | translate }}</h2>
       </div>
 
       <div class="preferences-card">
         <!-- Time Slot Selection -->
         <div class="preference-group">
-          <h3 class="preference-title">Preferred Time Slot</h3>
+          <h3 class="preference-title">{{ 'RIDE.PREFERRED_TIME_SLOT' | translate }}</h3>
           <div class="time-slots">
             <div
               class="time-slot"
               [ngClass]="{ selected: selectedTimeSlot === '9-12' }"
               (click)="selectTimeSlot('9-12')"
             >
-              <span>9 AM - 12 PM</span>
+              <span>{{ 'RIDE.TIME_SLOT_9_12' | translate }}</span>
             </div>
             <div
               class="time-slot"
               [ngClass]="{ selected: selectedTimeSlot === '12-17' }"
               (click)="selectTimeSlot('12-17')"
             >
-              <span>12 PM - 5 PM</span>
+              <span>{{ 'RIDE.TIME_SLOT_12_17' | translate }}</span>
             </div>
             <div
               class="time-slot"
               [ngClass]="{ selected: selectedTimeSlot === '17-20' }"
               (click)="selectTimeSlot('17-20')"
             >
-              <span>5 PM - 8 PM</span>
+              <span>{{ 'RIDE.TIME_SLOT_17_20' | translate }}</span>
             </div>
             <div
               class="time-slot"
               [ngClass]="{ selected: selectedTimeSlot === 'flexible' }"
               (click)="selectTimeSlot('flexible')"
             >
-              <span>Flexible</span>
+              <span>{{ 'RIDE.TIME_SLOT_FLEXIBLE' | translate }}</span>
             </div>
           </div>
         </div>
 
         <!-- Special Instructions -->
         <div class="preference-group">
-          <h3 class="preference-title">Special Instructions</h3>
+          <h3 class="preference-title">{{ 'RIDE.SPECIAL_INSTRUCTIONS' | translate }}</h3>
           <div class="special-options">
             <ion-item class="instruction-item" lines="none">
               <ion-checkbox
@@ -210,9 +202,9 @@
                     class="instruction-icon fragile"
                   ></ion-icon>
                   <div>
-                    <span class="instruction-title">Handle with Care</span>
+                    <span class="instruction-title">{{ 'RIDE.HANDLE_WITH_CARE' | translate }}</span>
                     <p class="instruction-desc">
-                      Fragile items requiring careful handling
+                      {{ 'RIDE.FRAGILE_DESC' | translate }}
                     </p>
                   </div>
                 </div>
@@ -233,11 +225,9 @@
                     class="instruction-icon cold"
                   ></ion-icon>
                   <div>
-                    <span class="instruction-title"
-                      >Temperature Controlled</span
-                    >
+                    <span class="instruction-title">{{ 'RIDE.TEMPERATURE_CONTROLLED' | translate }}</span>
                     <p class="instruction-desc">
-                      Maintain cold chain during transport
+                      {{ 'RIDE.COLD_CHAIN_DESC' | translate }}
                     </p>
                   </div>
                 </div>
@@ -258,8 +248,8 @@
                     class="instruction-icon contactless"
                   ></ion-icon>
                   <div>
-                    <span class="instruction-title">Contactless Delivery</span>
-                    <p class="instruction-desc">Leave at doorstep and notify</p>
+                    <span class="instruction-title">{{ 'RIDE.CONTACTLESS_DELIVERY' | translate }}</span>
+                    <p class="instruction-desc">{{ 'RIDE.CONTACTLESS_DESC' | translate }}</p>
                   </div>
                 </div>
               </ion-label>
@@ -269,10 +259,10 @@
 
         <!-- Additional Notes -->
         <div class="preference-group">
-          <h3 class="preference-title">Additional Notes</h3>
+          <h3 class="preference-title">{{ 'RIDE.ADDITIONAL_NOTES' | translate }}</h3>
           <ion-textarea
             [(ngModel)]="additionalNotes"
-            placeholder="Any specific delivery instructions, landmark details, or contact preferences..."
+            placeholder="{{ 'RIDE.NOTES_PLACEHOLDER' | translate }}"
             rows="3"
             class="notes-textarea"
           >
@@ -285,22 +275,22 @@
     <div class="cost-summary-card" *ngIf="selectedTransportType">
       <div class="summary-header">
         <ion-icon name="calculator-outline" class="summary-icon"></ion-icon>
-        <h3 class="summary-title">Delivery Cost Breakdown</h3>
+        <h3 class="summary-title">{{ 'RIDE.DELIVERY_COST_BREAKDOWN' | translate }}</h3>
       </div>
 
       <div class="cost-breakdown">
         <div class="cost-item">
-          <span class="cost-label">Base Delivery Charge</span>
+          <span class="cost-label">{{ 'RIDE.BASE_DELIVERY_CHARGE' | translate }}</span>
           <span class="cost-value">₹{{ getBaseDeliveryCharge() }}</span>
         </div>
 
         <div class="cost-item" *ngIf="specialInstructions.fragile">
-          <span class="cost-label">Special Handling</span>
+          <span class="cost-label">{{ 'RIDE.SPECIAL_HANDLING' | translate }}</span>
           <span class="cost-value">₹25</span>
         </div>
 
         <div class="cost-item" *ngIf="specialInstructions.coldChain">
-          <span class="cost-label">Temperature Control</span>
+          <span class="cost-label">{{ 'RIDE.TEMPERATURE_CONTROL' | translate }}</span>
           <span class="cost-value">₹50</span>
         </div>
 
@@ -308,14 +298,14 @@
           class="cost-item"
           *ngIf="selectedTimeSlot && selectedTimeSlot !== 'flexible'"
         >
-          <span class="cost-label">Time Slot Preference</span>
+          <span class="cost-label">{{ 'RIDE.TIME_SLOT_PREFERENCE' | translate }}</span>
           <span class="cost-value">₹20</span>
         </div>
 
         <div class="cost-divider"></div>
 
         <div class="cost-item total">
-          <span class="cost-label">Total Delivery Cost</span>
+          <span class="cost-label">{{ 'RIDE.TOTAL_DELIVERY_COST' | translate }}</span>
           <span class="cost-value">₹{{ getTotalDeliveryCost() }}</span>
         </div>
       </div>
@@ -343,7 +333,7 @@
         [disabled]="!selectedTransportType"
       >
         <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-        Confirm Delivery Options
+        {{ 'RIDE.CONFIRM_DELIVERY_OPTIONS' | translate }}
       </ion-button>
     </div>
   </div>

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import {
   chevronBack,
@@ -31,7 +33,7 @@ import {
 @Component({
   selector: 'app-ride',
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule],
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
   templateUrl: './ride.component.html',
   styleUrls: ['./ride.component.scss'],
 })
@@ -50,7 +52,7 @@ export class RideComponent {
     signature: false
   };
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private translate: TranslateService) {
     addIcons({
       chevronBack,
       busOutline,
@@ -94,25 +96,24 @@ export class RideComponent {
   }
 
   showPremiumUpgradeModal() {
-  // implement a modal or toast here
-  console.log('Premium upgrade required');
-  // For now, just show an alert - replace with proper modal implementation
-  alert('🌟 Upgrade to Premium!\n\n✓ Priority delivery\n✓ Premium support\n✓ Exclusive benefits\n\nUpgrade now to unlock all premium features!');
-}
-
-// Add this method to handle the upgrade button click specifically
-upgradeToPremium(event: Event) {
-  event.stopPropagation(); // Prevent card click
-  console.log('Upgrading to premium membership...');
-
-
-  // For demo purposes, let's simulate the upgrade
-  if (confirm('Would you like to upgrade to Premium for ₹299/month?\n\n✓ Priority delivery\n✓ Premium support\n✓ Exclusive benefits')) {
-    // Simulate successful upgrade
-    this.isPremiumUser = true;
-    alert('🎉 Welcome to Premium! You now have access to all premium features.');
+    // implement a modal or toast here
+    console.log('Premium upgrade required');
+    // For now, just show an alert - replace with proper modal implementation
+    alert(this.translate.instant('RIDE.PREMIUM_UPGRADE_MESSAGE'));
   }
-}
+
+  // Add this method to handle the upgrade button click specifically
+  upgradeToPremium(event: Event) {
+    event.stopPropagation(); // Prevent card click
+    console.log('Upgrading to premium membership...');
+
+    // For demo purposes, let's simulate the upgrade
+    if (confirm(this.translate.instant('RIDE.PREMIUM_UPGRADE_CONFIRM'))) {
+      // Simulate successful upgrade
+      this.isPremiumUser = true;
+      alert(this.translate.instant('RIDE.PREMIUM_UPGRADE_SUCCESS'));
+    }
+  }
 
   getBaseDeliveryCharge(): number {
     switch (this.selectedTransportType) {
@@ -135,18 +136,18 @@ upgradeToPremium(event: Event) {
 
   getTransportTypeName(): string {
     switch (this.selectedTransportType) {
-      case 'standard': return 'Standard Delivery';
-      case 'express': return 'Express Delivery';
-      case 'priority': return 'Priority Delivery';
+      case 'standard': return this.translate.instant('RIDE.STANDARD_DELIVERY');
+      case 'express': return this.translate.instant('RIDE.EXPRESS_DELIVERY');
+      case 'priority': return this.translate.instant('RIDE.PRIORITY_DELIVERY');
       default: return '';
     }
   }
 
   getEstimatedDeliveryTime(): string {
     switch (this.selectedTransportType) {
-      case 'standard': return '3-5 business days';
-      case 'express': return '1-2 business days';
-      case 'priority': return 'Same day (4-6 hours)';
+      case 'standard': return this.translate.instant('RIDE.STANDARD_TIME');
+      case 'express': return this.translate.instant('RIDE.EXPRESS_TIME');
+      case 'priority': return this.translate.instant('RIDE.PRIORITY_TIME');
       default: return '';
     }
   }

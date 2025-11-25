@@ -17,11 +17,13 @@ import {
   businessOutline
 } from 'ionicons/icons';
 import { PaymentService } from './payment.service';
+import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule],
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.scss'],
 })
@@ -36,36 +38,36 @@ export class PaymentComponent implements OnInit, OnDestroy {
   paymentMethods = [
     {
       id: 'UPI',
-      name: 'UPI Payment',
-      description: 'Pay using any UPI app (GPay, PhonePe, Paytm, etc.)',
+      name: 'PAYMENT.UPI_NAME',
+      description: 'PAYMENT.UPI_DESC',
       icon: 'phone-portrait-outline',
       available: true
     },
     {
       id: 'CARD',
-      name: 'Credit/Debit Card',
-      description: 'Visa, Mastercard, Rupay cards accepted',
+      name: 'PAYMENT.CARD_NAME',
+      description: 'PAYMENT.CARD_DESC',
       icon: 'card-outline',
       available: true
     },
     {
       id: 'NETBANKING',
-      name: 'Net Banking',
-      description: 'Pay directly from your bank account',
+      name: 'PAYMENT.NETBANKING_NAME',
+      description: 'PAYMENT.NETBANKING_DESC',
       icon: 'business-outline',
       available: true
     },
     {
       id: 'WALLET',
-      name: 'Digital Wallet',
-      description: 'Paytm, PhonePe, Amazon Pay, etc.',
+      name: 'PAYMENT.WALLET_NAME',
+      description: 'PAYMENT.WALLET_DESC',
       icon: 'wallet-outline',
       available: true
     },
     {
       id: 'COD',
-      name: 'Cash on Delivery',
-      description: 'Pay when your order is delivered',
+      name: 'PAYMENT.COD_NAME',
+      description: 'PAYMENT.COD_DESC',
       icon: 'cash-outline',
       available: true
     }
@@ -76,7 +78,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private translate: TranslateService
   ) {
     addIcons({
       chevronBack,
@@ -115,53 +118,53 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   getPaymentMethodName(): string {
     const method = this.paymentMethods.find(m => m.id === this.selectedPaymentMethod);
-    return method?.name || this.selectedPaymentMethod;
+    return method ? this.translate.instant(method.name) : this.selectedPaymentMethod;
   }
 
   getProcessingMessage(): string {
     switch (this.selectedPaymentMethod) {
       case 'UPI':
-        return 'Processing UPI payment...';
+        return this.translate.instant('PAYMENT.PROCESSING_UPI');
       case 'CARD':
-        return 'Processing card payment...';
+        return this.translate.instant('PAYMENT.PROCESSING_CARD');
       case 'NETBANKING':
-        return 'Redirecting to bank...';
+        return this.translate.instant('PAYMENT.PROCESSING_NETBANKING');
       case 'WALLET':
-        return 'Processing wallet payment...';
+        return this.translate.instant('PAYMENT.PROCESSING_WALLET');
       case 'COD':
-        return 'Confirming your order...';
+        return this.translate.instant('PAYMENT.PROCESSING_COD');
       default:
-        return 'Processing payment...';
+        return this.translate.instant('PAYMENT.PROCESSING_DEFAULT');
     }
   }
 
   getPayButtonText(): string {
     if (this.isProcessingPayment) {
-      return 'Processing...';
+      return this.translate.instant('PAYMENT.PROCESSING');
     }
 
     switch (this.selectedPaymentMethod) {
       case 'UPI':
-        return 'Pay with UPI';
+        return this.translate.instant('PAYMENT.PAY_UPI');
       case 'CARD':
-        return 'Pay with Card';
+        return this.translate.instant('PAYMENT.PAY_CARD');
       case 'NETBANKING':
-        return 'Pay with Net Banking';
+        return this.translate.instant('PAYMENT.PAY_NETBANKING');
       case 'WALLET':
-        return 'Pay with Wallet';
+        return this.translate.instant('PAYMENT.PAY_WALLET');
       case 'COD':
-        return 'Place Order (COD)';
+        return this.translate.instant('PAYMENT.PLACE_ORDER_COD');
       default:
-        return 'Select Payment Method';
+        return this.translate.instant('PAYMENT.SELECT_METHOD');
     }
   }
 
   async processPayment() {
     if (!this.selectedPaymentMethod) {
       const alert = await this.alertCtrl.create({
-        header: 'Payment Method Required',
-        message: 'Please select a payment method to continue.',
-        buttons: ['OK']
+        header: this.translate.instant('PAYMENT.METHOD_REQUIRED'),
+        message: this.translate.instant('PAYMENT.SELECT_METHOD_MSG'),
+        buttons: [this.translate.instant('PAYMENT.OK')]
       });
       await alert.present();
       return;
@@ -169,7 +172,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     this.isProcessingPayment = true;
 
-    // COD logic remains unchanged
     if (this.selectedPaymentMethod === 'COD') {
       const loading = await this.loadingCtrl.create({
         message: this.getProcessingMessage(),
@@ -201,14 +203,14 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     // Online payment logic
     const loading = await this.loadingCtrl.create({
-      message: 'Redirecting to payment gateway...',
+      message: this.translate.instant('PAYMENT.REDIRECTING'),
       spinner: 'dots'
     });
     await loading.present();
 
     try {
       const amount = this.orderData?.grandTotal;
-      const description = `Order for ${this.orderData?.items?.length || 1} item(s)`;
+      const description = this.translate.instant('PAYMENT.ORDER_DESC', { count: this.orderData?.items?.length || 1 });
       const currency = 'inr';
 
       const response = await this.paymentService.initiatePayment(amount, currency, description).toPromise();
@@ -221,7 +223,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
         // Show loading while polling
         const pollingLoader = await this.loadingCtrl.create({
-          message: 'Waiting for payment confirmation...',
+          message: this.translate.instant('PAYMENT.WAITING_CONFIRMATION'),
           spinner: 'dots'
         });
         await pollingLoader.present();
@@ -257,7 +259,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
             } else if (paymentStatus === 'failed') {
               await pollingLoader.dismiss();
               this.clearPolling();
-              this.showPaymentError('Payment failed or cancelled. Please try again.');
+              this.showPaymentError(this.translate.instant('PAYMENT.PAYMENT_FAILED'));
             }
             // If status is 'initiated' or 'pending', keep polling
           } catch (err) {
@@ -269,7 +271,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
         this.pollingTimeout = setTimeout(async () => {
           this.clearPolling();
           await pollingLoader.dismiss();
-          this.showPaymentError('Payment not completed within 5 minutes. Please try again.');
+          this.showPaymentError(this.translate.instant('PAYMENT.TIMEOUT_ERROR'));
         }, maxWaitMs);
 
       } else {
@@ -311,18 +313,18 @@ export class PaymentComponent implements OnInit, OnDestroy {
   private async showPaymentError(message?: string) {
     const methodName = this.getPaymentMethodName();
     const alert = await this.alertCtrl.create({
-      header: `${methodName} Failed`,
-      message: message || `There was an error processing your ${methodName.toLowerCase()}. Please try again or choose a different payment method.`,
+      header: this.translate.instant('PAYMENT.PAYMENT_FAILED_HEADER', { method: methodName }),
+      message: message || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG', { method: methodName.toLowerCase() }),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('PAYMENT.CANCEL'),
           role: 'cancel',
           handler: () => {
             this.goBack();
           }
         },
         {
-          text: 'Retry',
+          text: this.translate.instant('PAYMENT.RETRY'),
           handler: () => {
             // User can retry payment
           }

@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button (click)="goBack()" style="--color: white;"></ion-back-button>
     </ion-buttons>
-    <ion-title style="font-weight: 600; font-size: 1.2rem;">Order Details</ion-title>
+    <ion-title style="font-weight: 600; font-size: 1.2rem;">{{ 'RETAILER_ORDER_DETAILS.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -15,21 +15,21 @@
         <h2>{{ order.orderId }}</h2>
         <ion-badge [color]="getStatusColor(order.status)" class="status-badge">
           <ion-icon [name]="getStatusIcon(order.status)"></ion-icon>
-          {{ order.status }}
+          {{ getTranslatedStatus(order.status) }}
         </ion-badge>
       </div>
-      <p class="order-date">Placed on {{ order.placedAt | date: 'medium' }}</p>
+      <p class="order-date">{{ 'RETAILER_ORDER_DETAILS.PLACED_ON' | translate }} {{ order.placedAt | date: 'medium' }}</p>
     </div>
 
     <!-- Progress Bar -->
     <div class="progress-section" *ngIf="order.status !== 'Cancelled'">
       <ion-progress-bar [value]="getOrderProgress(order.status)" color="success"></ion-progress-bar>
-      <p class="progress-text">Order {{ order.status }}</p>
+      <p class="progress-text">{{ 'RETAILER_ORDER_DETAILS.ORDER_STATUS' | translate }} {{ getTranslatedStatus(order.status) }}</p>
     </div>
 
     <!-- Wholesaler Info -->
     <div class="detail-section">
-      <h3>Wholesaler Details</h3>
+      <h3>{{ 'RETAILER_ORDER_DETAILS.WHOLESALER_DETAILS' | translate }}</h3>
       <div class="wholesaler-card">
         <div class="wholesaler-info">
           <h4>{{ order.wholesalerName }}</h4>
@@ -39,13 +39,13 @@
 
     <!-- Items -->
     <div class="detail-section">
-      <h3>Items Ordered</h3>
+      <h3>{{ 'RETAILER_ORDER_DETAILS.ITEMS_ORDERED' | translate }}</h3>
       <div class="items-list">
         <div class="item-card" *ngFor="let item of order.items">
           <img [src]="item.imageUrl || 'assets/default-product.png'" alt="{{ item.productName }}">
           <div class="item-info">
             <h4>{{ item.productName }}</h4>
-            <p>Qty: {{ item.quantity }} × ₹{{ item.unitPrice }}</p>
+            <p>{{ 'RETAILER_ORDER_DETAILS.QTY' | translate }} {{ item.quantity }} × ₹{{ item.unitPrice }}</p>
           </div>
           <div class="item-total">
             <strong>₹{{ item.total }}</strong>
@@ -56,32 +56,32 @@
 
     <!-- Delivery Info -->
     <div class="detail-section">
-      <h3>Delivery Information</h3>
+      <h3>{{ 'RETAILER_ORDER_DETAILS.DELIVERY_INFORMATION' | translate }}</h3>
       <div class="info-item">
         <ion-icon name="location-outline"></ion-icon>
         <div>
-          <h4>Delivery Address</h4>
+          <h4>{{ 'RETAILER_ORDER_DETAILS.DELIVERY_ADDRESS' | translate }}</h4>
           <p>{{ order.deliveryAddress }}</p>
         </div>
       </div>
       <div class="info-item" *ngIf="order.estimatedDelivery">
         <ion-icon name="time-outline"></ion-icon>
         <div>
-          <h4>Estimated Delivery</h4>
+          <h4>{{ 'RETAILER_ORDER_DETAILS.ESTIMATED_DELIVERY' | translate }}</h4>
           <p>{{ order.estimatedDelivery | date: 'medium' }}</p>
         </div>
       </div>
       <div class="info-item" *ngIf="order.deliveredAt">
         <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
         <div>
-          <h4>Delivered On</h4>
+          <h4>{{ 'RETAILER_ORDER_DETAILS.DELIVERED_ON' | translate }}</h4>
           <p>{{ order.deliveredAt | date: 'medium' }}</p>
         </div>
       </div>
       <div class="info-item" *ngIf="order.trackingNumber">
         <ion-icon name="trail-sign-outline"></ion-icon>
         <div>
-          <h4>Tracking Number</h4>
+          <h4>{{ 'RETAILER_ORDER_DETAILS.TRACKING_NUMBER' | translate }}</h4>
           <p>{{ order.trackingNumber }}</p>
         </div>
       </div>
@@ -89,36 +89,36 @@
 
     <!-- Payment Info -->
     <div class="detail-section">
-      <h3>Payment Summary</h3>
+      <h3>{{ 'RETAILER_ORDER_DETAILS.PAYMENT_SUMMARY' | translate }}</h3>
       <div class="payment-summary">
         <div class="payment-row">
-          <span>Subtotal</span>
+          <span>{{ 'RETAILER_ORDER_DETAILS.SUBTOTAL' | translate }}</span>
           <span>₹{{ getSubtotal() }}</span>
         </div>
         <div class="payment-row">
-          <span>Delivery Fee</span>
+          <span>{{ 'RETAILER_ORDER_DETAILS.DELIVERY_FEE' | translate }}</span>
           <span>₹{{ getDeliveryFee() }}</span>
         </div>
         <div class="payment-row">
-          <span>Tax & Fees</span>
+          <span>{{ 'RETAILER_ORDER_DETAILS.TAX_FEES' | translate }}</span>
           <span>₹{{ getTaxFee() }}</span>
         </div>
         <div class="payment-row total">
-          <strong>Total</strong>
+          <strong>{{ 'RETAILER_ORDER_DETAILS.TOTAL' | translate }}</strong>
           <strong>₹{{ order.totalAmount }}</strong>
         </div>
         <div class="payment-method">
           <div class="payment-method-header">
             <ion-icon name="wallet-outline"></ion-icon>
-            <span>Payment Method</span>
+            <span>{{ 'RETAILER_ORDER_DETAILS.PAYMENT_METHOD' | translate }}</span>
           </div>
           <div class="payment-method-details">
             <div class="payment-type">
               <ion-icon [name]="getPaymentIcon(order.paymentMethod)"></ion-icon>
-              <span>{{ order.paymentMethod }}</span>
+              <span>{{ getTranslatedPaymentMethod(order.paymentMethod) }}</span>
             </div>
             <div class="payment-status">
-              <ion-badge color="success">Paid</ion-badge>
+              <ion-badge color="success">{{ 'RETAILER_ORDER_DETAILS.PAID' | translate }}</ion-badge>
             </div>
           </div>
         </div>
@@ -127,7 +127,7 @@
 
     <!-- Order Notes -->
     <div class="detail-section" *ngIf="order.orderNotes">
-      <h3>Order Notes</h3>
+      <h3>{{ 'RETAILER_ORDER_DETAILS.ORDER_NOTES' | translate }}</h3>
       <div class="notes-card">
         <p>{{ order.orderNotes }}</p>
       </div>

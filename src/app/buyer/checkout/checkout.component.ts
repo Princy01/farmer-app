@@ -32,6 +32,8 @@ import {
 import { DatabaseService } from '../../services/database.service';
 import { CheckoutService, BusinessBranch } from './checkout.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface CartItem {
   product_id: number;
@@ -61,7 +63,7 @@ interface WholeSeller {
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule],
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
 })
@@ -95,7 +97,8 @@ export class CheckoutComponent implements OnInit {
     private alertCtrl: AlertController,
     private loadingController: LoadingController,
     private checkoutService: CheckoutService,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) {
     addIcons({
       chevronBack,
@@ -127,7 +130,17 @@ export class CheckoutComponent implements OnInit {
 
     const navData = this.router.getCurrentNavigation()?.extras.state;
     if (navData) {
-      this.cartItems = navData['cartItems'] || [];
+      this.cartItems = (navData['cartItems'] || []).map((item: any) => ({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        unit_id: item.unit_id,
+        unit_name: item.unit_name,
+        price_while_added: item.price,  // Map 'price' from cart to 'price_while_added'
+        latest_wholesaler_price: item.price,  // Assuming same for now; adjust if you have update logic
+        price_updated_at: undefined,  // Set as needed
+        is_active: !item.is_deleted  // Map based on cart's is_deleted
+      }));
       this.totalPrice = navData['totalPrice'] || 0;
       this.retailerInfo = navData['retailer'] || null;
       this.wholeSeller = navData['wholeseller'] || null;
@@ -170,11 +183,11 @@ export class CheckoutComponent implements OnInit {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('CHECKOUT.AUTH_ERROR'),
+      message: this.translate.instant('CHECKOUT.SESSION_EXPIRED'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('CHECKOUT.OK'),
           handler: () => {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -187,11 +200,11 @@ export class CheckoutComponent implements OnInit {
 
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page.',
+      header: this.translate.instant('CHECKOUT.ACCESS_DENIED'),
+      message: this.translate.instant('CHECKOUT.NO_PERMISSION'),
       buttons: [
         {
-          text: 'OK',
+          text: this.translate.instant('CHECKOUT.OK'),
           handler: () => {
             this.router.navigate(['/login']);
           }
@@ -205,7 +218,7 @@ export class CheckoutComponent implements OnInit {
   async loadBusinessBranches() {
     this.isLoadingBranches = true;
     const loading = await this.loadingController.create({
-      message: 'Loading delivery addresses...'
+      message: this.translate.instant('CHECKOUT.LOADING_BRANCHES')
     });
     await loading.present();
 
@@ -226,7 +239,6 @@ export class CheckoutComponent implements OnInit {
           // Auto-select first branch if available
           if (this.businessBranches.length > 0) {
             this.selectedBranch = this.businessBranches[0];
-            this.calculateRidePrice(); // Recalculate with new branch
           }
           this.isLoadingBranches = false;
         },
@@ -239,13 +251,12 @@ export class CheckoutComponent implements OnInit {
 
           if (error.status === 401) {
             await this.showAuthError();
-            return;
           }
 
           const alert = await this.alertCtrl.create({
-            header: 'Error',
-            message: 'Failed to load delivery addresses. Please try again later.',
-            buttons: ['OK']
+            header: this.translate.instant('CHECKOUT.ERROR'),
+            message: this.translate.instant('CHECKOUT.LOAD_BRANCHES_ERROR'),
+            buttons: [this.translate.instant('CHECKOUT.OK')]
           });
           await alert.present();
         },
@@ -261,9 +272,9 @@ export class CheckoutComponent implements OnInit {
       console.error('Unexpected error:', error);
 
       const alert = await this.alertCtrl.create({
-        header: 'Error',
-        message: 'An unexpected error occurred.',
-        buttons: ['OK']
+        header: this.translate.instant('CHECKOUT.ERROR'),
+        message: this.translate.instant('CHECKOUT.UNEXPECTED_ERROR'),
+        buttons: [this.translate.instant('CHECKOUT.OK')]
       });
       await alert.present();
     }
@@ -277,7 +288,7 @@ export class CheckoutComponent implements OnInit {
 
   // Add new delivery address (placeholder for future implementation)
   addNewAddress() {
-    this.showInfoAlert('Add New Address', 'This feature will be available soon. You can add custom delivery addresses.');
+    this.showInfoAlert(this.translate.instant('CHECKOUT.ADD_NEW_ADDRESS'), this.translate.instant('CHECKOUT.ADD_NEW_ADDRESS_MSG'));
   }
 
   // Track by function for better performance
@@ -314,7 +325,7 @@ export class CheckoutComponent implements OnInit {
 
   arrangeRide() {
     if (!this.selectedBranch) {
-      this.showErrorAlert('Please select a delivery address first.');
+      this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
       return;
     }
 
@@ -329,11 +340,11 @@ export class CheckoutComponent implements OnInit {
 
   async confirmDriverSearch() {
     const alert = await this.alertCtrl.create({
-      header: 'Estimated Transport Cost',
-      message: `The estimated transport cost is ₹${this.estimatedRidePrice}. Would you like to search for an available driver?`,
+      header: this.translate.instant('CHECKOUT.ESTIMATED_COST'),
+      message: `${this.translate.instant('CHECKOUT.ESTIMATED_COST_MSG')} ₹${this.estimatedRidePrice}. ${this.translate.instant('CHECKOUT.SEARCH_DRIVER_QUESTION')}`,
       buttons: [
         {
-          text: 'No',
+          text: this.translate.instant('CHECKOUT.NO'),
           role: 'cancel',
           handler: () => {
             this.hasRideRequest = false;
@@ -344,7 +355,7 @@ export class CheckoutComponent implements OnInit {
           }
         },
         {
-          text: 'Yes',
+          text: this.translate.instant('CHECKOUT.YES'),
           handler: () => {
             this.startDriverSearch();
           }
@@ -372,7 +383,7 @@ export class CheckoutComponent implements OnInit {
     }
 
     if (!this.selectedBranch) {
-      this.showErrorAlert('Please select a delivery address first.');
+      this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
       return;
     }
 
@@ -421,20 +432,20 @@ export class CheckoutComponent implements OnInit {
 
   private async showDriverFoundAlert(driver: any) {
     const alert = await this.alertCtrl.create({
-      header: 'Driver Found!',
-      message: `${driver.name} will handle your delivery.`,
-      buttons: ['OK']
+      header: this.translate.instant('CHECKOUT.DRIVER_FOUND'),
+      message: `${driver.name} ${this.translate.instant('CHECKOUT.DRIVER_FOUND_MSG')}`,
+      buttons: [this.translate.instant('CHECKOUT.OK')]
     });
     await alert.present();
   }
 
   private async showNoDriverAlert() {
     const alert = await this.alertCtrl.create({
-      header: 'No Driver Available',
-      message: 'Would you like to continue searching?',
+      header: this.translate.instant('CHECKOUT.NO_DRIVER'),
+      message: this.translate.instant('CHECKOUT.NO_DRIVER_MSG'),
       buttons: [
         {
-          text: 'No',
+          text: this.translate.instant('CHECKOUT.NO'),
           role: 'cancel',
           handler: () => {
             this.hasRideRequest = false;
@@ -445,7 +456,7 @@ export class CheckoutComponent implements OnInit {
           }
         },
         {
-          text: 'Yes',
+          text: this.translate.instant('CHECKOUT.YES'),
           handler: () => {
             this.startDriverSearch();
           }
@@ -457,9 +468,9 @@ export class CheckoutComponent implements OnInit {
 
   private async showErrorAlert(message: string) {
     const alert = await this.alertCtrl.create({
-      header: 'Error',
+      header: this.translate.instant('CHECKOUT.ERROR'),
       message: message,
-      buttons: ['OK']
+      buttons: [this.translate.instant('CHECKOUT.OK')]
     });
     await alert.present();
   }
@@ -468,7 +479,7 @@ export class CheckoutComponent implements OnInit {
     const alert = await this.alertCtrl.create({
       header: header,
       message: message,
-      buttons: ['OK']
+      buttons: [this.translate.instant('CHECKOUT.OK')]
     });
     await alert.present();
   }
@@ -477,7 +488,7 @@ export class CheckoutComponent implements OnInit {
     if (this.isLoading) return;
 
     if (!this.selectedBranch) {
-      this.showErrorAlert('Please select a delivery address first.');
+      this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
       return;
     }
 
@@ -512,12 +523,12 @@ export class CheckoutComponent implements OnInit {
   }
 
   getRetailerInfo(): string {
-    if (!this.retailerInfo) return 'Unknown Retailer';
-    return `${this.retailerInfo.name || 'Unknown'} - ${this.retailerInfo.location || 'Unknown Location'}`;
+    if (!this.retailerInfo) return this.translate.instant('CHECKOUT.UNKNOWN_RETAILER');
+    return `${this.retailerInfo.name || this.translate.instant('CHECKOUT.UNKNOWN')} - ${this.retailerInfo.location || this.translate.instant('CHECKOUT.UNKNOWN_LOCATION')}`;
   }
 
   getWholesellerInfo(): string {
-    if (!this.wholeSeller) return 'Direct Order';
-    return `${this.wholeSeller.name || 'Unknown Wholeseller'}`;
+    if (!this.wholeSeller) return this.translate.instant('CHECKOUT.DIRECT_ORDER');
+    return `${this.wholeSeller.name || this.translate.instant('CHECKOUT.UNKNOWN_WHOLESELLER')}`;
   }
 }

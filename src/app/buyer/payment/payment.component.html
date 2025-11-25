@@ -5,7 +5,7 @@
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title class="page-title">Payment</ion-title>
+    <ion-title class="page-title">{{ 'PAYMENT.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -17,7 +17,7 @@
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Order Summary</h2>
+          <h2 class="card-title">{{ 'PAYMENT.ORDER_SUMMARY' | translate }}</h2>
         </div>
       </div>
       <ion-card-content class="card-content">
@@ -32,20 +32,20 @@
         <div class="summary-divider"></div>
 
         <div class="summary-row">
-          <span class="summary-label">Items Total</span>
+          <span class="summary-label">{{ 'PAYMENT.ITEMS_TOTAL' | translate }}</span>
           <span class="summary-amount">₹{{ orderData?.totalPrice }}</span>
         </div>
 
         <div class="summary-row" *ngIf="orderData?.transportCost > 0">
-          <span class="summary-label">Transport Cost</span>
+          <span class="summary-label">{{ 'PAYMENT.TRANSPORT_COST' | translate }}</span>
           <span class="summary-amount">₹{{ orderData?.transportCost }}</span>
         </div>
 
-        <!-- New Total Design -->
+        <!-- Total Design -->
         <div class="total-section">
           <div class="total-container">
             <div class="total-info">
-              <span class="total-label">Total Amount</span>
+              <span class="total-label">{{ 'PAYMENT.TOTAL_AMOUNT' | translate }}</span>
               <span class="total-amount">₹{{ orderData?.grandTotal }}</span>
             </div>
           </div>
@@ -61,8 +61,8 @@
         <div class="security-info">
           <ion-icon name="shield-checkmark-outline" class="security-icon"></ion-icon>
           <div class="security-text">
-            <h3>Secure Payment</h3>
-            <p>Your payment information is protected with bank-level security</p>
+            <h3>{{ 'PAYMENT.SECURE_PAYMENT' | translate }}</h3>
+            <p>{{ 'PAYMENT.SECURITY_DESC' | translate }}</p>
           </div>
         </div>
       </ion-card-content>
@@ -75,7 +75,7 @@
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="card-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Payment Methods</h2>
+          <h2 class="card-title">{{ 'PAYMENT.PAYMENT_METHODS' | translate }}</h2>
         </div>
       </div>
 
@@ -90,8 +90,8 @@
           <div class="payment-info">
             <ion-icon [name]="method.icon" class="payment-icon"></ion-icon>
             <div class="payment-details">
-              <span class="payment-label">{{ method.name }}</span>
-              <span class="payment-description">{{ method.description }}</span>
+              <span class="payment-label">{{ method.name | translate }}</span>
+              <span class="payment-description">{{ method.description | translate }}</span>
             </div>
           </div>
 
@@ -100,7 +100,7 @@
           </div>
 
           <div class="payment-unavailable" *ngIf="!method.available">
-            <span class="unavailable-text">Not Available</span>
+            <span class="unavailable-text">{{ 'PAYMENT.NOT_AVAILABLE' | translate }}</span>
           </div>
         </div>
       </ion-card-content>
@@ -108,7 +108,7 @@
       <!-- Loading State -->
       <ion-card-content class="loading-content" *ngIf="loadingPaymentMethods">
         <ion-spinner name="dots" class="loading-spinner"></ion-spinner>
-        <p class="loading-text">Loading payment methods...</p>
+        <p class="loading-text">{{ 'PAYMENT.LOADING_METHODS' | translate }}</p>
       </ion-card-content>
     </ion-card>
   </div>
@@ -122,7 +122,7 @@
   <div class="footer-content">
     <div class="total-display">
       <span class="total-label">
-        {{ selectedPaymentMethod === 'COD' ? 'Amount to Pay on Delivery' : 'Total to Pay' }}
+        {{ selectedPaymentMethod === 'COD' ? ('PAYMENT.AMOUNT_ON_DELIVERY' | translate) : ('PAYMENT.TOTAL_TO_PAY' | translate) }}
       </span>
       <span class="total-amount">₹{{ orderData?.grandTotal }}</span>
     </div>
