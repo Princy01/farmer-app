@@ -11,6 +11,11 @@
     </ion-title>
 
     <ion-buttons slot="end">
+      <ion-button (click)="openLanguagePopover($event)" class="header-btn language-btn">
+        <ion-icon name="language-outline" slot="start"></ion-icon>
+        <span>{{ currentLanguage }}</span>
+        <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
+      </ion-button>
       <ion-button (click)="openNotifications()">
         <ion-badge *ngIf="notifications > 0" class="custom-badge">
           {{ notifications }}

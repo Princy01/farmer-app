@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicModule, NavController, MenuController, ActionSheetController, LoadingController, AlertController } from '@ionic/angular';
+import { IonicModule, NavController, MenuController, ActionSheetController, LoadingController, AlertController, PopoverController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import {
@@ -8,20 +8,33 @@ import {
   trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
   homeOutline, business, list, cubeOutline, time, analytics, pulse, bulb, logOutOutline,
   businessOutline, bulbOutline, createOutline, notificationsOutline,
-  receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline
+  receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline,
+  languageOutline, chevronDownOutline, checkmarkOutline
 } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
-import { MenuService } from '../services/menu.service'; // Adjust path if needed
+import { MenuService } from '../services/menu.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { LanguagePopoverComponent } from './language-popover.component';
+
+// Simple model for user preferences (expand as needed)
+interface UserPreference {
+  language: string;
+}
+
+interface Language {
+  id: number;
+  code: string;
+  name: string;
+}
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, TranslatePipe]
+  imports: [IonicModule, CommonModule, TranslatePipe, LanguagePopoverComponent]
 })
 
 export class HomePage {
@@ -37,6 +50,10 @@ export class HomePage {
   isSearching = false;
   private searchTimeout: any;
 
+  languages: Language[] = [];
+  currentLanguage = 'English'; // Default
+  userPreference: UserPreference | null = null;
+
   constructor(
     private navCtrl: NavController,
     private router: Router,
@@ -47,7 +64,8 @@ export class HomePage {
     private alertCtrl: AlertController,
     private authService: AuthService,
     public menuService: MenuService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private popoverCtrl: PopoverController
 
   ) {
     addIcons({
@@ -55,13 +73,100 @@ export class HomePage {
       chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
       trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
       homeOutline, businessOutline, list, cubeOutline, time, analytics, pulse, bulbOutline, logOutOutline, createOutline,
-      notificationsOutline, receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline
+      notificationsOutline, receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline,
+      languageOutline, chevronDownOutline, checkmarkOutline // Add new icons
     });
+
+    // Set default language
+    this.translate.setDefaultLang('en');
+    this.translate.use('en');
   }
 
   ngOnInit() {
     this.setItemsPerPage();
     this.checkAuthAndLoadData();
+    this.fetchUserPreference();
+    this.fetchLanguages();
+  }
+
+  fetchLanguages() {
+    this.wholesalerService.getLanguages().subscribe({
+      next: (languages) => {
+        // Normalize codes to lowercase for consistency
+        this.languages = languages.map(lang => ({ ...lang, code: lang.code.toLowerCase() }));
+      },
+      error: (error) => {
+        console.error('Error fetching languages:', error);
+        // Fallback with lowercase codes
+        this.languages = [
+          { id: 1, code: 'en', name: 'English' },
+          { id: 2, code: 'es', name: 'Español' },
+          { id: 3, code: 'fr', name: 'Français' }
+        ];
+      }
+    });
+  }
+
+  fetchUserPreference() {
+    this.wholesalerService.getUserPreference().subscribe({
+      next: (pref) => {
+        // Normalize the language code to lowercase
+        const normalizedLang = pref.language.toLowerCase();
+        this.userPreference = { ...pref, language: normalizedLang };
+        this.setLanguage(normalizedLang);
+      },
+      error: (error) => {
+        console.error('Error fetching user preference:', error);
+        // Fallback with lowercase
+        this.userPreference = { language: 'en' };
+        this.setLanguage('en');
+      }
+    });
+  }
+
+  setLanguage(langCode: string) {
+    this.translate.use(langCode).subscribe({
+      next: () => {
+        const lang = this.languages.find(l => l.code === langCode);
+        this.currentLanguage = lang ? lang.name : 'English';
+      },
+      error: (err) => {
+        console.error('Error loading translation file for', langCode, err);
+        // Fallback to default language
+        this.translate.use('en');
+        this.currentLanguage = 'English';
+      }
+    });
+  }
+
+  saveLanguagePreference(langCode: string) {
+    const lang = this.languages.find(l => l.code === langCode);
+    if (lang) {
+      this.wholesalerService.setLanguagePreference(lang.id).subscribe({
+        next: () => {
+          this.setLanguage(langCode);
+        },
+        error: (error) => {
+          console.error('Error saving language preference:', error);
+          // Optionally show an alert
+        }
+      });
+    }
+  }
+
+  // Open popover for language selection
+  async openLanguagePopover(event: Event) {
+    const popover = await this.popoverCtrl.create({
+      component: LanguagePopoverComponent,
+      event: event,
+      translucent: true,
+      componentProps: {
+        languages: this.languages,
+        currentLanguage: this.currentLanguage,
+        onSelect: (lang: Language) => this.saveLanguagePreference(lang.code)
+      }
+    });
+    await popover.present();
   }
 
   private setItemsPerPage() {

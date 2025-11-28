@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-
+import { AuthService } from 'src/app/auth/auth.service';
 export interface Category {
   category_id: number;
   category_name: string;
@@ -65,13 +65,45 @@ export interface ProductAll {
   description?: string;
 }
 
+// Language-related interfaces
+interface Language {
+  id: number;
+  code: string;
+  name: string;
+}
+
+interface UserPreference {
+  language: string; // Adjust based on backend response (e.g., if it returns ID or code)
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class BuyerApiService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {} // Add AuthService injection
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  // Add language methods
+  getLanguages(): Observable<Language[]> {
+    return this.http.get<Language[]>(`${this.apiUrl}/getAllLanguages`);
+  }
+
+  getUserPreference(): Observable<UserPreference> {
+    return this.http.get<UserPreference>(`${this.apiUrl}/getUserLanguagePreference`, { headers: this.getAuthHeaders() });
+  }
+
+  setLanguagePreference(langId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/setUserLanguagePreference`, { lang_id: langId }, { headers: this.getAuthHeaders() });
+  }
 
   getCategoryBySuperCategoryId(superCatId: number): Observable<Category[]> {
   return this.http.get<Category[]>(`${this.apiUrl}/getCategoriesBySupID/${superCatId}`);

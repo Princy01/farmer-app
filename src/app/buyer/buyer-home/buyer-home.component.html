@@ -9,6 +9,11 @@
     <ion-title class="app-title">{{ 'BUYER_HOME.APP_TITLE' | translate }}</ion-title>
 
     <ion-buttons slot="end">
+      <ion-button (click)="openLanguagePopover($event)" class="header-btn language-btn">
+        <ion-icon name="language-outline" slot="start"></ion-icon>
+        <span>{{ currentLanguage }}</span>
+        <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
+      </ion-button>
       <ion-button (click)="openTrends()" class="header-btn">
         <ion-icon name="stats-chart-outline" slot="icon-only"></ion-icon>
       </ion-button>

@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, IonContent, MenuController, AlertController } from '@ionic/angular';
+import { IonicModule, IonContent, MenuController, AlertController, PopoverController } from '@ionic/angular';
 import { RouterModule, Router } from '@angular/router';
 import { BuyerApiService } from '../services/buyer-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -23,9 +23,22 @@ import {
   refreshOutline,
   menuOutline,
   createOutline,
-  logOutOutline
+  logOutOutline,
+  languageOutline,
+  chevronDownOutline
 } from 'ionicons/icons';
+import { LanguagePopoverComponent } from './language-popover.component';
 
+// Simple model for user preferences (expand as needed)
+interface UserPreference {
+  language: string;
+}
+
+interface Language {
+  id: number;
+  code: string;
+  name: string;
+}
 interface Category {
   id: number;
   name: string;
@@ -35,7 +48,7 @@ interface Category {
 @Component({
   selector: 'app-buyer-home',
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterModule, TranslateModule],
+  imports: [CommonModule, IonicModule, RouterModule, TranslateModule, LanguagePopoverComponent],
   templateUrl: './buyer-home.component.html',
   styleUrls: ['./buyer-home.component.scss'],
 })
@@ -46,6 +59,9 @@ export class BuyerHomeComponent {
   loadingCategories = false;
   errorLoadingCategories = false;
   categories: any[] = [];
+  languages: Language[] = [];
+  currentLanguage = 'English'; // Default
+  userPreference: UserPreference | null = null;
 
   constructor(
     private router: Router,
@@ -53,7 +69,8 @@ export class BuyerHomeComponent {
     private buyerApiService: BuyerApiService,
     private authService: AuthService,
     private alertCtrl: AlertController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private popoverCtrl: PopoverController
   ) {
     addIcons({
       personCircleOutline,
@@ -72,8 +89,99 @@ export class BuyerHomeComponent {
       refreshOutline,
       menuOutline,
       createOutline,
-      logOutOutline
+      logOutOutline,
+      languageOutline,
+      chevronDownOutline
     });
+
+  // Set default language
+    this.translate.setDefaultLang('en');
+    this.translate.use('en');
+  }
+
+  ngOnInit() {
+    this.fetchCategories();
+    this.fetchUserPreference();
+    this.fetchLanguages();
+  }
+
+  fetchLanguages() {
+    this.buyerApiService.getLanguages().subscribe({
+      next: (languages) => {
+        this.languages = languages.map(lang => ({ ...lang, code: lang.code.toLowerCase() }));
+      },
+      error: (error) => {
+        console.error('Error fetching languages:', error);
+        // Fallback with lowercase codes
+        this.languages = [
+          { id: 1, code: 'en', name: 'English' },
+          { id: 2, code: 'es', name: 'Español' },
+          { id: 3, code: 'fr', name: 'Français' }
+        ];
+      }
+    });
+  }
+
+  fetchUserPreference() {
+    this.buyerApiService.getUserPreference().subscribe({
+      next: (pref) => {
+        const normalizedLang = pref.language.toLowerCase();
+        this.userPreference = { ...pref, language: normalizedLang };
+        this.setLanguage(normalizedLang);
+      },
+      error: (error) => {
+        console.error('Error fetching user preference:', error);
+        // Fallback with lowercase
+        this.userPreference = { language: 'en' };
+        this.setLanguage('en');
+      }
+    });
+  }
+
+  // Set language using ngx-translate
+  setLanguage(langCode: string) {
+    this.translate.use(langCode).subscribe({
+      next: () => {
+        const lang = this.languages.find(l => l.code === langCode);
+        this.currentLanguage = lang ? lang.name : 'English';
+      },
+      error: (err) => {
+        console.error('Error loading translation file for', langCode, err);
+        // Fallback to default language
+        this.translate.use('en');
+        this.currentLanguage = 'English';
+      }
+    });
+  }
+
+  saveLanguagePreference(langCode: string) {
+    const lang = this.languages.find(l => l.code === langCode);
+    if (lang) {
+      // Send the original ID to backend (no change needed here)
+      this.buyerApiService.setLanguagePreference(lang.id).subscribe({
+        next: () => {
+          this.setLanguage(langCode);
+        },
+        error: (error) => {
+          console.error('Error saving language preference:', error);
+          // Optionally show an alert
+        }
+      });
+    }
+  }
+
+  async openLanguagePopover(event: Event) {
+    const popover = await this.popoverCtrl.create({
+      component: LanguagePopoverComponent,
+      event: event,
+      translucent: true,
+      componentProps: {
+        languages: this.languages,
+        currentLanguage: this.currentLanguage,
+        onSelect: (lang: Language) => this.saveLanguagePreference(lang.code)
+      }
+    });
+    await popover.present();
   }
 
   fetchCategories() {
@@ -92,10 +200,6 @@ export class BuyerHomeComponent {
         console.error('Error fetching categories:', error);
       }
     });
-  }
-
-  ngOnInit() {
-    this.fetchCategories();
   }
 
   onScroll(event: any) {

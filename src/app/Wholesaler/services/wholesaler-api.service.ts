@@ -189,6 +189,17 @@ export interface Mandi {
   city_shortnames: string;
 }
 
+// Language-related interfaces
+interface Language {
+  id: number;
+  code: string;
+  name: string;
+}
+
+interface UserPreference {
+  language: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -205,6 +216,7 @@ export class WholesalerApiService {
       'Content-Type': 'application/json'
     });
   }
+  
   getOrderSummary(): Observable<OrderSummary[]> {
     const headers = this.getAuthHeaders();
     return this.http.get<OrderSummary[]>(
@@ -376,5 +388,17 @@ export class WholesalerApiService {
       `${this.apiUrl}/getBusinessExistsOrNot`,
       { headers }
     );
+  }
+
+  getLanguages(): Observable<Language[]> {
+    return this.http.get<Language[]>(`${this.apiUrl}/getAllLanguages`);
+  }
+
+  getUserPreference(): Observable<UserPreference> {
+    return this.http.get<UserPreference>(`${this.apiUrl}/getUserLanguagePreference`, { headers: this.getAuthHeaders() });
+  }
+
+  setLanguagePreference(langId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/setUserLanguagePreference`, { lang_id: langId }, { headers: this.getAuthHeaders() });
   }
 }
