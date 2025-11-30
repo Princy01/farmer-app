@@ -92,19 +92,6 @@ export class BuyerApiService {
     });
   }
 
-  // Add language methods
-  getLanguages(): Observable<Language[]> {
-    return this.http.get<Language[]>(`${this.apiUrl}/getAllLanguages`);
-  }
-
-  getUserPreference(): Observable<UserPreference> {
-    return this.http.get<UserPreference>(`${this.apiUrl}/getUserLanguagePreference`, { headers: this.getAuthHeaders() });
-  }
-
-  setLanguagePreference(langId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/setUserLanguagePreference`, { lang_id: langId }, { headers: this.getAuthHeaders() });
-  }
-
   getCategoryBySuperCategoryId(superCatId: number): Observable<Category[]> {
   return this.http.get<Category[]>(`${this.apiUrl}/getCategoriesBySupID/${superCatId}`);
 }

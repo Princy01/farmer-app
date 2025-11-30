@@ -28,6 +28,7 @@ import {
   chevronDownOutline
 } from 'ionicons/icons';
 import { LanguagePopoverComponent } from './language-popover.component';
+import { TranslateApiService } from '../services/translate-api.service';
 
 // Simple model for user preferences (expand as needed)
 interface UserPreference {
@@ -70,7 +71,8 @@ export class BuyerHomeComponent {
     private authService: AuthService,
     private alertCtrl: AlertController,
     private translate: TranslateService,
-    private popoverCtrl: PopoverController
+    private popoverCtrl: PopoverController,
+    private translateApiService: TranslateApiService
   ) {
     addIcons({
       personCircleOutline,
@@ -106,7 +108,7 @@ export class BuyerHomeComponent {
   }
 
   fetchLanguages() {
-    this.buyerApiService.getLanguages().subscribe({
+    this.translateApiService.getLanguages().subscribe({
       next: (languages) => {
         this.languages = languages.map(lang => ({ ...lang, code: lang.code.toLowerCase() }));
       },
@@ -123,9 +125,9 @@ export class BuyerHomeComponent {
   }
 
   fetchUserPreference() {
-    this.buyerApiService.getUserPreference().subscribe({
+    this.translateApiService.getUserPreference().subscribe({
       next: (pref) => {
-        const normalizedLang = pref.language.toLowerCase();
+        const normalizedLang = pref.code.toLowerCase();
         this.userPreference = { ...pref, language: normalizedLang };
         this.setLanguage(normalizedLang);
       },
@@ -158,7 +160,7 @@ export class BuyerHomeComponent {
     const lang = this.languages.find(l => l.code === langCode);
     if (lang) {
       // Send the original ID to backend (no change needed here)
-      this.buyerApiService.setLanguagePreference(lang.id).subscribe({
+      this.translateApiService.setLanguagePreference(lang.id).subscribe({
         next: () => {
           this.setLanguage(langCode);
         },
