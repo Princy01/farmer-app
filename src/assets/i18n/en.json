@@ -953,7 +953,6 @@
   },
 
 
-
   "CATEGORY": {
     "SEARCH_PLACEHOLDER": "Search products...",
     "LOADING_CATEGORIES": "Loading categories...",
@@ -1053,7 +1052,6 @@
     "UNEXPECTED_ERROR": "An unexpected error occurred.",
     "ADD_NEW_ADDRESS_MSG": "This feature will be available soon. You can add custom delivery addresses.",
     "SELECT_ADDRESS_FIRST": "Please select a delivery address first.",
-    "ESTIMATED_COST": "Estimated Transport Cost",
     "ESTIMATED_COST_MSG": "The estimated transport cost is",
     "SEARCH_DRIVER_QUESTION": "Would you like to search for an available driver?",
     "NO": "No",
@@ -1067,9 +1065,12 @@
     "UNKNOWN": "Unknown",
     "UNKNOWN_LOCATION": "Unknown Location",
     "DIRECT_ORDER": "Direct Order",
-    "UNKNOWN_WHOLESELLER": "Unknown Wholeseller"
+    "UNKNOWN_WHOLESELLER": "Unknown Wholeseller",
+    "SELECT_DELIVERY_ADDRESS": "Please select a delivery address",
+    "DRIVER_INFO_TITLE": "Driver Assignment",
+    "DRIVER_INFO_MSG": "A driver will be assigned to your order after payment confirmation.",
+    "DISCOUNT": "Discount"
   },
-
 
   "PAYMENT": {
     "PAGE_TITLE": "Payment",
@@ -1118,7 +1119,20 @@
     "PAYMENT_FAILED_HEADER": "{{method}} Failed",
     "PAYMENT_ERROR_MSG": "There was an error processing your {{method}}. Please try again or choose a different payment method.",
     "CANCEL": "Cancel",
-    "RETRY": "Retry"
+    "RETRY": "Retry",
+    "TRANSPORT_JOB_FAILED": "Transport request could not be created, but your order was placed successfully. You can arrange transport later.",
+    "PAYMENT_TIMEOUT": "Payment verification timed out. Please check your order history.",
+    "CHECKING_STATUS": "Verifying payment status...",
+    "TRANSPORT_DETAILS": "Transport Details",
+    "DELIVERY_TYPE": "Delivery Type",
+    "URGENCY": "Urgency",
+    "PICKUP_LOCATION": "Pickup From",
+    "DELIVERY_LOCATION": "Deliver To",
+    "WEIGHT": "Total Weight",
+    "DISTANCE": "Distance",
+    "TRANSPORT_CHARGE": "Transport Charge",
+    "URGENT": "Urgent",
+    "NORMAL": "Standard"
   },
 
 
@@ -1192,31 +1206,17 @@
   "PRIORITY_RATE": "₹27/km",
   "FOR_PREMIUM_USERS": "FOR PREMIUM USERS",
   "UPGRADE_TO_PREMIUM": "Upgrade to Premium",
-  "DELIVERY_PREFERENCES": "Delivery Preferences",
-  "PREFERRED_TIME_SLOT": "Preferred Time Slot",
-  "TIME_SLOT_9_12": "9 AM - 12 PM",
-  "TIME_SLOT_12_17": "12 PM - 5 PM",
-  "TIME_SLOT_17_20": "5 PM - 8 PM",
-  "TIME_SLOT_FLEXIBLE": "Flexible",
-  "SPECIAL_INSTRUCTIONS": "Special Instructions",
-  "HANDLE_WITH_CARE": "Handle with Care",
-  "FRAGILE_DESC": "Fragile items requiring careful handling",
-  "TEMPERATURE_CONTROLLED": "Temperature Controlled",
-  "COLD_CHAIN_DESC": "Maintain cold chain during transport",
-  "CONTACTLESS_DELIVERY": "Contactless Delivery",
-  "CONTACTLESS_DESC": "Leave at doorstep and notify",
-  "ADDITIONAL_NOTES": "Additional Notes",
-  "NOTES_PLACEHOLDER": "Any specific delivery instructions, landmark details, or contact preferences...",
-  "DELIVERY_COST_BREAKDOWN": "Delivery Cost Breakdown",
-  "BASE_DELIVERY_CHARGE": "Base Delivery Charge",
-  "SPECIAL_HANDLING": "Special Handling",
-  "TEMPERATURE_CONTROL": "Temperature Control",
-  "TIME_SLOT_PREFERENCE": "Time Slot Preference",
-  "TOTAL_DELIVERY_COST": "Total Delivery Cost",
-  "CONFIRM_DELIVERY_OPTIONS": "Confirm Delivery Options",
   "PREMIUM_UPGRADE_MESSAGE": "🌟 Upgrade to Premium!\n\n✓ Priority delivery\n✓ Premium support\n✓ Exclusive benefits\n\nUpgrade now to unlock all premium features!",
   "PREMIUM_UPGRADE_CONFIRM": "Would you like to upgrade to Premium for ₹299/month?\n\n✓ Priority delivery\n✓ Premium support\n✓ Exclusive benefits",
-  "PREMIUM_UPGRADE_SUCCESS": "🎉 Welcome to Premium! You now have access to all premium features."
+  "PREMIUM_UPGRADE_SUCCESS": "🎉 Welcome to Premium! You now have access to all premium features.",
+  "DELIVERY_COST": "Delivery Cost",
+    "TOTAL_DELIVERY_COST": "Total Delivery Cost",
+    "FINAL_PRICE_NOTE": "This is the final delivery charge for your order",
+    "SELECT_TRANSPORT_TYPE": "Please select a delivery method",
+    "CONFIRM_DELIVERY_OPTIONS": "Confirm & Continue",
+    "ESTIMATED_DISTANCE": "Estimated Distance",
+    "RATE_PER_KM": "Rate per km",
+    "DISTANCE": "Distance"
 }
 
 

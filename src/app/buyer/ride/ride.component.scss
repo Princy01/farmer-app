@@ -778,3 +778,183 @@
 .section-container:nth-child(2) { animation-delay: 0.2s; }
 .cost-summary-card { animation-delay: 0.3s; }
 .confirmation-section { animation-delay: 0.4s; }
+
+// Distance Info Card
+.distance-info-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+
+  .distance-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+
+    .distance-icon {
+      font-size: 28px;
+      color: white;
+    }
+  }
+
+  .distance-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .distance-label {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .distance-value {
+      font-size: 28px;
+      color: white;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+  }
+}
+
+// Cost Summary Card
+.cost-summary-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+
+  .cost-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .cost-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f5;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &.total-row {
+        padding-top: 16px;
+        margin-top: 8px;
+        border-top: 2px solid #e0e0e0;
+        border-bottom: none;
+
+        .cost-label {
+          font-size: 16px;
+          font-weight: 600;
+          color: #2d3748;
+        }
+
+        .cost-amount {
+          font-size: 28px;
+          font-weight: 700;
+          color: #10b981;
+          letter-spacing: -0.5px;
+        }
+      }
+
+      .cost-label {
+        font-size: 14px;
+        color: #718096;
+        font-weight: 500;
+      }
+
+      .cost-value {
+        font-size: 16px;
+        color: #2d3748;
+        font-weight: 600;
+      }
+    }
+  }
+
+  // Simple cost display (if you want to keep the old style as fallback)
+  .cost-simple {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .cost-label {
+      font-size: 16px;
+      color: #718096;
+      font-weight: 500;
+    }
+
+    .cost-amount {
+      font-size: 28px;
+      font-weight: 700;
+      color: #10b981;
+      letter-spacing: -0.5px;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .distance-info-card {
+    padding: 16px;
+
+    .distance-icon-wrapper {
+      width: 48px;
+      height: 48px;
+
+      .distance-icon {
+        font-size: 24px;
+      }
+    }
+
+    .distance-details {
+      .distance-label {
+        font-size: 12px;
+      }
+
+      .distance-value {
+        font-size: 24px;
+      }
+    }
+  }
+
+  .cost-summary-card {
+    padding: 20px;
+
+    .cost-breakdown {
+      .cost-row {
+        padding: 10px 0;
+
+        &.total-row {
+          .cost-amount {
+            font-size: 24px;
+          }
+        }
+
+        .cost-label {
+          font-size: 13px;
+        }
+
+        .cost-value {
+          font-size: 15px;
+        }
+      }
+    }
+  }
+}

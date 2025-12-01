@@ -1035,7 +1035,6 @@
     "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई।",
     "ADD_NEW_ADDRESS_MSG": "यह सुविधा जल्द ही उपलब्ध होगी। आप कस्टम डिलीवरी पते जोड़ सकते हैं।",
     "SELECT_ADDRESS_FIRST": "कृपया पहले एक डिलीवरी पता चुनें।",
-    "ESTIMATED_COST": "अनुमानित परिवहन लागत",
     "ESTIMATED_COST_MSG": "अनुमानित परिवहन लागत है",
     "SEARCH_DRIVER_QUESTION": "क्या आप एक उपलब्ध ड्राइवर खोजना चाहेंगे?",
     "NO": "नहीं",
@@ -1049,7 +1048,12 @@
     "UNKNOWN": "अज्ञात",
     "UNKNOWN_LOCATION": "अज्ञात स्थान",
     "DIRECT_ORDER": "प्रत्यक्ष ऑर्डर",
-    "UNKNOWN_WHOLESELLER": "अज्ञात थोक विक्रेता"
+    "UNKNOWN_WHOLESELLER": "अज्ञात थोक विक्रेता",
+    "SELECT_DELIVERY_ADDRESS": "कृपया डिलीवरी का पता चुनें",
+    "DRIVER_INFO_TITLE": "ड्राइवर असाइनमेंट",
+    "DRIVER_INFO_MSG": "पेमेंट की पुष्टि के बाद आपके ऑर्डर के लिए एक ड्राइवर असाइन किया जाएगा।",
+    "DISCOUNT": "छूट"
+
   },
 
 
@@ -1100,7 +1104,20 @@
     "PAYMENT_FAILED_HEADER": "{{method}} विफल",
     "PAYMENT_ERROR_MSG": "आपके {{method}} को प्रोसेस करने में एक त्रुटि हुई। कृपया पुनः प्रयास करें या एक अलग भुगतान विधि चुनें।",
     "CANCEL": "रद्द करें",
-    "RETRY": "पुनः प्रयास करें"
+    "RETRY": "पुनः प्रयास करें",
+    "TRANSPORT_JOB_FAILED": "ट्रांसपोर्ट अनुरोध नहीं बन पाया, लेकिन आपका ऑर्डर सफलतापूर्वक प्लेस हो गया है। आप बाद में ट्रांसपोर्ट की व्यवस्था कर सकते हैं।",
+  "PAYMENT_TIMEOUT": "पेमेंट वेरिफिकेशन का समय समाप्त हो गया। कृपया अपने ऑर्डर इतिहास की जांच करें।",
+  "CHECKING_STATUS": "पेमेंट स्थिति की जांच की जा रही है...",
+  "TRANSPORT_DETAILS": "परिवहन विवरण",
+  "DELIVERY_TYPE": "डिलीवरी प्रकार",
+  "URGENCY": "आपातकाल",
+  "PICKUP_LOCATION": "पिकअप स्थान",
+  "DELIVERY_LOCATION": "डिलीवरी स्थान",
+  "WEIGHT": "कुल वजन",
+  "DISTANCE": "दूरी",
+  "TRANSPORT_CHARGE": "परिवहन शुल्क",
+  "URGENT": "तत्काल",
+  "NORMAL": "सामान्य"
   },
 
 
@@ -1175,31 +1192,17 @@
   "PRIORITY_RATE": "₹27/किमी",
   "FOR_PREMIUM_USERS": "प्रीमियम उपयोगकर्ताओं के लिए",
   "UPGRADE_TO_PREMIUM": "प्रीमियम में अपग्रेड करें",
-  "DELIVERY_PREFERENCES": "डिलीवरी प्राथमिकताएं",
-  "PREFERRED_TIME_SLOT": "पसंदीदा समय स्लॉट",
-  "TIME_SLOT_9_12": "सुबह 9 बजे - दोपहर 12 बजे",
-  "TIME_SLOT_12_17": "दोपहर 12 बजे - शाम 5 बजे",
-  "TIME_SLOT_17_20": "शाम 5 बजे - शाम 8 बजे",
-  "TIME_SLOT_FLEXIBLE": "लचीला",
-  "SPECIAL_INSTRUCTIONS": "विशेष निर्देश",
-  "HANDLE_WITH_CARE": "सावधानी से संभालें",
-  "FRAGILE_DESC": "नाजुक वस्तुएं जिन्हें सावधानी से संभालने की आवश्यकता है",
-  "TEMPERATURE_CONTROLLED": "तापमान नियंत्रित",
-  "COLD_CHAIN_DESC": "परिवहन के दौरान कोल्ड चेन बनाए रखें",
-  "CONTACTLESS_DELIVERY": "संपर्क रहित डिलीवरी",
-  "CONTACTLESS_DESC": "दरवाजे पर छोड़ें और सूचित करें",
-  "ADDITIONAL_NOTES": "अतिरिक्त नोट्स",
-  "NOTES_PLACEHOLDER": "डिलीवरी निर्देश, लैंडमार्क या संपर्क से संबंधित जानकारी...",
-  "DELIVERY_COST_BREAKDOWN": "डिलीवरी लागत विभाजन",
-  "BASE_DELIVERY_CHARGE": "बेस डिलीवरी शुल्क",
-  "SPECIAL_HANDLING": "विशेष हैंडलिंग",
-  "TEMPERATURE_CONTROL": "तापमान नियंत्रण",
-  "TIME_SLOT_PREFERENCE": "समय स्लॉट प्राथमिकता",
-  "TOTAL_DELIVERY_COST": "कुल डिलीवरी लागत",
-  "CONFIRM_DELIVERY_OPTIONS": "डिलीवरी विकल्पों की पुष्टि करें",
   "PREMIUM_UPGRADE_MESSAGE": "🌟 प्रीमियम में अपग्रेड करें!\n\n✓ प्राथमिकता डिलीवरी\n✓ प्रीमियम सहायता\n✓ विशेष लाभ\n\nअभी अपग्रेड करें सभी प्रीमियम सुविधाओं को अनलॉक करने के लिए!",
   "PREMIUM_UPGRADE_CONFIRM": "क्या आप ₹299/माह में प्रीमियम में अपग्रेड करना चाहेंगे?\n\n✓ प्रायोरिटी डिलीवरी\n✓ प्रीमियम सपोर्ट\n✓ विशेष लाभ",
-  "PREMIUM_UPGRADE_SUCCESS": "🎉 प्रीमियम में आपका स्वागत है! अब आपको सभी प्रीमियम फीचर्स का एक्सेस मिल गया है।"
+  "PREMIUM_UPGRADE_SUCCESS": "🎉 प्रीमियम में आपका स्वागत है! अब आपको सभी प्रीमियम फीचर्स का एक्सेस मिल गया है।",
+  "DELIVERY_COST": "डिलीवरी लागत",
+  "TOTAL_DELIVERY_COST": "कुल डिलीवरी लागत",
+  "FINAL_PRICE_NOTE": "यह आपके ऑर्डर का अंतिम डिलीवरी शुल्क है",
+  "SELECT_TRANSPORT_TYPE": "कृपया एक डिलीवरी विधि चुनें",
+  "CONFIRM_DELIVERY_OPTIONS": "कन्फर्म करें और आगे बढ़ें",
+  "ESTIMATED_DISTANCE": "अनुमानित दूरी",
+  "RATE_PER_KM": "प्रति किलोमीटर दर",
+  "DISTANCE": "दूरी"
 }
 
 }

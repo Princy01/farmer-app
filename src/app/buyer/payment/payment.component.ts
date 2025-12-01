@@ -19,7 +19,7 @@ import {
 import { PaymentService } from './payment.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
-
+import { OrderService, CreateOrderRequest } from '../order-confirmation/order.service';
 @Component({
   selector: 'app-payment',
   standalone: true,
@@ -34,6 +34,9 @@ export class PaymentComponent implements OnInit, OnDestroy {
   loadingPaymentMethods: boolean = true;
   pollingInterval: any = null;
   pollingTimeout: any = null;
+
+  hasTransport: boolean = false;
+  transportInfo: any = null;
 
   paymentMethods = [
     {
@@ -72,6 +75,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       available: true
     }
   ];
+  toastCtrl: any;
 
   constructor(
     private router: Router,
@@ -79,7 +83,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private paymentService: PaymentService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private orderService: OrderService,
   ) {
     addIcons({
       chevronBack,
@@ -99,7 +104,15 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     if (!this.orderData) {
       this.router.navigate(['/buyer/cart']);
+      return;
     }
+    // Extract transport information
+    this.hasTransport = this.orderData.hasTransport || false;
+    this.transportInfo = this.orderData.transportData;
+
+    console.log('Payment page initialized with order data:', this.orderData);
+    console.log('Has transport:', this.hasTransport);
+    console.log('Transport info:', this.transportInfo);
   }
 
   ngOnInit() {
@@ -110,6 +123,30 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.clearPolling();
+  }
+
+  // Helper method to get transport delivery type display name
+  getTransportTypeName(): string {
+    if (!this.transportInfo) return '';
+
+    switch (this.transportInfo.delivery_type) {
+      case 'standard':
+        return this.translate.instant('RIDE.STANDARD_DELIVERY');
+      case 'express':
+        return this.translate.instant('RIDE.EXPRESS_DELIVERY');
+      case 'priority':
+        return this.translate.instant('RIDE.PRIORITY_DELIVERY');
+      default:
+        return this.transportInfo.delivery_type;
+    }
+  }
+
+  // Helper method to get urgency display
+  getUrgencyDisplay(): string {
+    if (!this.transportInfo) return '';
+    return this.transportInfo.urgency === 'urgent'
+      ? this.translate.instant('PAYMENT.URGENT')
+      : this.translate.instant('PAYMENT.NORMAL');
   }
 
   selectPaymentMethod(method: string) {
@@ -159,6 +196,105 @@ export class PaymentComponent implements OnInit, OnDestroy {
     }
   }
 
+  private async handleOrderCreation(orderData: any): Promise<any> {
+    try {
+      // Prepare order request matching backend structure
+      const orderRequest: CreateOrderRequest = {
+        date_of_order: orderData.date_of_order,
+        order_status: orderData.order_status,
+        desired_delivery_date: orderData.desired_delivery_date,
+        retailer_id: orderData.retailer_id,
+        wholeseller_id: orderData.wholeseller_id,
+        total_order_amount: orderData.total_order_amount,
+        discount_amount: orderData.discount_amount,
+        tax_amount: orderData.tax_amount,
+        final_amount: orderData.final_amount,
+        items: orderData.items.map((item: any) => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          unit_id: item.unit_id,
+          price_while_added: item.price_while_added
+        }))
+      };
+
+      // Create the order
+      const orderResponse = await this.orderService.createOrder(orderRequest).toPromise();
+
+      if (!orderResponse || !orderResponse.selected_id) {
+        throw new Error('Invalid order response');
+      }
+
+      const orderId = orderResponse.selected_id;
+      console.log('Order created successfully:', orderId);
+
+      // Prepare response data
+      const responseData = {
+        ...orderData,
+        orderId: orderId,
+        orderStatus: orderData.order_status,
+        orderNumber: `ORD-${orderId}`,
+        orderDate: new Date(),
+        transportJobCreated: false
+      };
+
+      // Create transport job if transport was requested
+      if (orderData.hasTransport && orderData.transportData) {
+        try {
+          await this.createTransportJob(orderId, orderData.transportData);
+          responseData.transportJobCreated = true;
+        } catch (transportError) {
+          console.error('Transport job creation failed:', transportError);
+          // Don't fail the entire order, just log the error
+          responseData.transportJobCreated = false;
+          responseData.transportError = 'Transport job creation failed, but order was placed successfully';
+
+          await this.showToast(
+            this.translate.instant('PAYMENT.TRANSPORT_JOB_FAILED'),
+            'warning'
+          );
+        }
+      }
+
+      return responseData;
+    } catch (error) {
+      console.error('Order creation failed:', error);
+      throw new Error('Order creation failed');
+    }
+  }
+
+  private async createTransportJob(orderId: number, transportData: any): Promise<void> {
+    const transportRequest = {
+      order_ids: [orderId],
+      pickup_location: transportData.pickup_location,
+      dropoff_location: transportData.dropoff_location,
+      pickup_city_id: transportData.pickup_city_id,
+      dropoff_city_id: transportData.dropoff_city_id,
+      pickup_branch_id: transportData.pickup_branch_id,
+      dropoff_branch_id: transportData.dropoff_branch_id,
+      weight: transportData.weight,
+      distance: transportData.distance,
+      delivery_type: transportData.delivery_type,
+      base_price: transportData.base_price,
+      urgency: transportData.urgency,
+      requested_date: transportData.requested_date,
+      load_type: transportData.load_type,
+      status: transportData.status
+    };
+
+    console.log('Creating transport job with request:', transportRequest);
+
+    try {
+      const response = await this.orderService.createTransportJob(transportRequest).toPromise();
+      console.log('Transport job created successfully:', response);
+    } catch (error: any) {
+      console.error('Transport job creation error:', error);
+      if (error.error) {
+        console.error('Backend error response:', error.error);
+      }
+      throw error;
+    }
+  }
+
   async processPayment() {
     if (!this.selectedPaymentMethod) {
       const alert = await this.alertCtrl.create({
@@ -181,22 +317,17 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
       try {
         await this.simulatePaymentProcessing();
+        const updatedOrderData = await this.handleOrderCreation(this.orderData);
         await loading.dismiss();
+
         this.router.navigate(['/buyer/order-confirmation'], {
-          state: {
-            orderData: {
-              ...this.orderData,
-              orderId: 'ORD' + Date.now(),
-              paymentMethod: this.selectedPaymentMethod,
-              paymentStatus: 'pending',
-              orderDate: new Date()
-            }
-          }
+          state: { orderData: updatedOrderData }
         });
       } catch (error) {
+        console.error('Payment processing error:', error);
         await loading.dismiss();
         this.isProcessingPayment = false;
-        this.showPaymentError();
+        await this.showPaymentError();
       }
       return;
     }
@@ -209,79 +340,90 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await loading.present();
 
     try {
-      const amount = this.orderData?.grandTotal;
-      const description = this.translate.instant('PAYMENT.ORDER_DESC', { count: this.orderData?.items?.length || 1 });
+      const amount = this.orderData?.final_amount || this.orderData?.grandTotal;
+      const description = this.translate.instant('PAYMENT.ORDER_DESC', {
+        count: this.orderData?.items?.length || 1
+      });
       const currency = 'inr';
 
-      const response = await this.paymentService.initiatePayment(amount, currency, description).toPromise();
+      const response = await this.paymentService.initiatePayment(
+        amount,
+        currency,
+        description
+      ).toPromise();
+
       await loading.dismiss();
 
       if (response?.data?.payment_url && response?.data?.order_id) {
         const paymentUrl = response.data.payment_url;
-        const orderId = response.data.order_id;
+        const paymentOrderId = response.data.order_id;
+
+        // Open payment gateway in new window
         window.open(paymentUrl, '_blank');
 
-        // Show loading while polling
-        const pollingLoader = await this.loadingCtrl.create({
-          message: this.translate.instant('PAYMENT.WAITING_CONFIRMATION'),
-          spinner: 'dots'
-        });
-        await pollingLoader.present();
-
-        let elapsed = 0;
-        const pollIntervalMs = 3000;
-        const maxWaitMs = 5 * 60 * 1000; // 5 minutes
-
-        this.pollingInterval = setInterval(async () => {
-          elapsed += pollIntervalMs;
-          try {
-            const statusResponse = await this.paymentService.checkPaymentStatus(orderId).toPromise();
-            const paymentStatus = statusResponse?.data?.status || 'unknown';
-
-            if (paymentStatus === 'success') {
-              await pollingLoader.dismiss();
-              this.clearPolling();
-              this.router.navigate(['/buyer/order-confirmation'], {
-                state: {
-                  orderData: {
-                    ...this.orderData,
-                    orderId: statusResponse.data.order_id,
-                    paymentId: statusResponse.data.payment_id,
-                    transactionId: statusResponse.data.transaction_id,
-                    paymentMethod: this.selectedPaymentMethod,
-                    paymentStatus: 'completed',
-                    paidAt: statusResponse.data.paid_at,
-                    orderDate: statusResponse.data.created_at,
-                    amount: statusResponse.data.amount
-                  }
-                }
-              });
-            } else if (paymentStatus === 'failed') {
-              await pollingLoader.dismiss();
-              this.clearPolling();
-              this.showPaymentError(this.translate.instant('PAYMENT.PAYMENT_FAILED'));
-            }
-            // If status is 'initiated' or 'pending', keep polling
-          } catch (err) {
-            // Ignore errors during polling, will retry
-          }
-        }, pollIntervalMs);
-
-        // Set timeout to stop polling after maxWaitMs
-        this.pollingTimeout = setTimeout(async () => {
-          this.clearPolling();
-          await pollingLoader.dismiss();
-          this.showPaymentError(this.translate.instant('PAYMENT.TIMEOUT_ERROR'));
-        }, maxWaitMs);
-
+        // Show loading while polling for payment status
+        await this.pollPaymentStatus(paymentOrderId);
       } else {
-        throw new Error('Payment URL or Order ID not received');
+        throw new Error('Invalid payment response');
       }
     } catch (error) {
+      console.error('Payment initiation error:', error);
       await loading.dismiss();
       this.isProcessingPayment = false;
-      this.showPaymentError();
+      await this.showPaymentError();
     }
+  }
+
+  private async pollPaymentStatus(paymentOrderId: string): Promise<void> {
+    const pollingLoading = await this.loadingCtrl.create({
+      message: this.translate.instant('PAYMENT.CHECKING_STATUS'),
+      spinner: 'dots'
+    });
+    await pollingLoading.present();
+
+    let attempts = 0;
+    const maxAttempts = 40;
+
+    this.pollingInterval = setInterval(async () => {
+      attempts++;
+
+      try {
+        const statusResponse = await this.paymentService
+          .checkPaymentStatus(paymentOrderId)
+          .toPromise();
+
+        if (statusResponse?.status === 'success') {
+          this.clearPolling();
+          await pollingLoading.dismiss();
+
+          const updatedOrderData = await this.handleOrderCreation(this.orderData);
+
+          this.router.navigate(['/buyer/order-confirmation'], {
+            state: { orderData: updatedOrderData }
+          });
+        } else if (statusResponse?.status === 'failed') {
+          this.clearPolling();
+          await pollingLoading.dismiss();
+          await this.showPaymentError(
+            this.translate.instant('PAYMENT.PAYMENT_FAILED_MSG')
+          );
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+
+      if (attempts >= maxAttempts) {
+        this.clearPolling();
+        await pollingLoading.dismiss();
+        await this.showPaymentError(
+          this.translate.instant('PAYMENT.PAYMENT_TIMEOUT')
+        );
+      }
+    }, 3000);
+
+    this.pollingTimeout = setTimeout(() => {
+      this.clearPolling();
+    }, maxAttempts * 3000);
   }
 
   private clearPolling() {
@@ -293,48 +435,48 @@ export class PaymentComponent implements OnInit, OnDestroy {
       clearTimeout(this.pollingTimeout);
       this.pollingTimeout = null;
     }
-    this.isProcessingPayment = false;
+  }
+
+  private async showToast(message: string, color: string = 'dark'): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'bottom'
+    });
+    await toast.present();
   }
 
   private simulatePaymentProcessing(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const processingTime = this.selectedPaymentMethod === 'COD' ? 1500 : 3000;
+    return new Promise((resolve) => {
       setTimeout(() => {
-        const successRate = this.selectedPaymentMethod === 'COD' ? 0.98 : 0.9;
-        if (Math.random() < successRate) {
-          resolve();
-        } else {
-          reject(new Error('Payment failed'));
-        }
-      }, processingTime);
+        resolve();
+      }, 2000);
     });
   }
 
   private async showPaymentError(message?: string) {
-    const methodName = this.getPaymentMethodName();
     const alert = await this.alertCtrl.create({
-      header: this.translate.instant('PAYMENT.PAYMENT_FAILED_HEADER', { method: methodName }),
-      message: message || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG', { method: methodName.toLowerCase() }),
-      buttons: [
-        {
-          text: this.translate.instant('PAYMENT.CANCEL'),
-          role: 'cancel',
-          handler: () => {
-            this.goBack();
-          }
-        },
-        {
-          text: this.translate.instant('PAYMENT.RETRY'),
-          handler: () => {
-            // User can retry payment
-          }
-        }
-      ]
+      header: this.translate.instant('PAYMENT.PAYMENT_FAILED'),
+      message: message || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG'),
+      buttons: [this.translate.instant('PAYMENT.OK')]
     });
     await alert.present();
+    this.isProcessingPayment = false;
   }
 
   goBack() {
-    this.router.navigate(['/buyer/checkout']);
+    this.router.navigate(['/buyer/checkout'], {
+      state: {
+        cartItems: this.orderData.items,
+        totalPrice: this.orderData.total_order_amount,
+        discount: this.orderData.discount_amount,
+        retailer: this.orderData.retailer,
+        wholeseller: { id: this.orderData.wholeseller_id },
+        selectedBranch: this.orderData.selectedBranch,
+        transportData: this.transportInfo,
+        hasRideRequest: this.hasTransport
+      }
+    });
   }
 }

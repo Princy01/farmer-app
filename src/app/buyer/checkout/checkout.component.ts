@@ -2,38 +2,38 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   chevronBack,
-  arrowForwardOutline,
-  chevronDown,
+  locationOutline,
+  timeOutline,
+  cardOutline,
+  trashOutline,
+  addOutline,
+  checkmarkCircle,
+  carOutline,
+  calculatorOutline,
   receiptOutline,
   personOutline,
   storefrontOutline,
-  locationOutline,
   bagOutline,
-  carOutline,
-  calculatorOutline,
-  pencilOutline,
-  addOutline,
   rocketOutline,
   flashOutline,
-  timeOutline,
   cashOutline,
-  checkmarkCircle,
-  searchOutline,
+  informationCircleOutline,
   settingsOutline,
+  arrowForwardOutline,
+  checkmark,
   callOutline,
-  mailOutline,
-  person,
-  checkmark
+  mailOutline
 } from 'ionicons/icons';
 import { DatabaseService } from '../../services/database.service';
 import { CheckoutService, BusinessBranch } from './checkout.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
+import { OrderService } from 'src/app/buyer/order-confirmation/order.service';
 
 interface CartItem {
   product_id: number;
@@ -79,16 +79,15 @@ export class CheckoutComponent implements OnInit {
   selectedUrgency: string | null = null;
   estimatedRidePrice: number = 0;
   grandTotal: number = 0;
-  selectedTransporter: string | null = null;
-  availableTransporters: any[] = [];
-
-  isSearchingDriver: boolean = false;
   hasRideRequest: boolean = false;
 
   // Delivery address properties
   businessBranches: BusinessBranch[] = [];
   selectedBranch: BusinessBranch | null = null;
   isLoadingBranches: boolean = false;
+  discount: number = 0;
+
+  transportData: any = null;
 
   constructor(
     private router: Router,
@@ -98,68 +97,95 @@ export class CheckoutComponent implements OnInit {
     private loadingController: LoadingController,
     private checkoutService: CheckoutService,
     private authService: AuthService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private orderService: OrderService
   ) {
     addIcons({
       chevronBack,
-      arrowForwardOutline,
-      chevronDown,
-      receiptOutline,
-      personOutline,
-      storefrontOutline,
-      locationOutline,
-      bagOutline,
-      carOutline,
-      calculatorOutline,
-      pencilOutline,
-      addOutline,
-      rocketOutline,
-      flashOutline,
-      timeOutline,
-      cashOutline,
-      checkmarkCircle,
-      searchOutline,
-      settingsOutline,
-      callOutline,
-      mailOutline,
-      person,
-      checkmark
+    locationOutline,
+    timeOutline,
+    cardOutline,
+    trashOutline,
+    addOutline,
+    checkmarkCircle,
+    carOutline,
+    calculatorOutline,
+    receiptOutline,
+    personOutline,
+    storefrontOutline,
+    bagOutline,
+    rocketOutline,
+    flashOutline,
+    cashOutline,
+    informationCircleOutline,
+    settingsOutline,
+    arrowForwardOutline,
+    checkmark,
+    callOutline,
+    mailOutline
     });
 
-    this.loadTransporters();
+    // Initial navigation state handling
+    this.handleNavigationState();
 
-    const navData = this.router.getCurrentNavigation()?.extras.state;
+    // Subscribe to router events to handle state when returning from ride
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.handleNavigationState();
+      }
+    });
+  }
+
+  private handleNavigationState() {
+    const navigation = this.router.getCurrentNavigation();
+    const navData = navigation?.extras?.state;
+
     if (navData) {
-      this.cartItems = (navData['cartItems'] || []).map((item: any) => ({
-        product_id: item.product_id,
-        product_name: item.product_name,
-        quantity: item.quantity,
-        unit_id: item.unit_id,
-        unit_name: item.unit_name,
-        price_while_added: item.price,  // Map 'price' from cart to 'price_while_added'
-        latest_wholesaler_price: item.price,  // Assuming same for now; adjust if you have update logic
-        price_updated_at: undefined,  // Set as needed
-        is_active: !item.is_deleted  // Map based on cart's is_deleted
-      }));
-      this.totalPrice = navData['totalPrice'] || 0;
-      this.retailerInfo = navData['retailer'] || null;
-      this.wholeSeller = navData['wholeseller'] || null;
-      this.grandTotal = this.totalPrice;
-    }
+      console.log('Navigation state received:', navData);
 
-    this.route.queryParams.subscribe((params) => {
-      if (params['deliveryType']) {
-        this.selectedDeliveryType = params['deliveryType'];
-        this.hasRideRequest = true;
+      // Handle cart items
+      if (navData['cartItems']) {
+        this.cartItems = (navData['cartItems'] || []).map((item: any) => ({
+          product_id: item.product_id,
+          product_name: item.product_name || item.name,
+          quantity: item.quantity,
+          unit_id: item.unit_id,
+          unit_name: item.unit_name,
+          price_while_added: item.price_while_added || item.latest_wholesaler_price || item.price,
+          latest_wholesaler_price: item.latest_wholesaler_price || item.price,
+          price_updated_at: item.price_updated_at,
+          is_active: !item.is_deleted
+        }));
+
+        this.totalPrice = navData['totalPrice'] || 0;
+        this.retailerInfo = navData['retailer'] || null;
+        this.wholeSeller = navData['wholeseller'] || null;
+        this.discount = navData['discount'] || 0;
+
+        console.log('Cart items loaded:', this.cartItems);
+        console.log('Total price:', this.totalPrice);
       }
-      if (params['urgency']) {
-        this.selectedUrgency = params['urgency'];
+
+      // Handle transport data from ride component
+      if (navData['transportData']) {
+        this.transportData = navData['transportData'];
+        this.hasRideRequest = navData['hasRideRequest'] || false;
+        this.selectedDeliveryType = this.transportData.delivery_type;
+        this.selectedUrgency = this.transportData.urgency;
+        this.estimatedRidePrice = this.transportData.base_price;
+
+        console.log('Transport data received:', this.transportData);
+        console.log('Estimated ride price:', this.estimatedRidePrice);
       }
-      if (this.hasRideRequest) {
-        setTimeout(() => this.confirmDriverSearch(), 100);
+
+      // Handle selected branch
+      if (navData['selectedBranch']) {
+        this.selectedBranch = navData['selectedBranch'];
       }
+
+      // Calculate totals
       this.calculateRidePrice();
-    });
+    }
   }
 
   ngOnInit() {
@@ -237,7 +263,7 @@ export class CheckoutComponent implements OnInit {
           this.businessBranches = branches?.filter(branch => branch.active_status) || [];
 
           // Auto-select first branch if available
-          if (this.businessBranches.length > 0) {
+          if (this.businessBranches.length > 0 && !this.selectedBranch) {
             this.selectedBranch = this.businessBranches[0];
           }
           this.isLoadingBranches = false;
@@ -251,6 +277,7 @@ export class CheckoutComponent implements OnInit {
 
           if (error.status === 401) {
             await this.showAuthError();
+            return;
           }
 
           const alert = await this.alertCtrl.create({
@@ -288,7 +315,10 @@ export class CheckoutComponent implements OnInit {
 
   // Add new delivery address (placeholder for future implementation)
   addNewAddress() {
-    this.showInfoAlert(this.translate.instant('CHECKOUT.ADD_NEW_ADDRESS'), this.translate.instant('CHECKOUT.ADD_NEW_ADDRESS_MSG'));
+    this.showInfoAlert(
+      this.translate.instant('CHECKOUT.ADD_NEW_ADDRESS'),
+      this.translate.instant('CHECKOUT.ADD_NEW_ADDRESS_MSG')
+    );
   }
 
   // Track by function for better performance
@@ -296,31 +326,23 @@ export class CheckoutComponent implements OnInit {
     return branch.branch_id;
   }
 
-  private loadTransporters() {
-    this.availableTransporters = this.databaseService.getAvailableTransporters();
-  }
-
   calculateRidePrice() {
-    if (this.selectedDeliveryType && this.selectedBranch) {
-      const totalWeight = this.calculateTotalWeight();
-
-      this.estimatedRidePrice = this.databaseService.calculateBasePrice(
-        this.selectedBranch.city_name,
-        'Destination',
-        totalWeight,
-        this.selectedDeliveryType,
-        this.selectedUrgency || 'normal',
-        this.selectedTransporter || undefined
-      );
+    // If we already have transport data with a price, use it
+    if (this.hasRideRequest && this.transportData?.base_price) {
+      this.estimatedRidePrice = this.transportData.base_price;
     } else {
       this.estimatedRidePrice = 0;
     }
-    this.grandTotal = this.totalPrice + this.estimatedRidePrice;
-  }
 
-  selectTransporter(transporterId: string) {
-    this.selectedTransporter = transporterId;
-    this.calculateRidePrice();
+    // Calculate grand total
+    this.grandTotal = this.totalPrice - (this.discount || 0) + this.estimatedRidePrice;
+
+    console.log('Grand total calculated:', {
+      totalPrice: this.totalPrice,
+      discount: this.discount,
+      transportCost: this.estimatedRidePrice,
+      grandTotal: this.grandTotal
+    });
   }
 
   arrangeRide() {
@@ -329,141 +351,136 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
+    const totalWeight = this.calculateTotalWeight();
+
+    // Pass current checkout state to ride component
     this.router.navigate(['/buyer/ride'], {
-      queryParams: {
-        totalWeight: this.calculateTotalWeight(),
-        pickup: this.selectedBranch.city_name,
-        delivery: 'Destination'
+      state: {
+        totalWeight: totalWeight,
+        pickup: this.selectedBranch.address || this.selectedBranch.city_name,
+        delivery: 'Destination',
+        pickupCityId: this.selectedBranch.city_id,
+        pickupBranchId: this.selectedBranch.branch_id,
+        // Pass existing cart data so we can return to checkout with all data
+        cartItems: this.cartItems,
+        totalPrice: this.totalPrice,
+        discount: this.discount,
+        retailer: this.retailerInfo,
+        wholeseller: this.wholeSeller,
+        selectedBranch: this.selectedBranch
       }
     });
-  }
-
-  async confirmDriverSearch() {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('CHECKOUT.ESTIMATED_COST'),
-      message: `${this.translate.instant('CHECKOUT.ESTIMATED_COST_MSG')} ₹${this.estimatedRidePrice}. ${this.translate.instant('CHECKOUT.SEARCH_DRIVER_QUESTION')}`,
-      buttons: [
-        {
-          text: this.translate.instant('CHECKOUT.NO'),
-          role: 'cancel',
-          handler: () => {
-            this.hasRideRequest = false;
-            this.selectedDeliveryType = null;
-            this.selectedUrgency = null;
-            this.estimatedRidePrice = 0;
-            this.calculateRidePrice();
-          }
-        },
-        {
-          text: this.translate.instant('CHECKOUT.YES'),
-          handler: () => {
-            this.startDriverSearch();
-          }
-        }
-      ]
-    });
-    await alert.present();
   }
 
   private calculateTotalWeight(): number {
     return this.cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
   }
 
-  private async startDriverSearch() {
-    this.isSearchingDriver = true;
-    this.pollForDriverAssignment();
+  private getDistance(): number {
+    // Placeholder for distance calculation
+    // Implement proper distance calculation based on pickup and delivery locations
+    return 50; // Default 50 km
   }
 
-  private currentOrderId: string | null = null;
+  private prepareTransportData() {
+    if (!this.transportData || !this.selectedBranch) return null;
 
-  private async pollForDriverAssignment() {
-    if (this.currentOrderId) {
-      console.warn('Already polling for order:', this.currentOrderId);
-      return;
-    }
+    const totalWeight = this.calculateTotalWeight();
+    const estimatedDistance = this.getDistance();
+
+    // Only send fields that backend accepts
+    return {
+      pickup_location: this.selectedBranch.address || this.selectedBranch.city_name,
+      dropoff_location: this.transportData.dropoff_location || 'Destination',
+      pickup_city_id: this.selectedBranch.city_id,
+      dropoff_city_id: this.transportData.dropoff_city_id,
+      pickup_branch_id: this.selectedBranch.branch_id,
+      dropoff_branch_id: this.transportData.dropoff_branch_id,
+      weight: totalWeight,
+      distance: estimatedDistance,
+      delivery_type: this.transportData.delivery_type || this.selectedDeliveryType,
+      base_price: this.estimatedRidePrice,
+      urgency: this.transportData.urgency === 'urgent' ? 'urgent' : 'normal',
+      requested_date: new Date().toISOString(),
+      load_type: this.transportData.load_type || 'general',
+      status: 'pending'
+    };
+  }
+
+  proceedToPayment() {
+    if (this.isLoading) return;
 
     if (!this.selectedBranch) {
       this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
       return;
     }
 
-    const request = {
-      deliveryType: this.selectedDeliveryType!,
-      urgency: this.selectedUrgency!,
-      pickup: this.selectedBranch.city_name,
-      delivery: 'Destination',
-      distance: this.getDistance(),
-      load: {
-        weight: this.calculateTotalWeight(),
-        type: ""
-      },
-      basePrice: this.estimatedRidePrice,
-      requestedDate: new Date().toISOString()
+    // Prepare order data with ALL necessary information
+    const orderData = {
+      // Order details
+      date_of_order: new Date().toISOString().split('T')[0],
+      order_status: 1,
+      desired_delivery_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0],
+      retailer_id: this.authService.getUserId(),
+      wholeseller_id: this.wholeSeller?.id || 0,
+
+      // Financial details
+      total_order_amount: this.totalPrice,
+      discount_amount: this.discount || 0,
+      tax_amount: 0,
+      final_amount: this.grandTotal,
+
+      // Items with complete information
+      items: this.cartItems.map(item => ({
+        product_id: item.product_id,
+        product_name: item.product_name, // Add for display
+        quantity: item.quantity,
+        unit_id: item.unit_id,
+        unit_name: item.unit_name, // Add for display
+        price_while_added: item.price_while_added,
+        latest_wholesaler_price: item.latest_wholesaler_price // Add for display
+      })),
+
+      // Transport details
+      hasTransport: this.hasRideRequest,
+      transportData: this.hasRideRequest ? this.prepareTransportData() : null,
+      transportCost: this.estimatedRidePrice,
+
+      // Branch details
+      selectedBranch: this.selectedBranch,
+
+      // Display values for payment screen
+      totalPrice: this.totalPrice,
+      grandTotal: this.grandTotal,
+      discount: this.discount
     };
 
-    const newOrderId = await this.databaseService.createUnassignedOrder(request);
-    this.currentOrderId = newOrderId;
+    console.log('Proceeding to payment with complete order data:', orderData);
 
-    const pollInterval = setInterval(async () => {
-      const assignedDriver = await this.databaseService.checkOrderAssignment(this.currentOrderId!);
-
-      if (assignedDriver) {
-        this.isSearchingDriver = false;
-        this.selectedTransporter = assignedDriver.id;
-        clearInterval(pollInterval);
-        this.currentOrderId = null;
-        this.showDriverFoundAlert(assignedDriver);
-      }
-    }, 5000);
-
-    setTimeout(() => {
-      if (this.isSearchingDriver) {
-        clearInterval(pollInterval);
-        this.isSearchingDriver = false;
-        this.currentOrderId = null;
-        this.showNoDriverAlert();
-      }
-    }, 120000);
-  }
-
-  private getDistance(): number {
-    return Math.floor(Math.random() * (150 - 50 + 1)) + 50;
-  }
-
-  private async showDriverFoundAlert(driver: any) {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('CHECKOUT.DRIVER_FOUND'),
-      message: `${driver.name} ${this.translate.instant('CHECKOUT.DRIVER_FOUND_MSG')}`,
-      buttons: [this.translate.instant('CHECKOUT.OK')]
+    this.router.navigate(['/buyer/payment'], {
+      state: { orderData }
     });
-    await alert.present();
   }
 
-  private async showNoDriverAlert() {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('CHECKOUT.NO_DRIVER'),
-      message: this.translate.instant('CHECKOUT.NO_DRIVER_MSG'),
-      buttons: [
-        {
-          text: this.translate.instant('CHECKOUT.NO'),
-          role: 'cancel',
-          handler: () => {
-            this.hasRideRequest = false;
-            this.selectedDeliveryType = null;
-            this.selectedUrgency = null;
-            this.estimatedRidePrice = 0;
-            this.calculateRidePrice();
-          }
-        },
-        {
-          text: this.translate.instant('CHECKOUT.YES'),
-          handler: () => {
-            this.startDriverSearch();
-          }
-        }
-      ]
-    });
-    await alert.present();
+  goBack() {
+    this.router.navigate(['/buyer/cart']);
+  }
+
+  getRetailerInfo(): string {
+    if (!this.retailerInfo) return this.translate.instant('CHECKOUT.UNKNOWN_RETAILER');
+    return `${this.retailerInfo.name || this.translate.instant('CHECKOUT.UNKNOWN')} - ${this.retailerInfo.location || this.translate.instant('CHECKOUT.UNKNOWN_LOCATION')}`;
+  }
+
+  getWholesellerInfo(): string {
+    if (!this.wholeSeller) return this.translate.instant('CHECKOUT.DIRECT_ORDER');
+    return `${this.wholeSeller.name || this.translate.instant('CHECKOUT.UNKNOWN_WHOLESELLER')}`;
+  }
+
+  handleImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = 'assets/img/default-product.png';
   }
 
   private async showErrorAlert(message: string) {
@@ -482,53 +499,5 @@ export class CheckoutComponent implements OnInit {
       buttons: [this.translate.instant('CHECKOUT.OK')]
     });
     await alert.present();
-  }
-
-  proceedToPayment() {
-    if (this.isLoading) return;
-
-    if (!this.selectedBranch) {
-      this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
-      return;
-    }
-
-    const orderData = {
-      items: this.cartItems,
-      totalPrice: this.totalPrice,
-      transportCost: this.estimatedRidePrice,
-      grandTotal: this.grandTotal,
-      retailerInfo: this.retailerInfo,
-      wholeSeller: this.wholeSeller,
-      selectedBranch: this.selectedBranch,
-      hasTransport: this.hasRideRequest,
-      selectedDeliveryType: this.selectedDeliveryType,
-      selectedUrgency: this.selectedUrgency,
-      selectedTransporter: this.selectedTransporter,
-      transporterName: this.getAvailableTransporterName()
-    };
-
-    this.router.navigate(['/buyer/payment'], {
-      state: { orderData }
-    });
-  }
-
-  goBack() {
-    this.router.navigate(['/buyer/cart']);
-  }
-
-  getAvailableTransporterName(): string {
-    if (!this.selectedTransporter) return '';
-    const transporter = this.availableTransporters.find(t => t.id === this.selectedTransporter);
-    return transporter?.name || '';
-  }
-
-  getRetailerInfo(): string {
-    if (!this.retailerInfo) return this.translate.instant('CHECKOUT.UNKNOWN_RETAILER');
-    return `${this.retailerInfo.name || this.translate.instant('CHECKOUT.UNKNOWN')} - ${this.retailerInfo.location || this.translate.instant('CHECKOUT.UNKNOWN_LOCATION')}`;
-  }
-
-  getWholesellerInfo(): string {
-    if (!this.wholeSeller) return this.translate.instant('CHECKOUT.DIRECT_ORDER');
-    return `${this.wholeSeller.name || this.translate.instant('CHECKOUT.UNKNOWN_WHOLESELLER')}`;
   }
 }
