@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
+import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { addIcons } from 'ionicons';
@@ -20,6 +20,7 @@ import { PaymentService } from './payment.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { OrderService, CreateOrderRequest } from '../order-confirmation/order.service';
+
 @Component({
   selector: 'app-payment',
   standalone: true,
@@ -75,13 +76,13 @@ export class PaymentComponent implements OnInit, OnDestroy {
       available: true
     }
   ];
-  toastCtrl: any;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController,
     private paymentService: PaymentService,
     private translate: TranslateService,
     private orderService: OrderService,
@@ -209,11 +210,17 @@ export class PaymentComponent implements OnInit, OnDestroy {
         discount_amount: orderData.discount_amount,
         tax_amount: orderData.tax_amount,
         final_amount: orderData.final_amount,
+        delivery_address: orderData.delivery_address || 'Default Address',
+        delivery_pincode: orderData.delivery_pincode || '000000',
+        max_price_limit: orderData.max_price_limit || orderData.final_amount,
+        delivery_deadline: orderData.delivery_deadline || orderData.desired_delivery_date,
         items: orderData.items.map((item: any) => ({
           product_id: item.product_id,
           quantity: item.quantity,
           unit_id: item.unit_id,
-          price_while_added: item.price_while_added
+          price: item.price_while_added || item.price,
+          discount_amount: item.discount_amount || 0,
+          tax_amount: item.tax_amount || 0
         }))
       };
 
@@ -234,7 +241,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
         orderStatus: orderData.order_status,
         orderNumber: `ORD-${orderId}`,
         orderDate: new Date(),
-        transportJobCreated: false
+        transportJobCreated: false,
+        paymentMethod: this.selectedPaymentMethod
       };
 
       // Create transport job if transport was requested
@@ -242,6 +250,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
         try {
           await this.createTransportJob(orderId, orderData.transportData);
           responseData.transportJobCreated = true;
+          console.log('Transport job created successfully');
         } catch (transportError) {
           console.error('Transport job creation failed:', transportError);
           // Don't fail the entire order, just log the error
@@ -295,6 +304,9 @@ export class PaymentComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ============================================================================
+  // CURRENT IMPLEMENTATION: Direct Order Placement (For Testing)
+  // ============================================================================
   async processPayment() {
     if (!this.selectedPaymentMethod) {
       const alert = await this.alertCtrl.create({
@@ -308,6 +320,63 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     this.isProcessingPayment = true;
 
+    // Show processing loader
+    const loading = await this.loadingCtrl.create({
+      message: this.getProcessingMessage(),
+      spinner: 'dots'
+    });
+    await loading.present();
+
+    try {
+      // Simulate payment processing delay (2 seconds)
+      await this.simulatePaymentProcessing();
+
+      // Create order directly without payment gateway
+      const updatedOrderData = await this.handleOrderCreation(this.orderData);
+
+      await loading.dismiss();
+
+      // Show success message
+      await this.showToast(
+        this.translate.instant('PAYMENT.ORDER_PLACED_SUCCESS'),
+        'success'
+      );
+
+      // Navigate to order confirmation
+      this.router.navigate(['/buyer/order-confirmation'], {
+        state: { orderData: updatedOrderData }
+      });
+    } catch (error) {
+      console.error('Payment processing error:', error);
+      await loading.dismiss();
+      this.isProcessingPayment = false;
+      await this.showPaymentError();
+    }
+  }
+  // ============================================================================
+  // END: Current Implementation
+  // ============================================================================
+
+
+  // ============================================================================
+  // COMMENTED CODE: Payment Gateway Integration (To be used later)
+  // ============================================================================
+  // UNCOMMENT THIS CODE WHEN READY TO USE ACTUAL PAYMENT GATEWAY
+  /*
+  async processPayment() {
+    if (!this.selectedPaymentMethod) {
+      const alert = await this.alertCtrl.create({
+        header: this.translate.instant('PAYMENT.METHOD_REQUIRED'),
+        message: this.translate.instant('PAYMENT.SELECT_METHOD_MSG'),
+        buttons: [this.translate.instant('PAYMENT.OK')]
+      });
+      await alert.present();
+      return;
+    }
+
+    this.isProcessingPayment = true;
+
+    // COD: Direct order placement
     if (this.selectedPaymentMethod === 'COD') {
       const loading = await this.loadingCtrl.create({
         message: this.getProcessingMessage(),
@@ -319,6 +388,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
         await this.simulatePaymentProcessing();
         const updatedOrderData = await this.handleOrderCreation(this.orderData);
         await loading.dismiss();
+
+        await this.showToast(
+          this.translate.instant('PAYMENT.ORDER_PLACED_SUCCESS'),
+          'success'
+        );
 
         this.router.navigate(['/buyer/order-confirmation'], {
           state: { orderData: updatedOrderData }
@@ -332,7 +406,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Online payment logic
+    // Online payment: Redirect to payment gateway
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('PAYMENT.REDIRECTING'),
       spinner: 'dots'
@@ -346,6 +420,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       });
       const currency = 'inr';
 
+      // Initiate payment with gateway
       const response = await this.paymentService.initiatePayment(
         amount,
         currency,
@@ -361,7 +436,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
         // Open payment gateway in new window
         window.open(paymentUrl, '_blank');
 
-        // Show loading while polling for payment status
+        // Start polling for payment status
         await this.pollPaymentStatus(paymentOrderId);
       } else {
         throw new Error('Invalid payment response');
@@ -373,7 +448,16 @@ export class PaymentComponent implements OnInit, OnDestroy {
       await this.showPaymentError();
     }
   }
+  */
+  // ============================================================================
+  // END: Payment Gateway Integration Code
+  // ============================================================================
 
+
+  // ============================================================================
+  // COMMENTED CODE: Payment Status Polling (For payment gateway)
+  // ============================================================================
+  /*
   private async pollPaymentStatus(paymentOrderId: string): Promise<void> {
     const pollingLoading = await this.loadingCtrl.create({
       message: this.translate.instant('PAYMENT.CHECKING_STATUS'),
@@ -382,7 +466,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await pollingLoading.present();
 
     let attempts = 0;
-    const maxAttempts = 40;
+    const maxAttempts = 40; // 40 attempts * 3 seconds = 2 minutes max
 
     this.pollingInterval = setInterval(async () => {
       attempts++;
@@ -393,25 +477,34 @@ export class PaymentComponent implements OnInit, OnDestroy {
           .toPromise();
 
         if (statusResponse?.status === 'success') {
+          // Payment successful - create order
           this.clearPolling();
           await pollingLoading.dismiss();
 
           const updatedOrderData = await this.handleOrderCreation(this.orderData);
 
+          await this.showToast(
+            this.translate.instant('PAYMENT.PAYMENT_SUCCESS'),
+            'success'
+          );
+
           this.router.navigate(['/buyer/order-confirmation'], {
             state: { orderData: updatedOrderData }
           });
         } else if (statusResponse?.status === 'failed') {
+          // Payment failed
           this.clearPolling();
           await pollingLoading.dismiss();
           await this.showPaymentError(
             this.translate.instant('PAYMENT.PAYMENT_FAILED_MSG')
           );
         }
+        // If status is 'pending', continue polling
       } catch (error) {
         console.error('Error checking payment status:', error);
       }
 
+      // Timeout after max attempts
       if (attempts >= maxAttempts) {
         this.clearPolling();
         await pollingLoading.dismiss();
@@ -419,12 +512,17 @@ export class PaymentComponent implements OnInit, OnDestroy {
           this.translate.instant('PAYMENT.PAYMENT_TIMEOUT')
         );
       }
-    }, 3000);
+    }, 3000); // Poll every 3 seconds
 
+    // Set overall timeout
     this.pollingTimeout = setTimeout(() => {
       this.clearPolling();
     }, maxAttempts * 3000);
   }
+  */
+  // ============================================================================
+  // END: Payment Status Polling Code
+  // ============================================================================
 
   private clearPolling() {
     if (this.pollingInterval) {

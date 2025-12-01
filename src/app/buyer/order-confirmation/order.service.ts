@@ -7,7 +7,9 @@ export interface OrderItem {
   product_id: number;
   quantity: number;
   unit_id: number;
-  price_while_added: number;
+  price: number;
+  discount_amount?: number;
+  tax_amount?: number;
 }
 
 export interface CreateOrderRequest {
@@ -20,6 +22,10 @@ export interface CreateOrderRequest {
   discount_amount: number;
   tax_amount: number;
   final_amount: number;
+  delivery_address: string;
+  delivery_pincode: string;
+  max_price_limit: number;
+  delivery_deadline: string;
   items: OrderItem[];
 }
 
