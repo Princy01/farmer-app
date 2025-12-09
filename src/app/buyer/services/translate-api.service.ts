@@ -25,7 +25,7 @@ interface AvailableTranslations {
 })
 export class TranslateApiService {
   private apiUrl = environment.apiUrl;
-  private translateApiUrl = environment.translateApiUrl;
+   translateApiUrl = environment.translateApiUrl;
 
   availableTranslations: AvailableTranslations[] = [];
   preferredLanguage: Language | null = null;

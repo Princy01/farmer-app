@@ -1,4 +1,4 @@
-import {
+ import {
   HttpEvent,
   HttpHandlerFn,
   HttpInterceptorFn,
@@ -24,8 +24,16 @@ export const translationInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ): Observable<HttpEvent<any>> => {
   const translateService = inject(TranslateApiService);
-console.log('Translation Interceptor triggered for URL:', req.url);
+  console.log('Translation Interceptor triggered for URL:', req.url);
   // Skip translation entirely if explicitly disabled via context
+
+  // Stop from itself, env.translateApiUrl calls or contains: /assets/i18n
+
+  if (req.url.startsWith(translateService.translateApiUrl) || req.url.includes('/assets/i18n')) {
+    console.log('Translation Interceptor skipping translation for translateApiUrl request:', req.url);
+    return next(req);
+  }
+
   if (req.context.get(SKIP_TRANSLATION) === true) {
     return next(req);
   }
@@ -45,12 +53,12 @@ console.log('Translation Interceptor triggered for URL:', req.url);
         return of(event);
       }
 
-            console.log('Translation Interceptor processing event:', event, req);
+      console.log('Translation Interceptor processing event:', event, req);
 
-            // User's preferred language (guaranteed to exist after login)
+      // User's preferred language (guaranteed to exist after login)
       const targetLang = translateService.preferredLanguage?.code?.toLowerCase();
 
-console.log('Preferred language for translation:', translateService.preferredLanguage, targetLang);
+      console.log('Preferred language for translation:', translateService.preferredLanguage, targetLang);
       // No translation needed if user prefers English
       if (!targetLang || targetLang === 'en') {
         return of(event);
@@ -61,7 +69,7 @@ console.log('Preferred language for translation:', translateService.preferredLan
       if (!translateService.checkTranslationExists(targetLang)) {
         return of(event);
       }
-console.log(`Translating response to ${targetLang}...`);
+      console.log(`Translating response to ${targetLang}...`);
       // Translate the response body to user's language
       return translateService.getTranslation(body, targetLang).pipe(
         switchMap((translatedBody: any) => {
