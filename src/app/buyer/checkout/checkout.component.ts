@@ -102,27 +102,27 @@ export class CheckoutComponent implements OnInit {
   ) {
     addIcons({
       chevronBack,
-    locationOutline,
-    timeOutline,
-    cardOutline,
-    trashOutline,
-    addOutline,
-    checkmarkCircle,
-    carOutline,
-    calculatorOutline,
-    receiptOutline,
-    personOutline,
-    storefrontOutline,
-    bagOutline,
-    rocketOutline,
-    flashOutline,
-    cashOutline,
-    informationCircleOutline,
-    settingsOutline,
-    arrowForwardOutline,
-    checkmark,
-    callOutline,
-    mailOutline
+      locationOutline,
+      timeOutline,
+      cardOutline,
+      trashOutline,
+      addOutline,
+      checkmarkCircle,
+      carOutline,
+      calculatorOutline,
+      receiptOutline,
+      personOutline,
+      storefrontOutline,
+      bagOutline,
+      rocketOutline,
+      flashOutline,
+      cashOutline,
+      informationCircleOutline,
+      settingsOutline,
+      arrowForwardOutline,
+      checkmark,
+      callOutline,
+      mailOutline
     });
 
     // Initial navigation state handling
@@ -154,7 +154,9 @@ export class CheckoutComponent implements OnInit {
           price_while_added: item.price_while_added || item.latest_wholesaler_price || item.price,
           latest_wholesaler_price: item.latest_wholesaler_price || item.price,
           price_updated_at: item.price_updated_at,
-          is_active: !item.is_deleted
+          is_active: !item.is_deleted,
+          wholesaler_id: item.wholesaler_id,
+          wholesaler_name: item.wholesaler_name
         }));
 
         this.totalPrice = navData['totalPrice'] || 0;
@@ -408,56 +410,25 @@ export class CheckoutComponent implements OnInit {
   }
 
   proceedToPayment() {
-    if (this.isLoading) return;
-
     if (!this.selectedBranch) {
       this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
       return;
     }
 
-    // Prepare order data with ALL necessary information
     const orderData = {
-      // Order details
-      date_of_order: new Date().toISOString().split('T')[0],
-      order_status: 1,
-      desired_delivery_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      retailer_id: this.authService.getUserId(),
-      wholeseller_id: this.wholeSeller?.id || 0,
-
-      // Financial details
-      total_order_amount: this.totalPrice,
-      discount_amount: this.discount || 0,
-      tax_amount: 0,
-      final_amount: this.grandTotal,
-
-      // Items with complete information
-      items: this.cartItems.map(item => ({
-        product_id: item.product_id,
-        product_name: item.product_name, // Add for display
-        quantity: item.quantity,
-        unit_id: item.unit_id,
-        unit_name: item.unit_name, // Add for display
-        price_while_added: item.price_while_added,
-        latest_wholesaler_price: item.latest_wholesaler_price // Add for display
-      })),
-
-      // Transport details
-      hasTransport: this.hasRideRequest,
-      transportData: this.hasRideRequest ? this.prepareTransportData() : null,
-      transportCost: this.estimatedRidePrice,
-
-      // Branch details
+      items: this.cartItems,
+      retailer: this.retailerInfo,
       selectedBranch: this.selectedBranch,
-
-      // Display values for payment screen
+      deliveryAddress: this.selectedBranch?.address || '',
+      deliveryPincode: this.selectedBranch?.pincode || '',
       totalPrice: this.totalPrice,
+      discount: this.discount,
       grandTotal: this.grandTotal,
-      discount: this.discount
+      hasTransport: this.hasRideRequest,
+      transportData: this.transportData,
+      pickupCityId: this.selectedBranch?.city_id,
+      pickupBranchId: this.selectedBranch?.branch_id
     };
-
-    console.log('Proceeding to payment with complete order data:', orderData);
 
     this.router.navigate(['/buyer/payment'], {
       state: { orderData }

@@ -58,6 +58,7 @@ export class TranslateApiService {
   }
 
   setLanguagePreference(langId: number): Observable<any> {
+    console.log('Setting language preference to ID:', langId);
     return this.http.post(`${this.apiUrl}/setUserLanguagePreference`, { lang_id: langId }, { headers: this.getAuthHeaders() });
   }
 

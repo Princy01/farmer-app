@@ -29,12 +29,14 @@ export class OrderConfirmationComponent implements OnInit {
   orderData: any;
   estimatedDelivery: string = '';
   showAnimation: boolean = true;
+  hasTransport: boolean = false;
+  transportInfo: any = null;
 
   constructor(private router: Router) {
     addIcons({
       checkmarkCircle,
       receiptOutline,
-      navigateOutline,  // Changed from trackingOutline
+      navigateOutline,
       homeOutline,
       timeOutline,
       locationOutline,
@@ -51,13 +53,20 @@ export class OrderConfirmationComponent implements OnInit {
 
     if (!this.orderData) {
       this.router.navigate(['/buyer/home']);
+      return;
     }
+
+    // Extract transport info
+    this.hasTransport = this.orderData.hasTransport || false;
+    this.transportInfo = this.orderData.transportData;
+
+    console.log('Order confirmation data:', this.orderData);
+    console.log('Has transport:', this.hasTransport);
   }
 
   ngOnInit() {
     this.calculateDeliveryTime();
 
-    // Hide animation after 3 seconds
     setTimeout(() => {
       this.showAnimation = false;
     }, 3000);
@@ -83,11 +92,35 @@ export class OrderConfirmationComponent implements OnInit {
   }
 
   private calculateDeliveryTime() {
-    if (this.orderData?.hasTransport) {
-      this.estimatedDelivery = this.orderData.urgency === 'urgent' ?
-        '2-4 hours' : '4-8 hours';
+    if (this.hasTransport && this.transportInfo) {
+      const deliveryType = this.transportInfo.delivery_type;
+      switch (deliveryType) {
+        case 'priority':
+          this.estimatedDelivery = '2-4 hours';
+          break;
+        case 'express':
+          this.estimatedDelivery = '4-8 hours';
+          break;
+        case 'standard':
+          this.estimatedDelivery = '1-2 days';
+          break;
+        default:
+          this.estimatedDelivery = '1-2 business days';
+      }
     } else {
-      this.estimatedDelivery = '1-2 business days';
+      this.estimatedDelivery = '2-3 business days';
+    }
+  }
+
+  getTransportTypeName(): string {
+    if (!this.transportInfo) return '';
+
+    const type = this.transportInfo.delivery_type;
+    switch (type) {
+      case 'standard': return 'Standard Delivery';
+      case 'express': return 'Express Delivery';
+      case 'priority': return 'Priority Delivery';
+      default: return type;
     }
   }
 

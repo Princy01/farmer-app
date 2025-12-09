@@ -200,107 +200,80 @@ export class PaymentComponent implements OnInit, OnDestroy {
   private async handleOrderCreation(orderData: any): Promise<any> {
     try {
       // Prepare order request matching backend structure
-      const orderRequest: CreateOrderRequest = {
-        date_of_order: orderData.date_of_order,
-        order_status: orderData.order_status,
-        desired_delivery_date: orderData.desired_delivery_date,
-        retailer_id: orderData.retailer_id,
-        wholeseller_id: orderData.wholeseller_id,
-        total_order_amount: orderData.total_order_amount,
-        discount_amount: orderData.discount_amount,
-        tax_amount: orderData.tax_amount,
-        final_amount: orderData.final_amount,
-        delivery_address: orderData.delivery_address || 'Default Address',
-        delivery_pincode: orderData.delivery_pincode || '000000',
-        max_price_limit: orderData.max_price_limit || orderData.final_amount,
-        delivery_deadline: orderData.delivery_deadline || orderData.desired_delivery_date,
+      const orderRequest = {
+        date_of_order: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+        order_status: 1, // 1 for pending/new order
+        delivery_address: orderData.deliveryAddress || orderData.selectedBranch?.address || '',
         items: orderData.items.map((item: any) => ({
-          product_id: item.product_id,
+          product_id: item.product_id || item.id,
           quantity: item.quantity,
-          unit_id: item.unit_id,
-          price: item.price_while_added || item.price,
-          discount_amount: item.discount_amount || 0,
-          tax_amount: item.tax_amount || 0
+          unit_id: item.unit_id || item.selectedUnit?.id || 1,
+          price: item.price,
+          discount_amount: item.discount || 0,
+          tax_amount: item.tax || 0,
+          wholeseller_id: item.wholesaler_id
         }))
       };
 
-      // Create the order
-      const orderResponse = await this.orderService.createOrder(orderRequest).toPromise();
+      console.log('Creating order with request:', orderRequest);
 
-      if (!orderResponse || !orderResponse.selected_id) {
-        throw new Error('Invalid order response');
+      const response = await this.orderService.createOrder(orderRequest).toPromise();
+
+      if (!response || !response.order_ids || response.order_ids.length === 0) {
+        throw new Error('No order IDs returned from server');
       }
 
-      const orderId = orderResponse.selected_id;
-      console.log('Order created successfully:', orderId);
+      // If transport is required, create transport job
+      if (this.hasTransport && this.transportInfo && response.order_ids.length > 0) {
+        await this.createTransportJob(response.order_ids, this.transportInfo);
+      }
 
-      // Prepare response data
-      const responseData = {
+      return {
         ...orderData,
-        orderId: orderId,
-        orderStatus: orderData.order_status,
-        orderNumber: `ORD-${orderId}`,
+        orderIds: response.order_ids,
+        orderId: response.order_ids[0], // Primary order ID for display
+        orderNumber: `ORD${response.order_ids[0]}`,
         orderDate: new Date(),
-        transportJobCreated: false,
         paymentMethod: this.selectedPaymentMethod
       };
-
-      // Create transport job if transport was requested
-      if (orderData.hasTransport && orderData.transportData) {
-        try {
-          await this.createTransportJob(orderId, orderData.transportData);
-          responseData.transportJobCreated = true;
-          console.log('Transport job created successfully');
-        } catch (transportError) {
-          console.error('Transport job creation failed:', transportError);
-          // Don't fail the entire order, just log the error
-          responseData.transportJobCreated = false;
-          responseData.transportError = 'Transport job creation failed, but order was placed successfully';
-
-          await this.showToast(
-            this.translate.instant('PAYMENT.TRANSPORT_JOB_FAILED'),
-            'warning'
-          );
-        }
-      }
-
-      return responseData;
-    } catch (error) {
-      console.error('Order creation failed:', error);
-      throw new Error('Order creation failed');
+    } catch (error: any) {
+      console.error('Order creation error:', error);
+      throw error;
     }
   }
 
-  private async createTransportJob(orderId: number, transportData: any): Promise<void> {
-    const transportRequest = {
-      order_ids: [orderId],
-      pickup_location: transportData.pickup_location,
-      dropoff_location: transportData.dropoff_location,
-      pickup_city_id: transportData.pickup_city_id,
-      dropoff_city_id: transportData.dropoff_city_id,
-      pickup_branch_id: transportData.pickup_branch_id,
-      dropoff_branch_id: transportData.dropoff_branch_id,
-      weight: transportData.weight,
-      distance: transportData.distance,
-      delivery_type: transportData.delivery_type,
-      base_price: transportData.base_price,
-      urgency: transportData.urgency,
-      requested_date: transportData.requested_date,
-      load_type: transportData.load_type,
-      status: transportData.status
-    };
-
-    console.log('Creating transport job with request:', transportRequest);
-
+  private async createTransportJob(orderIds: number[], transportData: any): Promise<void> {
     try {
+      const transportRequest = {
+        order_ids: orderIds,
+        pickup_location: transportData.pickup_location,
+        dropoff_location: transportData.dropoff_location,
+        pickup_city_id: transportData.pickup_city_id,
+        dropoff_city_id: transportData.dropoff_city_id,
+        pickup_branch_id: transportData.pickup_branch_id,
+        dropoff_branch_id: transportData.dropoff_branch_id,
+        weight: transportData.weight,
+        distance: transportData.distance || 50,
+        delivery_type: transportData.delivery_type,
+        base_price: transportData.base_price,
+        urgency: transportData.urgency,
+        requested_date: new Date().toISOString(),
+        load_type: transportData.load_type || 'general',
+        status: 'pending'
+      };
+
+      console.log('Creating transport job with request:', transportRequest);
+
       const response = await this.orderService.createTransportJob(transportRequest).toPromise();
       console.log('Transport job created successfully:', response);
+
     } catch (error: any) {
-      console.error('Transport job creation error:', error);
-      if (error.error) {
-        console.error('Backend error response:', error.error);
-      }
-      throw error;
+      console.error('Transport job creation failed:', error);
+      // Don't throw - order is already created, just log the transport error
+      await this.showToast(
+        'Order placed but transport request failed. Please contact support.',
+        'warning'
+      );
     }
   }
 
@@ -320,7 +293,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     this.isProcessingPayment = true;
 
-    // Show processing loader
     const loading = await this.loadingCtrl.create({
       message: this.getProcessingMessage(),
       spinner: 'dots'
@@ -328,24 +300,39 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await loading.present();
 
     try {
-      // Simulate payment processing delay (2 seconds)
+      // Simulate payment processing delay
       await this.simulatePaymentProcessing();
 
-      // Create order directly without payment gateway
-      const updatedOrderData = await this.handleOrderCreation(this.orderData);
+      // Create the order(s)
+      const orderResponse = await this.handleOrderCreation(this.orderData);
+
+      // If transport was selected, create transport job
+      if (this.hasTransport && this.transportInfo && orderResponse.order_ids) {
+        await this.createTransportJob(orderResponse.order_ids, this.transportInfo);
+      }
 
       await loading.dismiss();
 
-      // Show success message
       await this.showToast(
         this.translate.instant('PAYMENT.ORDER_PLACED_SUCCESS'),
         'success'
       );
 
-      // Navigate to order confirmation
+      // Navigate to order confirmation with complete data
       this.router.navigate(['/buyer/order-confirmation'], {
-        state: { orderData: updatedOrderData }
+        state: {
+          orderData: {
+            ...this.orderData,
+            orderIds: orderResponse.order_ids,
+            orderId: orderResponse.order_ids[0], // Primary order ID for display
+            hasTransport: this.hasTransport,
+            transportData: this.transportInfo,
+            paymentMethod: this.selectedPaymentMethod,
+            orderDate: new Date().toISOString()
+          }
+        }
       });
+
     } catch (error) {
       console.error('Payment processing error:', error);
       await loading.dismiss();
@@ -353,6 +340,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       await this.showPaymentError();
     }
   }
+
   // ============================================================================
   // END: Current Implementation
   // ============================================================================

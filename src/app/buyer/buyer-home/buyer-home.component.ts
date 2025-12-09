@@ -144,7 +144,10 @@ export class BuyerHomeComponent {
   setLanguage(langCode: string) {
     this.translate.use(langCode).subscribe({
       next: () => {
+        console.log('Language set to', langCode);
+        console.log(this.languages);
         const lang = this.languages.find(l => l.code === langCode);
+        console.log(lang);
         this.currentLanguage = lang ? lang.name : 'English';
       },
       error: (err) => {

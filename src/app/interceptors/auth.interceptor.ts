@@ -1,54 +1,87 @@
-import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpInterceptorFn,
+  HttpRequest,
+  HttpHandlerFn,
+  HttpErrorResponse,
+  HttpContext,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { catchError, switchMap, throwError } from 'rxjs';
+import { SKIP_TRANSLATION } from './translation.context';
 
-export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
+export const authInterceptor: HttpInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+) => {
   const authService = inject(AuthService);
 
-  // Skip adding token for auth endpoints
-  if (req.url.includes('/auth/login') || req.url.includes('/auth/register-user') || req.url.includes('/auth/refresh-token')) {
-    return next(req);
-  }
+  const isAuthEndpoint =
+    req.url.includes('/auth/login') ||
+    req.url.includes('/auth/register-user') ||
+    req.url.includes('/auth/refresh-token') ||
+    req.url.includes('/auth/');
 
-  // Add token to the request if available
+  const shouldSkipTranslation = isAuthEndpoint    // || !!authService.getToken();
+
+  let modifiedReq = req;
+
   const token = authService.getToken();
-  if (token) {
-    req = addTokenToRequest(req, token);
+  if (token && !isAuthEndpoint) {
+    modifiedReq = modifiedReq.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 
-  // Handle the request and catch any errors
-  return next(req).pipe(
-    catchError((error) => {
-      // Handle 401 Unauthorized errors
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        return handleUnauthorizedError(req, next, authService);
-      }
+  // Automatically attach context to skip translation
+  if (shouldSkipTranslation) {
+    modifiedReq = modifiedReq.clone({
+      context: (modifiedReq.context || new HttpContext()).set(SKIP_TRANSLATION, true),
+    });
+  }
 
-      // Re-throw other errors
+  return next(modifiedReq).pipe(
+    catchError((error) => {
+      if (error instanceof HttpErrorResponse && error.status === 401) {
+        return handleUnauthorizedError(modifiedReq, next, authService);
+      }
       return throwError(() => error);
     })
   );
 };
 
-// Helper function to add token to request
+// Helper: Add token
 function addTokenToRequest(request: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
   return request.clone({
     setHeaders: {
-      Authorization: `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
 }
 
-// Helper function to handle 401 errors by refreshing the token
-function handleUnauthorizedError(request: HttpRequest<unknown>, next: HttpHandlerFn, authService: AuthService) {
+// Handle token refresh
+function handleUnauthorizedError(
+  request: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+  authService: AuthService
+) {
   return authService.refreshToken().pipe(
-    switchMap(response => {
-      // After successful refresh, retry the request with new token
-      return next(addTokenToRequest(request, response.access_token));
+    switchMap((response) => {
+      const newToken = response.access_token;
+      const reqWithNewToken = addTokenToRequest(request, newToken);
+
+      // Preserve the SKIP_TRANSLATION context during retry
+      const finalReq = request.context.get(SKIP_TRANSLATION)
+        ? reqWithNewToken.clone({
+            context: new HttpContext().set(SKIP_TRANSLATION, true),
+          })
+        : reqWithNewToken;
+
+      return next(finalReq);
     }),
-    catchError(refreshError => {
-      // If refresh fails, log the user out
+    catchError((refreshError) => {
       authService.logout();
       return throwError(() => refreshError);
     })

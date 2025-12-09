@@ -27,6 +27,7 @@ export interface BusinessBranch {
   created_at: string;
   updated_at: string;
   active_status: boolean;
+  pincode: string;
 }
 
 @Injectable({

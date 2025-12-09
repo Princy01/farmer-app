@@ -10,30 +10,20 @@ export interface OrderItem {
   price: number;
   discount_amount?: number;
   tax_amount?: number;
+  wholeseller_id: number;
 }
 
 export interface CreateOrderRequest {
-  date_of_order: string;
+  date_of_order: string; // YYYY-MM-DD format
   order_status: number;
-  desired_delivery_date: string;
-  retailer_id: number;
-  wholeseller_id: number;
-  total_order_amount: number;
-  discount_amount: number;
-  tax_amount: number;
-  final_amount: number;
   delivery_address: string;
-  delivery_pincode: string;
-  max_price_limit: number;
-  delivery_deadline: string;
   items: OrderItem[];
 }
 
 export interface CreateOrderResponse {
   message: string;
-  selected_id: number;
+  order_ids: number[];
 }
-
 export interface TransportJobRequest {
   order_ids: number[];
   pickup_location: string;

@@ -12,6 +12,7 @@ import { defineCustomElements } from '@ionic/core/loader';
 import { TRANSLATE_PROVIDERS } from './app/translate.config';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import { translationInterceptor } from '@/interceptors/translation.interceptor';
 
 // Call it before bootstrapping
 defineCustomElements(window);
@@ -22,7 +23,7 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(
-      withInterceptors([authInterceptor])
+      withInterceptors([authInterceptor, translationInterceptor])
     ),
     provideTranslateService({
       loader: provideTranslateHttpLoader({
