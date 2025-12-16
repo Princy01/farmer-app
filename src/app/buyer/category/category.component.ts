@@ -12,6 +12,7 @@ import { catchError, finalize, switchMap, tap } from 'rxjs';
 import { of } from 'rxjs';
 import { Location } from '@angular/common';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MandiProduct, MandiService} from '../category/mandi-products.service';
 
 @Component({
   selector: 'app-category-page',
@@ -87,8 +88,8 @@ export class CategoryPageComponent implements OnInit {
     private authService: AuthService,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
-    private translate: TranslateService
-
+    private translate: TranslateService,
+    private mandiService: MandiService
   ) {
     addIcons({ chevronBack, close, search, heart, alertCircleOutline, funnelOutline, swapVerticalOutline, heartOutline, cartOutline, star });
   }
@@ -381,14 +382,21 @@ export class CategoryPageComponent implements OnInit {
   }
 
   selectProduct(product: ProductAll) {
-    this.selectedProduct = product;
-    // Dummy mandi/wholesaler info
-    this.wholesalers = [
-      { id: 4, name: 'Mandi A', price: 200, distance: '2km', quantity: 100, rating: 4.5, favorite: false },
-      { id: 8, name: 'Mandi B', price: 220, distance: '5km', quantity: 80, rating: 4.2, favorite: false },
-      { id: 1, name: 'Mandi C', price: 190, distance: '7km', quantity: 120, rating: 4.7, favorite: false }
-    ];
-  }
+  this.selectedProduct = product;
+  this.wholesalers = [];
+  if (!product?.product_id) return;
+
+  // Optionally, pass cityId if you have it
+  this.mandiService.getMandisByProduct(product.product_id).subscribe({
+    next: (mandis: MandiProduct[]) => {
+      this.wholesalers = mandis;
+    },
+    error: (err) => {
+      console.error('Failed to load mandis:', err);
+      this.wholesalers = [];
+    }
+  });
+}
 
   backToCategories() {
     this.showProducts = false;

@@ -35,15 +35,17 @@
         <!-- Loading State for Categories -->
         <div *ngIf="loadingCategories" class="ion-text-center ion-padding">
           <ion-spinner></ion-spinner>
-          <p>{{ 'CATEGORY.LOADING_CATEGORIES' | translate }}</p>
+          <p>{{ "CATEGORY.LOADING_CATEGORIES" | translate }}</p>
         </div>
 
         <!-- Error State for Categories -->
         <div *ngIf="errorLoadingCategories" class="ion-padding">
           <ion-text color="danger">
-            <p>{{ 'CATEGORY.ERROR_LOADING_CATEGORIES' | translate }}</p>
+            <p>{{ "CATEGORY.ERROR_LOADING_CATEGORIES" | translate }}</p>
           </ion-text>
-          <ion-button (click)="ngOnInit()">{{ 'CATEGORY.RETRY' | translate }}</ion-button>
+          <ion-button (click)="ngOnInit()">{{
+            "CATEGORY.RETRY" | translate
+          }}</ion-button>
         </div>
 
         <!-- Categories List -->
@@ -70,7 +72,7 @@
                   [alt]="categoryName"
                 />
                 <div class="subcategory-name">
-                  <b>{{ 'CATEGORY.ALL' | translate }} {{ categoryName }}</b>
+                  <b>{{ "CATEGORY.ALL" | translate }} {{ categoryName }}</b>
                 </div>
               </div>
             </ion-item>
@@ -110,7 +112,7 @@
         <!-- Loading indicator -->
         <div class="loading-container" *ngIf="loadingProducts">
           <ion-spinner name="circular"></ion-spinner>
-          <p>{{ 'CATEGORY.LOADING_PRODUCTS' | translate }}</p>
+          <p>{{ "CATEGORY.LOADING_PRODUCTS" | translate }}</p>
         </div>
 
         <!-- Error message -->
@@ -120,7 +122,7 @@
             color="danger"
             size="large"
           ></ion-icon>
-          <p>{{ 'CATEGORY.ERROR_LOADING_PRODUCTS' | translate }}</p>
+          <p>{{ "CATEGORY.ERROR_LOADING_PRODUCTS" | translate }}</p>
           <ion-button
             (click)="
               selectSubcategory({
@@ -129,7 +131,7 @@
               })
             "
           >
-            {{ 'CATEGORY.RETRY' | translate }}
+            {{ "CATEGORY.RETRY" | translate }}
           </ion-button>
         </div>
 
@@ -186,16 +188,22 @@
             </ion-card-header>
             <ion-card-content>
               <p>
-                {{ selectedProduct.description || ('CATEGORY.NO_DESCRIPTION' | translate) }}
+                {{
+                  selectedProduct.description ||
+                    ("CATEGORY.NO_DESCRIPTION" | translate)
+                }}
               </p>
               <p>
-                <b>{{ 'CATEGORY.NUTRITION' | translate }}</b>
-                {{ selectedProduct.nutrition_factor || ('CATEGORY.NA' | translate) }}
+                <b>{{ "CATEGORY.NUTRITION" | translate }}</b>
+                {{
+                  selectedProduct.nutrition_factor ||
+                    ("CATEGORY.NA" | translate)
+                }}
               </p>
             </ion-card-content>
           </ion-card>
 
-          <!-- Mandi/Wholesaler Info (dummy data) -->
+          <!-- Mandi/Wholesaler Info-->
           <div class="wholesaler-vertical-scroll" style="margin-top: 12px">
             <ion-card
               *ngFor="let wholesaler of wholesalers"
@@ -204,7 +212,7 @@
               <ion-card-header
                 style="position: relative; display: flex; align-items: center"
               >
-                <ion-card-title>{{ wholesaler.name }}</ion-card-title>
+                <ion-card-title>{{ wholesaler.mandi_name }}</ion-card-title>
                 <ion-icon
                   [name]="wholesaler.favorite ? 'heart' : 'heart-outline'"
                   class="heart-icon"
@@ -212,14 +220,34 @@
                 ></ion-icon>
               </ion-card-header>
               <ion-card-content>
-                <p><b>{{ 'CATEGORY.QUANTITY' | translate }}</b> {{ wholesaler.quantity }} Kg</p>
-                <p><b>{{ 'CATEGORY.PRICE' | translate }}</b> ₹{{ wholesaler.price }}</p>
-                <p><b>{{ 'CATEGORY.DISTANCE' | translate }}</b> {{ wholesaler.distance }}</p>
+                <p>
+                  <b>{{ "CATEGORY.ADDRESS" | translate }}:</b>
+                  {{ wholesaler.mandi_address }}, {{ wholesaler.city_name }},
+                  {{ wholesaler.state_name }}
+                </p>
+                <p>
+                  <b>{{ "CATEGORY.INCHARGE" | translate }}:</b>
+                  {{ wholesaler.mandi_incharge }} ({{
+                    wholesaler.mandi_incharge_num
+                  }})
+                </p>
+                <p>
+                  <b>{{ "CATEGORY.PRODUCT" | translate }}:</b>
+                  {{ wholesaler.product_name }}
+                </p>
+                <p *ngIf="wholesaler.quality_name">
+                  <b>{{ "CATEGORY.QUALITY" | translate }}:</b>
+                  {{ wholesaler.quality_name }}
+                </p>
+                <p *ngIf="wholesaler.wastage_measure_name">
+                  <b>{{ "CATEGORY.WASTAGE" | translate }}:</b>
+                  {{ wholesaler.wastage_measure_name }}
+                </p>
                 <div
                   style="
                     display: flex;
                     align-items: center;
-                    justify-content: space-between;
+                    justify-content: flex-end;
                     margin-top: 8px;
                   "
                 >
@@ -227,22 +255,8 @@
                     size="small"
                     (click)="addToCart(wholesaler, $event)"
                   >
-                    {{ 'CATEGORY.ADD_TO_CART' | translate }}
+                    {{ "CATEGORY.ADD_TO_CART" | translate }}
                   </ion-button>
-                  <span
-                    style="
-                      display: flex;
-                      align-items: center;
-                      font-size: 1em;
-                      margin-left: 8px;
-                    "
-                  >
-                    <ion-icon
-                      name="star"
-                      style="color: #f4d03f; margin-right: 4px"
-                    ></ion-icon>
-                    {{ wholesaler.rating || 4.2 }}
-                  </span>
                 </div>
               </ion-card-content>
             </ion-card>
@@ -254,7 +268,9 @@
           *ngIf="!selectedProduct && filteredAndSortedItems.length > 0"
           style="text-align: center; margin-top: 24px"
         >
-          <ion-text color="medium">{{ 'CATEGORY.SELECT_PRODUCT' | translate }}</ion-text>
+          <ion-text color="medium">{{
+            "CATEGORY.SELECT_PRODUCT" | translate
+          }}</ion-text>
         </div>
       </ion-col>
     </ion-row>
@@ -264,10 +280,10 @@
   <ng-template #noItems>
     <div class="no-items">
       <ion-icon name="alert-circle-outline"></ion-icon>
-      <p>{{ 'CATEGORY.NO_ITEMS_FOUND' | translate }}</p>
-      <ion-button (click)="clearFilters()"
-        >{{ 'CATEGORY.CLEAR_FILTERS' | translate }}</ion-button
-      >
+      <p>{{ "CATEGORY.NO_ITEMS_FOUND" | translate }}</p>
+      <ion-button (click)="clearFilters()">{{
+        "CATEGORY.CLEAR_FILTERS" | translate
+      }}</ion-button>
     </div>
   </ng-template>
 </ion-content>
@@ -277,10 +293,12 @@
   <ion-toolbar class="toolbar-container">
     <ion-buttons class="button-group">
       <ion-button class="filter-button" (click)="openFilterModal()">
-        <ion-icon name="funnel-outline"></ion-icon> {{ 'CATEGORY.FILTER' | translate }}
+        <ion-icon name="funnel-outline"></ion-icon>
+        {{ "CATEGORY.FILTER" | translate }}
       </ion-button>
       <ion-button class="sort-button" (click)="openSortModal()">
-        <ion-icon name="swap-vertical-outline"></ion-icon> {{ 'CATEGORY.SORT' | translate }}
+        <ion-icon name="swap-vertical-outline"></ion-icon>
+        {{ "CATEGORY.SORT" | translate }}
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -296,9 +314,11 @@
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ 'CATEGORY.FILTER' | translate }}</ion-title>
+        <ion-title>{{ "CATEGORY.FILTER" | translate }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="closeFilterModal()">{{ 'CATEGORY.CLOSE' | translate }}</ion-button>
+          <ion-button (click)="closeFilterModal()">{{
+            "CATEGORY.CLOSE" | translate
+          }}</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -306,40 +326,57 @@
       <ion-list>
         <!-- Availability -->
         <ion-item>
-          <ion-label>{{ 'CATEGORY.IN_STOCK' | translate }}</ion-label>
+          <ion-label>{{ "CATEGORY.IN_STOCK" | translate }}</ion-label>
           <ion-toggle [(ngModel)]="availability"></ion-toggle>
         </ion-item>
 
         <!-- Quantity-Based Discount -->
         <ion-item>
-          <ion-label>{{ 'CATEGORY.DISCOUNT_AVAILABLE' | translate }}</ion-label>
+          <ion-label>{{ "CATEGORY.DISCOUNT_AVAILABLE" | translate }}</ion-label>
           <ion-toggle [(ngModel)]="quantityDiscount"></ion-toggle>
         </ion-item>
 
         <!-- Delivery Time -->
         <ion-item>
-          <ion-label>{{ 'CATEGORY.DELIVERY_TIME' | translate }}</ion-label>
+          <ion-label>{{ "CATEGORY.DELIVERY_TIME" | translate }}</ion-label>
           <ion-select [(ngModel)]="deliveryTime" interface="popover">
-            <ion-select-option value="any">{{ 'CATEGORY.DELIVERY_ANY' | translate }}</ion-select-option>
-            <ion-select-option value="same-day">{{ 'CATEGORY.DELIVERY_SAME_DAY' | translate }}</ion-select-option>
-            <ion-select-option value="1-3 days">{{ 'CATEGORY.DELIVERY_1_3_DAYS' | translate }}</ion-select-option>
-            <ion-select-option value="1 week">{{ 'CATEGORY.DELIVERY_1_WEEK' | translate }}</ion-select-option>
+            <ion-select-option value="any">{{
+              "CATEGORY.DELIVERY_ANY" | translate
+            }}</ion-select-option>
+            <ion-select-option value="same-day">{{
+              "CATEGORY.DELIVERY_SAME_DAY" | translate
+            }}</ion-select-option>
+            <ion-select-option value="1-3 days">{{
+              "CATEGORY.DELIVERY_1_3_DAYS" | translate
+            }}</ion-select-option>
+            <ion-select-option value="1 week">{{
+              "CATEGORY.DELIVERY_1_WEEK" | translate
+            }}</ion-select-option>
           </ion-select>
         </ion-item>
 
         <!-- Organic / Non-Organic -->
         <ion-item>
-          <ion-label>{{ 'CATEGORY.ORGANIC' | translate }}</ion-label>
+          <ion-label>{{ "CATEGORY.ORGANIC" | translate }}</ion-label>
           <ion-segment [(ngModel)]="organic">
-            <ion-segment-button value="true">{{ 'CATEGORY.YES' | translate }}</ion-segment-button>
-            <ion-segment-button value="false">{{ 'CATEGORY.NO' | translate }}</ion-segment-button>
-            <ion-segment-button value="null">{{ 'CATEGORY.ANY' | translate }}</ion-segment-button>
+            <ion-segment-button value="true">{{
+              "CATEGORY.YES" | translate
+            }}</ion-segment-button>
+            <ion-segment-button value="false">{{
+              "CATEGORY.NO" | translate
+            }}</ion-segment-button>
+            <ion-segment-button value="null">{{
+              "CATEGORY.ANY" | translate
+            }}</ion-segment-button>
           </ion-segment>
         </ion-item>
 
         <!-- Seller Ratings -->
         <ion-item>
-          <ion-label>{{ 'CATEGORY.SELLER_RATING' | translate }}: {{ sellerRatings }}⭐</ion-label>
+          <ion-label
+            >{{ "CATEGORY.SELLER_RATING" | translate }}:
+            {{ sellerRatings }}⭐</ion-label
+          >
           <ion-range
             [(ngModel)]="sellerRatings"
             min="0"
@@ -350,7 +387,7 @@
 
         <!-- Minimum Order Quantity -->
         <ion-item class="min-order-item">
-          <ion-label>{{ 'CATEGORY.MIN_ORDER_QUANTITY' | translate }}</ion-label>
+          <ion-label>{{ "CATEGORY.MIN_ORDER_QUANTITY" | translate }}</ion-label>
           <ion-input
             type="number"
             [(ngModel)]="minimumOrderQuantity"
@@ -359,8 +396,10 @@
         </ion-item>
       </ion-list>
       <ion-footer>
-        <ion-button expand="full" (click)="applyFilters(); closeFilterModal()"
-          >{{ 'CATEGORY.APPLY' | translate }}</ion-button
+        <ion-button
+          expand="full"
+          (click)="applyFilters(); closeFilterModal()"
+          >{{ "CATEGORY.APPLY" | translate }}</ion-button
         >
       </ion-footer>
     </ion-content>
@@ -377,9 +416,11 @@
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ 'CATEGORY.SORT' | translate }}</ion-title>
+        <ion-title>{{ "CATEGORY.SORT" | translate }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="closeSortModal()">{{ 'CATEGORY.CLOSE' | translate }}</ion-button>
+          <ion-button (click)="closeSortModal()">{{
+            "CATEGORY.CLOSE" | translate
+          }}</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -391,19 +432,19 @@
           (ionChange)="applySort()"
         >
           <ion-item lines="none" class="radio-item">
-            <ion-label>{{ 'CATEGORY.NAME_ASC' | translate }}</ion-label>
+            <ion-label>{{ "CATEGORY.NAME_ASC" | translate }}</ion-label>
             <ion-radio slot="end" value="name-asc"></ion-radio>
           </ion-item>
           <ion-item lines="none" class="radio-item">
-            <ion-label>{{ 'CATEGORY.NAME_DESC' | translate }}</ion-label>
+            <ion-label>{{ "CATEGORY.NAME_DESC" | translate }}</ion-label>
             <ion-radio slot="end" value="name-desc"></ion-radio>
           </ion-item>
           <ion-item lines="none" class="radio-item">
-            <ion-label>{{ 'CATEGORY.DISCOUNT' | translate }}</ion-label>
+            <ion-label>{{ "CATEGORY.DISCOUNT" | translate }}</ion-label>
             <ion-radio slot="end" value="discount"></ion-radio>
           </ion-item>
           <ion-item lines="none" class="radio-item">
-            <ion-label>{{ 'CATEGORY.CUSTOMER_RATING' | translate }}</ion-label>
+            <ion-label>{{ "CATEGORY.CUSTOMER_RATING" | translate }}</ion-label>
             <ion-radio slot="end" value="rating"></ion-radio>
           </ion-item>
         </ion-radio-group>

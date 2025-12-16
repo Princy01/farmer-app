@@ -1005,7 +1005,12 @@
     "ADDED_TO_CART": "{{product}} added to cart successfully!",
     "CONTINUE_SHOPPING": "Continue Shopping",
     "VIEW_CART": "View Cart",
-    "FAILED_ADD_TO_CART": "Failed to add item to cart. Please try again."
+    "FAILED_ADD_TO_CART": "Failed to add item to cart. Please try again.",
+    "ADDRESS": "Address",
+    "INCHARGE": "Incharge",
+    "PRODUCT": "Product",
+    "QUALITY": "Quality",
+    "WASTAGE": "Wastage"
   },
 
 
