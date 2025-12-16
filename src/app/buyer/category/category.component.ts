@@ -385,8 +385,8 @@ export class CategoryPageComponent implements OnInit {
     // Dummy mandi/wholesaler info
     this.wholesalers = [
       { id: 4, name: 'Mandi A', price: 200, distance: '2km', quantity: 100, rating: 4.5, favorite: false },
-      { id: 2, name: 'Mandi B', price: 220, distance: '5km', quantity: 80, rating: 4.2, favorite: false },
-      { id: 3, name: 'Mandi C', price: 190, distance: '7km', quantity: 120, rating: 4.7, favorite: false }
+      { id: 8, name: 'Mandi B', price: 220, distance: '5km', quantity: 80, rating: 4.2, favorite: false },
+      { id: 1, name: 'Mandi C', price: 190, distance: '7km', quantity: 120, rating: 4.7, favorite: false }
     ];
   }
 

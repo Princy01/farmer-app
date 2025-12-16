@@ -73,8 +73,10 @@ export class OrderConfirmationComponent implements OnInit {
   }
 
   trackOrder() {
+    // Assuming orderIds is an array, use the first one or handle multiple
+    const orderId = this.orderData.orderIds ? this.orderData.orderIds[0] : this.orderData.orderId;
     this.router.navigate(['/buyer/order-tracking'], {
-      queryParams: { orderId: this.orderData.orderId }
+      queryParams: { orderId: orderId }
     });
   }
 
@@ -88,7 +90,8 @@ export class OrderConfirmationComponent implements OnInit {
 
   downloadInvoice() {
     // Implement invoice download functionality
-    console.log('Downloading invoice for order:', this.orderData.orderId);
+    const orderId = this.orderData.orderIds ? this.orderData.orderIds[0] : this.orderData.orderId;
+    console.log('Downloading invoice for order:', orderId);
   }
 
   private calculateDeliveryTime() {

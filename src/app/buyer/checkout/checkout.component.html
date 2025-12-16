@@ -227,15 +227,9 @@
                 <ion-icon name="flash-outline" class="summary-icon"></ion-icon>
                 {{ "CHECKOUT.DELIVERY_TYPE" | translate }}
               </div>
-              <div class="summary-value">{{ selectedDeliveryType }}</div>
+              <div class="summary-value">{{ selectedDeliveryType | titlecase }}</div>
             </div>
-            <div class="summary-item">
-              <div class="summary-label">
-                <ion-icon name="time-outline" class="summary-icon"></ion-icon>
-                {{ "CHECKOUT.URGENCY" | translate }}
-              </div>
-              <div class="summary-value">{{ selectedUrgency }}</div>
-            </div>
+            <!-- Removed urgency summary item -->
             <div class="summary-item">
               <div class="summary-label">
                 <ion-icon name="cash-outline" class="summary-icon"></ion-icon>

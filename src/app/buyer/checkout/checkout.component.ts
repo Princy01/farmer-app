@@ -145,19 +145,24 @@ export class CheckoutComponent implements OnInit {
 
       // Handle cart items
       if (navData['cartItems']) {
-        this.cartItems = (navData['cartItems'] || []).map((item: any) => ({
-          product_id: item.product_id,
-          product_name: item.product_name || item.name,
-          quantity: item.quantity,
-          unit_id: item.unit_id,
-          unit_name: item.unit_name,
-          price_while_added: item.price_while_added || item.latest_wholesaler_price || item.price,
-          latest_wholesaler_price: item.latest_wholesaler_price || item.price,
-          price_updated_at: item.price_updated_at,
-          is_active: !item.is_deleted,
-          wholesaler_id: item.wholesaler_id,
-          wholesaler_name: item.wholesaler_name
-        }));
+        this.cartItems = (navData['cartItems'] || []).map((item: any) => {
+          // Determine the price: prefer price_while_added (from ride return), then fall back to item.price (from cart)
+          const price = item.price_while_added || item.price || 0;
+
+          return {
+            product_id: item.product_id,
+            product_name: item.product_name || item.name,
+            quantity: item.quantity,
+            unit_id: item.unit_id,
+            unit_name: item.unit_name,
+            price_while_added: price,
+            latest_wholesaler_price: price, // Use the same resolved price
+            price_updated_at: item.price_updated_at,
+            is_active: !item.is_deleted,
+            wholesaler_id: item.wholesaler_id,
+            wholesaler_name: item.wholesaler_name
+          };
+        });
 
         this.totalPrice = navData['totalPrice'] || 0;
         this.retailerInfo = navData['retailer'] || null;
@@ -171,7 +176,8 @@ export class CheckoutComponent implements OnInit {
       // Handle transport data from ride component
       if (navData['transportData']) {
         this.transportData = navData['transportData'];
-        this.hasRideRequest = navData['hasRideRequest'] || false;
+        // Check for both 'hasRideRequest' and 'hasTransport' keys for compatibility
+        this.hasRideRequest = navData['hasRideRequest'] || navData['hasTransport'] || false;
         this.selectedDeliveryType = this.transportData.delivery_type;
         this.selectedUrgency = this.transportData.urgency;
         this.estimatedRidePrice = this.transportData.base_price;
@@ -329,9 +335,11 @@ export class CheckoutComponent implements OnInit {
   }
 
   calculateRidePrice() {
-    // If we already have transport data with a price, use it
-    if (this.hasRideRequest && this.transportData?.base_price) {
-      this.estimatedRidePrice = this.transportData.base_price;
+    // Dynamically calculate transport cost based on delivery_type and distance (same logic as ride component)
+    if (this.hasRideRequest && this.transportData?.delivery_type && this.transportData?.distance) {
+      const ratesPerKm = { standard: 8, express: 15, priority: 25 };
+      const rate = ratesPerKm[this.transportData.delivery_type as keyof typeof ratesPerKm] || 0;
+      this.estimatedRidePrice = Math.max(50, Math.round(rate * this.transportData.distance));
     } else {
       this.estimatedRidePrice = 0;
     }
@@ -355,7 +363,7 @@ export class CheckoutComponent implements OnInit {
 
     const totalWeight = this.calculateTotalWeight();
 
-    // Pass current checkout state to ride component
+    // Pass current checkout state to ride component, including existing transport data
     this.router.navigate(['/buyer/ride'], {
       state: {
         totalWeight: totalWeight,
@@ -369,7 +377,10 @@ export class CheckoutComponent implements OnInit {
         discount: this.discount,
         retailer: this.retailerInfo,
         wholeseller: this.wholeSeller,
-        selectedBranch: this.selectedBranch
+        selectedBranch: this.selectedBranch,
+        // Include existing transport data for pre-population in ride page
+        transportData: this.transportData,
+        hasTransport: this.hasRideRequest
       }
     });
   }

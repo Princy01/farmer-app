@@ -16,7 +16,8 @@ import {
   calculatorOutline,
   checkmarkCircle,
   checkmarkCircleOutline,
-  starOutline
+  starOutline,
+  navigateOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -28,13 +29,14 @@ import {
 })
 export class RideComponent implements OnInit {
   private checkoutData: any = null;
+  private existingTransportData: any = null; // Store existing transport data from navigation
 
   selectedTransportType: string | null = null;
 
   totalWeight: number = 0;
   pickupLocation: string = '';
   dropoffLocation: string = 'Destination';
-  distance: number = 0;
+  distance: number = 50;
 
   // Simulate user premium status - change this based on user service
   isPremiumUser: boolean = false; // Set to true to test premium mode
@@ -54,7 +56,8 @@ export class RideComponent implements OnInit {
       calculatorOutline,
       checkmarkCircle,
       checkmarkCircleOutline,
-      starOutline
+      starOutline,
+      navigateOutline
     });
 
     // Get data from navigation state
@@ -66,7 +69,13 @@ export class RideComponent implements OnInit {
       this.pickupLocation = navData['pickup'] || '';
       this.dropoffLocation = navData['delivery'] || 'Destination';
 
-            this.distance = this.calculateDummyDistance();
+      this.distance = navData['distance'] || this.calculateDummyDistance();
+
+      // Store existing transport data and initialize selection if present
+      this.existingTransportData = navData['transportData'] || null;
+      if (this.existingTransportData) {
+        this.selectedTransportType = this.existingTransportData.delivery_type || null;
+      }
 
       // Store all checkout data to pass back
       this.checkoutData = {
@@ -77,26 +86,22 @@ export class RideComponent implements OnInit {
         wholeseller: navData['wholeseller'],
         selectedBranch: navData['selectedBranch'],
         pickupCityId: navData['pickupCityId'],
-        pickupBranchId: navData['pickupBranchId']
+        pickupBranchId: navData['pickupBranchId'],
+        dropoffCityId: navData['dropoffCityId'],
+        dropoffBranchId: navData['dropoffBranchId']
       };
     }
   }
 
   ngOnInit() {
-    // Also check query params as backup
     this.route.queryParams.subscribe(params => {
-      if (params['totalWeight']) {
-        this.totalWeight = +params['totalWeight'] || 0;
-      }
-      if (params['pickup']) {
-        this.pickupLocation = params['pickup'] || '';
-      }
-      if (params['delivery']) {
-        this.dropoffLocation = params['delivery'] || 'Destination';
-      }
+      if (params['totalWeight']) this.totalWeight = +params['totalWeight'];
+      if (params['pickup']) this.pickupLocation = params['pickup'];
+      if (params['delivery']) this.dropoffLocation = params['delivery'];
+      if (params['distance']) this.distance = +params['distance'];
     });
 
-     if (this.distance === 0) {
+    if (this.distance === 0) {
       this.distance = this.calculateDummyDistance();
     }
   }
@@ -109,14 +114,23 @@ export class RideComponent implements OnInit {
   }
 
   goBack() {
-    // Navigate back with checkout data intact
-    if (this.checkoutData) {
-      this.router.navigate(['/buyer/checkout'], {
-        state: this.checkoutData
-      });
-    } else {
-      this.router.navigate(['/buyer/checkout']);
+    let transportDataToPass = this.existingTransportData;
+    if (this.selectedTransportType && (!this.existingTransportData || this.selectedTransportType !== this.existingTransportData.delivery_type)) {
+      transportDataToPass = {
+        delivery_type: this.selectedTransportType,
+        distance: this.distance,
+        load_type: 'general',
+        status: 'pending'
+      };
     }
+
+    this.router.navigate(['/buyer/checkout'], {
+      state: {
+        ...this.checkoutData,
+        transportData: transportDataToPass,
+        hasTransport: !!transportDataToPass
+      }
+    });
   }
 
   selectTransportType(type: string) {
@@ -145,30 +159,8 @@ export class RideComponent implements OnInit {
   }
 
   getBaseDeliveryCharge(): number {
-    // Base rates per km for each transport type
-    const ratesPerKm = {
-      standard: 8,   // ₹8 per km
-      express: 15,   // ₹15 per km
-      priority: 25   // ₹25 per km
-    };
-
-    let rate = 0;
-    switch (this.selectedTransportType) {
-      case 'standard':
-        rate = ratesPerKm.standard;
-        break;
-      case 'express':
-        rate = ratesPerKm.express;
-        break;
-      case 'priority':
-        rate = ratesPerKm.priority;
-        break;
-      default:
-        return 0;
-    }
-
-    // Calculate cost: rate per km * distance
-    // Minimum charge of ₹50 for any delivery
+    const ratesPerKm = { standard: 8, express: 15, priority: 25 };
+    const rate = ratesPerKm[this.selectedTransportType as keyof typeof ratesPerKm] || 0;
     return Math.max(50, Math.round(rate * this.distance));
   }
 
@@ -176,7 +168,6 @@ export class RideComponent implements OnInit {
     return this.getBaseDeliveryCharge();
   }
 
-  // Get rate per km for display
   getRatePerKm(): number {
     switch (this.selectedTransportType) {
       case 'standard': return 8;
@@ -185,7 +176,7 @@ export class RideComponent implements OnInit {
       default: return 0;
     }
   }
-  
+
   getTransportTypeName(): string {
     switch (this.selectedTransportType) {
       case 'standard': return this.translate.instant('RIDE.STANDARD_DELIVERY');
@@ -210,31 +201,20 @@ export class RideComponent implements OnInit {
       return;
     }
 
-    const transportData = {
-      pickup_location: this.pickupLocation,
-      dropoff_location: this.dropoffLocation,
-      weight: this.totalWeight,
+    const transportRequestData = {
       delivery_type: this.selectedTransportType,
-      base_price: this.getTotalDeliveryCost(),
-      urgency: this.selectedTransportType === 'priority' ? 'urgent' : 'normal',
-      requested_date: new Date().toISOString(),
+      distance: this.distance,
       load_type: 'general',
-      status: 'pending',
-      pickup_city_id: this.checkoutData?.pickupCityId,
-      dropoff_city_id: undefined, // Add if you have this data
-      pickup_branch_id: this.checkoutData?.pickupBranchId,
-      dropoff_branch_id: undefined, // Add if you have this data
-      distance: 50 // Calculate or estimate
+      status: 'pending'
     };
 
-    console.log('Confirming transport with data:', transportData);
+    console.log('Confirmed transport data (passed to checkout/payment):', transportRequestData);
 
-    // Navigate back to checkout with ALL data
     this.router.navigate(['/buyer/checkout'], {
       state: {
-        ...this.checkoutData, // Spread all checkout data
-        transportData,
-        hasRideRequest: true
+        ...this.checkoutData,
+        transportData: transportRequestData,
+        hasTransport: true
       }
     });
   }
