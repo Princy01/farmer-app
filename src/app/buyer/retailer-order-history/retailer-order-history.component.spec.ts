@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { RetailerOrderTrackingComponent } from './retailer-order-tracking.component';
+import { RetailerOrderTrackingComponent } from './retailer-order-history.component';
 
 describe('RetailerOrderTrackingComponent', () => {
   let component: RetailerOrderTrackingComponent;

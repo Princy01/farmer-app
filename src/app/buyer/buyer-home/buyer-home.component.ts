@@ -230,7 +230,7 @@ export class BuyerHomeComponent {
 
   async navigateToTrackOrders() {
     await this.closeMenu();
-    this.router.navigate(['/buyer/retailer-order-tracking'], {
+    this.router.navigate(['/buyer/retailer-order-history'], {
       queryParams: { id: 'ORD123456' }
     });
   }

@@ -1,0 +1,228 @@
+// Global variables for consistency
+$primary-gradient-start: #667eea;
+$primary-gradient-end: #764ba2;
+$card-bg: #ffffff;
+$card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+$border-radius: 16px;
+$text-primary: #2d3436;
+$text-secondary: #636e72;
+$success-color: #00b894;
+
+// Loading container
+.loading-container {
+  padding: 16px;
+}
+
+// Filter tabs
+.filter-tabs {
+  padding: 16px 16px 8px 16px;
+  background: $card-bg;
+
+  ion-segment {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 4px;
+
+    ion-segment-button {
+      --background: transparent;
+      --color: #636e72;
+      --background-checked: white;
+      --color-checked: $text-primary;
+      --indicator-color: transparent;
+      --border-radius: 10px;
+      --padding-start: 16px;
+      --padding-end: 16px;
+      min-height: 40px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+
+      &.segment-button-checked {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+}
+
+// Orders grid
+.orders-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px 16px 16px;
+}
+
+.modern-order-card {
+  background: $card-bg;
+  border-radius: $border-radius;
+  padding: 16px;
+  box-shadow: $card-shadow;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #f0f0f0;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  // Order header
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+
+    .order-info {
+      .order-id {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $text-primary;
+        margin-bottom: 4px;
+      }
+
+      .order-date {
+        font-size: 0.9rem;
+        color: $text-secondary;
+      }
+    }
+
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      ion-icon {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  // Progress bar
+  .progress-container {
+    margin: 12px 0;
+
+    ion-progress-bar {
+      --progress-background: var(--ion-color-primary);
+      --background: #e9ecef;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+  }
+
+  // Address section
+  .address-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 12px 0;
+    font-size: 0.95rem;
+    color: $text-secondary;
+    line-height: 1.5;
+
+    ion-icon {
+      font-size: 1.2rem;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .address-text {
+      word-break: break-word;
+    }
+  }
+
+  // Footer section
+  .footer-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed #eee;
+
+    .amount-info {
+      .label {
+        font-size: 0.85rem;
+        color: $text-secondary;
+        margin-bottom: 4px;
+      }
+
+      .amount {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: $text-primary;
+      }
+    }
+
+    .delivery-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: $success-color;
+      font-weight: 500;
+
+      ion-icon {
+        font-size: 1.3rem;
+      }
+    }
+  }
+}
+
+// Empty state
+.empty-state {
+  text-align: center;
+  padding: 60px 32px;
+  color: $text-secondary;
+
+  .empty-icon {
+    font-size: 80px;
+    color: #ddd;
+    margin-bottom: 24px;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: $text-primary;
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .cta-button {
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 600;
+  }
+}
+
+// Error state
+.empty-state .empty-icon {
+  color: #fab1a0;
+}
+
+// Responsive adjustments
+@media (max-width: 360px) {
+  .modern-order-card {
+    padding: 14px;
+  }
+
+  .footer-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .amount-info .amount {
+    font-size: 1.2rem;
+  }
+}

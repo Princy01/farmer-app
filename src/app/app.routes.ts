@@ -228,8 +228,8 @@ export const routes: Routes = [
         loadComponent: () => import('./buyer/ride/ride.component').then((m) => m.RideComponent),
       },
       {
-        path: 'retailer-order-tracking',
-        loadComponent: () => import('./buyer/retailer-order-tracking/retailer-order-tracking.component').then((m) => m.RetailerOrderTrackingComponent),
+        path: 'retailer-order-history',
+        loadComponent: () => import('./buyer/retailer-order-history/retailer-order-history.component').then((m) => m.RetailerOrderHistoryComponent),
       },
       {
         path: 'retailer-order-details',

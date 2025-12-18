@@ -1176,19 +1176,28 @@
     "PAYMENT_NET_BANKING": "Net Banking"
   },
 
-  "RETAILER_ORDER_TRACKING": {
-  "PAGE_TITLE": "My Orders",
-  "FILTER_ALL": "All",
+  "RETAILER_ORDER_HISTORY": {
+  "PAGE_TITLE": "Order History",
+  "FILTER_ALL": "All Orders",
   "FILTER_ACTIVE": "Active",
   "FILTER_DELIVERED": "Delivered",
   "FILTER_CANCELLED": "Cancelled",
-  "NO_ORDERS": "No {{filter}} orders",
-  "NO_ORDERS_DESC_ALL": "You haven't placed any orders yet. Start shopping to see your orders here.",
-  "NO_ORDERS_DESC_FILTER": "No {{filter}} orders found. Try a different filter.",
+  "TOTAL_AMOUNT": "Total Amount",
+  "DELIVERED_ON": "Delivered on {date}",
+  "NO_ORDERS_TITLE": "No orders found",
+  "NO_ORDERS_DESC_ALL": "You haven't placed any orders yet.",
+  "NO_ORDERS_DESC_FILTER": "No {{filter}} orders at the moment.",
   "BROWSE_PRODUCTS": "Browse Products",
-  "ITEMS": "items",
-  "EST_DELIVERY": "Est. {{date}}",
-  "DELIVERED_ON": "{{date}}"
+  "ERROR_TITLE": "Something went wrong",
+  "ERROR_MESSAGE": "Failed to load your orders.",
+  "RETRY": "Try Again",
+  "STATUS_PLACED": "Placed",
+  "STATUS_CONFIRMED": "Confirmed",
+  "STATUS_PACKED": "Packed",
+  "STATUS_SHIPPED": "Shipped",
+  "STATUS_IN_TRANSIT": "In Transit",
+  "STATUS_DELIVERED": "Delivered",
+  "STATUS_CANCELLED": "Cancelled"
 },
 
 

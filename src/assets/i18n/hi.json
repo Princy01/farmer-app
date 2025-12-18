@@ -1162,20 +1162,29 @@
     "PAYMENT_NET_BANKING": "नेट बैंकिंग"
   },
 
-  "RETAILER_ORDER_TRACKING": {
-    "PAGE_TITLE": "मेरे ऑर्डर",
-    "FILTER_ALL": "सभी",
-    "FILTER_ACTIVE": "सक्रिय",
-    "FILTER_DELIVERED": "डिलीवर किए गए",
-    "FILTER_CANCELLED": "रद्द किए गए",
-    "NO_ORDERS": "कोई {{filter}} ऑर्डर नहीं",
-    "NO_ORDERS_DESC_ALL": "आपने अभी तक कोई ऑर्डर नहीं किया है। ऑर्डर देखने के लिए खरीदारी शुरू करें।",
-    "NO_ORDERS_DESC_FILTER": "कोई {{filter}} ऑर्डर नहीं मिला। कृपया दूसरा फ़िल्टर आज़माएं।",
-    "BROWSE_PRODUCTS": "उत्पाद देखें",
-    "ITEMS": "आइटम",
-    "EST_DELIVERY": "अनुमानित {{date}}",
-    "DELIVERED_ON": "{{date}}"
-  },
+  "RETAILER_ORDER_HISTORY": {
+  "PAGE_TITLE": "ऑर्डर सूची",
+  "FILTER_ALL": "सभी ऑर्डर",
+  "FILTER_ACTIVE": "चल रहे ऑर्डर",
+  "FILTER_DELIVERED": "डिलीवर हुए ऑर्डर",
+  "FILTER_CANCELLED": "रद्द किए गए ऑर्डर",
+  "TOTAL_AMOUNT": "कुल राशि",
+  "DELIVERED_ON": "{date} को डिलीवर हुआ",
+  "NO_ORDERS_TITLE": "कोई ऑर्डर नहीं मिला",
+  "NO_ORDERS_DESC_ALL": "आपने अभी तक कोई ऑर्डर नहीं किया है।",
+  "NO_ORDERS_DESC_FILTER": "अभी कोई {{filter}} ऑर्डर नहीं है।",
+  "BROWSE_PRODUCTS": "उत्पाद देखें",
+  "ERROR_TITLE": "कुछ गलत हो गया",
+  "ERROR_MESSAGE": "आपके ऑर्डर लोड नहीं हो पाए।",
+  "RETRY": "फिर से कोशिश करें",
+  "STATUS_PLACED": "ऑर्डर किया गया",
+  "STATUS_CONFIRMED": "पुष्टि हो गई",
+  "STATUS_PACKED": "पैक हो गया",
+  "STATUS_SHIPPED": "भेज दिया गया",
+  "STATUS_IN_TRANSIT": "रास्ते में है",
+  "STATUS_DELIVERED": "डिलीवर हो गया",
+  "STATUS_CANCELLED": "रद्द हो गया"
+},
 
 
   "RIDE": {
