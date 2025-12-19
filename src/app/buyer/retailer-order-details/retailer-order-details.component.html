@@ -1,136 +1,91 @@
-<ion-header mode="ios">
-  <ion-toolbar style="--background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --color: white;">
+<!-- retailer-order-details.component.html - Suggested minimal updates to match backend data -->
+<ion-header>
+  <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button (click)="goBack()" style="--color: white;"></ion-back-button>
+      <ion-back-button
+        defaultHref="/buyer/retailer-order-tracking"
+      ></ion-back-button>
     </ion-buttons>
-    <ion-title style="font-weight: 600; font-size: 1.2rem;">{{ 'RETAILER_ORDER_DETAILS.PAGE_TITLE' | translate }}</ion-title>
+    <ion-title>{{ "RETAILER_ORDER_DETAILS.TITLE" | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div class="order-details" *ngIf="order">
-    <!-- Order Header -->
-    <div class="detail-section">
-      <div class="order-header-info">
-        <h2>{{ order.orderId }}</h2>
-        <ion-badge [color]="getStatusColor(order.status)" class="status-badge">
-          <ion-icon [name]="getStatusIcon(order.status)"></ion-icon>
-          {{ getTranslatedStatus(order.status) }}
-        </ion-badge>
-      </div>
-      <p class="order-date">{{ 'RETAILER_ORDER_DETAILS.PLACED_ON' | translate }} {{ order.placedAt | date: 'medium' }}</p>
-    </div>
+<ion-content *ngIf="!loading && !error">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        {{ "RETAILER_ORDER_DETAILS.ORDER_NUMBER" | translate }} #{{
+          order.order_id
+        }}
+      </ion-card-title>
+      <ion-card-subtitle>
+        {{ order.date_of_order | date : "mediumDate" }}
+      </ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-label>
+        <strong>{{ "RETAILER_ORDER_DETAILS.STATUS" | translate }}:</strong>
+        <ion-chip [color]="getStatusColor(order.order_status)">
+          <ion-icon [name]="getStatusIcon(order.order_status)"></ion-icon>
+          {{ getTranslatedStatus(order.order_status) }}
+        </ion-chip>
+      </ion-label>
+      <p *ngIf="order.actual_delivery_date">
+        <strong
+          >{{ "RETAILER_ORDER_DETAILS.DELIVERED_AT" | translate }}:</strong
+        >
+        {{ order.actual_delivery_date | date : "medium" }}
+      </p>
+      <p>
+        <strong
+          >{{ "RETAILER_ORDER_DETAILS.DELIVERY_ADDRESS" | translate }}:</strong
+        >
+        {{ order.delivery_address }}
+      </p>
+    </ion-card-content>
+  </ion-card>
 
-    <!-- Progress Bar -->
-    <div class="progress-section" *ngIf="order.status !== 'Cancelled'">
-      <ion-progress-bar [value]="getOrderProgress(order.status)" color="success"></ion-progress-bar>
-      <p class="progress-text">{{ 'RETAILER_ORDER_DETAILS.ORDER_STATUS' | translate }} {{ getTranslatedStatus(order.status) }}</p>
-    </div>
+  <ion-card>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col>{{
+            "RETAILER_ORDER_DETAILS.TOTAL_ORDER_AMOUNT" | translate
+          }}</ion-col>
+          <ion-col>{{
+            order.total_order_amount | currency : "INR" : "symbol" : "1.2-2"
+          }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>{{ "RETAILER_ORDER_DETAILS.DISCOUNT" | translate }}</ion-col>
+          <ion-col
+            >-{{
+              order.discount_amount | currency : "INR" : "symbol" : "1.2-2"
+            }}</ion-col
+          >
+        </ion-row>
+        <ion-row>
+          <ion-col>{{ "RETAILER_ORDER_DETAILS.TAX" | translate }}</ion-col>
+          <ion-col>{{
+            order.tax_amount | currency : "INR" : "symbol" : "1.2-2"
+          }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>{{
+            "RETAILER_ORDER_DETAILS.FINAL_AMOUNT" | translate
+          }}</ion-col>
+          <ion-col>{{
+            order.final_amount | currency : "INR" : "symbol" : "1.2-2"
+          }}</ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
 
-    <!-- Wholesaler Info -->
-    <div class="detail-section">
-      <h3>{{ 'RETAILER_ORDER_DETAILS.WHOLESALER_DETAILS' | translate }}</h3>
-      <div class="wholesaler-card">
-        <div class="wholesaler-info">
-          <h4>{{ order.wholesalerName }}</h4>
-        </div>
-      </div>
-    </div>
+<ion-content *ngIf="loading">
+  <ion-spinner></ion-spinner>
+</ion-content>
 
-    <!-- Items -->
-    <div class="detail-section">
-      <h3>{{ 'RETAILER_ORDER_DETAILS.ITEMS_ORDERED' | translate }}</h3>
-      <div class="items-list">
-        <div class="item-card" *ngFor="let item of order.items">
-          <img [src]="item.imageUrl || 'assets/default-product.png'" alt="{{ item.productName }}">
-          <div class="item-info">
-            <h4>{{ item.productName }}</h4>
-            <p>{{ 'RETAILER_ORDER_DETAILS.QTY' | translate }} {{ item.quantity }} × ₹{{ item.unitPrice }}</p>
-          </div>
-          <div class="item-total">
-            <strong>₹{{ item.total }}</strong>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Delivery Info -->
-    <div class="detail-section">
-      <h3>{{ 'RETAILER_ORDER_DETAILS.DELIVERY_INFORMATION' | translate }}</h3>
-      <div class="info-item">
-        <ion-icon name="location-outline"></ion-icon>
-        <div>
-          <h4>{{ 'RETAILER_ORDER_DETAILS.DELIVERY_ADDRESS' | translate }}</h4>
-          <p>{{ order.deliveryAddress }}</p>
-        </div>
-      </div>
-      <div class="info-item" *ngIf="order.estimatedDelivery">
-        <ion-icon name="time-outline"></ion-icon>
-        <div>
-          <h4>{{ 'RETAILER_ORDER_DETAILS.ESTIMATED_DELIVERY' | translate }}</h4>
-          <p>{{ order.estimatedDelivery | date: 'medium' }}</p>
-        </div>
-      </div>
-      <div class="info-item" *ngIf="order.deliveredAt">
-        <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-        <div>
-          <h4>{{ 'RETAILER_ORDER_DETAILS.DELIVERED_ON' | translate }}</h4>
-          <p>{{ order.deliveredAt | date: 'medium' }}</p>
-        </div>
-      </div>
-      <div class="info-item" *ngIf="order.trackingNumber">
-        <ion-icon name="trail-sign-outline"></ion-icon>
-        <div>
-          <h4>{{ 'RETAILER_ORDER_DETAILS.TRACKING_NUMBER' | translate }}</h4>
-          <p>{{ order.trackingNumber }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Payment Info -->
-    <div class="detail-section">
-      <h3>{{ 'RETAILER_ORDER_DETAILS.PAYMENT_SUMMARY' | translate }}</h3>
-      <div class="payment-summary">
-        <div class="payment-row">
-          <span>{{ 'RETAILER_ORDER_DETAILS.SUBTOTAL' | translate }}</span>
-          <span>₹{{ getSubtotal() }}</span>
-        </div>
-        <div class="payment-row">
-          <span>{{ 'RETAILER_ORDER_DETAILS.DELIVERY_FEE' | translate }}</span>
-          <span>₹{{ getDeliveryFee() }}</span>
-        </div>
-        <div class="payment-row">
-          <span>{{ 'RETAILER_ORDER_DETAILS.TAX_FEES' | translate }}</span>
-          <span>₹{{ getTaxFee() }}</span>
-        </div>
-        <div class="payment-row total">
-          <strong>{{ 'RETAILER_ORDER_DETAILS.TOTAL' | translate }}</strong>
-          <strong>₹{{ order.totalAmount }}</strong>
-        </div>
-        <div class="payment-method">
-          <div class="payment-method-header">
-            <ion-icon name="wallet-outline"></ion-icon>
-            <span>{{ 'RETAILER_ORDER_DETAILS.PAYMENT_METHOD' | translate }}</span>
-          </div>
-          <div class="payment-method-details">
-            <div class="payment-type">
-              <ion-icon [name]="getPaymentIcon(order.paymentMethod)"></ion-icon>
-              <span>{{ getTranslatedPaymentMethod(order.paymentMethod) }}</span>
-            </div>
-            <div class="payment-status">
-              <ion-badge color="success">{{ 'RETAILER_ORDER_DETAILS.PAID' | translate }}</ion-badge>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Order Notes -->
-    <div class="detail-section" *ngIf="order.orderNotes">
-      <h3>{{ 'RETAILER_ORDER_DETAILS.ORDER_NOTES' | translate }}</h3>
-      <div class="notes-card">
-        <p>{{ order.orderNotes }}</p>
-      </div>
-    </div>
-  </div>
+<ion-content *ngIf="error">
+  <ion-text color="danger">{{ error }}</ion-text>
 </ion-content>

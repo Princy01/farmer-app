@@ -232,7 +232,7 @@ export const routes: Routes = [
         loadComponent: () => import('./buyer/retailer-order-history/retailer-order-history.component').then((m) => m.RetailerOrderHistoryComponent),
       },
       {
-        path: 'retailer-order-details',
+        path: 'retailer-order-details/:id',
         loadComponent: () => import('./buyer/retailer-order-details/retailer-order-details.component').then((m) => m.RetailerOrderDetailsComponent),
       },
       {

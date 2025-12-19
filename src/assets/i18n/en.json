@@ -894,7 +894,7 @@
     "APP_TITLE": "Farmer App",
     "MENU_TITLE": "Menu",
     "PROFILE": "Profile",
-    "TRACK_ORDERS": "Track Orders",
+    "ORDER_HISTORY": "Order History",
     "BUSINESS_LOCATIONS": "Business Locations",
     "UPDATE_BUSINESS": "Update Business",
     "SETTINGS": "Settings",
@@ -1141,26 +1141,14 @@
   },
 
 
+
   "RETAILER_ORDER_DETAILS": {
-    "PAGE_TITLE": "Order Details",
-    "PLACED_ON": "Placed on",
-    "ORDER_STATUS": "Order",
-    "WHOLESALER_DETAILS": "Wholesaler Details",
-    "ITEMS_ORDERED": "Items Ordered",
-    "QTY": "Qty:",
-    "DELIVERY_INFORMATION": "Delivery Information",
+    "TITLE": "Order Details",
+    "STATUS": "Order Status",
+    "DELIVERED_AT": "Delivered At",
     "DELIVERY_ADDRESS": "Delivery Address",
-    "ESTIMATED_DELIVERY": "Estimated Delivery",
-    "DELIVERED_ON": "Delivered On",
-    "TRACKING_NUMBER": "Tracking Number",
-    "PAYMENT_SUMMARY": "Payment Summary",
-    "SUBTOTAL": "Subtotal",
-    "DELIVERY_FEE": "Delivery Fee",
-    "TAX_FEES": "Tax & Fees",
-    "TOTAL": "Total",
-    "PAYMENT_METHOD": "Payment Method",
-    "PAID": "Paid",
-    "ORDER_NOTES": "Order Notes",
+    "CONTACT_WHOLESALER": "Contact Wholesaler",
+
     "STATUS_PLACED": "Placed",
     "STATUS_CONFIRMED": "Confirmed",
     "STATUS_PACKED": "Packed",
@@ -1169,11 +1157,16 @@
     "STATUS_OUT_FOR_DELIVERY": "Out for Delivery",
     "STATUS_DELIVERED": "Delivered",
     "STATUS_CANCELLED": "Cancelled",
-    "PAYMENT_UPI": "UPI",
-    "PAYMENT_CARD": "Card",
-    "PAYMENT_CASH_ON_DELIVERY": "Cash on Delivery",
-    "PAYMENT_WALLET": "Wallet",
-    "PAYMENT_NET_BANKING": "Net Banking"
+    "STATUS_UNKNOWN": "Unknown Status",
+
+    "ORDER_NUMBER": "Order",
+    "TOTAL_ORDER_AMOUNT": "Total Order Amount",
+    "DISCOUNT": "Discount",
+    "TAX": "Tax",
+    "FINAL_AMOUNT": "Final Amount",
+
+    "ERROR_INVALID_ID": "Invalid order ID",
+    "ERROR_LOAD_FAILED": "Failed to load order details"
   },
 
   "RETAILER_ORDER_HISTORY": {

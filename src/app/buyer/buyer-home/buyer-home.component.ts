@@ -228,7 +228,7 @@ export class BuyerHomeComponent {
     this.router.navigate(['/buyer/profile']);
   }
 
-  async navigateToTrackOrders() {
+  async navigateToOrderHistory() {
     await this.closeMenu();
     this.router.navigate(['/buyer/retailer-order-history'], {
       queryParams: { id: 'ORD123456' }

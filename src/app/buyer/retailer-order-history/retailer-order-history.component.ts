@@ -15,6 +15,7 @@ import { OrderService, RetailerOrderHistory } from './retailer-order-history.ser
 
 interface DisplayOrder {
   orderId: string;
+  rawOrderId: number;
   placedAt: string;
   status: string;
   deliveryAddress: string;
@@ -44,12 +45,12 @@ export class RetailerOrderHistoryComponent implements OnInit {
     private orderService: OrderService
   ) {
     addIcons({
-    alertCircleOutline,
-    locationOutline,
-    basketOutline,
-    storefrontOutline,
-    checkmarkCircle,
-  });
+      alertCircleOutline,
+      locationOutline,
+      basketOutline,
+      storefrontOutline,
+      checkmarkCircle,
+    });
   }
 
   ngOnInit() {
@@ -93,6 +94,7 @@ export class RetailerOrderHistoryComponent implements OnInit {
     const status = this.getStatusFromCode(o.order_status);
     return {
       orderId: `ORD-${o.order_id.toString().padStart(6, '0')}`,
+      rawOrderId: o.order_id,
       placedAt: o.date_of_order,
       status,
       deliveryAddress: o.delivery_address,
@@ -167,9 +169,7 @@ export class RetailerOrderHistoryComponent implements OnInit {
   }
 
   navigateToOrderDetails(order: DisplayOrder) {
-    this.router.navigate(['/buyer/retailer-order-details'], {
-      state: { order },
-    });
+    this.router.navigate(['/buyer/retailer-order-details', order.rawOrderId]);  // Use raw number
   }
 
   getOrderProgress(status: string): number {
