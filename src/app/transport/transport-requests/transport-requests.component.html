@@ -19,7 +19,7 @@
     <div class="preference-divider"></div>
   </div>
 
-  <!-- Show message if no location preferences are set -->
+  <!-- No Preferences Message -->
   <div class="no-preferences-message" *ngIf="!hasLocationPreferences">
     <ion-card>
       <ion-card-content>
@@ -29,11 +29,7 @@
             <h4>Select Your Service Areas</h4>
             <p>Choose your preferred cities and mandis to see relevant transport requests.</p>
           </div>
-          <ion-button
-            color="primary"
-            size="small"
-            (click)="openLocationPreferences()"
-          >
+          <ion-button color="primary" size="small" (click)="openLocationPreferences()">
             Select Areas
           </ion-button>
         </div>
@@ -45,24 +41,14 @@
   <div class="regular-section" *ngIf="hasLocationPreferences">
     <div class="section-header">
       <h2 class="section-title">Available Requests</h2>
-      <ion-badge color="primary" class="count-badge">{{
-        pendingDeliveries.length
-      }}</ion-badge>
+      <ion-badge color="primary" class="count-badge">{{pendingDeliveries.length}}</ion-badge>
     </div>
 
     <div class="empty-state" *ngIf="pendingDeliveries.length === 0">
       <ion-icon name="car-outline" class="empty-icon"></ion-icon>
       <h3>No Requests Available</h3>
-      <p>
-        New delivery requests will appear here when they match your capacity and
-        selected locations.
-      </p>
-      <ion-button
-        fill="outline"
-        color="primary"
-        (click)="openLocationPreferences()"
-        class="change-location-btn"
-      >
+      <p>New delivery requests will appear here when they match your capacity and selected locations.</p>
+      <ion-button fill="outline" color="primary" (click)="openLocationPreferences()" class="change-location-btn">
         <ion-icon name="map-outline" slot="start"></ion-icon>
         Change Service Areas
       </ion-button>
@@ -70,29 +56,26 @@
 
     <div class="requests-grid">
       <div class="request-card" *ngFor="let request of pendingDeliveries">
+        <!-- Card Header -->
         <div class="card-header">
           <div class="order-info">
             <h3 class="order-id">Job #{{ request.job_id }}</h3>
-            <ion-chip
-              class="urgency-chip"
-              [color]="getUrgencyColor(request.urgency)"
-            >
-              <ion-icon
-                [name]="getUrgencyIcon(request.urgency)"
-                slot="start"
-              ></ion-icon>
-              {{ request.urgency }}
-            </ion-chip>
+            <div class="header-badges">
+              <ion-chip class="urgency-chip" [color]="getUrgencyColor(request.urgency)">
+                <ion-icon [name]="getUrgencyIcon(request.urgency)" slot="start"></ion-icon>
+                {{ request.urgency }}
+              </ion-chip>
+              
+            </div>
           </div>
         </div>
 
+        <!-- Card Content -->
         <div class="card-content">
+          <!-- Route Section -->
           <div class="route-section">
             <div class="location-item">
-              <ion-icon
-                name="location-outline"
-                class="location-icon pickup-icon"
-              ></ion-icon>
+              <ion-icon name="location-outline" class="location-icon pickup-icon"></ion-icon>
               <div class="location-info">
                 <span class="location-label">Pickup</span>
                 <p class="location-address">{{ request.pickup_location }}</p>
@@ -100,10 +83,7 @@
             </div>
 
             <div class="location-item">
-              <ion-icon
-                name="flag-outline"
-                class="location-icon delivery-icon"
-              ></ion-icon>
+              <ion-icon name="flag-outline" class="location-icon delivery-icon"></ion-icon>
               <div class="location-info">
                 <span class="location-label">Delivery</span>
                 <p class="location-address">{{ request.dropoff_location }}</p>
@@ -111,6 +91,7 @@
             </div>
           </div>
 
+          <!-- Order Specifications -->
           <div class="order-specs">
             <div class="spec-row">
               <div class="spec-item">
@@ -141,25 +122,59 @@
                 <ion-icon name="calendar-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
                   <span class="spec-label">Deliver by</span>
-                  <span class="spec-value">{{
-                    formatDate(request.delivery_date)
-                  }}</span>
+                  <span class="spec-value">{{ formatDate(request.delivery_date) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Details (if available) -->
+            <div class="spec-row" *ngIf="hasOrders(request)">
+              <div class="spec-item">
+                <ion-icon name="cart-outline" class="spec-icon"></ion-icon>
+                <div class="spec-info">
+                  <span class="spec-label">Orders</span>
+                  <span class="spec-value">{{ request.orders!.length }}</span>
+                </div>
+              </div>
+              <div class="spec-item">
+                <ion-icon name="list-outline" class="spec-icon"></ion-icon>
+                <div class="spec-info">
+                  <span class="spec-label">Items</span>
+                  <span class="spec-value">{{ getTotalItemCount(request) }}</span>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- Price Section -->
           <div class="price-section">
-            <span class="price-label">Base Price</span>
-            <span class="price-amount">₹{{ request.base_price }}</span>
+            <div class="price-item">
+              <span class="price-label">Base Price</span>
+              <span class="price-amount">₹{{ request.base_price }}</span>
+            </div>
+            <div class="price-item" *ngIf="hasOrders(request)">
+              <span class="price-label">Order Value</span>
+              <span class="price-amount order-value">₹{{ getTotalOrderValue(request).toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <!-- Compact Order Preview Button -->
+          <div class="order-preview-compact" *ngIf="hasOrders(request) && request.orders!.length > 0">
+            <ion-button 
+              fill="clear" 
+              size="small" 
+              class="view-orders-button"
+              (click)="openOrderDetailsModal(request)"
+            >
+              <ion-icon name="list-outline" slot="start"></ion-icon>
+              View Order Items ({{ request.orders!.length }})
+            </ion-button>
           </div>
         </div>
 
+        <!-- Card Footer -->
         <div class="card-footer">
-          <div
-            class="action-buttons"
-            *ngIf="!isRequestAccepted(request.job_id) && !isRequestRejected(request.job_id)"
-          >
+          <div class="action-buttons" *ngIf="!isRequestAccepted(request.job_id) && !isRequestRejected(request.job_id)">
             <ion-button class="accept-button" (click)="acceptOrder(request)">
               <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
               Accept
@@ -170,22 +185,12 @@
             </ion-button>
           </div>
 
-          <ion-button
-            expand="block"
-            class="accepted-button"
-            *ngIf="isRequestAccepted(request.job_id)"
-            disabled
-          >
+          <ion-button expand="block" class="accepted-button" *ngIf="isRequestAccepted(request.job_id)" disabled>
             <ion-icon name="checkmark-circle" slot="start"></ion-icon>
             Accepted
           </ion-button>
 
-          <ion-button
-            expand="block"
-            class="rejected-button"
-            *ngIf="isRequestRejected(request.job_id)"
-            disabled
-          >
+          <ion-button expand="block" class="rejected-button" *ngIf="isRequestRejected(request.job_id)" disabled>
             <ion-icon name="close-circle" slot="start"></ion-icon>
             Rejected
           </ion-button>
@@ -199,11 +204,7 @@
 <ion-footer class="filter-footer" *ngIf="hasLocationPreferences">
   <ion-toolbar class="filter-toolbar">
     <div class="filter-actions">
-      <ion-button
-        fill="clear"
-        class="filter-button"
-        (click)="openFilterModal()"
-      >
+      <ion-button fill="clear" class="filter-button" (click)="openFilterModal()">
         <ion-icon name="funnel-outline" slot="start"></ion-icon>
         Filter
       </ion-button>

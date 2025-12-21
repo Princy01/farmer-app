@@ -8,11 +8,12 @@ import {
   locationOutline, flagOutline, cubeOutline, navigateOutline, calendarOutline,
   pricetagOutline, checkmarkOutline, checkmarkCircleOutline, checkmarkCircle,
   listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline,
-  settingsOutline, mapOutline
+  settingsOutline, mapOutline, cartOutline, leafOutline
 } from 'ionicons/icons';
 import { FilterModalComponent } from '../filter-modal/filter-modal.component';
 import { SortModalComponent } from '../sort-modal/sort-modal.component';
 import { LocationSelectionModalComponent } from '../location-selection/location-selection.component';
+import { OrderDetailsModalComponent } from './order-model.component';
 import { formatDate } from '@angular/common';
 import { TransportRequestService, TransportRequest } from './transport-requests.service';
 import { LocationPreferenceService } from '../location-selection/location-selection.service';
@@ -46,6 +47,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   delayedDeliveries = false;
   sharedDeliveries = false;
   singleDelivery = false;
+  perishableOnly = false;
 
   // Request states tracking
   acceptedRequests = new Set<number>();
@@ -68,7 +70,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       locationOutline, flagOutline, cubeOutline, navigateOutline, calendarOutline,
       pricetagOutline, checkmarkOutline, checkmarkCircleOutline, checkmarkCircle,
       listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline,
-      settingsOutline, mapOutline
+      settingsOutline, mapOutline, cartOutline, leafOutline
     });
   }
 
@@ -84,11 +86,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   private setupLocationPreferences() {
-    // Subscribe to location preference changes
     const prefSub = this.locationPreferenceService.preferences$.subscribe(preferences => {
       this.hasLocationPreferences = this.locationPreferenceService.hasPreferences();
       this.updateLocationSummary();
-      // Reload requests when preferences change
       if (this.hasLocationPreferences) {
         this.loadTransportRequests();
       }
@@ -114,7 +114,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   private startPolling() {
     this.pollInterval = setInterval(() => {
       this.loadTransportRequests();
-    }, 30000); // Poll every 30 seconds
+    }, 30000);
   }
 
   private stopPolling() {
@@ -154,37 +154,57 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     const { data } = await modal.onDidDismiss();
     if (data) {
       this.showToast('Location preferences updated successfully!', 'success');
-      // The subscription will automatically reload requests when preferences change
     }
   }
 
+  async openOrderDetailsModal(request: TransportRequest) {
+    const modal = await this.modalController.create({
+      component: OrderDetailsModalComponent,
+      componentProps: {
+        request: request
+      },
+      cssClass: 'order-details-modal'
+    });
+
+    await modal.present();
+  }
+
   async acceptOrder(request: TransportRequest) {
-    // Check if already accepted or rejected
     if (this.acceptedRequests.has(request.job_id) || this.rejectedRequests.has(request.job_id)) {
       return;
     }
 
-    // Check load capacity
     if (!this.checkLoadWithinCapacity(request.weight)) {
       const toast = await this.toastCtrl.create({
         message: 'This order exceeds your current load capacity. Please complete some deliveries first.',
         duration: 4000,
         position: 'middle',
         color: 'warning',
-        buttons: [
-          {
-            text: 'OK',
-            role: 'cancel'
-          }
-        ]
+        buttons: [{ text: 'OK', role: 'cancel' }]
       });
       await toast.present();
       return;
     }
 
+    // Build detailed order information
+    let orderDetails = `Job #${request.job_id}\n\n`;
+    orderDetails += `Pickup: ${request.pickup_location}\n`;
+    orderDetails += `Delivery: ${request.dropoff_location}\n`;
+    orderDetails += `Weight: ${request.weight}kg\n`;
+    orderDetails += `Distance: ${request.distance}km\n`;
+    orderDetails += `Base Price: ₹${request.base_price}\n`;
+
+    if (request.orders && request.orders.length > 0) {
+      orderDetails += `\nOrders: ${request.orders.length}\n`;
+      const totalValue = this.getTotalOrderValue(request);
+      const itemCount = this.getTotalItemCount(request);
+      orderDetails += `Total Items: ${itemCount}\n`;
+      orderDetails += `Order Value: ₹${totalValue.toFixed(2)}`;
+    }
+
     const alert = await this.alertCtrl.create({
       header: 'Accept Transport Request',
-      message: `Job #${request.job_id}\n\nPickup: ${request.pickup_location}\nDelivery: ${request.dropoff_location}\nWeight: ${request.weight}kg\nDistance: ${request.distance}km\nPrice: ₹${request.base_price}`,
+      message: orderDetails,
       buttons: [
         { text: 'Cancel', role: 'cancel' },
         {
@@ -309,6 +329,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
         delayedDeliveries: this.delayedDeliveries,
         sharedDeliveries: this.sharedDeliveries,
         singleDelivery: this.singleDelivery,
+        perishableOnly: this.perishableOnly
       },
     });
 
@@ -320,6 +341,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       this.delayedDeliveries = data.delayedDeliveries;
       this.sharedDeliveries = data.sharedDeliveries;
       this.singleDelivery = data.singleDelivery;
+      this.perishableOnly = data.perishableOnly || false;
       this.applyFilters();
     }
   }
@@ -349,9 +371,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       filteredOrders = filteredOrders.filter(order => order.weight > 500);
     }
 
-    this.filteredRequests = filteredOrders;
 
-    // Apply current sort if any
+
+    this.filteredRequests = [...this.transportRequests];
+
     if (this.sortOption) {
       this.applySort();
     }
@@ -389,6 +412,11 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       case 'quantity-desc':
         this.filteredRequests.sort((a, b) => b.weight - a.weight);
         break;
+      case 'order-value-desc':
+        this.filteredRequests.sort((a, b) => 
+          this.getTotalOrderValue(b) - this.getTotalOrderValue(a)
+        );
+        break;
     }
   }
 
@@ -402,6 +430,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     await toast.present();
   }
 
+  // Helper methods for template
   formatDate(dateString: string): string {
     return formatDate(dateString, 'dd MMM yyyy', 'en-US');
   }
@@ -432,7 +461,21 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     return this.rejectedRequests.has(jobId);
   }
 
-  // Getter for template compatibility
+  // New helper methods for orders data
+  getTotalOrderValue(request: TransportRequest): number {
+    return this.transportRequestService.getTotalOrderValue(request);
+  }
+
+  getTotalItemCount(request: TransportRequest): number {
+    return this.transportRequestService.getTotalItemCount(request);
+  }
+
+  hasOrders(request: TransportRequest): boolean {
+    return request.orders != null && request.orders.length > 0;
+  }
+
+
+
   get pendingDeliveries(): TransportRequest[] {
     return this.filteredRequests;
   }

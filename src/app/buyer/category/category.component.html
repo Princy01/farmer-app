@@ -243,6 +243,17 @@
                   <b>{{ "CATEGORY.WASTAGE" | translate }}:</b>
                   {{ wholesaler.wastage_measure_name }}
                 </p>
+                <p>
+                  <b>{{ "CATEGORY.PRICE_PER_UNIT" | translate }}:</b>
+                  {{ wholesaler.price_per_unit | currency:'INR':'symbol':'1.2-2' }}
+                  / {{ wholesaler.unit_name }}
+                </p>
+                <p>
+                  <b>{{ "CATEGORY.CURRENT_STOCK" | translate }}:</b>
+                  {{ wholesaler.current_stock }} {{ wholesaler.unit_name }}
+                </p>
+                
+
                 <div
                   style="
                     display: flex;
