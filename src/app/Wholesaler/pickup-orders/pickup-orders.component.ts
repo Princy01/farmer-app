@@ -2,17 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { addIcons } from 'ionicons';
 import {
   cubeOutline,
-  person,
-  personCircle,
-  call,
-  cube,
-  checkmarkCircle,
-  eyeOff
+  storefront,
+  receipt,
+  location,
+  cube
 } from 'ionicons/icons';
-
-import { addIcons } from 'ionicons';
 
 interface PickupOrder {
   id: string;
@@ -65,12 +62,10 @@ export class WholesalerPickupOrdersComponent implements OnInit {
   constructor(private router: Router) {
     addIcons({
       cubeOutline,
-      person,
-      personCircle,
-      call,
-      cube,
-      checkmarkCircle,
-      eyeOff
+      storefront,
+      receipt,
+      location,
+      cube
     });
 
   }

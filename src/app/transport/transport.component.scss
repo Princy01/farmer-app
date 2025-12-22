@@ -1,50 +1,56 @@
 ion-toolbar.main-toolbar {
-        --background: radial-gradient(circle, #ffffff 0%, #eef2f3 100%);
-        color: rgb(152, 151, 151);
-        font-family: "Garamond", serif;
-        text-transform: uppercase;
-      }
+  --background: radial-gradient(circle, #f5f7fa 0%, #c3cfe2 100%);
+  color: #5a5a89;
+  font-family: "Garamond", serif;
+  text-transform: uppercase;
+}
 
-      ion-toolbar.custom-toolbar {
-        --background: rgb(136, 172, 140);
-        --color: white;
-        font-family: "Garamond", serif;
-      }
+ion-toolbar.custom-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  font-family: "Garamond", serif;
+}
 
-      ion-menu-button {
-        --color: rgb(152, 151, 151);
-      }
+ion-menu-button {
+  --color: #667eea;
+}
 
-      ion-content {
-        --padding-top: 20px;
+ion-content {
+  --padding-top: 20px;
 
-        ion-list {
-          width: 100%;
-        }
+  ion-list {
+    width: 100%;
+  }
 
-        ion-item {
-          --inner-border-width: 0px;
-          margin-bottom: 10px;
-          transition: background-color 0.3s ease;
-          border-radius: 5px;
+  ion-item {
+    --inner-border-width: 0px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s ease;
+    border-radius: 5px;
 
-          &:hover {
-            background-color: rgba(136, 172, 140, 0.2);
-          }
-        }
-        ion-item.selected {
-          --background: rgba(10, 130, 24, 0.3);
-          color: white;
-          font-weight: bold;
-          border-radius: 5px;
-        }
+    &:hover {
+      background-color: rgba(102, 126, 234, 0.10);
+    }
+  }
+  ion-item.selected {
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
 
-        ion-label {
-          font-family: "Century Gothic", sans-serif;
-          color: rgb(115, 112, 112);
-        }
+    ion-icon,
+    ion-label {
+      color: white !important;
+    }
+  }
 
-        ion-icon {
-          font-size: 20px;
-        }
-      }
+  ion-label {
+    font-family: "Century Gothic", sans-serif;
+    color: #5a5a89;
+  }
+
+  ion-icon {
+    font-size: 20px;
+    color: #667eea;
+  }
+}

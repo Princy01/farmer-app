@@ -1,60 +1,177 @@
 .wholesaler-pickup-orders-content {
-  .orders-group {
-    margin-bottom: 24px;
-  }
-  .group-date-label {
-    margin: 16px 0 8px 16px;
-    font-weight: bold;
-    font-size: 1.1em;
-    color: var(--ion-color-primary);
-  }
-  .order-item {
-    margin-bottom: 8px;
-    .inline-icon {
-      font-size: 1em;
-      margin-right: 4px;
-      vertical-align: middle;
+  --background: #f8f9fa;
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    color: var(--ion-color-medium);
+
+    ion-icon {
+      font-size: 3.5rem;
+      color: var(--ion-color-primary);
+      margin-bottom: 1rem;
     }
-    h2 {
-      margin: 0 0 2px 0;
-      font-size: 1.1em;
-      font-weight: 600;
-    }
+
     p {
+      font-size: 1.1rem;
+      color: var(--ion-color-medium);
       margin: 0;
-      font-size: 0.95em;
-      color: #555;
     }
-    .otp-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      .otp-display {
-        display: flex;
-        align-items: center;
-        margin-top: 4px;
-        .otp-label {
-          font-weight: bold;
-          margin-right: 4px;
+  }
+
+  .orders-group {
+    margin: 1.5rem 1rem 0 1rem;
+
+    .group-date-label {
+      margin-bottom: 0.5rem;
+      ion-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ion-color-primary);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        padding: 0.25rem 0;
+      }
+    }
+
+    ion-list {
+      background: transparent;
+      box-shadow: none;
+      margin: 0;
+      padding: 0;
+
+      .order-item {
+        border-radius: 14px;
+        margin-bottom: 1rem;
+        background: white;
+        box-shadow: 0 2px 16px rgba(102, 126, 234, 0.08);
+        border: 2px solid var(--ion-color-light);
+        transition: box-shadow 0.2s, border-color 0.2s;
+
+        &:hover {
+          border-color: var(--ion-color-primary-tint);
+          box-shadow: 0 4px 20px rgba(102, 126, 234, 0.13);
         }
-        .otp-value {
-          font-size: 1.2em;
-          letter-spacing: 2px;
-          background: #f4f4f4;
-          padding: 2px 8px;
-          border-radius: 4px;
-          margin-right: 6px;
+
+        ion-icon[slot="start"] {
+          font-size: 2rem;
+          color: var(--ion-color-primary);
+          margin-right: 0.75rem;
+        }
+
+        ion-label {
+          h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--ion-color-dark);
+            margin: 0 0 0.25rem 0;
+          }
+          p {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.92rem;
+            color: var(--ion-color-medium);
+            margin: 0 0 0.15rem 0;
+
+            .inline-icon {
+              font-size: 1rem;
+              color: var(--ion-color-primary);
+              margin-right: 0.2rem;
+            }
+            strong {
+              color: var(--ion-color-secondary);
+              font-weight: 600;
+            }
+          }
+        }
+
+        .otp-actions {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.5rem;
+          min-width: 120px;
+
+          ion-button {
+            --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+          }
+
+          .otp-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--ion-color-light);
+            border-radius: 8px;
+            padding: 0.3rem 0.7rem;
+
+            .otp-label {
+              font-size: 0.9rem;
+              color: var(--ion-color-medium);
+              font-weight: 500;
+            }
+            .otp-value {
+              font-size: 1.1rem;
+              font-weight: 700;
+              color: var(--ion-color-primary);
+              letter-spacing: 0.1em;
+            }
+            ion-button {
+              --padding-start: 0;
+              --padding-end: 0;
+              --background: transparent;
+              --color: var(--ion-color-medium);
+              font-size: 1.1rem;
+            }
+          }
+
+          ion-icon[name="checkmark-circle"] {
+            color: var(--ion-color-success);
+            font-size: 2rem;
+            margin-top: 0.2rem;
+          }
         }
       }
     }
   }
-  .empty-state {
-    text-align: center;
-    margin-top: 64px;
-    color: #888;
-    ion-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
+}
+
+// Header styling to match theme
+ion-header, ion-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+
+  ion-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: white;
+  }
+  ion-back-button {
+    --color: white;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .wholesaler-pickup-orders-content {
+    .orders-group {
+      margin: 1rem 0.5rem 0 0.5rem;
+    }
+    .order-item {
+      font-size: 0.95rem;
+      ion-label h2 {
+        font-size: 1rem;
+      }
     }
   }
 }
