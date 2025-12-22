@@ -1011,7 +1011,10 @@
     "INCHARGE": "Incharge",
     "PRODUCT": "Product",
     "QUALITY": "Quality",
-    "WASTAGE": "Wastage"
+    "WASTAGE": "Wastage",
+    "PRICE_PER_UNIT":"Price per Unit",
+    "CURRENT_STOCK":"Current Stock"
+
   },
 
 

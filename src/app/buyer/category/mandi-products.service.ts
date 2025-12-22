@@ -14,7 +14,13 @@ export interface MandiProduct {
   quality_name?: string;
   wastage_measure_name?: string;
   product_id: number;
+  id: number
+  current_stock: number;
+  price_per_unit: number;
+  date_of_entry: string;
+  unit_name: string;
 }
+
 
 @Injectable({
   providedIn: 'root'

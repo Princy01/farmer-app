@@ -4,11 +4,57 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
+// Product interface matching backend
+export interface Product {
+  product_id: number;
+  product_name: string;
+  image_path: string;
+  category_id: number;
+  active_status: number;
+  nutrition_factor: string;
+  img_code: string;
+}
+
+// Order Item interface matching backend
+export interface OrderItem {
+  order_item_id: number;
+  quantity: number;
+  unit_id: number;
+  discount_amount: number;
+  tax_amount: number;
+  max_item_price: number;
+  wholeseller_price: number;
+  agreed_quantity: number;
+  product: Product;
+}
+
+// Order interface matching backend
+export interface Order {
+  order_id: number;
+  date_of_order: string;
+  order_status: number;
+  total_order_amount: number;
+  discount_amount: number;
+  tax_amount: number;
+  final_amount: number;
+  delivery_address: string;
+  actual_delivery_date?: string;
+  cancellation_reason?: string;
+  cancelled_by_user_id: number;
+  items: OrderItem[];
+}
+
+// Updated TransportRequest interface
 export interface TransportRequest {
   job_id: number;
   id: string;
+  order_ids?: number[];
   pickup_location: string;
   dropoff_location: string;
+  pickup_city_id?: number;
+  dropoff_city_id?: number;
+  pickup_branch_id?: number;
+  dropoff_branch_id?: number;
   weight: number;
   distance: number;
   delivery_type: string;
@@ -17,6 +63,9 @@ export interface TransportRequest {
   urgency: string;
   requested_date: string;
   load_type: string;
+  delivery_date_str: string;
+  requested_date_str: string;
+  orders?: Order[];
 }
 
 export interface AcceptJobRequest {
@@ -81,4 +130,32 @@ export class TransportRequestService {
 
     return this.http.post<{message: string}>(`${this.apiUrl}/requests/reject-transport-request`, body, { headers });
   }
+
+  // Utility methods for working with the new data structure
+  getTotalOrderValue(request: TransportRequest): number {
+    if (!request.orders || request.orders.length === 0) return 0;
+    return request.orders.reduce((total, order) => total + order.final_amount, 0);
+  }
+
+  getTotalItemCount(request: TransportRequest): number {
+    if (!request.orders || request.orders.length === 0) return 0;
+    return request.orders.reduce((total, order) => 
+      total + order.items.reduce((itemTotal, item) => itemTotal + item.quantity, 0), 0
+    );
+  }
+
+  getUniqueProductCategories(request: TransportRequest): Set<number> {
+    const categories = new Set<number>();
+    if (!request.orders) return categories;
+    
+    request.orders.forEach(order => {
+      order.items.forEach(item => {
+        categories.add(item.product.category_id);
+      });
+    });
+    
+    return categories;
+  }
+
+
 }

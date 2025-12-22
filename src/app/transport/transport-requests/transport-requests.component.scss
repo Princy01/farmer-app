@@ -1,720 +1,15 @@
+// ============================================
+// COMPLETE TRANSPORT REQUESTS STYLES
+// ============================================
+
+// Base Content Styles
 .transport-requests-content {
   --background: #f8f9fa;
 }
 
-/* Header Section */
-.header-section {
-  background: linear-gradient(135deg, rgb(136, 172, 140) 0%, rgb(106, 142, 110) 100%);
-  padding: 1.5rem 1rem 2rem;
-  margin-bottom: 1rem;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.header-info {
-  flex: 1;
-}
-
-.page-title {
-  color: #fff;
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.page-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
-  margin: 0;
-  font-weight: 300;
-}
-
-.header-stats {
-  display: flex;
-  gap: 1rem;
-}
-
-.stat-card {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.stat-icon {
-  font-size: 1.5rem;
-  color: #fff;
-}
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-number {
-  color: #fff;
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.stat-label {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-/* Section Headers */
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 0 1rem;
-}
-
-.section-title {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.title-icon {
-  font-size: 1.2rem;
-  color: rgb(136, 172, 140);
-}
-
-.count-badge {
-  --color: #fff;
-  font-weight: 600;
-}
-
-/* Urgent Requests Section */
-.urgent-section {
-  margin-bottom: 2rem;
-}
-
-.urgent-cards {
-  padding: 0 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.urgent-card {
-  background: #fff;
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: 0 6px 20px rgba(255, 193, 7, 0.2);
-  border: 2px solid #ffc107;
-  position: relative;
-  overflow: hidden;
-}
-
-.urgent-indicator {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: linear-gradient(135deg, #ffc107, #ff9800);
-  padding: 0.5rem 1rem;
-  border-bottom-left-radius: 15px;
-}
-
-.urgent-icon {
-  color: #fff;
-  font-size: 1.2rem;
-}
-
-.route-info {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-}
-
-.route-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-}
-
-.route-icon {
-  font-size: 1.2rem;
-
-  &.pickup-icon {
-    color: rgb(136, 172, 140);
-  }
-
-  &.delivery-icon {
-    color: #ff6b6b;
-  }
-}
-
-.route-details {
-  flex: 1;
-}
-
-.route-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.route-address {
-  color: #333;
-  font-size: 0.95rem;
-  margin: 0.25rem 0 0 0;
-  line-height: 1.3;
-}
-
-.route-arrow {
-  color: #666;
-  font-size: 1.1rem;
-}
-
-.order-details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.detail-icon {
-  font-size: 1rem;
-  color: rgb(136, 172, 140);
-}
-
-.price-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(136, 172, 140, 0.1);
-  padding: 1rem;
-  border-radius: 15px;
-  margin-bottom: 1rem;
-}
-
-.price-label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #666;
-}
-
-.price-amount {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: rgb(136, 172, 140);
-}
-
-.card-actions {
-  margin-top: 1rem;
-}
-
-.accept-urgent-button {
-  --background: linear-gradient(135deg, #ffc107, #ff9800);
-  --background-activated: linear-gradient(135deg, #e0a800, #e68900);
-  --color: #fff;
-  --border-radius: 15px;
-  --box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
-  height: 48px;
-  font-weight: 600;
-  text-transform: none;
-}
-
-/* Regular Requests Section */
-.regular-section {
-  margin-bottom: 2rem;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem 1rem;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin: 0 1rem;
-}
-
-.empty-icon {
-  font-size: 4rem;
-  color: #ccc;
-  margin-bottom: 1rem;
-}
-
-.empty-state h3 {
-  color: #666;
-  font-size: 1.2rem;
-  margin: 0 0 0.5rem 0;
-}
-
-.empty-state p {
-  color: #999;
-  font-size: 0.9rem;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.requests-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 1rem;
-  padding: 0 1rem;
-}
-
-.request-card {
-  background: #fff;
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f0f0f0;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  }
-}
-
-.card-header {
-  margin-bottom: 1.5rem;
-}
-
-.order-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.order-id {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #333;
-  margin: 0;
-}
-
-.urgency-chip {
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.route-section {
-  margin-bottom: 1.5rem;
-}
-
-.location-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.location-icon {
-  font-size: 1.1rem;
-  margin-top: 0.2rem;
-
-  &.pickup-icon {
-    color: rgb(136, 172, 140);
-  }
-
-  &.delivery-icon {
-    color: #ff6b6b;
-  }
-}
-
-.location-info {
-  flex: 1;
-}
-
-.location-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.location-address {
-  color: #333;
-  font-size: 0.95rem;
-  margin: 0.25rem 0 0 0;
-  line-height: 1.3;
-}
-
-.route-line {
-  margin: 0.5rem 0 0.5rem 0.55rem;
-}
-
-.route-dots {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-}
-
-.dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #ddd;
-}
-
-.order-specs {
-  margin-bottom: 1.5rem;
-}
-
-.spec-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.spec-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-}
-
-.spec-icon {
-  font-size: 1rem;
-  color: rgb(136, 172, 140);
-}
-
-.spec-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.spec-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #666;
-}
-
-.spec-value {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #333;
-}
-
-.card-footer {
-  margin-top: 1.5rem;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 1rem;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.75rem;
-  width: 100%;
-}
-
-.accept-button,
-.reject-button {
-  flex: 1;
-  height: 48px;
-  font-weight: 600;
-  text-transform: none;
-  --border-radius: 15px;
-}
-
-.accept-button {
-  --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
-  --background-activated: linear-gradient(135deg, rgb(116, 152, 120), rgb(96, 132, 100));
-  --color: #fff;
-  --box-shadow: 0 4px 15px rgba(136, 172, 140, 0.4);
-
-  &:hover {
-    transform: translateY(-2px);
-    --box-shadow: 0 6px 18px rgba(136, 172, 140, 0.5);
-  }
-}
-
-.reject-button {
-  --background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-  --background-activated: linear-gradient(135deg, #ff5252, #e53935);
-  --color: #fff;
-  --box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-
-  &:hover {
-    transform: translateY(-2px);
-    --box-shadow: 0 6px 18px rgba(255, 107, 107, 0.5);
-  }
-}
-
-.accepted-button {
-  --background: #e8f5e8;
-  --color: rgb(136, 172, 140);
-  --border-radius: 15px;
-  height: 48px;
-  font-weight: 600;
-  text-transform: none;
-  border: 2px solid rgba(136, 172, 140, 0.2);
-}
-
-.rejected-button {
-  --background: #fdeaea;
-  --color: #ff6b6b;
-  --border-radius: 15px;
-  height: 48px;
-  font-weight: 600;
-  text-transform: none;
-  border: 2px solid rgba(255, 107, 107, 0.2);
-}
-
-/* Responsive adjustments */
-/* Update the responsive adjustments section in transport-requests.component.scss */
-
-/* Remove or modify the existing mobile responsive rule */
-@media (max-width: 480px) {
-  .action-buttons {
-    /* Remove this rule that was causing vertical stacking */
-    /* flex-direction: column; */
-    /* gap: 0.5rem; */
-
-    /* Keep them horizontal but adjust spacing */
-    flex-direction: row;
-    gap: 0.75rem;
-  }
-
-  .accept-button,
-  .reject-button {
-    flex: 1; /* Each button takes equal width */
-    width: auto; /* Remove fixed width */
-    height: 48px; /* Keep consistent height */
-    font-size: 0.9rem; /* Slightly smaller text on mobile */
-    padding: 0 12px; /* Add horizontal padding */
-
-    /* Ensure text doesn't wrap */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-/* Enhanced action buttons for better mobile experience */
-.action-buttons {
-  display: flex;
-  gap: 0.75rem;
-  width: 100%;
-
-  /* Ensure buttons stay horizontal on all screen sizes */
-  flex-direction: row;
-  flex-wrap: nowrap;
-}
-
-.accept-button,
-.reject-button {
-  flex: 1;
-  height: 48px;
-  font-weight: 600;
-  text-transform: none;
-  --border-radius: 15px;
-  min-width: 0; /* Allow flex shrinking */
-
-  /* Ensure button content fits */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  ion-icon {
-    margin-right: 6px;
-    font-size: 1rem;
-  }
-}
-
-/* Additional mobile optimizations */
-@media (max-width: 768px) {
-  .action-buttons {
-    gap: 0.5rem; /* Slightly tighter gap on tablets */
-  }
-
-  .accept-button,
-  .reject-button {
-    font-size: 0.85rem;
-    height: 44px;
-  }
-}
-
-@media (max-width: 480px) {
-  .card-footer {
-    margin-top: 1rem; /* Reduce top margin */
-    padding-top: 0.75rem; /* Reduce top padding */
-  }
-
-  .action-buttons {
-    gap: 0.5rem; /* Tighter gap for small screens */
-  }
-
-  .accept-button,
-  .reject-button {
-    font-size: 0.8rem; /* Smaller text */
-    height: 42px; /* Slightly shorter buttons */
-    padding: 0 8px; /* Reduced horizontal padding */
-
-    /* More compact icon */
-    ion-icon {
-      margin-right: 4px;
-      font-size: 0.9rem;
-    }
-  }
-
-  /* Adjust button text for very small screens */
-  .accept-button span,
-  .reject-button span {
-    font-size: 0.8rem;
-  }
-}
-
-/* For very small screens, consider abbreviated text */
-@media (max-width: 360px) {
-  .accept-button,
-  .reject-button {
-    font-size: 0.75rem;
-    padding: 0 6px;
-
-    /* Use shorter text on very small screens */
-    &::after {
-      content: attr(data-short-text);
-    }
-  }
-}
-
-/* Filter Footer */
-.filter-footer {
-  --background: #fff;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.filter-toolbar {
-  --background: transparent;
-  --border-color: transparent;
-  --padding-start: 0;
-  --padding-end: 0;
-}
-
-.filter-actions {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  padding: 0.5rem;
-}
-
-.filter-button,
-.sort-button {
-  --color: rgb(136, 172, 140);
-  font-weight: 500;
-
-  &:hover {
-    --background: rgba(136, 172, 140, 0.1);
-  }
-}
-
-/* Utility Functions */
-.getUrgencyColor {
-  &.high { --background: rgba(255, 107, 107, 0.1); --color: #ff6b6b; }
-  &.standard { --background: rgba(255, 193, 7, 0.1); --color: #ffc107; }
-  &.low { --background: rgba(136, 172, 140, 0.1); --color: rgb(136, 172, 140); }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .header-stats {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .requests-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .spec-row {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .route-info {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .route-arrow {
-    transform: rotate(90deg);
-    align-self: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .header-section {
-    padding: 1rem;
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-  }
-
-  .request-card {
-    padding: 1rem;
-  }
-
-  .urgent-card {
-    padding: 1rem;
-  }
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.urgent-cards,
-.requests-grid {
-  animation: fadeIn 0.5s ease-out;
-}
-
+// ============================================
+// LOCATION PREFERENCES HEADER
+// ============================================
 .preferences-header {
   padding: 16px;
   background: var(--ion-color-light);
@@ -726,6 +21,8 @@
     align-items: center;
 
     .preference-text {
+      flex: 1;
+
       h3 {
         margin: 0 0 4px 0;
         font-size: 16px;
@@ -744,6 +41,7 @@
       --color: var(--ion-color-primary);
       text-transform: none;
       font-weight: 500;
+      flex-shrink: 0;
     }
   }
 
@@ -754,6 +52,9 @@
   }
 }
 
+// ============================================
+// NO PREFERENCES MESSAGE
+// ============================================
 .no-preferences-message {
   padding: 0 16px;
   margin-bottom: 16px;
@@ -799,10 +100,661 @@
   }
 }
 
+// ============================================
+// SECTION HEADERS
+// ============================================
+.regular-section {
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .title-icon {
+    font-size: 1.2rem;
+    color: rgb(136, 172, 140);
+  }
+
+  .count-badge {
+    --color: #fff;
+    font-weight: 600;
+  }
+}
+
+// ============================================
+// EMPTY STATE
+// ============================================
 .empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 0 1rem;
+
+  .empty-icon {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    color: #666;
+    font-size: 1.2rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    color: #999;
+    font-size: 0.9rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.4;
+  }
+
   .change-location-btn {
     margin-top: 16px;
     text-transform: none;
     font-weight: 500;
+  }
+}
+
+// ============================================
+// REQUESTS GRID
+// ============================================
+.requests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+// ============================================
+// REQUEST CARD
+// ============================================
+.request-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// ============================================
+// CARD HEADER
+// ============================================
+.card-header {
+  margin-bottom: 1.5rem;
+
+  .order-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+
+    .order-id {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+  }
+}
+
+.urgency-chip, .perishable-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  height: 28px;
+}
+
+.perishable-chip {
+  --background: rgba(76, 175, 80, 0.1);
+  --color: #4caf50;
+}
+
+// ============================================
+// ROUTE SECTION
+// ============================================
+.route-section {
+  margin-bottom: 1.5rem;
+
+  .location-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .location-icon {
+      font-size: 1.1rem;
+      margin-top: 0.2rem;
+
+      &.pickup-icon {
+        color: rgb(136, 172, 140);
+      }
+
+      &.delivery-icon {
+        color: #ff6b6b;
+      }
+    }
+
+    .location-info {
+      flex: 1;
+
+      .location-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .location-address {
+        color: #333;
+        font-size: 0.95rem;
+        margin: 0.25rem 0 0 0;
+        line-height: 1.3;
+      }
+    }
+  }
+}
+
+// ============================================
+// ORDER SPECIFICATIONS
+// ============================================
+.order-specs {
+  margin-bottom: 1.5rem;
+
+  .spec-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .spec-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+
+      .spec-icon {
+        font-size: 1rem;
+        color: rgb(136, 172, 140);
+      }
+
+      .spec-info {
+        display: flex;
+        flex-direction: column;
+
+        .spec-label {
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: #666;
+        }
+
+        .spec-value {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #333;
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// PRICE SECTION
+// ============================================
+.price-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(136, 172, 140, 0.1);
+  padding: 1rem;
+  border-radius: 15px;
+  margin-bottom: 1rem;
+  gap: 1rem;
+
+  .price-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+
+    &:last-child {
+      align-items: flex-end;
+    }
+
+    .price-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .price-amount {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: rgb(136, 172, 140);
+
+      &.order-value {
+        color: #2196f3;
+        font-size: 1.2rem;
+      }
+    }
+  }
+}
+
+// ============================================
+// ORDER PREVIEW COMPACT BUTTON
+// ============================================
+.order-preview-compact {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
+
+  .view-orders-button {
+    --color: rgb(136, 172, 140);
+    --padding-start: 0;
+    --padding-end: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: none;
+    height: auto;
+    margin: 0;
+
+    ion-icon {
+      font-size: 1rem;
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      --color: rgb(106, 142, 110);
+    }
+  }
+}
+
+// ============================================
+// CARD FOOTER & ACTION BUTTONS
+// ============================================
+.card-footer {
+  margin-top: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.accept-button,
+.reject-button {
+  flex: 1;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+  --border-radius: 15px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  ion-icon {
+    margin-right: 6px;
+    font-size: 1rem;
+  }
+}
+
+.accept-button {
+  --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
+  --background-activated: linear-gradient(135deg, rgb(116, 152, 120), rgb(96, 132, 100));
+  --color: #fff;
+  --box-shadow: 0 4px 15px rgba(136, 172, 140, 0.4);
+
+  &:hover {
+    transform: translateY(-2px);
+    --box-shadow: 0 6px 18px rgba(136, 172, 140, 0.5);
+  }
+}
+
+.reject-button {
+  --background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  --background-activated: linear-gradient(135deg, #ff5252, #e53935);
+  --color: #fff;
+  --box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+
+  &:hover {
+    transform: translateY(-2px);
+    --box-shadow: 0 6px 18px rgba(255, 107, 107, 0.5);
+  }
+}
+
+.accepted-button {
+  --background: #e8f5e8;
+  --color: rgb(136, 172, 140);
+  --border-radius: 15px;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+  border: 2px solid rgba(136, 172, 140, 0.2);
+  cursor: not-allowed;
+}
+
+.rejected-button {
+  --background: #fdeaea;
+  --color: #ff6b6b;
+  --border-radius: 15px;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+  border: 2px solid rgba(255, 107, 107, 0.2);
+  cursor: not-allowed;
+}
+
+// ============================================
+// FILTER FOOTER
+// ============================================
+.filter-footer {
+  --background: #fff;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.filter-toolbar {
+  --background: transparent;
+  --border-color: transparent;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 0.5rem;
+}
+
+.filter-button,
+.sort-button {
+  --color: rgb(136, 172, 140);
+  font-weight: 500;
+  text-transform: none;
+
+  &:hover {
+    --background: rgba(136, 172, 140, 0.1);
+  }
+}
+
+// ============================================
+// ANIMATIONS
+// ============================================
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.requests-grid {
+  animation: fadeIn 0.5s ease-out;
+}
+
+// ============================================
+// RESPONSIVE DESIGN
+// ============================================
+
+// Tablets (768px and below)
+@media (max-width: 768px) {
+  .requests-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .spec-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .action-buttons {
+    gap: 0.5rem;
+  }
+
+  .accept-button,
+  .reject-button {
+    font-size: 0.85rem;
+    height: 44px;
+  }
+
+  .filter-actions {
+    gap: 1rem;
+  }
+}
+
+// Mobile devices (480px and below)
+@media (max-width: 480px) {
+  .preferences-header {
+    padding: 12px;
+
+    .preference-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+
+      .preferences-button {
+        align-self: flex-end;
+      }
+    }
+  }
+
+  .no-preferences-message {
+    .message-content {
+      flex-direction: column;
+      text-align: center;
+
+      .message-icon {
+        font-size: 48px;
+      }
+    }
+  }
+
+  .request-card {
+    padding: 1rem;
+  }
+
+  .card-header {
+    .order-info {
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .header-badges {
+        width: 100%;
+      }
+    }
+  }
+
+  .card-footer {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+  }
+
+  .action-buttons {
+    gap: 0.5rem;
+  }
+
+  .accept-button,
+  .reject-button {
+    font-size: 0.8rem;
+    height: 42px;
+    padding: 0 8px;
+
+    ion-icon {
+      margin-right: 4px;
+      font-size: 0.9rem;
+    }
+  }
+
+  .price-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    .price-item {
+      width: 100%;
+
+      &:last-child {
+        align-items: flex-start;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(136, 172, 140, 0.2);
+      }
+    }
+  }
+
+  .order-preview-compact {
+    .view-orders-button {
+      font-size: 0.8rem;
+    }
+  }
+
+  .filter-actions {
+    gap: 0.5rem;
+    padding: 0.25rem;
+  }
+}
+
+// Very small devices (360px and below)
+@media (max-width: 360px) {
+  .section-header {
+    padding: 0 0.5rem;
+
+    .section-title {
+      font-size: 1.2rem;
+    }
+  }
+
+  .requests-grid {
+    padding: 0 0.5rem;
+  }
+
+  .accept-button,
+  .reject-button {
+    font-size: 0.75rem;
+    padding: 0 6px;
+  }
+
+  .empty-state {
+    padding: 2rem 1rem;
+
+    .empty-icon {
+      font-size: 3rem;
+    }
+  }
+}
+
+// ============================================
+// PRINT STYLES
+// ============================================
+@media print {
+  .filter-footer,
+  .preferences-header,
+  .action-buttons {
+    display: none;
+  }
+
+  .request-card {
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
+
+// ============================================
+// DARK MODE SUPPORT (if needed)
+// ============================================
+@media (prefers-color-scheme: dark) {
+  .transport-requests-content {
+    --background: #1a1a1a;
+  }
+
+  .request-card {
+    background: #2d2d2d;
+    border-color: #3d3d3d;
+  }
+
+  .empty-state {
+    background: #2d2d2d;
+  }
+}
+
+// ============================================
+// MODAL STYLING (Global)
+// ============================================
+:host ::ng-deep {
+  .order-details-modal {
+    --height: 90%;
+    --border-radius: 20px 20px 0 0;
+  }
+}
+
+ion-modal.order-details-modal {
+  --height: 90%;
+  --border-radius: 20px 20px 0 0;
+  
+  @media (min-width: 768px) {
+    --width: 600px;
+    --height: 85%;
+    --border-radius: 20px;
   }
 }

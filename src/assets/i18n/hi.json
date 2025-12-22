@@ -1011,7 +1011,9 @@
     "INCHARGE": "प्रभारी",
     "PRODUCT": "उत्पाद",
     "QUALITY": "गुणवत्ता",
-    "WASTAGE": "नुकसान"
+    "WASTAGE": "नुकसान",
+        "PRICE_PER_UNIT":"Price per Unit",
+    "CURRENT_STOCK":"Current Stock"
   },
 
 
