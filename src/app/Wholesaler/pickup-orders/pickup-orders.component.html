@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Scheduled Pickups</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="wholesaler-pickup-orders-content">
+  <div *ngIf="groupedOrders.length === 0" class="empty-state">
+    <ion-icon name="cube-outline" size="large"></ion-icon>
+    <p>No scheduled pickups.</p>
+  </div>
+
+  <div *ngFor="let group of groupedOrders" class="orders-group">
+    <div class="group-date-label">
+      <ion-label>
+        {{ getDateLabel(group.date) }}
+      </ion-label>
+    </div>
+    <ion-list>
+      <ion-item
+        *ngFor="let order of group.orders"
+        class="order-item"
+      >
+        <ion-icon name="person" slot="start"></ion-icon>
+        <ion-label>
+          <h2>Order #{{ order.id }}</h2>
+          <p>
+            <ion-icon name="person-circle" class="inline-icon"></ion-icon>
+            Driver: <strong>{{ order.driverName }}</strong>
+          </p>
+          <p>
+            <ion-icon name="call" class="inline-icon"></ion-icon>
+            {{ order.driverPhone }}
+          </p>
+          <p>
+            <ion-icon name="cube" class="inline-icon"></ion-icon>
+            {{ order.totalWeight }}
+          </p>
+        </ion-label>
+        <div slot="end" class="otp-actions">
+          <ion-button
+            *ngIf="order.status === 'pending'"
+            color="primary"
+            fill="solid"
+            size="small"
+            (click)="generateOtp(order)"
+          >
+            Generate OTP
+          </ion-button>
+          <div *ngIf="order.status === 'otp_generated' && otpVisible[order.id]" class="otp-display">
+            <span class="otp-label">OTP:</span>
+            <span class="otp-value">{{ order.otp }}</span>
+            <ion-button
+              fill="clear"
+              size="small"
+              color="medium"
+              (click)="hideOtp(order)"
+              title="Hide OTP"
+            >
+              <ion-icon name="eye-off"></ion-icon>
+            </ion-button>
+          </div>
+          <ion-icon
+            *ngIf="order.status === 'picked_up'"
+            name="checkmark-circle"
+            color="success"
+            size="large"
+            title="Picked Up"
+          ></ion-icon>
+        </div>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>

@@ -3,16 +3,20 @@ import { IonicModule, AlertController, ToastController, IonContent } from '@ioni
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { addIcons } from 'ionicons';
 import {
-  chevronBack, helpCircleOutline, checkmarkDoneCircle, location,
-  checkmarkCircle, receipt, storefront, call, cube,
-  documentText, checkmarkDone, warning, arrowForward, refresh,
-  qrCodeOutline, scanOutline, checkmark, close,
-  ellipseOutline, business, time, send, alertCircle,
-  warningOutline, removeCircleOutline, camera, images,
-  informationCircle, removeCircle, closeCircle
+  location,
+  checkmarkCircle,
+  receipt,
+  time,
+  business,
+  cube,
+  key,
+  documentText,
+  arrowForward
 } from 'ionicons/icons';
+
+import { addIcons } from 'ionicons';
+
 
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
@@ -60,21 +64,22 @@ interface ScanResult {
 export class PickupConfirmationComponent implements OnInit, OnDestroy {
   // Core Properties
   orderId: string = '';
-  isScanning: boolean = false;
   pickupConfirmed: boolean = false;
   driverNotes: string = '';
+
+  // OTP Properties
+  otp: string = '';
+  otpError: string = '';
+  otpVerifying: boolean = false;
+  otpVerified: boolean = false;
 
   // Modal Controls
   showSuccessModal: boolean = false;
   showQueryModal: boolean = false;
-  showScanResultsModal: boolean = false;
 
   // Query Properties
   selectedQueryType: QueryType | null = null;
   queryDescription: string = '';
-
-  // Scan Results
-  scanResult: ScanResult | null = null;
 
   // ViewChild References
   @ViewChild('queryModalContent') queryModalContent!: IonContent;
@@ -116,237 +121,43 @@ export class PickupConfirmationComponent implements OnInit, OnDestroy {
     private toastCtrl: ToastController
   ) {
     addIcons({
-      chevronBack, helpCircleOutline, checkmarkDoneCircle, location,
-      checkmarkCircle, receipt, storefront, call, cube,
-      documentText, checkmarkDone, warning, arrowForward, refresh,
-      qrCodeOutline, scanOutline, checkmark, close,
-      ellipseOutline, business, time, send, alertCircle,
-      warningOutline, removeCircleOutline, camera, images,
-      informationCircle, removeCircle, closeCircle
-    });
+  location,
+  checkmarkCircle,
+  receipt,
+  time,
+  business,
+  cube,
+  key,
+  documentText,
+  arrowForward
+});
+
   }
 
   ngOnInit() {
     this.orderId = this.route.snapshot.paramMap.get('id') || '123456';
-    this.loadQRLibrary();
   }
 
   ngOnDestroy() { }
 
-  // QR Library Setup
-  async loadQRLibrary() {
-    if (!Capacitor.isNativePlatform()) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
-      document.head.appendChild(script);
-    }
-  }
+  // OTP Verification Logic
+  async verifyOtp() {
+    this.otpError = '';
+    this.otpVerifying = true;
 
-  // QR Scanning Methods
-  async scanQRCode() {
-    try {
-      this.isScanning = true;
-
-      if (Capacitor.isNativePlatform()) {
-        await this.scanWithNativeCamera();
+    // Simulate API call delay
+    setTimeout(async () => {
+      // For demo, assume OTP "123456" is valid
+      if (this.otp === '123456') {
+        this.otpVerified = true;
+        this.pickupConfirmed = true;
+        this.showSuccessModal = true;
       } else {
-        await this.scanWithWebCamera();
+        this.otpError = 'Invalid OTP. Please check and try again.';
+        this.otpVerified = false;
       }
-    } catch (error) {
-      console.error('QR Scanner error:', error);
-      await this.showScannerError();
-    } finally {
-      this.isScanning = false;
-    }
-  }
-
-  async scanWithNativeCamera() {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Camera
-      });
-
-      if (image.dataUrl) {
-        await this.processScannedImage(image.dataUrl);
-      }
-    } catch (error: any) {
-      if (error.message !== 'User cancelled photos app') {
-        throw error;
-      }
-    }
-  }
-
-  async scanWithWebCamera() {
-    const alert = await this.alertCtrl.create({
-      header: 'Scan QR Code',
-      message: 'Choose scanning method:',
-      buttons: [
-        {
-          text: 'Take Photo',
-          handler: async () => { await this.takePhotoWeb(); }
-        },
-        {
-          text: 'Upload Image',
-          handler: async () => { await this.uploadImageWeb(); }
-        },
-        { text: 'Cancel', role: 'cancel' }
-      ]
-    });
-    await alert.present();
-  }
-
-  async takePhotoWeb() {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Camera
-      });
-
-      if (image.dataUrl) {
-        await this.processScannedImage(image.dataUrl);
-      }
-    } catch (error) {
-      await this.showScannerError();
-    }
-  }
-
-  async uploadImageWeb() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async (event: any) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = async (e: any) => {
-          await this.processScannedImage(e.target.result);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
-  }
-
-  async processScannedImage(dataUrl: string) {
-    try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx?.drawImage(img, 0, 0);
-
-        const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
-
-        if (imageData && typeof jsQR !== 'undefined') {
-          const code = jsQR(imageData.data, imageData.width, imageData.height);
-          if (code) {
-            this.handleScannedCode(code.data);
-          } else {
-            this.handleScanFailure('NO_QR_FOUND');
-          }
-        } else {
-          // Simulate detection for testing - use first unscanned item
-          const firstUnscannedItem = this.orderItems.find(item => !item.pickedUp);
-          if (firstUnscannedItem) {
-            this.handleScannedCode(firstUnscannedItem.qrCode);
-          } else {
-            this.handleScanFailure('NO_QR_FOUND');
-          }
-        }
-      };
-
-      img.onerror = () => {
-        this.handleScanFailure('IMAGE_ERROR');
-      };
-
-      img.src = dataUrl;
-    } catch (error) {
-      this.handleScanFailure('PROCESSING_ERROR');
-    }
-  }
-
-  handleScannedCode(scannedCode: string) {
-    const matchedItem = this.orderItems.find(item => item.qrCode === scannedCode);
-
-    if (matchedItem) {
-      if (matchedItem.pickedUp) {
-        this.scanResult = {
-          success: false,
-          scannedCode: scannedCode,
-          item: matchedItem
-        };
-        this.showAlreadyScannedResult(matchedItem);
-      } else {
-        matchedItem.pickedUp = true;
-        matchedItem.condition = 'good';
-        this.scanResult = {
-          success: true,
-          scannedCode: scannedCode,
-          item: matchedItem
-        };
-        this.showScanResultsModal = true;
-      }
-    } else {
-      this.scanResult = {
-        success: false,
-        scannedCode: scannedCode
-      };
-      this.showScanResultsModal = true;
-    }
-  }
-
-  handleScanFailure(reason: string) {
-    this.scanResult = {
-      success: false,
-      scannedCode: 'No QR code detected'
-    };
-    this.showScanResultsModal = true;
-  }
-
-  async showAlreadyScannedResult(item: OrderItem) {
-    const toast = await this.toastCtrl.create({
-      message: `${item.name} has already been scanned and picked up.`,
-      duration: 3000,
-      color: 'warning',
-      position: 'top',
-      icon: 'warning'
-    });
-    await toast.present();
-  }
-
-  continueScanningAfterSuccess() {
-    this.showScanResultsModal = false;
-    this.scanResult = null;
-
-    // Check if all items are scanned
-    if (!this.areAllItemsPickedUp()) {
-      // Continue scanning automatically
-      setTimeout(() => {
-        this.scanQRCode();
-      }, 500);
-    }
-  }
-
-  retryScan() {
-    this.showScanResultsModal = false;
-    this.scanResult = null;
-    setTimeout(() => {
-      this.scanQRCode();
-    }, 500);
-  }
-
-  reportScanIssue() {
-    this.showScanResultsModal = false;
-    this.scanResult = null;
-    this.raiseQuery();
+      this.otpVerifying = false;
+    }, 1200);
   }
 
   // General Query Methods
@@ -653,51 +464,6 @@ export class PickupConfirmationComponent implements OnInit, OnDestroy {
   // Navigation Methods
   goBack() {
     this.router.navigate(['/transport/dashboard']);
-  }
-
-  async confirmPickup() {
-    if (!this.areAllItemsPickedUp()) {
-      const alert = await this.alertCtrl.create({
-        header: 'Incomplete Pickup',
-        message: 'Please scan all items or report issues before confirming pickup.',
-        buttons: ['OK']
-      });
-      await alert.present();
-      return;
-    }
-
-    const damagedItems = this.orderItems.filter(item => item.condition === 'damaged');
-    const missingItems = this.orderItems.filter(item => item.condition === 'missing');
-
-    let message = 'Confirm that you have completed the pickup process?';
-
-    if (damagedItems.length > 0 || missingItems.length > 0) {
-      message += '\n\n';
-      if (damagedItems.length > 0) {
-        message += `${damagedItems.length} item(s) reported with issues. `;
-      }
-      if (missingItems.length > 0) {
-        message += `${missingItems.length} item(s) marked as missing.`;
-      }
-    }
-
-    const alert = await this.alertCtrl.create({
-      header: 'Confirm Pickup',
-      message: message,
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
-        {
-          text: 'Confirm Pickup',
-          handler: () => { this.submitPickup(); }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  async submitPickup() {
-    this.pickupConfirmed = true;
-    this.showSuccessModal = true;
   }
 
   goToDelivery() {

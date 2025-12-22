@@ -94,6 +94,10 @@ export const routes: Routes = [
     path: 'wholesaler/update-stock',
     loadComponent: () => import('./Wholesaler/update-stock/update-stock.component').then((m) => m.UpdateStockComponent),
   },
+  {
+    path: 'wholesaler/pickup-orders',
+    loadComponent: () => import('./Wholesaler/pickup-orders/pickup-orders.component').then((m) => m.WholesalerPickupOrdersComponent),
+  },
 
   {
     path: 'admin',
@@ -376,6 +380,10 @@ export const routes: Routes = [
       {
         path: 'assign-driver-modal',
         loadComponent: () => import('./transport/assign-driver-modal/assign-driver-modal.component').then((m) => m.AssignDriverModalComponent),
+      },
+      {
+        path: 'pickup-orders',
+        loadComponent: () => import('./transport/pickup-orders/pickup-orders.component').then((m) => m.PickupOrdersComponent),
       },
       {
         path: 'pickup-confirmation',

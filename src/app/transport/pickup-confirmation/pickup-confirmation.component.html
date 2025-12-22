@@ -7,13 +7,6 @@
     <div class="status-progress">
       <div class="progress-line active"></div>
     </div>
-    <div class="status-item" [class.active]="areAllItemsPickedUp()">
-      <ion-icon name="qr-code-outline" class="status-icon"></ion-icon>
-      <span class="status-text">Items Verified</span>
-    </div>
-    <div class="status-progress">
-      <div class="progress-line" [class.active]="pickupConfirmed"></div>
-    </div>
     <div class="status-item" [class.active]="pickupConfirmed">
       <ion-icon name="checkmark-circle" class="status-icon"></ion-icon>
       <span class="status-text">Pickup Confirmed</span>
@@ -71,53 +64,14 @@
     <ion-card class="items-card">
       <div class="card-header">
         <div class="header-left">
-          <ion-icon name="qr-code-outline" class="header-icon"></ion-icon>
+          <ion-icon name="receipt" class="header-icon"></ion-icon>
           <div class="header-info">
-            <h3 class="card-title">Verify Pickup Items</h3>
-            <span class="scan-progress"
-              >{{ getPickupProgress() }}% Complete</span
-            >
+            <h3 class="card-title">Pickup Items</h3>
           </div>
         </div>
-        <div class="scan-actions">
-          <ion-button
-            fill="solid"
-            size="small"
-            class="scan-qr-btn"
-            (click)="scanQRCode()"
-            [disabled]="isScanning"
-          >
-            <ion-icon name="scan-outline" slot="start"></ion-icon>
-            {{ isScanning ? "Scanning..." : "Scan QR Code" }}
-          </ion-button>
-          <ion-button
-            fill="outline"
-            size="small"
-            class="report-issue-btn"
-            (click)="reportIssue()"
-            title="Report Issue"
-          >
-            <ion-icon name="warning-outline" slot="start"></ion-icon>
-            Report Issue
-          </ion-button>
-        </div>
       </div>
-
       <div class="items-list">
-        <div class="scan-progress-bar">
-          <div
-            class="progress-fill"
-            [style.width.%]="getPickupProgress()"
-          ></div>
-        </div>
-
-        <div
-          *ngFor="let item of orderItems; let i = index"
-          class="item-row"
-          [class.picked-up]="item.pickedUp"
-          [class.damaged]="item.condition === 'damaged'"
-          [class.missing]="item.condition === 'missing'"
-        >
+        <div *ngFor="let item of orderItems; let i = index" class="item-row">
           <div class="item-details">
             <h4 class="item-name">{{ item.name }}</h4>
             <div class="item-quantities">
@@ -128,22 +82,36 @@
                 <strong>Actual Weight:</strong> {{ item.weight }}
               </span>
             </div>
-            <p *ngIf="item.notes" class="issue-note">
-              {{ getIssueIcon(item.condition) }} {{ item.notes }}
-            </p>
-          </div>
-          <div class="item-status" *ngIf="item.pickedUp">
-            <div
-              class="status-badge"
-              [ngClass]="getStatusClass(item.condition)"
-            >
-              <ion-icon [name]="getStatusIcon(item.condition)"></ion-icon>
-              <span class="status-text">{{
-                getStatusText(item.condition)
-              }}</span>
-            </div>
           </div>
         </div>
+      </div>
+    </ion-card>
+
+    <!-- OTP Section -->
+    <ion-card class="otp-card" *ngIf="!pickupConfirmed">
+      <div class="card-header">
+        <ion-icon name="key" class="header-icon"></ion-icon>
+        <h3 class="card-title">Enter OTP from Wholesaler</h3>
+      </div>
+      <div class="otp-section">
+        <ion-input
+          type="text"
+          maxlength="6"
+          placeholder="Enter 6-digit OTP"
+          [(ngModel)]="otp"
+          [disabled]="otpVerifying"
+          class="otp-input"
+        ></ion-input>
+        <ion-button
+          expand="block"
+          (click)="verifyOtp()"
+          [disabled]="otpVerifying || otp.length !== 6"
+        >
+          {{ otpVerifying ? "Verifying..." : "Verify OTP & Confirm Pickup" }}
+        </ion-button>
+        <ion-text color="danger" *ngIf="otpError">
+          {{ otpError }}
+        </ion-text>
       </div>
     </ion-card>
 
@@ -188,269 +156,21 @@
       </div>
     </ion-card>
 
-    <div class="action-section">
+    <div class="action-section" *ngIf="pickupConfirmed">
       <ion-button
         expand="block"
-        class="confirm-btn"
-        (click)="confirmPickup()"
-        [disabled]="!areAllItemsPickedUp()"
+        class="next-delivery-btn"
+        (click)="goToDelivery()"
       >
-        <ion-icon name="checkmark-done" slot="start"></ion-icon>
-        Confirm Pickup
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
+        Start Delivery
+      </ion-button>
+      <ion-button fill="clear" class="back-home-btn" (click)="goToDashboard()">
+        Back to Dashboard
       </ion-button>
     </div>
   </div>
 </ion-content>
-
-<!-- QR Scanner Results Modal -->
-<ion-modal
-  [isOpen]="showScanResultsModal"
-  (didDismiss)="showScanResultsModal = false"
-  class="scan-results-modal"
-  [backdropDismiss]="false"
->
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>QR Scan Result</ion-title>
-        <ion-buttons slot="end">
-          <ion-button fill="clear" (click)="showScanResultsModal = false">
-            <ion-icon name="close"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content class="scan-results-content">
-      <div class="modal-body">
-        <div *ngIf="scanResult?.success" class="scan-success">
-          <div class="success-icon">
-            <ion-icon name="checkmark-circle" color="success"></ion-icon>
-          </div>
-          <h3>Item Found!</h3>
-          <div *ngIf="scanResult && scanResult.item" class="scanned-item-info">
-            <h4>{{ scanResult.item.name }}</h4>
-            <p><strong>Ordered:</strong> {{ scanResult.item.quantity }} {{ scanResult.item.unit }}</p>
-            <p><strong>Actual Weight:</strong> {{ scanResult.item.weight }}</p>
-          </div>
-          <p class="success-message">
-            Item has been marked as picked up successfully.
-          </p>
-        </div>
-
-        <div *ngIf="!scanResult?.success" class="scan-error">
-          <div class="error-icon">
-            <ion-icon name="alert-circle" color="warning"></ion-icon>
-          </div>
-          <h3>QR Code Not Found</h3>
-          <div class="scanned-code">
-            <p><strong>Scanned Code:</strong> {{ scanResult?.scannedCode }}</p>
-          </div>
-          <p class="error-message">
-            This QR code doesn't match any item in this pickup order. Please
-            scan a valid QR code or report an issue if there's a problem.
-          </p>
-        </div>
-      </div>
-    </ion-content>
-
-    <ion-footer>
-      <ion-toolbar>
-        <div class="modal-actions">
-          <ion-button
-            *ngIf="scanResult?.success"
-            expand="block"
-            fill="solid"
-            (click)="continueScanningAfterSuccess()"
-          >
-            <ion-icon name="scan-outline" slot="start"></ion-icon>
-            Scan Next Item
-          </ion-button>
-          <ion-button
-            *ngIf="!scanResult?.success"
-            expand="block"
-            fill="solid"
-            (click)="retryScan()"
-          >
-            <ion-icon name="scan-outline" slot="start"></ion-icon>
-            Try Again
-          </ion-button>
-          <ion-button
-            *ngIf="!scanResult?.success"
-            expand="block"
-            fill="outline"
-            (click)="reportScanIssue()"
-          >
-            <ion-icon name="warning-outline" slot="start"></ion-icon>
-            Report Issue
-          </ion-button>
-        </div>
-      </ion-toolbar>
-    </ion-footer>
-  </ng-template>
-</ion-modal>
-
-<!-- Issue Report Modal-->
-<ion-modal
-  [isOpen]="showQueryModal"
-  (didDismiss)="showQueryModal = false"
-  class="query-modal"
-  [backdropDismiss]="false"
->
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Report Issue</ion-title>
-        <ion-buttons slot="end">
-          <ion-button fill="clear" (click)="showQueryModal = false">
-            <ion-icon name="close"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content #queryModalContent>
-      <div class="modal-body">
-        <p class="modal-description">
-          Report any issues or problems with the pickup process or specific items
-        </p>
-
-        <div class="query-types">
-          <ion-button
-            *ngFor="let query of queryTypes"
-            expand="block"
-            fill="outline"
-            class="query-type-btn"
-            [color]="selectedQueryType?.id === query.id ? 'primary' : 'medium'"
-            (click)="selectQueryType(query)"
-          >
-            {{ query.label }}
-          </ion-button>
-        </div>
-
-        <div
-          *ngIf="selectedQueryType"
-          class="query-details"
-          #queryDetailsSection
-        >
-          <div class="query-selected-info">
-            <ion-icon name="warning-outline" class="selected-icon"></ion-icon>
-            <span class="selected-label">{{ selectedQueryType.label }}</span>
-          </div>
-
-          <ion-item lines="none" class="description-item">
-            <ion-textarea
-              #queryTextarea
-              [(ngModel)]="queryDescription"
-              placeholder="Please describe the issue in detail..."
-              rows="4"
-              auto-grow="true"
-              maxlength="500"
-              counter="true"
-              (ionFocus)="onTextareaFocus()"
-            >
-            </ion-textarea>
-          </ion-item>
-
-          <!-- Image Upload Section - Only show for non-missing items -->
-          <div
-            *ngIf="selectedQueryType.requiresPhoto"
-            class="image-upload-section"
-          >
-            <div class="upload-header">
-              <ion-icon name="camera" class="upload-icon"></ion-icon>
-              <span class="upload-label">Add Photos</span>
-              <span class="upload-count" *ngIf="queryImages.length > 0">
-                {{ queryImages.length }}/5
-              </span>
-            </div>
-
-            <div class="upload-buttons">
-              <ion-button
-                fill="outline"
-                size="small"
-                (click)="takePicture()"
-                [disabled]="queryImages.length >= 5"
-              >
-                <ion-icon name="camera" slot="start"></ion-icon>
-                Take Photo
-              </ion-button>
-              <ion-button
-                fill="outline"
-                size="small"
-                (click)="selectFromGallery()"
-                [disabled]="queryImages.length >= 5"
-              >
-                <ion-icon name="images" slot="start"></ion-icon>
-                From Gallery
-              </ion-button>
-            </div>
-
-            <div class="image-preview-grid" *ngIf="queryImages.length > 0">
-              <div
-                *ngFor="let image of queryImages; let i = index"
-                class="image-preview-item"
-              >
-                <img [src]="image.dataUrl" alt="Issue photo" />
-                <ion-button
-                  fill="clear"
-                  size="small"
-                  class="remove-image-btn"
-                  (click)="removeImage(i)"
-                >
-                  <ion-icon name="close-circle" slot="icon-only"></ion-icon>
-                </ion-button>
-              </div>
-            </div>
-
-            <p class="upload-note" *ngIf="queryImages.length === 0">
-              Please add at least one photo to document the issue
-            </p>
-          </div>
-
-          <!-- Missing items note - Show only for missing items -->
-          <div *ngIf="selectedQueryType.id === 'missing'" class="missing-note">
-            <ion-icon name="information-circle" class="info-icon"></ion-icon>
-            <span
-              >Please describe which items are missing and any relevant
-              details</span
-            >
-          </div>
-        </div>
-      </div>
-    </ion-content>
-
-    <ion-footer>
-      <ion-toolbar>
-        <div class="modal-actions">
-          <ion-button
-            expand="block"
-            fill="clear"
-            (click)="showQueryModal = false"
-          >
-            Cancel
-          </ion-button>
-          <ion-button
-            expand="block"
-            class="submit-query-btn"
-            (click)="submitQuery()"
-            [disabled]="
-              !selectedQueryType ||
-              !queryDescription.trim() ||
-              (selectedQueryType.requiresPhoto && queryImages.length === 0)
-            "
-          >
-            <ion-icon name="send" slot="start"></ion-icon>
-            Submit Report
-            <span *ngIf="queryImages.length > 0" class="image-count-badge">
-              {{ queryImages.length }}
-            </span>
-          </ion-button>
-        </div>
-      </ion-toolbar>
-    </ion-footer>
-  </ng-template>
-</ion-modal>
 
 <!-- Success Modal -->
 <ion-modal
@@ -468,10 +188,7 @@
           ></ion-icon>
         </div>
         <h2 class="success-title">Pickup Confirmed!</h2>
-        <p class="success-message">
-          All items have been processed and pickup is complete. Ready for
-          delivery.
-        </p>
+        <p class="success-message">OTP verified. Order is now In Transit.</p>
         <div class="success-actions">
           <ion-button
             expand="block"

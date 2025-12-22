@@ -9,8 +9,7 @@ import { addIcons } from 'ionicons';
 import {
   speedometerOutline, pricetagOutline, carOutline, personOutline, navigateOutline,
   locationOutline, checkmarkCircleOutline, cashOutline, timeOutline, notificationsOutline,
-  documentTextOutline, checkmarkDoneOutline, personAddOutline
-} from 'ionicons/icons';
+  documentTextOutline, checkmarkDoneOutline, personAddOutline, listOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-transport',
@@ -38,6 +37,7 @@ export class TransportComponent implements OnInit {
     '/transport/active-deliveries': 'Active Deliveries',
     '/transport/live-tracking': 'Live Tracking',
     '/transport/delivery-confirmation': 'Confirmation',
+    '/transport/pickup-orders': 'Pickup Orders',
     '/transport/pickup-confirmation': 'Pickup Confirmation',
     '/transport/customer-chat': 'Customer Chat',
     '/transport/earnings-dashboard': 'Earnings & Reports',
@@ -46,11 +46,7 @@ export class TransportComponent implements OnInit {
   };
 
   constructor(private router: Router) {
-    addIcons({
-      speedometerOutline, pricetagOutline, carOutline, personOutline, navigateOutline,
-      locationOutline, checkmarkCircleOutline, cashOutline, timeOutline, notificationsOutline,
-      documentTextOutline, checkmarkDoneOutline, personAddOutline
-    });
+    addIcons({speedometerOutline,documentTextOutline,pricetagOutline,carOutline,personOutline,personAddOutline,locationOutline,listOutline,checkmarkCircleOutline,cashOutline,timeOutline,notificationsOutline,navigateOutline,checkmarkDoneOutline});
     // Listen for route changes
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {

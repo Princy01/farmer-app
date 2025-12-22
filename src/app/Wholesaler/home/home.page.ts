@@ -9,7 +9,7 @@ import {
   homeOutline, business, list, cubeOutline, time, analytics, pulse, bulb, logOutOutline,
   businessOutline, bulbOutline, createOutline, notificationsOutline,
   receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline,
-  languageOutline, chevronDownOutline, checkmarkOutline
+  languageOutline, chevronDownOutline, checkmarkOutline, carOutline
 } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
@@ -74,7 +74,7 @@ export class HomePage {
       trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
       homeOutline, businessOutline, list, cubeOutline, time, analytics, pulse, bulbOutline, logOutOutline, createOutline,
       notificationsOutline, receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline,
-      languageOutline, chevronDownOutline, checkmarkOutline // Add new icons
+      languageOutline, chevronDownOutline, checkmarkOutline, carOutline
     });
 
     // Set default language
@@ -490,6 +490,11 @@ export class HomePage {
     await this.closeMenu();
     this.router.navigate(['/wholesaler/orders']);
   }
+
+  async navigateToPickupOrders() {
+  await this.closeMenu();
+  this.router.navigate(['/wholesaler/pickup-orders']);
+}
 
   async navigateToStockDashboard() {
     await this.closeMenu();

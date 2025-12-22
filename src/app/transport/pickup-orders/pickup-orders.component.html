@@ -1,0 +1,49 @@
+<ion-content class="pickup-orders-content">
+  <div *ngIf="groupedOrders.length === 0" class="empty-state">
+    <ion-icon name="cube-outline" size="large"></ion-icon>
+    <p>No pickup orders assigned.</p>
+  </div>
+
+  <div *ngFor="let group of groupedOrders" class="orders-group">
+    <div class="group-date-label">
+      <ion-label>
+        {{ getDateLabel(group.date) }}
+      </ion-label>
+    </div>
+    <ion-list>
+      <ion-item
+        *ngFor="let order of group.orders"
+        (click)="openOrder(order)"
+        button
+        detail
+        class="order-item"
+      >
+        <ion-icon name="storefront" slot="start"></ion-icon>
+        <ion-label>
+          <h2>{{ order.wholesaler }}</h2>
+          <p>
+            <ion-icon name="receipt" class="inline-icon"></ion-icon>
+            <strong>Order #{{ order.id }}</strong>
+          </p>
+          <p>
+            <ion-icon name="location" class="inline-icon"></ion-icon>
+            {{ order.address }}
+          </p>
+          <p>
+            <ion-icon name="cube" class="inline-icon"></ion-icon>
+            {{ order.totalWeight }}
+          </p>
+        </ion-label>
+        <ion-button
+          slot="end"
+          color="primary"
+          fill="solid"
+          size="small"
+          (click)="openOrder(order); $event.stopPropagation();"
+        >
+          Start Pickup
+        </ion-button>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>

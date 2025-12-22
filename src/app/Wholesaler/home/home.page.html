@@ -6,12 +6,13 @@
       </ion-menu-button>
     </ion-buttons>
 
-    <ion-title>
-      {{ 'WHOLESALER_HOME.Go4u' | translate }}
-    </ion-title>
+    <ion-title> {{ 'WHOLESALER_HOME.Go4u' | translate }} </ion-title>
 
     <ion-buttons slot="end">
-      <ion-button (click)="openLanguagePopover($event)" class="header-btn language-btn">
+      <ion-button
+        (click)="openLanguagePopover($event)"
+        class="header-btn language-btn"
+      >
         <ion-icon name="language-outline" slot="start"></ion-icon>
         <span>{{ currentLanguage }}</span>
         <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
@@ -50,44 +51,91 @@
   <ion-content>
     <ion-list>
       <ion-item button (click)="navigateToProfile()" lines="none">
-        <ion-icon name="person-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-icon
+          name="person-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Profile' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToBusinessLocations()" lines="none">
-        <ion-icon name="business-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'WHOLESALER_HOME.Business Locations' | translate }}</ion-label>
+        <ion-icon
+          name="business-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
+        <ion-label
+          >{{ 'WHOLESALER_HOME.Business Locations' | translate }}</ion-label
+        >
       </ion-item>
       <ion-item button (click)="navigateToUpdateBusiness()" lines="none">
-        <ion-icon name="create-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'WHOLESALER_HOME.Update Business' | translate }}</ion-label>
+        <ion-icon
+          name="create-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
+        <ion-label
+          >{{ 'WHOLESALER_HOME.Update Business' | translate }}</ion-label
+        >
       </ion-item>
       <ion-item button (click)="navigateToMyOrders()" lines="none">
-        <ion-icon name="receipt-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'WHOLESALER_HOME.Orders Received' | translate }}</ion-label>
+        <ion-icon
+          name="receipt-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
+        <ion-label
+          >{{ 'WHOLESALER_HOME.Orders Received' | translate }}</ion-label
+        >
+      </ion-item>
+      <ion-item button (click)="navigateToPickupOrders()" lines="none">
+        <ion-icon name="car-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'WHOLESALER_HOME.Pickup Orders' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToStockDashboard()" lines="none">
         <ion-icon name="cube-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'WHOLESALER_HOME.Stock Dashboard' | translate }}</ion-label>
+        <ion-label
+          >{{ 'WHOLESALER_HOME.Stock Dashboard' | translate }}</ion-label
+        >
       </ion-item>
       <ion-item button (click)="navigateToPastOrders()" lines="none">
         <ion-icon name="time-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Past Orders' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToRestockingRecommendations()" lines="none">
+      <ion-item
+        button
+        (click)="navigateToRestockingRecommendations()"
+        lines="none"
+      >
         <ion-icon name="bulb-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'WHOLESALER_HOME.Restocking Recommendations' | translate }}</ion-label>
+        <ion-label
+          >{{ 'WHOLESALER_HOME.Restocking Recommendations' | translate
+          }}</ion-label
+        >
       </ion-item>
       <ion-item button (click)="navigateToMarketOpportunities()" lines="none">
-        <ion-icon name="analytics-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'WHOLESALER_HOME.Market Opportunities' | translate }}</ion-label>
+        <ion-icon
+          name="analytics-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
+        <ion-label
+          >{{ 'WHOLESALER_HOME.Market Opportunities' | translate }}</ion-label
+        >
       </ion-item>
       <ion-item button (click)="navigateToSettings()" lines="none">
-        <ion-icon name="settings-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-icon
+          name="settings-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Settings' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="logout()" lines="none">
         <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
-        <ion-label color="danger">{{ 'WHOLESALER_HOME.Logout' | translate }}</ion-label>
+        <ion-label color="danger"
+          >{{ 'WHOLESALER_HOME.Logout' | translate }}</ion-label
+        >
       </ion-item>
     </ion-list>
   </ion-content>
@@ -114,17 +162,30 @@
     </div>
 
     <ion-list *ngIf="filteredItems && filteredItems.length > 0">
-      <ion-item *ngFor="let item of filteredItems" lines="none" (click)="viewDetails(item)">
+      <ion-item
+        *ngFor="let item of filteredItems"
+        lines="none"
+        (click)="viewDetails(item)"
+      >
         <ion-label>
           <h2>{{ item.name }}</h2>
-          <p>{{ 'WHOLESALER_HOME.Total Quantity' | translate }}: {{ item.qty }} kg</p>
-          <p>{{ 'WHOLESALER_HOME.Orders placed' | translate }}: {{ item.orders }} kg</p>
+          <p>
+            {{ 'WHOLESALER_HOME.Total Quantity' | translate }}: {{ item.qty }}
+            kg
+          </p>
+          <p>
+            {{ 'WHOLESALER_HOME.Orders placed' | translate }}: {{ item.orders }}
+            kg
+          </p>
         </ion-label>
         <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
       </ion-item>
     </ion-list>
 
-    <div class="empty-state" *ngIf="filteredItems && filteredItems.length === 0">
+    <div
+      class="empty-state"
+      *ngIf="filteredItems && filteredItems.length === 0"
+    >
       <ion-icon name="search-outline"></ion-icon>
       <h3>{{ 'WHOLESALER_HOME.No items found' | translate }}</h3>
       <p>{{ 'WHOLESALER_HOME.Try adjusting your search' | translate }}</p>
@@ -133,10 +194,12 @@
     <ion-infinite-scroll
       threshold="100px"
       (ionInfinite)="onInfiniteScroll($event)"
-      [disabled]="!isInfiniteScrollEnabled">
+      [disabled]="!isInfiniteScrollEnabled"
+    >
       <ion-infinite-scroll-content
         loadingSpinner="bubbles"
-        loadingText="{{ 'WHOLESALER_HOME.Loading more items...' | translate }}">
+        loadingText="{{ 'WHOLESALER_HOME.Loading more items...' | translate }}"
+      >
       </ion-infinite-scroll-content>
     </ion-infinite-scroll>
   </div>
