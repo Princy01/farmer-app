@@ -1,49 +1,123 @@
-<ion-content class="pickup-orders-content">
-  <div *ngIf="groupedOrders.length === 0" class="empty-state">
-    <ion-icon name="cube-outline" size="large"></ion-icon>
-    <p>No pickup orders assigned.</p>
-  </div>
+<!--  JOB LIST  -->
+<ion-content *ngIf="!selectedJob">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Jobs</ion-card-title>
+      <ion-card-subtitle>Sorted by delivery date</ion-card-subtitle>
+    </ion-card-header>
 
-  <div *ngFor="let group of groupedOrders" class="orders-group">
-    <div class="group-date-label">
-      <ion-label>
-        {{ getDateLabel(group.date) }}
-      </ion-label>
-    </div>
-    <ion-list>
+    <ion-card-content>
       <ion-item
-        *ngFor="let order of group.orders"
-        (click)="openOrder(order)"
         button
         detail
-        class="order-item"
+        *ngFor="let job of sortedJobs()"
+        (click)="selectJob(job)"
       >
-        <ion-icon name="storefront" slot="start"></ion-icon>
         <ion-label>
-          <h2>{{ order.wholesaler }}</h2>
-          <p>
-            <ion-icon name="receipt" class="inline-icon"></ion-icon>
-            <strong>Order #{{ order.id }}</strong>
-          </p>
-          <p>
-            <ion-icon name="location" class="inline-icon"></ion-icon>
-            {{ order.address }}
-          </p>
-          <p>
-            <ion-icon name="cube" class="inline-icon"></ion-icon>
-            {{ order.totalWeight }}
-          </p>
+          <h2>{{ job.pickup_location }} → {{ job.dropoff_location }}</h2>
+          <p>Delivery Date: {{ job.delivery_date | date }}</p>
+          <p>Status: {{ job.job_status }}</p>
+          <p>Base Price: ₹{{ job.base_price }}</p>
         </ion-label>
-        <ion-button
-          slot="end"
-          color="primary"
-          fill="solid"
-          size="small"
-          (click)="openOrder(order); $event.stopPropagation();"
-        >
-          Start Pickup
-        </ion-button>
       </ion-item>
-    </ion-list>
+      <ion-text color="danger" *ngIf="error">{{ error }}</ion-text>
+      <ion-spinner *ngIf="loading"></ion-spinner>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+
+<!--  ORDER LIST  -->
+<ion-content *ngIf="selectedJob && !selectedOrder">
+  <ion-button fill="clear" (click)="backToJobs()">
+    &larr; Back to Jobs
+  </ion-button>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Orders for Job #{{ selectedJob.job_id }}</ion-card-title>
+      <ion-card-subtitle
+        >{{ selectedJob.pickup_location }} →
+        {{ selectedJob.dropoff_location }}</ion-card-subtitle
+      >
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-item
+        button
+        detail
+        *ngFor="let order of sortedOrders()"
+        (click)="selectOrder(order)"
+      >
+        <ion-label>
+          <h3>Order #{{ order.order_id }}</h3>
+          <p>Date: {{ order.date_of_order | date }}</p>
+          <p>Status: {{ order.order_status_text }}</p>
+          <p>Amount: ₹{{ order.final_amount }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-text color="danger" *ngIf="error">{{ error }}</ion-text>
+      <ion-spinner *ngIf="loading"></ion-spinner>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+
+<!--  ORDER DETAILS  -->
+<ion-content *ngIf="selectedOrder">
+  <ion-button fill="clear" (click)="backToOrders()">
+    &larr; Back to Orders
+  </ion-button>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Order Details</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><b>Order ID:</b> {{ selectedOrder.order_id }}</p>
+      <p><b>Date:</b> {{ selectedOrder.date_of_order | date }}</p>
+      <p><b>Status:</b> {{ selectedOrder.order_status_text }}</p>
+      <p><b>Delivery Address:</b> {{ selectedOrder.delivery_address }}</p>
+      <p><b>Amount:</b> ₹{{ selectedOrder.final_amount }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <div
+    class="otp-section"
+    *ngIf="
+      isToday(selectedOrder.date_of_order) &&
+      selectedOrder.order_status_text === 'Processing'
+    "
+  >
+    <ion-text>
+      <h3>Verify Pickup</h3>
+      <p>Enter OTP shared by wholesaler</p>
+    </ion-text>
+
+    <ion-item>
+      <ion-label position="floating">OTP</ion-label>
+      <ion-input
+        #otpInput
+        type="text"
+        inputmode="numeric"
+        maxlength="6"
+        [disabled]="otpLoading"
+      ></ion-input>
+    </ion-item>
+
+    <ion-button
+      class="confirm-btn"
+      [disabled]="otpLoading"
+      (click)="verifyOtp(otpInput.value ? otpInput.value.toString() : '')"
+    >
+      Confirm
+    </ion-button>
+    <ion-spinner *ngIf="otpLoading"></ion-spinner>
+
+    <ion-text color="danger" *ngIf="otpError">
+      {{ otpError }}
+    </ion-text>
+
+    <ion-text color="success" *ngIf="otpSuccess">
+      {{ otpSuccess }}
+    </ion-text>
   </div>
 </ion-content>

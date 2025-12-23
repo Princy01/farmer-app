@@ -225,16 +225,6 @@
                   {{ wholesaler.mandi_address }}, {{ wholesaler.city_name }},
                   {{ wholesaler.state_name }}
                 </p>
-                <p>
-                  <b>{{ "CATEGORY.INCHARGE" | translate }}:</b>
-                  {{ wholesaler.mandi_incharge }} ({{
-                    wholesaler.mandi_incharge_num
-                  }})
-                </p>
-                <p>
-                  <b>{{ "CATEGORY.PRODUCT" | translate }}:</b>
-                  {{ wholesaler.product_name }}
-                </p>
                 <p *ngIf="wholesaler.quality_name">
                   <b>{{ "CATEGORY.QUALITY" | translate }}:</b>
                   {{ wholesaler.quality_name }}
@@ -252,7 +242,7 @@
                   <b>{{ "CATEGORY.CURRENT_STOCK" | translate }}:</b>
                   {{ wholesaler.current_stock }} {{ wholesaler.unit_name }}
                 </p>
-                
+
 
                 <div
                   style="

@@ -1,136 +1,124 @@
-import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import {
-  location,
-  qrCodeOutline,
-  checkmarkCircle,
-  receipt,
-  time,
-  business,
-  cube,
-  scanOutline,
-  warningOutline,
-  documentText,
-  checkmarkDone,
-  close,
-  alertCircle,
-  camera,
-  images,
-  closeCircle,
-  informationCircle,
-  send,
-  arrowForward
-} from 'ionicons/icons';
-
-import { addIcons } from 'ionicons';
-
-interface PickupOrder {
-  id: string;
-  wholesaler: string;
-  address: string;
-  date: string; // ISO date string
-  totalWeight: string;
-  status: 'pending' | 'in_progress' | 'completed';
-}
+import { IonicModule } from '@ionic/angular';
+import { HttpClientModule } from '@angular/common/http';
+import { PickupService, ActiveJob, JobOrder } from './pickup.service';
 
 @Component({
   selector: 'app-pickup-orders',
   templateUrl: './pickup-orders.component.html',
   styleUrls: ['./pickup-orders.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, HttpClientModule],
 })
 export class PickupOrdersComponent implements OnInit {
-  orders: PickupOrder[] = [
-    {
-      id: 'ORD123456',
-      wholesaler: 'Green Valley Wholesale',
-      address: 'Warehouse 12, APMC Market, Sector 19, Vashi - 400703',
-      date: '2025-12-22',
-      totalWeight: '33 kg',
-      status: 'pending'
-    },
-    {
-      id: 'ORD123457',
-      wholesaler: 'Fresh Farms',
-      address: 'Plot 8, Navi Mumbai Market Yard',
-      date: '2025-12-22',
-      totalWeight: '20 kg',
-      status: 'pending'
-    },
-    {
-      id: 'ORD123458',
-      wholesaler: 'AgroMart',
-      address: 'Shop 5, Main Road, Vashi',
-      date: '2025-12-23',
-      totalWeight: '15 kg',
-      status: 'pending'
-    }
-  ];
+  jobs = signal<ActiveJob[]>([]);
+  selectedJob: ActiveJob | null = null;
+  orders = signal<JobOrder[]>([]);
+  selectedOrder: JobOrder | null = null;
+  loading = false;
+  error = '';
+  otpLoading = false;
+  otpError = '';
+  otpSuccess = '';
 
-  groupedOrders: { date: string, orders: PickupOrder[] }[] = [];
-
-  constructor(private router: Router) {
-    addIcons({
-      location,
-      qrCodeOutline,
-      checkmarkCircle,
-      receipt,
-      time,
-      business,
-      cube,
-      scanOutline,
-      warningOutline,
-      documentText,
-      checkmarkDone,
-      close,
-      alertCircle,
-      camera,
-      images,
-      closeCircle,
-      informationCircle,
-      send,
-      arrowForward
-    });
-  }
+  constructor(private pickupService: PickupService) { }
 
   ngOnInit() {
-    this.groupOrdersByDate();
+    this.fetchJobs();
   }
 
-  groupOrdersByDate() {
-    const groups: { [date: string]: PickupOrder[] } = {};
-    this.orders.forEach(order => {
-      if (!groups[order.date]) {
-        groups[order.date] = [];
+  fetchJobs() {
+    this.loading = true;
+    this.pickupService.getActiveJobs().subscribe({
+      next: jobs => {
+        this.jobs.set(jobs);
+        this.loading = false;
+      },
+      error: err => {
+        this.error = 'Failed to load jobs';
+        this.loading = false;
       }
-      groups[order.date].push(order);
     });
-    this.groupedOrders = Object.keys(groups)
-      .sort()
-      .map(date => ({
-        date,
-        orders: groups[date]
-      }));
   }
 
-  getDateLabel(date: string): string {
-    const today = new Date();
-    const d = new Date(date);
-    if (
-      d.getFullYear() === today.getFullYear() &&
-      d.getMonth() === today.getMonth() &&
-      d.getDate() === today.getDate()
-    ) {
-      return 'Today';
+  sortedJobs() {
+    return this.jobs().slice().sort((a, b) =>
+      a.delivery_date.localeCompare(b.delivery_date)
+    );
+  }
+
+  selectJob(job: ActiveJob) {
+    this.selectedJob = job;
+    this.selectedOrder = null;
+    this.otpError = '';
+    this.otpSuccess = '';
+    this.loading = true;
+    this.pickupService.getJobOrders(job.job_id).subscribe({
+      next: orders => {
+        this.orders.set(orders);
+        this.loading = false;
+      },
+      error: err => {
+        this.error = 'Failed to load orders';
+        this.loading = false;
+      }
+    });
+  }
+
+  sortedOrders() {
+    return this.orders().slice().sort((a, b) =>
+      a.date_of_order.localeCompare(b.date_of_order)
+    );
+  }
+
+  selectOrder(order: JobOrder) {
+    this.selectedOrder = order;
+    this.otpError = '';
+    this.otpSuccess = '';
+  }
+
+  backToJobs() {
+    this.selectedJob = null;
+    this.selectedOrder = null;
+    this.orders.set([]);
+    this.otpError = '';
+    this.otpSuccess = '';
+  }
+
+  backToOrders() {
+    this.selectedOrder = null;
+    this.otpError = '';
+    this.otpSuccess = '';
+  }
+
+  isToday(date: string) {
+    const today = new Date().toISOString().slice(0, 10);
+    return date.slice(0, 10) === today;
+  }
+
+  verifyOtp(enteredOtp: string) {
+    if (!enteredOtp) {
+      this.otpError = 'Please enter OTP';
+      this.otpSuccess = '';
+      return;
     }
-    return d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-  }
-
-  openOrder(order: PickupOrder) {
-    this.router.navigate(['/pickup-confirmation', order.id]);
-    // alert(`Open order: ${order.id}`);
+    if (!this.selectedOrder) return;
+    this.otpLoading = true;
+    this.pickupService.confirmPickup(this.selectedOrder.order_id, enteredOtp).subscribe({
+      next: res => {
+        this.otpSuccess = res.message || 'Pickup confirmed!';
+        this.otpError = '';
+        this.otpLoading = false;
+        // Optionally refresh order status here
+        this.selectJob(this.selectedJob!);
+        this.selectedOrder = null;
+      },
+      error: err => {
+        this.otpError = err.error?.error || 'Invalid OTP. Please try again.';
+        this.otpSuccess = '';
+        this.otpLoading = false;
+      }
+    });
   }
 }
