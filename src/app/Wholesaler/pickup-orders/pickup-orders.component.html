@@ -1,77 +1,166 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/wholesaler/home" color="light"></ion-back-button>
+      <ion-button
+        *ngIf="viewMode === 'details'"
+        (click)="goBackToList()"
+        fill="clear"
+        color="light"
+      >
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+      <ion-back-button
+        *ngIf="viewMode === 'list'"
+        defaultHref="/wholesaler/home"
+        color="light"
+      ></ion-back-button>
     </ion-buttons>
-    <ion-title>Scheduled Pickups</ion-title>
+    <ion-title>{{
+      viewMode === "list" ? "Scheduled Pickups" : "Order Details"
+    }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="wholesaler-pickup-orders-content">
-  <div *ngIf="groupedOrders.length === 0" class="empty-state">
-    <ion-icon name="cube-outline" size="large"></ion-icon>
-    <p>No scheduled pickups.</p>
+  <!-- List View -->
+  <div *ngIf="viewMode === 'list'">
+    <!-- Filter Section -->
+    <ion-item *ngIf="orderStatuses.length > 0" class="filter-section">
+      <ion-label>Filter by Status</ion-label>
+      <ion-select
+        multiple="true"
+        [(ngModel)]="selectedStatuses"
+        (ionChange)="onStatusFilterChange($event.detail.value)"
+        placeholder="Select statuses"
+      >
+        <ion-select-option
+          *ngFor="let status of orderStatuses"
+          [value]="status.order_status_id"
+        >
+          {{ status.order_status }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <div *ngIf="groupedOrders.length === 0" class="empty-state">
+      <ion-icon name="cube-outline" size="large"></ion-icon>
+      <p>No scheduled pickups.</p>
+    </div>
+
+    <div *ngFor="let group of groupedOrders" class="orders-group">
+      <div class="group-date-label">
+        <ion-label>
+          {{ getDateLabel(group.date) }}
+        </ion-label>
+      </div>
+      <ion-list>
+        <ion-item
+          *ngFor="let order of group.orders"
+          class="order-item"
+          (click)="viewOrderDetails(order)"
+          button
+        >
+          <ion-icon name="person" slot="start"></ion-icon>
+          <ion-label>
+            <h2>Order #{{ order.order_id }}</h2>
+            <p>
+              <ion-icon name="person-circle" class="inline-icon"></ion-icon>
+              Driver: <strong>{{ order.driverName }}</strong>
+            </p>
+            <p>
+              <ion-icon name="call" class="inline-icon"></ion-icon>
+              {{ order.driverPhone }}
+            </p>
+            <p>
+              <ion-icon name="cube" class="inline-icon"></ion-icon>
+              {{ order.totalWeight }}
+            </p>
+          </ion-label>
+          <div slot="end" class="otp-actions">
+            <ion-button
+              *ngIf="order.status === 'pending'"
+              color="primary"
+              fill="solid"
+              size="small"
+              (click)="generateOtp(order); $event.stopPropagation()"
+            >
+              Generate OTP
+            </ion-button>
+            <div
+              *ngIf="
+                order.status === 'otp_generated' && otpVisible[order.order_id]
+              "
+              class="otp-display"
+            >
+              <span class="otp-label">OTP:</span>
+              <span class="otp-value">{{ order.otp }}</span>
+              <ion-button
+                fill="clear"
+                size="small"
+                color="medium"
+                (click)="hideOtp(order); $event.stopPropagation()"
+                title="Hide OTP"
+              >
+                <ion-icon name="eye-off"></ion-icon>
+              </ion-button>
+            </div>
+            <ion-icon
+              *ngIf="order.status === 'picked_up'"
+              name="checkmark-circle"
+              color="success"
+              size="large"
+              title="Picked Up"
+            ></ion-icon>
+          </div>
+        </ion-item>
+      </ion-list>
+    </div>
   </div>
 
-  <div *ngFor="let group of groupedOrders" class="orders-group">
-    <div class="group-date-label">
-      <ion-label>
-        {{ getDateLabel(group.date) }}
-      </ion-label>
-    </div>
-    <ion-list>
-      <ion-item
-        *ngFor="let order of group.orders"
-        class="order-item"
-      >
-        <ion-icon name="person" slot="start"></ion-icon>
-        <ion-label>
-          <h2>Order #{{ order.id }}</h2>
-          <p>
-            <ion-icon name="person-circle" class="inline-icon"></ion-icon>
-            Driver: <strong>{{ order.driverName }}</strong>
-          </p>
-          <p>
-            <ion-icon name="call" class="inline-icon"></ion-icon>
-            {{ order.driverPhone }}
-          </p>
-          <p>
-            <ion-icon name="cube" class="inline-icon"></ion-icon>
-            {{ order.totalWeight }}
-          </p>
-        </ion-label>
-        <div slot="end" class="otp-actions">
-          <ion-button
-            *ngIf="order.status === 'pending'"
-            color="primary"
-            fill="solid"
-            size="small"
-            (click)="generateOtp(order)"
-          >
-            Generate OTP
-          </ion-button>
-          <div *ngIf="order.status === 'otp_generated' && otpVisible[order.id]" class="otp-display">
-            <span class="otp-label">OTP:</span>
-            <span class="otp-value">{{ order.otp }}</span>
-            <ion-button
-              fill="clear"
-              size="small"
-              color="medium"
-              (click)="hideOtp(order)"
-              title="Hide OTP"
-            >
-              <ion-icon name="eye-off"></ion-icon>
-            </ion-button>
-          </div>
-          <ion-icon
-            *ngIf="order.status === 'picked_up'"
-            name="checkmark-circle"
-            color="success"
-            size="large"
-            title="Picked Up"
-          ></ion-icon>
-        </div>
-      </ion-item>
-    </ion-list>
+  <!-- Details View -->
+  <div *ngIf="viewMode === 'details' && selectedOrderDetails">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title
+          >Order #{{ selectedOrderDetails.order_id }}</ion-card-title
+        >
+        <ion-card-subtitle>{{
+          selectedOrderDetails.order_status
+        }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>
+          <strong>Date:</strong> {{ selectedOrderDetails.date_of_order | date }}
+        </p>
+        <p>
+          <strong>Retailer ID:</strong> {{ selectedOrderDetails.retailer_id }}
+        </p>
+        <p>
+          <strong>Total Amount:</strong>
+          {{ selectedOrderDetails.total_order_amount }}
+        </p>
+        <p>
+          <strong>Final Amount:</strong> {{ selectedOrderDetails.final_amount }}
+        </p>
+        <p>
+          <strong>Delivery Address:</strong>
+          {{ selectedOrderDetails.delivery_address }}
+        </p>
+        <p>
+          <strong>Actual Delivery Date:</strong>
+          {{ selectedOrderDetails.actual_delivery_date | date }}
+        </p>
+        <h3>Items:</h3>
+        <ion-list>
+          <ion-item *ngFor="let item of selectedOrderDetails.items">
+            <ion-label>
+              <h2>{{ item.product_name }}</h2>
+              <p>Quantity: {{ item.quantity }}</p>
+              <p>Price: {{ item.wholeseller_price }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content>
