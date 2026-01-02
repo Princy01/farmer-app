@@ -1,3 +1,18 @@
+<ion-header mode="ios">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="end">
+      <ion-button
+        (click)="openLanguagePopover($event)"
+        class="header-btn language-btn"
+      >
+        <ion-icon name="language-outline" slot="start"></ion-icon>
+        <span>{{ currentLanguage }}</span>
+        <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content class="transport-content" [fullscreen]="true">
 
   <!-- Segment Control -->
@@ -5,77 +20,60 @@
     <ion-segment [(ngModel)]="selectedTab" (ionChange)="onTabChange()" class="custom-segment">
       <ion-segment-button value="active" class="segment-button">
         <ion-icon name="car-outline"></ion-icon>
-        <ion-label>Active</ion-label>
+        <ion-label>{{ 'TRANSPORT_DASHBOARD.ACTIVE' | translate }}</ion-label>
       </ion-segment-button>
       <ion-segment-button value="upcoming" class="segment-button">
         <ion-icon name="time-outline"></ion-icon>
-        <ion-label>Upcoming</ion-label>
+        <ion-label>{{ 'TRANSPORT_DASHBOARD.UPCOMING' | translate }}</ion-label>
       </ion-segment-button>
       <ion-segment-button value="completed" class="segment-button">
         <ion-icon name="checkmark-circle-outline"></ion-icon>
-        <ion-label>Completed</ion-label>
+        <ion-label>{{ 'TRANSPORT_DASHBOARD.COMPLETED' | translate }}</ion-label>
       </ion-segment-button>
     </ion-segment>
   </div>
 
   <!-- Content Section -->
   <div class="content-section">
+    <!-- Loading Indicator -->
+    <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+
+    <!-- Error Message -->
+    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
     <!-- Active Deliveries -->
     <ng-container *ngIf="selectedTab === 'active'">
       <div class="deliveries-container">
         <div class="section-header">
-          <h2 class="section-title">Active Deliveries</h2>
+          <h2 class="section-title">{{ 'TRANSPORT_DASHBOARD.ACTIVE_DELIVERIES' | translate }}</h2>
           <ion-badge color="success" class="count-badge">{{ activeDeliveries.length }}</ion-badge>
         </div>
 
         <div class="empty-state" *ngIf="activeDeliveries.length === 0">
           <ion-icon name="car-outline" class="empty-icon"></ion-icon>
-          <h3>No Active Deliveries</h3>
-          <p>All deliveries are either completed or scheduled for later.</p>
+          <h3>{{ 'TRANSPORT_DASHBOARD.NO_ACTIVE_DELIVERIES' | translate }}</h3>
+          <p>{{ 'TRANSPORT_DASHBOARD.ALL_DELIVERIES_COMPLETED_OR_SCHEDULED' | translate }}</p>
         </div>
 
         <div class="delivery-cards">
           <div class="delivery-card active-card" *ngFor="let order of activeDeliveries">
             <div class="card-header">
               <div class="job-info">
-                <h3 class="job-id">{{ order.job_id }}</h3>
-                <span class="job-type">Wholesaler → Retailer</span>
+                <h3 class="job-id">Job ID: {{ order.job_id }}</h3>
+                <span class="job-type">{{ 'TRANSPORT_DASHBOARD.WHOLESALER_TO_RETAILER' | translate }}</span>
               </div>
-              <ion-chip class="status-chip status-active">
-                <ion-icon name="car" slot="start"></ion-icon>
-                On the way
-              </ion-chip>
             </div>
 
             <div class="card-content">
               <div class="location-section">
                 <div class="location-item pickup">
-                  <div class="location-header">
-                    <ion-icon name="location-outline" class="location-icon pickup-icon"></ion-icon>
-                    <span class="location-label">Pickup Location</span>
-                  </div>
-                  <p class="location-address">{{ order.pickup_address }}</p>
+                  <span>Pickup Location: {{ order.pickup_address }}</span>
                 </div>
 
                 <div class="location-item delivery">
-                  <div class="location-header">
-                    <ion-icon name="flag-outline" class="location-icon delivery-icon"></ion-icon>
-                    <span class="location-label">Delivery Location</span>
-                  </div>
-                  <p class="location-address">{{ order.drop_address }}</p>
+                  <span>Delivery Location: {{ order.drop_address }}</span>
                 </div>
               </div>
-            </div>
-
-            <div class="card-footer">
-              <ion-button fill="clear" size="small" class="action-button">
-                <ion-icon name="call-outline" slot="start"></ion-icon>
-                Contact
-              </ion-button>
-              <ion-button fill="clear" size="small" class="action-button">
-                <ion-icon name="navigate-outline" slot="start"></ion-icon>
-                Track
-              </ion-button>
             </div>
           </div>
         </div>
@@ -86,58 +84,35 @@
     <ng-container *ngIf="selectedTab === 'upcoming'">
       <div class="deliveries-container">
         <div class="section-header">
-          <h2 class="section-title">Upcoming Deliveries</h2>
+          <h2 class="section-title">{{ 'TRANSPORT_DASHBOARD.UPCOMING_DELIVERIES' | translate }}</h2>
           <ion-badge color="primary" class="count-badge">{{ upcomingDeliveries.length }}</ion-badge>
         </div>
 
         <div class="empty-state" *ngIf="upcomingDeliveries.length === 0">
           <ion-icon name="time-outline" class="empty-icon"></ion-icon>
-          <h3>No Upcoming Deliveries</h3>
-          <p>New delivery requests will appear here.</p>
+          <h3>{{ 'TRANSPORT_DASHBOARD.NO_UPCOMING_DELIVERIES' | translate }}</h3>
+          <p>{{ 'TRANSPORT_DASHBOARD.NEW_DELIVERY_REQUESTS_WILL_APPEAR' | translate }}</p>
         </div>
 
         <div class="delivery-cards">
           <div class="delivery-card upcoming-card" *ngFor="let order of upcomingDeliveries">
             <div class="card-header">
               <div class="job-info">
-                <h3 class="job-id">{{ order.job_id }}</h3>
-                <span class="job-type">Wholesaler → Retailer</span>
+                <h3 class="job-id">Job ID: {{ order.job_id }}</h3>
+                <span class="job-type">{{ 'TRANSPORT_DASHBOARD.WHOLESALER_TO_RETAILER' | translate }}</span>
               </div>
-              <ion-chip class="status-chip status-scheduled">
-                <ion-icon name="time" slot="start"></ion-icon>
-                Scheduled
-              </ion-chip>
             </div>
 
             <div class="card-content">
               <div class="location-section">
                 <div class="location-item pickup">
-                  <div class="location-header">
-                    <ion-icon name="location-outline" class="location-icon pickup-icon"></ion-icon>
-                    <span class="location-label">Pickup Location</span>
-                  </div>
-                  <p class="location-address">{{ order.pickup_address }}</p>
+                  <span>Pickup Location: {{ order.pickup_address }}</span>
                 </div>
 
                 <div class="location-item delivery">
-                  <div class="location-header">
-                    <ion-icon name="flag-outline" class="location-icon delivery-icon"></ion-icon>
-                    <span class="location-label">Delivery Location</span>
-                  </div>
-                  <p class="location-address">{{ order.drop_address }}</p>
+                  <span>Delivery Location: {{ order.drop_address }}</span>
                 </div>
               </div>
-            </div>
-
-            <div class="card-footer">
-              <ion-button fill="clear" size="small" class="action-button">
-                <ion-icon name="calendar-outline" slot="start"></ion-icon>
-                Schedule
-              </ion-button>
-              <ion-button fill="clear" size="small" class="action-button">
-                <ion-icon name="information-circle-outline" slot="start"></ion-icon>
-                Details
-              </ion-button>
             </div>
           </div>
         </div>
@@ -148,58 +123,35 @@
     <ng-container *ngIf="selectedTab === 'completed'">
       <div class="deliveries-container">
         <div class="section-header">
-          <h2 class="section-title">Completed Deliveries</h2>
+          <h2 class="section-title">{{ 'TRANSPORT_DASHBOARD.COMPLETED_DELIVERIES' | translate }}</h2>
           <ion-badge color="success" class="count-badge">{{ completedDeliveries.length }}</ion-badge>
         </div>
 
         <div class="empty-state" *ngIf="completedDeliveries.length === 0">
           <ion-icon name="checkmark-circle-outline" class="empty-icon"></ion-icon>
-          <h3>No Completed Deliveries</h3>
-          <p>Completed deliveries will be shown here.</p>
+          <h3>{{ 'TRANSPORT_DASHBOARD.NO_COMPLETED_DELIVERIES' | translate }}</h3>
+          <p>{{ 'TRANSPORT_DASHBOARD.COMPLETED_DELIVERIES_WILL_BE_SHOWN' | translate }}</p>
         </div>
 
         <div class="delivery-cards">
           <div class="delivery-card completed-card" *ngFor="let order of completedDeliveries">
             <div class="card-header">
               <div class="job-info">
-                <h3 class="job-id">{{ order.job_id }}</h3>
-                <span class="job-type">Wholesaler → Retailer</span>
+                <h3 class="job-id">Job ID: {{ order.job_id }}</h3>
+                <span class="job-type">{{ 'TRANSPORT_DASHBOARD.WHOLESALER_TO_RETAILER' | translate }}</span>
               </div>
-              <ion-chip class="status-chip status-delivered">
-                <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-                Delivered
-              </ion-chip>
             </div>
 
             <div class="card-content">
               <div class="location-section">
                 <div class="location-item pickup">
-                  <div class="location-header">
-                    <ion-icon name="location-outline" class="location-icon pickup-icon"></ion-icon>
-                    <span class="location-label">Pickup Location</span>
-                  </div>
-                  <p class="location-address">{{ order.pickup_address }}</p>
+                  <span>Pickup Location: {{ order.pickup_address }}</span>
                 </div>
 
                 <div class="location-item delivery">
-                  <div class="location-header">
-                    <ion-icon name="flag-outline" class="location-icon delivery-icon"></ion-icon>
-                    <span class="location-label">Delivery Location</span>
-                  </div>
-                  <p class="location-address">{{ order.drop_address }}</p>
+                  <span>Delivery Location: {{ order.drop_address }}</span>
                 </div>
               </div>
-            </div>
-
-            <div class="card-footer">
-              <ion-button fill="clear" size="small" class="action-button">
-                <ion-icon name="receipt-outline" slot="start"></ion-icon>
-                Invoice
-              </ion-button>
-              <ion-button fill="clear" size="small" class="action-button">
-                <ion-icon name="star-outline" slot="start"></ion-icon>
-                Rating
-              </ion-button>
             </div>
           </div>
         </div>

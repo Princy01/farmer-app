@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DeliveryService, Delivery } from './delivery-history.service';
 
 @Component({
   selector: 'app-delivery-history',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe],
   templateUrl: './delivery-history.component.html',
   styleUrls: ['./delivery-history.component.scss']
 })
@@ -18,38 +19,41 @@ export class DeliveryHistoryComponent implements OnInit {
   isLoading: boolean = false;
   error: string | null = null;
 
-  constructor(private deliveryService: DeliveryService) {}
+  constructor(
+    private deliveryService: DeliveryService,
+    private translate: TranslateService
+  ) {}
 
   ngOnInit() {
     this.loadDeliveryHistory();
   }
 
   loadDeliveryHistory() {
-  this.isLoading = true;
-  this.error = null;
+    this.isLoading = true;
+    this.error = null;
 
-  this.deliveryService.getDeliveryHistory().subscribe({
-    next: (response) => {
-      if (response && Array.isArray(response.deliveries)) {
-        this.deliveries = response.deliveries;
-        this.deliveries.forEach(delivery => {
-          delivery.hasDispute = Math.random() < 0.3;
-        });
-        this.filteredDeliveries = [...this.deliveries];
-      } else {
-        this.deliveries = [];
-        this.filteredDeliveries = [];
-        this.error = 'No delivery history found or invalid response.';
+    this.deliveryService.getDeliveryHistory().subscribe({
+      next: (response) => {
+        if (response && Array.isArray(response.deliveries)) {
+          this.deliveries = response.deliveries;
+          this.deliveries.forEach(delivery => {
+            delivery.hasDispute = Math.random() < 0.3;
+          });
+          this.filteredDeliveries = [...this.deliveries];
+        } else {
+          this.deliveries = [];
+          this.filteredDeliveries = [];
+          this.error = this.translate.instant('DELIVERY_HISTORY.NO_HISTORY_FOUND');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load delivery history', err);
+        this.error = this.translate.instant('DELIVERY_HISTORY.LOAD_ERROR');
+        this.isLoading = false;
       }
-      this.isLoading = false;
-    },
-    error: (err) => {
-      console.error('Failed to load delivery history', err);
-      this.error = 'Failed to load delivery history. Please try again.';
-      this.isLoading = false;
-    }
-  });
-}
+    });
+  }
 
   filterDeliveries() {
     if (!this.searchQuery.trim()) {

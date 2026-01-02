@@ -2,11 +2,17 @@ import { Component, Input, inject } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core'; 
 
 @Component({
   selector: 'app-sort-modal',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [
+    IonicModule,
+    CommonModule,
+    FormsModule,
+    TranslatePipe
+  ],
   templateUrl: './sort-modal.component.html',
   styleUrls: ['./sort-modal.component.scss']
 })

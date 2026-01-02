@@ -1,0 +1,88 @@
+<ion-content>
+  <ion-toolbar class="demand-trends-toolbar">
+    <ion-buttons slot="start">
+      <ion-button color="dark" (click)="goToTrends()">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Trends</ion-title>
+  </ion-toolbar>
+  <ion-grid class="ion-no-padding">
+    <ion-row class="full-height">
+      <!-- Filters Sidebar -->
+      <ion-col size="12" size-md="3" class="sidebar">
+        <div class="filters-container">
+          <ion-item>
+            <ion-label position="stacked">Time Range</ion-label>
+            <ion-select [(ngModel)]="selectedTimeRange"
+                        (ionChange)="updateCharts()"
+                        interface="popover">
+              <ion-select-option value="weekly">Weekly</ion-select-option>
+              <ion-select-option value="monthly">Monthly</ion-select-option>
+              <ion-select-option value="quarterly">Quarterly</ion-select-option>
+              <ion-select-option value="yearly">Yearly</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Select Products</ion-label>
+            <ion-select [(ngModel)]="selectedProducts"
+                        [multiple]="true"
+                        (ionChange)="onProductSelectionChange()"
+                        interface="action-sheet"
+                        [interfaceOptions]="customActionSheetOptions">
+              <div slot="header">
+                <ion-searchbar [(ngModel)]="searchTerm"
+                               (ionInput)="filterProducts()"
+                               placeholder="Search products">
+                </ion-searchbar>
+                <ion-item lines="none">
+                  <ion-checkbox [(ngModel)]="allSelected"
+                                (ionChange)="toggleAllProducts()">
+                    Select All
+                  </ion-checkbox>
+                </ion-item>
+              </div>
+              <ion-select-option *ngFor="let product of filteredProducts"
+                                 [value]="product.name">
+                {{product.name}}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+      </ion-col>
+
+      <!-- Charts Area -->
+      <ion-col size="12" size-md="9" class="charts-area">
+        <div class="charts-container">
+          <!-- Seasonal Demand Chart -->
+          <div class="chart-wrapper">
+            <h3>Seasonal Demand Patterns</h3>
+            <apx-chart
+              [series]="seasonalDemandOptions.series"
+              [chart]="seasonalDemandOptions.chart"
+              [xaxis]="seasonalDemandOptions.xaxis"
+              [yaxis]="seasonalDemandOptions.yaxis"
+              [colors]="seasonalDemandOptions.colors"
+              [tooltip]="seasonalDemandOptions.tooltip">
+            </apx-chart>
+          </div>
+
+          <!-- Product Demand Chart -->
+          <div class="chart-wrapper">
+            <h3>Product Demand Comparison</h3>
+            <apx-chart
+              [series]="productDemandOptions.series"
+              [chart]="productDemandOptions.chart"
+              [xaxis]="productDemandOptions.xaxis"
+              [yaxis]="productDemandOptions.yaxis"
+              [colors]="productDemandOptions.colors"
+              [plotOptions]="productDemandOptions.plotOptions"
+              [tooltip]="productDemandOptions.tooltip">
+            </apx-chart>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

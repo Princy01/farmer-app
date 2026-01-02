@@ -2,6 +2,7 @@ import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { HttpClientModule } from '@angular/common/http';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PickupService, ActiveJob, JobOrder } from './pickup.service';
 
 @Component({
@@ -9,7 +10,7 @@ import { PickupService, ActiveJob, JobOrder } from './pickup.service';
   templateUrl: './pickup-orders.component.html',
   styleUrls: ['./pickup-orders.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, HttpClientModule],
+  imports: [IonicModule, CommonModule, HttpClientModule, TranslatePipe],
 })
 export class PickupOrdersComponent implements OnInit {
   jobs = signal<ActiveJob[]>([]);
@@ -22,7 +23,10 @@ export class PickupOrdersComponent implements OnInit {
   otpError = '';
   otpSuccess = '';
 
-  constructor(private pickupService: PickupService) { }
+  constructor(
+    private pickupService: PickupService,
+    private translate: TranslateService
+  ) { }
 
   ngOnInit() {
     this.fetchJobs();
@@ -36,7 +40,7 @@ export class PickupOrdersComponent implements OnInit {
         this.loading = false;
       },
       error: err => {
-        this.error = 'Failed to load jobs';
+        this.error = this.translate.instant('PICKUP_ORDERS.LOAD_JOBS_ERROR');
         this.loading = false;
       }
     });
@@ -60,7 +64,7 @@ export class PickupOrdersComponent implements OnInit {
         this.loading = false;
       },
       error: err => {
-        this.error = 'Failed to load orders';
+        this.error = this.translate.instant('PICKUP_ORDERS.LOAD_ORDERS_ERROR');
         this.loading = false;
       }
     });
@@ -99,7 +103,7 @@ export class PickupOrdersComponent implements OnInit {
 
   verifyOtp(enteredOtp: string) {
     if (!enteredOtp) {
-      this.otpError = 'Please enter OTP';
+      this.otpError = this.translate.instant('PICKUP_ORDERS.ENTER_OTP');
       this.otpSuccess = '';
       return;
     }
@@ -107,7 +111,7 @@ export class PickupOrdersComponent implements OnInit {
     this.otpLoading = true;
     this.pickupService.confirmPickup(this.selectedOrder.order_id, enteredOtp).subscribe({
       next: res => {
-        this.otpSuccess = res.message || 'Pickup confirmed!';
+        this.otpSuccess = res.message || this.translate.instant('PICKUP_ORDERS.PICKUP_CONFIRMED');
         this.otpError = '';
         this.otpLoading = false;
         // Optionally refresh order status here
@@ -115,7 +119,7 @@ export class PickupOrdersComponent implements OnInit {
         this.selectedOrder = null;
       },
       error: err => {
-        this.otpError = err.error?.error || 'Invalid OTP. Please try again.';
+        this.otpError = err.error?.error || this.translate.instant('PICKUP_ORDERS.INVALID_OTP');
         this.otpSuccess = '';
         this.otpLoading = false;
       }

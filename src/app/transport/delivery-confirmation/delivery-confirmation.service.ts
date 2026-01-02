@@ -26,20 +26,50 @@ export interface DeliveryItem {
 
 export interface GenerateOTPRequest {
   job_id: number;
-  order_id: number;
 }
 
 export interface GenerateOTPResponse {
+  job_id: number;
   otp_code: string;
+  expires_at: string;
   retailer_id: number;
-  expires_at: string; // Assuming backend returns expiry
 }
 
 export interface ConfirmDeliveryRequest {
   job_id: number;
-  order_id: number;
   otp: string;
-  notes?: string;
+}
+
+export interface ActiveJob {
+  assignment_id: number;
+  job_id: number;
+  pickup_location: string;
+  dropoff_location: string;
+  delivery_date: string; // ISO string from time.Time
+  base_price: number;
+  weight: number;
+  distance: number;
+  job_status: string;
+  accepted_at?: string; // ISO string or null
+  pickup_confirmed_at?: string; // ISO string or null
+  delivery_status: string;
+}
+
+export interface JobOrder {
+  order_id: number;
+  date_of_order: string; // ISO string from time.Time
+  delivery_address: string;
+  total_order_amount: number;
+  final_amount: number;
+  order_status_id: number;
+  order_status_text: string;
+  actual_delivery_date?: string; // ISO string or null
+  retailer_id: number;
+  retailer_owner?: string;
+  retailer_contact?: string;
+  retailer_email?: string;
+  wholeseller_ids: number[];
+  products: any; // Raw JSON array from backend; will be parsed to DeliveryItem[]
 }
 
 @Injectable({
@@ -57,29 +87,32 @@ export class DeliveryService {
       'Content-Type': 'application/json'
     });
   }
-  
-//Add a backend endpoint for getDeliveryDetails
-  // Fetch delivery details and validate assignment
-  getDeliveryDetails(jobId: number, orderId: number): Observable<DeliveryDetails> {
-    return this.http.get<DeliveryDetails>(
-      `${this.apiUrl}/delivery/details?job_id=${jobId}&order_id=${orderId}`,
+
+  getActiveDeliveryJobs(): Observable<ActiveJob[]> {
+    return this.http.get<ActiveJob[]>(
+      `${this.apiUrl}/transportation/delivery/active-delivery-jobs`,
       { headers: this.getHeaders() }
     );
   }
 
-  // Generate OTP via backend
+  getOrdersInJob(jobId: number): Observable<JobOrder[]> {
+    return this.http.get<JobOrder[]>(
+      `${this.apiUrl}/transportation/delivery/job-orders/${jobId}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
   generateOTP(request: GenerateOTPRequest): Observable<GenerateOTPResponse> {
     return this.http.post<GenerateOTPResponse>(
-      `${this.apiUrl}/generate-otp`,
+      `${this.apiUrl}/transportation/delivery/generate-otp`,
       request,
       { headers: this.getHeaders() }
     );
   }
 
-  // Confirm delivery via backend
   confirmDelivery(request: ConfirmDeliveryRequest): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
-      `${this.apiUrl}/confirm-delivery`,
+      `${this.apiUrl}/transportation/confirm-delivery`,
       request,
       { headers: this.getHeaders() }
     );

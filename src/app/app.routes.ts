@@ -385,10 +385,6 @@ export const routes: Routes = [
         path: 'pickup-orders',
         loadComponent: () => import('./transport/pickup-orders/pickup-orders.component').then((m) => m.PickupOrdersComponent),
       },
-      {
-        path: 'pickup-confirmation',
-        loadComponent: () => import('./transport/pickup-confirmation/pickup-confirmation.component').then((m) => m.PickupConfirmationComponent),
-      },
       //     {
       // path: 'delivery-confirmation/:jobId/:orderId',
       //       loadComponent: () => import('./transport/delivery-confirmation/delivery-confirmation.component').then((m) => m.DeliveryConfirmationComponent),

@@ -35,7 +35,6 @@ export class MarketComparisonService {
     const params = new HttpParams()
       .set('product_ids', productIds.join(','));
 
-    // Remove wholesaler_id param - backend will get user_id from JWT
     return this.http.get<GroupedPriceComparison | GroupedPriceComparison[]>(
       `${this.apiUrl}/getWholesellerPriceComparison`,
       { headers, params }

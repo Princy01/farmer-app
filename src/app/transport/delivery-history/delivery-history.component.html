@@ -1,25 +1,31 @@
 <ion-content>
 
   <!-- Search Past Deliveries -->
-  <ion-searchbar [(ngModel)]="searchQuery" (ionInput)="filterDeliveries()" placeholder="Search by location or order ID"></ion-searchbar>
+  <ion-searchbar
+    [(ngModel)]="searchQuery"
+    (ionInput)="filterDeliveries()"
+    [placeholder]="'DELIVERY_HISTORY.SEARCH_PLACEHOLDER' | translate">
+  </ion-searchbar>
 
   <!-- Loading Indicator -->
   <div class="ion-text-center" *ngIf="isLoading">
     <ion-spinner name="circular"></ion-spinner>
-    <p>Loading delivery history...</p>
+    <p>{{ 'DELIVERY_HISTORY.LOADING' | translate }}</p>
   </div>
 
   <!-- Error Message -->
   <ion-item *ngIf="error" color="danger">
     <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
     <ion-label>{{ error }}</ion-label>
-    <ion-button slot="end" (click)="loadDeliveryHistory()">Retry</ion-button>
+    <ion-button slot="end" (click)="loadDeliveryHistory()">
+      {{ 'DELIVERY_HISTORY.RETRY' | translate }}
+    </ion-button>
   </ion-item>
 
   <!-- Empty State -->
   <ion-item *ngIf="!isLoading && filteredDeliveries.length === 0 && !error">
     <ion-label class="ion-text-center">
-      <p>No delivery history found</p>
+      <p>{{ 'DELIVERY_HISTORY.NO_DELIVERIES' | translate }}</p>
     </ion-label>
   </ion-item>
 
@@ -27,14 +33,20 @@
   <ion-list *ngIf="!isLoading && filteredDeliveries.length > 0">
     <ion-item *ngFor="let delivery of filteredDeliveries">
       <ion-label>
-        <h3>Order ID: #{{ delivery.order_id }}</h3>
-        <p><strong>Pickup:</strong> {{ delivery.pickup_address }} → <strong>Drop:</strong> {{ delivery.drop_address }}</p>
-        <p><strong>Load:</strong> {{ delivery.weight_kg }} kg | <strong>Charges:</strong> ₹{{ delivery.base_price }}</p>
+        <h3>{{ 'DELIVERY_HISTORY.ORDER_ID' | translate }}: #{{ delivery.order_id }}</h3>
+        <p>
+          <strong>{{ 'DELIVERY_HISTORY.PICKUP' | translate }}:</strong> {{ delivery.pickup_address }} →
+          <strong>{{ 'DELIVERY_HISTORY.DROP' | translate }}:</strong> {{ delivery.drop_address }}
+        </p>
+        <p>
+          <strong>{{ 'DELIVERY_HISTORY.LOAD' | translate }}:</strong> {{ delivery.weight_kg }} {{ 'DELIVERY_HISTORY.KG' | translate }} |
+          <strong>{{ 'DELIVERY_HISTORY.CHARGES' | translate }}:</strong> ₹{{ delivery.base_price }}
+        </p>
       </ion-label>
 
       <!-- Dispute Button (Visible only if needed) -->
       <ion-button *ngIf="delivery.hasDispute" color="danger" (click)="resolveDispute(delivery.job_id)">
-        Resolve Dispute
+        {{ 'DELIVERY_HISTORY.RESOLVE_DISPUTE' | translate }}
       </ion-button>
     </ion-item>
   </ion-list>

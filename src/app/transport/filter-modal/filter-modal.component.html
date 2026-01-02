@@ -1,8 +1,10 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Filter</ion-title>
+    <ion-title>{{ 'TRANSPORT_REQUESTS.FILTER_TITLE' | translate }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button class = "close-btn" (click)="closeModal()">Close</ion-button>
+      <ion-button class="close-btn" (click)="closeModal()">
+        {{ 'TRANSPORT_REQUESTS.CLOSE' | translate }}
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -10,27 +12,29 @@
 <ion-content>
   <ion-list>
     <ion-item>
-      <ion-label>Priority Deliveries</ion-label>
+      <ion-label>{{ 'TRANSPORT_REQUESTS.PRIORITY_DELIVERIES' | translate }}</ion-label>
       <ion-toggle [(ngModel)]="priorityDeliveries"></ion-toggle>
     </ion-item>
 
     <ion-item>
-      <ion-label>Delayed Deliveries</ion-label>
+      <ion-label>{{ 'TRANSPORT_REQUESTS.DELAYED_DELIVERIES' | translate }}</ion-label>
       <ion-toggle [(ngModel)]="delayedDeliveries"></ion-toggle>
     </ion-item>
 
     <ion-item>
-      <ion-label>Shared Deliveries</ion-label>
+      <ion-label>{{ 'TRANSPORT_REQUESTS.SHARED_DELIVERIES' | translate }}</ion-label>
       <ion-toggle [(ngModel)]="sharedDeliveries"></ion-toggle>
     </ion-item>
 
     <ion-item>
-      <ion-label>Single Delivery</ion-label>
+      <ion-label>{{ 'TRANSPORT_REQUESTS.SINGLE_DELIVERY' | translate }}</ion-label>
       <ion-toggle [(ngModel)]="singleDelivery"></ion-toggle>
     </ion-item>
   </ion-list>
 </ion-content>
 
 <ion-footer>
-  <ion-button expand="full" (click)="applyFilters()">Apply</ion-button>
+  <ion-button expand="full" (click)="applyFilters()">
+    {{ 'TRANSPORT_REQUESTS.APPLY' | translate }}
+  </ion-button>
 </ion-footer>

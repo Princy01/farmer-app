@@ -1,5 +1,3 @@
-//CREATE MATERIALIZED VIEW IN SQL AND THEN MAKE CHANGES HERE FOR THAT
-
 import { Component, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { IonicModule, NavController } from '@ionic/angular';
@@ -7,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
+import { DemandTrendsService, DemandPatternRow, ProductDemandComparisonRow } from './demand-trends.service';
 
 interface ProductData {
   name: string;
@@ -15,249 +14,36 @@ interface ProductData {
 }
 
 @Component({
-  template: `
-    <ion-content>
-    <ion-toolbar class="demand-trends-toolbar">
-    <ion-buttons slot="start">
-      <ion-button  color="dark" (click)="goToTrends()">
-        <ion-icon name="chevron-back-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Trends</ion-title>
-  </ion-toolbar>
-      <ion-grid class="ion-no-padding">
-        <ion-row class="full-height">
-          <!-- Filters Sidebar -->
-          <ion-col size="12" size-md="3" class="sidebar">
-            <div class="filters-container">
-              <ion-item>
-                <ion-label position="stacked">Time Range</ion-label>
-                <ion-select [(ngModel)]="selectedTimeRange"
-                          (ionChange)="updateCharts()"
-                          interface="popover">
-                          <ion-select-option value="3">3 Months</ion-select-option>
-<ion-select-option value="6">6 Months</ion-select-option>
-<ion-select-option value="12">12 Months</ion-select-option>
-<ion-select-option value="18">18 Months</ion-select-option>
-<ion-select-option value="24">24 Months</ion-select-option>
-<ion-select-option value="36">36 Months</ion-select-option>
-</ion-select>
-              </ion-item>
-
-              <ion-item>
-                <ion-label position="stacked">Select Products</ion-label>
-                <ion-select [(ngModel)]="selectedProducts"
-                          [multiple]="true"
-                          (ionChange)="onProductSelectionChange()"
-                          interface="action-sheet"
-                          [interfaceOptions]="customActionSheetOptions">
-                  <div slot="header">
-                    <ion-searchbar [(ngModel)]="searchTerm"
-                                 (ionInput)="filterProducts()"
-                                 placeholder="Search products">
-                    </ion-searchbar>
-                    <ion-item lines="none">
-                      <ion-checkbox [(ngModel)]="allSelected"
-                                  (ionChange)="toggleAllProducts()">
-                        Select All
-                      </ion-checkbox>
-                    </ion-item>
-                  </div>
-                  <ion-select-option *ngFor="let product of filteredProducts"
-                                   [value]="product.name">
-                    {{product.name}}
-                  </ion-select-option>
-                </ion-select>
-              </ion-item>
-            </div>
-          </ion-col>
-
-          <!-- Charts Area -->
-          <ion-col size="12" size-md="9" class="charts-area">
-            <div class="charts-container">
-              <!-- Seasonal Demand Chart -->
-              <div class="chart-wrapper">
-                <h3>Seasonal Demand Patterns</h3>
-                <apx-chart
-                  [series]="seasonalDemandOptions.series"
-                  [chart]="seasonalDemandOptions.chart"
-                  [xaxis]="seasonalDemandOptions.xaxis"
-                  [yaxis]="seasonalDemandOptions.yaxis"
-                  [colors]="seasonalDemandOptions.colors"
-                  [tooltip]="seasonalDemandOptions.tooltip">
-                </apx-chart>
-              </div>
-
-              <!-- Product Demand Chart -->
-              <div class="chart-wrapper">
-                <h3>Product Demand Comparison</h3>
-                <apx-chart
-                  [series]="productDemandOptions.series"
-                  [chart]="productDemandOptions.chart"
-                  [xaxis]="productDemandOptions.xaxis"
-                  [yaxis]="productDemandOptions.yaxis"
-                  [colors]="productDemandOptions.colors"
-                  [plotOptions]="productDemandOptions.plotOptions"
-                  [tooltip]="productDemandOptions.tooltip">
-                </apx-chart>
-              </div>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-content>
-  `,
-
-  styles: [`
-    .full-height {
-      height: 100%;
-    }
-
-    .demand-trends-toolbar {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --color: white;
-  --border-color: transparent;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
-}
-
-
-    .sidebar {
-      background: #f5f5f5;
-      height: 100%;
-    }
-
-    .filters-container {
-      padding: 16px;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .products-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 16px;
-      background: #e0e0e0;
-      border-radius: 8px;
-    }
-
-    .product-search {
-      --background: #ffffff;
-      --box-shadow: none;
-      --border-radius: 8px;
-    }
-
-    .product-list {
-      overflow-y: auto;
-      flex: 1;
-      background: #ffffff;
-      border-radius: 8px;
-      padding: 8px;
-    }
-
-    .product-list ion-item {
-      --background: transparent;
-      --padding-start: 8px;
-      --padding-end: 8px;
-      --min-height: 40px;
-      margin-bottom: 4px;
-    }
-
-    .charts-area {
-      padding: 16px;
-      height: 100%;
-    }
-
-    .chart-container {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 20px;
-      height: calc(100vh - 32px);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    h3 {
-      color: #333;
-      margin: 0 0 20px;
-      text-align: center;
-      font-size: 1.2rem;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        height: auto;
-      }
-
-      .filters-container {
-        max-height: 300px;
-      }
-
-      .chart-container {
-        height: 400px;
-      }
-
-      ion-select::part(icon) {
-    color: #666;
-  }
-
-  ion-searchbar {
-    padding: 8px 16px;
-    --background: #f5f5f5;
-    --border-radius: 8px;
-  }
-
-  ion-select::part(placeholder),
-  ion-select::part(text) {
-    color: #333;
-    font-size: 14px;
-  }
-
-  .select-header {
-    padding: 16px;
-    background: #f5f5f5;
-    border-bottom: 1px solid #ddd;
-  }
-    }
-  `],
+  selector: 'app-demand-trends',
   standalone: true,
   imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule],
+  templateUrl: './demand-trends.component.html',
+  styleUrls: ['./demand-trends.component.scss']
 })
 export class DemandTrendsComponent implements OnInit {
-  constructor(private navController: NavController) {
+  constructor(private navController: NavController, private demandService: DemandTrendsService) {
     addIcons({ chevronBackOutline })
   }
   goToTrends() {
     this.navController.navigateBack('/wholesaler/trends'); // Change the path as per your route
   }
 
-  selectedTimeRange = '3';
+  selectedTimeRange = 'monthly';
   searchTerm = '';
   allSelected = false;
-  products: ProductData[] = [
-    { name: 'Potato', isSelected: true, data: [] },
-    { name: 'Tomato', isSelected: true, data: [] },
-    { name: 'Onion', isSelected: false, data: [] },
-    { name: 'Cauliflower', isSelected: false, data: [] },
-    { name: 'Green Peas', isSelected: false, data: [] },
-    { name: 'Cabbage', isSelected: false, data: [] }
-  ];
+  products: ProductData[] = [];
   filteredProducts: ProductData[] = [];
   seasonalDemandOptions: any;
   productDemandOptions: any;
 
-  selectedProducts: string[] = ['Potato', 'Tomato'];
+  selectedProducts: string[] = [];
   customActionSheetOptions = {
     header: 'Select Products',
     subHeader: 'Choose products to display in charts'
   };
 
   ngOnInit() {
-    this.filteredProducts = [...this.products];
-    this.loadInitialData();
+    this.loadProducts();
     this.syncProductSelections();
     this.updateCharts();
   }
@@ -298,28 +84,64 @@ export class DemandTrendsComponent implements OnInit {
     this.allSelected = this.selectedProducts.length === this.products.length;
   }
 
-  private loadInitialData() {
-    this.products.forEach(product => {
-      product.data = Array.from({ length: 36 }, () =>
-        Math.floor(Math.random() * (100000 - 20000) + 20000)
-      );
+  private loadProducts() {
+    // Fetch demand patterns to extract unique products
+    this.demandService.getDemandPatterns(this.selectedTimeRange).subscribe(data => {
+      const productMap = new Map<string, ProductData>();
+      data.forEach(row => {
+        if (!productMap.has(row.product_name)) {
+          productMap.set(row.product_name, { name: row.product_name, isSelected: false, data: [] });
+        }
+      });
+      this.products = Array.from(productMap.values());
+      this.filteredProducts = [...this.products];
+      this.selectedProducts = this.products.slice(0, 2).map(p => p.name); // Default select first two
+      this.syncProductSelections();
+      this.loadInitialData();
+    });
+  }
 
+  private loadInitialData() {
+    // Fetch demand patterns for seasonal chart
+    this.demandService.getDemandPatterns(this.selectedTimeRange).subscribe(patterns => {
+      // Group data by product and period based on range
+      const productDataMap = new Map<string, Map<string, number>>();
+      patterns.forEach(row => {
+        if (!productDataMap.has(row.product_name)) {
+          productDataMap.set(row.product_name, new Map());
+        }
+        const periodKey = this.getPeriodKey(row.period, this.selectedTimeRange);
+        productDataMap.get(row.product_name)!.set(periodKey, row.total_quantity);
+      });
+
+      // Sort periods
+      const allPeriods = Array.from(new Set(patterns.map(p => this.getPeriodKey(p.period, this.selectedTimeRange)))).sort();
+
+      this.products.forEach(product => {
+        product.data = allPeriods.map(period => productDataMap.get(product.name)?.get(period) || 0);
+      });
+
+      // Fetch comparison for current period
+      this.demandService.getProductDemandComparison(this.selectedTimeRange).subscribe(comparison => {
+        // This can be used if needed, but for now, charts are updated
+        this.updateCharts();
+      });
     });
   }
 
   updateCharts() {
-    const months = parseInt(this.selectedTimeRange);
+    const periods = this.getPeriodsCount(this.selectedTimeRange);
     const selectedProducts = this.products.filter(p => p.isSelected);
 
-    this.updateSeasonalDemandChart(selectedProducts, months);
+    this.updateSeasonalDemandChart(selectedProducts, periods);
     this.updateProductDemandChart(selectedProducts);
   }
 
-  private updateSeasonalDemandChart(selectedProducts: ProductData[], months: number) {
+  private updateSeasonalDemandChart(selectedProducts: ProductData[], periods: number) {
     this.seasonalDemandOptions = {
       series: selectedProducts.map(product => ({
         name: product.name,
-        data: product.data.slice(-months)
+        data: product.data.slice(-periods)
       })),
       chart: {
         height: 350,
@@ -331,7 +153,7 @@ export class DemandTrendsComponent implements OnInit {
       },
       colors: ['#FF6B6B', '#45B7D1', '#4ECDC4', '#96CEB4', '#FFEEAD', '#D4A5A5'],
       xaxis: {
-        categories: this.getLastXMonths(months)
+        categories: this.getLastXPeriods(periods, this.selectedTimeRange)
       },
       yaxis: {
         title: {
@@ -350,15 +172,15 @@ export class DemandTrendsComponent implements OnInit {
   }
 
   private updateProductDemandChart(selectedProducts: ProductData[]) {
-    const currentData = selectedProducts.map(p => p.data[p.data.length - 1]);
-    const previousData = selectedProducts.map(p => p.data[p.data.length - 2]);
+    const currentData = selectedProducts.map(p => p.data[p.data.length - 1] || 0);
+    const previousData = selectedProducts.map(p => p.data[p.data.length - 2] || 0);
 
     this.productDemandOptions = {
       series: [{
-        name: 'Current Month',
+        name: 'Current Period',
         data: currentData
       }, {
-        name: 'Previous Month',
+        name: 'Previous Period',
         data: previousData
       }],
       chart: {
@@ -396,15 +218,66 @@ export class DemandTrendsComponent implements OnInit {
     };
   }
 
-  private getLastXMonths(count: number): string[] {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const currentMonth = new Date().getMonth();
-    const result = [];
+  private getPeriodKey(period: string, range: string): string {
+    const date = new Date(period);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    switch (range) {
+      case 'weekly':
+        // Approximate week as YYYY-WW
+        const week = Math.ceil((date.getDate() - date.getDay() + 1) / 7);
+        return `${year}-W${week.toString().padStart(2, '0')}`;
+      case 'monthly':
+        return `${year}-${month.toString().padStart(2, '0')}`;
+      case 'quarterly':
+        const quarter = Math.ceil(month / 3);
+        return `${year}-Q${quarter}`;
+      case 'yearly':
+        return `${year}`;
+      default:
+        return `${year}-${month.toString().padStart(2, '0')}`;
+    }
+  }
 
+  private getPeriodsCount(range: string): number {
+    // Default number of periods to display
+    switch (range) {
+      case 'weekly': return 12; // Last 12 weeks
+      case 'monthly': return 12; // Last 12 months
+      case 'quarterly': return 4; // Last 4 quarters
+      case 'yearly': return 5; // Last 5 years
+      default: return 12;
+    }
+  }
+
+  private getLastXPeriods(count: number, range: string): string[] {
+    const result: string[] = [];
+    const now = new Date();
     for (let i = count - 1; i >= 0; i--) {
-      const monthIndex = (currentMonth - i + 12) % 12;
-      result.push(months[monthIndex]);
+      const date = new Date(now);
+      switch (range) {
+        case 'weekly':
+          date.setDate(date.getDate() - i * 7);
+          const week = Math.ceil((date.getDate() - date.getDay() + 1) / 7);
+          result.push(`${date.getFullYear()}-W${week.toString().padStart(2, '0')}`);
+          break;
+        case 'monthly':
+          date.setMonth(date.getMonth() - i);
+          result.push(`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`);
+          break;
+        case 'quarterly':
+          date.setMonth(date.getMonth() - i * 3);
+          const quarter = Math.ceil((date.getMonth() + 1) / 3);
+          result.push(`${date.getFullYear()}-Q${quarter}`);
+          break;
+        case 'yearly':
+          date.setFullYear(date.getFullYear() - i);
+          result.push(`${date.getFullYear()}`);
+          break;
+        default:
+          date.setMonth(date.getMonth() - i);
+          result.push(`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`);
+      }
     }
     return result;
   }

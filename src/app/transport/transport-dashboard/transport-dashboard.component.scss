@@ -8,6 +8,33 @@ ion-content {
 }
 
 /* Header Section */
+.header-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: #fff;
+  padding: 0 1rem;
+}
+
+.header-btn {
+  --color: #fff;
+  font-weight: 500;
+  text-transform: none;
+}
+
+.language-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  ion-icon {
+    font-size: 1.2rem;
+    color: #fff; // Changed to white for visibility on purple background
+  }
+
+  span {
+    font-size: 0.9rem;
+  }
+}
+
 .header-section {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 1.5rem 1rem 2rem;
@@ -131,6 +158,7 @@ ion-content {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  // Removed flex-wrap to keep badge inline
 }
 
 .section-title {
@@ -144,6 +172,8 @@ ion-content {
   --background: #667eea;
   --color: #fff;
   font-weight: 600;
+  font-size: 0.9rem;
+  padding: 4px 8px;
 }
 
 /* Empty State */
@@ -177,7 +207,7 @@ ion-content {
 .delivery-cards {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax((100%, 350px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   width: 100%;
 }
 
@@ -245,26 +275,6 @@ ion-content {
   font-weight: 500;
 }
 
-.status-chip {
-  font-weight: 600;
-  font-size: 0.8rem;
-
-  &.status-active {
-    --background: rgba(102, 126, 234, 0.1);
-    --color: #667eea;
-  }
-
-  &.status-scheduled {
-    --background: rgba(56, 128, 255, 0.1);
-    --color: #3880ff;
-  }
-
-  &.status-delivered {
-    --background: rgba(16, 220, 96, 0.1);
-    --color: #10dc60;
-  }
-}
-
 /* Location Section */
 .location-section {
   margin-bottom: 1.5rem;
@@ -278,87 +288,17 @@ ion-content {
   }
 }
 
-.location-header {
+.location-item {
   display: flex;
   align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.location-icon {
-  font-size: 1.1rem;
-  margin-right: 0.5rem;
-
-  &.pickup-icon {
-    color: #667eea;
-  }
-
-  &.delivery-icon {
-    color: #ff6b6b;
-  }
-}
-
-.location-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.location-address {
-  color: #333;
   font-size: 0.95rem;
-  margin: 0;
-  padding-left: 1.6rem;
-  line-height: 1.4;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Route Line */
-.route-line {
-  margin: 1rem 0;
-  padding-left: 0.55rem;
-}
-
-.route-dots {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ddd;
-
-  &.completed {
-    background: #667eea;
+  color: #333;
+  // Removed ion-icon styles since icons are removed
+  &.pickup {
+    // Optional: add color if needed, but removed icons
   }
-}
-
-.completed-route .dot {
-  background: #667eea;
-}
-
-/* Card Footer */
-.card-footer {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 1rem;
-}
-
-.action-button {
-  --color: #667eea;
-  font-size: 0.85rem;
-  font-weight: 500;
-
-  &:hover {
-    --background: rgba(102, 126, 234, 0.1);
+  &.delivery {
+    // Optional: add color if needed, but removed icons
   }
 }
 
@@ -410,19 +350,7 @@ ion-content {
     gap: 0.5rem;
   }
 
-  .card-footer {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .action-button {
-    justify-content: flex-start;
-  }
-
-  .section-header {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
+  // Removed flex-direction: column for .section-header to keep badge inline
 }
 
 @media (max-width: 480px) {
@@ -438,12 +366,7 @@ ion-content {
     padding: 1rem;
   }
 
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
+  // Removed flex-direction: column for .section-header to keep badge inline
   .content-section {
     padding: 0 0.5rem 2rem;
   }
@@ -458,8 +381,7 @@ ion-content {
     padding: 0.75rem;
   }
 
-  .location-address {
+  .location-item {
     font-size: 0.9rem;
-    padding-left: 1.4rem;
   }
 }

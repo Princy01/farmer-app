@@ -1,127 +1,134 @@
 <ion-content class="delivery-content">
-  <!-- Status Bar -->
-  <div class="status-bar">
-    <div class="status-item active">
-      <ion-icon name="location" class="status-icon"></ion-icon>
-      <span class="status-text">Arrived</span>
-    </div>
-    <div class="status-progress">
-      <div class="progress-line active"></div>
-    </div>
-    <div class="status-item" [class.active]="otpGenerated">
-      <ion-icon name="key" class="status-icon"></ion-icon>
-      <span class="status-text">OTP Generated</span>
-    </div>
-    <div class="status-progress">
-      <div class="progress-line" [class.active]="deliveryConfirmed"></div>
-    </div>
-    <div class="status-item" [class.active]="deliveryConfirmed">
-      <ion-icon name="checkmark-circle" class="status-icon"></ion-icon>
-      <span class="status-text">Delivery Confirmed</span>
-    </div>
-  </div>
-
-  <div class="content-container">
-    <!-- Order Details Card -->
-    <ion-card class="order-details-card">
-      <div class="card-header">
-        <div class="header-left">
-          <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
-          <div class="header-info">
-            <h2 class="order-id">Order #{{ orderId }}</h2>
-            <span class="order-type">Delivery to Retailer</span>
-          </div>
-        </div>
-        <div class="priority-badge">
-          <ion-icon name="time"></ion-icon>
-          <span>Delivery</span>
-        </div>
-      </div>
-
-      <div class="delivery-info">
-        <div class="info-row">
-          <ion-icon
-            name="storefront"
-            class="info-icon retailer-icon"
-          ></ion-icon>
-          <div class="info-details">
-            <span class="info-label">Deliver To</span>
-            <span class="info-value">{{ retailerName }}</span>
-          </div>
-        </div>
-
-        <div class="info-row">
-          <ion-icon name="location" class="info-icon location-icon"></ion-icon>
-          <div class="info-details">
-            <span class="info-label">Delivery Address</span>
-            <span class="info-value">{{ deliveryAddress }}</span>
-          </div>
-        </div>
-
-        <div class="info-row">
-          <ion-icon name="call" class="info-icon contact-icon"></ion-icon>
-          <div class="info-details">
-            <span class="info-label">Contact</span>
-            <span class="info-value">{{ retailerPhone }}</span>
-          </div>
-        </div>
-      </div>
-    </ion-card>
-
-    <!-- Delivery Items Summary -->
-    <ion-card class="items-summary-card">
+  <!-- List View: Active Jobs -->
+  <div *ngIf="showList" class="content-container">
+    <ion-card class="jobs-list-card">
       <div class="card-header">
         <div class="header-left">
           <ion-icon name="list-outline" class="header-icon"></ion-icon>
           <div class="header-info">
-            <h3 class="card-title">Items to Deliver</h3>
+            <h3 class="card-title">Active Delivery Jobs</h3>
           </div>
         </div>
       </div>
-
-      <div class="items-list">
-        <div *ngFor="let item of deliveryItems; let i = index" class="item-row">
-          <div class="item-details">
-            <h4 class="item-name">{{ item.name }}</h4>
-            <div class="item-quantities">
-              <span class="quantity-info">
-                <strong>Ordered:</strong> {{ item.quantity }} {{ item.unit }}
-              </span>
-              <span class="weight-info">
-                <strong>Actual Weight:</strong> {{ item.weight }}
-              </span>
+      <div class="jobs-list">
+        <div
+          *ngFor="let job of activeJobs"
+          class="job-item"
+          (click)="selectJob(job)"
+        >
+          <div class="job-details">
+            <h4 class="job-id">Job #{{ job.job_id }}</h4>
+            <div class="job-info">
+              <span class="pickup">Pickup: {{ job.pickup_location }}</span>
+              <span class="dropoff">Dropoff: {{ job.dropoff_location }}</span>
+              <span class="date"
+                >Date: {{ job.delivery_date | date : "short" }}</span
+              >
             </div>
           </div>
+          <ion-icon name="arrow-forward" class="job-arrow"></ion-icon>
+        </div>
+        <div *ngIf="activeJobs.length === 0" class="no-jobs">
+          <ion-icon name="information-circle"></ion-icon>
+          <span>No active jobs available.</span>
         </div>
       </div>
     </ion-card>
+  </div>
 
-    <!-- OTP Section -->
-    <ion-card class="otp-card" *ngIf="!deliveryConfirmed">
-      <div class="card-header">
-        <div class="header-left">
-          <ion-icon name="key" class="header-icon"></ion-icon>
-          <div class="header-info">
-            <h3 class="card-title">Delivery Verification</h3>
-            <span class="otp-instruction"
-              >Get OTP from customer to confirm delivery</span
-            >
+  <!-- Details View: Job Orders and OTP -->
+  <div *ngIf="!showList" class="content-container">
+    <!-- Orders Details Cards -->
+    <div *ngFor="let order of orders" class="order-section">
+      <!-- Order Details Card -->
+      <ion-card class="order-details-card">
+        <div class="card-header">
+          <ion-button fill="clear" (click)="showList = true" class="back-btn">
+            <ion-icon name="chevron-back-outline"></ion-icon>
+          </ion-button>
+          <div class="header-left">
+            <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
+            <div class="header-info">
+              <h2 class="order-id">Order #{{ order.order_id }}</h2>
+              <span class="order-type">Delivery to Retailer</span>
+            </div>
           </div>
         </div>
-      </div>
 
+        <div class="delivery-info">
+          <div class="info-row">
+            <ion-icon
+              name="storefront"
+              class="info-icon retailer-icon"
+            ></ion-icon>
+            <div class="info-details">
+              <span class="info-label">Deliver To</span>
+              <span class="info-value">{{
+                order.retailer_owner || "N/A"
+              }}</span>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <ion-icon
+              name="location"
+              class="info-icon location-icon"
+            ></ion-icon>
+            <div class="info-details">
+              <span class="info-label">Delivery Address</span>
+              <span class="info-value">{{ order.delivery_address }}</span>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <ion-icon name="call" class="info-icon contact-icon"></ion-icon>
+            <div class="info-details">
+              <span class="info-label">Contact</span>
+              <span class="info-value">{{
+                order.retailer_contact || "N/A"
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </ion-card>
+
+      <!-- Delivery Items Summary -->
+      <ion-card class="items-summary-card">
+        <div class="card-header">
+          <div class="header-left">
+            <ion-icon name="list-outline" class="header-icon"></ion-icon>
+            <div class="header-info">
+              <h3 class="card-title">Items to Deliver</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="items-list">
+          <div
+            *ngFor="let item of parseProducts(order.products); let i = index"
+            class="item-row"
+          >
+            <div class="item-details">
+              <h4 class="item-name">{{ item.name }}</h4>
+              <div class="item-quantities">
+                <span class="quantity-info">
+                  <strong>Ordered:</strong> {{ item.quantity }} {{ item.unit }}
+                </span>
+                <span class="weight-info">
+                  <strong>Actual Weight:</strong> {{ item.weight }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ion-card>
+    </div>
+
+    <!-- OTP Section (Per Job) -->
+    <ion-card class="otp-card" *ngIf="!deliveryConfirmed">
       <div class="otp-section">
         <!-- Generate OTP Step -->
         <div *ngIf="!otpGenerated" class="generate-otp-step">
-          <div class="step-info">
-            <ion-icon name="information-circle" class="info-icon"></ion-icon>
-            <div class="step-text">
-              <h4>Step 1: Generate OTP</h4>
-              <p>
-                Click below to generate OTP that will be sent to customer's app
-              </p>
-            </div>
-          </div>
           <ion-button
             expand="block"
             class="generate-otp-btn"
@@ -135,17 +142,6 @@
 
         <!-- OTP Generated - Waiting for Input -->
         <div *ngIf="otpGenerated && !deliveryConfirmed" class="otp-input-step">
-          <div class="step-info">
-            <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-            <div class="step-text">
-              <h4>Step 2: Get OTP from Customer</h4>
-              <p>
-                OTP has been sent to customer's app. Ask them for the
-                <strong>6-digit</strong> code.
-              </p>
-            </div>
-          </div>
-
           <div class="otp-timer" *ngIf="otpTimer > 0">
             <ion-icon name="time"></ion-icon>
             <span>OTP expires in {{ formatTime(otpTimer) }}</span>
@@ -205,14 +201,6 @@
             color="danger"
             (didDismiss)="otpError = ''"
           ></ion-toast>
-
-          <div class="otp-help">
-            <ion-icon name="help-circle"></ion-icon>
-            <span
-              >Customer should see the OTP in their app under "Active
-              Orders"</span
-            >
-          </div>
         </div>
 
         <!-- Delivery Confirmed -->
@@ -229,24 +217,7 @@
       </div>
     </ion-card>
 
-    <!-- Delivery Notes -->
-    <ion-card class="notes-card" *ngIf="!deliveryConfirmed">
-      <div class="card-header">
-        <ion-icon name="document-text" class="header-icon"></ion-icon>
-        <h3 class="card-title">Delivery Notes (Optional)</h3>
-      </div>
-
-      <div class="notes-section">
-        <ion-textarea
-          placeholder="Add any delivery notes, customer feedback, or observations..."
-          [(ngModel)]="deliveryNotes"
-          class="notes-input"
-          rows="3"
-        ></ion-textarea>
-      </div>
-    </ion-card>
-
-    <!-- Action Buttons - ORIGINAL CONTACT CUSTOMER SECTION KEPT -->
+    <!-- Action Buttons-->
     <div class="action-section" *ngIf="!deliveryConfirmed">
       <ion-button
         expand="block"
@@ -259,7 +230,7 @@
       </ion-button>
     </div>
 
-    <!-- Emergency Actions - ORIGINAL CALL SUPPORT SECTION KEPT -->
+    <!-- Emergency Actions-->
     <div class="emergency-section" *ngIf="!deliveryConfirmed">
       <h4 class="emergency-title">Need Help?</h4>
       <div class="emergency-buttons">
@@ -318,11 +289,10 @@
         </div>
         <h2 class="success-title">Delivery Completed!</h2>
         <p class="success-message">
-          Order #{{ orderId }} has been successfully delivered and confirmed by
-          the customer.
+          Job #{{ jobId }} has been successfully delivered and confirmed by the
+          customer.
         </p>
         <div class="delivery-summary">
-          <p><strong>Delivered to:</strong> {{ retailerName }}</p>
           <p>
             <strong>Time:</strong> {{ deliveryCompletedTime | date : "short" }}
           </p>

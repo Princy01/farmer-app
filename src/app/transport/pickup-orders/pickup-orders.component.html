@@ -2,8 +2,8 @@
 <ion-content *ngIf="!selectedJob">
   <ion-card>
     <ion-card-header>
-      <ion-card-title>Jobs</ion-card-title>
-      <ion-card-subtitle>Sorted by delivery date</ion-card-subtitle>
+      <ion-card-title>{{ 'PICKUP_ORDERS.JOBS' | translate }}</ion-card-title>
+      <ion-card-subtitle>{{ 'PICKUP_ORDERS.SORTED_BY_DELIVERY' | translate }}</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
@@ -15,9 +15,9 @@
       >
         <ion-label>
           <h2>{{ job.pickup_location }} → {{ job.dropoff_location }}</h2>
-          <p>Delivery Date: {{ job.delivery_date | date }}</p>
-          <p>Status: {{ job.job_status }}</p>
-          <p>Base Price: ₹{{ job.base_price }}</p>
+          <p>{{ 'PICKUP_ORDERS.DELIVERY_DATE' | translate }}: {{ job.delivery_date | date }}</p>
+          <p>{{ 'PICKUP_ORDERS.STATUS' | translate }}: {{ job.job_status }}</p>
+          <p>{{ 'PICKUP_ORDERS.BASE_PRICE' | translate }}: ₹{{ job.base_price }}</p>
         </ion-label>
       </ion-item>
       <ion-text color="danger" *ngIf="error">{{ error }}</ion-text>
@@ -29,12 +29,12 @@
 <!--  ORDER LIST  -->
 <ion-content *ngIf="selectedJob && !selectedOrder">
   <ion-button fill="clear" (click)="backToJobs()">
-    &larr; Back to Jobs
+    &larr; {{ 'PICKUP_ORDERS.BACK_TO_JOBS' | translate }}
   </ion-button>
 
   <ion-card>
     <ion-card-header>
-      <ion-card-title>Orders for Job #{{ selectedJob.job_id }}</ion-card-title>
+      <ion-card-title>{{ 'PICKUP_ORDERS.ORDERS_FOR_JOB' | translate }} #{{ selectedJob.job_id }}</ion-card-title>
       <ion-card-subtitle
         >{{ selectedJob.pickup_location }} →
         {{ selectedJob.dropoff_location }}</ion-card-subtitle
@@ -49,10 +49,10 @@
         (click)="selectOrder(order)"
       >
         <ion-label>
-          <h3>Order #{{ order.order_id }}</h3>
-          <p>Date: {{ order.date_of_order | date }}</p>
-          <p>Status: {{ order.order_status_text }}</p>
-          <p>Amount: ₹{{ order.final_amount }}</p>
+          <h3>{{ 'PICKUP_ORDERS.ORDER' | translate }} #{{ order.order_id }}</h3>
+          <p>{{ 'PICKUP_ORDERS.DATE' | translate }}: {{ order.date_of_order | date }}</p>
+          <p>{{ 'PICKUP_ORDERS.STATUS' | translate }}: {{ order.order_status_text }}</p>
+          <p>{{ 'PICKUP_ORDERS.AMOUNT' | translate }}: ₹{{ order.final_amount }}</p>
         </ion-label>
       </ion-item>
       <ion-text color="danger" *ngIf="error">{{ error }}</ion-text>
@@ -64,19 +64,19 @@
 <!--  ORDER DETAILS  -->
 <ion-content *ngIf="selectedOrder">
   <ion-button fill="clear" (click)="backToOrders()">
-    &larr; Back to Orders
+    &larr; {{ 'PICKUP_ORDERS.BACK_TO_ORDERS' | translate }}
   </ion-button>
 
   <ion-card>
     <ion-card-header>
-      <ion-card-title>Order Details</ion-card-title>
+      <ion-card-title>{{ 'PICKUP_ORDERS.ORDER_DETAILS' | translate }}</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p><b>Order ID:</b> {{ selectedOrder.order_id }}</p>
-      <p><b>Date:</b> {{ selectedOrder.date_of_order | date }}</p>
-      <p><b>Status:</b> {{ selectedOrder.order_status_text }}</p>
-      <p><b>Delivery Address:</b> {{ selectedOrder.delivery_address }}</p>
-      <p><b>Amount:</b> ₹{{ selectedOrder.final_amount }}</p>
+      <p><b>{{ 'PICKUP_ORDERS.ORDER_ID' | translate }}:</b> {{ selectedOrder.order_id }}</p>
+      <p><b>{{ 'PICKUP_ORDERS.DATE' | translate }}:</b> {{ selectedOrder.date_of_order | date }}</p>
+      <p><b>{{ 'PICKUP_ORDERS.STATUS' | translate }}:</b> {{ selectedOrder.order_status_text }}</p>
+      <p><b>{{ 'PICKUP_ORDERS.DELIVERY_ADDRESS' | translate }}:</b> {{ selectedOrder.delivery_address }}</p>
+      <p><b>{{ 'PICKUP_ORDERS.AMOUNT' | translate }}:</b> ₹{{ selectedOrder.final_amount }}</p>
     </ion-card-content>
   </ion-card>
 
@@ -88,12 +88,12 @@
     "
   >
     <ion-text>
-      <h3>Verify Pickup</h3>
-      <p>Enter OTP shared by wholesaler</p>
+      <h3>{{ 'PICKUP_ORDERS.VERIFY_PICKUP' | translate }}</h3>
+      <p>{{ 'PICKUP_ORDERS.ENTER_OTP_HINT' | translate }}</p>
     </ion-text>
 
     <ion-item>
-      <ion-label position="floating">OTP</ion-label>
+      <ion-label position="floating">{{ 'PICKUP_ORDERS.OTP' | translate }}</ion-label>
       <ion-input
         #otpInput
         type="text"
@@ -108,7 +108,7 @@
       [disabled]="otpLoading"
       (click)="verifyOtp(otpInput.value ? otpInput.value.toString() : '')"
     >
-      Confirm
+      {{ 'PICKUP_ORDERS.CONFIRM' | translate }}
     </ion-button>
     <ion-spinner *ngIf="otpLoading"></ion-spinner>
 

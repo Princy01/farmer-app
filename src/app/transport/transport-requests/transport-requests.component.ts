@@ -18,11 +18,12 @@ import { formatDate } from '@angular/common';
 import { TransportRequestService, TransportRequest } from './transport-requests.service';
 import { LocationPreferenceService } from '../location-selection/location-selection.service';
 import { Subscription } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-transport-requests',
   standalone: true,
-  imports: [IonicModule, CommonModule, HttpClientModule],
+  imports: [IonicModule, CommonModule, TranslatePipe],
   templateUrl: './transport-requests.component.html',
   styleUrls: ['./transport-requests.component.scss'],
 })
@@ -63,7 +64,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
     private transportRequestService: TransportRequestService,
-    private locationPreferenceService: LocationPreferenceService
+    private locationPreferenceService: LocationPreferenceService,
+    private translate: TranslateService
   ) {
     addIcons({
       chevronForwardOutline, funnelOutline, swapVerticalOutline, flashOutline,
@@ -103,11 +105,11 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     if (cityCount > 0 || branchCount > 0) {
       const parts = [];
-      if (cityCount > 0) parts.push(`${cityCount} cities`);
-      if (branchCount > 0) parts.push(`${branchCount} branches`);
+      if (cityCount > 0) parts.push(`${cityCount} ${this.translate.instant('TRANSPORT_REQUESTS.CITIES')}`);
+      if (branchCount > 0) parts.push(`${branchCount} ${this.translate.instant('TRANSPORT_REQUESTS.BRANCHES')}`);
       this.locationSummary = parts.join(' + ');
     } else {
-      this.locationSummary = 'All locations';
+      this.locationSummary = this.translate.instant('TRANSPORT_REQUESTS.ALL_LOCATIONS');
     }
   }
 
@@ -137,7 +139,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load transport requests:', error);
-        this.showToast('Failed to load requests. Please try again.', 'danger');
+        this.showToast(this.translate.instant('TRANSPORT_REQUESTS.LOAD_FAILED'), 'danger');
       }
     });
 
@@ -153,7 +155,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     const { data } = await modal.onDidDismiss();
     if (data) {
-      this.showToast('Location preferences updated successfully!', 'success');
+      this.showToast(this.translate.instant('TRANSPORT_REQUESTS.PREFERENCES_UPDATED'), 'success');
     }
   }
 
@@ -176,42 +178,41 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     if (!this.checkLoadWithinCapacity(request.weight)) {
       const toast = await this.toastCtrl.create({
-        message: 'This order exceeds your current load capacity. Please complete some deliveries first.',
+        message: this.translate.instant('TRANSPORT_REQUESTS.LOAD_CAPACITY_EXCEEDED'),
         duration: 4000,
         position: 'middle',
         color: 'warning',
-        buttons: [{ text: 'OK', role: 'cancel' }]
+        buttons: [{ text: this.translate.instant('TRANSPORT_REQUESTS.OK'), role: 'cancel' }]
       });
       await toast.present();
       return;
     }
 
-    // Build detailed order information
-    let orderDetails = `Job #${request.job_id}\n\n`;
-    orderDetails += `Pickup: ${request.pickup_location}\n`;
-    orderDetails += `Delivery: ${request.dropoff_location}\n`;
-    orderDetails += `Weight: ${request.weight}kg\n`;
-    orderDetails += `Distance: ${request.distance}km\n`;
-    orderDetails += `Base Price: ₹${request.base_price}\n`;
+    let orderDetails = `${this.translate.instant('TRANSPORT_REQUESTS.JOB_ID')}${request.job_id}\n\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.PICKUP')}: ${request.pickup_location}\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.DELIVERY')}: ${request.dropoff_location}\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.WEIGHT')}: ${request.weight}kg\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.DISTANCE')}: ${request.distance}km\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.BASE_PRICE')}: ₹${request.base_price}\n`;
 
     if (request.orders && request.orders.length > 0) {
-      orderDetails += `\nOrders: ${request.orders.length}\n`;
+      orderDetails += `\n${this.translate.instant('TRANSPORT_REQUESTS.ORDERS')}: ${request.orders.length}\n`;
       const totalValue = this.getTotalOrderValue(request);
       const itemCount = this.getTotalItemCount(request);
-      orderDetails += `Total Items: ${itemCount}\n`;
-      orderDetails += `Order Value: ₹${totalValue.toFixed(2)}`;
+      orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.TOTAL_ITEMS')}: ${itemCount}\n`;
+      orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.ORDER_VALUE')}: ₹${totalValue.toFixed(2)}`;
     }
 
     const alert = await this.alertCtrl.create({
-      header: 'Accept Transport Request',
+      header: this.translate.instant('TRANSPORT_REQUESTS.ACCEPT_HEADER'),
       message: orderDetails,
       buttons: [
-        { text: 'Cancel', role: 'cancel' },
+        { text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'), role: 'cancel' },
         {
-          text: 'Accept',
+          text: this.translate.instant('TRANSPORT_REQUESTS.ACCEPT'),
           handler: async () => {
             const loadingToast = await this.toastCtrl.create({
-              message: 'Processing request...',
+              message: this.translate.instant('TRANSPORT_REQUESTS.PROCESSING'),
               duration: 2000,
               position: 'middle'
             });
@@ -219,11 +220,11 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
             const sub = this.transportRequestService.acceptTransportRequest(request.job_id, this.vehicleId)
               .subscribe({
-                next: (response) => {
+                next: () => {
                   this.acceptedRequests.add(request.job_id);
                   this.currentLoad += request.weight;
                   loadingToast.dismiss();
-                  this.showToast('Request accepted successfully!', 'success');
+                  this.showToast(this.translate.instant('TRANSPORT_REQUESTS.ACCEPTED_SUCCESS'), 'success');
 
                   const remainingCapacity = this.maxLoad - this.currentLoad;
                   if (remainingCapacity > 0) {
@@ -233,7 +234,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
                 error: (error) => {
                   console.error('Failed to accept request:', error);
                   loadingToast.dismiss();
-                  this.showToast('Failed to accept request. Please try again.', 'danger');
+                  this.showToast(this.translate.instant('TRANSPORT_REQUESTS.ACCEPT_FAILED'), 'danger');
                 }
               });
 
@@ -251,23 +252,27 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
 
     const alert = await this.alertCtrl.create({
-      header: 'Reject Request',
-      message: `Are you sure you want to reject Job #${request.job_id}?\n\nPickup: ${request.pickup_location}\nDelivery: ${request.dropoff_location}`,
+      header: this.translate.instant('TRANSPORT_REQUESTS.REJECT_HEADER'),
+      message: this.translate.instant('TRANSPORT_REQUESTS.REJECT_CONFIRM', {
+        jobId: request.job_id,
+        pickup: request.pickup_location,
+        delivery: request.dropoff_location
+      }),
       buttons: [
-        { text: 'Cancel', role: 'cancel' },
+        { text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'), role: 'cancel' },
         {
-          text: 'Reject',
+          text: this.translate.instant('TRANSPORT_REQUESTS.REJECT'),
           role: 'destructive',
           handler: async () => {
             const sub = this.transportRequestService.rejectTransportRequest(request.job_id)
               .subscribe({
-                next: (response) => {
+                next: () => {
                   this.rejectedRequests.add(request.job_id);
-                  this.showToast('Request rejected', 'warning');
+                  this.showToast(this.translate.instant('TRANSPORT_REQUESTS.REJECTED_SUCCESS'), 'warning');
                 },
                 error: (error) => {
                   console.error('Failed to reject request:', error);
-                  this.showToast('Failed to reject request. Please try again.', 'danger');
+                  this.showToast(this.translate.instant('TRANSPORT_REQUESTS.REJECT_FAILED'), 'danger');
                 }
               });
 
@@ -285,19 +290,19 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   async promptForMoreOrders(remainingCapacity: number) {
     const toast = await this.toastCtrl.create({
-      message: `You still have ${remainingCapacity}kg capacity available. Check for more orders!`,
+      message: this.translate.instant('TRANSPORT_REQUESTS.REMAINING_CAPACITY', { capacity: remainingCapacity }),
       duration: 5000,
       position: 'middle',
       color: 'primary',
       buttons: [
         {
-          text: 'View Orders',
+          text: this.translate.instant('TRANSPORT_REQUESTS.VIEW_ORDERS'),
           handler: () => {
             this.showAvailableOrders(remainingCapacity);
           }
         },
         {
-          text: 'Dismiss',
+          text: this.translate.instant('TRANSPORT_REQUESTS.DISMISS'),
           role: 'cancel'
         }
       ]
@@ -313,7 +318,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     );
 
     if (availableOrders.length === 0) {
-      this.showToast('No more orders fit within your remaining capacity.', 'warning');
+      this.showToast(this.translate.instant('TRANSPORT_REQUESTS.NO_FITTING_ORDERS'), 'warning');
       return;
     }
 
@@ -349,12 +354,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   applyFilters() {
     let filteredOrders = [...this.transportRequests];
 
-    // Apply load capacity filters
     filteredOrders = filteredOrders.filter(order =>
       order.weight >= this.minLoad && order.weight <= this.maxLoad
     );
 
-    // Apply priority filters
     if (this.priorityDeliveries) {
       filteredOrders = filteredOrders.filter(order => order.urgency.toLowerCase() === 'high');
     }
@@ -371,9 +374,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       filteredOrders = filteredOrders.filter(order => order.weight > 500);
     }
 
-
-
-    this.filteredRequests = [...this.transportRequests];
+    this.filteredRequests = filteredOrders;
 
     if (this.sortOption) {
       this.applySort();
@@ -413,7 +414,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
         this.filteredRequests.sort((a, b) => b.weight - a.weight);
         break;
       case 'order-value-desc':
-        this.filteredRequests.sort((a, b) => 
+        this.filteredRequests.sort((a, b) =>
           this.getTotalOrderValue(b) - this.getTotalOrderValue(a)
         );
         break;
@@ -430,7 +431,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     await toast.present();
   }
 
-  // Helper methods for template
   formatDate(dateString: string): string {
     return formatDate(dateString, 'dd MMM yyyy', 'en-US');
   }
@@ -461,7 +461,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     return this.rejectedRequests.has(jobId);
   }
 
-  // New helper methods for orders data
   getTotalOrderValue(request: TransportRequest): number {
     return this.transportRequestService.getTotalOrderValue(request);
   }
@@ -473,8 +472,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   hasOrders(request: TransportRequest): boolean {
     return request.orders != null && request.orders.length > 0;
   }
-
-
 
   get pendingDeliveries(): TransportRequest[] {
     return this.filteredRequests;

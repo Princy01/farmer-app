@@ -31,10 +31,11 @@ import {
   locationOutline,
   closeCircleOutline,
   carOutline,
-  warningOutline
+  warningOutline,
+  chevronBackOutline
 } from 'ionicons/icons';
 import { AuthService } from 'src/app/auth/auth.service';
-import { DeliveryService, DeliveryDetails, DeliveryItem } from './delivery-confirmation.service';
+import { DeliveryService, DeliveryDetails, DeliveryItem, ActiveJob, JobOrder } from './delivery-confirmation.service';
 
 interface DeliveryIssueType {
   id: string;
@@ -53,11 +54,14 @@ interface DeliveryIssueType {
 export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   // Core Properties
   jobId: number | null = null;
-  orderId: number | null = null;
   driverId: number | null = null;
-  retailerName: string = '';
-  retailerPhone: string = '';
-  deliveryAddress: string = '';
+
+  // properties for list view
+  showList: boolean = true; // Toggle between list and details view
+  activeJobs: ActiveJob[] = [];
+
+  // properties for job details (orders for display, but OTP/confirmation per job)
+  orders: JobOrder[] = [];
 
   // OTP Properties
   otpGenerated: boolean = false;
@@ -72,9 +76,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   // Delivery Properties
   deliveryConfirmed: boolean = false;
-  deliveryNotes: string = '';
   deliveryCompletedTime: Date = new Date();
-  deliveryItems: DeliveryItem[] = [];
 
   // Modal Controls
   showSuccessModal: boolean = false;
@@ -133,7 +135,8 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
       'location-outline': locationOutline,
       'close-circle-outline': closeCircleOutline,
       'car-outline': carOutline,
-      'warning-outline': warningOutline
+      'warning-outline': warningOutline,
+      'chevron-back-outline': chevronBackOutline
     });
   }
 
@@ -145,78 +148,78 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     }
     this.driverId = this.authService.getUserId();
 
-    // Get job_id and order_id from route params
+    // Get job_id from route params
     this.jobId = +this.route.snapshot.paramMap.get('jobId')! || null;
-    this.orderId = +this.route.snapshot.paramMap.get('orderId')! || null;
 
-    if (!this.jobId || !this.orderId) {
-      await this.showToast('Invalid delivery details. Redirecting...', 'danger');
-      this.router.navigate(['/transport/transport-dashboard']);
-      return;
+    if (this.jobId) {
+      // Details view: Load orders for the job
+      this.showList = false;
+      await this.loadOrdersForJob();
+    } else {
+      // List view: Load active jobs
+      this.showList = true;
+      await this.loadActiveJobs();
     }
-
-    // Load delivery details and validate assignment
-    await this.loadDeliveryDetails();
   }
 
   ngOnDestroy() {
     this.clearTimers();
   }
 
-  private async loadDeliveryDetails() {
-    const loading = await this.loadingCtrl.create({ message: 'Loading delivery details...' });
+  private async loadActiveJobs() {
+    const loading = await this.loadingCtrl.create({ message: 'Loading active jobs...' });
     await loading.present();
 
     try {
-      const details = await this.deliveryService.getDeliveryDetails(this.jobId!, this.orderId!).toPromise();
-      if (!details) {
-        await loading.dismiss();
-        await this.showToast('No delivery details found.', 'danger');
-        this.router.navigate(['/transport/transport-dashboard']);
-        return;
-      }
-      // Validate assignment to logged-in driver
-      if (details.assigned_driver_id !== this.driverId) {
-        await loading.dismiss();
-        await this.showToast('This delivery is not assigned to you.', 'danger');
-        this.router.navigate(['/transport/transport-dashboard']);
-        return;
-      }
-
-      // Populate component properties
-      this.retailerName = details.retailer_name;
-      this.retailerPhone = details.retailer_phone;
-      this.deliveryAddress = details.delivery_address;
-      this.deliveryItems = details.items;
-      this.orderId = details.order_id; // Update if needed
-
+      this.activeJobs = await this.deliveryService.getActiveDeliveryJobs().toPromise() || [];
     } catch (error) {
-      console.error('Error loading delivery details:', error);
-      await this.showToast('Failed to load delivery details.', 'danger');
+      console.error('Error loading active jobs:', error);
+      await this.showToast('Failed to load active jobs.', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
+  private async loadOrdersForJob() {
+    if (!this.jobId) return;
+
+    const loading = await this.loadingCtrl.create({ message: 'Loading job orders...' });
+    await loading.present();
+
+    try {
+      this.orders = await this.deliveryService.getOrdersInJob(this.jobId).toPromise() || [];
+    } catch (error) {
+      console.error('Error loading job orders:', error);
+      await this.showToast('Failed to load job orders.', 'danger');
       this.router.navigate(['/transport/transport-dashboard']);
     } finally {
       await loading.dismiss();
     }
   }
 
-  // OTP Methods
+  selectJob(job: ActiveJob) {
+    this.jobId = job.job_id;
+    this.showList = false;
+    this.router.navigate(['/transport/delivery-confirmation', this.jobId]); // Update URL
+    this.loadOrdersForJob();
+  }
+
   async generateOTP() {
-    if (!this.jobId || !this.orderId) return;
+    if (!this.jobId) return;
 
     this.isGeneratingOTP = true;
     const loading = await this.loadingCtrl.create({ message: 'Generating OTP...' });
     await loading.present();
 
     try {
-      const response = await this.deliveryService.generateOTP({ job_id: this.jobId, order_id: this.orderId }).toPromise();
+      const response = await this.deliveryService.generateOTP({ job_id: this.jobId }).toPromise();
       if (response) {
         this.generatedOTP = response.otp_code; // For testing/debugging
         this.otpGenerated = true;
         this.startOtpTimer();
         this.startResendTimer();
         await this.showToast('OTP sent to retailer.', 'success');
-      }
-      else {
+      } else {
         await this.showToast('Failed to generate OTP.', 'danger');
       }
     } finally {
@@ -233,18 +236,24 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   }
 
   async verifyOTP() {
-    if (!this.isOtpComplete() || !this.jobId || !this.orderId) return;
+    if (!this.isOtpComplete() || !this.jobId) return;
 
+    if (this.otpDigits === this.generatedOTP) {
+      await this.confirmDelivery(); // Automatically run confirm delivery
+    } else {
+      this.showOTPError();
+    }
+  }
+
+  private async confirmDelivery() {
     this.isVerifyingOTP = true;
-    const loading = await this.loadingCtrl.create({ message: 'Verifying delivery...' });
+    const loading = await this.loadingCtrl.create({ message: 'Confirming delivery...' });
     await loading.present();
 
     try {
       await this.deliveryService.confirmDelivery({
-        job_id: this.jobId,
-        order_id: this.orderId,
+        job_id: this.jobId!,
         otp: this.otpDigits,
-        notes: this.deliveryNotes
       }).toPromise();
 
       this.deliveryConfirmed = true;
@@ -254,7 +263,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
       await this.showToast('Delivery confirmed successfully!', 'success');
     } catch (error) {
       console.error('Error confirming delivery:', error);
-      this.showOTPError();
+      await this.showToast('Failed to confirm delivery.', 'danger');
     } finally {
       this.isVerifyingOTP = false;
       await loading.dismiss();
@@ -273,7 +282,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     this.otpDigits = digits.join('');
     // Move focus to next box if filled
     if (sanitized && index < 5) {
-      const nextInput = document.querySelectorAll('.otp-box')[index + 1] as HTMLElement;
+      const nextInput = document.querySelector(`input[name="otp-${index + 1}"]`) as HTMLInputElement;
       if (nextInput) nextInput.focus();
     }
   }
@@ -281,7 +290,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   onOtpBoxKeydown(event: KeyboardEvent, index: number) {
     // Handle backspace
     if (event.key === 'Backspace' && !this.otpDigits[index] && index > 0) {
-      const prevInput = document.querySelectorAll('.otp-box')[index - 1] as HTMLElement;
+      const prevInput = document.querySelector(`input[name="otp-${index - 1}"]`) as HTMLInputElement;
       if (prevInput) prevInput.focus();
     }
   }
@@ -295,7 +304,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     this.otpError = 'Invalid OTP entered. Please check and try again.';  // Set error message
     console.log('Invalid OTP entered');
     setTimeout(() => {
-      const firstInput = document.querySelector('.otp-box') as HTMLElement;
+      const firstInput = document.querySelector('input[name="otp-0"]') as HTMLInputElement;
       if (firstInput) firstInput.focus();
     }, 0);
   }
@@ -333,9 +342,11 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   clearTimers() {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
+      this.timerInterval = null;
     }
     if (this.resendTimerInterval) {
       clearInterval(this.resendTimerInterval);
+      this.resendTimerInterval = null;
     }
   }
 
@@ -346,7 +357,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     // Optionally, move focus to last filled box
     const lastFilled = pasted.length > 0 ? pasted.length - 1 : 0;
     setTimeout(() => {
-      const input = document.querySelectorAll('.otp-box')[lastFilled] as HTMLElement;
+      const input = document.querySelector(`input[name="otp-${lastFilled}"]`) as HTMLInputElement;
       if (input) input.focus();
     }, 0);
   }
@@ -365,20 +376,17 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   getConditionText(condition: string): string {
     switch (condition) {
-      case 'good': return 'Good Condition';
-      case 'damaged': return 'Damaged';
-      default: return 'Not Checked';
+      default:
+        return condition;
     }
   }
 
-  // Action Methods - ORIGINAL FUNCTIONALITY RESTORED
   contactCustomer() {
-    // Original functionality: Open customer chat
     this.router.navigate(['/transport/customer-chat'], {
       state: {
-        orderId: this.orderId,
-        customerName: this.retailerName,
-        customerPhone: this.retailerPhone
+        orderId: this.orders.length > 0 ? this.orders[0].order_id : null, // Use first order for context
+        customerName: this.orders.length > 0 ? this.orders[0].retailer_owner || 'Retailer' : '',
+        customerPhone: this.orders.length > 0 ? this.orders[0].retailer_contact || '' : ''
       }
     });
   }
@@ -399,26 +407,16 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   async submitDeliveryIssue() {
     try {
-      // Simulate API call
-      await this.delay(1000);
-
-      console.log('Issue submitted:', {
-        type: this.selectedIssueType,
-        description: this.issueDescription,
-        orderId: this.orderId
-      });
-
+      // Implement issue submission logic here (e.g., call a service)
+      await this.showToast('Issue reported successfully.', 'success');
       this.showIssueModal = false;
-      // Show success message or navigate
-
     } catch (error) {
-      console.error('Error submitting issue:', error);
+      await this.showToast('Failed to report issue.', 'danger');
     }
   }
 
   goToNextDelivery() {
     this.showSuccessModal = false;
-    // Navigate to next delivery or dashboard
     this.router.navigate(['/transport/active-deliveries']);
   }
 
@@ -428,12 +426,19 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.router.navigate(['/transport/active-deliveries']);
+    if (this.showList) {
+      this.router.navigate(['/transport/active-deliveries']);
+    } else {
+      this.showList = true;
+      this.jobId = null;
+      this.orders = [];
+      this.router.navigate(['/transport/delivery-confirmation']);
+    }
   }
 
   hasMoreDeliveries(): boolean {
     // Check if driver has more deliveries
-    return true; // This would come from your delivery service
+    return true; // This would come from delivery service
   }
 
   // Utility Methods
@@ -460,4 +465,12 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     });
     await toast.present();
   }
+
+  // Public helper: Parse products JSON to DeliveryItem[]
+  parseProducts(products: any): any[] {
+  if (typeof products === 'string') {
+    return JSON.parse(products);
+  }
+  return products || [];
+}
 }
