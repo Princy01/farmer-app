@@ -104,7 +104,7 @@ export class DeliveryService {
 
   generateOTP(request: GenerateOTPRequest): Observable<GenerateOTPResponse> {
     return this.http.post<GenerateOTPResponse>(
-      `${this.apiUrl}/transportation/delivery/generate-otp`,
+      `${this.apiUrl}/transportation/delivery/generate-delivery-otp`,
       request,
       { headers: this.getHeaders() }
     );
@@ -112,7 +112,7 @@ export class DeliveryService {
 
   confirmDelivery(request: ConfirmDeliveryRequest): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
-      `${this.apiUrl}/transportation/confirm-delivery`,
+      `${this.apiUrl}/transportation/delivery/confirm-delivery`,
       request,
       { headers: this.getHeaders() }
     );
