@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -104,17 +105,27 @@ export class DeliveryService {
 
   generateOTP(request: GenerateOTPRequest): Observable<GenerateOTPResponse> {
     return this.http.post<GenerateOTPResponse>(
-      `${this.apiUrl}/transportation/delivery/generate-otp`,
+      `${this.apiUrl}/transportation/delivery/generate-delivery-otp`,
       request,
       { headers: this.getHeaders() }
     );
   }
 
-  confirmDelivery(request: ConfirmDeliveryRequest): Observable<{ message: string }> {
+   confirmDelivery(request: ConfirmDeliveryRequest): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
-      `${this.apiUrl}/transportation/confirm-delivery`,
+      `${this.apiUrl}/transportation/delivery/confirm-delivery`,
       request,
       { headers: this.getHeaders() }
-    );
+    ).pipe(catchError(this.handleError));
+  }
+
+
+  private handleError(error: HttpErrorResponse) {
+    if (error.error instanceof ErrorEvent) {
+      console.error('An error occurred:', error.error.message);
+    } else {
+      console.error(`Backend returned code ${error.status}, body was: ${error.error}`);
+    }
+    return throwError(() => new Error('Something went wrong. Please try again.'));
   }
 }

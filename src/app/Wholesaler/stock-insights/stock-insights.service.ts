@@ -41,6 +41,18 @@ export interface LowStockItemData {
 export interface MandiBasicInfo {
         mandi_id: number;
         mandi_name: string;
+        mandi_location?: string;
+        mandi_incharge?: string;
+        mandi_incharge_num?: string;
+        mandi_pincode?: string;
+        mandi_address?: string;
+        mandi_state_id?: number;
+        state_name?: string;
+        state_shortnames?: string;
+        mandi_shortnames?: string;
+        mandi_city_id?: number;
+        city_name?: string;
+        city_shortnames?: string;
 }
 
 export interface SlowMovingProductData {
@@ -102,7 +114,19 @@ export class StockInsightsService {
                         .pipe(
                                 map(mandis => mandis.map(mandi => ({
                                         mandi_id: mandi.mandi_id,
-                                        mandi_name: mandi.mandi_name
+                                        mandi_name: mandi.mandi_name,
+                                        mandi_location: mandi.mandi_location,
+                                        mandi_incharge: mandi.mandi_incharge,
+                                        mandi_incharge_num: mandi.mandi_incharge_num,
+                                        mandi_pincode: mandi.mandi_pincode,
+                                        mandi_address: mandi.mandi_address,
+                                        mandi_state_id: mandi.mandi_state_id,
+                                        state_name: mandi.state_name,
+                                        state_shortnames: mandi.state_shortnames,
+                                        mandi_shortnames: mandi.mandi_shortnames,
+                                        mandi_city_id: mandi.mandi_city_id,
+                                        city_name: mandi.city_name,
+                                        city_shortnames: mandi.city_shortnames
                                 })))
                         );
         }
@@ -110,5 +134,10 @@ export class StockInsightsService {
         getSlowMovingProducts(): Observable<SlowMovingProductData[]> {
                 const headers = this.getAuthHeaders();
                 return this.http.get<SlowMovingProductData[]>(`${this.apiUrl}/getSlowMovingProducts`, { headers });
+        }
+
+        getCurrentStockByProduct(productId: number): Observable<CurrentStockData[]> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<CurrentStockData[]>(`${this.apiUrl}/getCurrentStockByProduct/${productId}`, { headers });
         }
 }

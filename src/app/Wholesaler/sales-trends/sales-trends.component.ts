@@ -31,7 +31,6 @@ export class SalesTrendsComponent implements OnInit {
   chartOptions: any;
   topProductsOptions: any;
 
-  useRealData: boolean = true;
   isLoading: boolean = false;
   errorMessage: string = '';
 
@@ -96,7 +95,7 @@ export class SalesTrendsComponent implements OnInit {
         {
           text: this.translate.instant('SALES_TRENDS.OK'),
           handler: () => {
-            this.router.navigate(['/login']);
+            this.navController.navigateBack('/wholesaler');
           }
         }
       ]
@@ -119,31 +118,14 @@ export class SalesTrendsComponent implements OnInit {
   }
 
   onViewChange() {
-    if (this.selectedView === 'trends') {
-      this.updateTrendsChart();
-    } else {
-      this.updateTopProductsChart();
-    }
+    this.initializeCharts();
   }
 
   onPeriodChange() {
-    if (this.selectedView === 'trends') {
-      this.useRealData = true;
-      this.updateTrendsChart();
-    } else {
-      this.updateTopProductsChart();
-    }
+    this.initializeCharts();
   }
 
   onMetricChange() {
-    if (this.selectedView === 'products') {
-      this.updateTopProductsChart();
-    }
-  }
-
-  toggleDataSource() {
-    this.useRealData = !this.useRealData;
-    this.errorMessage = '';
     this.initializeCharts();
   }
 
@@ -155,15 +137,6 @@ export class SalesTrendsComponent implements OnInit {
   private async updateTrendsChart() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
-      return;
-    }
-
-    if (!this.useRealData) {
-      const dummyData = this.getDataForPeriod(this.selectedPeriod);
-      this.updateTrendsChartOptions(dummyData.values.map((value, index) => ({
-        date: dummyData.categories[index],
-        total_sales: value
-      })));
       return;
     }
 
@@ -187,19 +160,12 @@ export class SalesTrendsComponent implements OnInit {
       dataObservable.pipe(
         catchError(error => {
           console.error('API Error:', error);
-
+          this.errorMessage = this.translate.instant('SALES_TRENDS.ERROR_LOADING_DATA');
           if (error.status === 401) {
-            this.showAuthError();
-            return of([]);
+            this.authService.logout();
+            this.router.navigate(['/login']);
           }
-
-          this.errorMessage = this.translate.instant('SALES_TRENDS.FALLBACK_ERROR');
-          this.useRealData = false;
-          const dummyData = this.getDataForPeriod(this.selectedPeriod);
-          return of(dummyData.values.map((value, index) => ({
-            date: dummyData.categories[index],
-            total_sales: value
-          })));
+          return of([]);
         }),
         finalize(() => {
           loading.dismiss();
@@ -224,15 +190,16 @@ export class SalesTrendsComponent implements OnInit {
   }
 
   private updateTrendsChartOptions(data: any[]) {
+    // Ensure data has the correct fields from backend
     this.chartOptions = {
       series: [
         {
           name: this.translate.instant('SALES_TRENDS.TOTAL_REVENUE'),
-          data: data.map(item => item.total_revenue)
+          data: data.map(item => item.total_revenue || 0)
         },
         {
           name: this.translate.instant('SALES_TRENDS.TOTAL_ORDERS'),
-          data: data.map(item => item.total_orders)
+          data: data.map(item => item.total_orders || 0)
         }
       ],
       chart: {
@@ -245,7 +212,7 @@ export class SalesTrendsComponent implements OnInit {
       },
       colors: ['#2E93fA', '#66DA26'],
       xaxis: {
-        categories: data.map(item => item.month_year)
+        categories: data.map(item => item.month_year || 'N/A')
       },
       yaxis: [
         {
@@ -285,9 +252,8 @@ export class SalesTrendsComponent implements OnInit {
       return;
     }
 
-    let loading: any;
-    if (this.useRealData) {
-      loading = await this.showLoading();
+    const loading = await this.showLoading();
+    try {
       let dataObservable;
       switch (this.selectedPeriod) {
         case 'weekly':
@@ -306,143 +272,27 @@ export class SalesTrendsComponent implements OnInit {
       dataObservable.pipe(
         catchError(error => {
           console.error('API Error:', error);
-
+          this.errorMessage = this.translate.instant('SALES_TRENDS.ERROR_LOADING_DATA');
           if (error.status === 401) {
-            this.showAuthError();
-            return of([]);
+            this.authService.logout();
+            this.router.navigate(['/login']);
           }
-
-          this.errorMessage = this.translate.instant('SALES_TRENDS.TOP_PRODUCTS_ERROR');
-          this.useRealData = false;
-          return of(this.getTopProductsForPeriod(this.selectedPeriod).map(item => ({
-            product_id: 0,
-            product_name: item.name,
-            mandi_id: 0,
-            mandi_name: null,
-            unit_id: 1,
-            quantity: item.volume,
-            price: item.price,
-            total_quantity_kg: item.volume,
-            actual_delivery_date: new Date().toISOString(),
-            total_price: item.price
-          } as TopSellingProduct)));
+          return of([]);
         }),
         finalize(() => {
-          loading?.dismiss();
+          loading.dismiss();
           this.isLoading = false;
         })
       ).subscribe(products => {
-        this.updateTopProductsChartOptions(products);
-      });
-    } else {
-      const productData = this.getTopProductsForPeriod(this.selectedPeriod);
-      const isVolume = this.selectedMetric === 'volume';
-
-      const values = productData.map(item => isVolume ? item.volume : item.price);
-      const sortedData = [...productData]
-        .sort((a, b) => (isVolume ? b.volume - a.volume : b.price - a.price));
-
-      this.topProductsOptions = {
-        series: [{
-          name: isVolume ?
-            this.translate.instant('SALES_TRENDS.SALES_VOLUME') :
-            this.translate.instant('SALES_TRENDS.SALES_REVENUE'),
-          data: sortedData.map(item => isVolume ? item.volume : item.price)
-        }],
-        chart: {
-          type: 'bar',
-          height: 450,
-          background: '#ffffff',
-          toolbar: {
-            show: false
-          },
-          animations: {
-            enabled: true
-          },
-          foreColor: '#333',
-          fontFamily: 'inherit'
-        },
-        grid: {
-          padding: {
-            bottom: 70
-          },
-          xaxis: {
-            lines: {
-              show: true
-            }
-          }
-        },
-        plotOptions: {
-          bar: {
-            horizontal: false,
-            borderRadius: 4,
-            columnWidth: '60%'
-          }
-        },
-        dataLabels: {
-          enabled: true,
-          formatter: (value: number) => isVolume ?
-            `${value}kg` :
-            `₹${(value / 1000).toFixed(0)}K`,
-          style: {
-            fontSize: '7px',
-            colors: ['#000']
-          }
-        },
-        xaxis: {
-          categories: sortedData.map(item => item.name),
-          title: {
-            text: this.translate.instant('SALES_TRENDS.PRODUCTS_MANDI'),
-            offsetY: 70,
-            style: {
-              fontSize: '14px'
-            },
-            floating: false
-          },
-          labels: {
-            rotate: -90,
-            style: {
-              fontSize: '11px'
-            }
-          }
-        },
-        yaxis: {
-          title: {
-            text: isVolume ?
-              this.translate.instant('SALES_TRENDS.VOLUME_KG') :
-              this.translate.instant('SALES_TRENDS.REVENUE_RUPEES')
-          },
-          labels: {
-            formatter: (value: number) => isVolume ?
-              `${value} kg` :
-              `₹${(value / 1000).toFixed(0)}K`
-          }
-        },
-        colors: [
-          '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
-          '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
-        ],
-        title: {
-          text: this.translate.instant('SALES_TRENDS.TOP_PRODUCTS_TITLE', {
-            metric: isVolume ?
-              this.translate.instant('SALES_TRENDS.VOLUME') :
-              this.translate.instant('SALES_TRENDS.REVENUE'),
-            period: this.translate.instant(`SALES_TRENDS.PERIOD_${this.selectedPeriod.toUpperCase()}`)
-          }),
-          align: 'center',
-          style: {
-            fontSize: '16px'
-          },
-          margin: 20
-        },
-        tooltip: {
-          y: {
-            formatter: (value: number) => isVolume ?
-              `${value} kg` :
-              `₹${value.toLocaleString()}`
-          }
+        console.log('Top Products:', products);
+        if (products && Array.isArray(products)) {
+          this.updateTopProductsChartOptions(products);
         }
-      };
+      });
+    } catch (error) {
+      loading.dismiss();
+      this.isLoading = false;
+      console.error('Error in updateTopProductsChart:', error);
     }
   }
 
@@ -458,179 +308,66 @@ export class SalesTrendsComponent implements OnInit {
 
     const top10Products = sortedData.slice(0, 10);
 
+    // Set up bar chart options for top products
     this.topProductsOptions = {
-      series: [{
-        name: isVolume ?
-          this.translate.instant('SALES_TRENDS.VOLUME_KG') :
-          this.translate.instant('SALES_TRENDS.REVENUE_RUPEES'),
-        data: top10Products.map(item =>
-          isVolume ? item.total_quantity_kg : item.total_price
-        )
-      }],
+      series: [
+        {
+          name: isVolume ? this.translate.instant('SALES_TRENDS.VOLUME_KG') : this.translate.instant('SALES_TRENDS.REVENUE_INR'),
+          data: top10Products.map(p => isVolume ? (p.total_quantity_kg || 0) : (p.total_price || 0))
+        }
+      ],
       chart: {
         type: 'bar',
-        height: 450,
+        height: 350,
         background: '#ffffff',
         toolbar: {
-          show: false
-        },
-        animations: {
-          enabled: true
-        },
-        foreColor: '#333',
-        fontFamily: 'inherit'
+          show: true
+        }
       },
-      grid: {
-        padding: {
-          bottom: 70
+      colors: ['#546E7A'],
+      xaxis: {
+        categories: top10Products.map(p => p.product_name || this.translate.instant('SALES_TRENDS.UNKNOWN_PRODUCT')),
+        title: {
+          text: this.translate.instant('SALES_TRENDS.PRODUCTS')
+        }
+      },
+      yaxis: {
+        title: {
+          text: isVolume ? this.translate.instant('SALES_TRENDS.VOLUME_LABEL') : this.translate.instant('SALES_TRENDS.REVENUE_LABEL')
         },
-        xaxis: {
-          lines: {
-            show: true
-          }
+        labels: {
+          formatter: (value: number) => isVolume ? `${value} kg` : `₹${(value / 1000).toFixed(0)}K`
         }
       },
       plotOptions: {
         bar: {
           horizontal: false,
-          borderRadius: 4,
-          columnWidth: '60%'
+          columnWidth: '55%',
+          endingShape: 'rounded'
         }
       },
       dataLabels: {
-        enabled: true,
-        formatter: (value: number) => isVolume ?
-          `${value}kg` :
-          `₹${(value / 1000).toFixed(0)}K`,
-        style: {
-          fontSize: '7px',
-          colors: ['#000']
-        }
+        enabled: false
       },
-      xaxis: {
-        categories: top10Products.map(item =>
-          `${item.product_name || 'Unknown'} (${item.mandi_name || 'Unknown Mandi'})`
-        ),
-        title: {
-          text: this.translate.instant('SALES_TRENDS.PRODUCTS'),
-          offsetY: 70,
-          style: {
-            fontSize: '14px'
-          },
-          floating: false
-        },
-        labels: {
-          rotate: -90,
-          style: {
-            fontSize: '11px'
-          }
-        }
-      },
-      yaxis: {
-        title: {
-          text: isVolume ?
-            this.translate.instant('SALES_TRENDS.VOLUME_KG') :
-            this.translate.instant('SALES_TRENDS.REVENUE_RUPEES')
-        },
-        labels: {
-          formatter: (value: number) => isVolume ?
-            `${value?.toFixed(2)} kg` :
-            `₹${(value / 1000).toFixed(0)}K`
-        }
-      },
-      colors: [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
-        '#FFD93D', '#6C5B7B', '#355C7D', '#F67280', '#2A363B'
-      ],
       title: {
         text: this.translate.instant('SALES_TRENDS.TOP_PRODUCTS_TITLE', {
-          metric: isVolume ?
-            this.translate.instant('SALES_TRENDS.VOLUME') :
-            this.translate.instant('SALES_TRENDS.REVENUE'),
-          period: this.translate.instant(`SALES_TRENDS.PERIOD_${this.selectedPeriod.toUpperCase()}`)
+          period: this.translate.instant(`SALES_TRENDS.PERIOD_${this.selectedPeriod.toUpperCase()}`),
+          metric: this.translate.instant(`SALES_TRENDS.METRIC_${this.selectedMetric.toUpperCase()}`)
         }),
         align: 'center',
         style: {
           fontSize: '16px'
         },
-        margin: 20
+        margin: 40
+      },
+      grid: {
+        show: true
       },
       tooltip: {
         y: {
-          formatter: (value: number) => isVolume ?
-            `${value} kg` :
-            `₹${value.toLocaleString()}`
+          formatter: (value: number) => isVolume ? `${value} kg` : `₹${value.toFixed(2)}`
         }
       }
     };
-  }
-
-  private getTopProductsForPeriod(period: string): ProductData[] {
-    const base = {
-      weekly: 1000,
-      monthly: 4000,
-      quarterly: 12000,
-      yearly: 50000
-    }[period] || 1000;
-
-    const priceFactors = {
-      'Onion': 20,
-      'Potato': 15,
-      'Tomato': 25,
-      'Cabbage': 12,
-      'Cauliflower': 30,
-      'Green Peas': 40,
-      'Carrot': 18,
-      'Bitter Gourd': 35,
-      'Lady Finger': 22,
-      'Brinjal': 16
-    };
-
-    return [
-      { name: 'Onion (Lasalgaon Mandi)', volume: base + 500, price: (base + 500) * priceFactors['Onion'] },
-      { name: 'Potato (Agra Mandi)', volume: base + 300, price: (base + 300) * priceFactors['Potato'] },
-      { name: 'Tomato (Kolar Mandi)', volume: base + 200, price: (base + 200) * priceFactors['Tomato'] },
-      { name: 'Cabbage (Pune Mandi)', volume: base - 100, price: (base - 100) * priceFactors['Cabbage'] },
-      { name: 'Cauliflower (Delhi Mandi)', volume: base - 300, price: (base - 300) * priceFactors['Cauliflower'] },
-      { name: 'Green Peas (Indore Mandi)', volume: base - 500, price: (base - 500) * priceFactors['Green Peas'] },
-      { name: 'Carrot (Bangalore Mandi)', volume: base - 800, price: (base - 800) * priceFactors['Carrot'] },
-      { name: 'Bitter Gourd (Chennai Mandi)', volume: base - 900, price: (base - 900) * priceFactors['Bitter Gourd'] },
-      { name: 'Lady Finger (Ahmedabad Mandi)', volume: base - 1000, price: (base - 1000) * priceFactors['Lady Finger'] },
-      { name: 'Brinjal (Kolkata Mandi)', volume: base - 1200, price: (base - 1200) * priceFactors['Brinjal'] }
-    ];
-  }
-
-  private getDataForPeriod(period: string): { categories: string[], values: number[] } {
-    switch (period) {
-      case 'weekly':
-        return {
-          categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          values: [42000, 38000, 45000, 50000, 49000, 60000, 55000]
-        };
-      case 'monthly':
-        return {
-          categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-          values: [320000, 450000, 380000, 540000, 420000, 680000, 720000, 850000, 690000, 920000, 850000, 990000]
-        };
-      case 'quarterly':
-        return {
-          categories: ['Q1', 'Q2', 'Q3', 'Q4'],
-          values: [1150000, 1640000, 2260000, 2760000]
-        };
-      case 'yearly':
-        return {
-          categories: ['2020', '2021', '2022', '2023', '2024'],
-          values: [5800000, 6500000, 7800000, 8900000, 9500000]
-        };
-      default:
-        return {
-          categories: [],
-          values: []
-        };
-    }
-  }
-
-  private capitalize(text: string): string {
-    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 }

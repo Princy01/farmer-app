@@ -40,6 +40,8 @@ interface StockData {
 export class StockInsightsComponent implements OnInit {
   selectedView: string = 'chart';
   selectedWarehouse: MandiBasicInfo | null = null;
+  selectedProduct: number | null = null;
+  productStockData: CurrentStockData[] = [];
   slowMovingProducts: SlowMovingProductData[] = [];
   warehouses: MandiBasicInfo[] = [];
   stockLevelsOptions: any = {
@@ -147,7 +149,7 @@ export class StockInsightsComponent implements OnInit {
     await alert.present();
   }
 
-  private async loadMandis() {
+  public async loadMandis() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
@@ -370,5 +372,40 @@ export class StockInsightsComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/wholesaler/home']);
+  }
+
+  async getStockByProduct(productId: number) {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    const loading = await this.showLoading();
+    try {
+      this.stockInsightsService.getCurrentStockByProduct(productId)
+        .pipe(
+          finalize(() => {
+            loading.dismiss();
+          })
+        )
+        .subscribe({
+          next: (data) => {
+            this.productStockData = data;
+            // Update chart or display data
+            this.updateChartWithData(data);
+          },
+          error: async (error) => {
+            console.error('Failed to load product stock:', error);
+            if (error.status === 401) {
+              await this.showAuthError();
+              return;
+            }
+            this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_PRODUCT_STOCK'));
+          }
+        });
+    } catch (error) {
+      loading.dismiss();
+      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_PRODUCT_STOCK'));
+    }
   }
 }

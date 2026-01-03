@@ -35,6 +35,8 @@ export class DemandTrendsComponent implements OnInit {
   filteredProducts: ProductData[] = [];
   seasonalDemandOptions: any;
   productDemandOptions: any;
+  comparisonData: ProductDemandComparisonRow[] = [];
+
 
   selectedProducts: string[] = [];
   customActionSheetOptions = {
@@ -103,29 +105,38 @@ export class DemandTrendsComponent implements OnInit {
 
   private loadInitialData() {
     // Fetch demand patterns for seasonal chart
-    this.demandService.getDemandPatterns(this.selectedTimeRange).subscribe(patterns => {
-      // Group data by product and period based on range
-      const productDataMap = new Map<string, Map<string, number>>();
-      patterns.forEach(row => {
-        if (!productDataMap.has(row.product_name)) {
-          productDataMap.set(row.product_name, new Map());
-        }
-        const periodKey = this.getPeriodKey(row.period, this.selectedTimeRange);
-        productDataMap.get(row.product_name)!.set(periodKey, row.total_quantity);
-      });
+    this.demandService.getDemandPatterns(this.selectedTimeRange).subscribe({
+      next: (patterns) => {
+        const productDataMap = new Map<string, Map<string, number>>();
+        patterns.forEach(row => {
+          if (!productDataMap.has(row.product_name)) {
+            productDataMap.set(row.product_name, new Map());
+          }
+          const periodKey = this.getPeriodKey(row.period, this.selectedTimeRange);
+          productDataMap.get(row.product_name)!.set(periodKey, row.total_quantity);
+        });
 
-      // Sort periods
-      const allPeriods = Array.from(new Set(patterns.map(p => this.getPeriodKey(p.period, this.selectedTimeRange)))).sort();
+        // Sort periods
+        const allPeriods = Array.from(new Set(patterns.map(p => this.getPeriodKey(p.period, this.selectedTimeRange)))).sort();
 
-      this.products.forEach(product => {
-        product.data = allPeriods.map(period => productDataMap.get(product.name)?.get(period) || 0);
-      });
+        this.products.forEach(product => {
+          product.data = allPeriods.map(period => productDataMap.get(product.name)?.get(period) || 0);
+        });
 
-      // Fetch comparison for current period
-      this.demandService.getProductDemandComparison(this.selectedTimeRange).subscribe(comparison => {
-        // This can be used if needed, but for now, charts are updated
-        this.updateCharts();
-      });
+        // Fetch comparison for current period
+        this.demandService.getProductDemandComparison(this.selectedTimeRange).subscribe({
+          next: (comparison) => {
+            this.comparisonData = comparison;
+            this.updateCharts();
+          },
+          error: (err) => {
+            console.error('Failed to load product demand comparison:', err);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Failed to load demand patterns:', err);
+      }
     });
   }
 
@@ -172,7 +183,12 @@ export class DemandTrendsComponent implements OnInit {
   }
 
   private updateProductDemandChart(selectedProducts: ProductData[]) {
-    const currentData = selectedProducts.map(p => p.data[p.data.length - 1] || 0);
+    // Use comparison data for current period, filtered to selected products
+    const currentData = selectedProducts.map(p => {
+      const comp = this.comparisonData.find(c => c.product_name === p.name);
+      return comp ? comp.total_quantity : 0;
+    });
+    // Previous period remains from patterns data
     const previousData = selectedProducts.map(p => p.data[p.data.length - 2] || 0);
 
     this.productDemandOptions = {
@@ -280,5 +296,14 @@ export class DemandTrendsComponent implements OnInit {
       }
     }
     return result;
+  }
+
+   onTimeRangeChange(newRange: string) {
+    this.selectedTimeRange = newRange;
+    this.products = [];  // Reset products to avoid stale data
+    this.filteredProducts = [];
+    this.comparisonData = [];
+    this.selectedProducts = [];
+    this.loadProducts();  // Reload products and data for the new range
   }
 }

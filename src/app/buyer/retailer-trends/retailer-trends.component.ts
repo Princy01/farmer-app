@@ -5,10 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
+import { RetailerTrendsService, PriceComparisonRow } from './retailer-trends.service';  // Import the service
 
-interface PriceData {
-  product: string;
-  mandiPrices: { mandi: string; price: number }[];
+interface Product {
+  id: number;
+  name: string;
 }
 
 @Component({
@@ -19,46 +20,27 @@ interface PriceData {
   styleUrls: ['./retailer-trends.component.scss']
 })
 export class RetailerTrendsComponent implements OnInit {
-  selectedProducts: string[] = ['Tomato', 'Onion'];
+  selectedProducts: number[] = [1, 2];  // Use IDs (e.g., 1 for Tomato, 2 for Onion)
   searchTerm = '';
 
-  products: PriceData[] = [
-    {
-      product: 'Tomato',
-      mandiPrices: [
-        { mandi: 'Delhi Mandi', price: 22 },
-        { mandi: 'Mumbai Mandi', price: 25 },
-        { mandi: 'Lucknow Mandi', price: 20 }
-      ]
-    },
-    {
-      product: 'Onion',
-      mandiPrices: [
-        { mandi: 'Delhi Mandi', price: 15 },
-        { mandi: 'Mumbai Mandi', price: 18 },
-        { mandi: 'Lucknow Mandi', price: 14 }
-      ]
-    },
-    {
-      product: 'Potato',
-      mandiPrices: [
-        { mandi: 'Delhi Mandi', price: 12 },
-        { mandi: 'Mumbai Mandi', price: 14 },
-        { mandi: 'Lucknow Mandi', price: 11 }
-      ]
-    }
+  // Hardcoded products with IDs (replace with API fetch if available)
+  products: Product[] = [
+    { id: 1, name: 'Tomato' },
+    { id: 2, name: 'Onion' },
+    { id: 3, name: 'Potato' }
   ];
 
-  filteredProducts: string[] = [];
+  filteredProducts: Product[] = [];
   chartOptions: any;
+  priceData: PriceComparisonRow[] = [];  // Store API response
 
-  constructor(private navController: NavController) {
+  constructor(private navController: NavController, private retailerService: RetailerTrendsService) {
     addIcons({ chevronBackOutline });
   }
 
   ngOnInit() {
-    this.filteredProducts = this.products.map(p => p.product);
-    this.updateChart();
+    this.filteredProducts = [...this.products];
+    this.loadPriceData();
   }
 
   goBack() {
@@ -67,33 +49,58 @@ export class RetailerTrendsComponent implements OnInit {
 
   onProductChange() {
     if (this.selectedProducts.length > 5) {
-      // Keep only the first 5 selections
       this.selectedProducts = this.selectedProducts.slice(0, 5);
     }
-    this.updateChart();
+    this.loadPriceData();
   }
-
 
   filterProductList() {
     const term = this.searchTerm.toLowerCase();
-    this.filteredProducts = this.products
-      .map(p => p.product)
-      .filter(p => p.toLowerCase().includes(term));
+    this.filteredProducts = this.products.filter(p =>
+      p.name.toLowerCase().includes(term)
+    );
+  }
+
+  private loadPriceData() {
+    if (this.selectedProducts.length === 0) {
+      this.priceData = [];
+      this.updateChart();
+      return;
+    }
+    const productIds = this.selectedProducts.join(',');
+    this.retailerService.getPriceComparison(productIds).subscribe({
+      next: (data) => {
+        this.priceData = data;
+        this.updateChart();
+      },
+      error: (err) => {
+        console.error('Failed to load price comparison:', err);
+        this.priceData = [];
+        this.updateChart();
+        // Optionally show a toast or alert
+      }
+    });
   }
 
   updateChart() {
-    const selected = this.products.filter(p =>
-      this.selectedProducts.includes(p.product)
+    const selectedProductIds = this.selectedProducts;
+    const selectedData = this.priceData.filter(p =>
+      selectedProductIds.includes(p.product_id)
     );
 
-    const mandis = ['Delhi Mandi', 'Mumbai Mandi', 'Lucknow Mandi'];
+    // Group by mandi and product
+    const mandis = [...new Set(selectedData.map(p => p.mandi_name))];
+    const productNames = selectedProductIds.map(id =>
+      this.products.find(p => p.id === id)?.name || ''
+    );
 
     this.chartOptions = {
       series: mandis.map(mandi => ({
         name: mandi,
-        data: selected.map(p =>
-          p.mandiPrices.find(mp => mp.mandi === mandi)?.price || 0
-        )
+        data: productNames.map(productName => {
+          const productData = selectedData.find(p => p.product_name === productName && p.mandi_name === mandi);
+          return productData ? productData.price : 0;
+        })
       })),
       chart: {
         type: 'bar',
@@ -111,11 +118,11 @@ export class RetailerTrendsComponent implements OnInit {
       },
       colors: ['#FF6B6B', '#4ECDC4', '#FFD166'],
       xaxis: {
-        categories: selected.map(p => p.product)
+        categories: productNames
       },
       yaxis: {
         title: {
-          text: 'Price (₹/kg)'
+          text: 'Price (₹/kg)'  // Adjust based on unit_name if needed
         },
         labels: {
           formatter: (val: number) => `₹${val}`

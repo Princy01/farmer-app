@@ -22,8 +22,8 @@
             (ionChange)="onProductChange()">
             <ion-select-option
               *ngFor="let product of filteredProducts"
-              [value]="product">
-              {{ product }}
+              [value]="product.id">
+              {{ product.name }}
             </ion-select-option>
           </ion-select>
         </ion-item>
