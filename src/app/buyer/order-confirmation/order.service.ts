@@ -11,6 +11,8 @@ export interface Item {
   discount_amount: number;
   tax_amount: number;
   wholeseller_id: number;
+  product_name: string;
+  unit_name: string; 
 }
 
 export interface CreateOrderRequest {
@@ -30,6 +32,7 @@ export interface CreateOrderResponse {
   message: string;
   order_ids: number[];
 }
+
 export interface TransportRequestWithOrders {
   distance: number;
   delivery_type: string;
@@ -38,6 +41,21 @@ export interface TransportRequestWithOrders {
   load_type: string;
   status: string;
   order_ids: number[];
+}
+
+export interface RetailerOrderResponse {
+  order_id: number;
+  date_of_order: string;
+  order_status: number;
+  actual_delivery_date?: string;
+  retailer_id: number;
+  wholeseller_ids: number[];
+  delivery_address: string;
+  total_order_amount: number;
+  discount_amount: number;
+  tax_amount: number;
+  final_amount: number;
+  items: Item[];
 }
 
 @Injectable({
@@ -59,6 +77,12 @@ export class OrderService {
     return this.http.post(
       `${this.apiUrl}/transportation/requests/create-transport-job-with-orderids-request`,
       transportData
+    );
+  }
+
+  getRetailerOrderDetails(orderId: number): Observable<RetailerOrderResponse> {
+    return this.http.get<RetailerOrderResponse>(
+      `${this.apiUrl}/getRetailerOrderDetails/${orderId}`
     );
   }
 }

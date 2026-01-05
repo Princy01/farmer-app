@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { OrderService, RetailerOrderResponse } from './order.service';  // Import the service and response interface
 import { addIcons } from 'ionicons';
 import {
   checkmarkCircle,
   receiptOutline,
-  navigateOutline,  // Changed from trackingOutline
+  navigateOutline,
   homeOutline,
   timeOutline,
   locationOutline,
@@ -32,7 +33,7 @@ export class OrderConfirmationComponent implements OnInit {
   hasTransport: boolean = false;
   transportInfo: any = null;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private orderService: OrderService) {  // Inject OrderService
     addIcons({
       checkmarkCircle,
       receiptOutline,
@@ -64,8 +65,36 @@ export class OrderConfirmationComponent implements OnInit {
     console.log('Has transport:', this.hasTransport);
   }
 
+
   ngOnInit() {
     this.calculateDeliveryTime();
+
+    // Fetch full order details if orderIds are available
+    if (this.orderData?.orderIds && this.orderData.orderIds.length > 0) {
+      const orderId = this.orderData.orderIds[0];  // Use the first order ID
+      this.orderService.getRetailerOrderDetails(orderId).subscribe({
+        next: (response: RetailerOrderResponse) => {
+          this.orderData = {
+            ...this.orderData,
+            orderId: response.order_id,
+            orderDate: response.date_of_order,
+            deliveryAddress: response.delivery_address,
+            grandTotal: response.final_amount,
+            items: response.items.map(item => ({
+              ...item,
+              product_name: item.product_name || 'Unknown Product',
+              unit_name: item.unit_name || 'Unit',
+              latest_wholesaler_price: item.price  // Map price to match HTML usage
+            }))
+          };
+          console.log('Fetched order details:', this.orderData);
+        },
+        error: (err) => {
+          console.error('Failed to fetch order details:', err);
+          // Optionally, show an error message or fallback
+        }
+      });
+    }
 
     setTimeout(() => {
       this.showAnimation = false;

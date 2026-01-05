@@ -33,35 +33,23 @@
 
       <ion-card-content class="card-content">
         <div class="detail-row">
-          <div class="detail-label">
-            <ion-icon name="time-outline" class="detail-icon"></ion-icon>
-            Order Date
-          </div>
-          <div class="detail-value">{{ getFormattedDate(orderData?.orderDate) }}</div>
+          <span class="detail-label">Order Date:</span>
+          <span class="detail-value">{{ orderData?.orderDate | date:'mediumDate' }}</span>
         </div>
 
         <div class="detail-row">
-          <div class="detail-label">
-            <ion-icon name="location-outline" class="detail-icon"></ion-icon>
-            Delivery Address
-          </div>
-          <div class="detail-value">{{ orderData?.deliveryAddress || 'Default Address' }}</div>
+          <span class="detail-label">Status:</span>
+          <span class="detail-value">{{ orderData?.orderStatus === 1 ? 'Confirmed' : 'Pending' }}</span>
         </div>
 
         <div class="detail-row">
-          <div class="detail-label">
-            <ion-icon name="card-outline" class="detail-icon"></ion-icon>
-            Payment Method
-          </div>
-          <div class="detail-value">{{ orderData?.paymentMethod }}</div>
+          <span class="detail-label">Total Amount:</span>
+          <span class="detail-value">₹{{ orderData?.grandTotal }}</span>
         </div>
 
         <div class="detail-row">
-          <div class="detail-label">
-            <ion-icon name="cash-outline" class="detail-icon"></ion-icon>
-            Total Amount
-          </div>
-          <div class="detail-value price">₹{{ orderData?.grandTotal }}</div>
+          <span class="detail-label">Delivery Address:</span>
+          <span class="detail-value">{{ orderData?.deliveryAddress }}</span>
         </div>
       </ion-card-content>
     </ion-card>
@@ -72,26 +60,15 @@
     <ion-card class="modern-card delivery-info-card">
       <div class="card-header">
         <div class="header-content">
-          <ion-icon name="time-outline" class="header-icon"></ion-icon>
+          <ion-icon name="location-outline" class="header-icon"></ion-icon>
           <h2 class="card-title">Delivery Information</h2>
         </div>
       </div>
 
       <ion-card-content class="card-content">
         <div class="delivery-estimate">
-          <div class="estimate-icon">
-            <ion-icon name="rocket-outline"></ion-icon>
-          </div>
-          <div class="estimate-info">
-            <h3>Estimated Delivery</h3>
-            <p class="delivery-time">{{ estimatedDelivery }}</p>
-            <p class="delivery-note" *ngIf="orderData?.hasTransport">
-              A driver will be assigned shortly for your delivery
-            </p>
-            <p class="delivery-note" *ngIf="!orderData?.hasTransport">
-              You can arrange pickup directly with the seller
-            </p>
-          </div>
+          <span class="detail-label">Estimated Delivery:</span>
+          <span class="detail-value">{{ estimatedDelivery }}</span>
         </div>
       </ion-card-content>
     </ion-card>
@@ -103,7 +80,7 @@
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="bag-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Items Ordered</h2>
+          <h2 class="card-title">Order Items</h2>
         </div>
         <div class="items-count">{{ orderData?.items?.length }} items</div>
       </div>
@@ -111,17 +88,10 @@
       <ion-card-content class="card-content">
         <div class="items-list">
           <div class="item-row" *ngFor="let item of orderData?.items">
-            <div class="item-image">
-              <img [src]="'assets/img/' + item.product_name + '.png'"
-                   [alt]="item.product_name"
-                   class="product-img">
-            </div>
-            <div class="item-info">
-              <h4 class="item-name">{{ item.product_name }}</h4>
-              <p class="item-specs">{{ item.quantity }} {{ item.unit_name }}</p>
-            </div>
-            <div class="item-price">
-              ₹{{ item.latest_wholesaler_price * item.quantity }}
+            <div class="item-details">
+              <span class="item-name">{{ item.product_name }}</span>
+              <span class="item-quantity">{{ item.quantity }} {{ item.unit_name }}</span>
+              <span class="item-price">₹{{ item.price }}</span>
             </div>
           </div>
         </div>
@@ -134,19 +104,11 @@
     <ion-card class="modern-card actions-card">
       <ion-card-content class="actions-content">
         <div class="action-buttons">
-          <ion-button
-            expand="block"
-            class="action-btn primary"
-            (click)="trackOrder()">
-            <ion-icon name="location-outline" slot="start"></ion-icon>
-            Track Your Order
+          <ion-button expand="block" fill="outline" (click)="trackOrder()">
+            <ion-icon name="navigate-outline" slot="start"></ion-icon>
+            Track Order
           </ion-button>
-
-          <ion-button
-            expand="block"
-            fill="outline"
-            class="action-btn secondary"
-            (click)="downloadInvoice()">
+          <ion-button expand="block" fill="outline" (click)="downloadInvoice()">
             <ion-icon name="download-outline" slot="start"></ion-icon>
             Download Invoice
           </ion-button>
