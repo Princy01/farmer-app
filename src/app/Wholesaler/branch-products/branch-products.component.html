@@ -6,7 +6,7 @@
       </ion-button>
     </ion-buttons>
     <ion-title class="page-title">
-      {{ 'PRODUCTS_IN_BRANCH.TITLE' | translate }} {{ branchName }}
+      {{ "PRODUCTS_IN_BRANCH.TITLE" | translate }} {{ branchName }}
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -21,13 +21,16 @@
             <ion-icon name="storefront-outline"></ion-icon>
           </div>
           <div class="info-text">
-            <h2>{{ 'PRODUCTS_IN_BRANCH.BRANCH_INVENTORY' | translate }}</h2>
-            <p>{{ 'PRODUCTS_IN_BRANCH.MANAGE_PRODUCTS' | translate }} {{ branchName }}</p>
+            <h2>{{ "PRODUCTS_IN_BRANCH.BRANCH_INVENTORY" | translate }}</h2>
+            <p>
+              {{ "PRODUCTS_IN_BRANCH.MANAGE_PRODUCTS" | translate }}
+              {{ branchName }}
+            </p>
           </div>
         </div>
         <ion-button class="add-product-btn" (click)="addProduct()">
           <ion-icon name="add-outline" slot="start"></ion-icon>
-          {{ 'PRODUCTS_IN_BRANCH.ADD_PRODUCT' | translate }}
+          {{ "PRODUCTS_IN_BRANCH.ADD_PRODUCT" | translate }}
         </ion-button>
       </ion-card-content>
     </ion-card>
@@ -36,7 +39,6 @@
   <!-- Search Section -->
   <div class="search-section">
     <div class="search-container">
-      <ion-icon name="search-outline" class="search-icon"></ion-icon>
       <ion-searchbar
         [(ngModel)]="searchTerm"
         [placeholder]="'PRODUCTS_IN_BRANCH.SEARCH_PLACEHOLDER' | translate"
@@ -50,9 +52,14 @@
     <div class="section-header">
       <div class="header-content">
         <ion-icon name="cube-outline" class="section-icon"></ion-icon>
-        <h3 class="section-title">{{ 'PRODUCTS_IN_BRANCH.PRODUCTS_LABEL' | translate }}</h3>
+        <h3 class="section-title">
+          {{ "PRODUCTS_IN_BRANCH.PRODUCTS_LABEL" | translate }}
+        </h3>
       </div>
-      <div class="products-count-badge">{{ filteredProducts().length }} {{ 'PRODUCTS_IN_BRANCH.ITEMS_COUNT' | translate }}</div>
+      <div class="products-count-badge">
+        {{ filteredProducts().length }}
+        {{ "PRODUCTS_IN_BRANCH.ITEMS_COUNT" | translate }}
+      </div>
     </div>
 
     <div class="products-grid">
@@ -60,26 +67,11 @@
         *ngFor="let product of filteredProducts(); let i = index"
         class="modern-card product-card"
       >
-        <div class="product-image-container">
-          <img
-            [src]="'assets/img/' + product.name + '.png'"
-            [alt]="product.name"
-            class="product-image"
-            onerror="this.src='assets/img/placeholder.png'"
-          />
-          <div class="product-badge">
-            <ion-icon name="pricetag-outline"></ion-icon>
-          </div>
-        </div>
-
         <ion-card-content class="product-content">
           <div class="product-header">
             <div class="product-info">
               <h3 class="product-name">{{ product.name }}</h3>
-              <span class="product-category">
-                <ion-icon name="filing-outline" class="category-icon"></ion-icon>
-                {{ product.category }}
-              </span>
+              <span class="product-category">{{ product.category }}</span>
             </div>
           </div>
 
@@ -88,16 +80,25 @@
               <div class="detail-item price-item">
                 <ion-icon name="cash-outline" class="detail-icon"></ion-icon>
                 <div class="detail-content">
-                  <span class="detail-label">{{ 'PRODUCTS_IN_BRANCH.PRICE' | translate }}</span>
-                  <span class="detail-value price">₹{{ product.price }}/10Kg</span>
+                  <span class="detail-label">{{
+                    "PRODUCTS_IN_BRANCH.PRICE" | translate
+                  }}</span>
+                  <span class="detail-value price"
+                    >₹{{ product.price }}/10Kg</span
+                  >
                 </div>
               </div>
 
               <div class="detail-item stock-item">
                 <ion-icon name="layers-outline" class="detail-icon"></ion-icon>
                 <div class="detail-content">
-                  <span class="detail-label">{{ 'PRODUCTS_IN_BRANCH.STOCK' | translate }}</span>
-                  <span class="detail-value stock" [class.low-stock]="product.stock < 50">
+                  <span class="detail-label">{{
+                    "PRODUCTS_IN_BRANCH.STOCK" | translate
+                  }}</span>
+                  <span
+                    class="detail-value stock"
+                    [class.low-stock]="product.stock < 50"
+                  >
                     {{ product.stock }}Kg
                   </span>
                 </div>
@@ -112,7 +113,7 @@
               (click)="removeProduct(i)"
             >
               <ion-icon name="trash-outline" slot="start"></ion-icon>
-              {{ 'PRODUCTS_IN_BRANCH.REMOVE' | translate }}
+              {{ "PRODUCTS_IN_BRANCH.REMOVE" | translate }}
             </ion-button>
           </div>
         </ion-card-content>
@@ -124,11 +125,15 @@
       <div class="empty-icon-container">
         <ion-icon name="cube-outline" class="empty-icon"></ion-icon>
       </div>
-      <h3 class="empty-title">{{ 'PRODUCTS_IN_BRANCH.NO_PRODUCTS_FOUND' | translate }}</h3>
-      <p class="empty-text">{{ 'PRODUCTS_IN_BRANCH.NO_PRODUCTS' | translate }}</p>
+      <h3 class="empty-title">
+        {{ "PRODUCTS_IN_BRANCH.NO_PRODUCTS_FOUND" | translate }}
+      </h3>
+      <p class="empty-text">
+        {{ "PRODUCTS_IN_BRANCH.NO_PRODUCTS" | translate }}
+      </p>
       <ion-button class="add-first-btn" (click)="addProduct()">
         <ion-icon name="add-outline" slot="start"></ion-icon>
-        {{ 'PRODUCTS_IN_BRANCH.ADD_FIRST_PRODUCT' | translate }}
+        {{ "PRODUCTS_IN_BRANCH.ADD_FIRST_PRODUCT" | translate }}
       </ion-button>
     </div>
   </div>
