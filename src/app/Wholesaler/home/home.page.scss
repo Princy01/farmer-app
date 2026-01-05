@@ -1,4 +1,3 @@
-// Header Styles
 .header-toolbar {
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --color: white;
@@ -15,6 +14,16 @@
     color: white;
   }
 }
+
+.language-btn {
+    ion-icon[name="language-outline"] {
+      margin-left: 4px;
+    }
+
+    ion-icon[name="chevron-down-outline"] {
+      font-size: 1rem;
+    }
+  }
 
   ion-button {
     --color: white;
@@ -40,7 +49,6 @@
   }
 }
 
-// Menu Styles
 ion-menu {
   --background: #f8f9fa;
 
@@ -108,7 +116,6 @@ ion-menu {
   }
 }
 
-// Content Styles
 ion-content {
   --background: #f8f9fa;
 }
@@ -118,7 +125,6 @@ ion-content {
   min-height: 100%;
 }
 
-// Search Wrapper
 .search-wrapper {
   padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

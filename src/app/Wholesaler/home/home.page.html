@@ -13,8 +13,7 @@
         (click)="openLanguagePopover($event)"
         class="header-btn language-btn"
       >
-        <ion-icon name="language-outline" slot="start"></ion-icon>
-        <span>{{ currentLanguage }}</span>
+        <ion-icon name="language-outline" slot="end"></ion-icon>
         <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
       </ion-button>
       <ion-button (click)="openNotifications()">
@@ -22,12 +21,6 @@
           {{ notifications }}
         </ion-badge>
         <ion-icon name="notifications-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-      <ion-button (click)="openMessages()">
-        <ion-badge *ngIf="messages > 0" class="custom-badge">
-          {{ messages }}
-        </ion-badge>
-        <ion-icon name="chatbubbles-outline" slot="icon-only"></ion-icon>
       </ion-button>
       <ion-button (click)="openTrends()">
         <ion-icon name="stats-chart-outline" slot="icon-only"></ion-icon>
