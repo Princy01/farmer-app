@@ -4,18 +4,20 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
-export interface ProductAll {
+export interface BranchProduct {
+  b_b_p_id: number;
+  bid: number;
   product_id: number;
   product_name: string;
-  cat_id: number;
-  cat_name: string;
   image_path: string | null;
-  active_status: number;
-  nutrition_factor: string;
+  current_stock: number;
+  price_per_unit: number;
+  unit_id: number;
+  unit_name: string;
 }
 
 @Injectable({ providedIn: 'root' })
-export class AddProductService {
+export class BranchProductsService {
   private apiUrl = environment.apiUrl;
 
   constructor(
@@ -31,9 +33,9 @@ export class AddProductService {
     });
   }
 
-  getAllProductsForAdmin(): Observable<ProductAll[]> {
+  getProductsByBranch(branchId: number): Observable<BranchProduct[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<ProductAll[]>(`${this.apiUrl}/getAllProductsForAdmin`, { headers });
+    return this.http.get<BranchProduct[]>(`${this.apiUrl}/branch/${branchId}/products`, { headers });
   }
 
   addProductToBranch(bid: number, productId: number, qualityId: number, wastageMeasureId: number, currentStock: number, pricePerUnit: number, unitId: number): Observable<any> {
@@ -41,4 +43,10 @@ export class AddProductService {
   const body = { bid, product_id: productId, quality_id: qualityId, wastage_measure_id: wastageMeasureId, current_stock: currentStock, price_per_unit: pricePerUnit, unit_id: unitId };
   return this.http.post(`${this.apiUrl}/branch/product`, body, { headers });
 }
+
+  deleteProductFromBranch(bid: number, productId: number): Observable<any> {
+    const headers = this.getAuthHeaders();
+    const body = { bid, product_id: productId };
+    return this.http.delete(`${this.apiUrl}/branch/product`, { headers, body });
+  }
 }

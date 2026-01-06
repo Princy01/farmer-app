@@ -7,13 +7,15 @@ import { addIcons } from 'ionicons';
 import { chevronBack, storefrontOutline, addOutline, searchOutline, cubeOutline, pricetagOutline, cashOutline, layersOutline, trashOutline } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { BranchProductsService, BranchProduct } from './branch-products.service';
 
 interface Product {
   id: number;
   name: string;
-  category: string;
   price: number;
   stock: number;
+  image_path: string | null;
+  unit_name: string;
 }
 
 @Component({
@@ -34,8 +36,7 @@ export class BranchProductsComponent implements OnInit {
     if (!term) return this.products;
     return this.products.filter(
       p =>
-        p.name.toLowerCase().includes(term) ||
-        p.category.toLowerCase().includes(term)
+        p.name.toLowerCase().includes(term)
     );
   }
 
@@ -44,48 +45,86 @@ export class BranchProductsComponent implements OnInit {
     private modalCtrl: ModalController,
     private router: Router,
     private toastCtrl: ToastController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private branchProductsService: BranchProductsService
   ) {
-addIcons({
-  chevronBack,
-  storefrontOutline,
-  addOutline,
-  searchOutline,
-  cubeOutline,
-  pricetagOutline,
-  cashOutline,
-  layersOutline,
-  trashOutline
-});  }
+    addIcons({
+      chevronBack,
+      storefrontOutline,
+      addOutline,
+      searchOutline,
+      cubeOutline,
+      pricetagOutline,
+      cashOutline,
+      layersOutline,
+      trashOutline
+    });
+  }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
-      this.branchId = params['branchId'] || null;
+      this.branchId = params['branchId'] ? parseInt(params['branchId'], 10) : null;
       this.branchName = params['branchName'] || '';
-      this.loadDummyProducts();
+      if (this.branchId) {
+        this.loadProducts();
+      }
     });
   }
 
-  loadDummyProducts() {
-    // Dummy data
-    this.products = [
-      { id: 1, name: 'Wheat', category: 'Grains', price: 1200, stock: 50 },
-      { id: 2, name: 'Rice', category: 'Grains', price: 1500, stock: 30 },
-      { id: 3, name: 'Potato', category: 'Vegetables', price: 25, stock: 200 },
-      { id: 4, name: 'Tomato', category: 'Vegetables', price: 40, stock: 100 }
-    ];
+  loadProducts() {
+    if (!this.branchId) return;
+    this.branchProductsService.getProductsByBranch(this.branchId).subscribe({
+      next: (data: BranchProduct[]) => {
+        // Map backend BranchProduct to frontend Product (only backend fields)
+        this.products = data.map(bp => ({
+          id: bp.product_id,
+          name: bp.product_name,
+          price: bp.price_per_unit,
+          stock: bp.current_stock,
+          image_path: bp.image_path || '',
+          unit_name: bp.unit_name || ''
+        }));
+      },
+      error: async (err) => {
+        console.error('Error loading products:', err);
+        const toast = await this.toastCtrl.create({
+          message: this.translate.instant('PRODUCTS_IN_BRANCH.LOAD_ERROR'),
+          duration: 2000,
+          color: 'danger',
+          position: 'bottom'
+        });
+        await toast.present();
+      }
+    });
   }
 
   async removeProduct(index: number) {
-    this.products.splice(index, 1);
+    const product = this.filteredProducts()[index];
+    if (!this.branchId || !product) return;
 
-    const toast = await this.toastCtrl.create({
-      message: this.translate.instant('PRODUCTS_IN_BRANCH.PRODUCT_REMOVED'),
-      duration: 2000,
-      color: 'success',
-      position: 'bottom'
+    this.branchProductsService.deleteProductFromBranch(this.branchId, product.id).subscribe({
+      next: async () => {
+        // Refresh the list after deletion
+        this.loadProducts();
+        const toast = await this.toastCtrl.create({
+          message: this.translate.instant('PRODUCTS_IN_BRANCH.PRODUCT_REMOVED'),
+          duration: 2000,
+          color: 'success',
+          position: 'bottom'
+        });
+        await toast.present();
+      },
+      error: async (err) => {
+        console.error('Error removing product:', err);
+        const toast = await this.toastCtrl.create({
+          message: this.translate.instant('PRODUCTS_IN_BRANCH.REMOVE_ERROR'),
+          duration: 2000,
+          color: 'danger',
+          position: 'bottom'
+        });
+        await toast.present();
+      }
     });
-    await toast.present();
   }
 
   async addProduct() {
@@ -94,23 +133,23 @@ addIcons({
     });
     await modal.present();
     const { data } = await modal.onDidDismiss();
-    if (data && data.name) {
-      // Add the new product to the list (dummy logic)
-      this.products.push({
-        id: this.products.length + 1,
-        name: data.name,
-        category: '',
-        price: 0,
-        stock: 0
-      });
-
-      const toast = await this.toastCtrl.create({
-        message: this.translate.instant('PRODUCTS_IN_BRANCH.PRODUCT_ADDED'),
-        duration: 2000,
-        color: 'success',
-        position: 'bottom'
-      });
-      await toast.present();
+    if (data && Array.isArray(data) && this.branchId) {
+      for (const prod of data) {
+        this.branchProductsService.addProductToBranch(
+          this.branchId,
+          prod.product_id,
+          1,  // quality_id default
+          1,  // wastage_measure_id default
+          prod.stock || 0,
+          prod.price || 0,
+          prod.unitId || 1
+        ).subscribe({
+          next: () => {
+            this.loadProducts();  // Refresh
+          },
+          error: (err: any) => console.error('Error adding product:', err)
+        });
+      }
     }
   }
 

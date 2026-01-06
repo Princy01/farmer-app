@@ -69,9 +69,16 @@
       >
         <ion-card-content class="product-content">
           <div class="product-header">
+            <div class="product-image">
+              <img
+                [src]="product.image_path"
+                alt="Product Image"
+                class="product-img"
+              />
+            </div>
             <div class="product-info">
               <h3 class="product-name">{{ product.name }}</h3>
-              <span class="product-category">{{ product.category }}</span>
+              <!-- Removed unit_name from here -->
             </div>
           </div>
 
@@ -84,7 +91,7 @@
                     "PRODUCTS_IN_BRANCH.PRICE" | translate
                   }}</span>
                   <span class="detail-value price"
-                    >₹{{ product.price }}/10Kg</span
+                    >₹{{ product.price }}/{{ product.unit_name }}</span
                   >
                 </div>
               </div>
@@ -95,11 +102,8 @@
                   <span class="detail-label">{{
                     "PRODUCTS_IN_BRANCH.STOCK" | translate
                   }}</span>
-                  <span
-                    class="detail-value stock"
-                    [class.low-stock]="product.stock < 50"
-                  >
-                    {{ product.stock }}Kg
+                  <span class="detail-value stock">
+                    {{ product.stock }} {{ product.unit_name }}
                   </span>
                 </div>
               </div>
