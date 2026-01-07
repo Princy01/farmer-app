@@ -283,26 +283,24 @@
 
 
   "ADD_PRODUCT": {
-    "PAGE_TITLE": "Add Products",
-     "RECOMMEND_TITLE": "Can't find what you're looking for?",
-    "RECOMMEND_NEW": "Recommend New Product",
+    "PAGE_TITLE": "Add Product",
     "SEARCH_PLACEHOLDER": "Search products...",
-    "PRODUCTS_LIST": "Available Products",
-    "SELECTED_PRODUCTS_DETAILS": "Selected Products Details",
+    "PRODUCTS_LIST": "Products List",
+    "NO_PRODUCTS": "No products found",
     "STOCK": "Stock",
-    "STOCK_PLACEHOLDER": "Enter stock quantity",
-    "PRICE": "Price per Unit",
-    "PRICE_PLACEHOLDER": "Enter price per unit",
-    "UNIT_ID": "Unit ID",
-    "UNIT_ID_PLACEHOLDER": "Enter unit ID",
-    "ADD_NEW_TITLE": "Add New Product",
-    "NEW_PRODUCT_NAME": "Product Name",
-    "NEW_PRODUCT_CATEGORY": "Category",
-    "ADD_NEW": "Add New Product",
-    "SELECTED_ITEMS": "Selected Items:",
-    "ADD_SELECTED": "Add Selected",
-    "NO_SELECTION": "No products selected",
-    "ADD_ERROR": "Error adding product"
+    "PRICE": "Price",
+    "UNIT_ID": "Unit",
+    "QUALITY_ID": "Quality ID",
+    "WASTAGE_MEASURE_ID": "Wastage Measure ID",
+    "ADD_PRODUCT": "Add Product",
+    "ADD_NEW_PRODUCT": "Add New Product",
+    "PRODUCT_NAME": "Product Name",
+    "CATEGORY": "Category",
+    "SELECT_UNIT": "Select Unit",
+    "FILL_ALL_FIELDS": "Please fill all fields",
+    "PRODUCT_ADDED_SUCCESS": "Product added successfully",
+    "ERROR_ADDING_PRODUCT": "Error adding product: {{error}}",
+    "ADD_NEW_NOT_INTEGRATED": "Add new product not yet integrated"
   },
 
 

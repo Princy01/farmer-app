@@ -14,6 +14,10 @@ export interface ProductAll {
   nutrition_factor: string;
 }
 
+export interface Unit {
+  unit_id: number;
+  units_name: string;
+}
 @Injectable({ providedIn: 'root' })
 export class AddProductService {
   private apiUrl = environment.apiUrl;
@@ -41,4 +45,8 @@ export class AddProductService {
   const body = { bid, product_id: productId, quality_id: qualityId, wastage_measure_id: wastageMeasureId, current_stock: currentStock, price_per_unit: pricePerUnit, unit_id: unitId };
   return this.http.post(`${this.apiUrl}/branch/product`, body, { headers });
 }
+
+getAllUnits(): Observable<Unit[]> {
+    return this.http.get<Unit[]>(`${this.apiUrl}/getAllUnits`);
+  }
 }
