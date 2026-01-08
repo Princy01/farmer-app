@@ -18,6 +18,16 @@ export interface Unit {
   unit_id: number;
   units_name: string;
 }
+
+export interface Quality {
+  quality_id: number;
+  quality_name: string;
+}
+
+export interface WastageMeasure {
+  id: number;
+  wastage_measure_name: string;
+}
 @Injectable({ providedIn: 'root' })
 export class AddProductService {
   private apiUrl = environment.apiUrl;
@@ -48,5 +58,15 @@ export class AddProductService {
 
 getAllUnits(): Observable<Unit[]> {
     return this.http.get<Unit[]>(`${this.apiUrl}/getAllUnits`);
+  }
+
+    getAllQualities(): Observable<Quality[]> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<Quality[]>(`${this.apiUrl}/qualities`, { headers });
+  }
+
+  getAllWastageMeasures(): Observable<WastageMeasure[]> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<WastageMeasure[]>(`${this.apiUrl}/wastage-measures`, { headers });
   }
 }

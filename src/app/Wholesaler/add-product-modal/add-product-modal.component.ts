@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { cubeOutline, closeCircleOutline, bulbOutline, addCircleOutline, listOutline, checkmarkCircleOutline, chevronForward, arrowBack } from 'ionicons/icons';
-import { AddProductService, ProductAll, Unit } from './add-product.service';
+import { AddProductService, ProductAll, Unit, Quality, WastageMeasure } from './add-product.service';
 
 @Component({
   selector: 'app-add-product-modal',
@@ -21,7 +21,9 @@ export class AddProductModalComponent {
   selectedProductForDetails: (ProductAll & { stock?: number; price?: number; unitId?: number; qualityId?: number; wastageMeasureId?: number }) | null = null;
   @Input() bid!: number;
   units: Unit[] = [];
-  products: (ProductAll & { selected?: boolean; stock?: number; price?: number; unitId?: number; qualityId?: number; wastageMeasureId?: number })[] = [];
+  qualities: Quality[] = [];
+  wastageMeasures: WastageMeasure[] = [];
+   products: (ProductAll & { selected?: boolean; stock?: number; price?: number; unitId?: number; qualityId?: number; wastageMeasureId?: number })[] = [];
   categories: string[] = [];
   newProduct = { name: '', category: '', price: 0 };
 
@@ -50,6 +52,12 @@ export class AddProductModalComponent {
     });
     this.addProductService.getAllUnits().subscribe((data) => {
       this.units = data;
+    });
+    this.addProductService.getAllQualities().subscribe((data) => {
+      this.qualities = data;
+    });
+    this.addProductService.getAllWastageMeasures().subscribe((data) => {
+      this.wastageMeasures = data;
     });
   }
 
@@ -87,7 +95,7 @@ export class AddProductModalComponent {
       ).subscribe({
         next: () => {
           this.showToast(this.translate.instant('ADD_PRODUCT.PRODUCT_ADDED_SUCCESS'), 'success');
-          this.backToList();
+          this.modalCtrl.dismiss('success');  // Dismiss with success indicator
         },
         error: (err) => {
           this.showToast(this.translate.instant('ADD_PRODUCT.ERROR_ADDING_PRODUCT', { error: err.message }), 'danger');

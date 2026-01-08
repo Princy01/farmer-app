@@ -41,8 +41,9 @@
   --background-activated: rgba(255, 255, 255, 0.1);
   --background-hover: rgba(255, 255, 255, 0.05);
   --border-radius: 12px;
-  margin: 0 2px;
+  margin: 0px;
   transition: all 0.3s ease;
+  font-size: medium;
 
   ion-icon {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));

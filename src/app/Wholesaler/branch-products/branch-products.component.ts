@@ -128,28 +128,20 @@ export class BranchProductsComponent implements OnInit {
   }
 
   async addProduct() {
+    if (!this.branchId) {
+      console.error('Branch ID is missing');
+      return;
+    }
     const modal = await this.modalCtrl.create({
       component: AddProductModalComponent,
+      componentProps: {
+        bid: this.branchId  // Pass the branch ID
+      }
     });
     await modal.present();
     const { data } = await modal.onDidDismiss();
-    if (data && Array.isArray(data) && this.branchId) {
-      for (const prod of data) {
-        this.branchProductsService.addProductToBranch(
-          this.branchId,
-          prod.product_id,
-          1,  // quality_id default
-          1,  // wastage_measure_id default
-          prod.stock || 0,
-          prod.price || 0,
-          prod.unitId || 1
-        ).subscribe({
-          next: () => {
-            this.loadProducts();  // Refresh
-          },
-          error: (err: any) => console.error('Error adding product:', err)
-        });
-      }
+    if (data === 'success') {
+      this.loadProducts();  // Refresh after successful add
     }
   }
 

@@ -276,24 +276,28 @@
 
 
   "ADD_PRODUCT": {
-     "PAGE_TITLE": "उत्पाद जोड़ें",
-    "SEARCH_PLACEHOLDER": "उत्पाद खोजें...",
-    "PRODUCTS_LIST": "उत्पाद सूची",
-    "NO_PRODUCTS": "कोई उत्पाद नहीं मिला",
-    "STOCK": "स्टॉक",
-    "PRICE": "कीमत",
+    "PAGE_TITLE": "उत्पाद जोड़ें",
+    "SEARCH_PLACEHOLDER": "नाम या श्रेणी से उत्पाद खोजें...",
+    "PRODUCTS_LIST": "उपलब्ध उत्पाद",
+    "NO_PRODUCTS": "आपकी खोज से मिलान करने वाला कोई उत्पाद नहीं मिला।",
     "UNIT_ID": "इकाई",
-    "QUALITY_ID": "गुणवत्ता",
-    "WASTAGE_MEASURE_ID": "नुकसान",
+    "SELECT_UNIT": "एक इकाई चुनें (जैसे, किलोग्राम, टुकड़े)",
+    "STOCK_QUANTITY": "स्टॉक मात्रा (चयनित इकाई में)",
+    "STOCK_PLACEHOLDER": "वर्तमान स्टॉक मात्रा दर्ज करें",
+    "PRICE_PER_UNIT": "प्रति इकाई मूल्य",
+    "PRICE_PLACEHOLDER": "प्रति इकाई मूल्य दर्ज करें",
+    "QUALITY": "गुणवत्ता",
+    "SELECT_QUALITY": "गुणवत्ता स्तर चुनें",
+    "WASTAGE_MEASURE": "नुकसान माप",
+    "SELECT_WASTAGE_MEASURE": "नुकसान माप चुनें",
     "ADD_PRODUCT": "उत्पाद जोड़ें",
-    "ADD_NEW_PRODUCT": "नया उत्पाद जोड़ें",
+    "ADD_NEW_PRODUCT": "नया उत्पाद सुझाव दें",
     "PRODUCT_NAME": "उत्पाद का नाम",
     "CATEGORY": "श्रेणी",
-    "SELECT_UNIT": "इकाई चुनें",
-    "FILL_ALL_FIELDS": "कृपया सारी जानकारी भरें",
-    "PRODUCT_ADDED_SUCCESS": "उत्पाद सफलतापूर्वक जोड़ा गया",
+    "FILL_ALL_FIELDS": "कृपया सभी आवश्यक फ़ील्ड भरें।",
+    "PRODUCT_ADDED_SUCCESS": "उत्पाद सफलतापूर्वक जोड़ा गया!",
     "ERROR_ADDING_PRODUCT": "उत्पाद जोड़ने में त्रुटि: {{error}}",
-    "ADD_NEW_NOT_INTEGRATED": "नया उत्पाद जोड़ना अभी एकीकृत नहीं है"
+    "ADD_NEW_NOT_INTEGRATED": "नए उत्पादों का सुझाव अभी एकीकृत नहीं है।"
   },
 
 

@@ -74,22 +74,7 @@
         </div>
         <ion-card-content class="card-content">
           <div class="product-inputs">
-            <div class="input-group">
-              <ion-label>{{ "ADD_PRODUCT.STOCK" | translate }}</ion-label>
-              <ion-input
-                type="number"
-                [(ngModel)]="selectedProductForDetails!.stock"
-                required
-              ></ion-input>
-            </div>
-            <div class="input-group">
-              <ion-label>{{ "ADD_PRODUCT.PRICE" | translate }}</ion-label>
-              <ion-input
-                type="number"
-                [(ngModel)]="selectedProductForDetails!.price"
-                required
-              ></ion-input>
-            </div>
+            <!-- Unit Selector First -->
             <div class="input-group">
               <ion-label>{{ "ADD_PRODUCT.UNIT_ID" | translate }}</ion-label>
               <ion-select
@@ -104,23 +89,57 @@
                 >
               </ion-select>
             </div>
+            <!-- Stock and Price Grouped -->
+            <div class="input-group-group">
+              <div class="input-group">
+                <ion-label>{{ "ADD_PRODUCT.STOCK_QUANTITY" | translate }}</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="selectedProductForDetails!.stock"
+                  [placeholder]="'ADD_PRODUCT.STOCK_PLACEHOLDER' | translate"
+                  required
+                ></ion-input>
+              </div>
+              <div class="input-group">
+                <ion-label>{{ "ADD_PRODUCT.PRICE_PER_UNIT" | translate }}</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="selectedProductForDetails!.price"
+                  [placeholder]="'ADD_PRODUCT.PRICE_PLACEHOLDER' | translate"
+                  required
+                ></ion-input>
+              </div>
+            </div>
+            <!-- Quality and Wastage -->
             <div class="input-group">
-              <ion-label>{{ "ADD_PRODUCT.QUALITY_ID" | translate }}</ion-label>
-              <ion-input
-                type="number"
+              <ion-label>{{ "ADD_PRODUCT.QUALITY" | translate }}</ion-label>
+              <ion-select
                 [(ngModel)]="selectedProductForDetails!.qualityId"
+                [placeholder]="'ADD_PRODUCT.SELECT_QUALITY' | translate"
                 required
-              ></ion-input>
+              >
+                <ion-select-option
+                  *ngFor="let quality of qualities"
+                  [value]="quality.quality_id"
+                  >{{ quality.quality_name }}</ion-select-option
+                >
+              </ion-select>
             </div>
             <div class="input-group">
               <ion-label>{{
-                "ADD_PRODUCT.WASTAGE_MEASURE_ID" | translate
+                "ADD_PRODUCT.WASTAGE_MEASURE" | translate
               }}</ion-label>
-              <ion-input
-                type="number"
+              <ion-select
                 [(ngModel)]="selectedProductForDetails!.wastageMeasureId"
+                [placeholder]="'ADD_PRODUCT.SELECT_WASTAGE_MEASURE' | translate"
                 required
-              ></ion-input>
+              >
+                <ion-select-option
+                  *ngFor="let wastage of wastageMeasures"
+                  [value]="wastage.id"
+                  >{{ wastage.wastage_measure_name }}</ion-select-option
+                >
+              </ion-select>
             </div>
           </div>
           <ion-button expand="block" (click)="addProduct()" class="add-btn">
