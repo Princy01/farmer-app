@@ -11,20 +11,29 @@
 </ion-header>
 
 <ion-content>
-  <div class="product-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>{{ 'PRODUCT_DETAILS.LOADING' | translate }}</p>
+  </div>
+
+  <!-- Content -->
+  <div class="product-container" *ngIf="!isLoading && productDetails">
 
     <!-- Product Information Section -->
     <ion-card class="product-info-card">
       <ion-card-header>
         <div class="product-header">
           <div class="product-image">
-            <img [src]="productInfo.imageUrl" [alt]="productData.name" />
+            <img [src]="displayImageUrl" [alt]="productDetails.product_name" />
           </div>
           <div class="product-basic-info">
-            <ion-card-title>{{ productData.name }}</ion-card-title>
-            <ion-card-subtitle>{{ productInfo.category }}</ion-card-subtitle>
+            <ion-card-title>{{ productDetails.product_name }}</ion-card-title>
+            <ion-card-subtitle>{{ 'PRODUCT_DETAILS.CATEGORY' | translate }}: {{ productDetails.category_name
+              }}</ion-card-subtitle>
             <div class="price-section">
-              <span class="price">₹{{ productInfo.pricePerUnit }}/kg</span>
+              <span class="price">₹{{ productDetails.price_per_unit | number:'1.2-2' }}/{{ productDetails.unit_name
+                }}</span>
             </div>
           </div>
         </div>
@@ -43,22 +52,28 @@
         <div class="total-quantity-section">
           <div class="total-quantity-item">
             <span class="label">{{ 'PRODUCT_DETAILS.TOTAL_COMBINED' | translate }}</span>
-            <span class="value large">{{ quantityInfo.totalCombinedQuantity }} kg</span>
+            <span class="value large">{{ productDetails.total_quantity | number:'1.0-2' }} {{ productDetails.unit_name
+              }}</span>
           </div>
         </div>
 
         <!-- Mandi-wise Quantity Distribution -->
-        <div class="mandi-section" *ngIf="quantityInfo.mandiWiseQuantity.length > 1">
+        <div class="mandi-section" *ngIf="productDetails.mandi_wise && productDetails.mandi_wise.length > 0">
           <h4>{{ 'PRODUCT_DETAILS.MANDI_WISE' | translate }}</h4>
           <div class="mandi-grid">
-            <div class="mandi-item" *ngFor="let mandi of quantityInfo.mandiWiseQuantity">
+            <div class="mandi-item" *ngFor="let mandi of productDetails.mandi_wise">
               <div class="mandi-info">
-                <span class="mandi-name">{{ mandi.mandiName }}</span>
-                <span class="mandi-quantity">{{ mandi.quantity }} kg</span>
+                <span class="mandi-name">{{ mandi.mandi_name }}</span>
+                <span class="mandi-quantity">
+                  {{ mandi.quantity | number:'1.0-2' }} {{ productDetails.unit_name }}
+                </span>
+                <span class="mandi-price">
+                  ₹{{ mandi.price_per_unit | number:'1.2-2' }}/{{ productDetails.unit_name }}
+                </span>
               </div>
+
               <div class="mandi-progress">
-                <div class="progress-bar"
-                     [style.width.%]="(mandi.quantity / quantityInfo.totalCombinedQuantity) * 100">
+                <div class="progress-bar" [style.width.%]="getMandiPercentage(mandi.quantity)">
                 </div>
               </div>
             </div>
@@ -78,23 +93,23 @@
       <ion-card-content>
         <div class="orders-grid">
           <div class="order-stat-item">
-            <span class="number">{{ orderStats.totalOrdersPlaced }}</span>
+            <span class="number">{{ productDetails.order_stats.total }}</span>
             <span class="label">{{ 'PRODUCT_DETAILS.TOTAL_ORDERS' | translate }}</span>
           </div>
           <div class="order-stat-item">
-            <span class="number">{{ orderStats.last7Days }}</span>
+            <span class="number">{{ productDetails.order_stats.last_7_days }}</span>
             <span class="label">{{ 'PRODUCT_DETAILS.LAST_7_DAYS' | translate }}</span>
           </div>
           <div class="order-stat-item">
-            <span class="number">{{ orderStats.last30Days }}</span>
+            <span class="number">{{ productDetails.order_stats.last_30_days }}</span>
             <span class="label">{{ 'PRODUCT_DETAILS.LAST_30_DAYS' | translate }}</span>
           </div>
           <div class="order-stat-item">
-            <span class="number">{{ orderStats.last6Months }}</span>
+            <span class="number">{{ productDetails.order_stats.last_6_months }}</span>
             <span class="label">{{ 'PRODUCT_DETAILS.LAST_6_MONTHS' | translate }}</span>
           </div>
           <div class="order-stat-item">
-            <span class="number">{{ orderStats.lastYear }}</span>
+            <span class="number">{{ productDetails.order_stats.last_year }}</span>
             <span class="label">{{ 'PRODUCT_DETAILS.LAST_YEAR' | translate }}</span>
           </div>
         </div>
@@ -111,14 +126,16 @@
       </ion-card-header>
       <ion-card-content>
         <div class="actions-grid">
-          <ion-button expand="block" fill="outline" (click)="updateStock()">
+          <ion-button size="small" fill="outline" (click)="updateStock()">
             <ion-icon name="add-circle-outline" slot="start"></ion-icon>
             {{ 'PRODUCT_DETAILS.UPDATE_STOCK' | translate }}
+
           </ion-button>
 
-          <ion-button expand="block" fill="outline" (click)="editPrice()">
+
+          <ion-button size="small" fill="outline" (click)="updatePrice()">
             <ion-icon name="pricetag-outline" slot="start"></ion-icon>
-            {{ 'PRODUCT_DETAILS.EDIT_PRICE' | translate }}
+            {{ 'PRODUCT_DETAILS.UPDATE_PRICE' | translate }}
           </ion-button>
 
           <ion-button expand="block" fill="outline" (click)="setDiscount()">
@@ -134,5 +151,14 @@
       </ion-card-content>
     </ion-card>
 
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !productDetails" class="error-container">
+    <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+    <h3>{{ 'PRODUCT_DETAILS.NO_DATA' | translate }}</h3>
+    <ion-button (click)="goBack()">
+      {{ 'COMMON.GO_BACK' | translate }}
+    </ion-button>
   </div>
 </ion-content>

@@ -1,27 +1,34 @@
-import { Component } from '@angular/core';
-import { IonicModule, NavController, MenuController, ActionSheetController, LoadingController, AlertController, PopoverController } from '@ionic/angular';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import {
+  IonicModule,
+  NavController,
+  MenuController,
+  LoadingController,
+  AlertController,
+  PopoverController
+} from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
-  chatbubblesOutline, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
-  chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
-  trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
-  homeOutline, business, list, cubeOutline, time, analytics, pulse, bulb, logOutOutline,
-  businessOutline, bulbOutline, createOutline, notificationsOutline,
-  receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline,
-  languageOutline, chevronDownOutline, checkmarkOutline, carOutline
+  chatbubblesOutline, personCircleSharp, arrowForwardCircleSharp,
+  chevronForwardOutline, listCircleOutline, addCircleOutline,
+  timeOutline, statsChartOutline, personOutline,
+  trendingUpOutline, reloadOutline, settingsOutline,
+  closeOutline, locationOutline, menuOutline,
+  homeOutline, businessOutline, cubeOutline,
+  analyticsOutline, pulse, bulbOutline,
+  logOutOutline, createOutline, notificationsOutline,
+  receiptOutline, searchOutline, chevronDownCircleOutline,
+  languageOutline, chevronDownOutline, checkmarkOutline,
+  carOutline
 } from 'ionicons/icons';
-import { Router } from '@angular/router';
-import { WholesalerApiService } from '../services/wholesaler-api.service';
+
+import { WholesalerApiService, WholesalerProduct } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { MenuService } from '../services/menu.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LanguagePopoverComponent } from './language-popover.component';
-
-// Simple model for user preferences (expand as needed)
-interface UserPreference {
-  language: string;
-}
 
 interface Language {
   id: number;
@@ -36,29 +43,32 @@ interface Language {
   standalone: true,
   imports: [IonicModule, CommonModule, TranslatePipe, LanguagePopoverComponent]
 })
+export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
-export class HomePage {
-  items: any[] = [];
-  filteredItems: any[] = [];
-  notifications = 5;
-  messages = 3;
-  allDummyData: any[] = []; // Store all dummy data
-  private currentPage = 0;
-  private itemsPerPage = 5; // Show 5 items per page
+  // ===== DATA =====
+  items: WholesalerProduct[] = [];
+  filteredItems: WholesalerProduct[] = [];
+  currentPage = 0;
+  itemsPerPage = 10;
   isInfiniteScrollEnabled = true;
+  isLoading = false;
 
-  isSearching = false;
+  // ===== SEARCH =====
+  searchTerm = '';
   private searchTimeout: any;
 
+  // ===== UI =====
+  notifications = 0;
+  messages = 0;
+
+  // ===== LANGUAGE =====
   languages: Language[] = [];
-  currentLanguage = 'English'; // Default
-  userPreference: UserPreference | null = null;
+  currentLanguage = 'English';
 
   constructor(
     private navCtrl: NavController,
     private router: Router,
     private menuCtrl: MenuController,
-    private actionSheetController: ActionSheetController,
     private wholesalerService: WholesalerApiService,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
@@ -66,464 +76,230 @@ export class HomePage {
     public menuService: MenuService,
     private translate: TranslateService,
     private popoverCtrl: PopoverController
-
   ) {
     addIcons({
-      chatbubblesOutline, logoAndroid, personCircleSharp, arrowForwardCircleSharp,
-      chevronForwardOutline, listCircleOutline, addCircleOutline, timeOutline, statsChartOutline, personOutline,
-      trendingUpOutline, reloadOutline, settingsOutline, closeOutline, locationOutline, menuOutline,
-      homeOutline, businessOutline, list, cubeOutline, time, analytics, pulse, bulbOutline, logOutOutline, createOutline,
-      notificationsOutline, receiptOutline, searchOutline, chevronDownCircleOutline, analyticsOutline,
-      languageOutline, chevronDownOutline, checkmarkOutline, carOutline
+      chatbubblesOutline, personCircleSharp, arrowForwardCircleSharp,
+      chevronForwardOutline, listCircleOutline, addCircleOutline,
+      timeOutline, statsChartOutline, personOutline,
+      trendingUpOutline, reloadOutline, settingsOutline,
+      closeOutline, locationOutline, menuOutline,
+      homeOutline, businessOutline, cubeOutline,
+      analyticsOutline, pulse, bulbOutline,
+      logOutOutline, createOutline, notificationsOutline,
+      receiptOutline, searchOutline, chevronDownCircleOutline,
+      languageOutline, chevronDownOutline, checkmarkOutline,
+      carOutline
     });
 
-    // Set default language
     this.translate.setDefaultLang('en');
     this.translate.use('en');
   }
 
+  // =====================================================
+  // LIFECYCLE
+  // =====================================================
+
   ngOnInit() {
     this.setItemsPerPage();
-    this.checkAuthAndLoadData();
-    this.fetchUserPreference();
+    this.checkAuthAndLoad();
     this.fetchLanguages();
   }
 
-  fetchLanguages() {
-    this.wholesalerService.getLanguages().subscribe({
-      next: (languages) => {
-        // Normalize codes to lowercase for consistency
-        this.languages = languages.map(lang => ({ ...lang, code: lang.code.toLowerCase() }));
-      },
-      error: (error) => {
-        console.error('Error fetching languages:', error);
-        // Fallback with lowercase codes
-        this.languages = [
-          { id: 1, code: 'en', name: 'English' },
-          { id: 2, code: 'es', name: 'Español' },
-          { id: 3, code: 'fr', name: 'Français' }
-        ];
-      }
+  ngAfterViewInit() {
+    const items = document.querySelectorAll('ion-item');
+    items.forEach((item, index) => {
+      (item as HTMLElement).style.animationDelay = `${index * 0.05}s`;
     });
   }
 
-  fetchUserPreference() {
-    this.wholesalerService.getUserPreference().subscribe({
-      next: (pref) => {
-        // Normalize the language code to lowercase
-        const normalizedLang = pref.language.toLowerCase();
-        this.userPreference = { ...pref, language: normalizedLang };
-        this.setLanguage(normalizedLang);
-      },
-      error: (error) => {
-        console.error('Error fetching user preference:', error);
-        // Fallback with lowercase
-        this.userPreference = { language: 'en' };
-        this.setLanguage('en');
-      }
-    });
-  }
-
-  setLanguage(langCode: string) {
-    this.translate.use(langCode).subscribe({
-      next: () => {
-        const lang = this.languages.find(l => l.code === langCode);
-        this.currentLanguage = lang ? lang.name : 'English';
-      },
-      error: (err) => {
-        console.error('Error loading translation file for', langCode, err);
-        // Fallback to default language
-        this.translate.use('en');
-        this.currentLanguage = 'English';
-      }
-    });
-  }
-
-  saveLanguagePreference(langCode: string) {
-    const lang = this.languages.find(l => l.code === langCode);
-    if (lang) {
-      this.wholesalerService.setLanguagePreference(lang.id).subscribe({
-        next: () => {
-          this.setLanguage(langCode);
-        },
-        error: (error) => {
-          console.error('Error saving language preference:', error);
-          // Optionally show an alert
-        }
-      });
+  ngOnDestroy() {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
     }
   }
 
-  // Open popover for language selection
-  async openLanguagePopover(event: Event) {
-    const popover = await this.popoverCtrl.create({
-      component: LanguagePopoverComponent,
-      event: event,
-      translucent: true,
-      componentProps: {
-        languages: this.languages,
-        currentLanguage: this.currentLanguage,
-        onSelect: (lang: Language) => this.saveLanguagePreference(lang.code)
-      }
-    });
-    await popover.present();
-  }
+  // =====================================================
+  // AUTH + INITIAL LOAD
+  // =====================================================
 
-  private setItemsPerPage() {
-    // Adjust items per page based on breakpoint, assuming desktop (lg+) has 4+ columns
-    if (window.innerWidth >= 1536) { // 2xl
-      this.itemsPerPage = 20; // 5 rows of 4 columns
-    } else if (window.innerWidth >= 1280) { // xl
-      this.itemsPerPage = 16; // 4 rows of 4 columns
-    } else if (window.innerWidth >= 1024) { // lg
-      this.itemsPerPage = 12; // 3 rows of 4 columns
-    } else if (window.innerWidth >= 768) { // md
-      this.itemsPerPage = 8; // 2 rows of 4 columns
-    } else if (window.innerWidth >= 640) { // sm
-      this.itemsPerPage = 6; // 1.5 rows of 4 columns
-    } else {
-      this.itemsPerPage = 5; // xs: mobile, 1 column, 5 items
-    }
-  }
-
-  private checkAuthAndLoadData() {
+  private checkAuthAndLoad() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-    const userRole = this.authService.getUserRole();
     if (!this.authService.hasRole('wholesaler')) {
       this.showUnauthorizedError();
       return;
     }
 
-    this.loadOrderSummary();
+    this.loadProducts(true);
   }
 
-  //THIS FUNCTION IS BEING USED FOR NOW AS WE ARE USING DUMMY DATA, OTHERWISE THE LOAD ORDER SUMMARY FUNCTION WRITTEN NEXT WILL BE USED IN REAL APPLICATION
-  // use JWT token
-  async loadOrderSummary() {
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
-      return;
+  // =====================================================
+  // DATA LOADING
+  // =====================================================
+
+  async loadProducts(reset = false) {
+    if (this.isLoading) return;
+
+    if (reset) {
+      this.currentPage = 0;
+      this.items = [];
+      this.filteredItems = [];
+      this.isInfiniteScrollEnabled = true;
     }
 
-    const loading = await this.loadingCtrl.create({
-      message: 'Loading inventory...',
-      spinner: 'circular',
-    });
+    this.isLoading = true;
 
-    try {
-      await loading.present();
-
-      // Call service without wholesaler ID - backend will get user_id from JWT
-      this.wholesalerService.getOrderSummary().subscribe({
+    this.wholesalerService
+      .getWholesalerProducts(
+        this.currentPage,
+        this.itemsPerPage,
+        this.searchTerm || undefined
+      )
+      .subscribe({
         next: (data) => {
-          if (data && data.length > 0) {
-            // Use real data if available
-            this.allDummyData = data.map(item => ({
-              name: item.product_name,
-              qty: item.stock_left,
-              orders: item.stock_in,
-              wholeseller_id: item.wholeseller_id,
-              mandi_id: item.mandi_id,
-              product_id: item.product_id
-            }));
+          this.items = [...this.items, ...data];
+          this.filteredItems = [...this.items];
+
+          if (data.length < this.itemsPerPage) {
+            this.isInfiniteScrollEnabled = false;
           } else {
-            // Use dummy data if no real data
-            this.allDummyData = this.getDummyData();
+            this.currentPage++;
           }
 
-          // Reset pagination and load initial items
-          this.currentPage = 0;
-          this.items = [];
-          this.loadMoreItems();
-          loading.dismiss();
+          this.isLoading = false;
         },
-        error: async (error) => {
-          loading.dismiss();
-
-          // Handle authentication errors
-          if (error.status === 401) {
-            this.showAuthError();
-            return;
-          }
-
-          // Show dummy data on error as fallback
-          this.allDummyData = this.getDummyData();
-          this.currentPage = 0;
-          this.items = [];
-          this.loadMoreItems();
-
+        error: async () => {
+          this.isLoading = false;
           const alert = await this.alertCtrl.create({
-            header: this.translate.instant('WHOLESALER_HOME.NOTICE'),
-            message: this.translate.instant('WHOLESALER_HOME.UNABLE_TO_CONNECT'),
-            buttons: [this.translate.instant('WHOLESALER_HOME.OK')]
+            header: this.translate.instant('COMMON.ERROR'),
+            message: this.translate.instant('COMMON.LOAD_FAILED'),
+            buttons: ['OK']
           });
           await alert.present();
         }
       });
-    } catch (err) {
-      loading.dismiss();
-
-      // Show dummy data on exception
-      this.allDummyData = this.getDummyData();
-      this.currentPage = 0;
-      this.items = [];
-      this.loadMoreItems();
-
-      const alert = await this.alertCtrl.create({
-        header: this.translate.instant('WHOLESALER_HOME.NOTICE'),
-        message: this.translate.instant('WHOLESALER_HOME.SHOWING_SAMPLE_DATA'),
-        buttons: [this.translate.instant('WHOLESALER_HOME.OK')]
-      });
-      await alert.present();
-    }
   }
 
-  private getDummyData() {
-    return [
-      { name: 'Tomatoes', qty: 150, orders: 75, wholeseller_id: 1, mandi_id: 1, product_id: 1 },
-      { name: 'Onions', qty: 200, orders: 120, wholeseller_id: 1, mandi_id: 1, product_id: 2 },
-      { name: 'Potatoes', qty: 300, orders: 180, wholeseller_id: 1, mandi_id: 1, product_id: 3 },
-      { name: 'Carrots', qty: 100, orders: 60, wholeseller_id: 1, mandi_id: 1, product_id: 4 },
-      { name: 'Cabbage', qty: 80, orders: 45, wholeseller_id: 1, mandi_id: 1, product_id: 5 },
-      { name: 'Cauliflower', qty: 120, orders: 70, wholeseller_id: 1, mandi_id: 1, product_id: 6 },
-      { name: 'Green Beans', qty: 90, orders: 50, wholeseller_id: 1, mandi_id: 1, product_id: 7 },
-      { name: 'Bell Peppers', qty: 60, orders: 35, wholeseller_id: 1, mandi_id: 1, product_id: 8 },
-      { name: 'Spinach', qty: 75, orders: 40, wholeseller_id: 1, mandi_id: 1, product_id: 9 },
-      { name: 'Broccoli', qty: 85, orders: 55, wholeseller_id: 1, mandi_id: 1, product_id: 10 },
-      { name: 'Lettuce', qty: 65, orders: 30, wholeseller_id: 1, mandi_id: 1, product_id: 11 },
-      { name: 'Cucumber', qty: 110, orders: 85, wholeseller_id: 1, mandi_id: 1, product_id: 12 },
-      { name: 'Radish', qty: 45, orders: 25, wholeseller_id: 1, mandi_id: 1, product_id: 13 },
-      { name: 'Sweet Corn', qty: 95, orders: 60, wholeseller_id: 1, mandi_id: 1, product_id: 14 },
-      { name: 'Peas', qty: 70, orders: 45, wholeseller_id: 1, mandi_id: 1, product_id: 15 }
-    ];
-  }
+  // =====================================================
+  // INFINITE SCROLL
+  // =====================================================
 
-  // THIS FUNCTION IS THE ACTUAL ONE FOR BACKEND
-  // use JWT token
-  // async loadOrderSummary() {
-  //   if (!this.authService.isAuthenticated()) {
-  //     this.showAuthError();
-  //     return;
-  //   }
-
-  //   const loading = await this.loadingCtrl.create({
-  //     message: 'Loading order summary...',
-  //     spinner: 'circular',
-  //   });
-
-  //   try {
-  //     await loading.present();
-
-  //     // Call service without wholesaler ID - backend will get user_id from JWT
-  //     this.wholesalerService.getOrderSummary().subscribe({
-  //       next: (data) => {
-  //         // Store all data for infinite scroll
-  //         this.allDummyData = data.map(item => ({
-  //           name: item.product_name,
-  //           qty: item.stock_left,
-  //           orders: item.stock_in,
-  //           wholeseller_id: item.wholeseller_id,
-  //           mandi_id: item.mandi_id,
-  //           product_id: item.product_id
-  //         }));
-
-  //         // Reset pagination and load initial items
-  //         this.currentPage = 0;
-  //         this.items = [];
-  //         this.loadMoreItems();
-  //         loading.dismiss();
-  //       },
-  //       error: async (error) => {
-  //         loading.dismiss();
-
-  //         // Handle authentication errors
-  //         if (error.status === 401) {
-  //           this.showAuthError();
-  //           return;
-  //         }
-
-  //         const alert = await this.alertCtrl.create({
-  //           header: 'Error',
-  //           message: 'Failed to load inventory. Please try again later.',
-  //           buttons: [
-  //             {
-  //               text: 'Dismiss',
-  //               role: 'cancel'
-  //             },
-  //             {
-  //               text: 'Retry',
-  //               handler: () => {
-  //                 this.loadOrderSummary();
-  //               }
-  //             }
-  //           ]
-  //         });
-  //         await alert.present();
-  //       }
-  //     });
-  //   } catch (err) {
-  //     loading.dismiss();
-  //     const alert = await this.alertCtrl.create({
-  //       header: 'Error',
-  //       message: 'An unexpected error occurred.',
-  //       buttons: ['OK']
-  //     });
-  //     await alert.present();
-  //   }
-  // }
-
-  // Load more items for infinite scroll
-  loadMoreItems() {
-    const startIndex = this.currentPage * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    const newItems = this.allDummyData.slice(startIndex, endIndex);
-
-    if (newItems.length > 0) {
-      this.items = [...this.items, ...newItems];
-      this.filteredItems = [...this.items];
-      this.currentPage++;
-    }
-
-    // Disable infinite scroll if no more items
-    this.isInfiniteScrollEnabled = endIndex < this.allDummyData.length;
-  }
-
-  // Handle infinite scroll event
   onInfiniteScroll(event: any) {
-    setTimeout(() => {
-      this.loadMoreItems();
-      event.target.complete();
+    this.loadProducts();
+    event.target.complete();
 
-      // Disable the infinite scroll if no more data
-      if (!this.isInfiniteScrollEnabled) {
-        event.target.disabled = true;
-      }
-    }, 500); // Add slight delay to show loading
+    if (!this.isInfiniteScrollEnabled) {
+      event.target.disabled = true;
+    }
   }
 
   async handleRefresh(event: any) {
-    try {
-      // Reset pagination
-      this.currentPage = 0;
-      this.items = [];
-      this.isInfiniteScrollEnabled = true;
+    await this.loadProducts(true);
+    event.target.complete();
+  }
 
-      await this.loadOrderSummary();
+  // =====================================================
+  // SEARCH
+  // =====================================================
 
-      // Re-enable infinite scroll
-      const infiniteScroll = event.target.parentElement?.querySelector('ion-infinite-scroll');
-      if (infiniteScroll) {
-        infiniteScroll.disabled = false;
-      }
-    } finally {
-      event.target.complete();
+  searchItems(event: any) {
+    const value = event.target.value || '';
+
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
     }
+
+    this.searchTimeout = setTimeout(() => {
+      this.searchTerm = value;
+      this.loadProducts(true);
+    }, 300);
   }
 
-  private async showAuthError() {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('WHOLESALER_HOME.AUTH_ERROR'),
-      message: this.translate.instant('WHOLESALER_HOME.SESSION_EXPIRED'),
-      buttons: [
-        {
-          text: this.translate.instant('WHOLESALER_HOME.OK'),
-          handler: () => {
-            this.authService.logout();
-            this.router.navigate(['/login']);
-          }
-        }
-      ]
-    });
-    await alert.present();
+  // =====================================================
+  // NAVIGATION
+  // =====================================================
+
+  viewDetails(item: WholesalerProduct) {
+    this.router.navigate(['/wholesaler/product-details', item.product_id]);
   }
 
-  private async showUnauthorizedError() {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('WHOLESALER_HOME.ACCESS_DENIED'),
-      message: this.translate.instant('WHOLESALER_HOME.NO_PERMISSION'),
-      buttons: [
-        {
-          text: this.translate.instant('WHOLESALER_HOME.OK'),
-          handler: () => {
-            this.router.navigate(['/login']);
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  // MENU FUNCTIONS
-
-  openMenu() {
-    this.menuService.openMenu();
-  }
-  closeMenu() {
-    this.menuService.closeMenu();
-  }
-
-  // Navigation functions
   async navigateToHome() {
-    await this.closeMenu();
-    // Already on home, just scroll to top
+    await this.menuService.closeMenu();
     const content = document.querySelector('ion-content');
-    if (content) {
-      content.scrollToTop(300);
-    }
+    content?.scrollToTop(300);
   }
 
   async navigateToBusinessLocations() {
-    await this.closeMenu();
+    await this.menuService.closeMenu();
     this.router.navigate(['/wholesaler/business-locations']);
   }
 
   async navigateToUpdateBusiness() {
-    await this.closeMenu();
+    await this.menuService.closeMenu();
     this.router.navigate(['/wholesaler/business-update']);
   }
 
   async navigateToMyOrders() {
-    await this.closeMenu();
+    await this.menuService.closeMenu();
     this.router.navigate(['/wholesaler/orders']);
   }
 
   async navigateToPickupOrders() {
-  await this.closeMenu();
-  this.router.navigate(['/wholesaler/pickup-orders']);
-}
+    await this.menuService.closeMenu();
+    this.router.navigate(['/wholesaler/pickup-orders']);
+  }
 
   async navigateToStockDashboard() {
-    await this.closeMenu();
+    await this.menuService.closeMenu();
     this.router.navigate(['/wholesaler/stock-dashboard']);
   }
 
   async navigateToPastOrders() {
-    await this.closeMenu();
+    await this.menuService.closeMenu();
     this.router.navigate(['/wholesaler/past-orders']);
   }
 
   async navigateToRestockingRecommendations() {
-    await this.closeMenu();
+    await this.menuService.closeMenu();
     this.router.navigate(['/wholesaler/restocking-recommendations']);
   }
 
   async navigateToMarketOpportunities() {
-    await this.closeMenu();
+    await this.menuService.closeMenu();
     this.router.navigate(['/wholesaler/market-opportunities']);
   }
 
   async navigateToProfile() {
-    await this.closeMenu();
+    await this.menuService.closeMenu();
     this.router.navigate(['/wholesaler/profile']);
   }
 
   async navigateToSettings() {
-    await this.closeMenu();
+    await this.menuService.closeMenu();
     this.router.navigate(['/wholesaler/settings']);
+  }
+
+  createOrder() {
+    this.router.navigate(['/wholesaler/for-sale']);
+  }
+
+  // =====================================================
+  // MENU
+  // =====================================================
+
+  openMenu() {
+    this.menuService.openMenu();
+  }
+
+  closeMenu() {
+    this.menuService.closeMenu();
+  }
+
+  async toggleMenu() {
+    await this.menuCtrl.toggle();
   }
 
   async logout() {
@@ -548,102 +324,87 @@ export class HomePage {
     await alert.present();
   }
 
-  createOrder() {
-    this.router.navigate(['/wholesaler/for-sale']);
-  }
-
-  viewMyOrders() {
-    this.router.navigate(['/wholesaler/orders']);
-  }
-
-  viewPastOrders() {
-    this.router.navigate(['/wholesaler/past-orders']);
-  }
-
-  searchItems(event: any) {
-    const searchTerm = event.target.value?.toLowerCase() || '';
-
-    // Clear previous timeout to implement debouncing
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-
-    // Set searching state for UI feedback
-    this.isSearching = searchTerm.trim() !== '';
-
-    // Debounce search for better performance (waits 300ms after user stops typing)
-    this.searchTimeout = setTimeout(() => {
-      if (searchTerm.trim() === '') {
-        // If search is empty, show all items
-        this.filteredItems = [...this.items];
-        this.isSearching = false;
-      } else {
-        // Filter items based on search term
-        this.filteredItems = this.allDummyData.filter(item => {
-          const name = item.name?.toLowerCase() || '';
-          const qty = item.qty?.toString() || '';
-          const orders = item.orders?.toString() || '';
-
-          // Search in multiple fields
-          return name.includes(searchTerm) ||
-            qty.includes(searchTerm) ||
-            orders.includes(searchTerm);
-        });
-      }
-    }, 300); // 300ms debounce delay
-  }
-
-  async toggleMenu() {
-    await this.menuCtrl.toggle();
-  }
-
-  viewDetails(item: any) {
-    // Add haptic feedback (if device supports)
-    if ('vibrate' in navigator) {
-      navigator.vibrate(10);
-    }
-
-    this.router.navigate(['/wholesaler/product-details'], {
-      queryParams: {
-        productId: item.product_id,
-        wholesellerId: item.wholeseller_id,
-        mandiId: item.mandi_id
-      },
-      state: {
-        productData: item
-      }
-    });
-  }
-
-  ngAfterViewInit() {
-    // Trigger staggered animation
-    const items = document.querySelectorAll('ion-item');
-    items.forEach((item, index) => {
-      (item as HTMLElement).style.animationDelay = `${index * 0.05}s`;
-    });
-  }
-
-  //Cleanup on destroy
-  ngOnDestroy() {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-  }
-
-
-  openProfile() {
-    this.navCtrl.navigateForward('/profile');
-  }
+  // =====================================================
+  // HEADER ACTIONS
+  // =====================================================
 
   openNotifications() {
     console.log('Opening notifications');
   }
 
-  openMessages() {
-    console.log('Opening messages');
-  }
-
   openTrends() {
     this.router.navigate(['/wholesaler/trends']);
+  }
+
+  // =====================================================
+  // LANGUAGE
+  // =====================================================
+
+  fetchLanguages() {
+    this.wholesalerService.getLanguages().subscribe({
+      next: (langs) => {
+        this.languages = langs.map(l => ({ ...l, code: l.code.toLowerCase() }));
+      }
+    });
+  }
+
+  async openLanguagePopover(event: Event) {
+    const popover = await this.popoverCtrl.create({
+      component: LanguagePopoverComponent,
+      event,
+      translucent: true,
+      componentProps: {
+        languages: this.languages,
+        currentLanguage: this.currentLanguage,
+        onSelect: (lang: Language) => this.saveLanguagePreference(lang.code)
+      }
+    });
+    await popover.present();
+  }
+
+  saveLanguagePreference(langCode: string) {
+    const lang = this.languages.find(l => l.code === langCode);
+    if (!lang) return;
+
+    this.wholesalerService.setLanguagePreference(lang.id).subscribe(() => {
+      this.translate.use(langCode);
+      this.currentLanguage = lang.name;
+    });
+  }
+
+  // =====================================================
+  // UTILS
+  // =====================================================
+
+  private setItemsPerPage() {
+    if (window.innerWidth >= 1536) this.itemsPerPage = 20;
+    else if (window.innerWidth >= 1280) this.itemsPerPage = 16;
+    else if (window.innerWidth >= 1024) this.itemsPerPage = 12;
+    else if (window.innerWidth >= 768) this.itemsPerPage = 8;
+    else this.itemsPerPage = 5;
+  }
+
+  private async showAuthError() {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('COMMON.AUTH_ERROR'),
+      message: this.translate.instant('COMMON.SESSION_EXPIRED'),
+      buttons: [{
+        text: 'OK',
+        handler: () => {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }
+      }]
+    });
+    await alert.present();
+  }
+
+  private async showUnauthorizedError() {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('COMMON.ACCESS_DENIED'),
+      message: this.translate.instant('COMMON.NO_PERMISSION'),
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 }

@@ -39,12 +39,28 @@ export class RetailerTrendsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.filteredProducts = [...this.products];
+    this.loadAvailableProducts();
+    // this.filteredProducts = [...this.products];
     this.loadPriceData();
   }
 
   goBack() {
     this.navController.back();
+  }
+
+  loadAvailableProducts() {
+    this.retailerService.getAvailableProducts().subscribe({
+      next: (data) => {
+        if (data && data.length > 0) {
+          this.products = data.map(item => ({
+            id: item.product_id,
+            name: item.product_name
+          }));
+        }
+        // If no data returned, keep hardcoded products
+        this.filteredProducts = [...this.products];
+      }
+    });
   }
 
   onProductChange() {

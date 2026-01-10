@@ -196,6 +196,37 @@ interface Language {
   name: string;
 }
 
+export interface WholesalerProduct {
+  product_id: number;
+  product_name: string;
+  total_stock: number;
+  total_orders: number;
+}
+
+export interface WholesalerProductDetails {
+  product_id: number;
+  product_name: string;
+  category_name: string;
+  image_path?: string;
+  price_per_unit: number;
+  unit_name: string;
+  total_quantity: number;
+  mandi_wise: {
+    mandi_id: number;
+    mandi_name: string;
+    quantity: number;
+    price_per_unit: number;
+  }[];
+  order_stats: {
+    total: number;
+    last_7_days: number;
+    last_30_days: number;
+    last_6_months: number;
+    last_year: number;
+  };
+}
+
+
 interface UserPreference {
   language: string;
 }
@@ -216,7 +247,7 @@ export class WholesalerApiService {
       'Content-Type': 'application/json'
     });
   }
-  
+
   getOrderSummary(): Observable<OrderSummary[]> {
     const headers = this.getAuthHeaders();
     return this.http.get<OrderSummary[]>(
@@ -317,7 +348,7 @@ export class WholesalerApiService {
     );
   }
 
-   createWholesellerEntry(entry: WholesellerEntry): Observable<WholesellerEntryResponse> {
+  createWholesellerEntry(entry: WholesellerEntry): Observable<WholesellerEntryResponse> {
     const headers = this.getAuthHeaders();
 
     const entryData = {
@@ -356,13 +387,13 @@ export class WholesalerApiService {
   }
 
   addMandi(mandi: any): Observable<any> {
-  const headers = this.getAuthHeaders();
-  return this.http.post<any>(
-    `${this.apiUrl}/InsertMandiDetailsForWholeseller`,
-    mandi,
-    { headers }
-  );
-}
+    const headers = this.getAuthHeaders();
+    return this.http.post<any>(
+      `${this.apiUrl}/InsertMandiDetailsForWholeseller`,
+      mandi,
+      { headers }
+    );
+  }
 
   getWarehouses(wholesalerId?: number): Observable<{ warehouse_id: number, warehouse_name: string }[]> {
     const headers = this.getAuthHeaders();
@@ -400,5 +431,67 @@ export class WholesalerApiService {
 
   setLanguagePreference(langId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/setUserLanguagePreference`, { lang_id: langId }, { headers: this.getAuthHeaders() });
+  }
+
+
+  getWholesalerProducts(
+    page: number,
+    limit: number,
+    search?: string
+  ): Observable<WholesalerProduct[]> {
+    const headers = this.getAuthHeaders();
+    const params: any = { page, limit };
+
+    if (search) {
+      params.search = search;
+    }
+
+    return this.http.get<WholesalerProduct[]>(
+      `${this.apiUrl}/wholesaler/products`,
+      { headers, params }
+    );
+  }
+
+  getWholesalerProductDetails(
+    productId: number
+  ): Observable<WholesalerProductDetails> {
+    const headers = this.getAuthHeaders();
+
+    return this.http.get<WholesalerProductDetails>(
+      `${this.apiUrl}/wholesaler/products/${productId}`,
+      { headers }
+    );
+  }
+
+  updateProductStockForMandi(
+    productId: number,
+    mandiId: number,
+    newQuantity: number
+  ) {
+    return this.http.post(
+      `${this.apiUrl}/wholesaler/product/update-stock-mandi`,
+      {
+        product_id: productId,
+        mandi_id: mandiId,
+        new_quantity: newQuantity
+      },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  updateProductPriceForMandi(
+    productId: number,
+    mandiId: number,
+    newPrice: number
+  ) {
+    return this.http.post(
+      `${this.apiUrl}/wholesaler/product/update-price-mandi`,
+      {
+        product_id: productId,
+        mandi_id: mandiId,
+        new_price: newPrice
+      },
+      { headers: this.getAuthHeaders() }
+    );
   }
 }

@@ -110,11 +110,11 @@ export class OrderConfirmationComponent implements OnInit {
   }
 
   goToOrderHistory() {
-    this.router.navigate(['/buyer/order-history']);
+    this.router.navigate(['/buyer/retailer-order-history']);
   }
 
   goHome() {
-    this.router.navigate(['/buyer/home']);
+    this.router.navigate(['/buyer/buyer-home']);
   }
 
   downloadInvoice() {

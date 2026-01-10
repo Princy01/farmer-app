@@ -451,6 +451,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   getRetailerInfo(): string {
+    // console.log('Retailer Info:', this.retailerInfo);
     if (!this.retailerInfo) return this.translate.instant('CHECKOUT.UNKNOWN_RETAILER');
     return `${this.retailerInfo.name || this.translate.instant('CHECKOUT.UNKNOWN')} - ${this.retailerInfo.location || this.translate.instant('CHECKOUT.UNKNOWN_LOCATION')}`;
   }
