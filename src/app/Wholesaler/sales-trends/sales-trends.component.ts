@@ -220,7 +220,7 @@ export class SalesTrendsComponent implements OnInit {
             text: this.translate.instant('SALES_TRENDS.REVENUE_LABEL')
           },
           labels: {
-            formatter: (value: number) => `₹${(value / 1000).toFixed(0)}K`
+            formatter: (value: number) => `₹${(value / 1000).toFixed(2)}K`
           }
         },
         {
@@ -336,7 +336,7 @@ export class SalesTrendsComponent implements OnInit {
           text: isVolume ? this.translate.instant('SALES_TRENDS.VOLUME_LABEL') : this.translate.instant('SALES_TRENDS.REVENUE_LABEL')
         },
         labels: {
-          formatter: (value: number) => isVolume ? `${value} kg` : `₹${(value / 1000).toFixed(0)}K`
+          formatter: (value: number) => isVolume ? `${value} kg` : `₹${(value / 1000).toFixed(2)}K`
         }
       },
       plotOptions: {

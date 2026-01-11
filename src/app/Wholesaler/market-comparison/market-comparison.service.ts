@@ -8,6 +8,15 @@ export interface GroupedPriceComparison {
         prices: WholesellerPrice[];
 }
 
+export interface BranchPriceData {
+  branch_id: number;
+  branch_name: string;
+  product_id: number;
+  product_name: string;
+  price_per_unit: number;
+  current_stock: number;
+}
+
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -40,4 +49,16 @@ export class MarketComparisonService {
       { headers, params }
     );
   }
+
+  getBranchPriceComparison(branchIds: number[], productIds: number[]): Observable<BranchPriceData[]> {
+  const headers = this.getAuthHeaders();
+  const params = new HttpParams()
+    .set('branch_ids', branchIds.join(','))
+    .set('product_ids', productIds.join(','));
+
+  return this.http.get<BranchPriceData[]>(
+    `${this.apiUrl}/getBranchPriceComparison`,
+    { headers, params }
+  );
+}
 }

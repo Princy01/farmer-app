@@ -5,19 +5,18 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
-import { MarketComparisonService } from './market-comparison.service';
-import { catchError, finalize, of } from 'rxjs';
-import { GroupedPriceComparison, WholesellerPrice } from './market-comparison.service';
+import { MarketComparisonService, BranchPriceData } from './market-comparison.service';
+import { WholesalerApiService } from '../services/wholesaler-api.service';
+import { catchError, finalize, forkJoin, map, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { BranchData } from '../stock-insights/stock-insights.service';
+import { StockInsightsService } from '../stock-insights/stock-insights.service';
 
-interface ProductPrices {
-  [key: string]: number;
-}
-
-interface MarketPrices {
-  [key: string]: ProductPrices;
+interface Product {
+  product_id: number;
+  product_name: string;
 }
 
 @Component({
@@ -29,22 +28,18 @@ interface MarketPrices {
 })
 export class MarketComparisonComponent implements OnInit {
   priceComparisonOptions: any;
-  availableMandis = ['Azadpur Mandi', 'Ghazipur Mandi', 'Okhla Mandi'];
-  availableProducts = ['Potato', 'Onion', 'Tomato', 'Cauliflower', 'Green Peas', 'Cabbage'];
-  selectedMandis: string[] = ['Azadpur Mandi'];
-  selectedProducts: string[] = ['Potato', 'Onion', 'Tomato'];
+  availableBranches: BranchData[] = [];
+  availableProducts: Product[] = [];
+  selectedBranches: number[] = [];
+  selectedProducts: number[] = [];
   isLoading: boolean = false;
-  useRealData: boolean = true;
-
-  private priceData: MarketPrices = {
-    'Azadpur Mandi': { 'Potato': 45, 'Onion': 52, 'Tomato': 38, 'Cauliflower': 24, 'Green Peas': 33, 'Cabbage': 26 },
-    'Ghazipur Mandi': { 'Potato': 42, 'Onion': 48, 'Tomato': 35, 'Cauliflower': 22, 'Green Peas': 31, 'Cabbage': 24 },
-    'Okhla Mandi': { 'Potato': 48, 'Onion': 55, 'Tomato': 42, 'Cauliflower': 28, 'Green Peas': 36, 'Cabbage': 29 }
-  };
+  error: string | null = null;
 
   constructor(
     private navController: NavController,
     private marketComparisonService: MarketComparisonService,
+    private wholesalerApiService: WholesalerApiService,
+    private stockInsightsService: StockInsightsService,
     private loadingController: LoadingController,
     private toastController: ToastController,
     private alertCtrl: AlertController,
@@ -70,7 +65,8 @@ export class MarketComparisonComponent implements OnInit {
       return;
     }
 
-    this.initializeCharts();
+    this.setupChartOptions();
+    this.loadBranchesAndProducts();
   }
 
   private async showAuthError() {
@@ -127,21 +123,106 @@ export class MarketComparisonComponent implements OnInit {
     await toast.present();
   }
 
-  goToTrends() {
-    this.navController.navigateBack('/wholesaler/trends');
+  async loadBranchesAndProducts() {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    const loading = await this.showLoading();
+    this.error = null;
+
+    try {
+      forkJoin({
+        branches: this.stockInsightsService.getAllBusinessBranches().pipe(
+          catchError(err => {
+            console.error('Failed to load branches:', err);
+            if (err.status === 401) {
+              this.showAuthError();
+            }
+            return of([]);
+          })
+        ),
+        products: this.wholesalerApiService.getWholesalerProducts().pipe(
+          map(products => products.map(p => ({
+            product_id: p.product_id,
+            product_name: p.product_name
+          }))),
+          catchError(err => {
+            console.error('Failed to load products:', err);
+            if (err.status === 401) {
+              this.showAuthError();
+            }
+            return of([]);
+          })
+        )
+      })
+      .pipe(
+        finalize(() => {
+          loading.dismiss();
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: ({ branches, products }) => {
+          // Filter active branches
+          this.availableBranches = branches.filter(b => b.active_status);
+          this.availableProducts = products;
+
+          if (this.availableBranches.length === 0) {
+            this.error = this.translate.instant('MARKET_COMPARISON.NO_BRANCHES');
+            this.showToast(this.translate.instant('MARKET_COMPARISON.NO_BRANCHES'), 'warning');
+            return;
+          }
+
+          if (this.availableProducts.length === 0) {
+            this.error = this.translate.instant('MARKET_COMPARISON.NO_PRODUCTS');
+            this.showToast(this.translate.instant('MARKET_COMPARISON.NO_PRODUCTS'), 'warning');
+            return;
+          }
+
+          // Auto-select first 3 branches (or all if less than 3)
+          this.selectedBranches = this.availableBranches
+            .slice(0, Math.min(3, this.availableBranches.length))
+            .map(b => b.branch_id);
+
+          // Auto-select first 3 products (or all if less than 3)
+          this.selectedProducts = this.availableProducts
+            .slice(0, Math.min(3, this.availableProducts.length))
+            .map(p => p.product_id);
+
+          // Load initial chart data
+          if (this.selectedBranches.length > 0 && this.selectedProducts.length > 0) {
+            this.updateChart();
+          }
+        },
+        error: (error) => {
+          console.error('Error loading data:', error);
+          this.error = this.translate.instant('MARKET_COMPARISON.LOAD_ERROR');
+          this.showToast(this.translate.instant('MARKET_COMPARISON.LOAD_ERROR'), 'danger');
+        }
+      });
+    } catch (error) {
+      loading.dismiss();
+      this.isLoading = false;
+      this.error = this.translate.instant('MARKET_COMPARISON.UNEXPECTED_ERROR');
+      this.showToast(this.translate.instant('MARKET_COMPARISON.UNEXPECTED_ERROR'), 'danger');
+    }
   }
 
-  onMandiChange(event: any) {
-    if (this.selectedMandis.length && this.selectedProducts.length) {
-      this.useRealData = true;
+  onBranchChange(event: any) {
+    if (this.selectedBranches.length > 0 && this.selectedProducts.length > 0) {
       this.updateChart();
+    } else if (this.selectedBranches.length === 0) {
+      this.showToast(this.translate.instant('MARKET_COMPARISON.SELECT_BRANCHES_WARNING'), 'warning');
     }
   }
 
   onProductChange(event: any) {
-    if (this.selectedMandis.length && this.selectedProducts.length) {
-      this.useRealData = true;
+    if (this.selectedBranches.length > 0 && this.selectedProducts.length > 0) {
       this.updateChart();
+    } else if (this.selectedProducts.length === 0) {
+      this.showToast(this.translate.instant('MARKET_COMPARISON.SELECT_PRODUCTS_WARNING'), 'warning');
     }
   }
 
@@ -151,94 +232,113 @@ export class MarketComparisonComponent implements OnInit {
       return;
     }
 
-    if (this.useRealData) {
-      const loading = await this.showLoading();
-      try {
-        const productIds = this.selectedProducts.map(name => this.getProductId(name));
+    if (this.selectedBranches.length === 0 || this.selectedProducts.length === 0) {
+      this.showToast(this.translate.instant('MARKET_COMPARISON.SELECT_BOTH'), 'warning');
+      return;
+    }
 
-        this.marketComparisonService.getWholesellerPriceComparison(productIds)
-          .pipe(
-            catchError(error => {
-              console.error('API Error:', error);
+    const loading = await this.showLoading();
 
-              if (error.status === 401) {
-                this.showAuthError();
-                return of(null);
-              }
+    try {
+      this.marketComparisonService.getBranchPriceComparison(
+        this.selectedBranches,
+        this.selectedProducts
+      )
+      .pipe(
+        catchError(error => {
+          console.error('API Error:', error);
 
-              this.showToast(this.translate.instant('MARKET_COMPARISON.UNABLE_TO_FETCH'));
-              this.useRealData = false;
-              return of(null);
-            }),
-            finalize(() => {
-              loading.dismiss();
-              this.isLoading = false;
-            })
-          )
-          .subscribe(data => {
-            if (data) {
-              this.updateChartWithRealData(data);
-              this.showToast(this.translate.instant('MARKET_COMPARISON.DATA_UPDATED'), 'success');
-            } else {
-              this.useRealData = false;
-              this.updateChartWithFallbackData();
-            }
-          });
-      } catch (error) {
-        loading.dismiss();
-        this.isLoading = false;
-        this.useRealData = false;
-        this.updateChartWithFallbackData();
-        this.showToast(this.translate.instant('MARKET_COMPARISON.ERROR_FETCHING'));
-      }
-    } else {
-      this.updateChartWithFallbackData();
+          if (error.status === 401) {
+            this.showAuthError();
+            return of([]);
+          }
+
+          this.showToast(this.translate.instant('MARKET_COMPARISON.UNABLE_TO_FETCH'), 'danger');
+          return of([]);
+        }),
+        finalize(() => {
+          loading.dismiss();
+          this.isLoading = false;
+        })
+      )
+      .subscribe(data => {
+        if (data && data.length > 0) {
+          this.updateChartWithRealData(data);
+          this.showToast(this.translate.instant('MARKET_COMPARISON.DATA_UPDATED'), 'success');
+        } else {
+          this.showToast(this.translate.instant('MARKET_COMPARISON.NO_DATA'), 'warning');
+          this.clearChart();
+        }
+      });
+    } catch (error) {
+      loading.dismiss();
+      this.isLoading = false;
+      this.showToast(this.translate.instant('MARKET_COMPARISON.ERROR_FETCHING'), 'danger');
     }
   }
 
-  private updateChartWithRealData(data: GroupedPriceComparison | GroupedPriceComparison[]) {
-    const dataArray = Array.isArray(data) ? data : [data];
+  private updateChartWithRealData(data: BranchPriceData[]) {
+    // Create a map for branches with their data
+    const branchMap = new Map<number, { name: string; data: number[] }>();
+    
+    // Initialize branch data structure
+    this.selectedBranches.forEach(branchId => {
+      const branch = this.availableBranches.find(b => b.branch_id === branchId);
+      if (branch) {
+        branchMap.set(branchId, {
+          name: branch.shop_name,
+          data: []
+        });
+      }
+    });
 
-    const seriesData = this.selectedMandis.map(mandi => ({
-      name: mandi,
-      data: this.selectedProducts.map(productName => {
-        const productData = dataArray.find(d => d.product_name === productName);
-        if (productData) {
-          const mandiPrice = productData.prices.find(
-            price => price.wholeseller_id === this.getMandiId(mandi)
-          );
-          return mandiPrice ? mandiPrice.price_per_kg : 0;
+    // Fill in prices for each product across all selected branches
+    this.selectedProducts.forEach(productId => {
+      this.selectedBranches.forEach(branchId => {
+        const priceData = data.find(
+          d => d.branch_id === branchId && d.product_id === productId
+        );
+        
+        const branchData = branchMap.get(branchId);
+        if (branchData) {
+          // Use 0 if no price data available
+          branchData.data.push(priceData ? priceData.price_per_unit : 0);
         }
-        return 0;
-      })
-    }));
+      });
+    });
 
-    this.updateChartOptions(seriesData);
+    // Convert map to series array
+    const seriesData = Array.from(branchMap.values());
+    
+    // Get product names for x-axis
+    const productNames = this.selectedProducts.map(id => {
+      const product = this.availableProducts.find(p => p.product_id === id);
+      return product ? product.product_name : `Product ${id}`;
+    });
+
+    this.updateChartOptions(seriesData, productNames);
   }
 
-  private updateChartWithFallbackData() {
-    const seriesData = this.selectedMandis.map(mandi => ({
-      name: mandi,
-      data: this.selectedProducts.map(product => this.priceData[mandi][product])
-    }));
-
-    this.updateChartOptions(seriesData);
-  }
-
-  private updateChartOptions(seriesData: any[]) {
+  private updateChartOptions(seriesData: any[], categories: string[]) {
     this.priceComparisonOptions = {
       ...this.priceComparisonOptions,
       series: seriesData,
       xaxis: {
         ...this.priceComparisonOptions.xaxis,
-        categories: this.selectedProducts
+        categories: categories
       }
     };
   }
 
-  private initializeCharts() {
-    this.setupChartOptions();
-    this.updateChart();
+  private clearChart() {
+    this.priceComparisonOptions = {
+      ...this.priceComparisonOptions,
+      series: [],
+      xaxis: {
+        ...this.priceComparisonOptions.xaxis,
+        categories: []
+      }
+    };
   }
 
   private setupChartOptions() {
@@ -246,55 +346,99 @@ export class MarketComparisonComponent implements OnInit {
       series: [],
       chart: {
         type: 'bar',
-        height: 350,
+        height: 400,
         stacked: false,
-        toolbar: { show: false }
+        toolbar: { 
+          show: true,
+          tools: {
+            download: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+            reset: true
+          }
+        },
+        animations: {
+          enabled: true,
+          easing: 'easeinout',
+          speed: 800
+        }
       },
       plotOptions: {
         bar: {
           horizontal: false,
-          columnWidth: '55%',
-          borderRadius: 5
-        },
+          columnWidth: '60%',
+          borderRadius: 6,
+          dataLabels: {
+            position: 'top'
+          }
+        }
       },
-      colors: ['#008FFB', '#00E396', '#FEB019'],
+      colors: ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#546E7A', '#26a69a'],
+      dataLabels: {
+        enabled: true,
+        formatter: (val: number) => val > 0 ? `₹${val.toFixed(0)}` : '',
+        offsetY: -20,
+        style: {
+          fontSize: '10px',
+          colors: ['#304758']
+        }
+      },
       xaxis: {
-        categories: this.selectedProducts,
-        title: { text: this.translate.instant('MARKET_COMPARISON.PRODUCTS_LABEL') }
+        categories: [],
+        title: { 
+          text: this.translate.instant('MARKET_COMPARISON.PRODUCTS_LABEL'),
+          style: {
+            fontSize: '14px',
+            fontWeight: 600
+          }
+        },
+        labels: {
+          style: {
+            fontSize: '12px'
+          }
+        }
       },
       yaxis: {
-        title: { text: this.translate.instant('MARKET_COMPARISON.PRICE_LABEL') },
+        title: { 
+          text: this.translate.instant('MARKET_COMPARISON.PRICE_LABEL'),
+          style: {
+            fontSize: '14px',
+            fontWeight: 600
+          }
+        },
         labels: {
-          formatter: (val: number) => `₹${val}`
+          formatter: (val: number) => `₹${val.toFixed(0)}`,
+          style: {
+            fontSize: '12px'
+          }
         }
       },
       tooltip: {
+        shared: true,
+        intersect: false,
         y: {
-          formatter: (val: number) => `₹${val}/kg`
+          formatter: (val: number) => val > 0 ? `₹${val.toFixed(2)}/kg` : 'N/A'
         }
+      },
+      legend: {
+        position: 'top',
+        horizontalAlign: 'center',
+        fontSize: '13px',
+        fontWeight: 500,
+        offsetY: 0,
+        markers: {
+          width: 10,
+          height: 10,
+          radius: 2
+        }
+      },
+      grid: {
+        borderColor: '#e7e7e7',
+        strokeDashArray: 4
       }
     };
-  }
-
-  private getProductId(productName: string): number {
-    const productMap: { [key: string]: number } = {
-      'Potato': 1,
-      'Onion': 2,
-      'Tomato': 3,
-      'Cauliflower': 4,
-      'Green Peas': 5,
-      'Cabbage': 6
-    };
-    return productMap[productName] || 0;
-  }
-
-  private getMandiId(mandiName: string): number {
-    const mandiMap: { [key: string]: number } = {
-      'Azadpur Mandi': 1,
-      'Ghazipur Mandi': 2,
-      'Okhla Mandi': 3
-    };
-    return mandiMap[mandiName] || 0;
   }
 
   async handleRefresh(event: any) {
@@ -304,8 +448,7 @@ export class MarketComparisonComponent implements OnInit {
         return;
       }
 
-      this.useRealData = true;
-      await this.updateChart();
+      await this.loadBranchesAndProducts();
     } finally {
       event.target.complete();
     }
@@ -313,5 +456,19 @@ export class MarketComparisonComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/wholesaler/home']);
+  }
+
+  goToTrends() {
+    this.navController.navigateBack('/wholesaler/trends');
+  }
+
+  getBranchName(branchId: number): string {
+    const branch = this.availableBranches.find(b => b.branch_id === branchId);
+    return branch ? branch.shop_name : `Branch ${branchId}`;
+  }
+
+  getProductName(productId: number): string {
+    const product = this.availableProducts.find(p => p.product_id === productId);
+    return product ? product.product_name : `Product ${productId}`;
   }
 }

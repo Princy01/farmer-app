@@ -63,6 +63,31 @@ export interface SlowMovingProductData {
         days_in_stock: number;
 }
 
+export interface BranchData {
+        branch_id: number;
+        bid: number;
+        shop_name: string;
+        type_id: number;
+        location_id: number;
+        location_name: string;
+        state_id: number;
+        state_name: string;
+        state_shortname: string;
+        city_id: number;
+        city_name: string;
+        city_shortname: string;
+        address: string;
+        email: string;
+        number: string;
+        gst_num: string;
+        pan_num: string;
+        privilege_user: boolean;
+        established_year: string;
+        created_at: string;
+        updated_at: string;
+        active_status: boolean;
+}
+
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
@@ -108,28 +133,7 @@ export class StockInsightsService {
                 return this.http.get<StockAvailabilityData[]>(`${this.apiUrl}/getStockAvailability`, { headers });
         }
 
-        getMandiList(): Observable<MandiBasicInfo[]> {
-                const headers = this.getAuthHeaders();
-                return this.http.get<MandiBasicInfo[]>(`${this.apiUrl}/getMandiDetails`, { headers })
-                        .pipe(
-                                map(mandis => mandis.map(mandi => ({
-                                        mandi_id: mandi.mandi_id,
-                                        mandi_name: mandi.mandi_name,
-                                        mandi_location: mandi.mandi_location,
-                                        mandi_incharge: mandi.mandi_incharge,
-                                        mandi_incharge_num: mandi.mandi_incharge_num,
-                                        mandi_pincode: mandi.mandi_pincode,
-                                        mandi_address: mandi.mandi_address,
-                                        mandi_state_id: mandi.mandi_state_id,
-                                        state_name: mandi.state_name,
-                                        state_shortnames: mandi.state_shortnames,
-                                        mandi_shortnames: mandi.mandi_shortnames,
-                                        mandi_city_id: mandi.mandi_city_id,
-                                        city_name: mandi.city_name,
-                                        city_shortnames: mandi.city_shortnames
-                                })))
-                        );
-        }
+
 
         getSlowMovingProducts(): Observable<SlowMovingProductData[]> {
                 const headers = this.getAuthHeaders();
@@ -139,5 +143,29 @@ export class StockInsightsService {
         getCurrentStockByProduct(productId: number): Observable<CurrentStockData[]> {
                 const headers = this.getAuthHeaders();
                 return this.http.get<CurrentStockData[]>(`${this.apiUrl}/getCurrentStockByProduct/${productId}`, { headers });
+        }
+        // Update the getMandiList method in StockInsightsService
+        getAllBusinessBranches(): Observable<BranchData[]> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<BranchData[]>(`${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`, { headers });
+        }
+
+        getMandiList(): Observable<MandiBasicInfo[]> {
+                const headers = this.getAuthHeaders();
+                return this.http.get<BranchData[]>(`${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`, { headers })
+                        .pipe(
+                                map(branches => branches.map(branch => ({
+                                        mandi_id: branch.branch_id,
+                                        mandi_name: branch.shop_name,
+                                        mandi_location: branch.location_name,
+                                        mandi_address: branch.address,
+                                        mandi_state_id: branch.state_id,
+                                        state_name: branch.state_name,
+                                        state_shortnames: branch.state_shortname,
+                                        mandi_city_id: branch.city_id,
+                                        city_name: branch.city_name,
+                                        city_shortnames: branch.city_shortname
+                                })))
+                        );
         }
 }

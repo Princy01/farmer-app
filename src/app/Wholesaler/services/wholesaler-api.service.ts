@@ -495,12 +495,18 @@ export class WholesalerApiService {
   }
 
   getWholesalerProducts(
-    page: number,
-    limit: number,
+    page?: number,
+    limit?: number,
     search?: string
   ): Observable<WholesalerProduct[]> {
     const headers = this.getAuthHeaders();
-    const params: any = { page, limit };
+    const params: any = {};
+    if (page !== undefined) {
+      params.page = page;
+    }
+    if (limit !== undefined) {
+      params.limit = limit;
+    }
 
     if (search) {
       params.search = search;

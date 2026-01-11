@@ -1,55 +1,112 @@
 <ion-content>
   <ion-toolbar class="market-comparison-toolbar">
     <ion-buttons slot="start">
-      <ion-button color="dark" (click)="goToTrends()">
+      <ion-button color="light" (click)="goBack()">
         <ion-icon name="chevron-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title>{{ 'MARKET_COMPARISON.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 
-  <div class="filters-container">
-    <ion-list>
-      <ion-item>
-        <ion-label>{{ 'MARKET_COMPARISON.SELECT_MANDIS' | translate }}</ion-label>
-        <ion-select
-          multiple="true"
-          [(ngModel)]="selectedMandis"
-          (ionChange)="onMandiChange($event)"
-          [placeholder]="'MARKET_COMPARISON.SELECT_MANDIS_PLACEHOLDER' | translate"
-        >
-          <ion-select-option *ngFor="let mandi of availableMandis" [value]="mandi">
-            {{ mandi }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-      <ion-item>
-        <ion-label>{{ 'MARKET_COMPARISON.SELECT_PRODUCTS' | translate }}</ion-label>
-        <ion-select
-          multiple="true"
-          [(ngModel)]="selectedProducts"
-          (ionChange)="onProductChange($event)"
-          [placeholder]="'MARKET_COMPARISON.SELECT_PRODUCTS_PLACEHOLDER' | translate"
-        >
-          <ion-select-option *ngFor="let product of availableProducts" [value]="product">
-            {{ product }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-    </ion-list>
+  <!-- Loading State -->
+  <div *ngIf="isLoading && availableBranches.length === 0" class="ion-text-center ion-padding">
+    <ion-spinner></ion-spinner>
+    <p>{{ 'MARKET_COMPARISON.LOADING' | translate }}</p>
   </div>
 
-  <div class="chart-container">
-    <h3>{{ 'MARKET_COMPARISON.PRICE_COMPARISON_HEADING' | translate }}</h3>
-    <apx-chart
-      [series]="priceComparisonOptions.series"
-      [chart]="priceComparisonOptions.chart"
-      [xaxis]="priceComparisonOptions.xaxis"
-      [yaxis]="priceComparisonOptions.yaxis"
-      [plotOptions]="priceComparisonOptions.plotOptions"
-      [colors]="priceComparisonOptions.colors"
-      [tooltip]="priceComparisonOptions.tooltip"
-    ></apx-chart>
+  <!-- Error State -->
+  <div *ngIf="error && availableBranches.length === 0" class="ion-text-center ion-padding">
+    <ion-icon name="alert-circle-outline" color="danger" size="large"></ion-icon>
+    <p class="error-text">{{ error }}</p>
+    <ion-button (click)="loadBranchesAndProducts()">
+      {{ 'MARKET_COMPARISON.RETRY' | translate }}
+    </ion-button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="availableBranches.length > 0 && availableProducts.length > 0">
+    <!-- Filters Section -->
+    <div class="filters-container">
+      <h3>{{ 'MARKET_COMPARISON.FILTERS_HEADING' | translate }}</h3>
+
+      <ion-list>
+        <!-- Branch Selection -->
+        <ion-item>
+          <ion-label position="stacked">
+            {{ 'MARKET_COMPARISON.SELECT_BRANCHES' | translate }}
+            <span *ngIf="selectedBranches.length > 0">({{ selectedBranches.length }})</span>
+          </ion-label>
+          <ion-select
+            multiple="true"
+            [(ngModel)]="selectedBranches"
+            (ionChange)="onBranchChange($event)"
+            [placeholder]="'MARKET_COMPARISON.SELECT_BRANCHES_PLACEHOLDER' | translate"
+          >
+            <ion-select-option *ngFor="let branch of availableBranches" [value]="branch.branch_id">
+              {{ branch.shop_name }} - {{ branch.location_name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Product Selection -->
+        <ion-item>
+          <ion-label position="stacked">
+            {{ 'MARKET_COMPARISON.SELECT_PRODUCTS' | translate }}
+            <span *ngIf="selectedProducts.length > 0">({{ selectedProducts.length }})</span>
+          </ion-label>
+          <ion-select
+            multiple="true"
+            [(ngModel)]="selectedProducts"
+            (ionChange)="onProductChange($event)"
+            [placeholder]="'MARKET_COMPARISON.SELECT_PRODUCTS_PLACEHOLDER' | translate"
+          >
+            <ion-select-option *ngFor="let product of availableProducts" [value]="product.product_id">
+              {{ product.product_name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-section">
+      <h3>{{ 'MARKET_COMPARISON.PRICE_COMPARISON_HEADING' | translate }}</h3>
+
+      <!-- No Selection Warning -->
+      <div *ngIf="selectedBranches.length === 0 || selectedProducts.length === 0" 
+           class="ion-text-center ion-padding">
+        <ion-icon name="stats-chart-outline" size="large" color="medium"></ion-icon>
+        <p>{{ 'MARKET_COMPARISON.SELECT_TO_COMPARE' | translate }}</p>
+      </div>
+
+      <!-- Chart Container -->
+      <div *ngIf="selectedBranches.length > 0 && selectedProducts.length > 0" class="chart-container">
+        <div *ngIf="priceComparisonOptions.series.length > 0; else noChartData">
+          <apx-chart
+            [series]="priceComparisonOptions.series"
+            [chart]="priceComparisonOptions.chart"
+            [xaxis]="priceComparisonOptions.xaxis"
+            [yaxis]="priceComparisonOptions.yaxis"
+            [plotOptions]="priceComparisonOptions.plotOptions"
+            [colors]="priceComparisonOptions.colors"
+            [dataLabels]="priceComparisonOptions.dataLabels"
+            [tooltip]="priceComparisonOptions.tooltip"
+            [legend]="priceComparisonOptions.legend"
+            [grid]="priceComparisonOptions.grid"
+          ></apx-chart>
+        </div>
+
+        <ng-template #noChartData>
+          <div class="ion-text-center ion-padding">
+            <ion-icon name="bar-chart-outline" size="large" color="medium"></ion-icon>
+            <p>{{ 'MARKET_COMPARISON.NO_DATA_AVAILABLE' | translate }}</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
   </div>
 </ion-content>
