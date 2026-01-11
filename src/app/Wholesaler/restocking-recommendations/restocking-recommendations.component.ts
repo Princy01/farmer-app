@@ -1,17 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
+import { IonicModule, AlertController, LoadingController, ModalController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { alertCircle } from 'ionicons/icons';
+import { 
+  alertCircle, 
+  trendingDown, 
+  trendingUp, 
+  calendar,
+  analytics,
+  storefront,
+  chevronDown,
+  chevronUp
+} from 'ionicons/icons';
 import { WholesalerApiService, RestockProduct } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-restocking-recommendations',
   standalone: true,
-  imports: [CommonModule, IonicModule, TranslatePipe],
+  imports: [CommonModule, IonicModule, TranslatePipe, FormsModule],
   templateUrl: './restocking-recommendations.component.html',
   styleUrls: ['./restocking-recommendations.component.scss']
 })
@@ -19,6 +29,16 @@ export class RestockingRecommendationsComponent implements OnInit {
   products: RestockProduct[] = [];
   isLoading = false;
   error: string | null = null;
+  daysBack = 30;
+  expandedProducts: Set<number> = new Set();
+  
+  filterOptions = [
+    { value: 7, label: 'RESTOCK_RECS.LAST_7_DAYS' },
+    { value: 14, label: 'RESTOCK_RECS.LAST_14_DAYS' },
+    { value: 30, label: 'RESTOCK_RECS.LAST_30_DAYS' },
+    { value: 60, label: 'RESTOCK_RECS.LAST_60_DAYS' },
+    { value: 90, label: 'RESTOCK_RECS.LAST_90_DAYS' }
+  ];
 
   constructor(
     private wholesalerService: WholesalerApiService,
@@ -28,7 +48,16 @@ export class RestockingRecommendationsComponent implements OnInit {
     private loadingCtrl: LoadingController,
     private translate: TranslateService
   ) {
-    addIcons({ alertCircle });
+    addIcons({ 
+      alertCircle, 
+      trendingDown, 
+      trendingUp, 
+      calendar,
+      analytics,
+      storefront,
+      chevronDown,
+      chevronUp
+    });
   }
 
   ngOnInit() {
@@ -98,7 +127,7 @@ export class RestockingRecommendationsComponent implements OnInit {
       this.isLoading = true;
       this.error = null;
 
-      this.wholesalerService.getRestockingRecommendations().subscribe({
+      this.wholesalerService.getRestockingRecommendations(this.daysBack).subscribe({
         next: (data) => {
           this.products = data;
           this.isLoading = false;
@@ -148,23 +177,52 @@ export class RestockingRecommendationsComponent implements OnInit {
     await alert.present();
   }
 
-  getBadgeText(ratio: number): string {
-    if (ratio < 2) return this.translate.instant('RESTOCK_RECS.LOW_STOCK');
-    if (ratio < 4) return this.translate.instant('RESTOCK_RECS.RESTOCK_SOON');
-    return this.translate.instant('RESTOCK_RECS.STOCK_SUFFICIENT');
+  onDaysBackChange() {
+    this.loadRestockingRecommendations();
+  }
+
+  toggleProductExpand(productId: number) {
+    if (this.expandedProducts.has(productId)) {
+      this.expandedProducts.delete(productId);
+    } else {
+      this.expandedProducts.add(productId);
+    }
+  }
+
+  isProductExpanded(productId: number): boolean {
+    return this.expandedProducts.has(productId);
   }
 
   getBadgeColor(product: RestockProduct): string {
-    const ratio = product.stock_to_sales_ratio;
-    if (ratio < 2) return 'danger';
-    if (ratio < 4) return 'warning';
+    if (product.days_until_stockout < 7) return 'danger';
+    if (product.stock_to_sales_ratio < 2) return 'danger';
+    if (product.stock_to_sales_ratio < 4) return 'warning';
     return 'success';
+  }
+
+  getUrgencyIcon(product: RestockProduct): string {
+    if (product.days_until_stockout < 7) return 'alert-circle';
+    if (product.stock_to_sales_ratio < 2) return 'trending-down';
+    if (product.stock_to_sales_ratio < 4) return 'trending-up';
+    return 'checkmark-circle';
   }
 
   filteredProducts() {
     return this.products
-      .filter(product => product.stock_to_sales_ratio < 4)
-      .sort((a, b) => a.stock_to_sales_ratio - b.stock_to_sales_ratio);
+      .filter(product => product.stock_to_sales_ratio < 4 || product.days_until_stockout < 30)
+      .sort((a, b) => a.days_until_stockout - b.days_until_stockout);
+  }
+
+  getCriticalProducts() {
+    return this.products.filter(p => p.days_until_stockout < 7).length;
+  }
+
+  getLowStockProducts() {
+    return this.products.filter(p => p.stock_to_sales_ratio < 2 && p.days_until_stockout >= 7).length;
+  }
+
+  getRestockSoonProducts() {
+    return this.products.filter(p => p.stock_to_sales_ratio >= 2 && p.stock_to_sales_ratio < 4).length;
   }
 
   async handleRefresh(event: any) {

@@ -137,6 +137,9 @@
         (ionInput)="searchItems($event)"
         mode="ios"
       ></ion-searchbar>
+      <ion-button (click)="refreshItems()" fill="solid" color="light">
+        <ion-icon name="reload-outline" slot="icon-only"></ion-icon>
+      </ion-button>
     </div>
 
     <!-- Loading State -->

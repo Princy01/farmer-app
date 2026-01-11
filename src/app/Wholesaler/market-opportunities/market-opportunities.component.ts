@@ -10,6 +10,8 @@ import { Router } from '@angular/router';
 import { RetailerProductsModalComponent } from './retailer-products-modal/retailer-products-modal.component';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { forkJoin } from 'rxjs';
+import { chevronBack, chevronForward } from 'ionicons/icons';
 
 @Component({
   selector: 'app-market-opportunities',
@@ -22,55 +24,12 @@ export class MarketOpportunitiesComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
   bulkOrders: BulkOrder[] = [];
-  // topRetailers: TopRetailer[] = [];
+  topRetailers: TopRetailer[] = [];
+  
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 5;
 
-  // Example hardcoded TopRetailer[] data
-topRetailers: TopRetailer[] = [
-  {
-    retailer_id: 1,
-    retailer_name: 'FreshMart',
-    total_quantity: 1200,
-    total_order_value: 250000,
-    products: [
-      {
-        product_id: 101,
-        product_name: 'Tomato',
-        unit_id: 1,
-        quantity: 500,
-        order_value: 60000
-      },
-      {
-        product_id: 102,
-        product_name: 'Potato',
-        unit_id: 1,
-        quantity: 700,
-        order_value: 80000
-      }
-    ]
-  },
-  {
-    retailer_id: 2,
-    retailer_name: 'GreenGrocers',
-    total_quantity: 900,
-    total_order_value: 180000,
-    products: [
-      {
-        product_id: 103,
-        product_name: 'Onion',
-        unit_id: 1,
-        quantity: 400,
-        order_value: 50000
-      },
-      {
-        product_id: 104,
-        product_name: 'Carrot',
-        unit_id: 1,
-        quantity: 500,
-        order_value: 70000
-      }
-    ]
-  }
-];
   constructor(
     private wholesalerService: WholesalerApiService,
     private modalCtrl: ModalController,
@@ -81,7 +40,7 @@ topRetailers: TopRetailer[] = [
     private router: Router,
     private translate: TranslateService
   ) {
-    addIcons({ listOutline });
+    addIcons({ listOutline, add, chevronBack, chevronForward });
   }
 
   ngOnInit() {
@@ -151,34 +110,21 @@ topRetailers: TopRetailer[] = [
       this.isLoading = true;
       this.error = null;
 
-      // Load bulk orders using JWT
-      this.wholesalerService.getBulkOrders().subscribe({
+      // Use forkJoin to load both API calls in parallel
+      forkJoin({
+        bulkOrders: this.wholesalerService.getBulkOrders(),
+        topRetailers: this.wholesalerService.getTopRetailers()
+      }).subscribe({
         next: (data) => {
-          this.bulkOrders = data;
-        },
-        error: async (error) => {
-          console.error('Failed to load bulk orders:', error);
-
-          if (error.status === 401) {
-            await this.showAuthError();
-            return;
-          }
-
-          this.error = this.translate.instant('MARKET_OPPORTUNITIES.LOAD_BULK_ORDERS_ERROR');
-          this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.LOAD_BULK_ORDERS_ERROR'));
-        }
-      });
-
-      // Load top retailers using JWT
-      this.wholesalerService.getTopRetailers().subscribe({
-        next: (data) => {
-          // this.topRetailers = data;
-          console.log('Top retailers:', this.topRetailers);
+          this.bulkOrders = data.bulkOrders;
+          this.topRetailers = data.topRetailers;
+          console.log('Bulk orders loaded:', this.bulkOrders);
+          console.log('Top retailers loaded:', this.topRetailers);
           this.isLoading = false;
           loading.dismiss();
         },
         error: async (error) => {
-          console.error('Failed to load top retailers:', error);
+          console.error('Failed to load market opportunities:', error);
           this.isLoading = false;
           loading.dismiss();
 
@@ -187,8 +133,8 @@ topRetailers: TopRetailer[] = [
             return;
           }
 
-          this.error = this.translate.instant('MARKET_OPPORTUNITIES.LOAD_TOP_RETAILERS_ERROR');
-          this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.LOAD_TOP_RETAILERS_ERROR'));
+          this.error = this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR');
+          this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR'));
         }
       });
     } catch (err) {
@@ -266,8 +212,31 @@ topRetailers: TopRetailer[] = [
     });
     await modal.present();
   }
-console=console
+
   goBack() {
     this.router.navigate(['/wholesaler/home']);
+  }
+
+  // Pagination methods
+  getCurrentPageOrders(): BulkOrder[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return this.bulkOrders.slice(startIndex, endIndex);
+  }
+
+  getTotalPages(): number {
+    return Math.ceil(this.bulkOrders.length / this.itemsPerPage);
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.getTotalPages()) {
+      this.currentPage++;
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
   }
 }

@@ -163,6 +163,12 @@ export class OrdersComponent {
             items: this.formatOrderItems(order.order_items),
             total: order.total_order_amount
           }));
+
+          // By default sort by id descending
+
+          this.orders.sort((a, b) => b.id - a.id);
+
+
           this.filteredOrders = [...this.orders];
           loading.dismiss();
         },

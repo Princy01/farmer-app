@@ -136,6 +136,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     this.loadProducts(true);
   }
 
+
   // =====================================================
   // DATA LOADING
   // =====================================================
@@ -181,6 +182,10 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
           await alert.present();
         }
       });
+  }
+
+  refreshItems() {
+    this.checkAuthAndLoad();
   }
 
   // =====================================================

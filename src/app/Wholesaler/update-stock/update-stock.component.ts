@@ -51,9 +51,8 @@ export class UpdateStockComponent implements OnInit {
 
     const payload = {
       product_id: this.stockItem.product_id ?? this.stockItem.id,
-      stock_to_be_deducted: this.stockToDeduct,
-      b_b_id: this.branchId,
-      date_of_entry: new Date().toISOString().split('T')[0]
+      new_quantity: updatedStock,
+      mandi_id: this.branchId,
     };
 
     this.stockService.updateStock(payload).subscribe({

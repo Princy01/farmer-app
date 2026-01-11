@@ -25,6 +25,7 @@
       </div>
       <ion-card-content class="card-content">
         <div class="form-container">
+          
           <!-- Branch -->
           <div class="form-group">
             <ion-label class="form-label">
@@ -58,8 +59,8 @@
                 class="custom-select"
                 interface="action-sheet"
               >
-                <ion-select-option *ngFor="let product of products" [value]="product.id">
-                  {{ product.name }}
+                <ion-select-option *ngFor="let product of products" [value]="product.product_id">
+                  {{ product.product_name }}
                 </ion-select-option>
               </ion-select>
             </div>
@@ -73,17 +74,58 @@
             </ion-label>
             <div class="input-wrapper">
               <ion-select
-                [(ngModel)]="stockData.quality"
+                [(ngModel)]="stockData.qualityId"
                 [placeholder]="'ADD_STOCK.SELECT_QUALITY' | translate"
                 class="custom-select"
                 interface="action-sheet"
               >
-                <ion-select-option *ngFor="let quality of qualities" [value]="quality">
-                  {{ quality }}
+                <ion-select-option *ngFor="let quality of qualities" [value]="quality.quality_id">
+                  {{ quality.quality_name }}
                 </ion-select-option>
               </ion-select>
             </div>
           </div>
+
+          <!-- Wastage Measure -->
+          <div class="form-group">
+            <ion-label class="form-label">
+              <ion-icon name="trash-outline" class="label-icon"></ion-icon>
+              {{ 'ADD_STOCK.WASTAGE_MEASURE' | translate }}
+            </ion-label>
+            <div class="input-wrapper">
+              <ion-select
+                [(ngModel)]="stockData.wastageMeasureId"
+                [placeholder]="'ADD_STOCK.SELECT_WASTAGE_MEASURE' | translate"
+                class="custom-select"
+                interface="action-sheet"
+              >
+                <ion-select-option *ngFor="let wastage of wastageMeasures" [value]="wastage.id">
+                  {{ wastage.wastage_measure_name }}
+                </ion-select-option>
+              </ion-select>
+            </div>
+          </div>
+
+          <!-- Unit -->
+          <div class="form-group">
+            <ion-label class="form-label">
+              <ion-icon name="scale-outline" class="label-icon"></ion-icon>
+              {{ 'ADD_STOCK.UNIT' | translate }}
+            </ion-label>
+            <div class="input-wrapper">
+              <ion-select
+                [(ngModel)]="stockData.unitId"
+                [placeholder]="'ADD_STOCK.SELECT_UNIT' | translate"
+                class="custom-select"
+                interface="action-sheet"
+              >
+                <ion-select-option *ngFor="let unit of units" [value]="unit.unit_id">
+                  {{ unit.units_name }}
+                </ion-select-option>
+              </ion-select>
+            </div>
+          </div>
+
         </div>
       </ion-card-content>
     </ion-card>
@@ -98,30 +140,6 @@
       </div>
       <ion-card-content class="card-content">
         <div class="form-container">
-
-          <!-- Wastage -->
-          <div class="form-group">
-            <ion-label class="form-label">
-              <ion-icon name="trash-outline" class="label-icon"></ion-icon>
-              {{ 'ADD_STOCK.WASTAGE' | translate }}
-            </ion-label>
-            <div class="stepper-wrapper">
-              <ion-button fill="clear" class="stepper-btn decrement" (click)="decrement('wastage')">
-                <ion-icon name="remove-circle" slot="icon-only"></ion-icon>
-              </ion-button>
-              <div class="stepper-value-box">
-                <span class="stepper-value">{{ stockData.wastage || 0 }}</span>
-                <span class="stepper-unit">{{ 'ADD_STOCK.UNIT_KG' | translate }}</span>
-              </div>
-              <ion-button fill="clear" class="stepper-btn increment" (click)="increment('wastage')">
-                <ion-icon name="add-circle" slot="icon-only"></ion-icon>
-              </ion-button>
-              <ion-button fill="outline" class="bulk-btn" (click)="addFifty('wastage')">
-                <ion-icon name="flash-outline" slot="start"></ion-icon>
-                {{ 'ADD_STOCK.ADD_FIFTY' | translate }}
-              </ion-button>
-            </div>
-          </div>
 
           <!-- Stock Received -->
           <div class="form-group">
@@ -230,7 +248,7 @@
     <ion-button
       class="save-stock-btn"
       (click)="addStock()"
-      [disabled]="!stockData.branchId || !stockData.productId"
+      [disabled]="!isFormValid()"
     >
       <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
       {{ 'ADD_STOCK.SAVE' | translate }}

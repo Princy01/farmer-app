@@ -1,16 +1,18 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button
-        color="dark"
-        defaultHref="/wholesaler/home"
-      ></ion-back-button>
+      <ion-back-button color="dark" defaultHref="/wholesaler/home"></ion-back-button>
     </ion-buttons>
     <ion-title>{{ "MARKET_OPPORTUNITIES.PAGE_TITLE" | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-state ion-text-center">
     <ion-spinner name="dots" color="primary"></ion-spinner>
@@ -28,86 +30,84 @@
     </ion-card-content>
   </ion-card>
 
-  <div *ngIf="!isLoading && !error" class="opportunities-container">
+  <div *ngIf="!isLoading && !error">
     <!-- Bulk Orders Section -->
-    <ion-card class="bulk-orders-card">
+    <ion-card>
       <ion-card-header>
-        <ion-card-title
-          >📦
-          {{
-            "MARKET_OPPORTUNITIES.RECENT_BULK_ORDERS" | translate
-          }}</ion-card-title
-        >
+        <ion-card-title>
+          📦 {{ "MARKET_OPPORTUNITIES.RECENT_BULK_ORDERS" | translate }}
+        </ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <ion-list>
-          <ion-item *ngFor="let order of bulkOrders" class="custom-item">
+        <!-- Empty State -->
+        <div *ngIf="bulkOrders.length === 0" class="empty-state">
+          <p>{{ "MARKET_OPPORTUNITIES.NO_BULK_ORDERS" | translate }}</p>
+        </div>
+
+        <!-- Orders List -->
+        <ion-list *ngIf="bulkOrders.length > 0">
+          <ion-item *ngFor="let order of getCurrentPageOrders()" lines="full">
             <ion-label>
-              <h2 class="item-title">{{ order.retailer_name }}</h2>
-              <p class="order-id">
-                #{{ order.order_id }} •
-                {{ order.date_of_order | date : "mediumDate" }}
-              </p>
-              <p class="order-value">
-                {{ "MARKET_OPPORTUNITIES.TOTAL" | translate }}: ₹{{
-                  order.total_order_amount | number : "1.2-2"
-                }}
+              <h2>{{ order.retailer_name }}</h2>
+              <p>#{{ order.order_id }} • {{ order.date_of_order | date : "mediumDate" }}</p>
+              <p class="order-total">
+                {{ "MARKET_OPPORTUNITIES.TOTAL" | translate }}: ₹{{ order.total_order_amount | number : "1.2-2" }}
               </p>
               <div class="items-list">
                 <strong>{{ "MARKET_OPPORTUNITIES.ITEMS" | translate }}:</strong>
                 <ul>
                   <li *ngFor="let item of order.items">
-                    {{ item.product_name }} – {{ item.quantity }}kg
-                    {{ "MARKET_OPPORTUNITIES.AT" | translate }} ₹{{
-                      item.price_of_product
-                    }}/kg
+                    {{ item.product_name }} – {{ item.quantity | number : "1.0-2" }}kg &#64; ₹{{ item.price_of_product | number : "1.2-2" }}/kg
                   </li>
                 </ul>
               </div>
             </ion-label>
-            <ion-button
-              fill="solid"
-              size="small"
-              color="success"
-              slot="end"
-              (click)="openOfferModal(order)"
-            >
-              {{ "MARKET_OPPORTUNITIES.OFFER" | translate }}
-            </ion-button>
           </ion-item>
         </ion-list>
+
+        <!-- Pagination -->
+        <div *ngIf="getTotalPages() > 1" class="pagination">
+          <ion-button fill="solid" color="" size="small" [disabled]="currentPage === 1" (click)="previousPage()">
+            <ion-icon slot="icon-only" name="chevron-back"></ion-icon>
+          </ion-button>
+          
+          <span class="page-info">
+            {{ "MARKET_OPPORTUNITIES.PAGE" | translate }} {{ currentPage }} {{ "MARKET_OPPORTUNITIES.OF" | translate }} {{ getTotalPages() }}
+          </span>
+
+          <ion-button fill="solid" size="small" [disabled]="currentPage === getTotalPages()" (click)="nextPage()">
+            <ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
+          </ion-button>
+        </div>
       </ion-card-content>
     </ion-card>
 
     <!-- Top Retailers Section -->
-    <ion-card class="top-retailers-card">
+    <ion-card>
       <ion-card-header>
-        <ion-card-title
-          >🏆
-          {{ "MARKET_OPPORTUNITIES.TOP_RETAILERS" | translate }}</ion-card-title
-        >
+        <ion-card-title>
+          🏆 {{ "MARKET_OPPORTUNITIES.TOP_RETAILERS" | translate }}
+        </ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <ion-list>
-          <ion-item
-            button
-            *ngFor="let retailer of topRetailers"
-            class="custom-item"
-            (click)="openRetailerProductsModal(retailer)"
-          >
+        <!-- Empty State -->
+        <div *ngIf="topRetailers.length === 0" class="empty-state">
+          <p>{{ "MARKET_OPPORTUNITIES.NO_TOP_RETAILERS" | translate }}</p>
+        </div>
+
+        <!-- Retailers List -->
+        <ion-list *ngIf="topRetailers.length > 0">
+          <ion-item button *ngFor="let retailer of topRetailers; let i = index" (click)="openRetailerProductsModal(retailer)" lines="full">
             <ion-label>
-              <h2 class="item-title">{{ retailer.retailer_name }}</h2>
+              <h2>#{{ i + 1 }} {{ retailer.retailer_name }}</h2>
               <p>
-                {{ "MARKET_OPPORTUNITIES.TOTAL_QUANTITY" | translate }}:
-                <strong
-                  >{{ retailer.total_quantity | number : "1.0-2" }} kg</strong
-                >
+                {{ "MARKET_OPPORTUNITIES.TOTAL_QUANTITY" | translate }}: {{ retailer.total_quantity | number : "1.0-2" }} kg
               </p>
               <p>
-                {{ "MARKET_OPPORTUNITIES.TOTAL_ORDER_VALUE" | translate }}:
-                <strong
-                  >₹{{ retailer.total_order_value | number : "1.2-2" }}</strong
-                >
+                {{ "MARKET_OPPORTUNITIES.TOTAL_ORDER_VALUE" | translate }}: ₹{{ retailer.total_order_value | number : "1.2-2" }}
+              </p>
+              <p class="products-count">
+                {{ retailer.products.length }} {{ "MARKET_OPPORTUNITIES.PRODUCTS" | translate }}
               </p>
             </ion-label>
           </ion-item>

@@ -98,10 +98,19 @@ interface MandiStock {
 export interface RestockProduct {
   product_id: number;
   product_name: string;
+  category_name: string;
+  current_stock: number;
+  sales_volume: number;
   stock_to_sales_ratio: number;
   stock_status: string;
-  mandi: MandiStock[];
+  days_until_stockout: number;
+  avg_daily_sales: number;
+  recommended_restock_qty: number;
+  branches: BranchStock[];
+  sales_trend: WeeklyTrend[];
 }
+
+
 
 //for market opportunities screen
 interface BulkOrderItem {
@@ -232,6 +241,22 @@ export interface WholesalerProductDetails {
   };
 }
 
+export interface BranchStock {
+  branch_id: number;
+  branch_name: string;
+  current_stock: number;
+  stock_received: number;
+  stock_carried_forward: number;
+  price_per_unit: number;
+  quality: string;
+  wastage_level: string;
+  last_updated: string;
+}
+
+export interface WeeklyTrend {
+  week: number;
+  sales: number;
+}
 
 interface UserPreference {
   language: string;
@@ -288,7 +313,7 @@ export class WholesalerApiService {
 
   getCompletedOrders(wholesalerId?: number, daysAgo?: number): Observable<OrderItemDetails[]> {
     const headers = this.getAuthHeaders();
-    
+
     // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<OrderItemDetails[]>(
       `${this.apiUrl}/getCompletedOrderSummary`,
@@ -308,36 +333,66 @@ export class WholesalerApiService {
     );
   }
 
-  getRestockingRecommendations(wholesalerId?: number): Observable<RestockProduct[]> {
+  getRestockingRecommendations(daysBack: number = 30): Observable<RestockProduct[]> {
     const headers = this.getAuthHeaders();
-
-    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<RestockProduct[]>(
-      `${this.apiUrl}/getReStockProductsHandler`,
+      `${this.apiUrl}/getReStockProductsHandler?days_back=${daysBack}`,
       { headers }
     );
   }
 
-  getBulkOrders(wholesalerId?: number): Observable<BulkOrder[]> {
+  getBulkOrders(): Observable<BulkOrder[]> {
     const headers = this.getAuthHeaders();
-
-    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<BulkOrder[]>(
       `${this.apiUrl}/getAllBulkOrderDetails`,
       { headers }
     );
   }
 
-  getTopRetailers(wholesalerId?: number): Observable<TopRetailer[]> {
+  getTopRetailers(): Observable<TopRetailer[]> {
     const headers = this.getAuthHeaders();
 
-    // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
-    return this.http.get<TopRetailer[]>(
+    return this.http.get<RetailerProductResponse[]>(
       `${this.apiUrl}/getTopRetailerDetails`,
       { headers }
+    ).pipe(
+      map(response => this.transformTopRetailers(response))
     );
   }
 
+  /**
+   * Transform flat retailer-product response into grouped TopRetailer structure
+   */
+  private transformTopRetailers(response: RetailerProductResponse[]): TopRetailer[] {
+    const retailerMap = new Map<number, TopRetailer>();
+
+    response.forEach(item => {
+      if (!retailerMap.has(item.retailer_id)) {
+        retailerMap.set(item.retailer_id, {
+          retailer_id: item.retailer_id,
+          retailer_name: item.retailer_name,
+          total_quantity: 0,
+          total_order_value: 0,
+          products: []
+        });
+      }
+
+      const retailer = retailerMap.get(item.retailer_id)!;
+
+      retailer.products.push({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        unit_id: item.unit_id,
+        quantity: item.quantity,
+        order_value: item.order_value
+      });
+
+      retailer.total_quantity += item.quantity;
+      retailer.total_order_value += item.order_value;
+    });
+
+    return Array.from(retailerMap.values());
+  }
 
   createOffer(offer: CreateOfferRequest): Observable<CreateOfferResponse> {
     const headers = this.getAuthHeaders();
@@ -438,7 +493,6 @@ export class WholesalerApiService {
   setLanguagePreference(langId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/setUserLanguagePreference`, { lang_id: langId }, { headers: this.getAuthHeaders() });
   }
-
 
   getWholesalerProducts(
     page: number,

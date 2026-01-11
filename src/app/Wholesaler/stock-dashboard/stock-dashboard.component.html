@@ -21,8 +21,12 @@
     <ion-item *ngFor="let item of todayStock">
       <ion-label>
         <h2>{{ item.product_name }}</h2>
-        <p>{{ 'STOCK_DASHBOARD.CURRENT_STOCK' | translate }}: {{ item.current_stock }}</p>
+        <p>{{ item.category_name }}</p>
+        <p>{{ 'STOCK_DASHBOARD.CURRENT_STOCK' | translate }}: {{ item.current_stock }} {{item.units_name}}</p>
         <p>{{ 'STOCK_DASHBOARD.PRICE' | translate }}: ₹{{ item.price_per_unit }}</p>
+        @if (item.last_date_of_entry) {
+        <p>{{ 'STOCK_DASHBOARD.LAST_UPDATED' | translate }}: {{ item.last_date_of_entry | date:'mediumDate' }}</p>
+        } 
       </ion-label>
       <ion-button fill="outline" (click)="openUpdateStock(item)">
         {{ 'STOCK_DASHBOARD.UPDATE' | translate }}

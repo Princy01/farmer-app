@@ -35,22 +35,21 @@ import {
 export class AddStockComponent {
   stockData: any = {
     productId: null,
-    quality: 0,
-    wastage: 0,
+    qualityId: null,
+    wastageMeasureId: null,
     stockReceived: 0,
     stockCarriedForward: 0,
     pricePerUnit: 0,
     branchId: null,
-    dateOfEntry: new Date().toISOString().split('T')[0]
+    dateOfEntry: new Date().toISOString().split('T')[0],
+    unitId: null
   };
 
   branches: BusinessBranchWithNames[] = [];
-  products = [
-    { id: 1, name: 'Tomato' },
-    { id: 2, name: 'Potato' }
-  ];
-
-  qualities = [1.0, 2.0, 3.0];
+  products: any[] = [];
+  qualities: any[] = [];
+  wastageMeasures: any[] = [];
+  units: any[] = [];
 
   constructor(
     private stockService: StockService,
@@ -60,7 +59,7 @@ export class AddStockComponent {
     private cdr: ChangeDetectorRef,
     private translate: TranslateService
   ) {
-     addIcons({
+    addIcons({
       cubeOutline,
       closeCircleOutline,
       businessOutline,
@@ -77,7 +76,42 @@ export class AddStockComponent {
       pricetagOutline,
       checkmarkCircleOutline
     });
+  }
+
+  ngOnInit() {
     this.loadBranches();
+    this.loadProducts();
+    this.loadQualities();
+    this.loadWastageMeasures();
+    this.loadUnits();
+  }
+
+  loadProducts() {
+    this.stockService.getProducts().subscribe(products => {
+      this.products = products || [];
+      this.cdr.detectChanges();
+    });
+  }
+
+  loadQualities() {
+    this.stockService.getQualities().subscribe(qualities => {
+      this.qualities = qualities || [];
+      this.cdr.detectChanges();
+    });
+  }
+
+  loadWastageMeasures() {
+    this.stockService.getWastageMeasures().subscribe(wastages => {
+      this.wastageMeasures = wastages || [];
+      this.cdr.detectChanges();
+    });
+  }
+
+  loadUnits() {
+    this.stockService.getUnits().subscribe(units => {
+      this.units = units || [];
+      this.cdr.detectChanges();
+    });
   }
 
   increment(field: string) {
@@ -107,16 +141,28 @@ export class AddStockComponent {
     }
   }
 
+  isFormValid(): boolean {
+    return !!(
+      this.stockData.branchId &&
+      this.stockData.productId &&
+      this.stockData.qualityId &&
+      this.stockData.wastageMeasureId &&
+      this.stockData.unitId &&
+      this.stockData.pricePerUnit > 0
+    );
+  }
+
   addStock() {
     const payload: AddStockPayload = {
       product_id: this.stockData.productId,
-      quality: this.stockData.quality,
-      wastage: this.stockData.wastage,
+      quality_id: this.stockData.qualityId,  // Changed
+      wastage_measure_id: this.stockData.wastageMeasureId,  // Changed
       stock_received: this.stockData.stockReceived,
       stock_carried_forward: this.stockData.stockCarriedForward,
       price_per_unit: this.stockData.pricePerUnit,
       b_b_id: this.stockData.branchId,
-      date_of_entry: this.stockData.dateOfEntry
+      date_of_entry: this.stockData.dateOfEntry,
+      unit_id: this.stockData.unitId
     };
 
     this.stockService.addStock(payload).subscribe({
