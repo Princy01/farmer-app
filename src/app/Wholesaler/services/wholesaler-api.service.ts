@@ -62,26 +62,32 @@ export interface OrderFullDetails {
   order_id: number;
   date_of_order: string;
   order_status: number;
-  actual_delivery_date: string;
+  actual_delivery_date?: string;
+
   retailer_id: number;
-  shop_name: string;
-  wholeseller_ids: number[];
+  retailer_name: string;
+  retailer_address: string;
+  retailer_mobile: string;
+
   total_order_amount: number;
   discount_amount: number;
   tax_amount: number;
   final_amount: number;
-  products: {
-    product_id: number;
-    product_name: string;
-    category_id: number;
-    category_name: string;
-    quantity: number;
-    unit_id: number;
-    unit_name: string;
-    max_price: number;
-  }[];
+
+  products: ProductDetail[];
 }
 
+export interface ProductDetail {
+  order_item_id: number;
+  product_id: number;
+  product_name: string;
+  category_id: number;
+  category_name: string;
+  quantity: number;
+  unit_id: number;
+  unit_name: string;
+  max_item_price: number;
+}
 //for restocking recommendations screen
 interface MandiStock {
   mandi_id: number;
@@ -282,7 +288,7 @@ export class WholesalerApiService {
 
   getCompletedOrders(wholesalerId?: number, daysAgo?: number): Observable<OrderItemDetails[]> {
     const headers = this.getAuthHeaders();
-
+    
     // Always use JWT - wholesalerId parameter kept for backward compatibility but not used
     return this.http.get<OrderItemDetails[]>(
       `${this.apiUrl}/getCompletedOrderSummary`,

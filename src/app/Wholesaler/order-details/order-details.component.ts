@@ -35,14 +35,12 @@ export class OrderDetailsComponent implements OnInit {
     this.checkAuthAndLoadData();
   }
 
-  // authentication check
   private checkAuthAndLoadData() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-    // Check if user has wholesaler role
     if (!this.authService.hasRole('wholesaler')) {
       this.showUnauthorizedError();
       return;
@@ -86,18 +84,34 @@ export class OrderDetailsComponent implements OnInit {
 
   getStatusLabel(statusId: number): string {
     const statusMap: { [key: number]: string } = {
-      1: this.translate.instant('ORDER_DETAILS.STATUS_PROCESSING'),
-      2: this.translate.instant('ORDER_DETAILS.STATUS_CONFIRMED'),
-      3: this.translate.instant('ORDER_DETAILS.STATUS_PAYMENT_PENDING'),
-      4: this.translate.instant('ORDER_DETAILS.STATUS_REJECTED'),
-      5: this.translate.instant('ORDER_DETAILS.STATUS_SUCCESSFUL'),
-      6: this.translate.instant('ORDER_DETAILS.STATUS_CANCELLED'),
-      7: this.translate.instant('ORDER_DETAILS.STATUS_RETURNED'),
-      8: this.translate.instant('ORDER_DETAILS.STATUS_PROCESSING'),
-      9: this.translate.instant('ORDER_DETAILS.STATUS_RETURN_REQUESTED'),
-      10: this.translate.instant('ORDER_DETAILS.STATUS_REJECTED')
+      1: 'ORDER_DETAILS.STATUS_PROCESSING',
+      2: 'ORDER_DETAILS.STATUS_CONFIRMED',
+      3: 'ORDER_DETAILS.STATUS_PAYMENT_PENDING',
+      4: 'ORDER_DETAILS.STATUS_REJECTED',
+      5: 'ORDER_DETAILS.STATUS_SUCCESSFUL',
+      6: 'ORDER_DETAILS.STATUS_CANCELLED',
+      7: 'ORDER_DETAILS.STATUS_RETURNED',
+      8: 'ORDER_DETAILS.STATUS_PROCESSING',
+      9: 'ORDER_DETAILS.STATUS_RETURN_REQUESTED',
+      10: 'ORDER_DETAILS.STATUS_REJECTED'
     };
-    return statusMap[statusId] || this.translate.instant('ORDER_DETAILS.STATUS_UNKNOWN');
+    return statusMap[statusId] || 'ORDER_DETAILS.STATUS_UNKNOWN';
+  }
+
+  getStatusClass(statusId: number): string {
+    const statusClassMap: { [key: number]: string } = {
+      1: 'processing',
+      2: 'confirmed',
+      3: 'payment-pending',
+      4: 'rejected',
+      5: 'successful',
+      6: 'cancelled',
+      7: 'returned',
+      8: 'processing',
+      9: 'return-requested',
+      10: 'rejected'
+    };
+    return statusClassMap[statusId] || 'unknown';
   }
 
   loadOrderDetails() {
@@ -109,14 +123,12 @@ export class OrderDetailsComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    // Call service without wholesaler ID - backend will get user_id from JWT
     this.wholesalerService.getOrderFullDetails(this.orderId)
       .pipe(
         catchError(error => {
           console.error('Error loading order details:', error);
           this.error = true;
 
-          // Handle authentication errors
           if (error.status === 401) {
             this.showAuthError();
             return of(null);

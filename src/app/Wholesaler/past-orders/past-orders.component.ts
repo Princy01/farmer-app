@@ -5,26 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, chevronDownOutline } from 'ionicons/icons';
-import { WholesalerApiService } from '../services/wholesaler-api.service';
+import { WholesalerApiService, OrderItemDetails } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-
-interface OrderItem {
-  order_item_id: number;
-  product_id: number;
-  product_name: string;
-  quantity: number;
-  unit_id: number;
-  unit_name: string;
-  max_item_price: number;
-}
-
-interface OrderItemDetails {
-  order_id: number;
-  total_order_amount: number;
-  order_items: OrderItem[];
-  created_at?: string;
-}
 
 interface FilterOption {
   value: string;
@@ -50,17 +33,12 @@ export class PastOrdersComponent implements AfterViewInit {
     { value: '4days', label: 'PAST_ORDERS.FILTER_4DAYS' },
     { value: 'custom', label: 'PAST_ORDERS.FILTER_CUSTOM' }
   ];
-  selectedFilter: string | null = null;
+  selectedFilter: string = 'all';
   selectedOrderId: number | null = null;
   isLoading = false;
   hasError = false;
 
   private originalOrders: OrderItemDetails[] = [];
-  customStartDate: string = '';
-  customEndDate: string = '';
-
-  notifications = 5;
-  messages = 3;
 
   constructor(
     private router: Router,
@@ -80,14 +58,12 @@ export class PastOrdersComponent implements AfterViewInit {
     this.checkAuthAndLoadData();
   }
 
-  // authentication check
   private checkAuthAndLoadData() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
-    // Check if user has wholesaler role
     if (!this.authService.hasRole('wholesaler')) {
       this.showUnauthorizedError();
       return;
@@ -144,10 +120,11 @@ export class PastOrdersComponent implements AfterViewInit {
       await loading.present();
       this.isLoading = true;
       this.hasError = false;
+      console.log('Loading completed orders with daysAgo:', daysAgo);
 
-      // Call service without wholesaler ID - backend will get user_id from JWT
       this.wholesalerApiService.getCompletedOrders(undefined, daysAgo).subscribe({
         next: async (orders) => {
+          console.log('Completed orders loaded:', orders);
           this.originalOrders = orders;
           this.completedOrders = orders;
           await loading.dismiss();
@@ -163,7 +140,6 @@ export class PastOrdersComponent implements AfterViewInit {
           this.isLoading = false;
           this.hasError = true;
 
-          // Handle authentication errors
           if (error.status === 401) {
             this.showAuthError();
             return;
@@ -217,11 +193,13 @@ export class PastOrdersComponent implements AfterViewInit {
   }
 
   async applyFilter(filter: string) {
-    if (!filter || filter === 'all') {
+    if (!filter) {
       this.selectedFilter = 'all';
       this.completedOrders = this.originalOrders;
       return;
     }
+
+    this.selectedFilter = filter;
 
     switch (filter) {
       case '1day':
@@ -240,7 +218,7 @@ export class PastOrdersComponent implements AfterViewInit {
         await this.showCustomDateFilter();
         break;
       default:
-        this.completedOrders = this.originalOrders;
+        await this.loadCompletedOrders();
     }
   }
 
@@ -264,7 +242,6 @@ export class PastOrdersComponent implements AfterViewInit {
           text: this.translate.instant('PAST_ORDERS.CANCEL'),
           role: 'cancel',
           handler: () => {
-            // Reset to All Orders if user cancels
             this.selectedFilter = 'all';
             this.completedOrders = this.originalOrders;
           }
@@ -273,6 +250,7 @@ export class PastOrdersComponent implements AfterViewInit {
           text: this.translate.instant('PAST_ORDERS.FILTER'),
           handler: (data: any) => {
             if (!data.startDate || !data.endDate) {
+              this.showToast(this.translate.instant('PAST_ORDERS.SELECT_DATES'));
               this.selectedFilter = 'all';
               return false;
             }
@@ -294,8 +272,13 @@ export class PastOrdersComponent implements AfterViewInit {
       return;
     }
 
+    // Set time to start and end of day for proper comparison
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
     this.completedOrders = this.originalOrders.filter(order => {
-      const orderDate = new Date(order.created_at || '');
+      // Use actual_delivery_date for completed orders
+      const orderDate = new Date(order.actual_delivery_date);
       return orderDate >= startDate && orderDate <= endDate;
     });
 
@@ -318,5 +301,10 @@ export class PastOrdersComponent implements AfterViewInit {
     } finally {
       event.target.complete();
     }
+  }
+
+  clearFilter() {
+    this.selectedFilter = 'all';
+    this.loadCompletedOrders()
   }
 }
