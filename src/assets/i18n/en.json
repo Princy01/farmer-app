@@ -1049,7 +1049,9 @@
       "QUALITY": "Quality",
       "WASTAGE": "Wastage",
       "PRICE_PER_UNIT": "Price per Unit",
-      "CURRENT_STOCK": "Current Stock"
+      "CURRENT_STOCK": "Current Stock",
+      "NO_WHOLESALERS_AVAILABLE": "No wholesalers currently have this product in stock",
+      "TRY_DIFFERENT_PRODUCT": "Please try selecting a different product or check back later"
     },
     "CHECKOUT": {
       "PAGE_TITLE": "Checkout",

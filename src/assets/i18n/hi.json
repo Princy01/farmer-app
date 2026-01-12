@@ -1049,7 +1049,9 @@
     "QUALITY": "गुणवत्ता",
     "WASTAGE": "नुकसान",
     "PRICE_PER_UNIT": "Price per Unit",
-    "CURRENT_STOCK": "Current Stock"
+    "CURRENT_STOCK": "Current Stock",
+    "NO_WHOLESALERS_AVAILABLE": "वर्तमान में किसी भी थोक विक्रेता के पास यह उत्पाद स्टॉक में नहीं है",
+    "TRY_DIFFERENT_PRODUCT": "कृपया कोई दूसरा उत्पाद चुनें या बाद में फिर से जाँचें"
   },
   "CHECKOUT": {
     "PAGE_TITLE": "चेकआउट",
