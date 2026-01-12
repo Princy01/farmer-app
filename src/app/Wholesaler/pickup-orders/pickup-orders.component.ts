@@ -114,7 +114,7 @@ export class WholesalerPickupOrdersComponent implements OnInit {
       groups[date].push(order);
     });
     this.groupedOrders = Object.keys(groups)
-      .sort()
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
       .map(date => ({
         date,
         orders: groups[date]

@@ -131,6 +131,11 @@ export class AddStockComponent {
     this.cdr.detectChanges();
   }
 
+  subtractFifty(field: string) {
+    this.stockData[field] = Math.max(0, (this.stockData[field] || 0) - 50);
+    this.cdr.detectChanges();
+  }
+  
   async loadBranches() {
     const userId = this.authService.getUserId();
     if (userId) {

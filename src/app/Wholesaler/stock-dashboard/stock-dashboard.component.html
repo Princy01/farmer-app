@@ -8,40 +8,49 @@
 </ion-header>
 
 <ion-content>
-  <ion-item>
-    <ion-label>{{ 'STOCK_DASHBOARD.BRANCH_LABEL' | translate }}</ion-label>
-    <ion-select [(ngModel)]="selectedBranchId" (ionChange)="loadTodayStock()">
-      <ion-select-option *ngFor="let branch of branches" [value]="branch.branch_id">
-        {{ branch.shop_name }} - {{ branch.location_name }}, {{ branch.city_name }}
-      </ion-select-option>
-    </ion-select>
-  </ion-item>
-
-  <ion-list *ngIf="todayStock.length > 0; else noStock">
-    <ion-item *ngFor="let item of todayStock">
-      <ion-label>
-        <h2>{{ item.product_name }}</h2>
-        <p>{{ item.category_name }}</p>
-        <p>{{ 'STOCK_DASHBOARD.CURRENT_STOCK' | translate }}: {{ item.current_stock }} {{item.units_name}}</p>
-        <p>{{ 'STOCK_DASHBOARD.PRICE' | translate }}: ₹{{ item.price_per_unit }}</p>
-        @if (item.last_date_of_entry) {
-        <p>{{ 'STOCK_DASHBOARD.LAST_UPDATED' | translate }}: {{ item.last_date_of_entry | date:'mediumDate' }}</p>
-        } 
-      </ion-label>
-      <ion-button fill="outline" (click)="openUpdateStock(item)">
-        {{ 'STOCK_DASHBOARD.UPDATE' | translate }}
-      </ion-button>
+  <div class="branch-selector">
+    <ion-item>
+      <ion-label>{{ 'STOCK_DASHBOARD.BRANCH_LABEL' | translate }}</ion-label>
+      <ion-select [(ngModel)]="selectedBranchId" (ionChange)="loadTodayStock()">
+        <ion-select-option *ngFor="let branch of branches" [value]="branch.branch_id">
+          {{ branch.shop_name }} - {{ branch.location_name }}, {{ branch.city_name }}
+        </ion-select-option>
+      </ion-select>
     </ion-item>
-  </ion-list>
+  </div>
+
+  <div class="stock-list" *ngIf="todayStock.length > 0; else noStock">
+    <ion-card *ngFor="let item of todayStock" class="stock-card">
+      <ion-card-content>
+        <ion-row>
+          <ion-col size="8">
+            <h2>{{ item.product_name }} <span class="category-name">({{ item.category_name }})</span></h2>
+            <p><b>{{ 'STOCK_DASHBOARD.CURRENT_STOCK' | translate }}:</b> {{ item.current_stock }} {{item.units_name}}</p>
+            <p><b>{{ 'STOCK_DASHBOARD.PRICE' | translate }}:</b> ₹{{ item.price_per_unit }}</p>
+            @if (item.last_date_of_entry) {
+            <p><b>{{ 'STOCK_DASHBOARD.LAST_UPDATED' | translate }}:</b> {{ item.last_date_of_entry | date:'mediumDate' }}</p>
+            }
+          </ion-col>
+          <ion-col size="4" class="button-col">
+            <ion-button fill="outline" (click)="openUpdateStock(item)">
+              {{ 'STOCK_DASHBOARD.UPDATE' | translate }}
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-card-content>
+    </ion-card>
+  </div>
 
   <ng-template #noStock>
-    <ion-text class="ion-padding">
-      {{ 'STOCK_DASHBOARD.NO_STOCK' | translate }}
-    </ion-text>
+    <div class="no-stock-message">
+      <ion-text class="ion-padding">
+        {{ 'STOCK_DASHBOARD.NO_STOCK' | translate }}
+      </ion-text>
+    </div>
   </ng-template>
 
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" >
-    <ion-fab-button  color="tertiary" (click)="openAddStock()">
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="tertiary" (click)="openAddStock()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

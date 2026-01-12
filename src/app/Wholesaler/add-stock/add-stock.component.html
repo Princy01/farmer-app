@@ -2,7 +2,7 @@
   <ion-toolbar class="modal-toolbar">
     <ion-title class="page-title">
       <ion-icon name="cube-outline" class="title-icon"></ion-icon>
-      {{ 'ADD_STOCK.PAGE_TITLE' | translate }}
+      {{ "ADD_STOCK.PAGE_TITLE" | translate }}
     </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="close()" class="close-btn">
@@ -14,23 +14,23 @@
 
 <ion-content class="modal-content-wrapper">
   <div class="content-container">
-
     <!-- Branch & Product Selection Card -->
     <ion-card class="modern-card">
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="business-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">{{ 'ADD_STOCK.BUSINESS_DETAILS' | translate }}</h2>
+          <h2 class="card-title">
+            {{ "ADD_STOCK.BUSINESS_DETAILS" | translate }}
+          </h2>
         </div>
       </div>
       <ion-card-content class="card-content">
         <div class="form-container">
-          
           <!-- Branch -->
           <div class="form-group">
             <ion-label class="form-label">
               <ion-icon name="storefront-outline" class="label-icon"></ion-icon>
-              {{ 'ADD_STOCK.BRANCH' | translate }}
+              {{ "ADD_STOCK.BRANCH" | translate }}
             </ion-label>
             <div class="input-wrapper">
               <ion-select
@@ -39,7 +39,10 @@
                 class="custom-select"
                 interface="action-sheet"
               >
-                <ion-select-option *ngFor="let branch of branches" [value]="branch.branch_id">
+                <ion-select-option
+                  *ngFor="let branch of branches"
+                  [value]="branch.branch_id"
+                >
                   {{ branch.shop_name }} - {{ branch.location_name }}
                 </ion-select-option>
               </ion-select>
@@ -50,7 +53,7 @@
           <div class="form-group">
             <ion-label class="form-label">
               <ion-icon name="cube-outline" class="label-icon"></ion-icon>
-              {{ 'ADD_STOCK.PRODUCT' | translate }}
+              {{ "ADD_STOCK.PRODUCT" | translate }}
             </ion-label>
             <div class="input-wrapper">
               <ion-select
@@ -59,7 +62,10 @@
                 class="custom-select"
                 interface="action-sheet"
               >
-                <ion-select-option *ngFor="let product of products" [value]="product.product_id">
+                <ion-select-option
+                  *ngFor="let product of products"
+                  [value]="product.product_id"
+                >
                   {{ product.product_name }}
                 </ion-select-option>
               </ion-select>
@@ -70,7 +76,7 @@
           <div class="form-group">
             <ion-label class="form-label">
               <ion-icon name="star-outline" class="label-icon"></ion-icon>
-              {{ 'ADD_STOCK.QUALITY' | translate }}
+              {{ "ADD_STOCK.QUALITY" | translate }}
             </ion-label>
             <div class="input-wrapper">
               <ion-select
@@ -79,7 +85,10 @@
                 class="custom-select"
                 interface="action-sheet"
               >
-                <ion-select-option *ngFor="let quality of qualities" [value]="quality.quality_id">
+                <ion-select-option
+                  *ngFor="let quality of qualities"
+                  [value]="quality.quality_id"
+                >
                   {{ quality.quality_name }}
                 </ion-select-option>
               </ion-select>
@@ -90,7 +99,7 @@
           <div class="form-group">
             <ion-label class="form-label">
               <ion-icon name="trash-outline" class="label-icon"></ion-icon>
-              {{ 'ADD_STOCK.WASTAGE_MEASURE' | translate }}
+              {{ "ADD_STOCK.WASTAGE_MEASURE" | translate }}
             </ion-label>
             <div class="input-wrapper">
               <ion-select
@@ -99,7 +108,10 @@
                 class="custom-select"
                 interface="action-sheet"
               >
-                <ion-select-option *ngFor="let wastage of wastageMeasures" [value]="wastage.id">
+                <ion-select-option
+                  *ngFor="let wastage of wastageMeasures"
+                  [value]="wastage.id"
+                >
                   {{ wastage.wastage_measure_name }}
                 </ion-select-option>
               </ion-select>
@@ -110,7 +122,7 @@
           <div class="form-group">
             <ion-label class="form-label">
               <ion-icon name="scale-outline" class="label-icon"></ion-icon>
-              {{ 'ADD_STOCK.UNIT' | translate }}
+              {{ "ADD_STOCK.UNIT" | translate }}
             </ion-label>
             <div class="input-wrapper">
               <ion-select
@@ -119,13 +131,15 @@
                 class="custom-select"
                 interface="action-sheet"
               >
-                <ion-select-option *ngFor="let unit of units" [value]="unit.unit_id">
+                <ion-select-option
+                  *ngFor="let unit of units"
+                  [value]="unit.unit_id"
+                >
                   {{ unit.units_name }}
                 </ion-select-option>
               </ion-select>
             </div>
           </div>
-
         </div>
       </ion-card-content>
     </ion-card>
@@ -135,32 +149,58 @@
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="analytics-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">{{ 'ADD_STOCK.STOCK_INFORMATION' | translate }}</h2>
+          <h2 class="card-title">
+            {{ "ADD_STOCK.STOCK_INFORMATION" | translate }}
+          </h2>
         </div>
       </div>
       <ion-card-content class="card-content">
         <div class="form-container">
-
           <!-- Stock Received -->
           <div class="form-group">
             <ion-label class="form-label">
-              <ion-icon name="arrow-down-circle-outline" class="label-icon"></ion-icon>
-              {{ 'ADD_STOCK.STOCK_RECEIVED' | translate }}
+              <ion-icon
+                name="arrow-down-circle-outline"
+                class="label-icon"
+              ></ion-icon>
+              {{ "ADD_STOCK.STOCK_RECEIVED" | translate }}
             </ion-label>
             <div class="stepper-wrapper">
-              <ion-button fill="clear" class="stepper-btn decrement" (click)="decrement('stockReceived')">
+              <ion-button
+                fill="outline"
+                class="bulk-btn"
+                (click)="subtractFifty('stockReceived')"
+              >
+                -50
+              </ion-button>
+              <ion-button
+                fill="clear"
+                class="stepper-btn decrement"
+                (click)="decrement('stockReceived')"
+              >
                 <ion-icon name="remove-circle" slot="icon-only"></ion-icon>
               </ion-button>
               <div class="stepper-value-box">
-                <span class="stepper-value">{{ stockData.stockReceived || 0 }}</span>
-                <span class="stepper-unit">{{ 'ADD_STOCK.UNIT_KG' | translate }}</span>
+                <span class="stepper-value">{{
+                  stockData.stockReceived || 0
+                }}</span>
+                <span class="stepper-unit">{{
+                  "ADD_STOCK.UNIT_KG" | translate
+                }}</span>
               </div>
-              <ion-button fill="clear" class="stepper-btn increment" (click)="increment('stockReceived')">
+              <ion-button
+                fill="clear"
+                class="stepper-btn increment"
+                (click)="increment('stockReceived')"
+              >
                 <ion-icon name="add-circle" slot="icon-only"></ion-icon>
               </ion-button>
-              <ion-button fill="outline" class="bulk-btn" (click)="addFifty('stockReceived')">
-                <ion-icon name="flash-outline" slot="start"></ion-icon>
-                {{ 'ADD_STOCK.ADD_FIFTY' | translate }}
+              <ion-button
+                fill="outline"
+                class="bulk-btn"
+                (click)="addFifty('stockReceived')"
+              >
+                {{ "ADD_STOCK.ADD_FIFTY" | translate }}
               </ion-button>
             </div>
           </div>
@@ -169,26 +209,47 @@
           <div class="form-group">
             <ion-label class="form-label">
               <ion-icon name="sync-outline" class="label-icon"></ion-icon>
-              {{ 'ADD_STOCK.STOCK_CARRIED_FORWARD' | translate }}
+              {{ "ADD_STOCK.STOCK_CARRIED_FORWARD" | translate }}
             </ion-label>
             <div class="stepper-wrapper">
-              <ion-button fill="clear" class="stepper-btn decrement" (click)="decrement('stockCarriedForward')">
+              <ion-button
+                fill="outline"
+                class="bulk-btn"
+                (click)="subtractFifty('stockCarriedForward')"
+              >
+                -50
+              </ion-button>
+              <ion-button
+                fill="clear"
+                class="stepper-btn decrement"
+                (click)="decrement('stockCarriedForward')"
+              >
                 <ion-icon name="remove-circle" slot="icon-only"></ion-icon>
               </ion-button>
               <div class="stepper-value-box">
-                <span class="stepper-value">{{ stockData.stockCarriedForward || 0 }}</span>
-                <span class="stepper-unit">{{ 'ADD_STOCK.UNIT_KG' | translate }}</span>
+                <span class="stepper-value">{{
+                  stockData.stockCarriedForward || 0
+                }}</span>
+                <span class="stepper-unit">{{
+                  "ADD_STOCK.UNIT_KG" | translate
+                }}</span>
               </div>
-              <ion-button fill="clear" class="stepper-btn increment" (click)="increment('stockCarriedForward')">
+              <ion-button
+                fill="clear"
+                class="stepper-btn increment"
+                (click)="increment('stockCarriedForward')"
+              >
                 <ion-icon name="add-circle" slot="icon-only"></ion-icon>
               </ion-button>
-              <ion-button fill="outline" class="bulk-btn" (click)="addFifty('stockCarriedForward')">
-                <ion-icon name="flash-outline" slot="start"></ion-icon>
-                {{ 'ADD_STOCK.ADD_FIFTY' | translate }}
+              <ion-button
+                fill="outline"
+                class="bulk-btn"
+                (click)="addFifty('stockCarriedForward')"
+              >
+                {{ "ADD_STOCK.ADD_FIFTY" | translate }}
               </ion-button>
             </div>
           </div>
-
         </div>
       </ion-card-content>
     </ion-card>
@@ -198,36 +259,54 @@
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="cash-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">{{ 'ADD_STOCK.PRICING' | translate }}</h2>
+          <h2 class="card-title">{{ "ADD_STOCK.PRICING" | translate }}</h2>
         </div>
       </div>
       <ion-card-content class="card-content">
         <div class="form-container">
-
           <!-- Price per Unit -->
           <div class="form-group">
             <ion-label class="form-label">
               <ion-icon name="pricetag-outline" class="label-icon"></ion-icon>
-              {{ 'ADD_STOCK.PRICE_PER_UNIT' | translate }}
+              {{ "ADD_STOCK.PRICE_PER_UNIT" | translate }}
             </ion-label>
             <div class="stepper-wrapper">
-              <ion-button fill="clear" class="stepper-btn decrement" (click)="decrement('pricePerUnit')">
+              <ion-button
+                fill="outline"
+                class="bulk-btn"
+                (click)="subtractFifty('pricePerUnit')"
+              >
+                -50
+              </ion-button>
+              <ion-button
+                fill="clear"
+                class="stepper-btn decrement"
+                (click)="decrement('pricePerUnit')"
+              >
                 <ion-icon name="remove-circle" slot="icon-only"></ion-icon>
               </ion-button>
               <div class="stepper-value-box price">
                 <span class="currency">₹</span>
-                <span class="stepper-value">{{ stockData.pricePerUnit || 0 }}</span>
+                <span class="stepper-value">{{
+                  stockData.pricePerUnit || 0
+                }}</span>
               </div>
-              <ion-button fill="clear" class="stepper-btn increment" (click)="increment('pricePerUnit')">
+              <ion-button
+                fill="clear"
+                class="stepper-btn increment"
+                (click)="increment('pricePerUnit')"
+              >
                 <ion-icon name="add-circle" slot="icon-only"></ion-icon>
               </ion-button>
-              <ion-button fill="outline" class="bulk-btn" (click)="addFifty('pricePerUnit')">
-                <ion-icon name="flash-outline" slot="start"></ion-icon>
-                {{ 'ADD_STOCK.ADD_FIFTY' | translate }}
+              <ion-button
+                fill="outline"
+                class="bulk-btn"
+                (click)="addFifty('pricePerUnit')"
+              >
+                {{ "ADD_STOCK.ADD_FIFTY" | translate }}
               </ion-button>
             </div>
           </div>
-
         </div>
       </ion-card-content>
     </ion-card>
@@ -240,9 +319,8 @@
 <ion-footer class="modal-footer">
   <div class="footer-content">
     <div class="stock-summary">
-      <span class="summary-label">{{ 'ADD_STOCK.READY_TO_ADD' | translate }}</span>
       <span class="summary-value" *ngIf="stockData.stockReceived > 0">
-        {{ stockData.stockReceived }} {{ 'ADD_STOCK.UNIT_KG' | translate }}
+        {{ stockData.stockReceived }} {{ "ADD_STOCK.UNIT_KG" | translate }}
       </span>
     </div>
     <ion-button
@@ -251,7 +329,7 @@
       [disabled]="!isFormValid()"
     >
       <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-      {{ 'ADD_STOCK.SAVE' | translate }}
+      {{ "ADD_STOCK.SAVE" | translate }}
     </ion-button>
   </div>
 </ion-footer>

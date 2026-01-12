@@ -36,6 +36,7 @@ import {
 } from './driver-registration.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { forkJoin, firstValueFrom } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface FormData {
   driverInfo: Partial<DriverInfoRequest>;
@@ -49,7 +50,7 @@ interface FormData {
   templateUrl: './driver-registration.component.html',
   styleUrls: ['./driver-registration.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule, TranslatePipe]
 })
 export class DriverRegistrationComponent implements OnInit {
   currentStep = 1;
@@ -120,7 +121,8 @@ export class DriverRegistrationComponent implements OnInit {
     private authService: AuthService,
     private alertController: AlertController,
     private loadingController: LoadingController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private translate: TranslateService
   ) {
     addIcons({
       'chevron-forward': chevronForward,
@@ -188,7 +190,7 @@ export class DriverRegistrationComponent implements OnInit {
 
   private async checkDriverRegistrationStatus() {
     const loading = await this.loadingController.create({
-      message: 'Checking registration status...',
+      message: this.translate.instant('DRIVER_REGISTRATION.CHECKING_STATUS'),
       spinner: 'crescent',
       cssClass: 'custom-loading'
     });
@@ -209,7 +211,7 @@ export class DriverRegistrationComponent implements OnInit {
           // New registration - fresh start
           console.log('New driver registration');
           this.isUpdateMode = false;
-          await this.showToast('Starting new driver registration', 'primary');
+          await this.showToast('DRIVER_REGISTRATION.NEW_REGISTRATION_STARTED', 'primary');
         } else if (result.completed) {
           // Registration already completed
           console.log('Driver registration already completed');
@@ -225,7 +227,7 @@ export class DriverRegistrationComponent implements OnInit {
         await loading.dismiss();
         this.isCheckingRegistration = false;
         console.error('Error checking driver registration status:', error);
-        await this.showToast('Could not verify registration status. Starting fresh.', 'warning');
+        await this.showToast('DRIVER_REGISTRATION.STATUS_CHECK_ERROR', 'warning');
         this.isUpdateMode = false;
       }
     });
@@ -236,7 +238,7 @@ export class DriverRegistrationComponent implements OnInit {
 
     this.isLoadingExistingData = true;
     const loading = await this.loadingController.create({
-      message: 'Loading your data...',
+      message: this.translate.instant('DRIVER_REGISTRATION.LOADING'),
       spinner: 'circles',
       cssClass: 'custom-loading'
     });
@@ -285,7 +287,7 @@ export class DriverRegistrationComponent implements OnInit {
       await loading.dismiss();
       this.isLoadingExistingData = false;
       console.error('Error loading existing data:', error);
-      await this.showToast('Could not load some existing data', 'warning');
+      await this.showToast('DRIVER_REGISTRATION.LOAD_DATA_ERROR', 'warning');
     }
   }
 
@@ -347,8 +349,6 @@ export class DriverRegistrationComponent implements OnInit {
     console.log(this.vehicleForm.value)
   }
 
-
-
   // Update prefillDocuments to set preview URLs
   private prefillDocuments(documents: DriverDocumentResponse[]) {
     documents.forEach(doc => {
@@ -384,14 +384,12 @@ export class DriverRegistrationComponent implements OnInit {
     });
   }
 
-
-
   private async showIncompleteRegistrationAlert() {
     const alert = await this.alertController.create({
-      header: 'Resume Registration',
-      message: 'You have started the registration process. Your existing data has been loaded. Please complete all remaining steps.',
+      header: this.translate.instant('DRIVER_REGISTRATION.RESUME_REGISTRATION'),
+      message: this.translate.instant('DRIVER_REGISTRATION.RESUME_REGISTRATION_MESSAGE'),
       buttons: [{
-        text: 'Continue',
+        text: this.translate.instant('DRIVER_REGISTRATION.CONTINUE'),
         cssClass: 'primary-button'
       }],
       backdropDismiss: false,
@@ -402,10 +400,10 @@ export class DriverRegistrationComponent implements OnInit {
 
   private async showAuthError() {
     const alert = await this.alertController.create({
-      header: 'Authentication Error',
-      message: 'Your session has expired. Please login again.',
+      header: this.translate.instant('DRIVER_REGISTRATION.AUTH_ERROR'),
+      message: this.translate.instant('DRIVER_REGISTRATION.SESSION_EXPIRED'),
       buttons: [{
-        text: 'OK',
+        text: this.translate.instant('DRIVER_REGISTRATION.OK'),
         handler: () => {
           this.authService.logout();
           this.router.navigate(['/login']);
@@ -419,10 +417,10 @@ export class DriverRegistrationComponent implements OnInit {
 
   private async showUnauthorizedError() {
     const alert = await this.alertController.create({
-      header: 'Access Denied',
-      message: 'You do not have permission to access this page. Only drivers can register.',
+      header: this.translate.instant('DRIVER_REGISTRATION.ACCESS_DENIED'),
+      message: this.translate.instant('DRIVER_REGISTRATION.DRIVER_ONLY_ACCESS'),
       buttons: [{
-        text: 'OK',
+        text: this.translate.instant('DRIVER_REGISTRATION.OK'),
         handler: () => {
           this.router.navigate(['/login']);
         }
@@ -503,7 +501,7 @@ export class DriverRegistrationComponent implements OnInit {
 
     const currentForm = this.getCurrentForm();
     if (!currentForm) {
-      await this.showToast('Form not found', 'danger');
+      await this.showToast('DRIVER_REGISTRATION.FORM_NOT_FOUND', 'danger');
       return;
     }
 
@@ -511,10 +509,12 @@ export class DriverRegistrationComponent implements OnInit {
     if (currentForm.invalid) {
       this.markFormGroupTouched(currentForm);
       const invalidFields = this.getInvalidFields(currentForm);
-      const errorMessage = invalidFields.length > 0
-        ? `Please fill the following fields correctly: ${invalidFields.join(', ')}`
-        : 'Please fill all required fields correctly';
-      await this.showToast(errorMessage, 'warning');
+      if (invalidFields.length > 0) {
+        const fieldsText = invalidFields.join(', ');
+        await this.showToast(`${this.translate.instant('DRIVER_REGISTRATION.FILL_FIELDS_CORRECTLY')}: ${fieldsText}`, 'warning');
+      } else {
+        await this.showToast('DRIVER_REGISTRATION.FILL_REQUIRED_FIELDS', 'warning');
+      }
       return;
     }
 
@@ -551,7 +551,7 @@ export class DriverRegistrationComponent implements OnInit {
 
   async saveCurrentStepData() {
     const loading = await this.loadingController.create({
-      message: 'Saving...',
+      message: this.translate.instant('DRIVER_REGISTRATION.SAVING'),
       spinner: 'crescent',
       cssClass: 'custom-loading'
     });
@@ -579,14 +579,14 @@ export class DriverRegistrationComponent implements OnInit {
     } catch (error) {
       await loading.dismiss();
       console.error('Error saving step data:', error);
-      await this.showToast('An error occurred while saving', 'danger');
+      await this.showToast('DRIVER_REGISTRATION.SAVE_ERROR', 'danger');
     }
   }
 
   async saveDriverInfo(loading: HTMLIonLoadingElement) {
     if (!this.driverId) {
       await loading.dismiss();
-      await this.showToast('Driver ID not found', 'danger');
+      await this.showToast('DRIVER_REGISTRATION.DRIVER_ID_NOT_FOUND', 'danger');
       return;
     }
 
@@ -629,15 +629,13 @@ export class DriverRegistrationComponent implements OnInit {
       next: async (response) => {
         this.formData.driverInfo = driverInfo;
         await loading.dismiss();
-        await this.showToast(
-          hasExistingData ? 'Driver info updated successfully' : 'Driver info saved successfully',
-          'success'
-        );
+        const message = hasExistingData ? 'DRIVER_REGISTRATION.DRIVER_INFO_UPDATED' : 'DRIVER_REGISTRATION.DRIVER_INFO_SAVED';
+        await this.showToast(message, 'success');
         this.currentStep++;
       },
       error: async (error) => {
         await loading.dismiss();
-        const errorMsg = error.error?.error || error.error?.message || 'Failed to save driver information';
+        const errorMsg = error.error?.error || error.error?.message || this.translate.instant('DRIVER_REGISTRATION.DRIVER_INFO_SAVE_FAILED');
         await this.showToast(errorMsg, 'danger');
         console.error('Driver info save error:', error);
       }
@@ -647,7 +645,7 @@ export class DriverRegistrationComponent implements OnInit {
   async saveDocuments(loading: HTMLIonLoadingElement) {
     if (!this.driverId) {
       await loading.dismiss();
-      await this.showToast('Driver ID not found. Please complete step 1 first.', 'danger');
+      await this.showToast('DRIVER_REGISTRATION.COMPLETE_STEP_1_FIRST', 'danger');
       return;
     }
 
@@ -656,7 +654,7 @@ export class DriverRegistrationComponent implements OnInit {
     // Check if required documents are uploaded
     if (!formValue.rc_img || !formValue.license_img) {
       await loading.dismiss();
-      await this.showToast('Please upload RC and License documents', 'warning');
+      await this.showToast('DRIVER_REGISTRATION.UPLOAD_DOCUMENTS', 'warning');
       return;
     }
 
@@ -671,17 +669,16 @@ export class DriverRegistrationComponent implements OnInit {
     };
 
     // For documents, we always use ADD (backend handles upsert logic)
-    // Or if you want to update individual documents, you'd need to check each document type
     this.driverService.addDriverDocument(documents).subscribe({
       next: async (response) => {
         this.formData.documents = documents;
         await loading.dismiss();
-        await this.showToast(response.message || 'Documents uploaded successfully', 'success');
+        await this.showToast(response.message || 'DRIVER_REGISTRATION.DOCUMENTS_UPLOADED', 'success');
         this.currentStep++;
       },
       error: async (error) => {
         await loading.dismiss();
-        const errorMsg = error.error?.error || error.error?.message || 'Failed to upload documents';
+        const errorMsg = error.error?.error || error.error?.message || this.translate.instant('DRIVER_REGISTRATION.DOCUMENTS_UPLOAD_FAILED');
         await this.showToast(errorMsg, 'danger');
         console.error('Documents upload error:', error);
       }
@@ -691,7 +688,7 @@ export class DriverRegistrationComponent implements OnInit {
   async saveVehicle(loading: HTMLIonLoadingElement) {
     if (!this.driverId) {
       await loading.dismiss();
-      await this.showToast('Driver ID not found. Please complete step 1 first.', 'danger');
+      await this.showToast('DRIVER_REGISTRATION.COMPLETE_STEP_1_FIRST', 'danger');
       return;
     }
 
@@ -724,15 +721,13 @@ export class DriverRegistrationComponent implements OnInit {
         }
         this.formData.vehicle = vehicle;
         await loading.dismiss();
-        await this.showToast(
-          hasExistingVehicle ? 'Vehicle updated successfully' : 'Vehicle saved successfully',
-          'success'
-        );
+        const message = hasExistingVehicle ? 'DRIVER_REGISTRATION.VEHICLE_UPDATED' : 'DRIVER_REGISTRATION.VEHICLE_SAVED';
+        await this.showToast(message, 'success');
         this.currentStep++;
       },
       error: async (error) => {
         await loading.dismiss();
-        const errorMsg = error.error?.error || error.error?.message || 'Failed to save vehicle information';
+        const errorMsg = error.error?.error || error.error?.message || this.translate.instant('DRIVER_REGISTRATION.VEHICLE_SAVE_FAILED');
         await this.showToast(errorMsg, 'danger');
         console.error('Vehicle save error:', error);
       }
@@ -742,7 +737,7 @@ export class DriverRegistrationComponent implements OnInit {
   async saveInsurance(loading: HTMLIonLoadingElement) {
     if (!this.vehicleId || !this.driverId) {
       await loading.dismiss();
-      await this.showToast('Vehicle ID not found. Please complete step 3 first.', 'danger');
+      await this.showToast('DRIVER_REGISTRATION.COMPLETE_STEP_3_FIRST', 'danger');
       return;
     }
 
@@ -751,7 +746,7 @@ export class DriverRegistrationComponent implements OnInit {
     // Check if insurance data is provided
     if (!formValue.frm_date || !formValue.to_date || !formValue.ins_company) {
       await loading.dismiss();
-      await this.showToast('Please fill insurance details', 'warning');
+      await this.showToast('DRIVER_REGISTRATION.FILL_INSURANCE_DETAILS', 'warning');
       return;
     }
 
@@ -775,16 +770,14 @@ export class DriverRegistrationComponent implements OnInit {
       next: async () => {
         this.formData.insurance = insurance;
         await loading.dismiss();
-        await this.showToast(
-          hasExistingInsurance ? 'Insurance updated successfully' : 'Insurance saved successfully',
-          'success'
-        );
+        const message = hasExistingInsurance ? 'DRIVER_REGISTRATION.INSURANCE_UPDATED' : 'DRIVER_REGISTRATION.INSURANCE_SAVED';
+        await this.showToast(message, 'success');
         // Registration complete
         await this.submitForm();
       },
       error: async (error) => {
         await loading.dismiss();
-        const errorMsg = error.error?.error || error.error?.message || 'Failed to save insurance information';
+        const errorMsg = error.error?.error || error.error?.message || this.translate.instant('DRIVER_REGISTRATION.INSURANCE_SAVE_FAILED');
         await this.showToast(errorMsg, 'danger');
         console.error('Insurance save error:', error);
       }
@@ -797,20 +790,20 @@ export class DriverRegistrationComponent implements OnInit {
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      await this.showToast('File size should be less than 5MB', 'warning');
+      await this.showToast('DRIVER_REGISTRATION.FILE_TOO_LARGE', 'warning');
       event.target.value = '';
       return;
     }
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      await this.showToast('Please select an image file', 'warning');
+      await this.showToast('DRIVER_REGISTRATION.INVALID_FILE_TYPE', 'warning');
       event.target.value = '';
       return;
     }
 
     const loading = await this.loadingController.create({
-      message: 'Uploading...',
+      message: this.translate.instant('DRIVER_REGISTRATION.UPLOADING'),
       spinner: 'circles',
       cssClass: 'custom-loading'
     });
@@ -829,10 +822,11 @@ export class DriverRegistrationComponent implements OnInit {
       });
       this.documentsForm.get(fieldName)?.markAsTouched();
       await loading.dismiss();
-      await this.showToast(`${this.getDocumentLabel(fieldName)} uploaded`, 'success');
+      const docLabel = this.getDocumentLabel(fieldName);
+      await this.showToast(`${docLabel} ${this.translate.instant('DRIVER_REGISTRATION.UPLOADED')}`, 'success');
     } catch (error) {
       await loading.dismiss();
-      await this.showToast('Error uploading file', 'danger');
+      await this.showToast('DRIVER_REGISTRATION.FILE_UPLOAD_ERROR', 'danger');
       event.target.value = '';
     }
   }
@@ -872,10 +866,13 @@ export class DriverRegistrationComponent implements OnInit {
 
   async showSuccessAlert() {
     const alert = await this.alertController.create({
-      header: 'Registration Complete!',
-      message: `Driver registered successfully!\n\nDriver ID: ${this.driverId}\nVehicle ID: ${this.vehicleId || 'N/A'}`,
+      header: this.translate.instant('DRIVER_REGISTRATION.REGISTRATION_SUCCESS'),
+      message: this.translate.instant('DRIVER_REGISTRATION.REGISTRATION_SUCCESS_MESSAGE', {
+        driverId: this.driverId,
+        vehicleId: this.vehicleId || 'N/A'
+      }),
       buttons: [{
-        text: 'Go to Dashboard',
+        text: this.translate.instant('DRIVER_REGISTRATION.GO_TO_DASHBOARD'),
         cssClass: 'primary-button',
         handler: () => {
           this.router.navigate(['/transport/transport-dashboard']);
@@ -895,7 +892,8 @@ export class DriverRegistrationComponent implements OnInit {
     });
   }
 
-  async showToast(message: string, color: string) {
+  async showToast(messageKey: string, color: string) {
+    const message = this.translate.instant(messageKey);
     const toast = await this.toastController.create({
       message,
       duration: 3000,
@@ -904,7 +902,7 @@ export class DriverRegistrationComponent implements OnInit {
       cssClass: 'custom-toast',
       buttons: [
         {
-          text: 'Dismiss',
+          text: this.translate.instant('DRIVER_REGISTRATION.DISMISS'),
           role: 'cancel'
         }
       ]
@@ -913,14 +911,14 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   getStepTitle(): string {
-    const titles = [
+    const titleKeys = [
       '',
-      'Driver Information',
-      'Document Upload',
-      'Vehicle Details',
-      'Insurance Details'
+      'DRIVER_REGISTRATION.STEP_1_TITLE',
+      'DRIVER_REGISTRATION.STEP_2_TITLE',
+      'DRIVER_REGISTRATION.STEP_3_TITLE',
+      'DRIVER_REGISTRATION.STEP_4_TITLE'
     ];
-    return titles[this.currentStep] || '';
+    return titleKeys[this.currentStep] || '';
   }
 
   getStepIcon(): string {
@@ -939,25 +937,25 @@ export class DriverRegistrationComponent implements OnInit {
     const field = formGroup.get(fieldName);
     if (!field?.errors) return '';
 
-    if (field.errors['required']) return `${this.formatFieldName(fieldName)} is required`;
-    if (field.errors['email']) return 'Please enter a valid email';
-    if (field.errors['minLength']) return `Minimum ${field.errors['minLength'].requiredLength} characters required`;
-    if (field.errors['min']) return `Value must be at least ${field.errors['min'].min}`;
+    if (field.errors['required']) return this.translate.instant('DRIVER_REGISTRATION.REQUIRED_FIELD');
+    if (field.errors['email']) return this.translate.instant('DRIVER_REGISTRATION.INVALID_EMAIL');
+    if (field.errors['minLength']) return this.translate.instant('DRIVER_REGISTRATION.MIN_LENGTH', { length: field.errors['minLength'].requiredLength });
+    if (field.errors['min']) return this.translate.instant('DRIVER_REGISTRATION.MIN_VALUE', { value: field.errors['min'].min });
     if (field.errors['pattern']) return this.getPatternError(fieldName);
 
-    return 'Invalid input';
+    return this.translate.instant('DRIVER_REGISTRATION.INVALID_INPUT');
   }
 
   private getPatternError(fieldName: string): string {
-    const patterns: { [key: string]: string } = {
-      'contact_num': 'Contact number must be exactly 10 digits',
-      'contact_num_addl': 'Contact number must be exactly 10 digits',
-      'aadhar': 'Aadhar number must be exactly 12 digits',
-      'pan': 'PAN must be in format: AAAAA9999A (e.g., ABCDE1234F)',
-      'ifsc': 'IFSC code must be in format: AAAA0999999 (e.g., SBIN0001234)',
-      'address_pin_code': 'Pin code must be exactly 6 digits'
+    const patternKeys: { [key: string]: string } = {
+      'contact_num': 'DRIVER_REGISTRATION.INVALID_PHONE',
+      'contact_num_addl': 'DRIVER_REGISTRATION.INVALID_PHONE',
+      'aadhar': 'DRIVER_REGISTRATION.INVALID_AADHAR',
+      'pan': 'DRIVER_REGISTRATION.INVALID_PAN',
+      'ifsc': 'DRIVER_REGISTRATION.INVALID_IFSC',
+      'address_pin_code': 'DRIVER_REGISTRATION.INVALID_PINCODE'
     };
-    return patterns[fieldName] || 'Invalid format';
+    return this.translate.instant(patternKeys[fieldName] || 'DRIVER_REGISTRATION.INVALID_FORMAT');
   }
 
   private formatFieldName(fieldName: string): string {
@@ -972,15 +970,15 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   private getDocumentLabel(fieldName: string): string {
-    const labels: { [key: string]: string } = {
-      'aadhar_img': 'Aadhar Document',
-      'pan_img': 'PAN Document',
-      'driver_img': 'Driver Photo',
-      'insurance_img': 'Insurance Document',
-      'rc_img': 'RC Document',
-      'license_img': 'License Document'
+    const labelKeys: { [key: string]: string } = {
+      'aadhar_img': 'DRIVER_REGISTRATION.AADHAR_DOCUMENT',
+      'pan_img': 'DRIVER_REGISTRATION.PAN_DOCUMENT',
+      'driver_img': 'DRIVER_REGISTRATION.DRIVER_PHOTO',
+      'insurance_img': 'DRIVER_REGISTRATION.INSURANCE_DOCUMENT',
+      'rc_img': 'DRIVER_REGISTRATION.RC_DOCUMENT',
+      'license_img': 'DRIVER_REGISTRATION.LICENSE_DOCUMENT'
     };
-    return labels[fieldName] || 'Document';
+    return this.translate.instant(labelKeys[fieldName] || 'DRIVER_REGISTRATION.DOCUMENT');
   }
 
   getFormValue(step: number): any {
@@ -1008,7 +1006,7 @@ export class DriverRegistrationComponent implements OnInit {
       error: (error) => {
         console.error('Error loading states:', error);
         this.states = [];
-        this.showToast('Failed to load states', 'warning');
+        this.showToast('DRIVER_REGISTRATION.STATES_LOAD_FAILED', 'warning');
       }
     });
   }
@@ -1025,13 +1023,13 @@ export class DriverRegistrationComponent implements OnInit {
         next: (cities) => {
           this.cities = cities;
           if (cities.length === 0) {
-            this.showToast('No cities found for selected state', 'warning');
+            this.showToast('DRIVER_REGISTRATION.NO_CITIES_FOUND', 'warning');
           }
         },
         error: (error) => {
           console.error('Error loading cities:', error);
           this.cities = [];
-          this.showToast('Failed to load cities', 'warning');
+          this.showToast('DRIVER_REGISTRATION.CITIES_LOAD_FAILED', 'warning');
         }
       });
       formGroup.patchValue({ [cityField]: '' }); // Reset city/town field
@@ -1066,7 +1064,7 @@ export class DriverRegistrationComponent implements OnInit {
     if (this.canNavigateToStep(step)) {
       this.currentStep = step;
     } else {
-      this.showToast('Please complete previous steps first', 'warning');
+      this.showToast('DRIVER_REGISTRATION.COMPLETE_PREVIOUS_STEPS', 'warning');
     }
   }
 
@@ -1081,22 +1079,25 @@ export class DriverRegistrationComponent implements OnInit {
 
   async clearDocument(fieldName: string) {
     const alert = await this.alertController.create({
-      header: 'Clear Document',
-      message: `Are you sure you want to clear ${this.getDocumentLabel(fieldName)}?`,
+      header: this.translate.instant('DRIVER_REGISTRATION.CLEAR_DOCUMENT'),
+      message: this.translate.instant('DRIVER_REGISTRATION.CLEAR_DOCUMENT_CONFIRM', {
+        document: this.getDocumentLabel(fieldName)
+      }),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('DRIVER_REGISTRATION.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Clear',
+          text: this.translate.instant('DRIVER_REGISTRATION.CLEAR'),
           cssClass: 'danger-button',
           handler: () => {
             this.documentsForm.patchValue({
               [fieldName]: ''
             });
             this.imagePreviewUrls[fieldName as keyof typeof this.imagePreviewUrls] = null;
-            this.showToast(`${this.getDocumentLabel(fieldName)} cleared`, 'success');
+            const docLabel = this.getDocumentLabel(fieldName);
+            this.showToast(`${docLabel} ${this.translate.instant('DRIVER_REGISTRATION.CLEARED')}`, 'success');
           }
         }
       ],
@@ -1104,8 +1105,6 @@ export class DriverRegistrationComponent implements OnInit {
     });
     await alert.present();
   }
-
-
 
   // Ionic lifecycle hooks
   ionViewWillLeave() {

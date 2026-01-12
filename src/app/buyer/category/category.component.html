@@ -157,8 +157,6 @@
             <ion-card *ngFor="let wholesaler of wholesalers" style="margin-bottom: 8px">
               <ion-card-header style="position: relative; display: flex; align-items: center">
                 <ion-card-title>{{ wholesaler.mandi_name }}</ion-card-title>
-                <ion-icon [name]="wholesaler.favorite ? 'heart' : 'heart-outline'" class="heart-icon"
-                  (click)="toggleFavorite(wholesaler); $event.stopPropagation()"></ion-icon>
               </ion-card-header>
               <ion-card-content>
                 <p>

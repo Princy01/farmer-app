@@ -2,7 +2,7 @@
   <!-- Loading state while checking registration -->
   <div *ngIf="isCheckingRegistration" class="loading-container">
     <ion-spinner name="crescent"></ion-spinner>
-    <p>Checking registration status...</p>
+    <p>{{ 'DRIVER_REGISTRATION.CHECKING_STATUS' | translate }}</p>
   </div>
 
   <!-- Show form only when not checking and not registered -->
@@ -15,9 +15,9 @@
         <div class="step-info">
           <div class="step-number">
             <ion-icon [name]="getStepIcon()" class="step-icon"></ion-icon>
-            <span class="step-text">Step {{ currentStep }} of {{ totalSteps }}</span>
+            <span class="step-text">{{ 'DRIVER_REGISTRATION.STEP' | translate }} {{ currentStep }} {{ 'DRIVER_REGISTRATION.OF' | translate }} {{ totalSteps }}</span>
           </div>
-          <h2 class="step-title">{{ getStepTitle() }}</h2>
+          <h2 class="step-title">{{ getStepTitle() | translate }}</h2>
         </div>
       </div>
     </div>
@@ -29,8 +29,8 @@
           <div class="card-header-content">
             <ion-icon name="person" class="header-icon"></ion-icon>
             <div>
-              <ion-card-title>Personal Details</ion-card-title>
-              <ion-card-subtitle>Enter driver's basic information</ion-card-subtitle>
+              <ion-card-title>{{ 'DRIVER_REGISTRATION.PERSONAL_DETAILS' | translate }}</ion-card-title>
+              <ion-card-subtitle>{{ 'DRIVER_REGISTRATION.PERSONAL_DETAILS_SUBTITLE' | translate }}</ion-card-subtitle>
             </div>
           </div>
         </ion-card-header>
@@ -40,18 +40,18 @@
             <!-- Personal Information -->
             <div class="section-divider">
               <ion-icon name="person" class="section-icon"></ion-icon>
-              <span class="section-title">Personal Information</span>
+              <span class="section-title">{{ 'DRIVER_REGISTRATION.PERSONAL_INFO' | translate }}</span>
             </div>
 
             <ion-grid class="form-grid">
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">First Name *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.FIRST_NAME' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'first_name')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="first_name" placeholder="Enter first name" type="text">
+                      <ion-input formControlName="first_name" [placeholder]="'DRIVER_REGISTRATION.FIRST_NAME_PLACEHOLDER' | translate" type="text">
                       </ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'first_name')" class="error-text">
@@ -63,10 +63,10 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Last Name *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.LAST_NAME' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(driverInfoForm, 'last_name')" lines="none"
                       class="custom-item">
-                      <ion-input formControlName="last_name" placeholder="Enter last name" type="text">
+                      <ion-input formControlName="last_name" [placeholder]="'DRIVER_REGISTRATION.LAST_NAME_PLACEHOLDER' | translate" type="text">
                       </ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'last_name')" class="error-text">
@@ -78,9 +78,9 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Date of Birth *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.DOB' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(driverInfoForm, 'dob')" lines="none" class="custom-item">
-                      <ion-input formControlName="dob" type="date" [max]="today" placeholder="Select date"></ion-input>
+                      <ion-input formControlName="dob" type="date" [max]="today" [placeholder]="'DRIVER_REGISTRATION.SELECT_DATE' | translate"></ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'dob')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
@@ -94,18 +94,18 @@
             <!-- License Information -->
             <div class="section-divider">
               <ion-icon name="card" class="section-icon"></ion-icon>
-              <span class="section-title">License Information</span>
+              <span class="section-title">{{ 'DRIVER_REGISTRATION.LICENSE_INFO' | translate }}</span>
             </div>
 
             <ion-grid class="form-grid">
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">License Number *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.LICENSE_NUMBER' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'licence_no')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="licence_no" placeholder="Enter license number" type="text">
+                      <ion-input formControlName="licence_no" [placeholder]="'DRIVER_REGISTRATION.LICENSE_NUMBER_PLACEHOLDER' | translate" type="text">
                       </ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'licence_no')" class="error-text">
@@ -117,16 +117,16 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">License Type *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.LICENSE_TYPE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'licence_type')
                       " lines="none" class="custom-item">
-                      <ion-select formControlName="licence_type" placeholder="Select license type"
+                      <ion-select formControlName="licence_type" [placeholder]="'DRIVER_REGISTRATION.LICENSE_TYPE_PLACEHOLDER' | translate"
                         interface="action-sheet">
-                        <ion-select-option value="2W">2 Wheeler</ion-select-option>
-                        <ion-select-option value="LMV">Light Motor Vehicle</ion-select-option>
-                        <ion-select-option value="HMV">Heavy Motor Vehicle</ion-select-option>
-                        <ion-select-option value="TRANSPORT">Transport Vehicle</ion-select-option>
+                        <ion-select-option value="2W">{{ 'DRIVER_REGISTRATION.LICENSE_2W' | translate }}</ion-select-option>
+                        <ion-select-option value="LMV">{{ 'DRIVER_REGISTRATION.LICENSE_LMV' | translate }}</ion-select-option>
+                        <ion-select-option value="HMV">{{ 'DRIVER_REGISTRATION.LICENSE_HMV' | translate }}</ion-select-option>
+                        <ion-select-option value="TRANSPORT">{{ 'DRIVER_REGISTRATION.LICENSE_TRANSPORT' | translate }}</ion-select-option>
                       </ion-select>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'licence_type')" class="error-text">
@@ -141,12 +141,12 @@
                 <!-- License Issued Date -->
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">License Issued Date *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.LICENSE_ISSUED_DATE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'licence_issued_date')
                       " lines="none" class="custom-item">
                       <ion-input formControlName="licence_issued_date" type="date" [max]="today"
-                        placeholder="Select date"></ion-input>
+                        [placeholder]="'DRIVER_REGISTRATION.SELECT_DATE' | translate"></ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'licence_issued_date')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
@@ -160,12 +160,12 @@
                 <!-- License Expiry Date -->
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">License Expiry Date *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.LICENSE_EXPIRY_DATE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'licence_expiry_date')
                       " lines="none" class="custom-item">
                       <ion-input formControlName="licence_expiry_date" type="date" [min]="today"
-                        placeholder="Select date"></ion-input>
+                        [placeholder]="'DRIVER_REGISTRATION.SELECT_DATE' | translate"></ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'licence_expiry_date')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
@@ -181,18 +181,18 @@
             <!-- Contact Information -->
             <div class="section-divider">
               <ion-icon name="call" class="section-icon"></ion-icon>
-              <span class="section-title">Contact Information</span>
+              <span class="section-title">{{ 'DRIVER_REGISTRATION.CONTACT_INFO' | translate }}</span>
             </div>
 
             <ion-grid class="form-grid">
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Contact Number *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.CONTACT_NUMBER' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'contact_num')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="contact_num" type="tel" placeholder="Enter 10-digit number"
+                      <ion-input formControlName="contact_num" type="tel" [placeholder]="'DRIVER_REGISTRATION.CONTACT_NUMBER_PLACEHOLDER' | translate"
                         maxlength="10">
                       </ion-input>
                     </ion-item>
@@ -205,11 +205,11 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Additional Contact</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.ADDITIONAL_CONTACT' | translate }}</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'contact_num_addl')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="contact_num_addl" type="tel" placeholder="Enter 10-digit number"
+                      <ion-input formControlName="contact_num_addl" type="tel" [placeholder]="'DRIVER_REGISTRATION.CONTACT_NUMBER_PLACEHOLDER' | translate"
                         maxlength="10">
                       </ion-input>
                     </ion-item>
@@ -224,9 +224,9 @@
               <ion-row>
                 <ion-col size="12">
                   <div class="form-field">
-                    <ion-label class="field-label">Email</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.EMAIL' | translate }}</ion-label>
                     <ion-item [class.error-item]="hasError(driverInfoForm, 'email')" lines="none" class="custom-item">
-                      <ion-input formControlName="email" type="email" placeholder="Enter email address">
+                      <ion-input formControlName="email" type="email" [placeholder]="'DRIVER_REGISTRATION.EMAIL_PLACEHOLDER' | translate">
                       </ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'email')" class="error-text">
@@ -241,16 +241,16 @@
             <!-- Identity Information -->
             <div class="section-divider">
               <ion-icon name="card" class="section-icon"></ion-icon>
-              <span class="section-title">Identity Information</span>
+              <span class="section-title">{{ 'DRIVER_REGISTRATION.IDENTITY_INFO' | translate }}</span>
             </div>
 
             <ion-grid class="form-grid">
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Aadhar Number *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.AADHAR_NUMBER' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(driverInfoForm, 'aadhar')" lines="none" class="custom-item">
-                      <ion-input formControlName="aadhar" placeholder="Enter 12-digit Aadhar" type="text"
+                      <ion-input formControlName="aadhar" [placeholder]="'DRIVER_REGISTRATION.AADHAR_PLACEHOLDER' | translate" type="text"
                         maxlength="12">
                       </ion-input>
                     </ion-item>
@@ -263,9 +263,9 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">PAN Number *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.PAN_NUMBER' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(driverInfoForm, 'pan')" lines="none" class="custom-item">
-                      <ion-input formControlName="pan" placeholder="Enter PAN (AAAAA9999A)" type="text" maxlength="10"
+                      <ion-input formControlName="pan" [placeholder]="'DRIVER_REGISTRATION.PAN_PLACEHOLDER' | translate" type="text" maxlength="10"
                         style="text-transform: uppercase">
                       </ion-input>
                     </ion-item>
@@ -281,29 +281,29 @@
             <!-- Address Information -->
             <div class="section-divider">
               <ion-icon name="location" class="section-icon"></ion-icon>
-              <span class="section-title">Address Information</span>
+              <span class="section-title">{{ 'DRIVER_REGISTRATION.ADDRESS_INFO' | translate }}</span>
             </div>
 
             <ion-grid class="form-grid">
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Door Number</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.DOOR_NUMBER' | translate }}</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'address_door_no')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="address_door_no" placeholder="Enter door number"></ion-input>
+                      <ion-input formControlName="address_door_no" [placeholder]="'DRIVER_REGISTRATION.DOOR_NUMBER_PLACEHOLDER' | translate"></ion-input>
                     </ion-item>
                   </div>
                 </ion-col>
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Street *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.STREET' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'address_street')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="address_street" placeholder="Enter street"></ion-input>
+                      <ion-input formControlName="address_street" [placeholder]="'DRIVER_REGISTRATION.STREET_PLACEHOLDER' | translate"></ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'address_street')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
@@ -316,11 +316,11 @@
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">State *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.STATE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'address_state')
                       " lines="none" class="custom-item">
-                      <ion-select formControlName="address_state" placeholder="Select state" interface="action-sheet"
+                      <ion-select formControlName="address_state" [placeholder]="'DRIVER_REGISTRATION.STATE_PLACEHOLDER' | translate" interface="action-sheet"
                         (ionChange)="
                           onStateChange(
                             $event,
@@ -343,11 +343,11 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Town/City *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.TOWN_CITY' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'address_town')
                       " lines="none" class="custom-item">
-                      <ion-select formControlName="address_town" placeholder="Select town/city" interface="action-sheet"
+                      <ion-select formControlName="address_town" [placeholder]="'DRIVER_REGISTRATION.TOWN_CITY_PLACEHOLDER' | translate" interface="action-sheet"
                         [disabled]="!cities.length">
                         <ion-select-option *ngFor="let city of cities" [value]="city.city_name">
                           {{ city.city_name }} ({{ city.city_shortname }})
@@ -365,11 +365,11 @@
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Pin Code *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.PIN_CODE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'address_pin_code')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="address_pin_code" placeholder="Enter 6-digit pin code" type="text"
+                      <ion-input formControlName="address_pin_code" [placeholder]="'DRIVER_REGISTRATION.PIN_CODE_PLACEHOLDER' | translate" type="text"
                         maxlength="6">
                       </ion-input>
                     </ion-item>
@@ -382,11 +382,11 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Landmark</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.LANDMARK' | translate }}</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'address_landmark')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="address_landmark" placeholder="Enter landmark"></ion-input>
+                      <ion-input formControlName="address_landmark" [placeholder]="'DRIVER_REGISTRATION.LANDMARK_PLACEHOLDER' | translate"></ion-input>
                     </ion-item>
                   </div>
                 </ion-col>
@@ -396,18 +396,18 @@
             <!-- Bank Information (Required) -->
             <div class="section-divider">
               <ion-icon name="business" class="section-icon"></ion-icon>
-              <span class="section-title">Bank Information</span>
+              <span class="section-title">{{ 'DRIVER_REGISTRATION.BANK_INFO' | translate }}</span>
             </div>
 
             <ion-grid class="form-grid">
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Bank Account Number *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.BANK_ACCOUNT_NUMBER' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'bank_ac_no')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="bank_ac_no" placeholder="Enter account number"></ion-input>
+                      <ion-input formControlName="bank_ac_no" [placeholder]="'DRIVER_REGISTRATION.BANK_ACCOUNT_PLACEHOLDER' | translate"></ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'bank_ac_no')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
@@ -418,10 +418,10 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Bank Name *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.BANK_NAME' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(driverInfoForm, 'bank_name')" lines="none"
                       class="custom-item">
-                      <ion-input formControlName="bank_name" placeholder="Enter bank name"></ion-input>
+                      <ion-input formControlName="bank_name" [placeholder]="'DRIVER_REGISTRATION.BANK_NAME_PLACEHOLDER' | translate"></ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'bank_name')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
@@ -434,11 +434,11 @@
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Bank Branch *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.BANK_BRANCH' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'bank_branch')
                       " lines="none" class="custom-item">
-                      <ion-input formControlName="bank_branch" placeholder="Enter branch name"></ion-input>
+                      <ion-input formControlName="bank_branch" [placeholder]="'DRIVER_REGISTRATION.BANK_BRANCH_PLACEHOLDER' | translate"></ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'bank_branch')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
@@ -449,9 +449,9 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">IFSC Code *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.IFSC_CODE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(driverInfoForm, 'ifsc')" lines="none" class="custom-item">
-                      <ion-input formControlName="ifsc" placeholder="Enter IFSC code" style="text-transform: uppercase">
+                      <ion-input formControlName="ifsc" [placeholder]="'DRIVER_REGISTRATION.IFSC_PLACEHOLDER' | translate" style="text-transform: uppercase">
                       </ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'ifsc')" class="error-text">
@@ -465,11 +465,11 @@
               <ion-row>
                 <ion-col size="12">
                   <div class="form-field">
-                    <ion-label class="field-label">Bank Address *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.BANK_ADDRESS' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(driverInfoForm, 'bank_address')
                       " lines="none" class="custom-item">
-                      <ion-textarea formControlName="bank_address" placeholder="Enter bank address" rows="3"
+                      <ion-textarea formControlName="bank_address" [placeholder]="'DRIVER_REGISTRATION.BANK_ADDRESS_PLACEHOLDER' | translate" rows="3"
                         auto-grow="true">
                       </ion-textarea>
                     </ion-item>
@@ -493,9 +493,8 @@
           <div class="card-header-content">
             <ion-icon name="document-text" class="header-icon"></ion-icon>
             <div>
-              <ion-card-title>Document Upload</ion-card-title>
-              <ion-card-subtitle>Upload required documents (Images only, max 5MB
-                each)</ion-card-subtitle>
+              <ion-card-title>{{ 'DRIVER_REGISTRATION.DOCUMENT_UPLOAD' | translate }}</ion-card-title>
+              <ion-card-subtitle>{{ 'DRIVER_REGISTRATION.DOCUMENT_UPLOAD_SUBTITLE' | translate }}</ion-card-subtitle>
             </div>
           </div>
         </ion-card-header>
@@ -504,132 +503,22 @@
           <form [formGroup]="documentsForm">
             <ion-grid class="form-grid">
               <ion-row>
-                <!-- <ion-col size="12" size-md="6">
-              <div class="form-field">
-                <ion-label class="field-label">Aadhar Document</ion-label>
-                <div class="file-upload-wrapper">
-                  <div class="file-upload-container" *ngIf="!imagePreviewUrls.aadhar_img">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onFileSelected($event, 'aadhar_img')"
-                      class="file-input"
-                      id="aadhar-upload"
-                    />
-                    <label for="aadhar-upload" class="file-label">
-                      <ion-icon name="cloud-upload" class="upload-icon"></ion-icon>
-                      <span class="upload-text">Choose Aadhar Image</span>
-                      <span class="upload-hint">PNG, JPG up to 5MB</span>
-                    </label>
-                  </div>
-
-                  <div class="image-preview-container" *ngIf="imagePreviewUrls.aadhar_img">
-                    <img [src]="imagePreviewUrls.aadhar_img" alt="Aadhar Document" class="preview-image" />
-                    <div class="preview-overlay">
-
-                      <ion-button fill="clear" size="small" color="danger" (click)="clearDocument('aadhar_img')">
-                        <ion-icon name="trash" slot="icon-only"></ion-icon>
-                      </ion-button>
-                    </div>
-                    <div class="preview-badge">
-                      <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-                      <span>Uploaded</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ion-col>
-
-              <ion-col size="12" size-md="6">
-              <div class="form-field">
-                <ion-label class="field-label">PAN Document</ion-label>
-                <div class="file-upload-wrapper">
-                  <div class="file-upload-container" *ngIf="!imagePreviewUrls.pan_img">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onFileSelected($event, 'pan_img')"
-                      class="file-input"
-                      id="pan-upload"
-                    />
-                    <label for="pan-upload" class="file-label">
-                      <ion-icon name="cloud-upload" class="upload-icon"></ion-icon>
-                      <span class="upload-text">Choose PAN Image</span>
-                      <span class="upload-hint">PNG, JPG up to 5MB</span>
-                    </label>
-                  </div>
-
-                  <div class="image-preview-container" *ngIf="imagePreviewUrls.pan_img">
-                    <img [src]="imagePreviewUrls.pan_img" alt="PAN Document" class="preview-image" />
-                    <div class="preview-overlay">
-
-                      <ion-button fill="clear" size="small" color="danger" (click)="clearDocument('pan_img')">
-                        <ion-icon name="trash" slot="icon-only"></ion-icon>
-                      </ion-button>
-                    </div>
-                    <div class="preview-badge">
-                      <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-                      <span>Uploaded</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ion-col>
-          </ion-row>
-
-            <ion-row>
-            <ion-col size="12" size-md="6">
-              <div class="form-field">
-                <ion-label class="field-label">Driver Photo</ion-label>
-                <div class="file-upload-wrapper">
-                  <div class="file-upload-container" *ngIf="!imagePreviewUrls.driver_img">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onFileSelected($event, 'driver_img')"
-                      class="file-input"
-                      id="driver-upload"
-                    />
-                    <label for="driver-upload" class="file-label">
-                      <ion-icon name="cloud-upload" class="upload-icon"></ion-icon>
-                      <span class="upload-text">Choose Driver Photo</span>
-                      <span class="upload-hint">PNG, JPG up to 5MB</span>
-                    </label>
-                  </div>
-
-                  <div class="image-preview-container" *ngIf="imagePreviewUrls.driver_img">
-                    <img [src]="imagePreviewUrls.driver_img" alt="Driver Photo" class="preview-image" />
-                    <div class="preview-overlay">
-
-                      <ion-button fill="clear" size="small" color="danger" (click)="clearDocument('driver_img')">
-                        <ion-icon name="trash" slot="icon-only"></ion-icon>
-                      </ion-button>
-                    </div>
-                    <div class="preview-badge">
-                      <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-                      <span>Uploaded</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ion-col>-->
-
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">License Document *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.LICENSE_DOCUMENT' | translate }} *</ion-label>
                     <div class="file-upload-wrapper">
                       <div class="file-upload-container" *ngIf="!imagePreviewUrls.license_img">
                         <input type="file" accept="image/*" (change)="onFileSelected($event, 'license_img')"
                           class="file-input" id="license-upload" />
                         <label for="license-upload" class="file-label">
                           <ion-icon name="cloud-upload" class="upload-icon"></ion-icon>
-                          <span class="upload-text">Choose License Image</span>
-                          <span class="upload-hint">PNG, JPG up to 5MB</span>
+                          <span class="upload-text">{{ 'DRIVER_REGISTRATION.CHOOSE_LICENSE_IMAGE' | translate }}</span>
+                          <span class="upload-hint">{{ 'DRIVER_REGISTRATION.FILE_SIZE_HINT' | translate }}</span>
                         </label>
                       </div>
 
                       <div class="image-preview-container" *ngIf="imagePreviewUrls.license_img">
-                        <img [src]="imagePreviewUrls.license_img" alt="License Document" class="preview-image" />
+                        <img [src]="imagePreviewUrls.license_img" [alt]="'DRIVER_REGISTRATION.LICENSE_DOCUMENT' | translate" class="preview-image" />
                         <div class="preview-overlay">
 
                           <ion-button fill="clear" size="small" color="danger" (click)="clearDocument('license_img')">
@@ -638,7 +527,7 @@
                         </div>
                         <div class="preview-badge">
                           <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-                          <span>Uploaded</span>
+                          <span>{{ 'DRIVER_REGISTRATION.UPLOADED' | translate }}</span>
                         </div>
                       </div>
                     </div>
@@ -648,25 +537,23 @@
                     </div>
                   </div>
                 </ion-col>
-                <!-- </ion-row>
 
-            <ion-row> -->
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">RC Document *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.RC_DOCUMENT' | translate }} *</ion-label>
                     <div class="file-upload-wrapper">
                       <div class="file-upload-container" *ngIf="!imagePreviewUrls.rc_img">
                         <input type="file" accept="image/*" (change)="onFileSelected($event, 'rc_img')"
                           class="file-input" id="rc-upload" />
                         <label for="rc-upload" class="file-label">
                           <ion-icon name="cloud-upload" class="upload-icon"></ion-icon>
-                          <span class="upload-text">Choose RC Image</span>
-                          <span class="upload-hint">PNG, JPG up to 5MB</span>
+                          <span class="upload-text">{{ 'DRIVER_REGISTRATION.CHOOSE_RC_IMAGE' | translate }}</span>
+                          <span class="upload-hint">{{ 'DRIVER_REGISTRATION.FILE_SIZE_HINT' | translate }}</span>
                         </label>
                       </div>
 
                       <div class="image-preview-container" *ngIf="imagePreviewUrls.rc_img">
-                        <img [src]="imagePreviewUrls.rc_img" alt="RC Document" class="preview-image" />
+                        <img [src]="imagePreviewUrls.rc_img" [alt]="'DRIVER_REGISTRATION.RC_DOCUMENT' | translate" class="preview-image" />
                         <div class="preview-overlay">
 
                           <ion-button fill="clear" size="small" color="danger" (click)="clearDocument('rc_img')">
@@ -675,7 +562,7 @@
                         </div>
                         <div class="preview-badge">
                           <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-                          <span>Uploaded</span>
+                          <span>{{ 'DRIVER_REGISTRATION.UPLOADED' | translate }}</span>
                         </div>
                       </div>
                     </div>
@@ -685,42 +572,6 @@
                     </div>
                   </div>
                 </ion-col>
-
-                <!-- <ion-col size="12" size-md="6">
-              <div class="form-field">
-                <ion-label class="field-label">Insurance Document</ion-label>
-                <div class="file-upload-wrapper">
-                  <div class="file-upload-container" *ngIf="!imagePreviewUrls.insurance_img">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onFileSelected($event, 'insurance_img')"
-                      class="file-input"
-                      id="insurance-upload"
-                    />
-                    <label for="insurance-upload" class="file-label">
-                      <ion-icon name="cloud-upload" class="upload-icon"></ion-icon>
-                      <span class="upload-text">Choose Insurance Image</span>
-                      <span class="upload-hint">PNG, JPG up to 5MB</span>
-                    </label>
-                  </div>
-
-                  <div class="image-preview-container" *ngIf="imagePreviewUrls.insurance_img">
-                    <img [src]="imagePreviewUrls.insurance_img" alt="Insurance Document" class="preview-image" />
-                    <div class="preview-overlay">
-
-                      <ion-button fill="clear" size="small" color="danger" (click)="clearDocument('insurance_img')">
-                        <ion-icon name="trash" slot="icon-only"></ion-icon>
-                      </ion-button>
-                    </div>
-                    <div class="preview-badge">
-                      <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-                      <span>Uploaded</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ion-col> -->
               </ion-row>
             </ion-grid>
           </form>
@@ -735,8 +586,8 @@
           <div class="card-header-content">
             <ion-icon name="car" class="header-icon"></ion-icon>
             <div>
-              <ion-card-title>Vehicle Information</ion-card-title>
-              <ion-card-subtitle>Enter vehicle details</ion-card-subtitle>
+              <ion-card-title>{{ 'DRIVER_REGISTRATION.VEHICLE_INFO' | translate }}</ion-card-title>
+              <ion-card-subtitle>{{ 'DRIVER_REGISTRATION.VEHICLE_INFO_SUBTITLE' | translate }}</ion-card-subtitle>
             </div>
           </div>
         </ion-card-header>
@@ -747,9 +598,9 @@
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Vehicle Number *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.VEHICLE_NUMBER' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(vehicleForm, 'veh_number')" lines="none" class="custom-item">
-                      <ion-input formControlName="veh_number" placeholder="Enter vehicle number"
+                      <ion-input formControlName="veh_number" [placeholder]="'DRIVER_REGISTRATION.VEHICLE_NUMBER_PLACEHOLDER' | translate"
                         style="text-transform: uppercase">
                       </ion-input>
                     </ion-item>
@@ -762,10 +613,10 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Registration Date *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.REGISTRATION_DATE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(vehicleForm, 'reg_date')" lines="none" class="custom-item">
                       <ion-input formControlName="reg_date" type="date" [max]="today"
-                        placeholder="Select date"></ion-input>
+                        [placeholder]="'DRIVER_REGISTRATION.SELECT_DATE' | translate"></ion-input>
                     </ion-item>
                     <div *ngIf="hasError(vehicleForm, 'reg_date')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
@@ -777,9 +628,9 @@
               <ion-row>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">State *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.STATE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(vehicleForm, 'state')" lines="none" class="custom-item">
-                      <ion-select formControlName="state" placeholder="Select state" interface="action-sheet">
+                      <ion-select formControlName="state" [placeholder]="'DRIVER_REGISTRATION.STATE_PLACEHOLDER' | translate" interface="action-sheet">
                         <ion-select-option *ngFor="let state of states" [value]="state.state_shortname">
                           {{ state.state_name }} ({{ state.state_shortname }})
                         </ion-select-option>
@@ -793,13 +644,13 @@
                 </ion-col>
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Vehicle Type *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.VEHICLE_TYPE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(vehicleForm, 'type_id')" lines="none" class="custom-item">
-                      <ion-select formControlName="type_id" placeholder="Select vehicle type" interface="action-sheet">
-                        <ion-select-option value="1">Truck</ion-select-option>
-                        <ion-select-option value="2">Van</ion-select-option>
-                        <ion-select-option value="3">Tempo</ion-select-option>
-                        <ion-select-option value="4">Other</ion-select-option>
+                      <ion-select formControlName="type_id" [placeholder]="'DRIVER_REGISTRATION.VEHICLE_TYPE_PLACEHOLDER' | translate" interface="action-sheet">
+                        <ion-select-option value="1">{{ 'DRIVER_REGISTRATION.TRUCK' | translate }}</ion-select-option>
+                        <ion-select-option value="2">{{ 'DRIVER_REGISTRATION.VAN' | translate }}</ion-select-option>
+                        <ion-select-option value="3">{{ 'DRIVER_REGISTRATION.TEMPO' | translate }}</ion-select-option>
+                        <ion-select-option value="4">{{ 'DRIVER_REGISTRATION.OTHER' | translate }}</ion-select-option>
                       </ion-select>
                     </ion-item>
                     <div *ngIf="hasError(vehicleForm, 'type_id')" class="error-text">
@@ -811,12 +662,12 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Load Capacity (kg) *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.LOAD_CAPACITY' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
                         hasError(vehicleForm, 'load_capacity')
                       " lines="none" class="custom-item">
                       <ion-input formControlName="load_capacity" type="number"
-                        placeholder="Enter load capacity"></ion-input>
+                        [placeholder]="'DRIVER_REGISTRATION.LOAD_CAPACITY_PLACEHOLDER' | translate"></ion-input>
                     </ion-item>
                     <div *ngIf="hasError(vehicleForm, 'load_capacity')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
@@ -827,17 +678,17 @@
 
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">Fuel Type *</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.FUEL_TYPE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="hasError(vehicleForm, 'fuel_type')" lines="none" class="custom-item">
-                      <ion-select formControlName="fuel_type" placeholder="Select fuel type" interface="action-sheet">
-                        <ion-select-option value="Petrol">Petrol</ion-select-option>
-                        <ion-select-option value="Diesel">Diesel</ion-select-option>
-                        <ion-select-option value="CNG">CNG</ion-select-option>
-                        <ion-select-option value="Electric">Electric</ion-select-option>
-                        <ion-select-option value="CNG+Petrol">CNG + Petrol</ion-select-option>
-                        <ion-select-option value="Electric+Petrol">Electric + Petrol</ion-select-option>
-                        <ion-select-option value="CNG+Diesel">CNG + Diesel</ion-select-option>
-                        <ion-select-option value="Electric+Diesel">Electric + Diesel</ion-select-option>
+                      <ion-select formControlName="fuel_type" [placeholder]="'DRIVER_REGISTRATION.FUEL_TYPE_PLACEHOLDER' | translate" interface="action-sheet">
+                        <ion-select-option value="Petrol">{{ 'DRIVER_REGISTRATION.PETROL' | translate }}</ion-select-option>
+                        <ion-select-option value="Diesel">{{ 'DRIVER_REGISTRATION.DIESEL' | translate }}</ion-select-option>
+                        <ion-select-option value="CNG">{{ 'DRIVER_REGISTRATION.CNG' | translate }}</ion-select-option>
+                        <ion-select-option value="Electric">{{ 'DRIVER_REGISTRATION.ELECTRIC' | translate }}</ion-select-option>
+                        <ion-select-option value="CNG+Petrol">{{ 'DRIVER_REGISTRATION.CNG_PETROL' | translate }}</ion-select-option>
+                        <ion-select-option value="Electric+Petrol">{{ 'DRIVER_REGISTRATION.ELECTRIC_PETROL' | translate }}</ion-select-option>
+                        <ion-select-option value="CNG+Diesel">{{ 'DRIVER_REGISTRATION.CNG_DIESEL' | translate }}</ion-select-option>
+                        <ion-select-option value="Electric+Diesel">{{ 'DRIVER_REGISTRATION.ELECTRIC_DIESEL' | translate }}</ion-select-option>
                       </ion-select>
                     </ion-item>
                     <div *ngIf="hasError(vehicleForm, 'fuel_type')" class="error-text">
@@ -847,84 +698,15 @@
                   </div>
                 </ion-col>
 
-                <!-- <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Vehicle Make *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'veh_make')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="veh_make"
-                      placeholder="Enter vehicle make"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(vehicleForm, 'veh_make')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(vehicleForm, "veh_make") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Vehicle Model *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'veh_model')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="veh_model"
-                      placeholder="Enter vehicle model"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(vehicleForm, 'veh_model')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(vehicleForm, "veh_model") }}
-                  </div>
-                </div>
-              </ion-col> -->
-
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
-                    <ion-label class="field-label">RC Document</ion-label>
+                    <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.RC_DOCUMENT_DETAILS' | translate }}</ion-label>
                     <ion-item [class.error-item]="hasError(vehicleForm, 'rc_document')" lines="none"
                       class="custom-item">
-                      <ion-input formControlName="rc_document" placeholder="Enter RC document details"></ion-input>
+                      <ion-input formControlName="rc_document" [placeholder]="'DRIVER_REGISTRATION.RC_DOCUMENT_PLACEHOLDER' | translate"></ion-input>
                     </ion-item>
                   </div>
                 </ion-col>
-
-                <!-- <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">KMs Travelled</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(vehicleForm, 'kms_travelled')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="kms_travelled"
-                      type="number"
-                      placeholder="Enter KMs travelled"
-                    ></ion-input>
-                  </ion-item>
-                </div>
-              </ion-col> -->
               </ion-row>
             </ion-grid>
           </form>
@@ -932,191 +714,15 @@
       </ion-card>
     </div>
 
-    <!-- Step 4: Insurance Information -->
-    <!-- <div *ngIf="currentStep === 4" class="step-container">
-    <ion-card class="form-card">
-      <ion-card-header>
-        <div class="card-header-content">
-          <ion-icon name="shield" class="header-icon"></ion-icon>
-          <div>
-            <ion-card-title>Insurance Information</ion-card-title>
-            <ion-card-subtitle
-              >Enter vehicle insurance details</ion-card-subtitle
-            >
-          </div>
-        </div>
-      </ion-card-header>
-
-      <ion-card-content>
-        <form [formGroup]="insuranceForm">
-          <ion-grid class="form-grid">
-            <ion-row> -->
-    <!-- Insurance From Date -->
-    <!-- <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label"
-                    >Insurance From Date *</ion-label
-                  >
-                  <ion-item
-                    [class.error-item]="hasError(insuranceForm, 'frm_date')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="frm_date"
-                      type="date"
-                      placeholder="Select date"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(insuranceForm, 'frm_date')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(insuranceForm, "frm_date") }}
-                  </div>
-                </div>
-              </ion-col> -->
-
-    <!-- Insurance To Date -->
-    <!-- <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Insurance To Date *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(insuranceForm, 'to_date')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="to_date"
-                      type="date"
-                      [min]="today"
-                      placeholder="Select date"
-                    ></ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(insuranceForm, 'to_date')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(insuranceForm, "to_date") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-            <ion-row>
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label">Insurance Company *</ion-label>
-                  <ion-item
-                    [class.error-item]="hasError(insuranceForm, 'ins_company')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-select
-                      formControlName="ins_company"
-                      placeholder="Select insurance company"
-                      interface="action-sheet"
-                    >
-                      <ion-select-option value="LIC"
-                        >Life Insurance Corporation of India</ion-select-option
-                      >
-                      <ion-select-option value="ICICI"
-                        >ICICI Lombard</ion-select-option
-                      >
-                      <ion-select-option value="HDFC"
-                        >HDFC ERGO</ion-select-option
-                      >
-                      <ion-select-option value="BAJAJ"
-                        >Bajaj Allianz</ion-select-option
-                      >
-                      <ion-select-option value="TATA"
-                        >Tata AIG</ion-select-option
-                      >
-                      <ion-select-option value="RELIANCE"
-                        >Reliance General</ion-select-option
-                      >
-                      <ion-select-option value="NEW_INDIA"
-                        >New India Assurance</ion-select-option
-                      >
-                      <ion-select-option value="ORIENTAL"
-                        >Oriental Insurance</ion-select-option
-                      >
-                      <ion-select-option value="NATIONAL"
-                        >National Insurance</ion-select-option
-                      >
-                      <ion-select-option value="UNITED"
-                        >United India Insurance</ion-select-option
-                      >
-                      <ion-select-option value="OTHER">Other</ion-select-option>
-                    </ion-select>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(insuranceForm, 'ins_company')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(insuranceForm, "ins_company") }}
-                  </div>
-                </div>
-              </ion-col>
-
-              <ion-col size="12" size-md="6">
-                <div class="form-field">
-                  <ion-label class="field-label"
-                    >Amount Insured (₹) *</ion-label
-                  >
-                  <ion-item
-                    [class.error-item]="hasError(insuranceForm, 'amt_insured')"
-                    lines="none"
-                    class="custom-item"
-                  >
-                    <ion-input
-                      formControlName="amt_insured"
-                      type="number"
-                      placeholder="Enter insured amount"
-                      min="1"
-                    >
-                    </ion-input>
-                  </ion-item>
-                  <div
-                    *ngIf="hasError(insuranceForm, 'amt_insured')"
-                    class="error-text"
-                  >
-                    <ion-icon
-                      name="information-circle"
-                      class="error-icon"
-                    ></ion-icon>
-                    {{ getErrorMessage(insuranceForm, "amt_insured") }}
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </form>
-      </ion-card-content>
-    </ion-card>
-  </div> -->
-
-    <!-- Step 5: Review & Submit -->
+    <!-- Step 4: Review & Submit -->
     <div *ngIf="currentStep === 4" class="step-container">
       <ion-card class="form-card review-card">
         <ion-card-header>
           <div class="card-header-content">
             <ion-icon name="checkmark-circle" class="header-icon"></ion-icon>
             <div>
-              <ion-card-title>Review & Submit</ion-card-title>
-              <ion-card-subtitle>Please review all information before
-                submitting</ion-card-subtitle>
+              <ion-card-title>{{ 'DRIVER_REGISTRATION.REVIEW_SUBMIT' | translate }}</ion-card-title>
+              <ion-card-subtitle>{{ 'DRIVER_REGISTRATION.REVIEW_SUBMIT_SUBTITLE' | translate }}</ion-card-subtitle>
             </div>
           </div>
         </ion-card-header>
@@ -1126,44 +732,44 @@
           <div class="review-section">
             <div class="review-header">
               <ion-icon name="person" class="review-icon"></ion-icon>
-              <h3>Driver Information</h3>
+              <h3>{{ 'DRIVER_REGISTRATION.DRIVER_INFO' | translate }}</h3>
             </div>
             <div class="review-content">
               <div class="review-item">
-                <span class="review-label">Name:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.NAME' | translate }}:</span>
                 <span class="review-value">{{ formData.driverInfo.first_name }}
                   {{ formData.driverInfo.last_name }}</span>
               </div>
               <div class="review-item">
-                <span class="review-label">License:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.LICENSE' | translate }}:</span>
                 <span class="review-value">{{ formData.driverInfo.licence_no }} ({{
                   formData.driverInfo.licence_type
                   }})</span>
               </div>
               <div class="review-item">
-                <span class="review-label">Contact:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.CONTACT' | translate }}:</span>
                 <span class="review-value">{{
                   formData.driverInfo.contact_num
                   }}</span>
               </div>
               <div class="review-item" *ngIf="formData.driverInfo.email">
-                <span class="review-label">Email:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.EMAIL' | translate }}:</span>
                 <span class="review-value">{{
                   formData.driverInfo.email
                   }}</span>
               </div>
               <div class="review-item">
-                <span class="review-label">Aadhar:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.AADHAR' | translate }}:</span>
                 <span class="review-value">{{
                   formData.driverInfo.aadhar
                   }}</span>
               </div>
               <div class="review-item">
-                <span class="review-label">PAN:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.PAN' | translate }}:</span>
                 <span class="review-value">{{ formData.driverInfo.pan }}</span>
               </div>
               <div class="review-item">
-                <span class="review-label">Address:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.ADDRESS' | translate }}:</span>
                 <span class="review-value">
                   {{ formData.driverInfo.address_door_no }}
                   {{ formData.driverInfo.address_street }},
@@ -1179,124 +785,49 @@
           <div class="review-section">
             <div class="review-header">
               <ion-icon name="car" class="review-icon"></ion-icon>
-              <h3>Vehicle Information</h3>
+              <h3>{{ 'DRIVER_REGISTRATION.VEHICLE_INFO' | translate }}</h3>
             </div>
             <div class="review-content">
               <div class="review-item">
-                <span class="review-label">Vehicle Number:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.VEHICLE_NUMBER' | translate }}:</span>
                 <span class="review-value">{{
                   formData.vehicle.veh_number
                   }}</span>
               </div>
-              <!-- <div class="review-item">
-              <span class="review-label">Make & Model:</span>
-              <span class="review-value"
-                >{{ formData.vehicle.veh_make }}
-                {{ formData.vehicle.veh_model }}</span
-              >
-            </div> -->
               <div class="review-item">
-                <span class="review-label">Registration Date:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.REGISTRATION_DATE' | translate }}:</span>
                 <span class="review-value">{{
                   formData.vehicle.reg_date
                   }}</span>
               </div>
               <div class="review-item">
-                <span class="review-label">State:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.STATE' | translate }}:</span>
                 <span class="review-value">{{ formData.vehicle.state }}</span>
               </div>
               <div class="review-item">
-                <span class="review-label">Fuel Type:</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.FUEL_TYPE' | translate }}:</span>
                 <span class="review-value">{{
                   formData.vehicle.fuel_type
                   }}</span>
               </div>
               <div class="review-item">
-                <span class="review-label">Load Capacity:</span>
-                <span class="review-value">{{ formData.vehicle.load_capacity }} kg</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.LOAD_CAPACITY' | translate }}:</span>
+                <span class="review-value">{{ formData.vehicle.load_capacity }} {{ 'DRIVER_REGISTRATION.KG' | translate }}</span>
               </div>
               <div class="review-item" *ngIf="formData.vehicle.kms_travelled">
-                <span class="review-label">KMs Travelled:</span>
-                <span class="review-value">{{ formData.vehicle.kms_travelled }} km</span>
+                <span class="review-label">{{ 'DRIVER_REGISTRATION.KMS_TRAVELLED' | translate }}:</span>
+                <span class="review-value">{{ formData.vehicle.kms_travelled }} {{ 'DRIVER_REGISTRATION.KM' | translate }}</span>
               </div>
             </div>
           </div>
-
-          <!-- Insurance Info Review -->
-          <!-- <div class="review-section">
-          <div class="review-header">
-            <ion-icon name="shield" class="review-icon"></ion-icon>
-            <h3>Insurance Information</h3>
-          </div>
-          <div class="review-content">
-            <div class="review-item">
-              <span class="review-label">Insurance Company:</span>
-              <span class="review-value">{{
-                formData.insurance.ins_company
-              }}</span>
-            </div>
-            <div class="review-item">
-              <span class="review-label">Valid Period:</span>
-              <span class="review-value"
-                >{{ formData.insurance.frm_date }} to
-                {{ formData.insurance.to_date }}</span
-              >
-            </div>
-            <div class="review-item">
-              <span class="review-label">Amount Insured:</span>
-              <span class="review-value"
-                >₹{{ formData.insurance.amt_insured | number }}</span
-              >
-            </div>
-          </div>
-        </div> -->
 
           <!-- Documents Review -->
           <div class="review-section">
             <div class="review-header">
               <ion-icon name="document-text" class="review-icon"></ion-icon>
-              <h3>Documents Uploaded</h3>
+              <h3>{{ 'DRIVER_REGISTRATION.DOCUMENTS_UPLOADED' | translate }}</h3>
             </div>
             <div class="review-content">
-              <!-- <div class="document-status">
-              <ion-icon
-                [name]="
-                  formData.documents.aadhar_img
-                    ? 'checkmark-circle'
-                    : 'close-circle'
-                "
-                [class]="
-                  formData.documents.aadhar_img ? 'doc-uploaded' : 'doc-missing'
-                "
-              ></ion-icon>
-              <span>Aadhar Document</span>
-            </div>
-            <div class="document-status">
-              <ion-icon
-                [name]="
-                  formData.documents.pan_img
-                    ? 'checkmark-circle'
-                    : 'close-circle'
-                "
-                [class]="
-                  formData.documents.pan_img ? 'doc-uploaded' : 'doc-missing'
-                "
-              ></ion-icon>
-              <span>PAN Document</span>
-            </div>
-            <div class="document-status">
-              <ion-icon
-                [name]="
-                  formData.documents.driver_img
-                    ? 'checkmark-circle'
-                    : 'close-circle'
-                "
-                [class]="
-                  formData.documents.driver_img ? 'doc-uploaded' : 'doc-missing'
-                "
-              ></ion-icon>
-              <span>Driver Photo</span>
-            </div> -->
               <div class="document-status">
                 <ion-icon [name]="
                     formData.documents.license_img
@@ -1307,7 +838,7 @@
                       ? 'doc-uploaded'
                       : 'doc-missing'
                   "></ion-icon>
-                <span>License Document</span>
+                <span>{{ 'DRIVER_REGISTRATION.LICENSE_DOCUMENT' | translate }}</span>
               </div>
               <div class="document-status">
                 <ion-icon [name]="
@@ -1317,23 +848,8 @@
                   " [class]="
                     formData.documents.rc_img ? 'doc-uploaded' : 'doc-missing'
                   "></ion-icon>
-                <span>RC Document</span>
+                <span>{{ 'DRIVER_REGISTRATION.RC_DOCUMENT' | translate }}</span>
               </div>
-              <!-- <div class="document-status">
-              <ion-icon
-                [name]="
-                  formData.documents.insurance_img
-                    ? 'checkmark-circle'
-                    : 'close-circle'
-                "
-                [class]="
-                  formData.documents.insurance_img
-                    ? 'doc-uploaded'
-                    : 'doc-missing'
-                "
-              ></ion-icon>
-              <span>Insurance Document</span>
-            </div> -->
             </div>
           </div>
         </ion-card-content>
@@ -1344,17 +860,17 @@
     <div class="navigation-buttons">
       <ion-button *ngIf="currentStep > 1" fill="outline" (click)="previousStep()" class="nav-btn prev-btn">
         <ion-icon name="chevron-back" slot="start"></ion-icon>
-        Previous
+        {{ 'DRIVER_REGISTRATION.PREVIOUS' | translate }}
       </ion-button>
 
       <ion-button *ngIf="currentStep < 5" (click)="nextStep()" class="nav-btn next-btn">
-        Save & Next
+        {{ 'DRIVER_REGISTRATION.SAVE_NEXT' | translate }}
         <ion-icon name="chevron-forward" slot="end"></ion-icon>
       </ion-button>
 
       <ion-button *ngIf="currentStep === 5" (click)="submitForm()" class="nav-btn submit-btn">
         <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-        Complete Registration
+        {{ 'DRIVER_REGISTRATION.COMPLETE_REGISTRATION' | translate }}
       </ion-button>
     </div>
   </div>

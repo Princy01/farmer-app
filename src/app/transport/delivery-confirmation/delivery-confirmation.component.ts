@@ -36,6 +36,7 @@ import {
 } from 'ionicons/icons';
 import { AuthService } from 'src/app/auth/auth.service';
 import { DeliveryService, DeliveryDetails, DeliveryItem, ActiveJob, JobOrder } from './delivery-confirmation.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface DeliveryIssueType {
   id: string;
@@ -48,7 +49,7 @@ interface DeliveryIssueType {
   standalone: true,
   templateUrl: './delivery-confirmation.component.html',
   styleUrls: ['./delivery-confirmation.component.scss'],
-  imports: [IonicModule, FormsModule, CommonModule],
+  imports: [IonicModule, FormsModule, CommonModule, TranslatePipe],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
@@ -91,12 +92,12 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   resendTimerInterval: any;
 
   deliveryIssueTypes: DeliveryIssueType[] = [
-    { id: 'customer_absent', label: 'Customer Not Available', icon: 'person-outline' },
-    { id: 'wrong_address', label: 'Wrong/Unclear Address', icon: 'location-outline' },
-    { id: 'customer_refuses', label: 'Customer Refuses Delivery', icon: 'close-circle-outline' },
-    { id: 'vehicle_breakdown', label: 'Vehicle Breakdown', icon: 'car-outline' },
-    { id: 'goods_damaged', label: 'Goods Damaged in Transit', icon: 'warning-outline' },
-    { id: 'other', label: 'Other Issue', icon: 'help-circle-outline' }
+    { id: 'customer_absent', label: 'DELIVERY_CONFIRMATION.CUSTOMER_NOT_AVAILABLE', icon: 'person-outline' },
+    { id: 'wrong_address', label: 'DELIVERY_CONFIRMATION.WRONG_UNCLEAR_ADDRESS', icon: 'location-outline' },
+    { id: 'customer_refuses', label: 'DELIVERY_CONFIRMATION.CUSTOMER_REFUSES_DELIVERY', icon: 'close-circle-outline' },
+    { id: 'vehicle_breakdown', label: 'DELIVERY_CONFIRMATION.VEHICLE_BREAKDOWN', icon: 'car-outline' },
+    { id: 'goods_damaged', label: 'DELIVERY_CONFIRMATION.GOODS_DAMAGED_TRANSIT', icon: 'warning-outline' },
+    { id: 'other', label: 'DELIVERY_CONFIRMATION.OTHER_ISSUE', icon: 'help-circle-outline' }
   ];
 
   constructor(
@@ -106,7 +107,8 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     private deliveryService: DeliveryService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private translate: TranslateService
   ) {
     addIcons({
       'chevron-back': chevronBack,
@@ -167,14 +169,14 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   }
 
   private async loadActiveJobs() {
-    const loading = await this.loadingCtrl.create({ message: 'Loading active jobs...' });
+    const loading = await this.loadingCtrl.create({ message: this.translate.instant('DELIVERY_CONFIRMATION.LOADING_ACTIVE_JOBS') });
     await loading.present();
 
     try {
       this.activeJobs = await this.deliveryService.getActiveDeliveryJobs().toPromise() || [];
     } catch (error) {
       console.error('Error loading active jobs:', error);
-      await this.showToast('Failed to load active jobs.', 'danger');
+      await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_LOAD_ACTIVE_JOBS'), 'danger');
     } finally {
       await loading.dismiss();
     }
@@ -183,14 +185,14 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   private async loadOrdersForJob() {
     if (!this.jobId) return;
 
-    const loading = await this.loadingCtrl.create({ message: 'Loading job orders...' });
+    const loading = await this.loadingCtrl.create({ message: this.translate.instant('DELIVERY_CONFIRMATION.LOADING_JOB_ORDERS') });
     await loading.present();
 
     try {
       this.orders = await this.deliveryService.getOrdersInJob(this.jobId).toPromise() || [];
     } catch (error) {
       console.error('Error loading job orders:', error);
-      await this.showToast('Failed to load job orders.', 'danger');
+      await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_LOAD_JOB_ORDERS'), 'danger');
       this.router.navigate(['/transport/transport-dashboard']);
     } finally {
       await loading.dismiss();
@@ -208,7 +210,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     if (!this.jobId) return;
 
     this.isGeneratingOTP = true;
-    const loading = await this.loadingCtrl.create({ message: 'Generating OTP...' });
+    const loading = await this.loadingCtrl.create({ message: this.translate.instant('DELIVERY_CONFIRMATION.GENERATING_OTP') });
     await loading.present();
 
     try {
@@ -218,9 +220,9 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
         this.otpGenerated = true;
         this.startOtpTimer();
         this.startResendTimer();
-        await this.showToast('OTP sent to retailer.', 'success');
+        await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.OTP_SENT_RETAILER'), 'success');
       } else {
-        await this.showToast('Failed to generate OTP.', 'danger');
+        await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_GENERATE_OTP'), 'danger');
       }
     } finally {
       this.isGeneratingOTP = false;
@@ -247,7 +249,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   private async confirmDelivery() {
     this.isVerifyingOTP = true;
-    const loading = await this.loadingCtrl.create({ message: 'Confirming delivery...' });
+    const loading = await this.loadingCtrl.create({ message: this.translate.instant('DELIVERY_CONFIRMATION.CONFIRMING_DELIVERY') });
     await loading.present();
 
     try {
@@ -260,10 +262,10 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
       this.deliveryCompletedTime = new Date();
       this.clearTimers();
       this.showSuccessModal = true;
-      await this.showToast('Delivery confirmed successfully!', 'success');
+      await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.DELIVERY_CONFIRMED_SUCCESS'), 'success');
     } catch (error) {
       console.error('Error confirming delivery:', error);
-      await this.showToast('Failed to confirm delivery.', 'danger');
+      await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_CONFIRM_DELIVERY'), 'danger');
     } finally {
       this.isVerifyingOTP = false;
       await loading.dismiss();
@@ -301,7 +303,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   showOTPError() {
     this.otpDigits = '';  // Reset the string
-    this.otpError = 'Invalid OTP entered. Please check and try again.';  // Set error message
+    this.otpError = this.translate.instant('DELIVERY_CONFIRMATION.INVALID_OTP');  // Set error message
     console.log('Invalid OTP entered');
     setTimeout(() => {
       const firstInput = document.querySelector('input[name="otp-0"]') as HTMLInputElement;
@@ -370,8 +372,8 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   getResendButtonText(): string {
     return this.isOtpResendDisabled ?
-      `Resend in ${this.otpResendTimer}s` :
-      'Generate New OTP';
+      `${this.translate.instant('DELIVERY_CONFIRMATION.RESEND_IN')} ${this.otpResendTimer}s` :
+      this.translate.instant('DELIVERY_CONFIRMATION.GENERATE_NEW_OTP');
   }
 
   getConditionText(condition: string): string {
@@ -408,10 +410,10 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   async submitDeliveryIssue() {
     try {
       // Implement issue submission logic here (e.g., call a service)
-      await this.showToast('Issue reported successfully.', 'success');
+      await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.ISSUE_REPORTED_SUCCESS'), 'success');
       this.showIssueModal = false;
     } catch (error) {
-      await this.showToast('Failed to report issue.', 'danger');
+      await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_REPORT_ISSUE'), 'danger');
     }
   }
 
@@ -448,8 +450,8 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: 'Authentication Required',
-      message: 'Please log in to access this page.',
+      header: this.translate.instant('DELIVERY_CONFIRMATION.AUTH_REQUIRED'),
+      message: this.translate.instant('DELIVERY_CONFIRMATION.LOGIN_ACCESS_PAGE'),
       buttons: ['OK']
     });
     await alert.present();

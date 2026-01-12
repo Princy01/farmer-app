@@ -146,18 +146,18 @@
     justify-content: center;
     background: #f8f9fa;
     border-radius: 6px;
-    padding: 0.75rem 1rem;
-    min-width: 90px;
+    padding: 0.5rem 0.75rem;
+    min-width: 60px;
 
     .stepper-value {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: #333;
       line-height: 1;
     }
 
     .stepper-unit {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #666;
       margin-top: 0.25rem;
       font-weight: 500;
@@ -168,13 +168,13 @@
       gap: 0.25rem;
 
       .currency {
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 600;
         color: var(--ion-color-primary);
       }
 
       .stepper-value {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
       }
     }
   }
@@ -182,11 +182,13 @@
   .bulk-btn {
     --border-color: var(--ion-color-primary);
     --color: var(--ion-color-primary);
-    --padding-start: 0.75rem;
-    --padding-end: 0.75rem;
+    --padding-start: 0.5rem;
+    --padding-end: 0.5rem;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     height: 2.5rem;
+    min-width: 2.5rem;
+    flex-shrink: 0;
 
     ion-icon {
       font-size: 0.9rem;
@@ -253,15 +255,25 @@
   }
 
   .stepper-wrapper {
-    flex-wrap: wrap;
+    gap: 0.25rem;
 
     .stepper-value-box {
-      min-width: 80px;
+      min-width: 50px;
+
+      .stepper-value {
+        font-size: 1rem;
+      }
+
+      &.price .stepper-value {
+        font-size: 1.2rem;
+      }
     }
 
     .bulk-btn {
-      flex: 1 1 100%;
-      margin-top: 0.5rem;
+      min-width: 2rem;
+      --padding-start: 0.25rem;
+      --padding-end: 0.25rem;
+      font-size: 0.7rem;
     }
   }
 
