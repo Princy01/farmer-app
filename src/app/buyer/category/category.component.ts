@@ -152,7 +152,8 @@ export class CategoryPageComponent implements OnInit {
       }
 
       const cartRequest: AddCartItemRequest = {
-        wholesaler_id: wholesaler.id,
+        wholesaler_id: wholesaler.wholesaler_id,
+        branch_id: wholesaler.id,
         product_id: this.selectedProduct.product_id,
         quantity: 1,
         unit_id: 1, // Default unit, adjust if you have unit selection

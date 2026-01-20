@@ -36,6 +36,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { OrderService } from 'src/app/buyer/order-confirmation/order.service';
 
 interface CartItem {
+  selected_id?: number;
   product_id: number;
   product_name: string;
   quantity: number;
@@ -150,7 +151,9 @@ export class CheckoutComponent implements OnInit {
           const price = item.price_while_added || item.price || 0;
 
           return {
+            selected_id: item.selected_id,
             product_id: item.product_id,
+            branch_id: item.branch_id,
             product_name: item.product_name || item.name,
             quantity: item.quantity,
             unit_id: item.unit_id,
@@ -438,7 +441,8 @@ export class CheckoutComponent implements OnInit {
       hasTransport: this.hasRideRequest,
       transportData: this.transportData,
       pickupCityId: this.selectedBranch?.city_id,
-      pickupBranchId: this.selectedBranch?.branch_id
+      pickupBranchId: this.selectedBranch?.branch_id,
+      transporterCost: this.estimatedRidePrice
     };
 
     this.router.navigate(['/buyer/payment'], {

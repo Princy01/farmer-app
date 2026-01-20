@@ -285,6 +285,7 @@ export class CartComponent implements OnInit, OnDestroy {
       return;
     }
 
+    console.log('Proceeding to checkout with items:', this.cartProducts);
     this.router.navigate(['/buyer/checkout'], {
       state: {
         cartItems: this.cartProducts,

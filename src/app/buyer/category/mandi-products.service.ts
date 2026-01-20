@@ -15,6 +15,7 @@ export interface MandiProduct {
   wastage_measure_name?: string;
   product_id: number;
   id: number
+  wholesaler_id: number;
   current_stock: number;
   price_per_unit: number;
   date_of_entry: string;

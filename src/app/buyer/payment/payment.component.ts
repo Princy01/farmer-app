@@ -198,15 +198,18 @@ export class PaymentComponent implements OnInit, OnDestroy {
   }
 
   private async handleOrderCreation(orderData: any): Promise<any> {
+    console.log('Creating order with data:', orderData);
     // Map orderData to CreateOrderRequest
     const items: Item[] = orderData.items.map((item: any) => ({
+      selected_id: item.selected_id,
       product_id: item.product_id ?? item.productId,
       quantity: item.quantity,
       unit_id: item.unit_id ?? item.unitId ?? 1,
       price: item.price ?? item.price_while_added ?? item.latest_wholesaler_price ?? 0,
       discount_amount: item.discount_amount ?? item.discountAmount ?? 0,
       tax_amount: item.tax_amount ?? item.taxAmount ?? 0,
-      wholeseller_id: item.wholeseller_id ?? item.wholesaler_id ?? item.wholesellerId ?? item.wholesalerId
+      wholeseller_id: item.wholeseller_id ?? item.wholesaler_id ?? item.wholesellerId ?? item.wholesalerId,
+      branch_id: item.branch_id ?? item.branchId ?? undefined,
     }));
 
     // Calculate totals as backend expects them
@@ -218,6 +221,9 @@ export class PaymentComponent implements OnInit, OnDestroy {
       final_amount += (item.quantity * item.price) - item.discount_amount + item.tax_amount;
     }
 
+    const delivery_amount = orderData.transporterCost || 0;
+    final_amount += delivery_amount;
+
     const createOrderRequest: CreateOrderRequest = {
       date_of_order: new Date().toISOString().split('T')[0],
       order_status: 1,
@@ -228,7 +234,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
       total_order_amount: total_order_amount || 0,
       discount_amount: discount_amount || 0,
       tax_amount: tax_amount || 0,
-      final_amount: final_amount || 0
+      final_amount: final_amount || 0,
+      delivery_amount: delivery_amount || 0
     };
 
     const response = await this.orderService.createOrder(createOrderRequest).toPromise();

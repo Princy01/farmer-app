@@ -354,25 +354,25 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   applyFilters() {
     let filteredOrders = [...this.transportRequests];
 
-    filteredOrders = filteredOrders.filter(order =>
-      order.weight >= this.minLoad && order.weight <= this.maxLoad
-    );
+    // filteredOrders = filteredOrders.filter(order =>
+    //   order.weight >= this.minLoad && order.weight <= this.maxLoad
+    // );
 
-    if (this.priorityDeliveries) {
-      filteredOrders = filteredOrders.filter(order => order.urgency.toLowerCase() === 'high');
-    }
+    // if (this.priorityDeliveries) {
+    //   filteredOrders = filteredOrders.filter(order => order.urgency.toLowerCase() === 'high');
+    // }
 
-    if (this.delayedDeliveries) {
-      filteredOrders = filteredOrders.filter(order => new Date(order.delivery_date) < new Date());
-    }
+    // if (this.delayedDeliveries) {
+    //   filteredOrders = filteredOrders.filter(order => new Date(order.delivery_date) < new Date());
+    // }
 
-    if (this.sharedDeliveries) {
-      filteredOrders = filteredOrders.filter(order => order.weight <= 500);
-    }
+    // if (this.sharedDeliveries) {
+    //   filteredOrders = filteredOrders.filter(order => order.weight <= 500);
+    // }
 
-    if (this.singleDelivery) {
-      filteredOrders = filteredOrders.filter(order => order.weight > 500);
-    }
+    // if (this.singleDelivery) {
+    //   filteredOrders = filteredOrders.filter(order => order.weight > 500);
+    // }
 
     this.filteredRequests = filteredOrders;
 

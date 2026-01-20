@@ -10,6 +10,7 @@ export interface CartItem {
   product_id: number;
   product_name: string;
   wholesaler_id: number;
+  branch_id: number;
   image_path: string;
   wholesaler_name: string;
   unit_id: number;
@@ -21,6 +22,7 @@ export interface CartItem {
 
 export interface AddCartItemRequest {
   wholesaler_id: number;
+  branch_id?: number;
   product_id: number;
   quantity: number;
   unit_id: number;
@@ -53,7 +55,7 @@ export class CartService {
   constructor(
     private http: HttpClient,
     private authService: AuthService
-  ) {}
+  ) { }
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
@@ -104,76 +106,76 @@ export class CartService {
   }
 
   addItemToCart(item: AddCartItemRequest): Observable<any> {
-  const operationKey = this.createOperationKey('add', item.product_id);
+    const operationKey = this.createOperationKey('add', item.product_id);
 
-  if (this.pendingOperations.has(operationKey)) {
-    console.log('Add operation already in progress, skipping...');
-    return throwError(() => new Error('Add operation already in progress'));
+    if (this.pendingOperations.has(operationKey)) {
+      console.log('Add operation already in progress, skipping...');
+      return throwError(() => new Error('Add operation already in progress'));
+    }
+
+    this.pendingOperations.add(operationKey);
+    const headers = this.getAuthHeaders();
+
+    console.log('Adding item to cart:', item);
+
+    return this.http.post<{ message: string; selected_id: number }>(
+      `${this.apiUrl}/AddSelectedItemToCart`,
+      item,
+      { headers }
+    ).pipe(
+      tap((response) => {
+        console.log('Item added successfully:', response);
+        console.log('Selected ID:', response.selected_id);
+      }),
+      catchError(error => {
+        console.error('Error adding item to cart:', error);
+        return throwError(() => error);
+      }),
+      finalize(() => {
+        this.pendingOperations.delete(operationKey);
+      })
+    );
   }
-
-  this.pendingOperations.add(operationKey);
-  const headers = this.getAuthHeaders();
-
-  console.log('Adding item to cart:', item);
-
-  return this.http.post<{ message: string; selected_id: number }>(
-    `${this.apiUrl}/AddSelectedItemToCart`,
-    item,
-    { headers }
-  ).pipe(
-    tap((response) => {
-      console.log('Item added successfully:', response);
-      console.log('Selected ID:', response.selected_id);
-    }),
-    catchError(error => {
-      console.error('Error adding item to cart:', error);
-      return throwError(() => error);
-    }),
-    finalize(() => {
-      this.pendingOperations.delete(operationKey);
-    })
-  );
-}
 
 
   updateItemQuantity(selectedItemId: number, quantity: number): Observable<any> {
-  const operationKey = this.createOperationKey('update', selectedItemId);
+    const operationKey = this.createOperationKey('update', selectedItemId);
 
-  if (this.pendingOperations.has(operationKey)) {
-    console.log('Update operation already in progress, skipping...');
-    return throwError(() => new Error('Update operation already in progress'));
+    if (this.pendingOperations.has(operationKey)) {
+      console.log('Update operation already in progress, skipping...');
+      return throwError(() => new Error('Update operation already in progress'));
+    }
+
+    this.pendingOperations.add(operationKey);
+    const headers = this.getAuthHeaders();
+
+    const updateRequest: UpdateCartItemRequest = {
+      selected_item_id: selectedItemId,
+      quantity: quantity
+    };
+
+    console.log('=== Updating Item Quantity ===');
+    console.log('Request Payload:', JSON.stringify(updateRequest, null, 2));
+
+    return this.http.post<{ message: string; selected_item_id: number; new_quantity: number }>(
+      `${this.apiUrl}/UpdateCartItemQuantity`,
+      updateRequest,
+      { headers }
+    ).pipe(
+      tap((response) => {
+        console.log('=== Item Updated Successfully ===');
+        console.log('Response:', response);
+      }),
+      catchError(error => {
+        console.error('=== Error Updating Item ===');
+        console.error('Error:', error);
+        return throwError(() => error);
+      }),
+      finalize(() => {
+        this.pendingOperations.delete(operationKey);
+      })
+    );
   }
-
-  this.pendingOperations.add(operationKey);
-  const headers = this.getAuthHeaders();
-
-  const updateRequest: UpdateCartItemRequest = {
-    selected_item_id: selectedItemId,
-    quantity: quantity
-  };
-
-  console.log('=== Updating Item Quantity ===');
-  console.log('Request Payload:', JSON.stringify(updateRequest, null, 2));
-
-  return this.http.post<{ message: string; selected_item_id: number; new_quantity: number }>(
-    `${this.apiUrl}/UpdateCartItemQuantity`,
-    updateRequest,
-    { headers }
-  ).pipe(
-    tap((response) => {
-      console.log('=== Item Updated Successfully ===');
-      console.log('Response:', response);
-    }),
-    catchError(error => {
-      console.error('=== Error Updating Item ===');
-      console.error('Error:', error);
-      return throwError(() => error);
-    }),
-    finalize(() => {
-      this.pendingOperations.delete(operationKey);
-    })
-  );
-}
 
 
   deleteCartItem(selectedId: number): Observable<any> {

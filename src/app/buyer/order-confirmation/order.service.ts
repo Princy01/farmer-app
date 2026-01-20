@@ -13,6 +13,7 @@ export interface Item {
   wholeseller_id: number;
   product_name: string;
   unit_name: string; 
+  branch_id?: number;
 }
 
 export interface CreateOrderRequest {
@@ -22,6 +23,7 @@ export interface CreateOrderRequest {
   items: Item[];
   retailer_id?: number;
   wholeseller_id?: number;
+  delivery_amount?: number;
   total_order_amount?: number;
   discount_amount?: number;
   tax_amount?: number;
