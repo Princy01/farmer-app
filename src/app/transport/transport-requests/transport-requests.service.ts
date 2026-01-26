@@ -15,6 +15,13 @@ export interface Product {
   img_code: string;
 }
 
+export interface Branch {
+  branch_id?: number;
+  branch_name?: string;
+  branch_address?: string;
+  branch_number?: string;
+}
+
 // Order Item interface matching backend
 export interface OrderItem {
   order_item_id: number;
@@ -26,6 +33,7 @@ export interface OrderItem {
   wholeseller_price: number;
   agreed_quantity: number;
   product: Product;
+  branch?: Branch;
 }
 
 // Order interface matching backend

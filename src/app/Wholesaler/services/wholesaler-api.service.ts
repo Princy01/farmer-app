@@ -87,6 +87,10 @@ export interface ProductDetail {
   unit_id: number;
   unit_name: string;
   max_item_price: number;
+  branch_id?: number;
+  branch_name?: string;
+  branch_address?: string;
+  branch_number?: string;  
 }
 //for restocking recommendations screen
 interface MandiStock {
