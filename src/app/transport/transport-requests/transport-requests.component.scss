@@ -1,15 +1,74 @@
-// ============================================
-// COMPLETE TRANSPORT REQUESTS STYLES
-// ============================================
-
 // Base Content Styles
 .transport-requests-content {
   --background: #f8f9fa;
 }
 
-// ============================================
+// DRIVER AVAILABILITY HEADER
+.availability-header {
+  padding: 16px;
+  background: var(--ion-color-light);
+  margin-bottom: 0;
+
+  .availability-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    .availability-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+
+      .availability-icon {
+        font-size: 32px;
+        flex-shrink: 0;
+      }
+
+      .availability-text {
+        h3 {
+          margin: 0 0 2px 0;
+          font-size: 15px;
+          font-weight: 600;
+          color: var(--ion-color-dark);
+        }
+
+        .status-label {
+          margin: 0;
+          font-size: 13px;
+          font-weight: 500;
+
+          &.available {
+            color: var(--ion-color-success);
+          }
+
+          &.unavailable {
+            color: var(--ion-color-medium);
+          }
+        }
+      }
+    }
+
+    .availability-toggle {
+      flex-shrink: 0;
+      --handle-width: 26px;
+      --handle-height: 26px;
+      height: 32px;
+    }
+  }
+
+  .availability-divider {
+    height: 1px;
+    background: var(--ion-color-medium-tint);
+    margin-top: 16px;
+  }
+}
+
 // LOCATION PREFERENCES HEADER
-// ============================================
 .preferences-header {
   padding: 16px;
   background: var(--ion-color-light);
@@ -52,9 +111,51 @@
   }
 }
 
-// ============================================
+// UNAVAILABLE MESSAGE
+.unavailable-message {
+  padding: 16px;
+
+  ion-card {
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+
+    ion-card-content {
+      padding: 20px;
+
+      .message-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
+
+        .message-icon {
+          font-size: 48px;
+          opacity: 0.6;
+        }
+
+        .message-text {
+          h4 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--ion-color-dark);
+          }
+
+          p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--ion-color-medium);
+            line-height: 1.5;
+          }
+        }
+      }
+    }
+  }
+}
+
 // NO PREFERENCES MESSAGE
-// ============================================
 .no-preferences-message {
   padding: 0 16px;
   margin-bottom: 16px;
@@ -100,9 +201,7 @@
   }
 }
 
-// ============================================
 // SECTION HEADERS
-// ============================================
 .regular-section {
   margin-bottom: 2rem;
 }
@@ -135,9 +234,7 @@
   }
 }
 
-// ============================================
 // EMPTY STATE
-// ============================================
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
@@ -172,9 +269,7 @@
   }
 }
 
-// ============================================
 // REQUESTS GRID
-// ============================================
 .requests-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -182,9 +277,7 @@
   padding: 0 1rem;
 }
 
-// ============================================
 // REQUEST CARD
-// ============================================
 .request-card {
   background: #fff;
   border-radius: 20px;
@@ -199,9 +292,7 @@
   }
 }
 
-// ============================================
 // CARD HEADER
-// ============================================
 .card-header {
   margin-bottom: 1.5rem;
 
@@ -238,9 +329,7 @@
   --color: #4caf50;
 }
 
-// ============================================
 // ROUTE SECTION
-// ============================================
 .route-section {
   margin-bottom: 1.5rem;
 
@@ -288,9 +377,7 @@
   }
 }
 
-// ============================================
 // ORDER SPECIFICATIONS
-// ============================================
 .order-specs {
   margin-bottom: 1.5rem;
 
@@ -334,10 +421,8 @@
   }
 }
 
-// ============================================
-// PRICE SECTION
-// ============================================
-.price-section {
+ // PRICE SECTION
+ .price-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -378,10 +463,8 @@
   }
 }
 
-// ============================================
-// ORDER PREVIEW COMPACT BUTTON
-// ============================================
-.order-preview-compact {
+ // ORDER PREVIEW COMPACT BUTTON
+ .order-preview-compact {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid #f0f0f0;
@@ -407,10 +490,8 @@
   }
 }
 
-// ============================================
-// CARD FOOTER & ACTION BUTTONS
-// ============================================
-.card-footer {
+ // CARD FOOTER & ACTION BUTTONS
+ .card-footer {
   margin-top: 1.5rem;
   border-top: 1px solid #f0f0f0;
   padding-top: 1rem;
@@ -489,10 +570,8 @@
   cursor: not-allowed;
 }
 
-// ============================================
-// FILTER FOOTER
-// ============================================
-.filter-footer {
+ // FILTER FOOTER
+ .filter-footer {
   --background: #fff;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -522,10 +601,8 @@
   }
 }
 
-// ============================================
-// ANIMATIONS
-// ============================================
-@keyframes slideDown {
+ // ANIMATIONS
+ @keyframes slideDown {
   from {
     opacity: 0;
     max-height: 0;
@@ -553,9 +630,7 @@
   animation: fadeIn 0.5s ease-out;
 }
 
-// ============================================
-// RESPONSIVE DESIGN
-// ============================================
+ // RESPONSIVE DESIGN
 
 // Tablets (768px and below)
 @media (max-width: 768px) {
@@ -703,10 +778,8 @@
   }
 }
 
-// ============================================
-// PRINT STYLES
-// ============================================
-@media print {
+ // PRINT STYLES
+ @media print {
   .filter-footer,
   .preferences-header,
   .action-buttons {
@@ -720,10 +793,8 @@
   }
 }
 
-// ============================================
-// DARK MODE SUPPORT (if needed)
-// ============================================
-@media (prefers-color-scheme: dark) {
+ // DARK MODE SUPPORT (if needed)
+ @media (prefers-color-scheme: dark) {
   .transport-requests-content {
     --background: #1a1a1a;
   }
@@ -738,10 +809,8 @@
   }
 }
 
-// ============================================
-// MODAL STYLING (Global)
-// ============================================
-:host ::ng-deep {
+ // MODAL STYLING (Global)
+ :host ::ng-deep {
   .order-details-modal {
     --height: 90%;
     --border-radius: 20px 20px 0 0;
@@ -751,7 +820,7 @@
 ion-modal.order-details-modal {
   --height: 90%;
   --border-radius: 20px 20px 0 0;
-  
+
   @media (min-width: 768px) {
     --width: 600px;
     --height: 85%;

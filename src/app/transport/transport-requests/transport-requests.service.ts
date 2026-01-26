@@ -85,6 +85,15 @@ export interface RejectJobRequest {
   job_id: number;
 }
 
+export interface DriverStatusResponse {
+  driver_id: number;
+  status: string; // 'active' | 'inactive'
+}
+
+export interface UpdateDriverStatusRequest {
+  status: string; // 'active' | 'inactive'
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -139,6 +148,20 @@ export class TransportRequestService {
     return this.http.post<{message: string}>(`${this.apiUrl}/requests/reject-transport-request`, body, { headers });
   }
 
+  getDriverStatus(): Observable<DriverStatusResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<DriverStatusResponse>(`${this.apiUrl}/driver/status`, { headers });
+  }
+
+  updateDriverStatus(status: string): Observable<{message: string}> {
+    const headers = this.getAuthHeaders();
+    const body: UpdateDriverStatusRequest = {
+      status: status
+    };
+
+    return this.http.post<{message: string}>(`${this.apiUrl}/driver/status`, body, { headers });
+  }
+
   // Utility methods for working with the new data structure
   getTotalOrderValue(request: TransportRequest): number {
     if (!request.orders || request.orders.length === 0) return 0;
@@ -147,7 +170,7 @@ export class TransportRequestService {
 
   getTotalItemCount(request: TransportRequest): number {
     if (!request.orders || request.orders.length === 0) return 0;
-    return request.orders.reduce((total, order) => 
+    return request.orders.reduce((total, order) =>
       total + order.items.reduce((itemTotal, item) => itemTotal + item.quantity, 0), 0
     );
   }
@@ -155,13 +178,13 @@ export class TransportRequestService {
   getUniqueProductCategories(request: TransportRequest): Set<number> {
     const categories = new Set<number>();
     if (!request.orders) return categories;
-    
+
     request.orders.forEach(order => {
       order.items.forEach(item => {
         categories.add(item.product.category_id);
       });
     });
-    
+
     return categories;
   }
 

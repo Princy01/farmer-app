@@ -58,6 +58,11 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   hasLocationPreferences = false;
   locationSummary = '';
 
+  // Driver availability status
+  isDriverAvailable: boolean = false;
+  isLoadingStatus: boolean = true;
+  driverStatus: string = 'inactive';
+
   private modalController = inject(ModalController);
 
   constructor(
@@ -78,6 +83,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.setupLocationPreferences();
+    this.loadDriverStatus();
     this.loadTransportRequests();
     this.startPolling();
   }
@@ -125,7 +131,63 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
   }
 
+  private loadDriverStatus() {
+    this.isLoadingStatus = true;
+    const sub = this.transportRequestService.getDriverStatus().subscribe({
+      next: (response) => {
+        this.driverStatus = response.status;
+        this.isDriverAvailable = response.status === 'active';
+        this.isLoadingStatus = false;
+        console.log(`Driver status loaded: ${this.driverStatus}`);
+      },
+      error: (error) => {
+        console.error('Failed to load driver status:', error);
+        this.isLoadingStatus = false;
+        this.showToast(this.translate.instant('TRANSPORT_REQUESTS.STATUS_LOAD_FAILED'), 'danger');
+      }
+    });
+
+    this.subscription.add(sub);
+  }
+
+  toggleDriverAvailability(event: any) {
+    const newStatus = event.detail.checked ? 'active' : 'inactive';
+
+    const sub = this.transportRequestService.updateDriverStatus(newStatus).subscribe({
+      next: (response) => {
+        this.driverStatus = newStatus;
+        this.isDriverAvailable = newStatus === 'active';
+
+        const messageKey = this.isDriverAvailable
+          ? 'TRANSPORT_REQUESTS.NOW_AVAILABLE'
+          : 'TRANSPORT_REQUESTS.NOW_UNAVAILABLE';
+
+        this.showToast(this.translate.instant(messageKey), 'success');
+
+        // Reload requests when becoming available
+        if (this.isDriverAvailable) {
+          this.loadTransportRequests();
+        }
+      },
+      error: (error) => {
+        console.error('Failed to update driver status:', error);
+        // Revert toggle on error
+        event.target.checked = !event.detail.checked;
+        this.showToast(this.translate.instant('TRANSPORT_REQUESTS.STATUS_UPDATE_FAILED'), 'danger');
+      }
+    });
+
+    this.subscription.add(sub);
+  }
+
   private loadTransportRequests() {
+    // Only load requests if driver is available
+    if (!this.isDriverAvailable) {
+      this.transportRequests = [];
+      this.filteredRequests = [];
+      return;
+    }
+
     const preferences = this.locationPreferenceService.getCurrentPreferences();
 
     const sub = this.transportRequestService.getTransportRequests(

@@ -1,4 +1,31 @@
 <ion-content class="transport-requests-content">
+  <!-- Driver Availability Toggle -->
+  <div class="availability-header">
+    <div class="availability-container">
+      <div class="availability-info">
+        <ion-icon
+          [name]="isDriverAvailable ? 'checkmark-circle' : 'close-circle'"
+          [color]="isDriverAvailable ? 'success' : 'medium'"
+          class="availability-icon"
+        ></ion-icon>
+        <div class="availability-text">
+          <h3>{{ 'TRANSPORT_REQUESTS.AVAILABILITY_STATUS' | translate }}</h3>
+          <p class="status-label" [class.available]="isDriverAvailable" [class.unavailable]="!isDriverAvailable">
+            {{ (isDriverAvailable ? 'TRANSPORT_REQUESTS.AVAILABLE' : 'TRANSPORT_REQUESTS.UNAVAILABLE') | translate }}
+          </p>
+        </div>
+      </div>
+      <ion-toggle
+        [checked]="isDriverAvailable"
+        (ionChange)="toggleDriverAvailability($event)"
+        [disabled]="isLoadingStatus"
+        color="success"
+        class="availability-toggle"
+      ></ion-toggle>
+    </div>
+    <div class="availability-divider"></div>
+  </div>
+
   <!-- Location Preferences Header -->
   <div class="preferences-header">
     <div class="preference-info">
@@ -19,8 +46,23 @@
     <div class="preference-divider"></div>
   </div>
 
+  <!-- Driver Unavailable Message -->
+  <div class="unavailable-message" *ngIf="!isDriverAvailable">
+    <ion-card>
+      <ion-card-content>
+        <div class="message-content">
+          <ion-icon name="close-circle-outline" color="medium" class="message-icon"></ion-icon>
+          <div class="message-text">
+            <h4>{{ 'TRANSPORT_REQUESTS.YOU_ARE_UNAVAILABLE' | translate }}</h4>
+            <p>{{ 'TRANSPORT_REQUESTS.UNAVAILABLE_MESSAGE' | translate }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
   <!-- No Preferences Message -->
-  <div class="no-preferences-message" *ngIf="!hasLocationPreferences">
+  <div class="no-preferences-message" *ngIf="!hasLocationPreferences && isDriverAvailable">
     <ion-card>
       <ion-card-content>
         <div class="message-content">
@@ -38,7 +80,7 @@
   </div>
 
   <!-- Transport Requests Section -->
-  <div class="regular-section" *ngIf="hasLocationPreferences">
+  <div class="regular-section" *ngIf="hasLocationPreferences && isDriverAvailable">
     <div class="section-header">
       <h2 class="section-title">{{ 'TRANSPORT_REQUESTS.AVAILABLE_REQUESTS' | translate }}</h2>
       <ion-badge color="primary" class="count-badge">{{pendingDeliveries.length}}</ion-badge>
@@ -200,7 +242,7 @@
 </ion-content>
 
 <!-- Filter and Sort Footer -->
-<ion-footer class="filter-footer" *ngIf="hasLocationPreferences">
+<ion-footer class="filter-footer" *ngIf="hasLocationPreferences && isDriverAvailable">
   <ion-toolbar class="filter-toolbar">
     <div class="filter-actions">
       <ion-button fill="clear" class="filter-button" (click)="openFilterModal()">

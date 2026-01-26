@@ -1343,7 +1343,16 @@
       "SORT_PRICE_DESC": "Price: Highest First",
       "SORT_QUANTITY_ASC": "Weight: Lightest First",
       "SORT_QUANTITY_DESC": "Weight: Heaviest First",
-      "SORT_ORDER_VALUE_DESC": "Order Value: Highest First"
+      "SORT_ORDER_VALUE_DESC": "Order Value: Highest First",
+      "AVAILABILITY_STATUS": "Availability Status",
+      "AVAILABLE": "Available",
+      "UNAVAILABLE": "Unavailable",
+      "YOU_ARE_UNAVAILABLE": "You Are Currently Unavailable",
+      "UNAVAILABLE_MESSAGE": "Turn on your availability to start receiving transport requests from customers in your service areas.",
+      "NOW_AVAILABLE": "You are now available! You will start receiving transport requests.",
+      "NOW_UNAVAILABLE": "You are now unavailable. You will not receive new transport requests.",
+      "STATUS_LOAD_FAILED": "Failed to load availability status. Please try again.",
+      "STATUS_UPDATE_FAILED": "Failed to update availability status. Please try again."
     },
     "PICKUP_ORDERS": {
       "JOBS": "Jobs",
@@ -1598,7 +1607,7 @@
     "DRIVER_ONLY_ACCESS": "This page is only accessible to drivers. Please login with driver credentials."
   },
 
-  
+
   "DELIVERY_CONFIRMATION": {
     "ACTIVE_DELIVERY_JOBS": "Active Delivery Jobs",
     "JOB_LABEL": "Job",

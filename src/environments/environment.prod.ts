@@ -1,7 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl : 'http://ekadyu.org:3000',
+  apiUrl : 'http://160.250.204.132:3000',
 
-  translateApiUrl : 'http://ekadyu.org:8000'
-
+  translateApiUrl : 'http://160.250.204.132:8000'
 };
