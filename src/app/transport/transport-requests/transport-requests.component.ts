@@ -32,6 +32,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   filteredRequests: TransportRequest[] = [];
   private subscription = new Subscription();
   private pollInterval: any;
+  private visibilityCheckInterval: any;
+  private citiesCache: Map<number, string> = new Map(); // Cache city ID to name mapping
 
   // Driver configuration
   transporterId: string = 'T001';
@@ -53,6 +55,16 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   // Request states tracking
   acceptedRequests = new Set<number>();
   rejectedRequests = new Set<number>();
+
+  // Transit/Waiting time tracking
+  private requestVisibilityMap = new Map<number, {
+    isVisible: boolean;
+    showCount: number;
+    lastToggleTime: number;
+  }>();
+  private readonly TRANSIT_TIME_MS = 60 * 1000; // 1 minute
+  private readonly WAITING_TIME_MS = 3 * 60 * 1000; // 3 minutes
+  private readonly MAX_SHOW_COUNT = 3; // Show 3 times maximum
 
   // Location preferences
   hasLocationPreferences = false;
@@ -82,6 +94,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.loadRejectedRequests();
+    this.loadCityNames(); // Load city names for mapping
     this.setupLocationPreferences();
     this.loadDriverStatus();
     this.loadTransportRequests();
@@ -120,14 +134,23 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   private startPolling() {
+    // Poll for new requests every 5 seconds
     this.pollInterval = setInterval(() => {
       this.loadTransportRequests();
-    }, 30000);
+    }, 5000);
+
+    // Check request visibility states every second
+    this.visibilityCheckInterval = setInterval(() => {
+      this.updateRequestVisibility();
+    }, 1000);
   }
 
   private stopPolling() {
     if (this.pollInterval) {
       clearInterval(this.pollInterval);
+    }
+    if (this.visibilityCheckInterval) {
+      clearInterval(this.visibilityCheckInterval);
     }
   }
 
@@ -190,12 +213,17 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     const preferences = this.locationPreferenceService.getCurrentPreferences();
 
-    const sub = this.transportRequestService.getTransportRequests(
-      preferences.cities.length > 0 ? preferences.cities : undefined,
-      preferences.branches.length > 0 ? preferences.branches : undefined
-    ).subscribe({
+    // Use the first city name if available (backend accepts single city parameter)
+    let cityName: string | undefined = undefined;
+    if (preferences.cities.length > 0) {
+      const cityId = preferences.cities[0];
+      cityName = this.citiesCache.get(cityId);
+    }
+
+    const sub = this.transportRequestService.getTransportRequests(cityName).subscribe({
       next: (response) => {
-        this.transportRequests = response.delivery_requests || [];
+        this.transportRequests = response || [];
+        this.initializeRequestVisibility();
         this.applyFilters();
         console.log(`Loaded ${this.transportRequests.length} transport requests`);
       },
@@ -326,19 +354,18 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           text: this.translate.instant('TRANSPORT_REQUESTS.REJECT'),
           role: 'destructive',
           handler: async () => {
-            const sub = this.transportRequestService.rejectTransportRequest(request.job_id)
-              .subscribe({
-                next: () => {
-                  this.rejectedRequests.add(request.job_id);
-                  this.showToast(this.translate.instant('TRANSPORT_REQUESTS.REJECTED_SUCCESS'), 'warning');
-                },
-                error: (error) => {
-                  console.error('Failed to reject request:', error);
-                  this.showToast(this.translate.instant('TRANSPORT_REQUESTS.REJECT_FAILED'), 'danger');
-                }
-              });
+            // Handle rejection on frontend only - don't burden backend
+            this.rejectedRequests.add(request.job_id);
+            this.requestVisibilityMap.delete(request.job_id);
 
-            this.subscription.add(sub);
+            // Store rejection in localStorage for persistence
+            this.saveRejectedRequest(request.job_id);
+
+            this.applyFilters();
+            await this.showToast(
+              this.translate.instant('TRANSPORT_REQUESTS.REJECTED_SUCCESS'),
+              'medium'
+            );
           },
         },
       ]
@@ -536,6 +563,107 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   get pendingDeliveries(): TransportRequest[] {
-    return this.filteredRequests;
+    return this.filteredRequests.filter(request => {
+      // Filter out accepted and rejected requests
+      if (this.acceptedRequests.has(request.job_id) || this.rejectedRequests.has(request.job_id)) {
+        return false;
+      }
+
+      // Apply visibility logic - only show if currently visible
+      const visibilityState = this.requestVisibilityMap.get(request.job_id);
+      return visibilityState?.isVisible ?? true;
+    });
+  }
+
+  // Initialize visibility tracking for new requests
+  private initializeRequestVisibility() {
+    this.transportRequests.forEach(request => {
+      if (!this.requestVisibilityMap.has(request.job_id)) {
+        // New request - show it immediately
+        this.requestVisibilityMap.set(request.job_id, {
+          isVisible: true,
+          showCount: 1,
+          lastToggleTime: Date.now()
+        });
+      }
+    });
+
+    // Clean up visibility map for requests that no longer exist
+    const currentJobIds = new Set(this.transportRequests.map(r => r.job_id));
+    for (const jobId of this.requestVisibilityMap.keys()) {
+      if (!currentJobIds.has(jobId) && !this.acceptedRequests.has(jobId) && !this.rejectedRequests.has(jobId)) {
+        this.requestVisibilityMap.delete(jobId);
+      }
+    }
+  }
+
+  // Update request visibility based on transit/waiting time logic
+  private updateRequestVisibility() {
+    const now = Date.now();
+
+    this.requestVisibilityMap.forEach((state, jobId) => {
+      // Skip if max show count reached
+      if (state.showCount >= this.MAX_SHOW_COUNT) {
+        state.isVisible = false;
+        return;
+      }
+
+      const timeSinceLastToggle = now - state.lastToggleTime;
+
+      if (state.isVisible) {
+        // Currently visible - check if transit time (1 min) has passed
+        if (timeSinceLastToggle >= this.TRANSIT_TIME_MS) {
+          state.isVisible = false;
+          state.lastToggleTime = now;
+          console.log(`Job ${jobId} entering waiting period (shown ${state.showCount}/${this.MAX_SHOW_COUNT} times)`);
+        }
+      } else {
+        // Currently hidden - check if waiting time (3 min) has passed
+        if (timeSinceLastToggle >= this.WAITING_TIME_MS) {
+          state.isVisible = true;
+          state.showCount++;
+          state.lastToggleTime = now;
+          console.log(`Job ${jobId} becoming visible again (${state.showCount}/${this.MAX_SHOW_COUNT})`);
+        }
+      }
+    });
+
+    // Trigger change detection by updating filtered requests
+    this.applyFilters();
+  }
+
+  // Load rejected requests from localStorage
+  private loadRejectedRequests() {
+    const stored = localStorage.getItem('rejected_transport_requests');
+    if (stored) {
+      try {
+        const rejectedArray = JSON.parse(stored) as number[];
+        this.rejectedRequests = new Set(rejectedArray);
+      } catch (error) {
+        console.error('Failed to load rejected requests:', error);
+      }
+    }
+  }
+
+  // Save rejected request to localStorage
+  private saveRejectedRequest(jobId: number) {
+    const rejectedArray = Array.from(this.rejectedRequests);
+    localStorage.setItem('rejected_transport_requests', JSON.stringify(rejectedArray));
+  }
+
+  // Load city names and cache them
+  private loadCityNames() {
+    const sub = this.locationPreferenceService.getCities().subscribe({
+      next: (cities) => {
+        cities.forEach(city => {
+          this.citiesCache.set(city.id, city.city_name);
+        });
+        console.log(`Loaded ${cities.length} cities for mapping`);
+      },
+      error: (error) => {
+        console.error('Failed to load city names:', error);
+      }
+    });
+    this.subscription.add(sub);
   }
 }
