@@ -6,10 +6,15 @@
       </ion-menu-button>
     </ion-buttons>
 
-    <ion-title class="app-title">{{ 'BUYER_HOME.APP_TITLE' | translate }}</ion-title>
+    <ion-title class="app-title">{{
+      "BUYER_HOME.APP_TITLE" | translate
+    }}</ion-title>
 
     <ion-buttons slot="end">
-      <ion-button (click)="openLanguagePopover($event)" class="header-btn language-btn">
+      <ion-button
+        (click)="openLanguagePopover($event)"
+        class="header-btn language-btn"
+      >
         <ion-icon name="language-outline" slot="end"></ion-icon>
         <!-- <ion-icon name="chevron-down-outline" slot="end"></ion-icon> -->
       </ion-button>
@@ -23,10 +28,17 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-menu side="start" menuId="buyer-menu" contentId="buyer-main-content" class="custom-menu">
+<ion-menu
+  side="start"
+  menuId="buyer-menu"
+  contentId="buyer-main-content"
+  class="custom-menu"
+>
   <ion-header>
     <ion-toolbar class="menu-toolbar">
-      <ion-title class="menu-title">{{ 'BUYER_HOME.MENU_TITLE' | translate }}</ion-title>
+      <ion-title class="menu-title">{{
+        "BUYER_HOME.MENU_TITLE" | translate
+      }}</ion-title>
       <ion-buttons slot="end">
         <ion-button (click)="closeMenu()" class="menu-close-btn">
           <ion-icon name="close-outline"></ion-icon>
@@ -37,29 +49,76 @@
 
   <ion-content class="menu-content">
     <ion-list class="menu-list">
-      <ion-item button (click)="navigateToProfile()" lines="none" class="menu-item">
-        <ion-icon name="person-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'BUYER_HOME.PROFILE' | translate }}</ion-label>
+      <ion-item
+        button
+        (click)="navigateToProfile()"
+        lines="none"
+        class="menu-item"
+      >
+        <ion-icon
+          name="person-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
+        <ion-label>{{ "BUYER_HOME.PROFILE" | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToOrderHistory()" lines="none" class="menu-item">
-        <ion-icon name="archive-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'BUYER_HOME.ORDER_HISTORY' | translate }}</ion-label>
+      <ion-item
+        button
+        (click)="navigateToOrderHistory()"
+        lines="none"
+        class="menu-item"
+      >
+        <ion-icon
+          name="archive-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
+        <ion-label>{{ "BUYER_HOME.ORDER_HISTORY" | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToBusinessLocations()" lines="none" class="menu-item">
+      <!-- <ion-item button (click)="navigateToBusinessLocations()" lines="none" class="menu-item">
         <ion-icon name="location-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'BUYER_HOME.BUSINESS_LOCATIONS' | translate }}</ion-label>
+      </ion-item> -->
+      <ion-item
+        button
+        (click)="navigateToUpdateBusiness()"
+        lines="none"
+        class="menu-item"
+      >
+        <ion-icon
+          name="create-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
+        <ion-label>{{ "BUYER_HOME.UPDATE_BUSINESS" | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToUpdateBusiness()" lines="none" class="menu-item">
-        <ion-icon name="create-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'BUYER_HOME.UPDATE_BUSINESS' | translate }}</ion-label>
+      <ion-item
+        button
+        (click)="navigateToSettings()"
+        lines="none"
+        class="menu-item"
+      >
+        <ion-icon
+          name="settings-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
+        <ion-label>{{ "BUYER_HOME.SETTINGS" | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToSettings()" lines="none" class="menu-item">
-        <ion-icon name="settings-outline" slot="start" class="menu-icon"></ion-icon>
-        <ion-label>{{ 'BUYER_HOME.SETTINGS' | translate }}</ion-label>
-      </ion-item>
-      <ion-item button (click)="logout()" lines="none" class="menu-item logout-item">
-        <ion-icon name="log-out-outline" slot="start" class="menu-icon logout-icon"></ion-icon>
-        <ion-label class="logout-label">{{ 'BUYER_HOME.LOGOUT' | translate }}</ion-label>
+      <ion-item
+        button
+        (click)="logout()"
+        lines="none"
+        class="menu-item logout-item"
+      >
+        <ion-icon
+          name="log-out-outline"
+          slot="start"
+          class="menu-icon logout-icon"
+        ></ion-icon>
+        <ion-label class="logout-label">{{
+          "BUYER_HOME.LOGOUT" | translate
+        }}</ion-label>
       </ion-item>
     </ion-list>
   </ion-content>
@@ -90,13 +149,15 @@
   <div class="categories-section">
     <div class="loading-container" *ngIf="loadingCategories">
       <ion-spinner name="crescent" color="primary"></ion-spinner>
-      <p class="loading-text">{{ 'BUYER_HOME.LOADING_CATEGORIES' | translate }}</p>
+      <p class="loading-text">
+        {{ "BUYER_HOME.LOADING_CATEGORIES" | translate }}
+      </p>
     </div>
 
     <div class="error-container" *ngIf="errorLoadingCategories">
       <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
-      <h4>{{ 'BUYER_HOME.ERROR_LOADING_CATEGORIES' | translate }}</h4>
-      <p>{{ 'BUYER_HOME.ERROR_LOADING_CATEGORIES_DESC' | translate }}</p>
+      <h4>{{ "BUYER_HOME.ERROR_LOADING_CATEGORIES" | translate }}</h4>
+      <p>{{ "BUYER_HOME.ERROR_LOADING_CATEGORIES_DESC" | translate }}</p>
       <ion-button
         fill="outline"
         size="small"
@@ -104,7 +165,7 @@
         class="retry-btn"
       >
         <ion-icon name="refresh-outline" slot="start"></ion-icon>
-        {{ 'BUYER_HOME.RETRY' | translate }}
+        {{ "BUYER_HOME.RETRY" | translate }}
       </ion-button>
     </div>
 
@@ -115,7 +176,7 @@
       <div class="section-header">
         <h1 class="section-title">
           <ion-icon name="grid-outline" class="title-icon"></ion-icon>
-          {{ 'BUYER_HOME.EXPLORE_COLLECTIONS' | translate }}
+          {{ "BUYER_HOME.EXPLORE_COLLECTIONS" | translate }}
         </h1>
       </div>
 
@@ -133,7 +194,7 @@
           >
             <div class="card-image-container">
               <img
-                [src]="category.img_path"
+                [src]="getImagePath(category)"
                 [alt]="category.category_name"
                 class="category-image"
                 (error)="onImageError($event.target)"
@@ -149,7 +210,9 @@
                 <b>{{ category.category_name }}</b>
               </h3>
               <div class="category-stats">
-                <span class="product-count">{{ 'BUYER_HOME.FRESH_QUALITY' | translate }}</span>
+                <span class="product-count">{{
+                  "BUYER_HOME.FRESH_QUALITY" | translate
+                }}</span>
               </div>
             </ion-card-content>
           </ion-card>

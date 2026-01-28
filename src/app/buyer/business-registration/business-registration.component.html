@@ -1,10 +1,5 @@
 <ion-header [translucent]="true">
   <ion-toolbar class="registration-toolbar">
-    <!-- <ion-buttons slot="start">
-      <ion-button class="back-btn">
-        <ion-icon name="chevron-back"></ion-icon>
-      </ion-button>
-    </ion-buttons> -->
     <ion-title class="page-title">{{ 'BUSINESS_REGISTRATION.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -28,108 +23,120 @@
               {{ 'BUSINESS_REGISTRATION.SECTION_BUSINESS_INFO' | translate }}
             </div>
 
-            <!-- Registration Number -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('b_registration_num')?.invalid &&
-                form.get('b_registration_num')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.REGISTRATION_NUMBER' | translate }} *</ion-label>
-              <ion-input
-                formControlName="b_registration_num"
-                [placeholder]="'BUSINESS_REGISTRATION.REGISTRATION_NUMBER_PLACEHOLDER' | translate"
-                type="text"
-              >
-              </ion-input>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="
-                form.get('b_registration_num')?.invalid &&
-                form.get('b_registration_num')?.touched
-              "
-            >
-              {{ 'BUSINESS_REGISTRATION.ERROR_REGISTRATION_NUMBER' | translate }}
-            </div>
-
-            <!-- Owner Name -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('b_owner_name')?.invalid && form.get('b_owner_name')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.OWNER_NAME' | translate }} *</ion-label>
-              <ion-input
-                formControlName="b_owner_name"
-                [placeholder]="'BUSINESS_REGISTRATION.OWNER_NAME_PLACEHOLDER' | translate"
-                type="text"
-              >
-              </ion-input>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="
-                form.get('b_owner_name')?.invalid && form.get('b_owner_name')?.touched
-              "
-            >
-              {{ 'BUSINESS_REGISTRATION.ERROR_OWNER_NAME' | translate }}
-            </div>
-
-            <!-- Category ID -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('b_category_id')?.invalid &&
-                form.get('b_category_id')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.BUSINESS_CATEGORY' | translate }} *</ion-label>
-              <ion-select
-                formControlName="b_category_id"
-                [placeholder]="'BUSINESS_REGISTRATION.BUSINESS_CATEGORY_PLACEHOLDER' | translate"
-              >
-                <ion-select-option
-                  *ngFor="let category of businessCategories"
-                  [value]="category.b_category_id"
+            <div class="form-row">
+              <!-- Registration Number -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('b_registration_num')?.invalid &&
+                    form.get('b_registration_num')?.touched
+                  "
                 >
-                  {{ category.b_category_name }}
-                </ion-select-option>
-              </ion-select>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="
-                form.get('b_category_id')?.invalid &&
-                form.get('b_category_id')?.touched
-              "
-            >
-              {{ 'BUSINESS_REGISTRATION.ERROR_BUSINESS_CATEGORY' | translate }}
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.REGISTRATION_NUMBER' | translate }} *</ion-label>
+                  <ion-input
+                    formControlName="b_registration_num"
+                    [placeholder]="'BUSINESS_REGISTRATION.REGISTRATION_NUMBER_PLACEHOLDER' | translate"
+                    type="text"
+                  >
+                  </ion-input>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="
+                    form.get('b_registration_num')?.invalid &&
+                    form.get('b_registration_num')?.touched
+                  "
+                >
+                  {{ 'BUSINESS_REGISTRATION.ERROR_REGISTRATION_NUMBER' | translate }}
+                </div>
+              </div>
+
+              <!-- Owner Name -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('b_owner_name')?.invalid && form.get('b_owner_name')?.touched
+                  "
+                >
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.OWNER_NAME' | translate }} *</ion-label>
+                  <ion-input
+                    formControlName="b_owner_name"
+                    [placeholder]="'BUSINESS_REGISTRATION.OWNER_NAME_PLACEHOLDER' | translate"
+                    type="text"
+                  >
+                  </ion-input>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="
+                    form.get('b_owner_name')?.invalid && form.get('b_owner_name')?.touched
+                  "
+                >
+                  {{ 'BUSINESS_REGISTRATION.ERROR_OWNER_NAME' | translate }}
+                </div>
+              </div>
             </div>
 
-            <!-- Business Type ID -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('b_type_id')?.invalid && form.get('b_type_id')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.BUSINESS_TYPE' | translate }} *</ion-label>
-              <ion-select
-                formControlName="b_type_id"
-                [placeholder]="'BUSINESS_REGISTRATION.BUSINESS_TYPE_PLACEHOLDER' | translate"
-              >
-                <ion-select-option
-                  *ngFor="let type of businessTypes"
-                  [value]="type.b_typeid"
+            <div class="form-row">
+              <!-- Category ID -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('b_category_id')?.invalid &&
+                    form.get('b_category_id')?.touched
+                  "
                 >
-                  {{ type.b_typename }}
-                </ion-select-option>
-              </ion-select>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="form.get('b_type_id')?.invalid && form.get('b_type_id')?.touched"
-            >
-              {{ 'BUSINESS_REGISTRATION.ERROR_BUSINESS_TYPE' | translate }}
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.BUSINESS_CATEGORY' | translate }} *</ion-label>
+                  <ion-select
+                    formControlName="b_category_id"
+                    [placeholder]="'BUSINESS_REGISTRATION.BUSINESS_CATEGORY_PLACEHOLDER' | translate"
+                  >
+                    <ion-select-option
+                      *ngFor="let category of businessCategories"
+                      [value]="category.b_category_id"
+                    >
+                      {{ category.b_category_name }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="
+                    form.get('b_category_id')?.invalid &&
+                    form.get('b_category_id')?.touched
+                  "
+                >
+                  {{ 'BUSINESS_REGISTRATION.ERROR_BUSINESS_CATEGORY' | translate }}
+                </div>
+              </div>
+
+              <!-- Business Type ID -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('b_type_id')?.invalid && form.get('b_type_id')?.touched
+                  "
+                >
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.BUSINESS_TYPE' | translate }} *</ion-label>
+                  <ion-select
+                    formControlName="b_type_id"
+                    [placeholder]="'BUSINESS_REGISTRATION.BUSINESS_TYPE_PLACEHOLDER' | translate"
+                  >
+                    <ion-select-option
+                      *ngFor="let type of businessTypes"
+                      [value]="type.b_typeid"
+                    >
+                      {{ type.b_typename }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="form.get('b_type_id')?.invalid && form.get('b_type_id')?.touched"
+                >
+                  {{ 'BUSINESS_REGISTRATION.ERROR_BUSINESS_TYPE' | translate }}
+                </div>
+              </div>
             </div>
 
             <!-- Established Year -->
@@ -170,69 +177,77 @@
               {{ 'BUSINESS_REGISTRATION.SECTION_LOCATION_INFO' | translate }}
             </div>
 
-            <!-- State ID -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('state_id')?.invalid && form.get('state_id')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.STATE' | translate }} *</ion-label>
-              <ion-select formControlName="state_id" [placeholder]="'BUSINESS_REGISTRATION.STATE_PLACEHOLDER' | translate">
-                <ion-select-option *ngFor="let state of states" [value]="state.id">
-                  {{ state.state_name }} ({{ state.state_shortname }})
-                </ion-select-option>
-              </ion-select>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="form.get('state_id')?.invalid && form.get('state_id')?.touched"
-            >
-              {{ 'BUSINESS_REGISTRATION.ERROR_STATE' | translate }}
-            </div>
-
-            <!-- City -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('city_id')?.invalid && form.get('city_id')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.CITY' | translate }} *</ion-label>
-              <ion-select formControlName="city_id" [placeholder]="'BUSINESS_REGISTRATION.CITY_PLACEHOLDER' | translate">
-                <ion-select-option *ngFor="let city of cities" [value]="city.id">
-                  {{ city.city_name }} ({{ city.city_shortname }})
-                </ion-select-option>
-              </ion-select>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="form.get('city_id')?.invalid && form.get('city_id')?.touched"
-            >
-              {{ 'BUSINESS_REGISTRATION.ERROR_CITY' | translate }}
-            </div>
-
-            <!-- Location -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('location_id')?.invalid && form.get('location_id')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.LOCATION' | translate }} *</ion-label>
-              <ion-select formControlName="location_id" [placeholder]="'BUSINESS_REGISTRATION.LOCATION_PLACEHOLDER' | translate">
-                <ion-select-option
-                  *ngFor="let location of locations"
-                  [value]="location.id"
+            <div class="form-row form-row-triple">
+              <!-- State ID -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('state_id')?.invalid && form.get('state_id')?.touched
+                  "
                 >
-                  {{ location.location_name }}
-                </ion-select-option>
-              </ion-select>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="
-                form.get('location_id')?.invalid && form.get('location_id')?.touched
-              "
-            >
-              {{ 'BUSINESS_REGISTRATION.ERROR_LOCATION' | translate }}
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.STATE' | translate }} *</ion-label>
+                  <ion-select formControlName="state_id" [placeholder]="'BUSINESS_REGISTRATION.STATE_PLACEHOLDER' | translate">
+                    <ion-select-option *ngFor="let state of states" [value]="state.id">
+                      {{ state.state_name }} ({{ state.state_shortname }})
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="form.get('state_id')?.invalid && form.get('state_id')?.touched"
+                >
+                  {{ 'BUSINESS_REGISTRATION.ERROR_STATE' | translate }}
+                </div>
+              </div>
+
+              <!-- City -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('city_id')?.invalid && form.get('city_id')?.touched
+                  "
+                >
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.CITY' | translate }} *</ion-label>
+                  <ion-select formControlName="city_id" [placeholder]="'BUSINESS_REGISTRATION.CITY_PLACEHOLDER' | translate">
+                    <ion-select-option *ngFor="let city of cities" [value]="city.id">
+                      {{ city.city_name }} ({{ city.city_shortname }})
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="form.get('city_id')?.invalid && form.get('city_id')?.touched"
+                >
+                  {{ 'BUSINESS_REGISTRATION.ERROR_CITY' | translate }}
+                </div>
+              </div>
+
+              <!-- Location -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('location_id')?.invalid && form.get('location_id')?.touched
+                  "
+                >
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.LOCATION' | translate }} *</ion-label>
+                  <ion-select formControlName="location_id" [placeholder]="'BUSINESS_REGISTRATION.LOCATION_PLACEHOLDER' | translate">
+                    <ion-select-option
+                      *ngFor="let location of locations"
+                      [value]="location.id"
+                    >
+                      {{ location.location_name }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="
+                    form.get('location_id')?.invalid && form.get('location_id')?.touched
+                  "
+                >
+                  {{ 'BUSINESS_REGISTRATION.ERROR_LOCATION' | translate }}
+                </div>
+              </div>
             </div>
 
             <!-- Address -->
@@ -264,60 +279,66 @@
               {{ 'BUSINESS_REGISTRATION.SECTION_CONTACT_INFO' | translate }}
             </div>
 
-            <!-- Mobile Number -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('mobile_number')?.invalid &&
-                form.get('mobile_number')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.MOBILE_NUMBER' | translate }} *</ion-label>
-              <ion-input
-                formControlName="mobile_number"
-                [placeholder]="'BUSINESS_REGISTRATION.MOBILE_NUMBER_PLACEHOLDER' | translate"
-                type="tel"
-              >
-              </ion-input>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="
-                form.get('mobile_number')?.invalid &&
-                form.get('mobile_number')?.touched
-              "
-            >
-              <span *ngIf="form.get('mobile_number')?.errors?.['required']"
-                >{{ 'BUSINESS_REGISTRATION.ERROR_MOBILE_REQUIRED' | translate }}</span
-              >
-              <span *ngIf="form.get('mobile_number')?.errors?.['pattern']"
-                >{{ 'BUSINESS_REGISTRATION.ERROR_MOBILE_PATTERN' | translate }}</span
-              >
-            </div>
+            <div class="form-row">
+              <!-- Mobile Number -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('mobile_number')?.invalid &&
+                    form.get('mobile_number')?.touched
+                  "
+                >
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.MOBILE_NUMBER' | translate }} *</ion-label>
+                  <ion-input
+                    formControlName="mobile_number"
+                    [placeholder]="'BUSINESS_REGISTRATION.MOBILE_NUMBER_PLACEHOLDER' | translate"
+                    type="tel"
+                  >
+                  </ion-input>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="
+                    form.get('mobile_number')?.invalid &&
+                    form.get('mobile_number')?.touched
+                  "
+                >
+                  <span *ngIf="form.get('mobile_number')?.errors?.['required']"
+                    >{{ 'BUSINESS_REGISTRATION.ERROR_MOBILE_REQUIRED' | translate }}</span
+                  >
+                  <span *ngIf="form.get('mobile_number')?.errors?.['pattern']"
+                    >{{ 'BUSINESS_REGISTRATION.ERROR_MOBILE_PATTERN' | translate }}</span
+                  >
+                </div>
+              </div>
 
-            <!-- Email -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('email')?.invalid && form.get('email')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.EMAIL' | translate }} *</ion-label>
-              <ion-input
-                formControlName="email"
-                [placeholder]="'BUSINESS_REGISTRATION.EMAIL_PLACEHOLDER' | translate"
-                type="email"
-              >
-              </ion-input>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
-            >
-              <span *ngIf="form.get('email')?.errors?.['required']"
-                >{{ 'BUSINESS_REGISTRATION.ERROR_EMAIL_REQUIRED' | translate }}</span
-              >
-              <span *ngIf="form.get('email')?.errors?.['email']"
-                >{{ 'BUSINESS_REGISTRATION.ERROR_EMAIL_INVALID' | translate }}</span
-              >
+              <!-- Email -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('email')?.invalid && form.get('email')?.touched
+                  "
+                >
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.EMAIL' | translate }} *</ion-label>
+                  <ion-input
+                    formControlName="email"
+                    [placeholder]="'BUSINESS_REGISTRATION.EMAIL_PLACEHOLDER' | translate"
+                    type="email"
+                  >
+                  </ion-input>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
+                >
+                  <span *ngIf="form.get('email')?.errors?.['required']"
+                    >{{ 'BUSINESS_REGISTRATION.ERROR_EMAIL_REQUIRED' | translate }}</span
+                  >
+                  <span *ngIf="form.get('email')?.errors?.['email']"
+                    >{{ 'BUSINESS_REGISTRATION.ERROR_EMAIL_INVALID' | translate }}</span
+                  >
+                </div>
+              </div>
             </div>
           </div>
 
@@ -328,76 +349,62 @@
               {{ 'BUSINESS_REGISTRATION.SECTION_LEGAL_INFO' | translate }}
             </div>
 
-            <!-- GST Number -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('gst_number')?.invalid && form.get('gst_number')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.GST_NUMBER' | translate }} *</ion-label>
-              <ion-input
-                formControlName="gst_number"
-                [placeholder]="'BUSINESS_REGISTRATION.GST_NUMBER_PLACEHOLDER' | translate"
-                type="text"
-              >
-              </ion-input>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="
-                form.get('gst_number')?.invalid && form.get('gst_number')?.touched
-              "
-            >
-              {{ 'BUSINESS_REGISTRATION.ERROR_GST_NUMBER' | translate }}
+            <div class="form-row">
+              <!-- GST Number -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('gst_number')?.invalid && form.get('gst_number')?.touched
+                  "
+                >
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.GST_NUMBER' | translate }} *</ion-label>
+                  <ion-input
+                    formControlName="gst_number"
+                    [placeholder]="'BUSINESS_REGISTRATION.GST_NUMBER_PLACEHOLDER' | translate"
+                    type="text"
+                  >
+                  </ion-input>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="
+                    form.get('gst_number')?.invalid && form.get('gst_number')?.touched
+                  "
+                >
+                  {{ 'BUSINESS_REGISTRATION.ERROR_GST_NUMBER' | translate }}
+                </div>
+              </div>
+
+              <!-- PAN Number -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="
+                    form.get('pan_number')?.invalid && form.get('pan_number')?.touched
+                  "
+                >
+                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.PAN_NUMBER' | translate }} *</ion-label>
+                  <ion-input
+                    formControlName="pan_number"
+                    [placeholder]="'BUSINESS_REGISTRATION.PAN_NUMBER_PLACEHOLDER' | translate"
+                    type="text"
+                  >
+                  </ion-input>
+                </ion-item>
+                <div
+                  class="error-message"
+                  *ngIf="
+                    form.get('pan_number')?.invalid && form.get('pan_number')?.touched
+                  "
+                >
+                  <span *ngIf="form.get('pan_number')?.errors?.['required']"
+                    >{{ 'BUSINESS_REGISTRATION.ERROR_PAN_REQUIRED' | translate }}</span
+                  >
+                  <span *ngIf="form.get('pan_number')?.errors?.['pattern']"
+                    >{{ 'BUSINESS_REGISTRATION.ERROR_PAN_PATTERN' | translate }}</span
+                  >
+                </div>
+              </div>
             </div>
-
-            <!-- PAN Number -->
-            <ion-item
-              [class.ion-invalid]="
-                form.get('pan_number')?.invalid && form.get('pan_number')?.touched
-              "
-            >
-              <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.PAN_NUMBER' | translate }} *</ion-label>
-              <ion-input
-                formControlName="pan_number"
-                [placeholder]="'BUSINESS_REGISTRATION.PAN_NUMBER_PLACEHOLDER' | translate"
-                type="text"
-              >
-              </ion-input>
-            </ion-item>
-            <div
-              class="error-message"
-              *ngIf="
-                form.get('pan_number')?.invalid && form.get('pan_number')?.touched
-              "
-            >
-              <span *ngIf="form.get('pan_number')?.errors?.['required']"
-                >{{ 'BUSINESS_REGISTRATION.ERROR_PAN_REQUIRED' | translate }}</span
-              >
-              <span *ngIf="form.get('pan_number')?.errors?.['pattern']"
-                >{{ 'BUSINESS_REGISTRATION.ERROR_PAN_PATTERN' | translate }}</span
-              >
-            </div>
-          </div>
-
-          <!-- Settings Section -->
-          <div class="form-section">
-            <div class="section-title">
-              <ion-icon name="settings-outline" class="section-icon"></ion-icon>
-              {{ 'BUSINESS_REGISTRATION.SECTION_ACCOUNT_SETTINGS' | translate }}
-            </div>
-
-            <!-- Privileged User -->
-            <ion-item>
-              <ion-label>{{ 'BUSINESS_REGISTRATION.PRIVILEGED_USER' | translate }}</ion-label>
-              <ion-toggle formControlName="privileged_user"></ion-toggle>
-            </ion-item>
-
-            <!-- Active Status -->
-            <ion-item>
-              <ion-label>{{ 'BUSINESS_REGISTRATION.ACTIVE_STATUS' | translate }}</ion-label>
-              <ion-toggle formControlName="is_active"></ion-toggle>
-            </ion-item>
           </div>
 
           <!-- Submit Button -->

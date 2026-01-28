@@ -38,7 +38,7 @@ export class BusinessRegistrationComponent implements OnInit {
       b_owner_name: ['', Validators.required],
       b_category_id: [null, Validators.required],
       b_type_id: [null, Validators.required],
-      is_active: [true],
+      is_active: [true], // Default true
       state_id: [null, Validators.required],
       city_id: [null, Validators.required],
       location_id: [null, Validators.required],
@@ -49,26 +49,27 @@ export class BusinessRegistrationComponent implements OnInit {
       user_id: [null, Validators.required],
       gst_number: ['', Validators.required],
       pan_number: ['', [Validators.required, Validators.pattern(/[A-Z]{5}[0-9]{4}[A-Z]{1}/)]],
-      privileged_user: [false],
+      privileged_user: [false], // Default false
     });
 
     addIcons({ save });
   }
 
   ngOnInit() {
-    // Check business existence first
+    this.checkBusinessExistence();
+  }
+
+  private checkBusinessExistence() {
     this.businessRegistrationService.getBusinessExistsOrNot().subscribe({
       next: (exists: boolean) => {
         if (exists) {
-          // Business already exists, navigate to the home
           this.router.navigate(['/buyer/buyer-home']);
         } else {
-          // Business does not exist, continue with registration initialization
           this.initializeRegistrationForm();
         }
       },
       error: (err: any) => {
-        // Business does not exist, continue with registration
+        console.error('Error checking business existence:', err);
         this.initializeRegistrationForm();
       }
     });
@@ -78,24 +79,29 @@ export class BusinessRegistrationComponent implements OnInit {
     this.fetchBusinessCategories();
     this.fetchBusinessTypes();
     this.fetchStates();
+    this.setUserId();
+    this.setupFormListeners();
+  }
 
-    // Set user_id from AuthService
+  private setUserId() {
     const userId = this.authService.getUserId();
     if (userId) {
       this.form.get('user_id')?.setValue(userId);
+    } else {
+      console.warn('User ID not found');
     }
+  }
 
+  private setupFormListeners() {
     this.form.get('state_id')?.valueChanges.subscribe((stateId) => {
       if (stateId) {
         this.fetchCities(stateId);
-        this.form.get('city_id')?.setValue(null);
+        this.form.patchValue({ city_id: null, location_id: null });
         this.locations = [];
-        this.form.get('location_id')?.setValue(null);
       } else {
         this.cities = [];
         this.locations = [];
-        this.form.get('city_id')?.setValue(null);
-        this.form.get('location_id')?.setValue(null);
+        this.form.patchValue({ city_id: null, location_id: null });
       }
     });
 
@@ -113,13 +119,9 @@ export class BusinessRegistrationComponent implements OnInit {
   fetchBusinessCategories() {
     this.businessRegistrationService.getBusinessCategories().subscribe({
       next: (data) => (this.businessCategories = data),
-      error: async () => {
-        const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.ERROR_LOAD_CATEGORIES'),
-          duration: 2000,
-          color: 'danger',
-        });
-        toast.present();
+      error: (err) => {
+        console.error('Error loading business categories:', err);
+        this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOAD_CATEGORIES');
       },
     });
   }
@@ -127,13 +129,9 @@ export class BusinessRegistrationComponent implements OnInit {
   fetchBusinessTypes() {
     this.businessRegistrationService.getBusinessTypes().subscribe({
       next: (data) => (this.businessTypes = data),
-      error: async () => {
-        const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.ERROR_LOAD_TYPES'),
-          duration: 2000,
-          color: 'danger',
-        });
-        toast.present();
+      error: (err) => {
+        console.error('Error loading business types:', err);
+        this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOAD_TYPES');
       },
     });
   }
@@ -141,13 +139,9 @@ export class BusinessRegistrationComponent implements OnInit {
   fetchStates() {
     this.businessRegistrationService.getStates().subscribe({
       next: (data) => (this.states = data),
-      error: async () => {
-        const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.ERROR_LOAD_STATES'),
-          duration: 2000,
-          color: 'danger',
-        });
-        toast.present();
+      error: (err) => {
+        console.error('Error loading states:', err);
+        this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOAD_STATES');
       },
     });
   }
@@ -155,13 +149,9 @@ export class BusinessRegistrationComponent implements OnInit {
   fetchCities(stateId: number) {
     this.businessRegistrationService.getCitiesOfState(stateId).subscribe({
       next: (data) => (this.cities = data),
-      error: async () => {
-        const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.ERROR_LOAD_CITIES'),
-          duration: 2000,
-          color: 'danger',
-        });
-        toast.present();
+      error: (err) => {
+        console.error('Error loading cities:', err);
+        this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOAD_CITIES');
       },
     });
   }
@@ -169,54 +159,53 @@ export class BusinessRegistrationComponent implements OnInit {
   fetchLocations(cityId: number) {
     this.businessRegistrationService.getLocationsByCity(cityId).subscribe({
       next: (data) => (this.locations = data),
-      error: async () => {
-        const toast = await this.toastCtrl.create({
-          message: this.translate.instant('BUSINESS_REGISTRATION.ERROR_LOAD_LOCATIONS'),
-          duration: 2000,
-          color: 'danger',
-        });
-        toast.present();
+      error: (err) => {
+        console.error('Error loading locations:', err);
+        this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOAD_LOCATIONS');
       },
     });
   }
 
   async onSubmit() {
     if (this.form.valid) {
-      // Prepare payload as per Go struct
       const payload = {
         ...this.form.value,
         city_id: this.form.value.city_id
       };
 
       this.businessRegistrationService.addNewBusiness(payload).subscribe({
-        next: async (res) => {
-          const toast = await this.toastCtrl.create({
-            message: this.translate.instant('BUSINESS_REGISTRATION.SUCCESS_MESSAGE'),
-            duration: 2000,
-            color: 'success',
-          });
-          toast.present();
+        next: async () => {
+          await this.showSuccessToast('BUSINESS_REGISTRATION.SUCCESS_MESSAGE');
           this.form.reset();
-          // Navigate to buyer home after successful registration
           this.router.navigate(['/buyer/buyer-home']);
         },
         error: async (err) => {
-          const toast = await this.toastCtrl.create({
-            message: err?.error?.error || this.translate.instant('BUSINESS_REGISTRATION.ERROR_REGISTER'),
-            duration: 2000,
-            color: 'danger',
-          });
-          toast.present();
+          console.error('Error registering business:', err);
+          const message = err?.error?.error || 'BUSINESS_REGISTRATION.ERROR_REGISTER';
+          await this.showErrorToast(message);
         }
       });
     } else {
       this.form.markAllAsTouched();
-      const toast = await this.toastCtrl.create({
-        message: this.translate.instant('BUSINESS_REGISTRATION.ERROR_FORM_INVALID'),
-        duration: 2000,
-        color: 'danger',
-      });
-      toast.present();
+      await this.showErrorToast('BUSINESS_REGISTRATION.ERROR_FORM_INVALID');
     }
+  }
+
+  private async showErrorToast(messageKey: string) {
+    const toast = await this.toastCtrl.create({
+      message: this.translate.instant(messageKey),
+      duration: 2000,
+      color: 'danger',
+    });
+    await toast.present();
+  }
+
+  private async showSuccessToast(messageKey: string) {
+    const toast = await this.toastCtrl.create({
+      message: this.translate.instant(messageKey),
+      duration: 2000,
+      color: 'success',
+    });
+    await toast.present();
   }
 }
