@@ -164,6 +164,24 @@
   line-height: 1.3;
 }
 
+.price-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  .unit-price {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .item-total {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+}
+
 .price-info {
   display: flex;
   flex-direction: column;

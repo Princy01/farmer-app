@@ -162,15 +162,6 @@ export class BusinessUpdateComponent implements OnInit {
     return '';
   }
 
-  private getFieldLabel(fieldName: string): string {
-    const labels: { [key: string]: string } = {
-      'email': this.translate.instant('BUSINESS_UPDATE.EMAIL_LABEL'),
-      'mobile_number': this.translate.instant('BUSINESS_UPDATE.MOBILE_LABEL'),
-      'address': this.translate.instant('BUSINESS_UPDATE.ADDRESS_LABEL')
-    };
-    return labels[fieldName] || fieldName.replace('_', ' ');
-  }
-
   isFieldInvalid(fieldName: string): boolean {
     const field = this.businessForm.get(fieldName);
     return !!(field && field.invalid && field.touched);

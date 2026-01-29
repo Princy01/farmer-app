@@ -189,12 +189,14 @@ export class CartComponent implements OnInit, OnDestroy {
 
     this.cartService.updateItemQuantity(update.selectedId, update.quantity).subscribe({
       next: async () => {
+        this.isLoading = false;
         await this.showToast(this.translate.instant('CART.QUANTITY_UPDATED'), 'success');
         // Refresh cart to sync with backend
         this.loadCartItems();
       },
       error: async (error) => {
         console.error('Error updating quantity:', error);
+        this.isLoading = false;
         await this.showToast(this.translate.instant('CART.FAILED_UPDATE_QUANTITY'), 'danger');
         // Revert the optimistic update
         this.loadCartItems();
@@ -235,14 +237,15 @@ export class CartComponent implements OnInit, OnDestroy {
 
     this.cartService.deleteCartItem(selectedId).subscribe({
       next: async () => {
+        this.isLoading = false;
         await this.showToast(this.translate.instant('CART.ITEM_REMOVED'), 'success');
         // Refresh cart to sync with backend
         this.loadCartItems();
       },
       error: async (error) => {
         console.error('Error removing item:', error);
-        await this.showToast(this.translate.instant('CART.FAILED_REMOVE_ITEM'), 'danger');
         this.isLoading = false;
+        await this.showToast(this.translate.instant('CART.FAILED_REMOVE_ITEM'), 'danger');
         // Reload to revert optimistic update
         this.loadCartItems();
       }
@@ -294,21 +297,6 @@ export class CartComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  // private async processCheckout(): Promise<void> {
-  //   const loading = await this.loadingCtrl.create({
-  //     message: this.translate.instant('CART.PROCESSING_ORDER'),
-  //     spinner: 'dots'
-  //   });
-  //   await loading.present();
-
-  //   setTimeout(async () => {
-  //     await loading.dismiss();
-  //     await this.showToast(this.translate.instant('CART.ORDER_PLACED'), 'success');
-  //     this.cartService.clearCart();
-  //     this.router.navigate(['/buyer/orders']);
-  //   }, 2000);
-  // }
 
   goBack(): void {
     this.router.navigate(['/buyer/buyer-home']);

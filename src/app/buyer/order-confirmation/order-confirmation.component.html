@@ -1,6 +1,6 @@
 <ion-header mode="ios">
   <ion-toolbar class="confirmation-toolbar">
-    <ion-title class="page-title">Order Confirmation</ion-title>
+    <ion-title class="page-title">{{ 'ORDER_CONFIRMATION.PAGE_TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -14,17 +14,17 @@
       </div>
       <div class="success-ripple"></div>
     </div>
-    <h1 class="success-title">Order Confirmed!</h1>
-    <p class="success-message">Thank you for your order. We're processing it now.</p>
+    <h1 class="success-title">{{ 'ORDER_CONFIRMATION.SUCCESS_TITLE' | translate }}</h1>
+    <p class="success-message">{{ 'ORDER_CONFIRMATION.SUCCESS_MESSAGE' | translate }}</p>
   </div>
 
   <!-- Order Details Card -->
-  <div class="card-section" *ngIf="!showAnimation">
+  <div class="card-section" *ngIf="!showAnimation && orderData">
     <ion-card class="modern-card order-details-card">
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Order Details</h2>
+          <h2 class="card-title">{{ 'ORDER_CONFIRMATION.ORDER_DETAILS' | translate }}</h2>
         </div>
         <div class="order-id-badge">
           #{{ orderData?.orderId }}
@@ -33,22 +33,22 @@
 
       <ion-card-content class="card-content">
         <div class="detail-row">
-          <span class="detail-label">Order Date:</span>
+          <span class="detail-label">{{ 'ORDER_CONFIRMATION.ORDER_DATE' | translate }}:</span>
           <span class="detail-value">{{ orderData?.orderDate | date:'mediumDate' }}</span>
         </div>
 
         <div class="detail-row">
-          <span class="detail-label">Status:</span>
-          <span class="detail-value">{{ orderData?.orderStatus === 1 ? 'Confirmed' : 'Pending' }}</span>
+          <span class="detail-label">{{ 'ORDER_CONFIRMATION.STATUS' | translate }}:</span>
+          <span class="detail-value">{{ getStatusText(orderData?.orderStatus) }}</span>
         </div>
 
         <div class="detail-row">
-          <span class="detail-label">Total Amount:</span>
-          <span class="detail-value">₹{{ orderData?.grandTotal }}</span>
+          <span class="detail-label">{{ 'ORDER_CONFIRMATION.TOTAL_AMOUNT' | translate }}:</span>
+          <span class="detail-value">₹{{ orderData?.grandTotal | number:'1.2-2' }}</span>
         </div>
 
         <div class="detail-row">
-          <span class="detail-label">Delivery Address:</span>
+          <span class="detail-label">{{ 'ORDER_CONFIRMATION.DELIVERY_ADDRESS' | translate }}:</span>
           <span class="detail-value">{{ orderData?.deliveryAddress }}</span>
         </div>
       </ion-card-content>
@@ -56,18 +56,18 @@
   </div>
 
   <!-- Delivery Information -->
-  <div class="card-section" *ngIf="!showAnimation">
+  <div class="card-section" *ngIf="!showAnimation && orderData">
     <ion-card class="modern-card delivery-info-card">
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="location-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Delivery Information</h2>
+          <h2 class="card-title">{{ 'ORDER_CONFIRMATION.DELIVERY_INFO' | translate }}</h2>
         </div>
       </div>
 
       <ion-card-content class="card-content">
         <div class="delivery-estimate">
-          <span class="detail-label">Estimated Delivery:</span>
+          <span class="detail-label">{{ 'ORDER_CONFIRMATION.ESTIMATED_DELIVERY' | translate }}:</span>
           <span class="detail-value">{{ estimatedDelivery }}</span>
         </div>
       </ion-card-content>
@@ -75,14 +75,14 @@
   </div>
 
   <!-- Order Items -->
-  <div class="card-section" *ngIf="!showAnimation">
+  <div class="card-section" *ngIf="!showAnimation && orderData?.items?.length > 0">
     <ion-card class="modern-card items-card">
       <div class="card-header">
         <div class="header-content">
           <ion-icon name="bag-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">Order Items</h2>
+          <h2 class="card-title">{{ 'ORDER_CONFIRMATION.ORDER_ITEMS' | translate }}</h2>
         </div>
-        <div class="items-count">{{ orderData?.items?.length }} items</div>
+        <div class="items-count">{{ orderData?.items?.length }} {{ 'ORDER_CONFIRMATION.ITEMS' | translate }}</div>
       </div>
 
       <ion-card-content class="card-content">
@@ -91,7 +91,7 @@
             <div class="item-details">
               <span class="item-name">{{ item.product_name }}</span>
               <span class="item-quantity">{{ item.quantity }} {{ item.unit_name }}</span>
-              <span class="item-price">₹{{ item.price }}</span>
+              <span class="item-price">₹{{ item.price | number:'1.2-2' }}</span>
             </div>
           </div>
         </div>
@@ -106,11 +106,11 @@
         <div class="action-buttons">
           <ion-button expand="block" fill="outline" (click)="trackOrder()">
             <ion-icon name="navigate-outline" slot="start"></ion-icon>
-            Track Order
+            {{ 'ORDER_CONFIRMATION.TRACK_ORDER' | translate }}
           </ion-button>
           <ion-button expand="block" fill="outline" (click)="downloadInvoice()">
             <ion-icon name="download-outline" slot="start"></ion-icon>
-            Download Invoice
+            {{ 'ORDER_CONFIRMATION.DOWNLOAD_INVOICE' | translate }}
           </ion-button>
         </div>
       </ion-card-content>
@@ -125,7 +125,7 @@
       class="bottom-btn"
       (click)="goToOrderHistory()">
       <ion-icon name="receipt-outline" slot="start"></ion-icon>
-      View All Orders
+      {{ 'ORDER_CONFIRMATION.VIEW_ALL_ORDERS' | translate }}
     </ion-button>
 
     <ion-button
@@ -134,7 +134,14 @@
       class="bottom-btn"
       (click)="goHome()">
       <ion-icon name="home-outline" slot="start"></ion-icon>
-      Continue Shopping
+      {{ 'ORDER_CONFIRMATION.CONTINUE_SHOPPING' | translate }}
     </ion-button>
   </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading && !showAnimation">
+    <ion-spinner></ion-spinner>
+    <p>{{ 'ORDER_CONFIRMATION.LOADING_DETAILS' | translate }}</p>
+  </div>
+
 </ion-content>

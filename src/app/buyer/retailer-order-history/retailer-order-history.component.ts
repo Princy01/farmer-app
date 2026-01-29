@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
@@ -9,9 +9,19 @@ import {
   basketOutline,
   storefrontOutline,
   checkmarkCircle,
+  timeOutline,
+  checkmarkCircleOutline,
+  cubeOutline,
+  airplaneOutline,
+  carOutline,
+  bicycleOutline,
+  checkmarkDoneCircle,
+  closeCircleOutline,
+  helpOutline,
 } from 'ionicons/icons';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
-import { OrderService, RetailerOrderHistory } from './retailer-order-history.service';
+import { Subscription } from 'rxjs';
+import { RetailerOrderHistoryService, RetailerOrderHistory } from './retailer-order-history.service';
 
 interface DisplayOrder {
   orderId: string;
@@ -32,17 +42,19 @@ interface DisplayOrder {
   templateUrl: './retailer-order-history.component.html',
   styleUrls: ['./retailer-order-history.component.scss'],
 })
-export class RetailerOrderHistoryComponent implements OnInit {
+export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   orders: DisplayOrder[] = [];
   filteredOrders: DisplayOrder[] = [];
   selectedFilter: string = 'all';
   isLoading = true;
   hasError = false;
 
+  private subscriptions = new Subscription();
+
   constructor(
     private router: Router,
     private translate: TranslateService,
-    private orderService: OrderService
+    private orderService: RetailerOrderHistoryService
   ) {
     addIcons({
       alertCircleOutline,
@@ -50,44 +62,69 @@ export class RetailerOrderHistoryComponent implements OnInit {
       basketOutline,
       storefrontOutline,
       checkmarkCircle,
+      timeOutline,
+      checkmarkCircleOutline,
+      cubeOutline,
+      airplaneOutline,
+      carOutline,
+      bicycleOutline,
+      checkmarkDoneCircle,
+      closeCircleOutline,
+      helpOutline,
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadOrders();
   }
 
-  async loadOrders() {
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  loadOrders(): void {
     this.isLoading = true;
     this.hasError = false;
 
-    this.orderService.getOrderHistory().subscribe({
+    const subscription = this.orderService.getOrderHistory().subscribe({
       next: (response) => {
-        const allOrders: DisplayOrder[] = [];
+        try {
+          const allOrders: DisplayOrder[] = [];
 
-        // Current orders (status 1 to 5)
-        response.current_orders.forEach((o) => {
-          allOrders.push(this.mapToDisplayOrder(o, true));
-        });
+          // Current orders (status 1 to 5)
+          if (response.current_orders && Array.isArray(response.current_orders)) {
+            response.current_orders.forEach((o) => {
+              allOrders.push(this.mapToDisplayOrder(o, true));
+            });
+          }
 
-        // Past orders (delivered, cancelled, or null status)
-        response.order_history.forEach((o) => {
-          allOrders.push(this.mapToDisplayOrder(o, false));
-        });
+          // Past orders (delivered, cancelled, or null status)
+          if (response.order_history && Array.isArray(response.order_history)) {
+            response.order_history.forEach((o) => {
+              allOrders.push(this.mapToDisplayOrder(o, false));
+            });
+          }
 
-        // Sort newest first
-        allOrders.sort((a, b) => new Date(b.placedAt).getTime() - new Date(a.placedAt).getTime());
+          // Sort newest first
+          allOrders.sort((a, b) => new Date(b.placedAt).getTime() - new Date(a.placedAt).getTime());
 
-        this.orders = allOrders;
-        this.filteredOrders = [...allOrders];
-        this.isLoading = false;
+          this.orders = allOrders;
+          this.filterOrders(this.selectedFilter);
+          this.isLoading = false;
+        } catch (error) {
+          console.error('Error processing order data:', error);
+          this.hasError = true;
+          this.isLoading = false;
+        }
       },
       error: (err) => {
-        console.error('Failed to load order history', err);
+        console.error('Failed to load order history:', err);
         this.hasError = true;
         this.isLoading = false;
       },
     });
+
+    this.subscriptions.add(subscription);
   }
 
   private mapToDisplayOrder(o: RetailerOrderHistory, isCurrent: boolean): DisplayOrder {
@@ -97,34 +134,38 @@ export class RetailerOrderHistoryComponent implements OnInit {
       rawOrderId: o.order_id,
       placedAt: o.date_of_order,
       status,
-      deliveryAddress: o.delivery_address,
-      totalAmount: o.total_order_amount,
-      finalAmount: o.final_amount,
+      deliveryAddress: o.delivery_address || '',
+      totalAmount: o.total_order_amount || 0,
+      finalAmount: o.final_amount || 0,
       actualDeliveryDate: o.actual_delivery_date || undefined,
       isCurrent,
     };
   }
 
   private getStatusFromCode(code: number | null): string {
-    if (code === null) return 'Cancelled'; // or 'Unknown' – adjust as needed
-    switch (code) {
-      case 1: return 'Placed';
-      case 2: return 'Confirmed';
-      case 3: return 'Packed';
-      case 4: return 'Shipped';
-      case 5: return 'In Transit'; // or 'Out for Delivery' – adjust if you have exact mapping
-      case 6: return 'Delivered';
-      default: return 'Cancelled';
+    if (code === null) return 'Cancelled';
+
+    const statusMap: { [key: number]: string } = {
+      1: 'Placed',
+      2: 'Confirmed',
+      3: 'Packed',
+      4: 'Shipped',
+      5: 'In Transit',
+      6: 'Delivered',
+    };
+
+    return statusMap[code] || 'Cancelled';
+  }
+
+  onSegmentChange(event: any): void {
+    if (event?.detail?.value) {
+      this.filterOrders(event.detail.value);
     }
   }
 
-  onSegmentChange(event: any) {
-    const value = event.detail.value;
-    this.filterOrders(value);
-  }
-
-  filterOrders(filter: string) {
+  filterOrders(filter: string): void {
     this.selectedFilter = filter;
+
     if (filter === 'all') {
       this.filteredOrders = [...this.orders];
     } else if (filter === 'active') {
@@ -164,12 +205,14 @@ export class RetailerOrderHistoryComponent implements OnInit {
     return icons[status] || 'help-outline';
   }
 
-  onOrderClick(order: DisplayOrder) {
-    this.navigateToOrderDetails(order);
+  onOrderClick(order: DisplayOrder): void {
+    if (order?.rawOrderId) {
+      this.navigateToOrderDetails(order);
+    }
   }
 
-  navigateToOrderDetails(order: DisplayOrder) {
-    this.router.navigate(['/buyer/retailer-order-details', order.rawOrderId]);  // Use raw number
+  navigateToOrderDetails(order: DisplayOrder): void {
+    this.router.navigate(['/buyer/retailer-order-details', order.rawOrderId]);
   }
 
   getOrderProgress(status: string): number {
@@ -187,13 +230,15 @@ export class RetailerOrderHistoryComponent implements OnInit {
   }
 
   getTranslatedStatus(status: string): string {
-    const key = 'RETAILER_ORDER_HISTORY.STATUS_' + status.toUpperCase().replace(/\s+/g, '_');
-    return this.translate.instant(key);
+    const key = `RETAILER_ORDER_HISTORY.STATUS_${status.toUpperCase().replace(/\s+/g, '_')}`;
+    const translation = this.translate.instant(key);
+    return translation !== key ? translation : status;
   }
 
   getTranslatedFilterLabel(filter: string): string {
-    const key = 'RETAILER_ORDER_HISTORY.FILTER_' + filter.toUpperCase();
-    return this.translate.instant(key);
+    const key = `RETAILER_ORDER_HISTORY.FILTER_${filter.toUpperCase()}`;
+    const translation = this.translate.instant(key);
+    return translation !== key ? translation : filter;
   }
 
   getNoOrdersMessage(filter: string): string {

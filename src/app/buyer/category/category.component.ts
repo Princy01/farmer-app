@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, IonModal, AlertController, LoadingController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,8 +8,8 @@ import { FormsModule } from '@angular/forms';
 import { BuyerApiService, Product, ProductAll, Category } from '../services/buyer-api.service';
 import { CartService, AddCartItemRequest } from '../cart/cart.service';
 import { AuthService } from '../../auth/auth.service';
-import { catchError, finalize, switchMap, tap } from 'rxjs';
-import { of } from 'rxjs';
+import { catchError, finalize, switchMap, tap, takeUntil } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { Location } from '@angular/common';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MandiProduct, MandiService} from '../category/mandi-products.service';
@@ -21,9 +21,17 @@ import { MandiProduct, MandiService} from '../category/mandi-products.service';
   templateUrl: './category.component.html',
   styleUrls: ['./category.component.scss'],
 })
-export class CategoryPageComponent implements OnInit {
+export class CategoryPageComponent implements OnInit, OnDestroy {
   @ViewChild('filterModal') filterModal!: IonModal;
   @ViewChild('sortModal') sortModal!: IonModal;
+
+  // Subscription management
+  private destroy$ = new Subject<void>();
+
+  // Constants
+  private readonly DEFAULT_LOADING_TIMEOUT = 10000; // 10 seconds
+  private readonly DEFAULT_UNIT_ID = 1;
+  private readonly DEFAULT_INITIAL_QUANTITY = 1;
 
   // Navigation and Selection
   superCategoryId: number = -1;
@@ -95,6 +103,11 @@ export class CategoryPageComponent implements OnInit {
   }
 
 
+  /**
+   * Adds a product from a specific wholesaler to the shopping cart
+   * @param wholesaler - The wholesaler/mandi offering the product
+   * @param event - Optional click event to prevent propagation
+   */
   async addToCart(wholesaler: any, event?: Event) {
     if (event) {
       event.stopPropagation();
@@ -141,10 +154,22 @@ export class CategoryPageComponent implements OnInit {
     try {
       await loading.present();
 
-      if (wholesaler.price < 0) {
+      if (!wholesaler || wholesaler.price_per_unit < 0) {
+        await loading.dismiss();
         const alert = await this.alertCtrl.create({
           header: this.translate.instant('CATEGORY.ERROR'),
           message: this.translate.instant('CATEGORY.INVALID_PRICE'),
+          buttons: [this.translate.instant('CATEGORY.OK')]
+        });
+        await alert.present();
+        return;
+      }
+
+      if (!wholesaler.wholesaler_id || !wholesaler.id) {
+        await loading.dismiss();
+        const alert = await this.alertCtrl.create({
+          header: this.translate.instant('CATEGORY.ERROR'),
+          message: this.translate.instant('CATEGORY.INVALID_WHOLESALER'),
           buttons: [this.translate.instant('CATEGORY.OK')]
         });
         await alert.present();
@@ -155,14 +180,16 @@ export class CategoryPageComponent implements OnInit {
         wholesaler_id: wholesaler.wholesaler_id,
         branch_id: wholesaler.id,
         product_id: this.selectedProduct.product_id,
-        quantity: 1,
-        unit_id: 1, // Default unit, adjust if you have unit selection
+        quantity: this.DEFAULT_INITIAL_QUANTITY,
+        unit_id: this.DEFAULT_UNIT_ID,
         price: wholesaler.price_per_unit
       };
 
       console.log('Adding to cart:', cartRequest);
 
-      this.cartService.addItemToCart(cartRequest).subscribe({
+      this.cartService.addItemToCart(cartRequest).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
         next: async (response) => {
           await loading.dismiss();
           console.log('Item added to cart:', response);
@@ -221,6 +248,7 @@ export class CategoryPageComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.pipe(
+      takeUntil(this.destroy$),
       tap(params => {
         this.superCategoryId = +params['superCategoryId'] || +params['categoryId'];
         this.categoryId = this.superCategoryId;
@@ -262,9 +290,9 @@ export class CategoryPageComponent implements OnInit {
             this.errorLoadingCategories = true;
             this.loadingCategories = false;
             // Fallback to generic name
-            this.categoryName = 'Products';
+            this.categoryName = this.translate.instant('CATEGORY.PRODUCTS_FALLBACK');
             this.superCategoryName = this.categoryName;
-            this.selectedCategoryName = `All ${this.categoryName}`;
+            this.selectedCategoryName = `${this.translate.instant('CATEGORY.ALL')} ${this.categoryName}`;
             this.selectedSubcategory = this.selectedCategoryName;
             return of([]);
           })
@@ -290,11 +318,24 @@ export class CategoryPageComponent implements OnInit {
     });
   }
 
+  /**
+   * Lifecycle hook that is called when the component is destroyed
+   * Cleans up subscriptions to prevent memory leaks
+   */
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Loads all products for the current super category
+   */
   loadAllProducts() {
     this.loadingProducts = true;
     this.errorLoadingProducts = false;
 
     this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
+      takeUntil(this.destroy$),
       catchError(error => {
         console.error('Error fetching all products of super category:', error);
         this.errorLoadingProducts = true;
@@ -315,6 +356,10 @@ export class CategoryPageComponent implements OnInit {
     });
   }
 
+  /**
+   * Loads products for a selected subcategory or all products if main category is selected
+   * @param category - The category or subcategory to load products for
+   */
   selectSubcategory(category: Category | { category_id: number; category_name: string }) {
     this.loadingProducts = true;
     this.errorLoadingProducts = false;
@@ -326,6 +371,7 @@ export class CategoryPageComponent implements OnInit {
 
     if (category.category_id === this.categoryId) {
       this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
+        takeUntil(this.destroy$),
         catchError(error => {
           console.error('Error fetching all products of super category:', error);
           this.errorLoadingProducts = true;
@@ -346,6 +392,7 @@ export class CategoryPageComponent implements OnInit {
       });
     } else {
       this.buyerApiService.getProductsByCategoryId(category.category_id).pipe(
+        takeUntil(this.destroy$),
         catchError(error => {
           console.error('Error fetching products:', error);
           this.errorLoadingProducts = true;
@@ -377,27 +424,67 @@ export class CategoryPageComponent implements OnInit {
     }
   }
 
-  // Keep the original method name as well
-  selectCategory(category: Category) {
-    this.selectSubcategory(category);
-  }
 
-  selectProduct(product: ProductAll) {
-  this.selectedProduct = product;
-  this.wholesalers = [];
-  if (!product?.product_id) return;
 
-  // Optionally, pass cityId if you have it
-  this.mandiService.getMandisByProduct(product.product_id).subscribe({
-    next: (mandis: MandiProduct[]) => {
-      this.wholesalers = mandis;
-    },
-    error: (err) => {
-      console.error('Failed to load mandis:', err);
-      this.wholesalers = [];
+  /**
+   * Selects a product and loads available wholesalers for that product
+   * @param product - The product to select and display details for
+   */
+  async selectProduct(product: ProductAll) {
+    this.selectedProduct = product;
+    this.wholesalers = [];
+
+    if (!product?.product_id) {
+      console.warn('No product ID provided');
+      return;
     }
-  });
-}
+
+    const loading = await this.loadingCtrl.create({
+      message: this.translate.instant('CATEGORY.LOADING_WHOLESALERS'),
+      spinner: 'circular',
+      duration: this.DEFAULT_LOADING_TIMEOUT
+    });
+
+    try {
+      await loading.present();
+
+      // Optionally, pass cityId if you have it
+      this.mandiService.getMandisByProduct(product.product_id).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
+        next: async (mandis: MandiProduct[]) => {
+          this.wholesalers = mandis || [];
+          await loading.dismiss();
+        },
+        error: async (err) => {
+          console.error('Failed to load mandis:', err);
+          this.wholesalers = [];
+          await loading.dismiss();
+
+          const alert = await this.alertCtrl.create({
+            header: this.translate.instant('CATEGORY.ERROR'),
+            message: this.translate.instant('CATEGORY.ERROR_LOADING_WHOLESALERS'),
+            buttons: [
+              {
+                text: this.translate.instant('CATEGORY.CANCEL'),
+                role: 'cancel'
+              },
+              {
+                text: this.translate.instant('CATEGORY.RETRY'),
+                handler: () => {
+                  this.selectProduct(product);
+                }
+              }
+            ]
+          });
+          await alert.present();
+        }
+      });
+    } catch (error) {
+      await loading.dismiss();
+      console.error('Unexpected error in selectProduct:', error);
+    }
+  }
 
   backToCategories() {
     this.showProducts = false;
@@ -431,36 +518,46 @@ export class CategoryPageComponent implements OnInit {
   }
 
   // Filter and Sort Methods
+  /**
+   * Applies search, filter, and sort operations to the product list
+   * @returns Filtered and sorted array of products
+   */
   getFilteredAndSortedItems(): ProductAll[] {
-    if (!this.productsList) return [];
+    if (!this.productsList || !Array.isArray(this.productsList) || this.productsList.length === 0) {
+      return [];
+    }
 
     let items = [...this.productsList];
 
     // Search Filter
-    if (this.searchQuery) {
+    if (this.searchQuery && this.searchQuery.trim()) {
+      const query = this.searchQuery.toLowerCase().trim();
       items = items.filter(item =>
-        item.product_name.toLowerCase().includes(this.searchQuery.toLowerCase())
+        item?.product_name?.toLowerCase()?.includes(query)
       );
     }
 
     // Apply additional filters
     if (this.availability) {
-      items = items.filter(item => item.active_status === 1);
+      items = items.filter(item => item?.active_status === 1);
     }
 
     // Apply sorting
     switch (this.sortOption) {
       case 'name-asc':
-        items.sort((a, b) => a.product_name.localeCompare(b.product_name));
+        items.sort((a, b) => (a?.product_name || '').localeCompare(b?.product_name || ''));
         break;
       case 'name-desc':
-        items.sort((a, b) => b.product_name.localeCompare(a.product_name));
+        items.sort((a, b) => (b?.product_name || '').localeCompare(a?.product_name || ''));
         break;
       case 'category-asc':
-        items.sort((a, b) => a.cat_name.localeCompare(b.cat_name));
+        items.sort((a, b) => (a?.cat_name || '').localeCompare(b?.cat_name || ''));
         break;
       case 'category-desc':
-        items.sort((a, b) => b.cat_name.localeCompare(a.cat_name));
+        items.sort((a, b) => (b?.cat_name || '').localeCompare(a?.cat_name || ''));
+        break;
+      default:
+        // Keep original order if sort option is invalid
         break;
     }
 
@@ -506,6 +603,10 @@ export class CategoryPageComponent implements OnInit {
   }
 
   goToProductDetails(product: ProductAll) {
+    if (!product?.product_id) {
+      console.error('Cannot navigate: Invalid product');
+      return;
+    }
     this.router.navigate(['/buyer/product-details', product.product_id]);
   }
 }

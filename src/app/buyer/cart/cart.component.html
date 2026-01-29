@@ -46,6 +46,10 @@
 
                 <div class="product-details">
                   <h3 class="product-name">{{ item.product_name }}</h3>
+                  <div class="price-details">
+                    <span class="unit-price">₹{{ item.price }} / {{ item.unit_name }}</span>
+                    <span class="item-total">{{ 'CART.ITEM_TOTAL' | translate }}: ₹{{ item.price * item.quantity }}</span>
+                  </div>
                 </div>
               </div>
 

@@ -104,6 +104,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.orderData = navigation?.extras?.state?.['orderData'];
 
     if (!this.orderData) {
+      console.error('No order data found in navigation state');
       this.router.navigate(['/buyer/cart']);
       return;
     }
@@ -198,77 +199,76 @@ export class PaymentComponent implements OnInit, OnDestroy {
   }
 
   private async handleOrderCreation(orderData: any): Promise<any> {
-    console.log('Creating order with data:', orderData);
-    // Map orderData to CreateOrderRequest
-    const items: Item[] = orderData.items.map((item: any) => ({
-      selected_id: item.selected_id,
-      product_id: item.product_id ?? item.productId,
-      quantity: item.quantity,
-      unit_id: item.unit_id ?? item.unitId ?? 1,
-      price: item.price ?? item.price_while_added ?? item.latest_wholesaler_price ?? 0,
-      discount_amount: item.discount_amount ?? item.discountAmount ?? 0,
-      tax_amount: item.tax_amount ?? item.taxAmount ?? 0,
-      wholeseller_id: item.wholeseller_id ?? item.wholesaler_id ?? item.wholesellerId ?? item.wholesalerId,
-      branch_id: item.branch_id ?? item.branchId ?? undefined,
-    }));
+    try {
+      console.log('Creating order with data:', orderData);
 
-    // Calculate totals as backend expects them
-    let total_order_amount = 0, discount_amount = 0, tax_amount = 0, final_amount = 0;
-    for (const item of items) {
-      total_order_amount += item.quantity * item.price;
-      discount_amount += item.discount_amount;
-      tax_amount += item.tax_amount;
-      final_amount += (item.quantity * item.price) - item.discount_amount + item.tax_amount;
-    }
+      // Validate order data
+      if (!orderData?.items || orderData.items.length === 0) {
+        throw new Error(this.translate.instant('PAYMENT.ERROR_NO_ITEMS'));
+      }
 
-    const delivery_amount = orderData.transporterCost || 0;
-    final_amount += delivery_amount;
+      // Map orderData to CreateOrderRequest
+      const items: Item[] = orderData.items.map((item: any) => ({
+        selected_id: item.selected_id,
+        product_id: item.product_id ?? item.productId,
+        quantity: item.quantity,
+        unit_id: item.unit_id ?? item.unitId ?? 1,
+        price: item.price ?? item.price_while_added ?? item.latest_wholesaler_price ?? 0,
+        discount_amount: item.discount_amount ?? item.discountAmount ?? 0,
+        tax_amount: item.tax_amount ?? item.taxAmount ?? 0,
+        wholeseller_id: item.wholeseller_id ?? item.wholesaler_id ?? item.wholesellerId ?? item.wholesalerId,
+        branch_id: item.branch_id ?? item.branchId ?? undefined,
+      }));
 
-    const createOrderRequest: CreateOrderRequest = {
-      date_of_order: new Date().toISOString().split('T')[0],
-      order_status: 1,
-      delivery_address: orderData.deliveryAddress,
-      items: items,
-      retailer_id: orderData.retailer?.id ?? undefined,
-      wholeseller_id: undefined, // Not used for grouped orders
-      total_order_amount: total_order_amount || 0,
-      discount_amount: discount_amount || 0,
-      tax_amount: tax_amount || 0,
-      final_amount: final_amount || 0,
-      delivery_amount: delivery_amount || 0
-    };
+      // Calculate totals as backend expects them
+      let total_order_amount = 0, discount_amount = 0, tax_amount = 0, final_amount = 0;
+      for (const item of items) {
+        total_order_amount += item.quantity * item.price;
+        discount_amount += item.discount_amount;
+        tax_amount += item.tax_amount;
+        final_amount += (item.quantity * item.price) - item.discount_amount + item.tax_amount;
+      }
 
-    const response = await this.orderService.createOrder(createOrderRequest).toPromise();
-    if (!response) {
-      throw new Error('Order creation failed');
-    }
-    const orderIds = response.order_ids;
+      const delivery_amount = orderData.transporterCost || 0;
+      final_amount += delivery_amount;
 
-    // Update orderData with orderIds
-    const updatedOrderData = {
-      ...orderData,
-      orderIds: orderIds,
-      orderId: orderIds[0]
-    };
-
-    // If transport is selected, create transport job
-    if (this.hasTransport && this.transportInfo) {
-      const transportRequest: TransportRequestWithOrders = {
-        distance: this.transportInfo.distance,
-        delivery_type: this.transportInfo.delivery_type,
-        urgency: this.transportInfo.urgency || null,
-        requested_date: this.transportInfo.requested_date
-          ? new Date(this.transportInfo.requested_date)
-          : null,
-        load_type: this.transportInfo.load_type,
-        status: 'open',
-        order_ids: orderIds
+      const createOrderRequest: CreateOrderRequest = {
+        date_of_order: new Date().toISOString().split('T')[0],
+        order_status: 1,
+        delivery_address: orderData.deliveryAddress,
+        items: items,
+        retailer_id: orderData.retailer?.id ?? undefined,
+        wholeseller_id: undefined, // Not used for grouped orders
+        total_order_amount: total_order_amount || 0,
+        discount_amount: discount_amount || 0,
+        tax_amount: tax_amount || 0,
+        final_amount: final_amount || 0,
+        delivery_amount: delivery_amount || 0
       };
 
-      await this.orderService.createTransportJob(transportRequest).toPromise();
-    }
+      const response = await this.orderService.createOrder(createOrderRequest).toPromise();
+      if (!response || !response.order_ids || response.order_ids.length === 0) {
+        throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
+      }
+      const orderIds = response.order_ids;
 
-    return updatedOrderData;
+      // Update orderData with orderIds
+      const updatedOrderData = {
+        ...orderData,
+        orderIds: orderIds,
+        orderId: orderIds[0]
+      };
+
+      // If transport is selected, create transport job
+      if (this.hasTransport && this.transportInfo) {
+        await this.createTransportJob(orderIds, this.transportInfo);
+      }
+
+      return updatedOrderData;
+    } catch (error: any) {
+      console.error('Order creation error:', error);
+      throw error;
+    }
   }
 
   private async createTransportJob(orderIds: number[], transportData: any): Promise<void> {
@@ -276,8 +276,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
       const transportRequest: TransportRequestWithOrders = {
         distance: transportData.distance || 50,
         delivery_type: transportData.delivery_type,
-        urgency: transportData.urgency || null,                    // optional
-        requested_date: null,
+        urgency: transportData.urgency || null,
+        requested_date: transportData.requested_date
+          ? new Date(transportData.requested_date)
+          : null,
         load_type: transportData.load_type || 'general',
         status: 'open',
         order_ids: orderIds
@@ -292,7 +294,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       console.error('Transport job creation failed:', error);
       // Don't throw - order is already created, just log the transport error
       await this.showToast(
-        'Order placed but transport request failed. Please contact support.',
+        this.translate.instant('PAYMENT.ERROR_TRANSPORT_JOB'),
         'warning'
       );
     }
@@ -309,6 +311,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
         buttons: [this.translate.instant('PAYMENT.OK')]
       });
       await alert.present();
+      return;
+    }
+
+    if (this.isProcessingPayment) {
       return;
     }
 
@@ -332,11 +338,13 @@ export class PaymentComponent implements OnInit, OnDestroy {
       this.router.navigate(['/buyer/order-confirmation'], {
         state: { orderData: updatedOrderData }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment processing error:', error);
       await loading.dismiss();
       this.isProcessingPayment = false;
-      await this.showPaymentError();
+
+      const errorMessage = error?.message || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG');
+      await this.showPaymentError(errorMessage);
     }
   }
 
@@ -551,14 +559,18 @@ export class PaymentComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
+    if (this.isProcessingPayment) {
+      return;
+    }
+
     this.router.navigate(['/buyer/checkout'], {
       state: {
-        cartItems: this.orderData.items,
-        totalPrice: this.orderData.total_order_amount,
-        discount: this.orderData.discount_amount,
-        retailer: this.orderData.retailer,
-        wholeseller: { id: this.orderData.wholeseller_id },
-        selectedBranch: this.orderData.selectedBranch,
+        cartItems: this.orderData?.items || [],
+        totalPrice: this.orderData?.total_order_amount || 0,
+        discount: this.orderData?.discount_amount || 0,
+        retailer: this.orderData?.retailer,
+        wholeseller: { id: this.orderData?.wholeseller_id },
+        selectedBranch: this.orderData?.selectedBranch,
         transportData: this.transportInfo,
         hasRideRequest: this.hasTransport
       }

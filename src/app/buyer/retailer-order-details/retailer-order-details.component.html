@@ -1,91 +1,139 @@
-<!-- retailer-order-details.component.html - Suggested minimal updates to match backend data -->
-<ion-header>
-  <ion-toolbar>
+<ion-header [translucent]="true" mode="ios">
+  <ion-toolbar style="--background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --color: white;">
     <ion-buttons slot="start">
-      <ion-back-button
-        defaultHref="/buyer/retailer-order-tracking"
-      ></ion-back-button>
+      <ion-back-button defaultHref="/buyer/retailer-order-history" style="--color: white;"></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ "RETAILER_ORDER_DETAILS.TITLE" | translate }}</ion-title>
+    <ion-title style="font-weight: 600; font-size: 1.2rem;">
+      {{ 'RETAILER_ORDER_DETAILS.TITLE' | translate }}
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content *ngIf="!loading && !error">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        {{ "RETAILER_ORDER_DETAILS.ORDER_NUMBER" | translate }} #{{
-          order.order_id
-        }}
-      </ion-card-title>
-      <ion-card-subtitle>
-        {{ order.date_of_order | date : "mediumDate" }}
-      </ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-label>
-        <strong>{{ "RETAILER_ORDER_DETAILS.STATUS" | translate }}:</strong>
-        <ion-chip [color]="getStatusColor(order.order_status)">
-          <ion-icon [name]="getStatusIcon(order.order_status)"></ion-icon>
-          {{ getTranslatedStatus(order.order_status) }}
-        </ion-chip>
-      </ion-label>
-      <p *ngIf="order.actual_delivery_date">
-        <strong
-          >{{ "RETAILER_ORDER_DETAILS.DELIVERED_AT" | translate }}:</strong
-        >
-        {{ order.actual_delivery_date | date : "medium" }}
-      </p>
-      <p>
-        <strong
-          >{{ "RETAILER_ORDER_DETAILS.DELIVERY_ADDRESS" | translate }}:</strong
-        >
-        {{ order.delivery_address }}
-      </p>
-    </ion-card-content>
-  </ion-card>
+<ion-content [fullscreen]="true" class="ion-padding">
 
-  <ion-card>
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col>{{
-            "RETAILER_ORDER_DETAILS.TOTAL_ORDER_AMOUNT" | translate
-          }}</ion-col>
-          <ion-col>{{
-            order.total_order_amount | currency : "INR" : "symbol" : "1.2-2"
-          }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col>{{ "RETAILER_ORDER_DETAILS.DISCOUNT" | translate }}</ion-col>
-          <ion-col
-            >-{{
-              order.discount_amount | currency : "INR" : "symbol" : "1.2-2"
-            }}</ion-col
-          >
-        </ion-row>
-        <ion-row>
-          <ion-col>{{ "RETAILER_ORDER_DETAILS.TAX" | translate }}</ion-col>
-          <ion-col>{{
-            order.tax_amount | currency : "INR" : "symbol" : "1.2-2"
-          }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col>{{
-            "RETAILER_ORDER_DETAILS.FINAL_AMOUNT" | translate
-          }}</ion-col>
-          <ion-col>{{
-            order.final_amount | currency : "INR" : "symbol" : "1.2-2"
-          }}</ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
-  </ion-card>
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>{{ 'RETAILER_ORDER_DETAILS.LOADING' | translate }}</p>
+  </div>
 
-<ion-content *ngIf="loading">
-  <ion-spinner></ion-spinner>
-</ion-content>
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <ion-icon name="alert-circle-outline" color="danger" class="error-icon"></ion-icon>
+    <h3>{{ 'RETAILER_ORDER_DETAILS.ERROR_TITLE' | translate }}</h3>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" (click)="retry()">
+      {{ 'RETAILER_ORDER_DETAILS.RETRY' | translate }}
+    </ion-button>
+  </div>
 
-<ion-content *ngIf="error">
-  <ion-text color="danger">{{ error }}</ion-text>
+  <!-- Order Details -->
+  <div *ngIf="!loading && !error && order">
+
+    <!-- Order Header Card -->
+    <ion-card class="order-header-card">
+      <ion-card-header>
+        <ion-card-title>
+          {{ 'RETAILER_ORDER_DETAILS.ORDER_NUMBER' | translate }} #{{ order.order_id }}
+        </ion-card-title>
+        <ion-card-subtitle>
+          {{ order.date_of_order | date: 'medium' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="status-section">
+          <ion-label>
+            <strong>{{ 'RETAILER_ORDER_DETAILS.STATUS' | translate }}:</strong>
+          </ion-label>
+          <ion-chip [color]="getStatusColor(order.order_status)">
+            <ion-icon [name]="getStatusIcon(order.order_status)"></ion-icon>
+            <ion-label>{{ getTranslatedStatus(order.order_status) }}</ion-label>
+          </ion-chip>
+        </div>
+
+        <div class="info-row" *ngIf="order.actual_delivery_date">
+          <ion-icon name="checkmark-done-circle" color="success"></ion-icon>
+          <div>
+            <strong>{{ 'RETAILER_ORDER_DETAILS.DELIVERED_AT' | translate }}:</strong>
+            <p>{{ order.actual_delivery_date | date: 'medium' }}</p>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <ion-icon name="location-outline" color="primary"></ion-icon>
+          <div>
+            <strong>{{ 'RETAILER_ORDER_DETAILS.DELIVERY_ADDRESS' | translate }}:</strong>
+            <p>{{ order.delivery_address }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Order Items Card -->
+    <ion-card *ngIf="order.items && order.items.length > 0">
+      <ion-card-header>
+        <ion-card-title>{{ 'RETAILER_ORDER_DETAILS.ORDER_ITEMS' | translate }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full">
+          <ion-item *ngFor="let item of order.items">
+            <div class="item-details">
+              <div class="item-header">
+                <h3>{{ item.product_name || ('RETAILER_ORDER_DETAILS.PRODUCT_ID' | translate: { id: item.product_id }) }}</h3>
+                <p class="item-price">₹{{ item.price | number:'1.2-2' }} × {{ item.quantity }}</p>
+              </div>
+
+              <div class="item-breakdown">
+                <div class="breakdown-row">
+                  <span>{{ 'RETAILER_ORDER_DETAILS.SUBTOTAL' | translate }}</span>
+                  <span>₹{{ getItemTotal(item) | number:'1.2-2' }}</span>
+                </div>
+                <div class="breakdown-row" *ngIf="getItemDiscount(item) > 0">
+                  <span>{{ 'RETAILER_ORDER_DETAILS.DISCOUNT' | translate }}</span>
+                  <span class="discount">-₹{{ getItemDiscount(item) | number:'1.2-2' }}</span>
+                </div>
+                <div class="breakdown-row" *ngIf="getItemTax(item) > 0">
+                  <span>{{ 'RETAILER_ORDER_DETAILS.TAX' | translate }}</span>
+                  <span>₹{{ getItemTax(item) | number:'1.2-2' }}</span>
+                </div>
+                <div class="breakdown-row total-row">
+                  <span><strong>{{ 'RETAILER_ORDER_DETAILS.ITEM_TOTAL' | translate }}</strong></span>
+                  <span><strong>₹{{ getItemFinalTotal(item) | number:'1.2-2' }}</strong></span>
+                </div>
+              </div>
+            </div>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Order Summary Card -->
+    <ion-card class="summary-card">
+      <ion-card-header>
+        <ion-card-title>{{ 'RETAILER_ORDER_DETAILS.ORDER_SUMMARY' | translate }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="summary-grid">
+          <div class="summary-row">
+            <span>{{ 'RETAILER_ORDER_DETAILS.TOTAL_ORDER_AMOUNT' | translate }}</span>
+            <span>₹{{ order.total_order_amount | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-row" *ngIf="order.discount_amount > 0">
+            <span>{{ 'RETAILER_ORDER_DETAILS.DISCOUNT' | translate }}</span>
+            <span class="discount">-₹{{ order.discount_amount | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-row" *ngIf="order.tax_amount > 0">
+            <span>{{ 'RETAILER_ORDER_DETAILS.TAX' | translate }}</span>
+            <span>₹{{ order.tax_amount | number:'1.2-2' }}</span>
+          </div>
+          <ion-item-divider></ion-item-divider>
+          <div class="summary-row final-row">
+            <span><strong>{{ 'RETAILER_ORDER_DETAILS.FINAL_AMOUNT' | translate }}</strong></span>
+            <span class="final-amount"><strong>₹{{ order.final_amount | number:'1.2-2' }}</strong></span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
 </ion-content>

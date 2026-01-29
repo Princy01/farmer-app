@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 export interface RetailerOrderHistory {
@@ -23,12 +24,30 @@ export interface RetailerOrderHistoryResponse {
 @Injectable({
   providedIn: 'root'
 })
-export class OrderService {
+export class RetailerOrderHistoryService {
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   getOrderHistory(): Observable<RetailerOrderHistoryResponse> {
-    return this.http.get<RetailerOrderHistoryResponse>(`${this.apiUrl}/order_history`);
+    return this.http.get<RetailerOrderHistoryResponse>(`${this.apiUrl}/order_history`)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An error occurred while fetching order history';
+
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+
+    console.error(errorMessage);
+    return throwError(() => new Error(errorMessage));
   }
 }

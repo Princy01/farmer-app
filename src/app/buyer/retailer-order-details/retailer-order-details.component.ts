@@ -1,12 +1,21 @@
-// - Adapt to backend response: order_status as number, no wholesalerName/Phone (remove), no paymentMethod (remove), etc.
-// - Map status number to display (assuming common codes: 0=Placed, 1=Confirmed, 2=Packed, 3=Shipped, 4=In Transit, 5=Out for Delivery, 6=Delivered, 7=Cancelled)
-// - No imageUrl in items (backend doesn't provide - can add later if needed)
-
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
+import { addIcons } from 'ionicons';
+import {
+  timeOutline,
+  checkmarkCircleOutline,
+  cubeOutline,
+  airplaneOutline,
+  carOutline,
+  bicycleOutline,
+  checkmarkDoneCircle,
+  closeCircleOutline,
+  helpOutline,
+} from 'ionicons/icons';
 import { RetailerOrderService, RetailerOrderDetails, OrderItem } from './retailer-order-details.service';
 
 @Component({
@@ -16,30 +25,54 @@ import { RetailerOrderService, RetailerOrderDetails, OrderItem } from './retaile
   templateUrl: './retailer-order-details.component.html',
   styleUrls: ['./retailer-order-details.component.scss'],
 })
-export class RetailerOrderDetailsComponent implements OnInit {
-  order!: RetailerOrderDetails;
+export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
+  order: RetailerOrderDetails | null = null;
   loading = true;
   error: string | null = null;
+
+  private subscriptions = new Subscription();
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private orderService: RetailerOrderService,
     private translate: TranslateService
-  ) { }
+  ) {
+    addIcons({
+      timeOutline,
+      checkmarkCircleOutline,
+      cubeOutline,
+      airplaneOutline,
+      carOutline,
+      bicycleOutline,
+      checkmarkDoneCircle,
+      closeCircleOutline,
+      helpOutline,
+    });
+  }
 
-  ngOnInit() {
+  ngOnInit(): void {
+    this.loadOrderDetails();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  private loadOrderDetails(): void {
     const orderId = this.route.snapshot.paramMap.get('id');
+
     if (!orderId || isNaN(+orderId)) {
       this.error = this.translate.instant('RETAILER_ORDER_DETAILS.ERROR_INVALID_ID');
       this.loading = false;
       return;
     }
 
-    this.orderService.getOrderDetails(+orderId).subscribe({
+    const subscription = this.orderService.getOrderDetails(+orderId).subscribe({
       next: (data) => {
         this.order = data;
         this.loading = false;
+        this.error = null;
       },
       error: (err) => {
         console.error('Error fetching order:', err);
@@ -47,69 +80,93 @@ export class RetailerOrderDetailsComponent implements OnInit {
         this.loading = false;
       }
     });
+
+    this.subscriptions.add(subscription);
   }
 
-  goBack() {
-    this.router.navigate(['/buyer/retailer-order-tracking']);
+  retry(): void {
+    this.loading = true;
+    this.error = null;
+    this.loadOrderDetails();
   }
 
-  getStatusLabel(status: number): string {
+  goBack(): void {
+    this.router.navigate(['/buyer/retailer-order-history']);
+  }
+
+  getStatusLabel(status: number | null): string {
+    if (status === null) return 'Cancelled';
+
     const labels: { [key: number]: string } = {
-      0: 'Placed',
-      1: 'Confirmed',
-      2: 'Packed',
-      3: 'Shipped',
-      4: 'In Transit',
-      5: 'Out for Delivery',
+      1: 'Placed',
+      2: 'Confirmed',
+      3: 'Packed',
+      4: 'Shipped',
+      5: 'In Transit',
       6: 'Delivered',
-      7: 'Cancelled'
     };
-    return labels[status] || 'Unknown';
+    return labels[status] || 'Cancelled';
   }
 
-  getStatusColor(status: number): string {
+  getStatusColor(status: number | null): string {
+    if (status === null) return 'danger';
+
     const colors: { [key: number]: string } = {
-      0: 'medium',
-      1: 'primary',
-      2: 'secondary',
-      3: 'tertiary',
-      4: 'warning',
+      1: 'medium',
+      2: 'primary',
+      3: 'secondary',
+      4: 'tertiary',
       5: 'warning',
       6: 'success',
-      7: 'danger'
     };
     return colors[status] || 'medium';
   }
 
-  getStatusIcon(status: number): string {
+  getStatusIcon(status: number | null): string {
+    if (status === null) return 'close-circle-outline';
+
     const icons: { [key: number]: string } = {
-      0: 'time-outline',
-      1: 'checkmark-circle-outline',
-      2: 'cube-outline',
-      3: 'airplane-outline',
-      4: 'car-outline',
-      5: 'bicycle-outline',
+      1: 'time-outline',
+      2: 'checkmark-circle-outline',
+      3: 'cube-outline',
+      4: 'airplane-outline',
+      5: 'car-outline',
       6: 'checkmark-done-circle',
-      7: 'close-circle-outline'
     };
     return icons[status] || 'help-outline';
   }
 
-  getTranslatedStatus(status: number): string {
+  getTranslatedStatus(status: number | null): string {
     const label = this.getStatusLabel(status);
-    const key = 'RETAILER_ORDER_DETAILS.STATUS_' + label.toUpperCase().replace(/\s+/g, '_');
-    return this.translate.instant(key);
+    const key = `RETAILER_ORDER_DETAILS.STATUS_${label.toUpperCase().replace(/\s+/g, '_')}`;
+    const translation = this.translate.instant(key);
+    return translation !== key ? translation : label;
   }
 
   getSubtotal(): number {
-    return this.order.total_order_amount;
+    return this.order?.total_order_amount || 0;
   }
 
   getTotal(): number {
-    return this.order.final_amount;
+    return this.order?.final_amount || 0;
   }
 
   getItemTotal(item: OrderItem): number {
     return item.quantity * item.price;
+  }
+
+  getItemDiscount(item: OrderItem): number {
+    return item.discount_amount || 0;
+  }
+
+  getItemTax(item: OrderItem): number {
+    return item.tax_amount || 0;
+  }
+
+  getItemFinalTotal(item: OrderItem): number {
+    const subtotal = this.getItemTotal(item);
+    const discount = this.getItemDiscount(item);
+    const tax = this.getItemTax(item);
+    return subtotal - discount + tax;
   }
 }

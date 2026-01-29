@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -34,9 +35,12 @@ export interface BusinessBranch {
   providedIn: 'root'
 })
 export class CheckoutService {
-  private apiUrl = environment.apiUrl;
+  private readonly apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
@@ -46,8 +50,33 @@ export class CheckoutService {
     });
   }
 
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An unknown error occurred';
+
+    if (error.error instanceof ErrorEvent) {
+      // Client-side or network error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Backend error
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+
+      if (error.error?.message) {
+        errorMessage = error.error.message;
+      }
+    }
+
+    console.error('CheckoutService Error:', errorMessage);
+    return throwError(() => error);
+  }
+
   getAllBusinessBranches(): Observable<BusinessBranch[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<BusinessBranch[]>(`${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`, { headers });
+    return this.http.get<BusinessBranch[]>(
+      `${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`,
+      { headers }
+    ).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
   }
 }

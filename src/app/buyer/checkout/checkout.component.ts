@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
@@ -34,6 +34,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { OrderService } from 'src/app/buyer/order-confirmation/order.service';
+import { Subscription } from 'rxjs';
 
 interface CartItem {
   selected_id?: number;
@@ -46,6 +47,9 @@ interface CartItem {
   latest_wholesaler_price: number;
   price_updated_at?: string;
   is_active: boolean;
+  branch_id?: number;
+  wholesaler_id?: number;
+  wholesaler_name?: string;
 }
 
 interface RetailerInfo {
@@ -61,6 +65,17 @@ interface WholeSeller {
   name?: string;
 }
 
+interface TransportData {
+  delivery_type: 'standard' | 'express' | 'priority';
+  urgency: 'normal' | 'urgent';
+  base_price: number;
+  distance: number;
+  dropoff_location?: string;
+  dropoff_city_id?: number;
+  dropoff_branch_id?: number;
+  load_type?: string;
+}
+
 @Component({
   selector: 'app-checkout',
   standalone: true,
@@ -68,7 +83,7 @@ interface WholeSeller {
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
 })
-export class CheckoutComponent implements OnInit {
+export class CheckoutComponent implements OnInit, OnDestroy {
   cartItems: CartItem[] = [];
   retailerInfo: RetailerInfo | null = null;
   wholeSeller: WholeSeller | null = null;
@@ -82,13 +97,14 @@ export class CheckoutComponent implements OnInit {
   grandTotal: number = 0;
   hasRideRequest: boolean = false;
 
-  // Delivery address properties
   businessBranches: BusinessBranch[] = [];
   selectedBranch: BusinessBranch | null = null;
   isLoadingBranches: boolean = false;
   discount: number = 0;
 
-  transportData: any = null;
+  transportData: TransportData | null = null;
+
+  private routerSubscription?: Subscription;
 
   constructor(
     private router: Router,
@@ -126,85 +142,86 @@ export class CheckoutComponent implements OnInit {
       mailOutline
     });
 
-    // Initial navigation state handling
     this.handleNavigationState();
 
-    // Subscribe to router events to handle state when returning from ride
-    this.router.events.subscribe((event) => {
+    this.routerSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.handleNavigationState();
       }
     });
   }
 
-  private handleNavigationState() {
-    const navigation = this.router.getCurrentNavigation();
-    const navData = navigation?.extras?.state;
-
-    if (navData) {
-      console.log('Navigation state received:', navData);
-
-      // Handle cart items
-      if (navData['cartItems']) {
-        this.cartItems = (navData['cartItems'] || []).map((item: any) => {
-          // Determine the price: prefer price_while_added (from ride return), then fall back to item.price (from cart)
-          const price = item.price_while_added || item.price || 0;
-
-          return {
-            selected_id: item.selected_id,
-            product_id: item.product_id,
-            branch_id: item.branch_id,
-            product_name: item.product_name || item.name,
-            quantity: item.quantity,
-            unit_id: item.unit_id,
-            unit_name: item.unit_name,
-            price_while_added: price,
-            latest_wholesaler_price: price, // Use the same resolved price
-            price_updated_at: item.price_updated_at,
-            is_active: !item.is_deleted,
-            wholesaler_id: item.wholesaler_id,
-            wholesaler_name: item.wholesaler_name
-          };
-        });
-
-        this.totalPrice = navData['totalPrice'] || 0;
-        this.retailerInfo = navData['retailer'] || null;
-        this.wholeSeller = navData['wholeseller'] || null;
-        this.discount = navData['discount'] || 0;
-
-        console.log('Cart items loaded:', this.cartItems);
-        console.log('Total price:', this.totalPrice);
-      }
-
-      // Handle transport data from ride component
-      if (navData['transportData']) {
-        this.transportData = navData['transportData'];
-        // Check for both 'hasRideRequest' and 'hasTransport' keys for compatibility
-        this.hasRideRequest = navData['hasRideRequest'] || navData['hasTransport'] || false;
-        this.selectedDeliveryType = this.transportData.delivery_type;
-        this.selectedUrgency = this.transportData.urgency;
-        this.estimatedRidePrice = this.transportData.base_price;
-
-        console.log('Transport data received:', this.transportData);
-        console.log('Estimated ride price:', this.estimatedRidePrice);
-      }
-
-      // Handle selected branch
-      if (navData['selectedBranch']) {
-        this.selectedBranch = navData['selectedBranch'];
-      }
-
-      // Calculate totals
-      this.calculateRidePrice();
-    }
-  }
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.calculateRidePrice();
     this.checkAuthAndLoadBranches();
   }
 
-  private async checkAuthAndLoadBranches() {
+  ngOnDestroy(): void {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
+
+  private handleNavigationState(): void {
+    const navigation = this.router.getCurrentNavigation();
+    const navData = navigation?.extras?.state;
+
+    if (!navData) {
+      return;
+    }
+
+    console.log('Navigation state received:', navData);
+
+    if (navData['cartItems']) {
+      this.cartItems = (navData['cartItems'] || []).map((item: any) => {
+        const price = item.price_while_added ?? item.price ?? 0;
+
+        return {
+          selected_id: item.selected_id,
+          product_id: item.product_id,
+          product_name: item.product_name || item.name,
+          quantity: item.quantity,
+          unit_id: item.unit_id,
+          unit_name: item.unit_name,
+          price_while_added: price,
+          latest_wholesaler_price: price,
+          price_updated_at: item.price_updated_at,
+          is_active: !item.is_deleted
+        };
+      });
+
+      this.totalPrice = navData['totalPrice'] || 0;
+      this.retailerInfo = navData['retailer'] || null;
+      this.wholeSeller = navData['wholeseller'] || null;
+      this.discount = navData['discount'] || 0;
+
+      console.log('Cart items loaded:', this.cartItems);
+      console.log('Total price:', this.totalPrice);
+    }
+
+    if (navData['transportData']) {
+      this.transportData = navData['transportData'];
+      this.hasRideRequest = navData['hasRideRequest'] || navData['hasTransport'] || false;
+
+      // Fix null safety issues
+      if (this.transportData) {
+        this.selectedDeliveryType = this.transportData.delivery_type;
+        this.selectedUrgency = this.transportData.urgency;
+        this.estimatedRidePrice = this.transportData.base_price;
+      }
+
+      console.log('Transport data received:', this.transportData);
+      console.log('Estimated ride price:', this.estimatedRidePrice);
+    }
+
+    if (navData['selectedBranch']) {
+      this.selectedBranch = navData['selectedBranch'];
+    }
+
+    this.calculateRidePrice();
+  }
+
+  private async checkAuthAndLoadBranches(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       await this.showAuthError();
       return;
@@ -218,7 +235,7 @@ export class CheckoutComponent implements OnInit {
     await this.loadBusinessBranches();
   }
 
-  private async showAuthError() {
+  private async showAuthError(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('CHECKOUT.AUTH_ERROR'),
       message: this.translate.instant('CHECKOUT.SESSION_EXPIRED'),
@@ -235,7 +252,7 @@ export class CheckoutComponent implements OnInit {
     await alert.present();
   }
 
-  private async showUnauthorizedError() {
+  private async showUnauthorizedError(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('CHECKOUT.ACCESS_DENIED'),
       message: this.translate.instant('CHECKOUT.NO_PERMISSION'),
@@ -251,8 +268,7 @@ export class CheckoutComponent implements OnInit {
     await alert.present();
   }
 
-  // Load business branches from backend
-  async loadBusinessBranches() {
+  async loadBusinessBranches(): Promise<void> {
     this.isLoadingBranches = true;
     const loading = await this.loadingController.create({
       message: this.translate.instant('CHECKOUT.LOADING_BRANCHES')
@@ -262,9 +278,6 @@ export class CheckoutComponent implements OnInit {
     try {
       const userId = this.authService.getUserId();
       if (!userId) {
-        this.isLoadingBranches = false;
-        this.businessBranches = [];
-        loading.dismiss();
         await this.showAuthError();
         return;
       }
@@ -273,17 +286,11 @@ export class CheckoutComponent implements OnInit {
         next: (branches: BusinessBranch[]) => {
           this.businessBranches = branches?.filter(branch => branch.active_status) || [];
 
-          // Auto-select first branch if available
           if (this.businessBranches.length > 0 && !this.selectedBranch) {
             this.selectedBranch = this.businessBranches[0];
           }
-          this.isLoadingBranches = false;
         },
         error: async (error: any) => {
-          this.isLoadingBranches = false;
-          this.businessBranches = [];
-          loading.dismiss();
-
           console.error('Error loading business branches:', error);
 
           if (error.status === 401) {
@@ -291,63 +298,54 @@ export class CheckoutComponent implements OnInit {
             return;
           }
 
-          const alert = await this.alertCtrl.create({
-            header: this.translate.instant('CHECKOUT.ERROR'),
-            message: this.translate.instant('CHECKOUT.LOAD_BRANCHES_ERROR'),
-            buttons: [this.translate.instant('CHECKOUT.OK')]
-          });
-          await alert.present();
+          await this.showErrorAlert(
+            this.translate.instant('CHECKOUT.LOAD_BRANCHES_ERROR')
+          );
         },
         complete: () => {
+          this.isLoadingBranches = false;
           loading.dismiss();
         }
       });
     } catch (error) {
+      console.error('Unexpected error loading branches:', error);
       this.isLoadingBranches = false;
-      this.businessBranches = [];
-      loading.dismiss();
-
-      console.error('Unexpected error:', error);
-
-      const alert = await this.alertCtrl.create({
-        header: this.translate.instant('CHECKOUT.ERROR'),
-        message: this.translate.instant('CHECKOUT.UNEXPECTED_ERROR'),
-        buttons: [this.translate.instant('CHECKOUT.OK')]
-      });
-      await alert.present();
+      await loading.dismiss();
+      await this.showErrorAlert(
+        this.translate.instant('CHECKOUT.UNEXPECTED_ERROR')
+      );
     }
   }
 
-  // Select a branch
-  selectBranch(branch: BusinessBranch) {
+  selectBranch(branch: BusinessBranch): void {
     this.selectedBranch = branch;
-    this.calculateRidePrice(); // Recalculate with new branch
+    this.calculateRidePrice();
   }
 
-  // Add new delivery address (placeholder for future implementation)
-  addNewAddress() {
+  addNewAddress(): void {
     this.showInfoAlert(
       this.translate.instant('CHECKOUT.ADD_NEW_ADDRESS'),
       this.translate.instant('CHECKOUT.ADD_NEW_ADDRESS_MSG')
     );
   }
 
-  // Track by function for better performance
   trackByBranchId(index: number, branch: BusinessBranch): number {
     return branch.branch_id;
   }
 
-  calculateRidePrice() {
-    // Dynamically calculate transport cost based on delivery_type and distance (same logic as ride component)
+  calculateRidePrice(): void {
     if (this.hasRideRequest && this.transportData?.delivery_type && this.transportData?.distance) {
-      const ratesPerKm = { standard: 8, express: 15, priority: 25 };
-      const rate = ratesPerKm[this.transportData.delivery_type as keyof typeof ratesPerKm] || 0;
+      const ratesPerKm: Record<string, number> = {
+        standard: 8,
+        express: 15,
+        priority: 25
+      };
+      const rate = ratesPerKm[this.transportData.delivery_type] || 0;
       this.estimatedRidePrice = Math.max(50, Math.round(rate * this.transportData.distance));
     } else {
       this.estimatedRidePrice = 0;
     }
 
-    // Calculate grand total
     this.grandTotal = this.totalPrice - (this.discount || 0) + this.estimatedRidePrice;
 
     console.log('Grand total calculated:', {
@@ -358,7 +356,7 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-  arrangeRide() {
+  arrangeRide(): void {
     if (!this.selectedBranch) {
       this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
       return;
@@ -366,7 +364,6 @@ export class CheckoutComponent implements OnInit {
 
     const totalWeight = this.calculateTotalWeight();
 
-    // Pass current checkout state to ride component, including existing transport data
     this.router.navigate(['/buyer/ride'], {
       state: {
         totalWeight: totalWeight,
@@ -374,14 +371,12 @@ export class CheckoutComponent implements OnInit {
         delivery: 'Destination',
         pickupCityId: this.selectedBranch.city_id,
         pickupBranchId: this.selectedBranch.branch_id,
-        // Pass existing cart data so we can return to checkout with all data
         cartItems: this.cartItems,
         totalPrice: this.totalPrice,
         discount: this.discount,
         retailer: this.retailerInfo,
         wholeseller: this.wholeSeller,
         selectedBranch: this.selectedBranch,
-        // Include existing transport data for pre-population in ride page
         transportData: this.transportData,
         hasTransport: this.hasRideRequest
       }
@@ -393,39 +388,18 @@ export class CheckoutComponent implements OnInit {
   }
 
   private getDistance(): number {
-    // Placeholder for distance calculation
-    // Implement proper distance calculation based on pickup and delivery locations
+    // TODO: Implement proper distance calculation based on pickup and delivery locations
     return 50; // Default 50 km
   }
 
-  private prepareTransportData() {
-    if (!this.transportData || !this.selectedBranch) return null;
-
-    const totalWeight = this.calculateTotalWeight();
-    const estimatedDistance = this.getDistance();
-
-    // Only send fields that backend accepts
-    return {
-      pickup_location: this.selectedBranch.address || this.selectedBranch.city_name,
-      dropoff_location: this.transportData.dropoff_location || 'Destination',
-      pickup_city_id: this.selectedBranch.city_id,
-      dropoff_city_id: this.transportData.dropoff_city_id,
-      pickup_branch_id: this.selectedBranch.branch_id,
-      dropoff_branch_id: this.transportData.dropoff_branch_id,
-      weight: totalWeight,
-      distance: estimatedDistance,
-      delivery_type: this.transportData.delivery_type || this.selectedDeliveryType,
-      base_price: this.estimatedRidePrice,
-      urgency: this.transportData.urgency === 'urgent' ? 'urgent' : 'normal',
-      requested_date: new Date().toISOString(),
-      load_type: this.transportData.load_type || 'general',
-      status: 'pending'
-    };
-  }
-
-  proceedToPayment() {
+  proceedToPayment(): void {
     if (!this.selectedBranch) {
       this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
+      return;
+    }
+
+    if (this.cartItems.length === 0) {
+      this.showErrorAlert(this.translate.instant('CHECKOUT.EMPTY_CART_ERROR'));
       return;
     }
 
@@ -433,15 +407,15 @@ export class CheckoutComponent implements OnInit {
       items: this.cartItems,
       retailer: this.retailerInfo,
       selectedBranch: this.selectedBranch,
-      deliveryAddress: this.selectedBranch?.address || '',
-      deliveryPincode: this.selectedBranch?.pincode || '',
+      deliveryAddress: this.selectedBranch.address || '',
+      deliveryPincode: this.selectedBranch.pincode || '',
       totalPrice: this.totalPrice,
       discount: this.discount,
       grandTotal: this.grandTotal,
       hasTransport: this.hasRideRequest,
       transportData: this.transportData,
-      pickupCityId: this.selectedBranch?.city_id,
-      pickupBranchId: this.selectedBranch?.branch_id,
+      pickupCityId: this.selectedBranch.city_id,
+      pickupBranchId: this.selectedBranch.branch_id,
       transporterCost: this.estimatedRidePrice
     };
 
@@ -450,18 +424,21 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-  goBack() {
+  goBack(): void {
     this.router.navigate(['/buyer/cart']);
   }
 
   getRetailerInfo(): string {
-    // console.log('Retailer Info:', this.retailerInfo);
-    if (!this.retailerInfo) return this.translate.instant('CHECKOUT.UNKNOWN_RETAILER');
+    if (!this.retailerInfo) {
+      return this.translate.instant('CHECKOUT.UNKNOWN_RETAILER');
+    }
     return `${this.retailerInfo.name || this.translate.instant('CHECKOUT.UNKNOWN')} - ${this.retailerInfo.location || this.translate.instant('CHECKOUT.UNKNOWN_LOCATION')}`;
   }
 
   getWholesellerInfo(): string {
-    if (!this.wholeSeller) return this.translate.instant('CHECKOUT.DIRECT_ORDER');
+    if (!this.wholeSeller) {
+      return this.translate.instant('CHECKOUT.DIRECT_ORDER');
+    }
     return `${this.wholeSeller.name || this.translate.instant('CHECKOUT.UNKNOWN_WHOLESELLER')}`;
   }
 
@@ -470,7 +447,7 @@ export class CheckoutComponent implements OnInit {
     imgElement.src = 'assets/img/default-product.png';
   }
 
-  private async showErrorAlert(message: string) {
+  private async showErrorAlert(message: string): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('CHECKOUT.ERROR'),
       message: message,
@@ -479,7 +456,7 @@ export class CheckoutComponent implements OnInit {
     await alert.present();
   }
 
-  private async showInfoAlert(header: string, message: string) {
+  private async showInfoAlert(header: string, message: string): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: header,
       message: message,
