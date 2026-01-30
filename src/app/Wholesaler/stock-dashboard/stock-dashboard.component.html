@@ -8,10 +8,22 @@
 </ion-header>
 
 <ion-content>
+  <!-- Error message banner -->
+  <ion-card *ngIf="errorMessage && !isLoading" color="danger" class="error-card">
+    <ion-card-content>
+      <ion-text>{{ errorMessage | translate }}</ion-text>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Branch selector -->
   <div class="branch-selector">
     <ion-item>
       <ion-label>{{ 'STOCK_DASHBOARD.BRANCH_LABEL' | translate }}</ion-label>
-      <ion-select [(ngModel)]="selectedBranchId" (ionChange)="loadTodayStock()">
+      <ion-select
+        [(ngModel)]="selectedBranchId"
+        (ionChange)="loadTodayStock()"
+        [disabled]="isLoading || branches.length === 0"
+        aria-label="{{ 'STOCK_DASHBOARD.BRANCH_LABEL' | translate }}">
         <ion-select-option *ngFor="let branch of branches" [value]="branch.branch_id">
           {{ branch.shop_name }} - {{ branch.location_name }}, {{ branch.city_name }}
         </ion-select-option>
@@ -19,7 +31,16 @@
     </ion-item>
   </div>
 
-  <div class="stock-list" *ngIf="todayStock.length > 0; else noStock">
+  <!-- Loading spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="circular"></ion-spinner>
+    <ion-text class="loading-text">
+      {{ 'STOCK_DASHBOARD.LOADING.LOADING_STOCK' | translate }}
+    </ion-text>
+  </div>
+
+  <!-- Stock list -->
+  <div class="stock-list" *ngIf="!isLoading && todayStock.length > 0">
     <ion-card *ngFor="let item of todayStock" class="stock-card">
       <ion-card-content>
         <ion-row>
@@ -32,7 +53,11 @@
             }
           </ion-col>
           <ion-col size="4" class="button-col">
-            <ion-button fill="outline" (click)="openUpdateStock(item)">
+            <ion-button
+              fill="outline"
+              (click)="openUpdateStock(item)"
+              [disabled]="isLoading"
+              aria-label="{{ 'STOCK_DASHBOARD.UPDATE' | translate }} {{ item.product_name }}">
               {{ 'STOCK_DASHBOARD.UPDATE' | translate }}
             </ion-button>
           </ion-col>
@@ -41,16 +66,20 @@
     </ion-card>
   </div>
 
-  <ng-template #noStock>
-    <div class="no-stock-message">
-      <ion-text class="ion-padding">
-        {{ 'STOCK_DASHBOARD.NO_STOCK' | translate }}
-      </ion-text>
-    </div>
-  </ng-template>
+  <!-- No stock message -->
+  <div *ngIf="!isLoading && todayStock.length === 0 && !errorMessage" class="no-stock-message">
+    <ion-text class="ion-padding">
+      {{ 'STOCK_DASHBOARD.NO_STOCK' | translate }}
+    </ion-text>
+  </div>
 
+  <!-- FAB button -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button color="tertiary" (click)="openAddStock()">
+    <ion-fab-button
+      color="tertiary"
+      (click)="openAddStock()"
+      [disabled]="isLoading || !selectedBranchId"
+      aria-label="{{ 'STOCK_DASHBOARD.ADD_STOCK' | translate }}">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

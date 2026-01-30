@@ -55,12 +55,9 @@
               <p>{{ 'ORDER_DETAILS.Category' | translate }}: {{item.category_name}}</p>
               <p>{{ 'ORDER_DETAILS.Quantity' | translate }}: {{item.quantity}} {{item.unit_name}}</p>
               <p>{{ 'ORDER_DETAILS.Price' | translate }}: ₹{{item.max_item_price}}/{{item.unit_name}}</p>
-              <p *ngIf="item.branch_name">{{ ('ORDER_DETAILS.Branch' | translate) || 'Branch' }}: {{item.branch_name}}
-              </p>
-              <p *ngIf="item.branch_address">{{( 'ORDER_DETAILS.Branch Address' | translate ) || 'Branch Address' }}:
-                {{item.branch_address}}</p>
-              <p *ngIf="item.branch_number">{{ ('ORDER_DETAILS.Branch Contact' | translate) || 'Branch Contact' }}:
-                {{item.branch_number}}</p>
+              <p *ngIf="item.branch_name">{{ 'ORDER_DETAILS.Branch' | translate }}: {{item.branch_name}}</p>
+              <p *ngIf="item.branch_address">{{ 'ORDER_DETAILS.Branch Address' | translate }}: {{item.branch_address}}</p>
+              <p *ngIf="item.branch_number">{{ 'ORDER_DETAILS.Branch Contact' | translate }}: {{item.branch_number}}</p>
             </ion-label>
           </ion-item>
         </ion-list>
@@ -93,11 +90,9 @@
           <span>{{ 'ORDER_DETAILS.Tax Amount' | translate }}</span>
           <span>₹{{orderDetails.tax_amount | number:'1.2-2'}}</span>
         </div>
-        <div>
-          <div class="summary-item">
-            <span>{{ 'ORDER_DETAILS.Delivery Charges' | translate }}</span>
-            <span>₹{{ orderDetails.final_amount - orderDetails.total_order_amount | number:'1.2-2'}}</span>
-          </div>
+        <div class="summary-item">
+          <span>{{ 'ORDER_DETAILS.Delivery Charges' | translate }}</span>
+          <span>₹{{(orderDetails.final_amount - orderDetails.total_order_amount) | number:'1.2-2'}}</span>
         </div>
         <div class="summary-item final-amount">
           <span>{{ 'ORDER_DETAILS.Final Amount' | translate }}</span>
@@ -114,7 +109,7 @@
         {{ 'ORDER_DETAILS.LOAD_ERROR' | translate }}
       </div>
       <ion-button expand="block" (click)="loadOrderDetails()">
-        {{ 'ORDER_DETAILS.Retry' | translate }}
+        {{ 'ORDER_DETAILS.RETRY' | translate }}
       </ion-button>
     </ion-card-content>
   </ion-card>

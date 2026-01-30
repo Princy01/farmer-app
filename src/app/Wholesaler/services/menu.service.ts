@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { MenuController, AlertController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { MenuController, AlertController, ToastController } from '@ionic/angular';
+import { Router, NavigationExtras } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root'
@@ -12,82 +13,118 @@ export class MenuService {
     private menuCtrl: MenuController,
     private router: Router,
     private authService: AuthService,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private toastController: ToastController,
+    private translate: TranslateService
   ) { }
 
+  private async showErrorToast(message: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 3000,
+      position: 'bottom',
+      color: 'danger',
+      buttons: [
+        {
+          text: this.translate.instant('MENU.DISMISS'),
+          role: 'cancel'
+        }
+      ]
+    });
+    await toast.present();
+  }
+
+  private async navigateSafely(route: string[], extras?: NavigationExtras): Promise<boolean> {
+    try {
+      await this.closeMenu();
+      const result = await this.router.navigate(route, extras);
+      if (!result) {
+        this.showErrorToast(this.translate.instant('MENU.NAVIGATION_ERROR'));
+      }
+      return result;
+    } catch (error) {
+      console.error('Navigation error:', error);
+      this.showErrorToast(this.translate.instant('MENU.NAVIGATION_ERROR'));
+      return false;
+    }
+  }
+
   async openMenu() {
-    await this.menuCtrl.open('main-menu');
+    try {
+      await this.menuCtrl.open('main-menu');
+    } catch (error) {
+      console.error('Error opening menu:', error);
+    }
   }
 
   async closeMenu() {
-    await this.menuCtrl.close('main-menu');
+    try {
+      await this.menuCtrl.close('main-menu');
+    } catch (error) {
+      console.error('Error closing menu:', error);
+    }
   }
 
   async navigateToHome() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/home']);
+    return this.navigateSafely(['/wholesaler/home']);
   }
 
   async navigateToBusinessLocations() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/business-locations']);
+    return this.navigateSafely(['/wholesaler/business-locations']);
   }
 
   async navigateToMyOrders() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/orders']);
+    return this.navigateSafely(['/wholesaler/orders']);
   }
 
   async navigateToStockDashboard() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/stock-dashboard']);
+    return this.navigateSafely(['/wholesaler/stock-dashboard']);
   }
 
   async navigateToPastOrders() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/past-orders']);
+    return this.navigateSafely(['/wholesaler/past-orders']);
   }
 
   async navigateToRestockingRecommendations() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/restocking-recommendations']);
+    return this.navigateSafely(['/wholesaler/restocking-recommendations']);
   }
 
   async navigateToMarketOpportunities() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/market-opportunities']);
+    return this.navigateSafely(['/wholesaler/market-opportunities']);
   }
 
   async navigateToTrends() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/trends']);
+    return this.navigateSafely(['/wholesaler/trends']);
   }
 
   async navigateToProfile() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/profile']);
+    return this.navigateSafely(['/wholesaler/profile']);
   }
 
   async navigateToSettings() {
-    await this.closeMenu();
-    this.router.navigate(['/wholesaler/settings']);
+    return this.navigateSafely(['/wholesaler/settings']);
   }
 
   async logout() {
     const alert = await this.alertCtrl.create({
-      header: 'Logout',
-      message: 'Are you sure you want to logout?',
+      header: this.translate.instant('MENU.LOGOUT_TITLE'),
+      message: this.translate.instant('MENU.LOGOUT_MESSAGE'),
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('MENU.CANCEL'),
           role: 'cancel'
         },
         {
-          text: 'Logout',
+          text: this.translate.instant('MENU.LOGOUT_CONFIRM'),
           handler: async () => {
-            await this.closeMenu();
-            this.authService.logout();
-            this.router.navigate(['/login']);
+            try {
+              await this.closeMenu();
+              this.authService.logout();
+              await this.router.navigate(['/login']);
+            } catch (error) {
+              console.error('Error during logout:', error);
+              this.showErrorToast(this.translate.instant('MENU.LOGOUT_ERROR'));
+            }
           }
         }
       ]

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../../auth/auth.service';
 
@@ -11,7 +11,7 @@ export interface DemandPatternRow {
   total_quantity: number;
   unit_id: number;
   unit_name: string;
-  period: string; // ISO date string
+  period: string;
 }
 
 export interface ProductDemandComparisonRow {
@@ -25,7 +25,8 @@ export interface ProductDemandComparisonRow {
   providedIn: 'root'
 })
 export class DemandTrendsService {
-  private apiUrl = environment.apiUrl;
+  private readonly apiUrl = environment.apiUrl;
+  private readonly REQUEST_TIMEOUT = 30000;
 
   constructor(
     private http: HttpClient,
@@ -34,31 +35,55 @@ export class DemandTrendsService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
   }
 
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An unknown error occurred';
+
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Client Error: ${error.error.message}`;
+    } else {
+      errorMessage = `Server Error: ${error.status} - ${error.message}`;
+    }
+
+    console.error('Demand Trends Service Error:', errorMessage);
+    return throwError(() => new Error(errorMessage));
+  }
+
   getDemandPatterns(range: string): Observable<DemandPatternRow[]> {
+    if (!range) {
+      return throwError(() => new Error('Time range is required'));
+    }
+
     const headers = this.getAuthHeaders();
-    return this.http.get<DemandPatternRow[]>(`${this.apiUrl}/getDemandPatterns/${range}`, { headers })
-      .pipe(
-        catchError(error => {
-          console.error('Get demand patterns failed:', error);
-          return throwError(() => error);
-        })
-      );
+    return this.http.get<DemandPatternRow[]>(
+      `${this.apiUrl}/getDemandPatterns/${range}`,
+      { headers }
+    ).pipe(
+      timeout(this.REQUEST_TIMEOUT),
+      catchError(this.handleError)
+    );
   }
 
   getProductDemandComparison(range: string): Observable<ProductDemandComparisonRow[]> {
+    if (!range) {
+      return throwError(() => new Error('Time range is required'));
+    }
+
     const headers = this.getAuthHeaders();
-    return this.http.get<ProductDemandComparisonRow[]>(`${this.apiUrl}/getProductDemandComparison/${range}`, { headers })
-      .pipe(
-        catchError(error => {
-          console.error('Get product demand comparison failed:', error);
-          return throwError(() => error);
-        })
-      );
+    return this.http.get<ProductDemandComparisonRow[]>(
+      `${this.apiUrl}/getProductDemandComparison/${range}`,
+      { headers }
+    ).pipe(
+      timeout(this.REQUEST_TIMEOUT),
+      catchError(this.handleError)
+    );
   }
 }

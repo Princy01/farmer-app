@@ -5,29 +5,43 @@
         <ion-icon name="chevron-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>Trends</ion-title>
+    <ion-title>{{ 'DEMAND_TRENDS.TITLE' | translate }}</ion-title>
   </ion-toolbar>
-  <ion-grid class="ion-no-padding">
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>{{ 'DEMAND_TRENDS.LOADING' | translate }}</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="hasError && !isLoading" class="error-container">
+    <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+    <p>{{ 'DEMAND_TRENDS.ERROR_MESSAGE' | translate }}</p>
+  </div>
+
+  <!-- Main Content -->
+  <ion-grid class="ion-no-padding" *ngIf="!isLoading && !hasError">
     <ion-row class="full-height">
       <!-- Filters Sidebar -->
       <ion-col size="12" size-md="3" class="sidebar">
         <div class="filters-container">
           <ion-item>
-            <ion-label position="stacked">Time Range</ion-label>
+            <ion-label position="stacked">{{ 'DEMAND_TRENDS.TIME_RANGE' | translate }}</ion-label>
             <ion-select
               [(ngModel)]="selectedTimeRange"
               (ionChange)="onTimeRangeChange($event.detail.value)"
               interface="popover"
             >
-              <ion-select-option value="weekly">Weekly</ion-select-option>
-              <ion-select-option value="monthly">Monthly</ion-select-option>
-              <ion-select-option value="quarterly">Quarterly</ion-select-option>
-              <ion-select-option value="yearly">Yearly</ion-select-option>
+              <ion-select-option value="weekly">{{ 'DEMAND_TRENDS.WEEKLY' | translate }}</ion-select-option>
+              <ion-select-option value="monthly">{{ 'DEMAND_TRENDS.MONTHLY' | translate }}</ion-select-option>
+              <ion-select-option value="quarterly">{{ 'DEMAND_TRENDS.QUARTERLY' | translate }}</ion-select-option>
+              <ion-select-option value="yearly">{{ 'DEMAND_TRENDS.YEARLY' | translate }}</ion-select-option>
             </ion-select>
           </ion-item>
 
           <ion-item>
-            <ion-label position="stacked">Select Products</ion-label>
+            <ion-label position="stacked">{{ 'DEMAND_TRENDS.SELECT_PRODUCTS' | translate }}</ion-label>
             <ion-select
               [(ngModel)]="selectedProducts"
               [multiple]="true"
@@ -39,7 +53,7 @@
                 <ion-searchbar
                   [(ngModel)]="searchTerm"
                   (ionInput)="filterProducts()"
-                  placeholder="Search products"
+                  [placeholder]="'DEMAND_TRENDS.SEARCH_PRODUCTS' | translate"
                 >
                 </ion-searchbar>
                 <ion-item lines="none">
@@ -47,7 +61,7 @@
                     [(ngModel)]="allSelected"
                     (ionChange)="toggleAllProducts()"
                   >
-                    Select All
+                    {{ 'DEMAND_TRENDS.SELECT_ALL' | translate }}
                   </ion-checkbox>
                 </ion-item>
               </div>
@@ -64,11 +78,12 @@
 
       <!-- Charts Area -->
       <ion-col size="12" size-md="9" class="charts-area">
-        <div class="charts-container">
+        <div class="charts-container" *ngIf="products.length > 0; else noData">
           <!-- Seasonal Demand Chart -->
           <div class="chart-wrapper">
-            <h3>Seasonal Demand Patterns</h3>
+            <h3>{{ 'DEMAND_TRENDS.SEASONAL_DEMAND_PATTERNS' | translate }}</h3>
             <apx-chart
+              *ngIf="seasonalDemandOptions"
               [series]="seasonalDemandOptions.series"
               [chart]="seasonalDemandOptions.chart"
               [xaxis]="seasonalDemandOptions.xaxis"
@@ -81,8 +96,9 @@
 
           <!-- Product Demand Chart -->
           <div class="chart-wrapper">
-            <h3>Product Demand Comparison</h3>
+            <h3>{{ 'DEMAND_TRENDS.PRODUCT_DEMAND_COMPARISON' | translate }}</h3>
             <apx-chart
+              *ngIf="productDemandOptions"
               [series]="productDemandOptions.series"
               [chart]="productDemandOptions.chart"
               [xaxis]="productDemandOptions.xaxis"
@@ -94,6 +110,13 @@
             </apx-chart>
           </div>
         </div>
+
+        <ng-template #noData>
+          <div class="no-data-container">
+            <ion-icon name="analytics-outline" color="medium"></ion-icon>
+            <p>{{ 'DEMAND_TRENDS.NO_DATA_AVAILABLE' | translate }}</p>
+          </div>
+        </ng-template>
       </ion-col>
     </ion-row>
   </ion-grid>

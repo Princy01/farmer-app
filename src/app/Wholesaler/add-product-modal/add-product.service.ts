@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -28,6 +29,7 @@ export interface WastageMeasure {
   id: number;
   wastage_measure_name: string;
 }
+
 @Injectable({ providedIn: 'root' })
 export class AddProductService {
   private apiUrl = environment.apiUrl;
@@ -45,28 +47,78 @@ export class AddProductService {
     });
   }
 
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'ADD_PRODUCT.ERROR_UNKNOWN';
+
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = 'ADD_PRODUCT.ERROR_CLIENT';
+    } else {
+      // Server-side error
+      switch (error.status) {
+        case 401:
+          errorMessage = 'ADD_PRODUCT.ERROR_UNAUTHORIZED';
+          break;
+        case 403:
+          errorMessage = 'ADD_PRODUCT.ERROR_FORBIDDEN';
+          break;
+        case 404:
+          errorMessage = 'ADD_PRODUCT.ERROR_NOT_FOUND';
+          break;
+        case 500:
+          errorMessage = 'ADD_PRODUCT.ERROR_SERVER';
+          break;
+        default:
+          errorMessage = 'ADD_PRODUCT.ERROR_UNKNOWN';
+      }
+    }
+
+    return throwError(() => ({ message: errorMessage, originalError: error }));
+  }
+
   getAllProductsForAdmin(): Observable<ProductAll[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<ProductAll[]>(`${this.apiUrl}/getAllProductsForAdmin`, { headers });
+    return this.http.get<ProductAll[]>(`${this.apiUrl}/getAllProductsForAdmin`, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
   }
 
-  addProductToBranch(bid: number, productId: number, qualityId: number, wastageMeasureId: number, currentStock: number, pricePerUnit: number, unitId: number): Observable<any> {
-  const headers = this.getAuthHeaders();
-  const body = { bid, product_id: productId, quality_id: qualityId, wastage_measure_id: wastageMeasureId, current_stock: currentStock, price_per_unit: pricePerUnit, unit_id: unitId };
-  return this.http.post(`${this.apiUrl}/branch/product`, body, { headers });
-}
-
-getAllUnits(): Observable<Unit[]> {
-    return this.http.get<Unit[]>(`${this.apiUrl}/getAllUnits`);
-  }
-
-    getAllQualities(): Observable<Quality[]> {
+  addProductToBranch(
+    bid: number,
+    productId: number,
+    qualityId: number,
+    wastageMeasureId: number,
+    currentStock: number,
+    pricePerUnit: number,
+    unitId: number
+  ): Observable<any> {
     const headers = this.getAuthHeaders();
-    return this.http.get<Quality[]>(`${this.apiUrl}/qualities`, { headers });
+    const body = {
+      bid,
+      product_id: productId,
+      quality_id: qualityId,
+      wastage_measure_id: wastageMeasureId,
+      current_stock: currentStock,
+      price_per_unit: pricePerUnit,
+      unit_id: unitId
+    };
+    return this.http.post(`${this.apiUrl}/branch/product`, body, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  getAllUnits(): Observable<Unit[]> {
+    return this.http.get<Unit[]>(`${this.apiUrl}/getAllUnits`)
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  getAllQualities(): Observable<Quality[]> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<Quality[]>(`${this.apiUrl}/qualities`, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
   }
 
   getAllWastageMeasures(): Observable<WastageMeasure[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<WastageMeasure[]>(`${this.apiUrl}/wastage-measures`, { headers });
+    return this.http.get<WastageMeasure[]>(`${this.apiUrl}/wastage-measures`, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
   }
 }

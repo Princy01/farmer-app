@@ -16,7 +16,7 @@
       ></ion-back-button>
     </ion-buttons>
     <ion-title>{{
-      viewMode === "list" ? "Scheduled Pickups" : "Order Details"
+      viewMode === "list" ? ("PICKUP_ORDERS.TITLE" | translate) : ("PICKUP_ORDERS.ORDER_DETAILS_TITLE" | translate)
     }}</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -26,12 +26,12 @@
   <div *ngIf="viewMode === 'list'">
     <!-- Filter Section -->
     <ion-item *ngIf="orderStatuses.length > 0" class="filter-section">
-      <ion-label>Filter by Status</ion-label>
+      <ion-label>{{ "PICKUP_ORDERS.FILTER_BY_STATUS" | translate }}</ion-label>
       <ion-select
         multiple="true"
         [(ngModel)]="selectedStatuses"
         (ionChange)="onStatusFilterChange($event.detail.value)"
-        placeholder="Select statuses"
+        [placeholder]="'PICKUP_ORDERS.SELECT_STATUSES' | translate"
       >
         <ion-select-option
           *ngFor="let status of orderStatuses"
@@ -42,9 +42,9 @@
       </ion-select>
     </ion-item>
 
-    <div *ngIf="groupedOrders.length === 0" class="empty-state">
+    <div *ngIf="groupedOrders.length === 0 && !isLoading" class="empty-state">
       <ion-icon name="cube-outline" size="large"></ion-icon>
-      <p>No scheduled pickups.</p>
+      <p>{{ "PICKUP_ORDERS.NO_ORDERS" | translate }}</p>
     </div>
 
     <div *ngFor="let group of groupedOrders" class="orders-group">
@@ -62,10 +62,10 @@
         >
           <ion-icon name="person" slot="start"></ion-icon>
           <ion-label>
-            <h2>Order #{{ order.order_id }}</h2>
+            <h2>{{ "PICKUP_ORDERS.ORDER_NUMBER" | translate }} #{{ order.order_id }}</h2>
             <p>
               <ion-icon name="person-circle" class="inline-icon"></ion-icon>
-              Driver: <strong>{{ order.driverName }}</strong>
+              {{ "PICKUP_ORDERS.DRIVER" | translate }}: <strong>{{ order.driverName }}</strong>
             </p>
             <p>
               <ion-icon name="call" class="inline-icon"></ion-icon>
@@ -84,7 +84,7 @@
               size="small"
               (click)="generateOtp(order); $event.stopPropagation()"
             >
-              Generate OTP
+              {{ "PICKUP_ORDERS.GENERATE_OTP" | translate }}
             </ion-button>
             <div
               *ngIf="
@@ -92,24 +92,34 @@
               "
               class="otp-display"
             >
-              <span class="otp-label">OTP:</span>
+              <span class="otp-label">{{ "PICKUP_ORDERS.OTP" | translate }}:</span>
               <span class="otp-value">{{ order.otp }}</span>
               <ion-button
                 fill="clear"
                 size="small"
                 color="medium"
-                (click)="hideOtp(order); $event.stopPropagation()"
-                title="Hide OTP"
+                (click)="toggleOtpVisibility(order); $event.stopPropagation()"
+                [title]="'PICKUP_ORDERS.HIDE_OTP' | translate"
               >
                 <ion-icon name="eye-off"></ion-icon>
               </ion-button>
             </div>
+            <ion-button
+              *ngIf="order.status === 'otp_generated' && !otpVisible[order.order_id]"
+              fill="clear"
+              size="small"
+              color="primary"
+              (click)="toggleOtpVisibility(order); $event.stopPropagation()"
+              [title]="'PICKUP_ORDERS.SHOW_OTP' | translate"
+            >
+              <ion-icon name="eye-outline"></ion-icon>
+            </ion-button>
             <ion-icon
               *ngIf="order.status === 'picked_up'"
               name="checkmark-circle"
               color="success"
               size="large"
-              title="Picked Up"
+              [title]="'PICKUP_ORDERS.PICKED_UP' | translate"
             ></ion-icon>
           </div>
         </ion-item>
@@ -121,42 +131,40 @@
   <div *ngIf="viewMode === 'details' && selectedOrderDetails">
     <ion-card>
       <ion-card-header>
-        <ion-card-title
-          >Order #{{ selectedOrderDetails.order_id }}</ion-card-title
-        >
+        <ion-card-title>{{ "PICKUP_ORDERS.ORDER_NUMBER" | translate }} #{{ selectedOrderDetails.order_id }}</ion-card-title>
         <ion-card-subtitle>{{
           selectedOrderDetails.order_status
         }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <p>
-          <strong>Date:</strong> {{ selectedOrderDetails.date_of_order | date }}
+          <strong>{{ "PICKUP_ORDERS.DATE" | translate }}:</strong> {{ selectedOrderDetails.date_of_order | date }}
         </p>
         <p>
-          <strong>Retailer ID:</strong> {{ selectedOrderDetails.retailer_id }}
+          <strong>{{ "PICKUP_ORDERS.RETAILER_ID" | translate }}:</strong> {{ selectedOrderDetails.retailer_id }}
         </p>
         <p>
-          <strong>Total Amount:</strong>
+          <strong>{{ "PICKUP_ORDERS.TOTAL_AMOUNT" | translate }}:</strong>
           {{ selectedOrderDetails.total_order_amount }}
         </p>
         <p>
-          <strong>Final Amount:</strong> {{ selectedOrderDetails.final_amount }}
+          <strong>{{ "PICKUP_ORDERS.FINAL_AMOUNT" | translate }}:</strong> {{ selectedOrderDetails.final_amount }}
         </p>
         <p>
-          <strong>Delivery Address:</strong>
+          <strong>{{ "PICKUP_ORDERS.DELIVERY_ADDRESS" | translate }}:</strong>
           {{ selectedOrderDetails.delivery_address }}
         </p>
-        <p>
-          <strong>Actual Delivery Date:</strong>
+        <p *ngIf="selectedOrderDetails.actual_delivery_date">
+          <strong>{{ "PICKUP_ORDERS.ACTUAL_DELIVERY_DATE" | translate }}:</strong>
           {{ selectedOrderDetails.actual_delivery_date | date }}
         </p>
-        <h3>Items:</h3>
+        <h3>{{ "PICKUP_ORDERS.ITEMS" | translate }}:</h3>
         <ion-list>
           <ion-item *ngFor="let item of selectedOrderDetails.items">
             <ion-label>
               <h2>{{ item.product_name }}</h2>
-              <p>Quantity: {{ item.quantity }}</p>
-              <p>Price: {{ item.wholeseller_price }}</p>
+              <p>{{ "PICKUP_ORDERS.QUANTITY" | translate }}: {{ item.quantity }}</p>
+              <p>{{ "PICKUP_ORDERS.PRICE" | translate }}: {{ item.wholeseller_price }}</p>
             </ion-label>
           </ion-item>
         </ion-list>

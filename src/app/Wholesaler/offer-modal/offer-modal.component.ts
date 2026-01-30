@@ -1,10 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController, AlertController, LoadingController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { BulkOrder, WholesalerApiService, CreateOfferRequest } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-offer-modal',
@@ -13,12 +14,13 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, IonicModule, FormsModule, TranslatePipe]
 })
-export class OfferModalComponent implements OnInit {
+export class OfferModalComponent implements OnInit, OnDestroy {
   @Input() order!: BulkOrder;
   offerPrice: number = 0;
   message: string = '';
   proposedDeliveryDate: string = '';
   isSubmitting = false;
+  private subscription: Subscription = new Subscription();
 
   constructor(
     private modalCtrl: ModalController,
@@ -30,11 +32,20 @@ export class OfferModalComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    console.log('Modal opened with order:', this.order);
+    // Validate required input
+    if (!this.order) {
+      this.close();
+      return;
+    }
+
     // Set default delivery date to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     this.proposedDeliveryDate = tomorrow.toISOString().split('T')[0];
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   async submitOffer() {
@@ -70,10 +81,10 @@ export class OfferModalComponent implements OnInit {
         message: this.message
       };
 
-      this.wholesalerService.createOffer(offerData).subscribe({
-        next: (response) => {
+      const offerSubscription = this.wholesalerService.createOffer(offerData).subscribe({
+        next: async (response) => {
           this.isSubmitting = false;
-          loading.dismiss();
+          await this.dismissLoading(loading);
 
           this.modalCtrl.dismiss({
             success: true,
@@ -84,22 +95,22 @@ export class OfferModalComponent implements OnInit {
         },
         error: async (error) => {
           this.isSubmitting = false;
-          loading.dismiss();
-
-          console.error('Failed to submit offer:', error);
+          await this.dismissLoading(loading);
 
           if (error.status === 401) {
             await this.showAuthError();
             return;
           }
 
-          await this.showErrorAlert(this.translate.instant('MAKE_OFFER.SUBMIT_ERROR'));
+          const errorMessage = error.error?.message || this.translate.instant('MAKE_OFFER.SUBMIT_ERROR');
+          await this.showErrorAlert(errorMessage);
         }
       });
+
+      this.subscription.add(offerSubscription);
     } catch (err) {
       this.isSubmitting = false;
-      loading.dismiss();
-      console.error('Unexpected error:', err);
+      await this.dismissLoading(loading);
       await this.showErrorAlert(this.translate.instant('MAKE_OFFER.UNEXPECTED_ERROR'));
     }
   }
@@ -139,7 +150,18 @@ export class OfferModalComponent implements OnInit {
     await alert.present();
   }
 
+  private async dismissLoading(loading: HTMLIonLoadingElement): Promise<void> {
+    try {
+      await loading.dismiss();
+    } catch (error) {
+      // Loading already dismissed, ignore
+    }
+  }
+
   close() {
+    if (this.isSubmitting) {
+      return;
+    }
     this.modalCtrl.dismiss();
   }
 }

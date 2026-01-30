@@ -1,0 +1,23 @@
+{
+  "MENU": {
+    "TITLE": "Menu",
+    "HOME_DASHBOARD": "Home Dashboard",
+    "BUSINESS_LOCATIONS": "Business Locations",
+    "MY_ORDERS": "My Orders",
+    "UPDATE_INVENTORY": "Update Inventory",
+    "PAST_ORDERS": "Past Orders",
+    "RESTOCKING_RECOMMENDATIONS": "Restocking Recommendations",
+    "MARKET_OPPORTUNITIES": "Market Opportunities",
+    "TRENDS": "Trends",
+    "PROFILE": "Profile",
+    "SETTINGS": "Settings",
+    "LOGOUT": "Logout",
+    "DISMISS": "Dismiss",
+    "CANCEL": "Cancel",
+    "LOGOUT_TITLE": "Confirm Logout",
+    "LOGOUT_MESSAGE": "Are you sure you want to logout?",
+    "LOGOUT_CONFIRM": "Logout",
+    "LOGOUT_ERROR": "Failed to logout. Please try again.",
+    "NAVIGATION_ERROR": "Failed to navigate. Please try again."
+  }
+}

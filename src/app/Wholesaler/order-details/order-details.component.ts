@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WholesalerApiService, OrderFullDetails } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -15,11 +15,12 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   standalone: true,
   imports: [IonicModule, CommonModule, TranslatePipe]
 })
-export class OrderDetailsComponent implements OnInit {
+export class OrderDetailsComponent implements OnInit, OnDestroy {
   orderId!: number;
   orderDetails?: OrderFullDetails;
   loading = true;
   error = false;
+  private subscription: Subscription = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
@@ -31,8 +32,20 @@ export class OrderDetailsComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.orderId = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.route.snapshot.paramMap.get('id');
+    this.orderId = Number(id);
+
+    // Validate order ID
+    if (!id || isNaN(this.orderId) || this.orderId <= 0) {
+      this.showInvalidOrderIdError();
+      return;
+    }
+
     this.checkAuthAndLoadData();
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   private checkAuthAndLoadData() {
@@ -82,6 +95,23 @@ export class OrderDetailsComponent implements OnInit {
     await alert.present();
   }
 
+  private async showInvalidOrderIdError() {
+    this.loading = false;
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('ORDER_DETAILS.INVALID_ORDER'),
+      message: this.translate.instant('ORDER_DETAILS.INVALID_ORDER_ID'),
+      buttons: [
+        {
+          text: this.translate.instant('ORDER_DETAILS.OK'),
+          handler: () => {
+            this.router.navigate(['/wholesaler/orders']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
   getStatusLabel(statusId: number): string {
     const statusMap: { [key: number]: string } = {
       1: 'ORDER_DETAILS.STATUS_PROCESSING',
@@ -115,18 +145,12 @@ export class OrderDetailsComponent implements OnInit {
   }
 
   loadOrderDetails() {
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
-      return;
-    }
-
     this.loading = true;
     this.error = false;
 
-    this.wholesalerService.getOrderFullDetails(this.orderId)
+    const orderSubscription = this.wholesalerService.getOrderFullDetails(this.orderId)
       .pipe(
         catchError(error => {
-          console.error('Error loading order details:', error);
           this.error = true;
 
           if (error.status === 401) {
@@ -136,6 +160,11 @@ export class OrderDetailsComponent implements OnInit {
 
           if (error.status === 403) {
             this.showOrderAccessError();
+            return of(null);
+          }
+
+          if (error.status === 404) {
+            this.showOrderNotFoundError();
             return of(null);
           }
 
@@ -149,14 +178,33 @@ export class OrderDetailsComponent implements OnInit {
       .subscribe(data => {
         if (data) {
           this.orderDetails = data;
+          this.error = false;
         }
       });
+
+    this.subscription.add(orderSubscription);
   }
 
   private async showOrderAccessError() {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('ORDER_DETAILS.ACCESS_DENIED'),
       message: this.translate.instant('ORDER_DETAILS.ORDER_ACCESS_DENIED'),
+      buttons: [
+        {
+          text: this.translate.instant('ORDER_DETAILS.OK'),
+          handler: () => {
+            this.router.navigate(['/wholesaler/orders']);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async showOrderNotFoundError() {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('ORDER_DETAILS.NOT_FOUND'),
+      message: this.translate.instant('ORDER_DETAILS.ORDER_NOT_FOUND'),
       buttons: [
         {
           text: this.translate.instant('ORDER_DETAILS.OK'),

@@ -3,8 +3,9 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { IonicModule, NavController, LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CurrentStockData, LeastStockedData, MandiBasicInfo, StockInsightsService } from './stock-insights.service';
-import { catchError, finalize, of } from 'rxjs';
+import { finalize } from 'rxjs';
 import { LowStockItemData, SlowMovingProductData } from './stock-insights.service';
 import { addIcons } from 'ionicons';
 import {
@@ -101,7 +102,7 @@ export class StockInsightsComponent implements OnInit {
   }
 
   // authentication check
-  private checkAuthAndLoadData() {
+  private checkAuthAndLoadData(): void {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
@@ -116,10 +117,11 @@ export class StockInsightsComponent implements OnInit {
     this.loadMandis();
   }
 
-  private async showAuthError() {
+  private async showAuthError(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('STOCK_INSIGHTS.AUTH_ERROR'),
       message: this.translate.instant('STOCK_INSIGHTS.SESSION_EXPIRED'),
+      backdropDismiss: false,
       buttons: [
         {
           text: this.translate.instant('STOCK_INSIGHTS.OK'),
@@ -133,10 +135,11 @@ export class StockInsightsComponent implements OnInit {
     await alert.present();
   }
 
-  private async showUnauthorizedError() {
+  private async showUnauthorizedError(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('STOCK_INSIGHTS.ACCESS_DENIED'),
       message: this.translate.instant('STOCK_INSIGHTS.NO_PERMISSION'),
+      backdropDismiss: false,
       buttons: [
         {
           text: this.translate.instant('STOCK_INSIGHTS.OK'),
@@ -149,55 +152,9 @@ export class StockInsightsComponent implements OnInit {
     await alert.present();
   }
 
-  public async loadMandis() {
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
-      return;
-    }
-
-    this.isLoading = true;
-    this.error = null;
-
-    const loading = await this.showLoading();
-
-    try {
-      this.stockInsightsService.getMandiList().subscribe({
-        next: (mandis) => {
-          this.warehouses = mandis;
-          if (mandis.length > 0) {
-            this.selectedWarehouse = mandis[0];
-            this.initializeData();
-          } else {
-            this.error = this.translate.instant('STOCK_INSIGHTS.NO_MANDIS');
-          }
-        },
-        error: async (error) => {
-          console.error('Failed to load mandis:', error);
-
-          if (error.status === 401) {
-            await this.showAuthError();
-            return;
-          }
-
-          this.error = this.translate.instant('STOCK_INSIGHTS.LOAD_MANDI_ERROR');
-          this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.LOAD_MANDI_ERROR'));
-        },
-        complete: () => {
-          loading.dismiss();
-          this.isLoading = false;
-        }
-      });
-    } catch (error) {
-      loading.dismiss();
-      this.isLoading = false;
-      this.error = this.translate.instant('STOCK_INSIGHTS.UNEXPECTED_ERROR');
-      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.UNEXPECTED_ERROR'));
-    }
-  }
-
-  private async showErrorToast(message: string) {
+  private async showErrorToast(message: string): Promise<void> {
     const toast = await this.toastController.create({
-      message: message,
+      message,
       duration: 3000,
       position: 'bottom',
       color: 'danger',
@@ -211,139 +168,152 @@ export class StockInsightsComponent implements OnInit {
     await toast.present();
   }
 
-  async showLoading() {
-    this.isLoading = true;
+  private async showLoading(message?: string): Promise<HTMLIonLoadingElement> {
     const loading = await this.loadingController.create({
-      message: this.translate.instant('STOCK_INSIGHTS.LOADING_MESSAGE'),
+      message: message || this.translate.instant('STOCK_INSIGHTS.LOADING_MESSAGE'),
       spinner: 'crescent'
     });
     await loading.present();
     return loading;
   }
 
-  goToTrends() {
-    this.navController.navigateBack('/wholesaler/trends');
+  private handleApiError(error: HttpErrorResponse, customMessage?: string): void {
+    console.error('Stock Insights API Error:', error);
+
+    if (error.status === 401) {
+      this.showAuthError();
+      return;
+    }
+
+    let errorMessage: string;
+
+    if (error.status === 0) {
+      errorMessage = this.translate.instant('STOCK_INSIGHTS.NETWORK_ERROR');
+    } else if (error.status >= 500) {
+      errorMessage = this.translate.instant('STOCK_INSIGHTS.SERVER_ERROR');
+    } else if (error.status === 403) {
+      errorMessage = this.translate.instant('STOCK_INSIGHTS.FORBIDDEN_ERROR');
+    } else if (error.status === 404) {
+      errorMessage = this.translate.instant('STOCK_INSIGHTS.NOT_FOUND_ERROR');
+    } else {
+      errorMessage = customMessage || this.translate.instant('STOCK_INSIGHTS.UNEXPECTED_ERROR');
+    }
+
+    this.error = errorMessage;
+    this.showErrorToast(errorMessage);
   }
 
-  private async initializeData() {
-    await this.initializeCharts();
-    await this.initializeAlerts();
-    await this.initializeSlowMoving();
+  public async loadMandis(): Promise<void> {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
+
+    this.isLoading = true;
+    this.error = null;
+
+    const loading = await this.showLoading();
+
+    this.stockInsightsService.getMandiList()
+      .pipe(
+        finalize(() => {
+          loading.dismiss();
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: (mandis) => {
+          this.warehouses = mandis;
+          if (mandis.length > 0) {
+            this.selectedWarehouse = mandis[0];
+            this.initializeData();
+          } else {
+            this.error = this.translate.instant('STOCK_INSIGHTS.NO_MANDIS');
+          }
+        },
+        error: (error: HttpErrorResponse) => {
+          this.handleApiError(error, this.translate.instant('STOCK_INSIGHTS.LOAD_MANDI_ERROR'));
+        }
+      });
   }
 
-  private async initializeCharts() {
-    await this.updateChartData();
+  private async initializeData(): Promise<void> {
+    await Promise.all([
+      this.updateChartData(),
+      this.initializeAlerts(),
+      this.initializeSlowMoving()
+    ]);
   }
 
-  private async initializeAlerts() {
+  private async initializeAlerts(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
     const loading = await this.showLoading();
-    try {
-      this.stockInsightsService.getLowStockItems()
-        .pipe(
-          finalize(() => {
-            loading.dismiss();
-            this.isLoading = false;
-          })
-        )
-        .subscribe({
-          next: (data) => {
-            this.lowStockAlerts = data;
-          },
-          error: async (error) => {
-            console.error('Failed to fetch low stock items:', error);
 
-            if (error.status === 401) {
-              await this.showAuthError();
-              return;
-            }
-
-            this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.LOAD_LOW_STOCK_ERROR'));
-          }
-        });
-    } catch (error) {
-      loading.dismiss();
-      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_ALERTS'));
-    }
+    this.stockInsightsService.getLowStockItems()
+      .pipe(
+        finalize(() => loading.dismiss())
+      )
+      .subscribe({
+        next: (data) => {
+          this.lowStockAlerts = data;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.handleApiError(error, this.translate.instant('STOCK_INSIGHTS.LOAD_LOW_STOCK_ERROR'));
+        }
+      });
   }
 
-  private async initializeSlowMoving() {
+  private async initializeSlowMoving(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
     const loading = await this.showLoading();
-    try {
-      this.stockInsightsService.getSlowMovingProducts()
-        .pipe(
-          finalize(() => {
-            loading.dismiss();
-            this.isLoading = false;
-          })
-        )
-        .subscribe({
-          next: (data) => {
-            this.slowMovingProducts = data;
-          },
-          error: async (error) => {
-            console.error('Failed to fetch slow moving products:', error);
 
-            if (error.status === 401) {
-              await this.showAuthError();
-              return;
-            }
-
-            this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.LOAD_SLOW_MOVING_ERROR'));
-          }
-        });
-    } catch (error) {
-      loading.dismiss();
-      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_SLOW_MOVING'));
-    }
+    this.stockInsightsService.getSlowMovingProducts()
+      .pipe(
+        finalize(() => loading.dismiss())
+      )
+      .subscribe({
+        next: (data) => {
+          this.slowMovingProducts = data;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.handleApiError(error, this.translate.instant('STOCK_INSIGHTS.LOAD_SLOW_MOVING_ERROR'));
+        }
+      });
   }
 
-  async updateChartData() {
+  async updateChartData(): Promise<void> {
     if (!this.selectedWarehouse || !this.authService.isAuthenticated()) {
-      this.showAuthError();
+      if (!this.authService.isAuthenticated()) {
+        this.showAuthError();
+      }
       return;
     }
 
     const loading = await this.showLoading();
-    try {
-      this.stockInsightsService.getCurrentStockByMandi(this.selectedWarehouse.mandi_id)
-        .pipe(
-          finalize(() => {
-            loading.dismiss();
-            this.isLoading = false;
-          })
-        )
-        .subscribe({
-          next: (data) => {
-            this.updateChartWithData(data);
-          },
-          error: async (error) => {
-            console.error('Failed to fetch stock data:', error);
 
-            if (error.status === 401) {
-              await this.showAuthError();
-              return;
-            }
-
-            this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.LOAD_STOCK_ERROR'));
-          }
-        });
-    } catch (error) {
-      loading.dismiss();
-      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_STOCK'));
-    }
+    this.stockInsightsService.getCurrentStockByMandi(this.selectedWarehouse.mandi_id)
+      .pipe(
+        finalize(() => loading.dismiss())
+      )
+      .subscribe({
+        next: (data) => {
+          this.updateChartWithData(data);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.handleApiError(error, this.translate.instant('STOCK_INSIGHTS.LOAD_STOCK_ERROR'));
+        }
+      });
   }
 
-  private updateChartWithData(data: CurrentStockData[]) {
+  private updateChartWithData(data: CurrentStockData[]): void {
     this.stockLevelsOptions = {
       ...this.stockLevelsOptions,
       series: [{
@@ -356,56 +326,50 @@ export class StockInsightsComponent implements OnInit {
     };
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: any): Promise<void> {
     try {
       await this.initializeData();
+    } catch (error) {
+      console.error('Refresh failed:', error);
     } finally {
       event.target.complete();
     }
   }
 
-  onWarehouseChange() {
+  onWarehouseChange(): void {
     if (this.selectedWarehouse) {
       this.updateChartData();
     }
   }
 
-  goBack() {
+  goBack(): void {
     this.router.navigate(['/wholesaler/home']);
   }
 
-  async getStockByProduct(productId: number) {
+  goToTrends(): void {
+    this.navController.navigateBack('/wholesaler/trends');
+  }
+
+  async getStockByProduct(productId: number): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
     }
 
     const loading = await this.showLoading();
-    try {
-      this.stockInsightsService.getCurrentStockByProduct(productId)
-        .pipe(
-          finalize(() => {
-            loading.dismiss();
-          })
-        )
-        .subscribe({
-          next: (data) => {
-            this.productStockData = data;
-            // Update chart or display data
-            this.updateChartWithData(data);
-          },
-          error: async (error) => {
-            console.error('Failed to load product stock:', error);
-            if (error.status === 401) {
-              await this.showAuthError();
-              return;
-            }
-            this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_PRODUCT_STOCK'));
-          }
-        });
-    } catch (error) {
-      loading.dismiss();
-      this.showErrorToast(this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_PRODUCT_STOCK'));
-    }
+
+    this.stockInsightsService.getCurrentStockByProduct(productId)
+      .pipe(
+        finalize(() => loading.dismiss())
+      )
+      .subscribe({
+        next: (data) => {
+          this.productStockData = data;
+          this.updateChartWithData(data);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.handleApiError(error, this.translate.instant('STOCK_INSIGHTS.ERROR_FETCHING_PRODUCT_STOCK'));
+        }
+      });
   }
 }

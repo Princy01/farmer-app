@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { catchError, retry } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { AuthService } from 'src/app/auth/auth.service';
 
 export interface Stock {
   id: number;
@@ -55,46 +57,134 @@ export interface UpdateStockPayload {
 export class StockService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An error occurred while processing your request.';
+
+    if (error.error instanceof ErrorEvent) {
+      // Client-side or network error
+      errorMessage = `Network error: ${error.error.message}`;
+    } else {
+      // Backend returned an unsuccessful response code
+      switch (error.status) {
+        case 401:
+          errorMessage = 'Unauthorized. Please login again.';
+          break;
+        case 403:
+          errorMessage = 'Access denied. Insufficient permissions.';
+          break;
+        case 404:
+          errorMessage = 'Resource not found.';
+          break;
+        case 500:
+          errorMessage = 'Server error. Please try again later.';
+          break;
+        default:
+          errorMessage = `Server error: ${error.status}`;
+      }
+    }
+
+    console.error('Stock Service Error:', errorMessage, error);
+    return throwError(() => error);
+  }
 
   getProductsStockOfBranchForDate(branchId: number, date: string): Observable<ProductPriceData[]> {
-    console.log('Calling API:', `${this.apiUrl}/getAllProductsStockOfBusinessBranchOfTheDate/${branchId}/${date}`);
+    const headers = this.getAuthHeaders();
     return this.http.get<ProductPriceData[]>(
-      `${this.apiUrl}/getAllProductsStockOfBusinessBranchOfTheDate/${branchId}/${date}`
+      `${this.apiUrl}/getAllProductsStockOfBusinessBranchOfTheDate/${branchId}/${date}`,
+      { headers }
     ).pipe(
-      // Log the response for debugging
-      tap(data => console.log('API response:', data))
+      retry(1),
+      catchError(this.handleError.bind(this))
     );
   }
 
   getBranchesByUser(userId: number): Observable<BusinessBranchWithNames[]> {
+    const headers = this.getAuthHeaders();
     return this.http.get<BusinessBranchWithNames[]>(
-      `${this.apiUrl}/getAllBusinessBranchesWithNamesByUser?userId=${userId}`
+      `${this.apiUrl}/getAllBusinessBranchesWithNamesByUser?userId=${userId}`,
+      { headers }
+    ).pipe(
+      retry(1),
+      catchError(this.handleError.bind(this))
     );
   }
 
   addStock(data: AddStockPayload): Observable<any> {
-    return this.http.post(`${this.apiUrl}/addStockPriceDataForBusinessBranch`, data);
+    const headers = this.getAuthHeaders();
+    return this.http.post(
+      `${this.apiUrl}/addStockPriceDataForBusinessBranch`,
+      data,
+      { headers }
+    ).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   updateStock(data: UpdateStockPayload): Observable<any> {
-    return this.http.post(`${this.apiUrl}/wholesaler/product/update-stock-mandi`, data);
+    const headers = this.getAuthHeaders();
+    return this.http.post(
+      `${this.apiUrl}/wholesaler/product/update-stock-mandi`,
+      data,
+      { headers }
+    ).pipe(
+      catchError(this.handleError.bind(this))
+    );
   }
 
   getProducts(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/getAllProducts`);
+    const headers = this.getAuthHeaders();
+    return this.http.get<any[]>(
+      `${this.apiUrl}/getAllProducts`,
+      { headers }
+    ).pipe(
+      retry(1),
+      catchError(this.handleError.bind(this))
+    );
   }
 
   getQualities(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/getAllQualityLevels`);
+    const headers = this.getAuthHeaders();
+    return this.http.get<any[]>(
+      `${this.apiUrl}/getAllQualityLevels`,
+      { headers }
+    ).pipe(
+      retry(1),
+      catchError(this.handleError.bind(this))
+    );
   }
 
   getWastageMeasures(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/getAllWastageMeasures`);
+    const headers = this.getAuthHeaders();
+    return this.http.get<any[]>(
+      `${this.apiUrl}/getAllWastageMeasures`,
+      { headers }
+    ).pipe(
+      retry(1),
+      catchError(this.handleError.bind(this))
+    );
   }
 
   getUnits(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/getAllUnits`);
+    const headers = this.getAuthHeaders();
+    return this.http.get<any[]>(
+      `${this.apiUrl}/getAllUnits`,
+      { headers }
+    ).pipe(
+      retry(1),
+      catchError(this.handleError.bind(this))
+    );
   }
-
 }

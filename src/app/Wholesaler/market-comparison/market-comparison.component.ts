@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { IonicModule, NavController, LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +7,7 @@ import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
 import { MarketComparisonService, BranchPriceData } from './market-comparison.service';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
-import { catchError, finalize, forkJoin, map, of } from 'rxjs';
+import { catchError, finalize, forkJoin, map, of, Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -26,7 +26,7 @@ interface Product {
   standalone: true,
   imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule, TranslatePipe]
 })
-export class MarketComparisonComponent implements OnInit {
+export class MarketComparisonComponent implements OnInit, OnDestroy {
   priceComparisonOptions: any;
   availableBranches: BranchData[] = [];
   availableProducts: Product[] = [];
@@ -34,6 +34,10 @@ export class MarketComparisonComponent implements OnInit {
   selectedProducts: number[] = [];
   isLoading: boolean = false;
   error: string | null = null;
+
+  private destroy$ = new Subject<void>();
+  private readonly MAX_AUTO_SELECT = 3;
+  private currentLoading?: HTMLIonLoadingElement;
 
   constructor(
     private navController: NavController,
@@ -50,11 +54,23 @@ export class MarketComparisonComponent implements OnInit {
     addIcons({ chevronBackOutline });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.checkAuthAndInitialize();
   }
 
-  private checkAuthAndInitialize() {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    // Dismiss any open loading spinner
+    if (this.currentLoading) {
+      this.currentLoading.dismiss().catch(err =>
+        console.error('Error dismissing loading:', err)
+      );
+    }
+  }
+
+  private checkAuthAndInitialize(): void {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
@@ -69,7 +85,7 @@ export class MarketComparisonComponent implements OnInit {
     this.loadBranchesAndProducts();
   }
 
-  private async showAuthError() {
+  private async showAuthError(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('MARKET_COMPARISON.AUTH_ERROR'),
       message: this.translate.instant('MARKET_COMPARISON.SESSION_EXPIRED'),
@@ -78,15 +94,18 @@ export class MarketComparisonComponent implements OnInit {
           text: this.translate.instant('MARKET_COMPARISON.OK'),
           handler: () => {
             this.authService.logout();
-            this.router.navigate(['/login']);
+            this.router.navigate(['/login']).catch(err =>
+              console.error('Navigation error:', err)
+            );
           }
         }
-      ]
+      ],
+      backdropDismiss: false
     });
     await alert.present();
   }
 
-  private async showUnauthorizedError() {
+  private async showUnauthorizedError(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('MARKET_COMPARISON.ACCESS_DENIED'),
       message: this.translate.instant('MARKET_COMPARISON.NO_PERMISSION'),
@@ -94,38 +113,53 @@ export class MarketComparisonComponent implements OnInit {
         {
           text: this.translate.instant('MARKET_COMPARISON.OK'),
           handler: () => {
-            this.router.navigate(['/login']);
+            this.router.navigate(['/login']).catch(err =>
+              console.error('Navigation error:', err)
+            );
           }
         }
-      ]
+      ],
+      backdropDismiss: false
     });
     await alert.present();
   }
 
-  async showLoading() {
+  private async showLoading(): Promise<HTMLIonLoadingElement> {
     this.isLoading = true;
-    const loading = await this.loadingController.create({
+
+    // Dismiss previous loading if exists
+    if (this.currentLoading) {
+      await this.currentLoading.dismiss().catch(() => {});
+    }
+
+    this.currentLoading = await this.loadingController.create({
       message: this.translate.instant('MARKET_COMPARISON.LOADING'),
-      spinner: 'crescent'
+      spinner: 'crescent',
+      backdropDismiss: false
     });
-    await loading.present();
-    return loading;
+
+    await this.currentLoading.present();
+    return this.currentLoading;
   }
 
-  private async showToast(message: string, color: string = 'warning') {
-    const toast = await this.toastController.create({
-      message: message,
-      duration: 3000,
-      position: 'bottom',
-      color: color,
-      buttons: [{ icon: 'close', role: 'cancel' }]
-    });
-    await toast.present();
+  private async showToast(message: string, color: 'success' | 'warning' | 'danger' = 'warning'): Promise<void> {
+    try {
+      const toast = await this.toastController.create({
+        message: message,
+        duration: 3000,
+        position: 'bottom',
+        color: color,
+        buttons: [{ icon: 'close', role: 'cancel' }]
+      });
+      await toast.present();
+    } catch (err) {
+      console.error('Error showing toast:', err);
+    }
   }
 
-  async loadBranchesAndProducts() {
+  async loadBranchesAndProducts(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
+      await this.showAuthError();
       return;
     }
 
@@ -144,10 +178,10 @@ export class MarketComparisonComponent implements OnInit {
           })
         ),
         products: this.wholesalerApiService.getWholesalerProducts().pipe(
-          map(products => products.map(p => ({
+          map(products => products?.map(p => ({
             product_id: p.product_id,
             product_name: p.product_name
-          }))),
+          })) || []),
           catchError(err => {
             console.error('Failed to load products:', err);
             if (err.status === 401) {
@@ -158,43 +192,16 @@ export class MarketComparisonComponent implements OnInit {
         )
       })
       .pipe(
+        takeUntil(this.destroy$),
         finalize(() => {
-          loading.dismiss();
+          loading.dismiss().catch(err => console.error('Error dismissing loading:', err));
           this.isLoading = false;
+          this.currentLoading = undefined;
         })
       )
       .subscribe({
         next: ({ branches, products }) => {
-          // Filter active branches
-          this.availableBranches = branches.filter(b => b.active_status);
-          this.availableProducts = products;
-
-          if (this.availableBranches.length === 0) {
-            this.error = this.translate.instant('MARKET_COMPARISON.NO_BRANCHES');
-            this.showToast(this.translate.instant('MARKET_COMPARISON.NO_BRANCHES'), 'warning');
-            return;
-          }
-
-          if (this.availableProducts.length === 0) {
-            this.error = this.translate.instant('MARKET_COMPARISON.NO_PRODUCTS');
-            this.showToast(this.translate.instant('MARKET_COMPARISON.NO_PRODUCTS'), 'warning');
-            return;
-          }
-
-          // Auto-select first 3 branches (or all if less than 3)
-          this.selectedBranches = this.availableBranches
-            .slice(0, Math.min(3, this.availableBranches.length))
-            .map(b => b.branch_id);
-
-          // Auto-select first 3 products (or all if less than 3)
-          this.selectedProducts = this.availableProducts
-            .slice(0, Math.min(3, this.availableProducts.length))
-            .map(p => p.product_id);
-
-          // Load initial chart data
-          if (this.selectedBranches.length > 0 && this.selectedProducts.length > 0) {
-            this.updateChart();
-          }
+          this.handleLoadedData(branches, products);
         },
         error: (error) => {
           console.error('Error loading data:', error);
@@ -203,36 +210,83 @@ export class MarketComparisonComponent implements OnInit {
         }
       });
     } catch (error) {
-      loading.dismiss();
+      console.error('Unexpected error:', error);
+      loading.dismiss().catch(err => console.error('Error dismissing loading:', err));
       this.isLoading = false;
+      this.currentLoading = undefined;
       this.error = this.translate.instant('MARKET_COMPARISON.UNEXPECTED_ERROR');
       this.showToast(this.translate.instant('MARKET_COMPARISON.UNEXPECTED_ERROR'), 'danger');
     }
   }
 
-  onBranchChange(event: any) {
+  private handleLoadedData(branches: BranchData[], products: Product[]): void {
+    // Filter active branches
+    this.availableBranches = branches.filter(b => b?.active_status) || [];
+    this.availableProducts = products || [];
+
+    if (this.availableBranches.length === 0) {
+      this.error = this.translate.instant('MARKET_COMPARISON.NO_BRANCHES');
+      this.showToast(this.translate.instant('MARKET_COMPARISON.NO_BRANCHES'), 'warning');
+      return;
+    }
+
+    if (this.availableProducts.length === 0) {
+      this.error = this.translate.instant('MARKET_COMPARISON.NO_PRODUCTS');
+      this.showToast(this.translate.instant('MARKET_COMPARISON.NO_PRODUCTS'), 'warning');
+      return;
+    }
+
+    // Auto-select first 3 branches (or all if less than 3)
+    this.selectedBranches = this.availableBranches
+      .slice(0, Math.min(this.MAX_AUTO_SELECT, this.availableBranches.length))
+      .map(b => b.branch_id);
+
+    // Auto-select first 3 products (or all if less than 3)
+    this.selectedProducts = this.availableProducts
+      .slice(0, Math.min(this.MAX_AUTO_SELECT, this.availableProducts.length))
+      .map(p => p.product_id);
+
+    // Load initial chart data
+    if (this.selectedBranches.length > 0 && this.selectedProducts.length > 0) {
+      this.updateChart();
+    }
+  }
+
+  onBranchChange(event: any): void {
+    if (!event?.detail?.value) {
+      this.showToast(this.translate.instant('MARKET_COMPARISON.SELECT_BRANCHES_WARNING'), 'warning');
+      return;
+    }
+
     if (this.selectedBranches.length > 0 && this.selectedProducts.length > 0) {
       this.updateChart();
     } else if (this.selectedBranches.length === 0) {
       this.showToast(this.translate.instant('MARKET_COMPARISON.SELECT_BRANCHES_WARNING'), 'warning');
+      this.clearChart();
     }
   }
 
-  onProductChange(event: any) {
+  onProductChange(event: any): void {
+    if (!event?.detail?.value) {
+      this.showToast(this.translate.instant('MARKET_COMPARISON.SELECT_PRODUCTS_WARNING'), 'warning');
+      return;
+    }
+
     if (this.selectedBranches.length > 0 && this.selectedProducts.length > 0) {
       this.updateChart();
     } else if (this.selectedProducts.length === 0) {
       this.showToast(this.translate.instant('MARKET_COMPARISON.SELECT_PRODUCTS_WARNING'), 'warning');
+      this.clearChart();
     }
   }
 
-  async updateChart() {
+  async updateChart(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
+      await this.showAuthError();
       return;
     }
 
-    if (this.selectedBranches.length === 0 || this.selectedProducts.length === 0) {
+    if (!this.selectedBranches?.length || !this.selectedProducts?.length) {
       this.showToast(this.translate.instant('MARKET_COMPARISON.SELECT_BOTH'), 'warning');
       return;
     }
@@ -245,6 +299,7 @@ export class MarketComparisonComponent implements OnInit {
         this.selectedProducts
       )
       .pipe(
+        takeUntil(this.destroy$),
         catchError(error => {
           console.error('API Error:', error);
 
@@ -257,36 +312,50 @@ export class MarketComparisonComponent implements OnInit {
           return of([]);
         }),
         finalize(() => {
-          loading.dismiss();
+          loading.dismiss().catch(err => console.error('Error dismissing loading:', err));
           this.isLoading = false;
+          this.currentLoading = undefined;
         })
       )
-      .subscribe(data => {
-        if (data && data.length > 0) {
-          this.updateChartWithRealData(data);
-          this.showToast(this.translate.instant('MARKET_COMPARISON.DATA_UPDATED'), 'success');
-        } else {
-          this.showToast(this.translate.instant('MARKET_COMPARISON.NO_DATA'), 'warning');
-          this.clearChart();
+      .subscribe({
+        next: (data) => {
+          if (data && Array.isArray(data) && data.length > 0) {
+            this.updateChartWithRealData(data);
+            this.showToast(this.translate.instant('MARKET_COMPARISON.DATA_UPDATED'), 'success');
+          } else {
+            this.showToast(this.translate.instant('MARKET_COMPARISON.NO_DATA'), 'warning');
+            this.clearChart();
+          }
+        },
+        error: (err) => {
+          console.error('Subscription error:', err);
+          this.showToast(this.translate.instant('MARKET_COMPARISON.ERROR_FETCHING'), 'danger');
         }
       });
     } catch (error) {
-      loading.dismiss();
+      console.error('Unexpected error in updateChart:', error);
+      loading.dismiss().catch(err => console.error('Error dismissing loading:', err));
       this.isLoading = false;
+      this.currentLoading = undefined;
       this.showToast(this.translate.instant('MARKET_COMPARISON.ERROR_FETCHING'), 'danger');
     }
   }
 
-  private updateChartWithRealData(data: BranchPriceData[]) {
+  private updateChartWithRealData(data: BranchPriceData[]): void {
+    if (!data || !Array.isArray(data)) {
+      console.error('Invalid data received:', data);
+      return;
+    }
+
     // Create a map for branches with their data
     const branchMap = new Map<number, { name: string; data: number[] }>();
-    
+
     // Initialize branch data structure
     this.selectedBranches.forEach(branchId => {
       const branch = this.availableBranches.find(b => b.branch_id === branchId);
       if (branch) {
         branchMap.set(branchId, {
-          name: branch.shop_name,
+          name: branch.shop_name || `Branch ${branchId}`,
           data: []
         });
       }
@@ -298,39 +367,48 @@ export class MarketComparisonComponent implements OnInit {
         const priceData = data.find(
           d => d.branch_id === branchId && d.product_id === productId
         );
-        
+
         const branchData = branchMap.get(branchId);
         if (branchData) {
           // Use 0 if no price data available
-          branchData.data.push(priceData ? priceData.price_per_unit : 0);
+          branchData.data.push(priceData?.price_per_unit || 0);
         }
       });
     });
 
     // Convert map to series array
     const seriesData = Array.from(branchMap.values());
-    
+
     // Get product names for x-axis
     const productNames = this.selectedProducts.map(id => {
       const product = this.availableProducts.find(p => p.product_id === id);
-      return product ? product.product_name : `Product ${id}`;
+      return product?.product_name || `Product ${id}`;
     });
 
     this.updateChartOptions(seriesData, productNames);
   }
 
-  private updateChartOptions(seriesData: any[], categories: string[]) {
+  private updateChartOptions(seriesData: any[], categories: string[]): void {
+    if (!this.priceComparisonOptions) {
+      console.error('Chart options not initialized');
+      return;
+    }
+
     this.priceComparisonOptions = {
       ...this.priceComparisonOptions,
-      series: seriesData,
+      series: seriesData || [],
       xaxis: {
         ...this.priceComparisonOptions.xaxis,
-        categories: categories
+        categories: categories || []
       }
     };
   }
 
-  private clearChart() {
+  private clearChart(): void {
+    if (!this.priceComparisonOptions) {
+      return;
+    }
+
     this.priceComparisonOptions = {
       ...this.priceComparisonOptions,
       series: [],
@@ -341,14 +419,14 @@ export class MarketComparisonComponent implements OnInit {
     };
   }
 
-  private setupChartOptions() {
+  private setupChartOptions(): void {
     this.priceComparisonOptions = {
       series: [],
       chart: {
         type: 'bar',
         height: 400,
         stacked: false,
-        toolbar: { 
+        toolbar: {
           show: true,
           tools: {
             download: true,
@@ -387,7 +465,7 @@ export class MarketComparisonComponent implements OnInit {
       },
       xaxis: {
         categories: [],
-        title: { 
+        title: {
           text: this.translate.instant('MARKET_COMPARISON.PRODUCTS_LABEL'),
           style: {
             fontSize: '14px',
@@ -401,7 +479,7 @@ export class MarketComparisonComponent implements OnInit {
         }
       },
       yaxis: {
-        title: { 
+        title: {
           text: this.translate.instant('MARKET_COMPARISON.PRICE_LABEL'),
           style: {
             fontSize: '14px',
@@ -441,34 +519,41 @@ export class MarketComparisonComponent implements OnInit {
     };
   }
 
-  async handleRefresh(event: any) {
+  async handleRefresh(event: any): Promise<void> {
     try {
       if (!this.authService.isAuthenticated()) {
-        this.showAuthError();
+        await this.showAuthError();
         return;
       }
 
       await this.loadBranchesAndProducts();
+    } catch (error) {
+      console.error('Error during refresh:', error);
+      this.showToast(this.translate.instant('MARKET_COMPARISON.REFRESH_ERROR'), 'danger');
     } finally {
-      event.target.complete();
+      event?.target?.complete();
     }
   }
 
-  goBack() {
-    this.router.navigate(['/wholesaler/home']);
+  goBack(): void {
+    this.router.navigate(['/wholesaler/home']).catch(err =>
+      console.error('Navigation error:', err)
+    );
   }
 
-  goToTrends() {
+  goToTrends(): void {
     this.navController.navigateBack('/wholesaler/trends');
   }
 
   getBranchName(branchId: number): string {
+    if (!branchId) return 'Unknown Branch';
     const branch = this.availableBranches.find(b => b.branch_id === branchId);
-    return branch ? branch.shop_name : `Branch ${branchId}`;
+    return branch?.shop_name || `Branch ${branchId}`;
   }
 
   getProductName(productId: number): string {
+    if (!productId) return 'Unknown Product';
     const product = this.availableProducts.find(p => p.product_id === productId);
-    return product ? product.product_name : `Product ${productId}`;
+    return product?.product_name || `Product ${productId}`;
   }
 }

@@ -1,12 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IonicModule, NavController, LoadingController, AlertController } from '@ionic/angular';
+import { IonicModule, NavController, LoadingController, AlertController, ToastController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
 import { SalesTrendsService, SalesTrend, TopSellingProduct } from './sales-trends.service';
-import { catchError, finalize, of } from 'rxjs';
+import { catchError, finalize, of, Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -24,7 +24,9 @@ interface ProductData {
   standalone: true,
   imports: [IonicModule, NgApexchartsModule, FormsModule, CommonModule, TranslatePipe],
 })
-export class SalesTrendsComponent implements OnInit {
+export class SalesTrendsComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private currentLoading: HTMLIonLoadingElement | null = null;
   selectedView: string = 'trends';
   selectedPeriod: string = 'monthly';
   selectedMetric: string = 'volume';
@@ -39,6 +41,7 @@ export class SalesTrendsComponent implements OnInit {
     private salesTrendsService: SalesTrendsService,
     private loadingController: LoadingController,
     private alertCtrl: AlertController,
+    private toastController: ToastController,
     private router: Router,
     private authService: AuthService,
     private translate: TranslateService
@@ -48,6 +51,14 @@ export class SalesTrendsComponent implements OnInit {
 
   ngOnInit() {
     this.checkAuthAndLoadData();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    if (this.currentLoading) {
+      this.currentLoading.dismiss();
+    }
   }
 
   private checkAuthAndLoadData() {
@@ -61,13 +72,7 @@ export class SalesTrendsComponent implements OnInit {
       return;
     }
 
-    this.selectedView = 'trends';
-    this.selectedPeriod = 'monthly';
-    this.selectedMetric = 'volume';
-
-    setTimeout(() => {
-      this.initializeCharts();
-    }, 0);
+    this.initializeCharts();
   }
 
   private async showAuthError() {
@@ -103,14 +108,43 @@ export class SalesTrendsComponent implements OnInit {
     await alert.present();
   }
 
-  async showLoading() {
+  private async showLoading(): Promise<HTMLIonLoadingElement> {
+    // Dismiss any existing loader first
+    if (this.currentLoading) {
+      await this.currentLoading.dismiss();
+    }
+
     this.isLoading = true;
-    const loading = await this.loadingController.create({
+    this.currentLoading = await this.loadingController.create({
       message: this.translate.instant('SALES_TRENDS.LOADING'),
       spinner: 'crescent'
     });
-    await loading.present();
-    return loading;
+    await this.currentLoading.present();
+    return this.currentLoading;
+  }
+
+  private async hideLoading() {
+    this.isLoading = false;
+    if (this.currentLoading) {
+      await this.currentLoading.dismiss();
+      this.currentLoading = null;
+    }
+  }
+
+  private async showErrorToast(message: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 3000,
+      position: 'bottom',
+      color: 'danger',
+      buttons: [
+        {
+          text: this.translate.instant('SALES_TRENDS.DISMISS'),
+          role: 'cancel'
+        }
+      ]
+    });
+    await toast.present();
   }
 
   goToTrends() {
@@ -158,9 +192,13 @@ export class SalesTrendsComponent implements OnInit {
       }
 
       dataObservable.pipe(
+        takeUntil(this.destroy$),
         catchError(error => {
           console.error('API Error:', error);
-          this.errorMessage = this.translate.instant('SALES_TRENDS.ERROR_LOADING_DATA');
+          const errorMsg = this.translate.instant('SALES_TRENDS.ERROR_LOADING_DATA');
+          this.errorMessage = errorMsg;
+          this.showErrorToast(errorMsg);
+
           if (error.status === 401) {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -168,14 +206,16 @@ export class SalesTrendsComponent implements OnInit {
           return of([]);
         }),
         finalize(() => {
-          loading.dismiss();
-          this.isLoading = false;
+          this.hideLoading();
         })
       ).subscribe({
         next: (data) => {
-          console.log('Fetched data:', data);
-          if (data && Array.isArray(data)) {
+          if (data && Array.isArray(data) && data.length > 0) {
             this.updateTrendsChartOptions(data);
+            this.errorMessage = '';
+          } else {
+            this.chartOptions = null;
+            this.errorMessage = this.translate.instant('SALES_TRENDS.NO_DATA_AVAILABLE');
           }
         },
         error: (error) => {
@@ -183,14 +223,18 @@ export class SalesTrendsComponent implements OnInit {
         }
       });
     } catch (error) {
-      loading.dismiss();
-      this.isLoading = false;
+      await this.hideLoading();
       console.error('Error in updateTrendsChart:', error);
+      this.showErrorToast(this.translate.instant('SALES_TRENDS.UNEXPECTED_ERROR'));
     }
   }
 
-  private updateTrendsChartOptions(data: any[]) {
-    // Ensure data has the correct fields from backend
+  private updateTrendsChartOptions(data: SalesTrend[]) {
+    if (!data || data.length === 0) {
+      this.chartOptions = null;
+      return;
+    }
+
     this.chartOptions = {
       series: [
         {
@@ -270,9 +314,13 @@ export class SalesTrendsComponent implements OnInit {
       }
 
       dataObservable.pipe(
+        takeUntil(this.destroy$),
         catchError(error => {
           console.error('API Error:', error);
-          this.errorMessage = this.translate.instant('SALES_TRENDS.ERROR_LOADING_DATA');
+          const errorMsg = this.translate.instant('SALES_TRENDS.ERROR_LOADING_DATA');
+          this.errorMessage = errorMsg;
+          this.showErrorToast(errorMsg);
+
           if (error.status === 401) {
             this.authService.logout();
             this.router.navigate(['/login']);
@@ -280,25 +328,36 @@ export class SalesTrendsComponent implements OnInit {
           return of([]);
         }),
         finalize(() => {
-          loading.dismiss();
-          this.isLoading = false;
+          this.hideLoading();
         })
-      ).subscribe(products => {
-        console.log('Top Products:', products);
-        if (products && Array.isArray(products)) {
-          this.updateTopProductsChartOptions(products);
+      ).subscribe({
+        next: (products) => {
+          if (products && Array.isArray(products) && products.length > 0) {
+            this.updateTopProductsChartOptions(products);
+            this.errorMessage = '';
+          } else {
+            this.topProductsOptions = null;
+            this.errorMessage = this.translate.instant('SALES_TRENDS.NO_DATA_AVAILABLE');
+          }
+        },
+        error: (error) => {
+          console.error('Error updating top products chart:', error);
         }
       });
     } catch (error) {
-      loading.dismiss();
-      this.isLoading = false;
+      await this.hideLoading();
       console.error('Error in updateTopProductsChart:', error);
+      this.showErrorToast(this.translate.instant('SALES_TRENDS.UNEXPECTED_ERROR'));
     }
   }
 
   private updateTopProductsChartOptions(products: TopSellingProduct[]) {
+    if (!products || products.length === 0) {
+      this.topProductsOptions = null;
+      return;
+    }
+
     const isVolume = this.selectedMetric === 'volume';
-    console.log('Top Products:', products);
 
     const sortedData = [...products].sort((a, b) =>
       isVolume ?

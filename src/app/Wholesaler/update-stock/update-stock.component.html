@@ -10,10 +10,23 @@
 <ion-content class="ion-padding">
   <ion-item>
     <ion-label position="floating">{{ 'UPDATE_STOCK.STOCK_TO_DEDUCT' | translate }}</ion-label>
-    <ion-input type="number" [(ngModel)]="stockToDeduct"></ion-input>
+    <ion-input
+      type="number"
+      [(ngModel)]="stockToDeduct"
+      [disabled]="isLoading"
+      min="1"
+      step="1"
+    ></ion-input>
   </ion-item>
 
-  <ion-button color = "tertiary" expand="block" class="ion-margin-top" (click)="updateStock()">
-    {{ 'UPDATE_STOCK.UPDATE' | translate }}
+  <ion-button
+    color="tertiary"
+    expand="block"
+    class="ion-margin-top"
+    (click)="updateStock()"
+    [disabled]="isLoading"
+  >
+    <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+    <span *ngIf="!isLoading">{{ 'UPDATE_STOCK.UPDATE' | translate }}</span>
   </ion-button>
 </ion-content>

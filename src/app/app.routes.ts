@@ -84,7 +84,7 @@ export const routes: Routes = [
   },
   {
     path: 'wholesaler/stock-dashboard',
-    loadComponent: () => import('./Wholesaler/stock-dashboard/stock-dashboard.component').then((m) => m.StockDashboardAddStockComponent),
+    loadComponent: () => import('./Wholesaler/stock-dashboard/stock-dashboard.component').then((m) => m.StockDashboardComponent),
   },
   {
     path: 'wholesaler/add-stock',

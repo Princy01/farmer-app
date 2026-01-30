@@ -89,8 +89,8 @@ export interface BranchData {
 }
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { catchError, map, Observable, retry, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -113,47 +113,89 @@ export class StockInsightsService {
                 });
         }
 
+        private handleError(error: HttpErrorResponse): Observable<never> {
+                let errorMessage = 'An unknown error occurred';
+
+                if (error.error instanceof ErrorEvent) {
+                        // Client-side or network error
+                        errorMessage = `Network error: ${error.error.message}`;
+                } else {
+                        // Backend error
+                        errorMessage = `Server error: ${error.status} - ${error.message}`;
+                }
+
+                console.error('Stock Insights Service Error:', errorMessage, error);
+                return throwError(() => error);
+        }
+
         getCurrentStockByMandi(mandiId: number): Observable<CurrentStockData[]> {
                 const headers = this.getAuthHeaders();
-                return this.http.get<CurrentStockData[]>(`${this.apiUrl}/getCurrentStockByMandi/${mandiId}`, { headers });
+                return this.http.get<CurrentStockData[]>(`${this.apiUrl}/getCurrentStockByMandi/${mandiId}`, { headers })
+                        .pipe(
+                                retry({ count: 2, delay: 1000 }),
+                                catchError(this.handleError)
+                        );
         }
 
         getLeastStockedProducts(): Observable<LeastStockedData[]> {
                 const headers = this.getAuthHeaders();
-                return this.http.get<LeastStockedData[]>(`${this.apiUrl}/getMandiStockedProduct`, { headers });
+                return this.http.get<LeastStockedData[]>(`${this.apiUrl}/getMandiStockedProduct`, { headers })
+                        .pipe(
+                                retry({ count: 2, delay: 1000 }),
+                                catchError(this.handleError)
+                        );
         }
 
         getLowStockItems(): Observable<LowStockItemData[]> {
                 const headers = this.getAuthHeaders();
-                return this.http.get<LowStockItemData[]>(`${this.apiUrl}/getLowStockItems`, { headers });
+                return this.http.get<LowStockItemData[]>(`${this.apiUrl}/getLowStockItems`, { headers })
+                        .pipe(
+                                retry({ count: 2, delay: 1000 }),
+                                catchError(this.handleError)
+                        );
         }
 
         getStockAvailabilityPercentage(): Observable<StockAvailabilityData[]> {
                 const headers = this.getAuthHeaders();
-                return this.http.get<StockAvailabilityData[]>(`${this.apiUrl}/getStockAvailability`, { headers });
+                return this.http.get<StockAvailabilityData[]>(`${this.apiUrl}/getStockAvailability`, { headers })
+                        .pipe(
+                                retry({ count: 2, delay: 1000 }),
+                                catchError(this.handleError)
+                        );
         }
-
-
 
         getSlowMovingProducts(): Observable<SlowMovingProductData[]> {
                 const headers = this.getAuthHeaders();
-                return this.http.get<SlowMovingProductData[]>(`${this.apiUrl}/getSlowMovingProducts`, { headers });
+                return this.http.get<SlowMovingProductData[]>(`${this.apiUrl}/getSlowMovingProducts`, { headers })
+                        .pipe(
+                                retry({ count: 2, delay: 1000 }),
+                                catchError(this.handleError)
+                        );
         }
 
         getCurrentStockByProduct(productId: number): Observable<CurrentStockData[]> {
                 const headers = this.getAuthHeaders();
-                return this.http.get<CurrentStockData[]>(`${this.apiUrl}/getCurrentStockByProduct/${productId}`, { headers });
+                return this.http.get<CurrentStockData[]>(`${this.apiUrl}/getCurrentStockByProduct/${productId}`, { headers })
+                        .pipe(
+                                retry({ count: 2, delay: 1000 }),
+                                catchError(this.handleError)
+                        );
         }
-        // Update the getMandiList method in StockInsightsService
+
         getAllBusinessBranches(): Observable<BranchData[]> {
                 const headers = this.getAuthHeaders();
-                return this.http.get<BranchData[]>(`${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`, { headers });
+                return this.http.get<BranchData[]>(`${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`, { headers })
+                        .pipe(
+                                retry({ count: 2, delay: 1000 }),
+                                catchError(this.handleError)
+                        );
         }
 
         getMandiList(): Observable<MandiBasicInfo[]> {
                 const headers = this.getAuthHeaders();
                 return this.http.get<BranchData[]>(`${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`, { headers })
                         .pipe(
+                                retry({ count: 2, delay: 1000 }),
                                 map(branches => branches.map(branch => ({
                                         mandi_id: branch.branch_id,
                                         mandi_name: branch.shop_name,
@@ -165,7 +207,8 @@ export class StockInsightsService {
                                         mandi_city_id: branch.city_id,
                                         city_name: branch.city_name,
                                         city_shortnames: branch.city_shortname
-                                })))
+                                }))),
+                                catchError(this.handleError)
                         );
         }
 }

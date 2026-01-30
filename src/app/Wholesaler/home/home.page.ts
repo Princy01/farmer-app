@@ -29,6 +29,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { MenuService } from '../services/menu.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LanguagePopoverComponent } from './language-popover.component';
+import { Subject, takeUntil } from 'rxjs';
 
 interface Language {
   id: number;
@@ -44,6 +45,7 @@ interface Language {
   imports: [IonicModule, CommonModule, TranslatePipe, LanguagePopoverComponent]
 })
 export class HomePage implements OnInit, AfterViewInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   // ===== DATA =====
   items: WholesalerProduct[] = [];
@@ -92,7 +94,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.translate.setDefaultLang('en');
-    this.translate.use('en');
   }
 
   // =====================================================
@@ -101,6 +102,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.setItemsPerPage();
+    this.loadLanguagePreference();
     this.checkAuthAndLoad();
     this.fetchLanguages();
   }
@@ -116,6 +118,8 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // =====================================================
@@ -135,7 +139,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
     this.loadProducts(true);
   }
-
 
   // =====================================================
   // DATA LOADING
@@ -159,6 +162,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
         this.itemsPerPage,
         this.searchTerm || undefined
       )
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
           this.items = [...this.items, ...data];
@@ -172,14 +176,13 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
           this.isLoading = false;
         },
-        error: async () => {
+        error: async (error) => {
+          console.error('Error loading products:', error);
           this.isLoading = false;
-          const alert = await this.alertCtrl.create({
-            header: this.translate.instant('COMMON.ERROR'),
-            message: this.translate.instant('COMMON.LOAD_FAILED'),
-            buttons: ['OK']
-          });
-          await alert.present();
+          await this.showErrorAlert(
+            this.translate.instant('WHOLESALER_HOME.ERROR'),
+            this.translate.instant('WHOLESALER_HOME.LOAD_PRODUCTS_ERROR')
+          );
         }
       });
   }
@@ -202,8 +205,13 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async handleRefresh(event: any) {
-    await this.loadProducts(true);
-    event.target.complete();
+    try {
+      await this.loadProducts(true);
+    } catch (error) {
+      console.error('Error refreshing products:', error);
+    } finally {
+      event.target.complete();
+    }
   }
 
   // =====================================================
@@ -228,83 +236,114 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   // =====================================================
 
   viewDetails(item: WholesalerProduct) {
-    this.router.navigate(['/wholesaler/product-details', item.product_id]);
+    try {
+      this.router.navigate(['/wholesaler/product-details', item.product_id]);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      this.showErrorAlert(
+        this.translate.instant('WHOLESALER_HOME.ERROR'),
+        this.translate.instant('WHOLESALER_HOME.NAVIGATION_ERROR')
+      );
+    }
   }
 
   async navigateToHome() {
-    await this.menuService.closeMenu();
-    const content = document.querySelector('ion-content');
-    content?.scrollToTop(300);
+    try {
+      await this.menuService.closeMenu();
+      const content = document.querySelector('ion-content');
+      content?.scrollToTop(300);
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
   }
 
   async navigateToBusinessLocations() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/business-locations']);
+    await this.safeNavigate('/wholesaler/business-locations');
   }
 
   async navigateToUpdateBusiness() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/business-update']);
+    await this.safeNavigate('/wholesaler/business-update');
   }
 
   async navigateToMyOrders() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/orders']);
+    await this.safeNavigate('/wholesaler/orders');
   }
 
   async navigateToPickupOrders() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/pickup-orders']);
+    await this.safeNavigate('/wholesaler/pickup-orders');
   }
 
   async navigateToStockDashboard() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/stock-dashboard']);
+    await this.safeNavigate('/wholesaler/stock-dashboard');
   }
 
   async navigateToPastOrders() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/past-orders']);
+    await this.safeNavigate('/wholesaler/past-orders');
   }
 
   async navigateToRestockingRecommendations() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/restocking-recommendations']);
+    await this.safeNavigate('/wholesaler/restocking-recommendations');
   }
 
   async navigateToMarketOpportunities() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/market-opportunities']);
+    await this.safeNavigate('/wholesaler/market-opportunities');
   }
 
   async navigateToProfile() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/profile']);
+    await this.safeNavigate('/wholesaler/profile');
   }
 
   async navigateToSettings() {
-    await this.menuService.closeMenu();
-    this.router.navigate(['/wholesaler/settings']);
+    await this.safeNavigate('/wholesaler/settings');
   }
 
   createOrder() {
-    this.router.navigate(['/wholesaler/for-sale']);
+    try {
+      this.router.navigate(['/wholesaler/for-sale']);
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  }
+
+  private async safeNavigate(route: string) {
+    try {
+      await this.menuService.closeMenu();
+      await this.router.navigate([route]);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      await this.showErrorAlert(
+        this.translate.instant('WHOLESALER_HOME.ERROR'),
+        this.translate.instant('WHOLESALER_HOME.NAVIGATION_ERROR')
+      );
+    }
   }
 
   // =====================================================
   // MENU
   // =====================================================
 
-  openMenu() {
-    this.menuService.openMenu();
+  async openMenu() {
+    try {
+      await this.menuService.openMenu();
+    } catch (error) {
+      console.error('Error opening menu:', error);
+    }
   }
 
-  closeMenu() {
-    this.menuService.closeMenu();
+  async closeMenu() {
+    try {
+      await this.menuService.closeMenu();
+    } catch (error) {
+      console.error('Error closing menu:', error);
+    }
   }
 
   async toggleMenu() {
-    await this.menuCtrl.toggle();
+    try {
+      await this.menuCtrl.toggle();
+    } catch (error) {
+      console.error('Error toggling menu:', error);
+    }
   }
 
   async logout() {
@@ -319,9 +358,13 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
         {
           text: this.translate.instant('WHOLESALER_HOME.LOGOUT'),
           handler: async () => {
-            await this.closeMenu();
-            this.authService.logout();
-            this.router.navigate(['/login']);
+            try {
+              await this.closeMenu();
+              this.authService.logout();
+              await this.router.navigate(['/login']);
+            } catch (error) {
+              console.error('Error during logout:', error);
+            }
           }
         }
       ]
@@ -334,47 +377,89 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   // =====================================================
 
   openNotifications() {
-    console.log('Opening notifications');
+    try {
+      this.router.navigate(['/wholesaler/notifications']);
+    } catch (error) {
+      console.error('Error opening notifications:', error);
+    }
   }
 
   openTrends() {
-    this.router.navigate(['/wholesaler/trends']);
+    try {
+      this.router.navigate(['/wholesaler/trends']);
+    } catch (error) {
+      console.error('Error opening trends:', error);
+    }
   }
 
   // =====================================================
   // LANGUAGE
   // =====================================================
 
+  private loadLanguagePreference() {
+    const savedLang = localStorage.getItem('wholesaler_language');
+    if (savedLang) {
+      this.translate.use(savedLang);
+    }
+  }
+
   fetchLanguages() {
-    this.wholesalerService.getLanguages().subscribe({
-      next: (langs) => {
-        this.languages = langs.map(l => ({ ...l, code: l.code.toLowerCase() }));
-      }
-    });
+    this.wholesalerService.getLanguages()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (langs) => {
+          this.languages = langs.map(l => ({ ...l, code: l.code.toLowerCase() }));
+          const currentLang = this.translate.currentLang || 'en';
+          const lang = this.languages.find(l => l.code === currentLang);
+          if (lang) {
+            this.currentLanguage = lang.name;
+          }
+        },
+        error: (error) => {
+          console.error('Error fetching languages:', error);
+        }
+      });
   }
 
   async openLanguagePopover(event: Event) {
-    const popover = await this.popoverCtrl.create({
-      component: LanguagePopoverComponent,
-      event,
-      translucent: true,
-      componentProps: {
-        languages: this.languages,
-        currentLanguage: this.currentLanguage,
-        onSelect: (lang: Language) => this.saveLanguagePreference(lang.code)
-      }
-    });
-    await popover.present();
+    try {
+      const popover = await this.popoverCtrl.create({
+        component: LanguagePopoverComponent,
+        event,
+        translucent: true,
+        componentProps: {
+          languages: this.languages,
+          currentLanguage: this.currentLanguage,
+          onSelect: (lang: Language) => this.saveLanguagePreference(lang.code)
+        }
+      });
+      await popover.present();
+      await popover.onDidDismiss();
+    } catch (error) {
+      console.error('Error opening language popover:', error);
+    }
   }
 
   saveLanguagePreference(langCode: string) {
     const lang = this.languages.find(l => l.code === langCode);
     if (!lang) return;
 
-    this.wholesalerService.setLanguagePreference(lang.id).subscribe(() => {
-      this.translate.use(langCode);
-      this.currentLanguage = lang.name;
-    });
+    this.wholesalerService.setLanguagePreference(lang.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.translate.use(langCode);
+          this.currentLanguage = lang.name;
+          localStorage.setItem('wholesaler_language', langCode);
+        },
+        error: (error) => {
+          console.error('Error saving language preference:', error);
+          this.showErrorAlert(
+            this.translate.instant('WHOLESALER_HOME.ERROR'),
+            this.translate.instant('WHOLESALER_HOME.LANGUAGE_SAVE_ERROR')
+          );
+        }
+      });
   }
 
   // =====================================================
@@ -391,10 +476,10 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   private async showAuthError() {
     const alert = await this.alertCtrl.create({
-      header: this.translate.instant('COMMON.AUTH_ERROR'),
-      message: this.translate.instant('COMMON.SESSION_EXPIRED'),
+      header: this.translate.instant('WHOLESALER_HOME.AUTH_ERROR'),
+      message: this.translate.instant('WHOLESALER_HOME.SESSION_EXPIRED'),
       buttons: [{
-        text: 'OK',
+        text: this.translate.instant('WHOLESALER_HOME.OK'),
         handler: () => {
           this.authService.logout();
           this.router.navigate(['/login']);
@@ -406,9 +491,18 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   private async showUnauthorizedError() {
     const alert = await this.alertCtrl.create({
-      header: this.translate.instant('COMMON.ACCESS_DENIED'),
-      message: this.translate.instant('COMMON.NO_PERMISSION'),
-      buttons: ['OK']
+      header: this.translate.instant('WHOLESALER_HOME.ACCESS_DENIED'),
+      message: this.translate.instant('WHOLESALER_HOME.NO_PERMISSION'),
+      buttons: [this.translate.instant('WHOLESALER_HOME.OK')]
+    });
+    await alert.present();
+  }
+
+  private async showErrorAlert(header: string, message: string) {
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: [this.translate.instant('WHOLESALER_HOME.OK')]
     });
     await alert.present();
   }

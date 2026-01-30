@@ -1,8 +1,9 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { IonicModule, NavController, IonContent, LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
 import { filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, chevronDownOutline } from 'ionicons/icons';
 import { WholesalerApiService, OrderItemDetails } from '../services/wholesaler-api.service';
@@ -21,7 +22,7 @@ interface FilterOption {
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
 })
-export class PastOrdersComponent implements AfterViewInit {
+export class PastOrdersComponent implements AfterViewInit, OnDestroy {
   @ViewChild(IonContent) content!: IonContent;
 
   completedOrders: OrderItemDetails[] = [];
@@ -35,10 +36,11 @@ export class PastOrdersComponent implements AfterViewInit {
   ];
   selectedFilter: string = 'all';
   selectedOrderId: number | null = null;
-  isLoading = false;
-  hasError = false;
+  isLoading: boolean = false;
+  hasError: boolean = false;
 
   private originalOrders: OrderItemDetails[] = [];
+  private subscriptions = new Subscription();
 
   constructor(
     private router: Router,
@@ -53,12 +55,22 @@ export class PastOrdersComponent implements AfterViewInit {
     addIcons({ filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, chevronDownOutline });
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.content.scrollEvents = true;
     this.checkAuthAndLoadData();
   }
 
-  private checkAuthAndLoadData() {
+  /**
+   * Cleanup subscriptions to prevent memory leaks
+   */
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  /**
+   * Validates authentication and authorization before loading data
+   */
+  private checkAuthAndLoadData(): void {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
       return;
@@ -72,7 +84,10 @@ export class PastOrdersComponent implements AfterViewInit {
     this.loadCompletedOrders();
   }
 
-  private async showAuthError() {
+  /**
+   * Displays authentication error and redirects to login
+   */
+  private async showAuthError(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('PAST_ORDERS.AUTH_ERROR'),
       message: this.translate.instant('PAST_ORDERS.SESSION_EXPIRED'),
@@ -84,12 +99,16 @@ export class PastOrdersComponent implements AfterViewInit {
             this.router.navigate(['/login']);
           }
         }
-      ]
+      ],
+      backdropDismiss: false
     });
     await alert.present();
   }
 
-  private async showUnauthorizedError() {
+  /**
+   * Displays unauthorized access error
+   */
+  private async showUnauthorizedError(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('PAST_ORDERS.ACCESS_DENIED'),
       message: this.translate.instant('PAST_ORDERS.NO_PERMISSION'),
@@ -100,14 +119,19 @@ export class PastOrdersComponent implements AfterViewInit {
             this.router.navigate(['/login']);
           }
         }
-      ]
+      ],
+      backdropDismiss: false
     });
     await alert.present();
   }
 
-  async loadCompletedOrders(daysAgo?: number) {
+  /**
+   * Loads completed orders from the API
+   * @param daysAgo Optional number of days to filter by
+   */
+  async loadCompletedOrders(daysAgo?: number): Promise<void> {
     if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
+      await this.showAuthError();
       return;
     }
 
@@ -120,18 +144,16 @@ export class PastOrdersComponent implements AfterViewInit {
       await loading.present();
       this.isLoading = true;
       this.hasError = false;
-      console.log('Loading completed orders with daysAgo:', daysAgo);
 
-      this.wholesalerApiService.getCompletedOrders(undefined, daysAgo).subscribe({
+      const subscription = this.wholesalerApiService.getCompletedOrders(undefined, daysAgo).subscribe({
         next: async (orders) => {
-          console.log('Completed orders loaded:', orders);
           this.originalOrders = orders;
           this.completedOrders = orders;
           await loading.dismiss();
           this.isLoading = false;
 
           if (orders.length === 0) {
-            this.showToast(this.translate.instant('PAST_ORDERS.NO_ORDERS'));
+            await this.showToast(this.translate.instant('PAST_ORDERS.NO_ORDERS'));
           }
         },
         error: async (error) => {
@@ -140,29 +162,37 @@ export class PastOrdersComponent implements AfterViewInit {
           this.isLoading = false;
           this.hasError = true;
 
-          if (error.status === 401) {
-            this.showAuthError();
+          if (error?.status === 401) {
+            await this.showAuthError();
             return;
           }
 
-          this.showError(
+          await this.showError(
             this.translate.instant('PAST_ORDERS.LOAD_ERROR'),
             this.translate.instant('PAST_ORDERS.TRY_LATER')
           );
         }
       });
+
+      this.subscriptions.add(subscription);
     } catch (error) {
       await loading.dismiss();
       this.isLoading = false;
       this.hasError = true;
-      this.showError(
+      console.error('Unexpected error loading completed orders:', error);
+
+      await this.showError(
         this.translate.instant('PAST_ORDERS.UNEXPECTED_ERROR'),
         this.translate.instant('PAST_ORDERS.TRY_LATER')
       );
     }
   }
 
-  async showToast(message: string) {
+  /**
+   * Displays a toast message
+   * @param message The message to display
+   */
+  async showToast(message: string): Promise<void> {
     const toast = await this.toastCtrl.create({
       message,
       duration: 2000,
@@ -172,7 +202,12 @@ export class PastOrdersComponent implements AfterViewInit {
     await toast.present();
   }
 
-  async showError(header: string, message: string) {
+  /**
+   * Displays an error alert with retry option
+   * @param header The alert header
+   * @param message The error message
+   */
+  async showError(header: string, message: string): Promise<void> {
     const alert = await this.alertCtrl.create({
       header,
       message,
@@ -192,10 +227,14 @@ export class PastOrdersComponent implements AfterViewInit {
     await alert.present();
   }
 
-  async applyFilter(filter: string) {
-    if (!filter) {
+  /**
+   * Applies the selected filter to orders
+   * @param filter The filter value to apply
+   */
+  async applyFilter(filter: string): Promise<void> {
+    if (!filter || filter === 'all') {
       this.selectedFilter = 'all';
-      this.completedOrders = this.originalOrders;
+      await this.loadCompletedOrders();
       return;
     }
 
@@ -222,7 +261,10 @@ export class PastOrdersComponent implements AfterViewInit {
     }
   }
 
-  private async showCustomDateFilter() {
+  /**
+   * Shows custom date range filter dialog
+   */
+  private async showCustomDateFilter(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('PAST_ORDERS.CUSTOM_DATE_RANGE'),
       inputs: [
@@ -264,11 +306,24 @@ export class PastOrdersComponent implements AfterViewInit {
     await alert.present();
   }
 
-  private filterByDateRange(startDate: Date, endDate: Date) {
+  /**
+   * Filters orders by custom date range
+   * @param startDate Start date of the range
+   * @param endDate End date of the range
+   */
+  private async filterByDateRange(startDate: Date, endDate: Date): Promise<void> {
     if (!startDate || !endDate) {
-      this.showToast(this.translate.instant('PAST_ORDERS.SELECT_DATES'));
+      await this.showToast(this.translate.instant('PAST_ORDERS.SELECT_DATES'));
       this.selectedFilter = 'all';
-      this.completedOrders = this.originalOrders;
+      this.completedOrders = [...this.originalOrders];
+      return;
+    }
+
+    // Validate date range
+    if (startDate > endDate) {
+      await this.showToast(this.translate.instant('PAST_ORDERS.INVALID_DATE_RANGE'));
+      this.selectedFilter = 'all';
+      this.completedOrders = [...this.originalOrders];
       return;
     }
 
@@ -277,34 +332,58 @@ export class PastOrdersComponent implements AfterViewInit {
     endDate.setHours(23, 59, 59, 999);
 
     this.completedOrders = this.originalOrders.filter(order => {
-      // Use actual_delivery_date for completed orders
+      if (!order.actual_delivery_date) return false;
+
       const orderDate = new Date(order.actual_delivery_date);
       return orderDate >= startDate && orderDate <= endDate;
     });
 
     if (this.completedOrders.length === 0) {
-      this.showToast(this.translate.instant('PAST_ORDERS.NO_ORDERS_IN_RANGE'));
+      await this.showToast(this.translate.instant('PAST_ORDERS.NO_ORDERS_IN_RANGE'));
     }
   }
 
-  viewOrderDetails(order: OrderItemDetails) {
+  /**
+   * Toggles order details expansion
+   * @param order The order to expand/collapse
+   */
+  viewOrderDetails(order: OrderItemDetails): void {
+    if (!order || !order.order_id) {
+      console.error('Invalid order data');
+      return;
+    }
+
     this.selectedOrderId = this.selectedOrderId === order.order_id ? null : order.order_id;
   }
 
-  trackById(_index: number, order: OrderItemDetails) {
+  /**
+   * Track by function for order list performance
+   * @param _index The index of the item
+   * @param order The order item
+   * @returns The unique order ID
+   */
+  trackById(_index: number, order: OrderItemDetails): number {
     return order.order_id;
   }
 
-  async handleRefresh(event: any) {
+  /**
+   * Handles pull-to-refresh gesture
+   */
+  async handleRefresh(event: any): Promise<void> {
     try {
       await this.loadCompletedOrders();
+    } catch (error) {
+      console.error('Error refreshing orders:', error);
     } finally {
-      event.target.complete();
+      event?.target?.complete();
     }
   }
 
-  clearFilter() {
+  /**
+   * Clears the current filter and loads all orders
+   */
+  clearFilter(): void {
     this.selectedFilter = 'all';
-    this.loadCompletedOrders()
+    this.loadCompletedOrders();
   }
 }

@@ -44,6 +44,11 @@
   </div>
 
   <div class="chart-container">
+    <div *ngIf="errorMessage" class="error-message">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+
     <ng-container *ngIf="selectedView === 'trends'">
       <apx-chart
         *ngIf="chartOptions?.series"

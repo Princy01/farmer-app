@@ -97,21 +97,47 @@ export class WholesalerOrderService {
       .pipe(catchError(this.handleError));
   }
 
+  /**
+   * Handles HTTP errors and returns user-friendly error messages
+   * @param error The HTTP error response
+   * @returns An observable that throws an error with a user-friendly message
+   */
   private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'PICKUP_ORDERS.ERRORS.GENERIC';
+
     if (error.error instanceof ErrorEvent) {
-      console.error('An error occurred:', error.error.message);
-      return throwError(() => new Error('Something went wrong. Please try again later.'));
+      // Client-side or network error
+      console.error('Client error occurred:', error.error.message);
+      errorMessage = 'PICKUP_ORDERS.ERRORS.NETWORK';
     } else {
+      // Backend returned an unsuccessful response code
       console.error(
         `Backend returned code ${error.status}, ` +
-        `body was: ${error.error}`);
+        `body was:`, error.error
+      );
 
-        let errorMessage = 'Something went wrong. Please try again later.';
-        if(error.error && error.error.message){
-            errorMessage = error.error.message;
-        }
-
-      return throwError(() => new Error(errorMessage));
+      // Map specific HTTP status codes to appropriate error messages
+      switch (error.status) {
+        case 400:
+          errorMessage = error.error?.message || 'PICKUP_ORDERS.ERRORS.BAD_REQUEST';
+          break;
+        case 401:
+          errorMessage = 'PICKUP_ORDERS.ERRORS.UNAUTHORIZED';
+          break;
+        case 403:
+          errorMessage = 'PICKUP_ORDERS.ERRORS.FORBIDDEN';
+          break;
+        case 404:
+          errorMessage = 'PICKUP_ORDERS.ERRORS.NOT_FOUND';
+          break;
+        case 500:
+          errorMessage = 'PICKUP_ORDERS.ERRORS.SERVER';
+          break;
+        default:
+          errorMessage = error.error?.message || 'PICKUP_ORDERS.ERRORS.GENERIC';
+      }
     }
+
+    return throwError(() => ({ message: errorMessage, status: error.status }));
   }
 }
