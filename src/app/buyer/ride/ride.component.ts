@@ -46,6 +46,7 @@ interface CheckoutData {
   pickupBranchId?: string;
   dropoffCityId?: string;
   dropoffBranchId?: string;
+  wholesalerGroups?: any[];
 }
 
 interface TransportData {
@@ -142,7 +143,8 @@ export class RideComponent implements OnInit {
         pickupCityId: navData['pickupCityId'],
         pickupBranchId: navData['pickupBranchId'],
         dropoffCityId: navData['dropoffCityId'],
-        dropoffBranchId: navData['dropoffBranchId']
+        dropoffBranchId: navData['dropoffBranchId'],
+        wholesalerGroups: navData['wholesalerGroups']
       };
     } catch (error) {
       console.error('Error initializing from navigation state:', error);

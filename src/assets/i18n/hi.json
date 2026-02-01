@@ -1165,7 +1165,11 @@
     "ENTER_CODE": "कृपया डिस्काउंट कोड डालें",
     "DISCOUNT_APPLIED_MSG": "₹{{amount}} की छूट सफलतापूर्वक लागू हो गई",
     "INVALID_CODE": "गलत डिस्काउंट कोड",
-    "EMPTY_CART": "आपकी टोकरी खाली है"
+    "EMPTY_CART": "आपकी टोकरी खाली है",
+    "SELECT_ALL": "सभी चुनें",
+    "STORES": "दुकानें",
+    "SELECT_ITEMS_FIRST": "कृपया चेकआउट करने के लिए कम से कम एक दुकान चुनें",
+    "REMOVE_GROUP_MESSAGE": "{{wholesaler}} से सभी {{count}} सामान हटाएं?"
   },
 
   "CATEGORY": {

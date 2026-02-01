@@ -65,6 +65,17 @@ interface WholeSeller {
   name?: string;
 }
 
+interface WholesalerGroupSummary {
+  wholesalerId: number;
+  branchId: number;
+  wholesalerName: string;
+  branchName: string;
+  itemCount: number;
+  subtotal: number;
+}
+
+
+
 interface TransportData {
   delivery_type: 'standard' | 'express' | 'priority';
   urgency: 'normal' | 'urgent';
@@ -103,6 +114,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   discount: number = 0;
 
   transportData: TransportData | null = null;
+  wholesalerGroups: WholesalerGroupSummary[] = [];
 
   private routerSubscription?: Subscription;
 
@@ -189,6 +201,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           is_active: !item.is_deleted
         };
       });
+
+      if (navData['wholesalerGroups']) {
+        this.wholesalerGroups = navData['wholesalerGroups'];
+      }
 
       this.totalPrice = navData['totalPrice'] || 0;
       this.retailerInfo = navData['retailer'] || null;
@@ -378,7 +394,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         wholeseller: this.wholeSeller,
         selectedBranch: this.selectedBranch,
         transportData: this.transportData,
-        hasTransport: this.hasRideRequest
+        hasTransport: this.hasRideRequest,
+        wholesalerGroups: this.wholesalerGroups,
       }
     });
   }
@@ -436,10 +453,22 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   getWholesellerInfo(): string {
+    // If we have the grouped summary from cart, use it
+    if (this.wholesalerGroups.length === 1) {
+      const g = this.wholesalerGroups[0];
+      return `${g.wholesalerName} · ${g.branchName}`;
+    }
+
+    if (this.wholesalerGroups.length > 1) {
+      // Multiple wholesalers selected — show count
+      return `${this.wholesalerGroups.length} ${this.translate.instant('CHECKOUT.WHOLESALERS')}`;
+    }
+
+    // Fallback to the old single-wholesaler path
     if (!this.wholeSeller) {
       return this.translate.instant('CHECKOUT.DIRECT_ORDER');
     }
-    return `${this.wholeSeller.name || this.translate.instant('CHECKOUT.UNKNOWN_WHOLESELLER')}`;
+    return this.wholeSeller.name || this.translate.instant('CHECKOUT.UNKNOWN_WHOLESELLER');
   }
 
   handleImageError(event: Event): void {

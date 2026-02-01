@@ -23,7 +23,7 @@
         [(ngModel)]="selectedBranchId"
         (ionChange)="loadTodayStock()"
         [disabled]="isLoading || branches.length === 0"
-        aria-label="{{ 'STOCK_DASHBOARD.BRANCH_LABEL' | translate }}">
+       >
         <ion-select-option *ngFor="let branch of branches" [value]="branch.branch_id">
           {{ branch.shop_name }} - {{ branch.location_name }}, {{ branch.city_name }}
         </ion-select-option>
@@ -57,7 +57,7 @@
               fill="outline"
               (click)="openUpdateStock(item)"
               [disabled]="isLoading"
-              aria-label="{{ 'STOCK_DASHBOARD.UPDATE' | translate }} {{ item.product_name }}">
+              >
               {{ 'STOCK_DASHBOARD.UPDATE' | translate }}
             </ion-button>
           </ion-col>
@@ -78,8 +78,7 @@
     <ion-fab-button
       color="tertiary"
       (click)="openAddStock()"
-      [disabled]="isLoading || !selectedBranchId"
-      aria-label="{{ 'STOCK_DASHBOARD.ADD_STOCK' | translate }}">
+      [disabled]="isLoading || !selectedBranchId">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

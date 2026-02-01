@@ -1144,7 +1144,11 @@
     "ENTER_CODE": "Please enter a discount code",
     "DISCOUNT_APPLIED_MSG": "Discount of ₹{{amount}} applied successfully",
     "INVALID_CODE": "Invalid discount code",
-    "EMPTY_CART": "Your cart is empty"
+    "EMPTY_CART": "Your cart is empty",
+    "SELECT_ALL": "Select All",
+    "STORES": "Stores",
+    "SELECT_ITEMS_FIRST": "Please select at least one store to checkout",
+    "REMOVE_GROUP_MESSAGE": "Remove all {{count}} items from {{wholesaler}}?"
   },
 
     "CATEGORY": {
