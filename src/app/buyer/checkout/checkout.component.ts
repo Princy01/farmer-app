@@ -72,6 +72,10 @@ interface WholesalerGroupSummary {
   branchName: string;
   itemCount: number;
   subtotal: number;
+  items: CartItem[];
+  allocatedDiscount: number;
+  allocatedTax: number;
+  finalAmount: number;
 }
 
 
@@ -187,7 +191,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     if (navData['cartItems']) {
       this.cartItems = (navData['cartItems'] || []).map((item: any) => {
         const price = item.price_while_added ?? item.price ?? 0;
-
         return {
           selected_id: item.selected_id,
           product_id: item.product_id,
@@ -216,10 +219,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     }
 
     if (navData['transportData']) {
+      console.log('Transport data in navigation state:', navData['transportData']);
       this.transportData = navData['transportData'];
       this.hasRideRequest = navData['hasRideRequest'] || navData['hasTransport'] || false;
 
-      // Fix null safety issues
       if (this.transportData) {
         this.selectedDeliveryType = this.transportData.delivery_type;
         this.selectedUrgency = this.transportData.urgency;
@@ -234,8 +237,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       this.selectedBranch = navData['selectedBranch'];
     }
 
-    this.calculateRidePrice();
+
+    this.calculateGroupPricing();
   }
+
 
   private async checkAuthAndLoadBranches(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
@@ -349,6 +354,46 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     return branch.branch_id;
   }
 
+  private calculateGroupPricing(): void {
+    if (this.wholesalerGroups.length === 0) {
+      this.grandTotal = this.totalPrice - this.discount + this.estimatedRidePrice;
+      return;
+    }
+
+    // Total subtotal across all groups for proportional allocation
+    const totalSubtotal = this.wholesalerGroups.reduce((sum, g) => sum + g.subtotal, 0);
+
+    // Allocate discount proportionally to each group
+    for (const group of this.wholesalerGroups) {
+      const proportion = totalSubtotal > 0 ? group.subtotal / totalSubtotal : 0;
+
+      // Allocate discount based on proportion of subtotal
+      group.allocatedDiscount = Math.round(this.discount * proportion * 100) / 100;
+
+      // Tax calculation (adjust based on your tax rules)
+      group.allocatedTax = 0;  // TODO: implement tax logic if needed
+
+      // Final amount for this group's order (no delivery in per-order amounts)
+      group.finalAmount = group.subtotal - group.allocatedDiscount + group.allocatedTax;
+    }
+
+    // Grand total = sum of all order finals + transport cost
+    const ordersTotal = this.wholesalerGroups.reduce((sum, g) => sum + g.finalAmount, 0);
+    this.grandTotal = ordersTotal + this.estimatedRidePrice;
+
+    console.log('Group pricing calculated:', {
+      groups: this.wholesalerGroups.map(g => ({
+        wholesaler: g.wholesalerName,
+        subtotal: g.subtotal,
+        discount: g.allocatedDiscount,
+        final: g.finalAmount
+      })),
+      ordersTotal,
+      transportCost: this.estimatedRidePrice,
+      grandTotal: this.grandTotal
+    });
+  }
+
   calculateRidePrice(): void {
     if (this.hasRideRequest && this.transportData?.delivery_type && this.transportData?.distance) {
       const ratesPerKm: Record<string, number> = {
@@ -362,14 +407,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       this.estimatedRidePrice = 0;
     }
 
-    this.grandTotal = this.totalPrice - (this.discount || 0) + this.estimatedRidePrice;
-
-    console.log('Grand total calculated:', {
-      totalPrice: this.totalPrice,
-      discount: this.discount,
-      transportCost: this.estimatedRidePrice,
-      grandTotal: this.grandTotal
-    });
+    this.calculateGroupPricing();
   }
 
   arrangeRide(): void {
@@ -415,25 +453,26 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.cartItems.length === 0) {
-      this.showErrorAlert(this.translate.instant('CHECKOUT.EMPTY_CART_ERROR'));
+    if (this.wholesalerGroups.length === 0) { 
+      this.showErrorAlert(this.translate.instant('CHECKOUT.NO_ITEMS_ERROR'));
       return;
     }
 
+    // Ensure pricing is calculated
+    this.calculateGroupPricing();
+
     const orderData = {
-      items: this.cartItems,
-      retailer: this.retailerInfo,
+      wholesalerGroups: this.wholesalerGroups,  
       selectedBranch: this.selectedBranch,
       deliveryAddress: this.selectedBranch.address || '',
       deliveryPincode: this.selectedBranch.pincode || '',
-      totalPrice: this.totalPrice,
       discount: this.discount,
       grandTotal: this.grandTotal,
       hasTransport: this.hasRideRequest,
       transportData: this.transportData,
-      pickupCityId: this.selectedBranch.city_id,
-      pickupBranchId: this.selectedBranch.branch_id,
-      transporterCost: this.estimatedRidePrice
+      transporterCost: this.estimatedRidePrice,
+      retailer: this.retailerInfo,  
+      retailerBranchId: this.selectedBranch.branch_id
     };
 
     this.router.navigate(['/buyer/payment'], {

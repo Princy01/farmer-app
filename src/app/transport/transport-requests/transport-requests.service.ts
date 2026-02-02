@@ -46,6 +46,7 @@ export interface Order {
   actual_delivery_date?: string;
   cancellation_reason?: string;
   cancelled_by_user_id: number;
+  retailer_branch: Branch;
   items: OrderItem[];
 }
 
@@ -53,12 +54,14 @@ export interface TransportRequest {
   job_id: number;
   id: string;
   order_ids?: number[];
-  pickup_location: string;
-  dropoff_location: string;
-  pickup_city_id?: number;
-  dropoff_city_id?: number;
-  pickup_branch_id?: number;
-  dropoff_branch_id?: number;
+  // REMOVE these fields:
+  // pickup_location: string;
+  // dropoff_location: string;
+  // pickup_city_id?: number;
+  // dropoff_city_id?: number;
+  // pickup_branch_id?: number;
+  // dropoff_branch_id?: number;
+
   weight: number;
   distance: number;
   delivery_type: string;
@@ -95,7 +98,7 @@ export interface UpdateDriverStatusRequest {
 export class TransportRequestService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
@@ -116,20 +119,36 @@ export class TransportRequestService {
     return this.http.get<any>(url, { headers });
   }
 
-  acceptTransportRequest(jobId: number, vehicleId: number): Observable<{status: string}> {
+  getTransportRequestDetailed(cityIds: number[], branchIds: number[]): Observable<any> {
+    const headers = this.getAuthHeaders();
+    let url = `${this.apiUrl}/transportation/requests/transport-requests`;
+    if (cityIds.length > 0) {
+      const cityParams = cityIds.map(id => `city_ids=${id}`).join('&');
+      url += `?${cityParams}`;
+    }
+
+    if (branchIds.length > 0) {
+      const branchParams = branchIds.map(id => `branch_ids=${id}`).join('&');
+      url += cityIds.length > 0 ? `&${branchParams}` : `?${branchParams}`;
+    }
+
+    return this.http.get<any>(url, { headers });
+  }
+
+  acceptTransportRequest(jobId: number, vehicleId: number): Observable<{ status: string }> {
     const headers = this.getAuthHeaders();
     const body: AcceptJobRequest = {
       vehicle_id: vehicleId
     };
 
-    return this.http.post<{status: string}>(`${this.apiUrl}/transportation//driver/jobs/${jobId}/accept`, body, { headers });
+    return this.http.post<{ status: string }>(`${this.apiUrl}/transportation/driver/jobs/${jobId}/accept`, body, { headers });
   }
 
-  rejectTransportRequest(jobId: number): Observable<{status: string}> {
+  rejectTransportRequest(jobId: number): Observable<{ status: string }> {
     const headers = this.getAuthHeaders();
     const body: RejectJobRequest = {};
 
-    return this.http.post<{status: string}>(`${this.apiUrl}/transportation/driver/jobs/${jobId}/reject`, body, { headers });
+    return this.http.post<{ status: string }>(`${this.apiUrl}/transportation/driver/jobs/${jobId}/reject`, body, { headers });
   }
 
   getDriverStatus(): Observable<DriverStatusResponse> {
@@ -137,13 +156,13 @@ export class TransportRequestService {
     return this.http.get<DriverStatusResponse>(`${this.apiUrl}/transportation/driver/status`, { headers });
   }
 
-  updateDriverStatus(status: string): Observable<{message: string}> {
+  updateDriverStatus(status: string): Observable<{ message: string }> {
     const headers = this.getAuthHeaders();
     const body: UpdateDriverStatusRequest = {
       status: status
     };
 
-    return this.http.post<{message: string}>(`${this.apiUrl}/transportation/driver/status`, body, { headers });
+    return this.http.post<{ message: string }>(`${this.apiUrl}/transportation/driver/status`, body, { headers });
   }
 
   // Utility methods for working with the new data structure

@@ -248,7 +248,7 @@ export class LocationSelectionModalComponent implements OnInit, OnDestroy {
       await this.showToast('Please select at least one city or business branch', 'warning');
       return;
     }
-
+    console.log('Saving preferences:', this.selectedCities, this.selectedBranches);
     const preferences: LocationPreference = {
       cities: this.selectedCities,
       branches: this.selectedBranches

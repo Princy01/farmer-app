@@ -54,6 +54,8 @@ interface TransportData {
   distance: number;
   load_type: string;
   status: string;
+  urgency?: string;
+  base_price?: number;
 }
 
 @Component({
@@ -208,12 +210,17 @@ export class RideComponent implements OnInit {
         (!this.existingTransportData ||
           this.selectedTransportType !== this.existingTransportData.delivery_type)
       ) {
+        const basePrice = this.getBaseDeliveryCharge();
+        const urgency = this.selectedTransportType === 'priority' ? 'high' : 'standard';
+
         transportDataToPass = {
           delivery_type: this.selectedTransportType,
           distance: this.distance,
           load_type: 'general',
-          status: 'pending'
-        };
+          status: 'pending',
+          urgency: urgency,
+          base_price: basePrice
+        } as any;
       }
 
       this.router.navigate(['/buyer/checkout'], {
@@ -225,6 +232,62 @@ export class RideComponent implements OnInit {
       });
     } catch (error) {
       console.error('Error navigating back:', error);
+    }
+  }
+
+  async confirmTransportSelection(): Promise<void> {
+    if (!this.selectedTransportType) {
+      const alert = await this.alertController.create({
+        header: this.translate.instant('RIDE.ERROR_TITLE'),
+        message: this.translate.instant('RIDE.SELECT_TRANSPORT_TYPE'),
+        buttons: [this.translate.instant('COMMON.OK')]
+      });
+
+      await alert.present();
+      return;
+    }
+
+    const loading = await this.loadingController.create({
+      message: this.translate.instant('RIDE.CONFIRMING_SELECTION')
+    });
+
+    try {
+      await loading.present();
+
+      const basePrice = this.getBaseDeliveryCharge();
+      const urgency = this.selectedTransportType === 'priority' ? 'urgent' : 'normal';
+
+      const transportRequestData = {
+        delivery_type: this.selectedTransportType,
+        distance: this.distance,
+        load_type: 'general',
+        status: 'pending',
+        urgency: urgency,
+        base_price: basePrice
+      } as any;
+
+      console.log('Confirmed transport data:', transportRequestData);
+
+      await loading.dismiss();
+
+      await this.router.navigate(['/buyer/checkout'], {
+        state: {
+          ...this.checkoutData,
+          transportData: transportRequestData,
+          hasTransport: true
+        }
+      });
+    } catch (error) {
+      await loading.dismiss();
+      console.error('Error confirming transport selection:', error);
+
+      const errorAlert = await this.alertController.create({
+        header: this.translate.instant('RIDE.ERROR_TITLE'),
+        message: this.translate.instant('RIDE.CONFIRMATION_ERROR'),
+        buttons: [this.translate.instant('COMMON.OK')]
+      });
+
+      await errorAlert.present();
     }
   }
 
@@ -374,54 +437,4 @@ export class RideComponent implements OnInit {
     return this.translate.instant(times[this.selectedTransportType]);
   }
 
-  async confirmTransportSelection(): Promise<void> {
-    if (!this.selectedTransportType) {
-      const alert = await this.alertController.create({
-        header: this.translate.instant('RIDE.ERROR_TITLE'),
-        message: this.translate.instant('RIDE.SELECT_TRANSPORT_TYPE'),
-        buttons: [this.translate.instant('COMMON.OK')]
-      });
-
-      await alert.present();
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: this.translate.instant('RIDE.CONFIRMING_SELECTION')
-    });
-
-    try {
-      await loading.present();
-
-      const transportRequestData: TransportData = {
-        delivery_type: this.selectedTransportType,
-        distance: this.distance,
-        load_type: 'general',
-        status: 'pending'
-      };
-
-      console.log('Confirmed transport data:', transportRequestData);
-
-      await loading.dismiss();
-
-      await this.router.navigate(['/buyer/checkout'], {
-        state: {
-          ...this.checkoutData,
-          transportData: transportRequestData,
-          hasTransport: true
-        }
-      });
-    } catch (error) {
-      await loading.dismiss();
-      console.error('Error confirming transport selection:', error);
-
-      const errorAlert = await this.alertController.create({
-        header: this.translate.instant('RIDE.ERROR_TITLE'),
-        message: this.translate.instant('RIDE.CONFIRMATION_ERROR'),
-        buttons: [this.translate.instant('COMMON.OK')]
-      });
-
-      await errorAlert.present();
-    }
-  }
 }

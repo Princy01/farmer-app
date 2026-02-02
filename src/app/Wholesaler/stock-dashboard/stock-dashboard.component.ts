@@ -1,8 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ModalController, LoadingController, ToastController } from '@ionic/angular';
-import { IonFab, IonFabButton, IonIcon } from '@ionic/angular/standalone';
-
+import {  ModalController, LoadingController, ToastController } from '@ionic/angular/standalone';
+import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { StockService, ProductPriceData, BusinessBranchWithNames } from 'src/app/Wholesaler/services/stock.service';
@@ -23,7 +22,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   templateUrl: './stock-dashboard.component.html',
   styleUrls: ['./stock-dashboard.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe,IonFab, IonFabButton, IonIcon],
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
 })
 export class StockDashboardComponent implements OnInit, OnDestroy {
   /** Current stock data for selected branch */

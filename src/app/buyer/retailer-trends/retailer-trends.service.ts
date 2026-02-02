@@ -46,7 +46,7 @@ export class RetailerTrendsService {
 
   getAvailableProducts(): Observable<{ product_id: number; product_name: string; }[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<{ product_id: number; product_name: string; }[]>(`${this.apiUrl}/getAvailableProducts`, { headers })
+    return this.http.get<{ product_id: number; product_name: string; }[]>(`${this.apiUrl}/getAllProducts`, { headers })
       .pipe(
         catchError(error => {
           console.error('Get available products failed:', error);

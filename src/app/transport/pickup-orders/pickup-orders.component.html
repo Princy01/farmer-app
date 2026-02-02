@@ -16,7 +16,7 @@
         <ion-label>
           <h2>{{ job.pickup_location }} → {{ job.dropoff_location }}</h2>
           <p>{{ 'PICKUP_ORDERS.DELIVERY_DATE' | translate }}: {{ job.delivery_date | date }}</p>
-          <p>{{ 'PICKUP_ORDERS.STATUS' | translate }}: {{ job.job_status }}</p>
+          <p>{{ 'PICKUP_ORDERS.STATUS' | translate }}: {{ getStatusTitle(job.job_status) }}</p>
           <p>{{ 'PICKUP_ORDERS.BASE_PRICE' | translate }}: ₹{{ job.base_price }}</p>
         </ion-label>
       </ion-item>

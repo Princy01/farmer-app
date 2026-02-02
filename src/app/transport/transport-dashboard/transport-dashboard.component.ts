@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { addIcons } from 'ionicons';
-import { languageOutline, carOutline, timeOutline, checkmarkCircleOutline } from 'ionicons/icons'; 
+import { languageOutline, carOutline, timeOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { UpcomingDeliveriesService } from 'src/app/services/upcoming-deliveries.service';
 import { DeliveryService } from './delivery.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -152,5 +152,38 @@ export class TransportDashboardComponent implements OnInit {
         console.error('Error loading deliveries:', err);
       }
     });
+  }
+
+  getPickupLocations(orders: any[]): string {
+
+
+    const pickupLocations = new Set<string>();
+
+    orders.forEach((order: any) => {
+      if (order.pickup_branch && order.pickup_branch.branch_address) {
+        pickupLocations.add(order.pickup_branch.branch_address);
+      }
+    });
+    const prefix = pickupLocations.size === 1 ? '' : 'Multiple locations [ ';
+    const suffix = pickupLocations.size === 1 ? '' : ' ]';
+
+    return prefix + Array.from(pickupLocations).join(', ') + suffix || 'Multiple locations';
+  }
+
+  getDropoffLocation(orders: any[]): string {
+
+
+    // Use first order's delivery address
+    const firstOrder = orders[0];
+
+    // First try retailer_branch if it exists
+    if (firstOrder.dropoff_branch &&
+      Object.keys(firstOrder.dropoff_branch).length > 0 &&
+      firstOrder.dropoff_branch.branch_address) {
+      return firstOrder.dropoff_branch.branch_address;
+    }
+
+    // Otherwise use delivery_address
+    return firstOrder.delivery_address || 'Address not available';
   }
 }

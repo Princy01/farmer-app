@@ -18,6 +18,8 @@ import {
   checkmarkDoneCircle,
   closeCircleOutline,
   helpOutline,
+  cardOutline,
+  arrowUndoOutline,
 } from 'ionicons/icons';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -71,6 +73,8 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       checkmarkDoneCircle,
       closeCircleOutline,
       helpOutline,
+      cardOutline,
+      arrowUndoOutline,
     });
   }
 
@@ -106,8 +110,18 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
           }
 
           // Sort newest first
-          allOrders.sort((a, b) => new Date(b.placedAt).getTime() - new Date(a.placedAt).getTime());
+          allOrders.sort((a, b) => {
+            const dateA = new Date(a.placedAt).getTime();
+            const dateB = new Date(b.placedAt).getTime();
 
+            // First, compare by date
+            if (dateB !== dateA) {
+              return dateB - dateA;
+            }
+
+            // If dates are equal, compare by order ID
+            return b.rawOrderId - a.rawOrderId;
+          });
           this.orders = allOrders;
           this.filterOrders(this.selectedFilter);
           this.isLoading = false;
@@ -141,20 +155,23 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       isCurrent,
     };
   }
-
   private getStatusFromCode(code: number | null): string {
-    if (code === null) return 'Cancelled';
+    if (code === null) return 'Unknown';
 
     const statusMap: { [key: number]: string } = {
-      1: 'Placed',
+      1: 'Processing',
       2: 'Confirmed',
-      3: 'Packed',
-      4: 'Shipped',
-      5: 'In Transit',
-      6: 'Delivered',
+      3: 'Payment',
+      4: 'Rejected',
+      5: 'Successful',
+      6: 'Cancellation',
+      7: 'Returned',
+      8: 'Picked Up',
+      9: 'Return',
+      10: 'Rejected',
     };
 
-    return statusMap[code] || 'Cancelled';
+    return statusMap[code] || 'Unknown';
   }
 
   onSegmentChange(event: any): void {
@@ -169,7 +186,21 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     if (filter === 'all') {
       this.filteredOrders = [...this.orders];
     } else if (filter === 'active') {
-      this.filteredOrders = this.orders.filter((o) => o.isCurrent);
+      // Active orders: Processing, Confirmed, Payment, Picked Up
+      this.filteredOrders = this.orders.filter((o) =>
+        ['Processing', 'Confirmed', 'Payment', 'Picked Up'].includes(o.status)
+      );
+    } else if (filter === 'successful') {
+      this.filteredOrders = this.orders.filter((o) => o.status === 'Successful');
+    } else if (filter === 'cancelled') {
+      // Cancelled/Rejected orders
+      this.filteredOrders = this.orders.filter((o) =>
+        ['Rejected', 'Cancellation'].includes(o.status)
+      );
+    } else if (filter === 'returned') {
+      this.filteredOrders = this.orders.filter((o) =>
+        ['Returned', 'Return'].includes(o.status)
+      );
     } else {
       this.filteredOrders = this.orders.filter(
         (o) => o.status.toLowerCase() === filter.toLowerCase()
@@ -179,28 +210,32 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
 
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
-      Placed: 'medium',
-      Confirmed: 'primary',
-      Packed: 'secondary',
-      Shipped: 'tertiary',
-      'In Transit': 'warning',
-      'Out for Delivery': 'warning',
-      Delivered: 'success',
-      Cancelled: 'danger',
+      'Processing': 'warning',
+      'Confirmed': 'primary',
+      'Payment': 'secondary',
+      'Rejected': 'danger',
+      'Successful': 'success',
+      'Cancellation': 'danger',
+      'Returned': 'medium',
+      'Picked Up': 'tertiary',
+      'Return': 'medium',
+      'Unknown': 'medium',
     };
     return colors[status] || 'medium';
   }
 
   getStatusIcon(status: string): string {
     const icons: { [key: string]: string } = {
-      Placed: 'time-outline',
-      Confirmed: 'checkmark-circle-outline',
-      Packed: 'cube-outline',
-      Shipped: 'airplane-outline',
-      'In Transit': 'car-outline',
-      'Out for Delivery': 'bicycle-outline',
-      Delivered: 'checkmark-done-circle',
-      Cancelled: 'close-circle-outline',
+      'Processing': 'time-outline',
+      'Confirmed': 'checkmark-circle-outline',
+      'Payment': 'card-outline',
+      'Rejected': 'close-circle-outline',
+      'Successful': 'checkmark-done-circle',
+      'Cancellation': 'close-circle-outline',
+      'Returned': 'arrow-undo-outline',
+      'Picked Up': 'cube-outline',
+      'Return': 'arrow-undo-outline',
+      'Unknown': 'help-outline',
     };
     return icons[status] || 'help-outline';
   }
@@ -217,14 +252,16 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
 
   getOrderProgress(status: string): number {
     const progress: { [key: string]: number } = {
-      Placed: 0.2,
-      Confirmed: 0.4,
-      Packed: 0.6,
-      Shipped: 0.7,
-      'In Transit': 0.8,
-      'Out for Delivery': 0.9,
-      Delivered: 1.0,
-      Cancelled: 0,
+      'Processing': 0.2,
+      'Confirmed': 0.4,
+      'Payment': 0.6,
+      'Picked Up': 0.8,
+      'Successful': 1.0,
+      'Rejected': 0,
+      'Cancellation': 0,
+      'Returned': 0.5,
+      'Return': 0.5,
+      'Unknown': 0,
     };
     return progress[status] || 0;
   }

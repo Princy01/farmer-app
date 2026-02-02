@@ -15,7 +15,11 @@ import {
   cube,
   eyeOff,
   checkmarkCircle,
-  eyeOutline
+  eyeOutline,
+  calendarOutline,
+  locationOutline,
+  cashOutline,
+  checkmarkDoneCircle
 } from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WholesalerOrderService, WholesalerOrderSummary, WholesalerOrderDetails, OrderStatus } from './pickup-orders.service';
@@ -24,10 +28,9 @@ interface PickupOrder extends WholesalerOrderSummary {
   driverName?: string;
   driverPhone?: string;
   totalWeight: string;
-  status: 'pending' | 'otp_generated' | 'picked_up';
   otp?: string;
+  canGenerateOtp?: boolean;
 }
-
 @Component({
   selector: 'app-wholesaler-pickup-orders',
   templateUrl: './pickup-orders.component.html',
@@ -45,6 +48,9 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
   selectedStatuses: number[] = [];
   isLoading = false;
   hasError = false;
+
+  selectedOrder: PickupOrder | null = null;
+  private readonly OTP_ALLOWED_STATUSES = [1, 2, 3];
 
   private destroy$ = new Subject<void>();
 
@@ -65,7 +71,11 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
       cube,
       eyeOff,
       checkmarkCircle,
-      eyeOutline
+      eyeOutline,
+      calendarOutline,
+      locationOutline,
+      cashOutline,
+      checkmarkDoneCircle
     });
   }
 
@@ -146,9 +156,9 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
             this.orders = data.map(order => ({
               ...order,
               totalWeight: `${order.total_quantity} ${this.translate.instant('PICKUP_ORDERS.KG')}`,
-              status: this.mapStatus(order.order_status_id),
               driverName: this.translate.instant('PICKUP_ORDERS.NOT_ASSIGNED'),
-              driverPhone: this.translate.instant('PICKUP_ORDERS.NOT_ASSIGNED')
+              driverPhone: this.translate.instant('PICKUP_ORDERS.NOT_ASSIGNED'),
+              canGenerateOtp: this.OTP_ALLOWED_STATUSES.includes(order.order_status_id)
             }));
             this.groupOrdersByDate();
             await loading.dismiss();
@@ -176,19 +186,6 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Maps order status ID to internal status string
-   * @param statusId The order status ID from backend
-   * @returns The mapped status string
-   */
-  private mapStatus(statusId: number): 'pending' | 'otp_generated' | 'picked_up' {
-    switch (statusId) {
-      case 1: return 'pending';
-      case 2: return 'otp_generated';
-      case 3: return 'picked_up';
-      default: return 'pending';
-    }
-  }
 
   /**
    * Groups orders by their order date
@@ -202,11 +199,17 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
       }
       groups[date].push(order);
     });
+
     this.groupedOrders = Object.keys(groups)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+      .sort((a, b) => {
+        const dateA = new Date(a).getTime();
+        const dateB = new Date(b).getTime();
+        if (dateB !== dateA) return dateB - dateA;
+        return groups[b][0].order_id - groups[a][0].order_id;
+      })
       .map(date => ({
         date,
-        orders: groups[date]
+        orders: groups[date].sort((a, b) => b.order_id - a.order_id)
       }));
   }
 
@@ -259,6 +262,7 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
         .subscribe({
           next: async (data) => {
             this.selectedOrderDetails = data;
+            this.selectedOrder = order;
             this.viewMode = 'details';
             await loading.dismiss();
           },
@@ -283,13 +287,25 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
   goBackToList() {
     this.viewMode = 'list';
     this.selectedOrderDetails = null;
+    this.selectedOrder = null;
   }
 
   /**
    * Generates a pickup OTP for the specified order
    * @param order The order to generate OTP for
    */
-  async generateOtp(order: PickupOrder) {
+  async generateOtp(order: PickupOrder, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    if (!order.canGenerateOtp) {
+      await this.showToast(
+        this.translate.instant('PICKUP_ORDERS.ERRORS.CANNOT_GENERATE_OTP'),
+        'warning'
+      );
+      return;
+    }
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('PICKUP_ORDERS.GENERATING_OTP'),
       spinner: 'circular'
@@ -303,7 +319,7 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
         .subscribe({
           next: async (data) => {
             order.otp = data.otp_code;
-            order.status = 'otp_generated';
+            order.order_status = 'otp_generated';
             this.otpVisible[order.order_id.toString()] = true;
             await loading.dismiss();
             await this.showToast(
@@ -326,11 +342,23 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
     }
   }
 
+  getStatusColor(statusId: number): string {
+    const colors: { [key: number]: string } = {
+      1: 'warning', 2: 'primary', 3: 'secondary', 4: 'danger',
+      5: 'success', 6: 'danger', 7: 'medium', 8: 'tertiary',
+      9: 'medium', 10: 'danger'
+    };
+    return colors[statusId] || 'medium';
+  }
+
   /**
    * Toggles OTP visibility for a specific order
    * @param order The order to toggle OTP visibility for
    */
-  toggleOtpVisibility(order: PickupOrder) {
+  toggleOtpVisibility(order: PickupOrder, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
     const orderId = order.order_id.toString();
     this.otpVisible[orderId] = !this.otpVisible[orderId];
   }
@@ -348,7 +376,7 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
    * @param message The message to display
    * @param color The color of the toast (success, danger, medium)
    */
-  private async showToast(message: string, color: 'success' | 'danger' | 'medium' = 'medium') {
+  private async showToast(message: string, color: 'success' | 'danger' | 'medium' | 'warning' = 'medium') {
     const toast = await this.toastCtrl.create({
       message,
       duration: 3000,

@@ -12,7 +12,7 @@ export interface Item {
   tax_amount: number;
   wholeseller_id: number;
   product_name: string;
-  unit_name: string; 
+  unit_name: string;
   branch_id?: number;
 }
 
@@ -60,16 +60,44 @@ export interface RetailerOrderResponse {
   items: Item[];
 }
 
+export interface OrderGroup {
+  wholeseller_id: number;
+  branch_id: number;
+  items: Item[];
+  total_order_amount: number;
+  discount_amount: number;
+  tax_amount: number;
+  final_amount: number;
+}
+
+export interface CreateBatchOrderRequest {
+  date_of_order: string;
+  order_status: number;
+  delivery_address: string;
+  order_groups: OrderGroup[];
+  delivery_amount: number;
+  retailer_branch_id: number;
+}
+
+export interface CreateBatchOrderResponse {
+  status: string;
+  message: string;
+  order_ids: number[];
+  orders_total: number;
+  delivery_cost: number;
+  grand_total: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  createOrder(orderData: CreateOrderRequest): Observable<CreateOrderResponse> {
-    return this.http.post<CreateOrderResponse>(
+  createOrder(orderData: CreateBatchOrderRequest): Observable<CreateBatchOrderResponse> {
+    return this.http.post<CreateBatchOrderResponse>(
       `${this.apiUrl}/CreateRetailerOrder`,
       orderData
     );

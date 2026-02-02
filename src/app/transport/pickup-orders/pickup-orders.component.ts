@@ -28,6 +28,27 @@ export class PickupOrdersComponent implements OnInit {
     private translate: TranslateService
   ) { }
 
+  getStatusTitle(status: string): string {
+    switch (status) {
+      // case 'accepted':
+      //   return this.translate.instant('PICKUP_ORDERS.STATUS_ACCEPTED') || 'Accepted';
+      // case 'picked_up':
+      //   return this.translate.instant('PICKUP_ORDERS.STATUS_PICKED_UP') || 'Picked Up';
+      // case 'partially_picked':
+      //   return this.translate.instant('PICKUP_ORDERS.STATUS_PARTIALLY_PICKED') || 'Partially Picked';
+      // default:
+      //   return this.translate.instant('PICKUP_ORDERS.STATUS_UNKNOWN') || 'Unknown';
+      case 'accepted':
+        return 'Accepted';
+      case 'picked_up':
+        return 'Picked Up';
+      case 'partially_picked':
+        return 'Partially Picked';
+      default:
+        return 'Unknown';
+    }
+  }
+
   ngOnInit() {
     this.fetchJobs();
   }

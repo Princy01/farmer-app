@@ -31,8 +31,41 @@ export class RetailerTrendsComponent implements OnInit {
   ];
 
   filteredProducts: Product[] = [];
-  chartOptions: any;
-  priceData: PriceComparisonRow[] = [];  // Store API response
+  chartOptions: any = {
+    series: [],
+    chart: {
+      type: 'bar',
+      height: 350,
+      stacked: false,
+      toolbar: { show: false },
+      background: '#fff'
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        borderRadius: 6,
+        columnWidth: '50%'
+      }
+    },
+    colors: ['#FF6B6B', '#4ECDC4', '#FFD166'],
+    xaxis: {
+      categories: []
+    },
+    yaxis: {
+      title: {
+        text: 'Price (₹/kg)'
+      },
+      labels: {
+        formatter: (val: number) => `₹${val}`
+      }
+    },
+    tooltip: {
+      y: {
+        formatter: (val: number) => `₹${val}`
+      }
+    }
+  };
+   priceData: PriceComparisonRow[] = [];  // Store API response
 
   constructor(private navController: NavController, private retailerService: RetailerTrendsService) {
     addIcons({ chevronBackOutline });

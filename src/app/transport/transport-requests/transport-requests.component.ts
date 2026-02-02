@@ -205,6 +205,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   private loadTransportRequests() {
     // Only load requests if driver is available
+    console.log(`Driver availability: ${this.isDriverAvailable}`);
     if (!this.isDriverAvailable) {
       this.transportRequests = [];
       this.filteredRequests = [];
@@ -215,14 +216,22 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     // Use the first city name if available (backend accepts single city parameter)
     let cityName: string | undefined = undefined;
+    let cityIds: number[] = [];
     if (preferences.cities.length > 0) {
       const cityId = preferences.cities[0];
       cityName = this.citiesCache.get(cityId);
+      cityIds.push(cityId);
     }
 
-    const sub = this.transportRequestService.getTransportRequests(cityName).subscribe({
+    let branchIds: number[] = [];
+    if (preferences.branches.length > 0) {
+      branchIds = preferences.branches;
+    }
+
+    console.log(cityIds, branchIds);
+    const sub = this.transportRequestService.getTransportRequestDetailed(cityIds, branchIds).subscribe({
       next: (response) => {
-        this.transportRequests = response || [];
+        this.transportRequests = response.delivery_requests || [];
         this.initializeRequestVisibility();
         this.applyFilters();
         console.log(`Loaded ${this.transportRequests.length} transport requests`);
@@ -279,8 +288,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
 
     let orderDetails = `${this.translate.instant('TRANSPORT_REQUESTS.JOB_ID')}${request.job_id}\n\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.PICKUP')}: ${request.pickup_location}\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.DELIVERY')}: ${request.dropoff_location}\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.PICKUP')}: ${this.getPickupLocations(request)}\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.DELIVERY')}: ${this.getDropoffLocation(request)}\n`;
     orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.WEIGHT')}: ${request.weight}kg\n`;
     orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.DISTANCE')}: ${request.distance}km\n`;
     orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.BASE_PRICE')}: ₹${request.base_price}\n`;
@@ -345,8 +354,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       header: this.translate.instant('TRANSPORT_REQUESTS.REJECT_HEADER'),
       message: this.translate.instant('TRANSPORT_REQUESTS.REJECT_CONFIRM', {
         jobId: request.job_id,
-        pickup: request.pickup_location,
-        delivery: request.dropoff_location
+        pickup: this.getPickupLocations(request),
+        delivery: this.getDropoffLocation(request)
       }),
       buttons: [
         { text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'), role: 'cancel' },
@@ -354,13 +363,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           text: this.translate.instant('TRANSPORT_REQUESTS.REJECT'),
           role: 'destructive',
           handler: async () => {
-            // Handle rejection on frontend only - don't burden backend
             this.rejectedRequests.add(request.job_id);
             this.requestVisibilityMap.delete(request.job_id);
-
-            // Store rejection in localStorage for persistence
             this.saveRejectedRequest(request.job_id);
-
             this.applyFilters();
             await this.showToast(
               this.translate.instant('TRANSPORT_REQUESTS.REJECTED_SUCCESS'),
@@ -463,6 +468,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     //   filteredOrders = filteredOrders.filter(order => order.weight > 500);
     // }
 
+    console.log(`Filtered down to ${filteredOrders.length} requests`);
     this.filteredRequests = filteredOrders;
 
     if (this.sortOption) {
@@ -665,5 +671,46 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       }
     });
     this.subscription.add(sub);
+  }
+
+  // Get unique pickup locations from all order items
+  getPickupLocations(request: TransportRequest): string {
+    if (!request.orders || request.orders.length === 0) {
+      return 'No pickup info';
+    }
+
+    const pickupLocations = new Set<string>();
+
+    request.orders.forEach(order => {
+      if (order.items && order.items.length > 0) {
+        order.items.forEach(item => {
+          if (item.branch && item.branch.branch_address) {
+            pickupLocations.add(item.branch.branch_address);
+          }
+        });
+      }
+    });
+
+    return Array.from(pickupLocations).join(', ') || 'Multiple locations';
+  }
+
+  // Get dropoff location from retailer branch or delivery address
+  getDropoffLocation(request: TransportRequest): string {
+    if (!request.orders || request.orders.length === 0) {
+      return 'No delivery info';
+    }
+
+    // Use first order's delivery address
+    const firstOrder = request.orders[0];
+
+    // First try retailer_branch if it exists
+    if (firstOrder.retailer_branch &&
+      Object.keys(firstOrder.retailer_branch).length > 0 &&
+      firstOrder.retailer_branch.branch_address) {
+      return firstOrder.retailer_branch.branch_address;
+    }
+
+    // Otherwise use delivery_address
+    return firstOrder.delivery_address || 'Address not available';
   }
 }

@@ -125,8 +125,11 @@ export class SalesTrendsComponent implements OnInit, OnDestroy {
 
   private async hideLoading() {
     this.isLoading = false;
+    console.log(this.currentLoading)
     if (this.currentLoading) {
+      console.log('Dismissing loader'); 
       await this.currentLoading.dismiss();
+      console.log('Loader dismissed');
       this.currentLoading = null;
     }
   }

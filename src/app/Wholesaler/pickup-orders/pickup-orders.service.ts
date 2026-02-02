@@ -48,6 +48,7 @@ export interface WholesalerOrderDetails {
   actual_delivery_date?: string;
   created_at: string;
   updated_at: string;
+  otp?: string;
   items: WholesalerOrderItem[];
 }
 

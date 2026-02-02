@@ -3,11 +3,8 @@
   <div class="availability-header">
     <div class="availability-container">
       <div class="availability-info">
-        <ion-icon
-          [name]="isDriverAvailable ? 'checkmark-circle' : 'close-circle'"
-          [color]="isDriverAvailable ? 'success' : 'medium'"
-          class="availability-icon"
-        ></ion-icon>
+        <ion-icon [name]="isDriverAvailable ? 'checkmark-circle' : 'close-circle'"
+          [color]="isDriverAvailable ? 'success' : 'medium'" class="availability-icon"></ion-icon>
         <div class="availability-text">
           <h3>{{ 'TRANSPORT_REQUESTS.AVAILABILITY_STATUS' | translate }}</h3>
           <p class="status-label" [class.available]="isDriverAvailable" [class.unavailable]="!isDriverAvailable">
@@ -15,13 +12,8 @@
           </p>
         </div>
       </div>
-      <ion-toggle
-        [checked]="isDriverAvailable"
-        (ionChange)="toggleDriverAvailability($event)"
-        [disabled]="isLoadingStatus"
-        color="success"
-        class="availability-toggle"
-      ></ion-toggle>
+      <ion-toggle [checked]="isDriverAvailable" (ionChange)="toggleDriverAvailability($event)"
+        [disabled]="isLoadingStatus" color="success" class="availability-toggle"></ion-toggle>
     </div>
     <div class="availability-divider"></div>
   </div>
@@ -33,14 +25,10 @@
         <h3>{{ 'TRANSPORT_REQUESTS.SERVICE_AREAS' | translate }}</h3>
         <p class="location-summary">{{locationSummary}}</p>
       </div>
-      <ion-button
-        fill="clear"
-        size="small"
-        (click)="openLocationPreferences()"
-        class="preferences-button"
-      >
+      <ion-button fill="clear" size="small" (click)="openLocationPreferences()" class="preferences-button">
         <ion-icon name="map-outline" slot="start"></ion-icon>
-        {{ hasLocationPreferences ? ('TRANSPORT_REQUESTS.CHANGE' | translate) : ('TRANSPORT_REQUESTS.SELECT' | translate) }}
+        {{ hasLocationPreferences ? ('TRANSPORT_REQUESTS.CHANGE' | translate) : ('TRANSPORT_REQUESTS.SELECT' |
+        translate) }}
       </ion-button>
     </div>
     <div class="preference-divider"></div>
@@ -119,7 +107,7 @@
               <ion-icon name="location-outline" class="location-icon pickup-icon"></ion-icon>
               <div class="location-info">
                 <span class="location-label">{{ 'TRANSPORT_REQUESTS.PICKUP' | translate }}</span>
-                <p class="location-address">{{ request.pickup_location }}</p>
+                <p class="location-address">{{ getPickupLocations(request) }}</p>
               </div>
             </div>
 
@@ -127,7 +115,7 @@
               <ion-icon name="flag-outline" class="location-icon delivery-icon"></ion-icon>
               <div class="location-info">
                 <span class="location-label">{{ 'TRANSPORT_REQUESTS.DELIVERY' | translate }}</span>
-                <p class="location-address">{{ request.dropoff_location }}</p>
+                <p class="location-address">{{ getDropoffLocation(request) }}</p>
               </div>
             </div>
           </div>
@@ -201,12 +189,7 @@
 
           <!-- Compact Order Preview Button -->
           <div class="order-preview-compact" *ngIf="hasOrders(request) && request.orders!.length > 0">
-            <ion-button
-              fill="clear"
-              size="small"
-              class="view-orders-button"
-              (click)="openOrderDetailsModal(request)"
-            >
+            <ion-button fill="clear" size="small" class="view-orders-button" (click)="openOrderDetailsModal(request)">
               <ion-icon name="list-outline" slot="start"></ion-icon>
               {{ 'TRANSPORT_REQUESTS.VIEW_ORDER_ITEMS' | translate }} ({{ request.orders!.length }})
             </ion-button>

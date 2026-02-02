@@ -1414,6 +1414,7 @@
     "STATUS_IN_TRANSIT": "In Transit",
     "STATUS_DELIVERED": "Delivered",
     "STATUS_CANCELLED": "Cancelled"
+
   },
 
   "RETAILER_ORDER_HISTORY": {
@@ -1424,7 +1425,9 @@
     "FILTER_ALL": "All",
     "FILTER_ACTIVE": "Active",
     "FILTER_DELIVERED": "Delivered",
+    "FILTER_SUCCESSFUL": "Successful",
     "FILTER_CANCELLED": "Cancelled",
+    "FILTER_RETURNED": "Returned",
     "TOTAL_AMOUNT": "Total Amount",
     "DELIVERED_ON": "Delivered on {{date}}",
     "NO_ORDERS_TITLE": "No Orders Found",

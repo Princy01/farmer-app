@@ -65,7 +65,7 @@ export class CartComponent implements OnInit, OnDestroy {
   selectedDate: string;
 
   // Feature flag: allow multiple selection
-  allowMultipleSelection = false;
+  allowMultipleSelection = true;
 
   // Derived totals across all selected groups
   selectedSubtotal = 0;
@@ -206,22 +206,22 @@ export class CartComponent implements OnInit, OnDestroy {
       }
 
       const group = map.get(key)!;
-        group.items.push(item);
-        group.subtotal += item.price * item.quantity;
-      }
-
-      this.wholesalerGroups = Array.from(map.values());
-
-      // If no group is selected and single-select mode, select the first one
-      if (!this.allowMultipleSelection && this.wholesalerGroups.length > 0) {
-        const hasSelection = this.wholesalerGroups.some(g => g.isSelected);
-        if (!hasSelection) {
-          this.wholesalerGroups[0].isSelected = true;
-        }
-      }
-
-      this.recalcSelectedTotals();
+      group.items.push(item);
+      group.subtotal += item.price * item.quantity;
     }
+
+    this.wholesalerGroups = Array.from(map.values());
+
+    // If no group is selected and single-select mode, select the first one
+    if (!this.allowMultipleSelection && this.wholesalerGroups.length > 0) {
+      const hasSelection = this.wholesalerGroups.some(g => g.isSelected);
+      if (!hasSelection) {
+        this.wholesalerGroups[0].isSelected = true;
+      }
+    }
+
+    this.recalcSelectedTotals();
+  }
 
   private groupKey(wholesalerId: number, branchId: number): string {
     return `${wholesalerId}_${branchId}`;
@@ -403,7 +403,6 @@ export class CartComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ─── Checkout — sends only selected groups ────────────────────────────────
   async checkout(): Promise<void> {
     const selected = this.wholesalerGroups.filter((g: WholesalerGroup) => g.isSelected);
 
@@ -412,22 +411,21 @@ export class CartComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Flatten selected groups back into items for the existing checkout flow
-
     const selectedItems: CartItem[] = selected.flatMap((g: WholesalerGroup) => g.items);
 
     this.router.navigate(['/buyer/checkout'], {
       state: {
         cartItems: selectedItems,
         discount: this.discount,
-        totalPrice: this.selectedSubtotal - this.discount,
+        totalPrice: this.selectedSubtotal,  
         wholesalerGroups: selected.map((g: WholesalerGroup) => ({
           wholesalerId: g.wholesalerId,
           branchId: g.branchId,
           wholesalerName: g.wholesalerName,
           branchName: g.branchName,
           itemCount: g.items.length,
-          subtotal: g.subtotal
+          subtotal: g.subtotal,
+          items: g.items 
         }))
       }
     });

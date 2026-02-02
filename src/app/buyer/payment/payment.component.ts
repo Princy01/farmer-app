@@ -200,63 +200,63 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   private async handleOrderCreation(orderData: any): Promise<any> {
     try {
-      console.log('Creating order with data:', orderData);
+      console.log('Creating batch order with data:', orderData);
 
-      // Validate order data
-      if (!orderData?.items || orderData.items.length === 0) {
+      // Validate
+      if (!orderData?.wholesalerGroups || orderData.wholesalerGroups.length === 0) {
         throw new Error(this.translate.instant('PAYMENT.ERROR_NO_ITEMS'));
       }
 
-      // Map orderData to CreateOrderRequest
-      const items: Item[] = orderData.items.map((item: any) => ({
-        selected_id: item.selected_id,
-        product_id: item.product_id ?? item.productId,
-        quantity: item.quantity,
-        unit_id: item.unit_id ?? item.unitId ?? 1,
-        price: item.price ?? item.price_while_added ?? item.latest_wholesaler_price ?? 0,
-        discount_amount: item.discount_amount ?? item.discountAmount ?? 0,
-        tax_amount: item.tax_amount ?? item.taxAmount ?? 0,
-        wholeseller_id: item.wholeseller_id ?? item.wholesaler_id ?? item.wholesellerId ?? item.wholesalerId,
-        branch_id: item.branch_id ?? item.branchId ?? undefined,
+      const orderGroups = orderData.wholesalerGroups.map((group: any) => ({
+        wholeseller_id: group.wholesalerId,
+        branch_id: group.branchId,
+        items: group.items.map((item: any) => ({
+          selected_id: item.selected_id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          unit_id: item.unit_id,
+          price: item.price ?? item.latest_wholesaler_price ?? 0,
+          discount_amount: 0,  // per-item discount (usually 0, group discount is at group level)
+          tax_amount: 0,       // per-item tax (usually 0, group tax is at group level)
+          wholeseller_id: group.wholesalerId,
+          branch_id: group.branchId,
+        })),
+        total_order_amount: group.subtotal,
+        discount_amount: group.allocatedDiscount ?? 0,
+        tax_amount: group.allocatedTax ?? 0,
+        final_amount: group.finalAmount,
       }));
 
-      // Calculate totals as backend expects them
-      let total_order_amount = 0, discount_amount = 0, tax_amount = 0, final_amount = 0;
-      for (const item of items) {
-        total_order_amount += item.quantity * item.price;
-        discount_amount += item.discount_amount;
-        tax_amount += item.tax_amount;
-        final_amount += (item.quantity * item.price) - item.discount_amount + item.tax_amount;
-      }
-
-      const delivery_amount = orderData.transporterCost || 0;
-      final_amount += delivery_amount;
-
-      const createOrderRequest: CreateOrderRequest = {
+      const batchRequest = {
         date_of_order: new Date().toISOString().split('T')[0],
         order_status: 1,
         delivery_address: orderData.deliveryAddress,
-        items: items,
-        retailer_id: orderData.retailer?.id ?? undefined,
-        wholeseller_id: undefined, // Not used for grouped orders
-        total_order_amount: total_order_amount || 0,
-        discount_amount: discount_amount || 0,
-        tax_amount: tax_amount || 0,
-        final_amount: final_amount || 0,
-        delivery_amount: delivery_amount || 0
+        retailer_branch_id: orderData.retailerBranchId,
+        order_groups: orderGroups,
+        delivery_amount: orderData.transporterCost ?? 0,
       };
 
-      const response = await this.orderService.createOrder(createOrderRequest).toPromise();
+      console.log('Batch order request:', batchRequest);
+
+      // Call batch endpoint
+      const response = await this.orderService.createOrder(batchRequest).toPromise();
+
       if (!response || !response.order_ids || response.order_ids.length === 0) {
         throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
       }
+
+      console.log('Batch order response:', response);
+
       const orderIds = response.order_ids;
 
-      // Update orderData with orderIds
+      // Update orderData with response
       const updatedOrderData = {
         ...orderData,
         orderIds: orderIds,
-        orderId: orderIds[0]
+        orderId: orderIds[0],
+        ordersTotal: response.orders_total,
+        deliveryCost: response.delivery_cost,
+        grandTotal: response.grand_total,
       };
 
       // If transport is selected, create transport job
@@ -265,6 +265,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       }
 
       return updatedOrderData;
+
     } catch (error: any) {
       console.error('Order creation error:', error);
       throw error;
@@ -569,6 +570,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
         totalPrice: this.orderData?.total_order_amount || 0,
         discount: this.orderData?.discount_amount || 0,
         retailer: this.orderData?.retailer,
+        retailerBranchId: this.orderData?.retailerBranchId,
         wholeseller: { id: this.orderData?.wholeseller_id },
         selectedBranch: this.orderData?.selectedBranch,
         transportData: this.transportInfo,

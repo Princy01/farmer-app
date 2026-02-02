@@ -14,7 +14,7 @@
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
     <ion-skeleton-text animated style="width: 100%; height: 140px; border-radius: 16px; margin-bottom: 16px;"
-                       *ngFor="let item of [1,2,3,4]"></ion-skeleton-text>
+      *ngFor="let item of [1,2,3,4]"></ion-skeleton-text>
   </div>
 
   <!-- Error State -->
@@ -36,11 +36,14 @@
       <ion-segment-button value="active">
         <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_ACTIVE' | translate }}</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="delivered">
-        <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_DELIVERED' | translate }}</ion-label>
+      <ion-segment-button value="successful">
+        <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_SUCCESSFUL' | translate }}</ion-label>
       </ion-segment-button>
       <ion-segment-button value="cancelled">
         <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_CANCELLED' | translate }}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="returned">
+        <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_RETURNED' | translate }}</ion-label>
       </ion-segment-button>
     </ion-segment>
   </div>
@@ -48,10 +51,7 @@
   <!-- Orders List -->
   <div class="orders-container" *ngIf="!isLoading && !hasError">
     <div class="orders-grid" *ngIf="filteredOrders.length > 0">
-      <div
-        *ngFor="let order of filteredOrders"
-        class="modern-order-card"
-        (click)="onOrderClick(order)">
+      <div *ngFor="let order of filteredOrders" class="modern-order-card" (click)="onOrderClick(order)">
 
         <!-- Order Header -->
         <div class="order-header">
@@ -89,7 +89,8 @@
           <!-- Actual Delivery Date (if delivered) -->
           <div class="delivery-info" *ngIf="order.actualDeliveryDate">
             <ion-icon name="checkmark-circle" color="success"></ion-icon>
-            <span>{{ 'RETAILER_ORDER_HISTORY.DELIVERED_ON' | translate: { date: (order.actualDeliveryDate | date: 'MMM dd, yyyy') } }}</span>
+            <span>{{ 'RETAILER_ORDER_HISTORY.DELIVERED_ON' | translate: { date: (order.actualDeliveryDate | date: 'MMM
+              dd, yyyy') } }}</span>
           </div>
         </div>
       </div>
@@ -102,11 +103,7 @@
       </div>
       <h3>{{ 'RETAILER_ORDER_HISTORY.NO_ORDERS_TITLE' | translate }}</h3>
       <p>{{ getNoOrdersMessage(selectedFilter) }}</p>
-      <ion-button
-        *ngIf="selectedFilter === 'all'"
-        fill="solid"
-        routerLink="/buyer/buyer-home"
-        class="cta-button">
+      <ion-button *ngIf="selectedFilter === 'all'" fill="solid" routerLink="/buyer/buyer-home" class="cta-button">
         <ion-icon name="storefront-outline" slot="start"></ion-icon>
         {{ 'RETAILER_ORDER_HISTORY.BROWSE_PRODUCTS' | translate }}
       </ion-button>
