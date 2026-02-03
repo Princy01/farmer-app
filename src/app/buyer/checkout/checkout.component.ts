@@ -82,7 +82,7 @@ interface WholesalerGroupSummary {
 
 interface TransportData {
   delivery_type: 'standard' | 'express' | 'priority';
-  urgency: 'normal' | 'urgent';
+  urgency: 'low' | 'standard' | 'high';
   base_price: number;
   distance: number;
   dropoff_location?: string;

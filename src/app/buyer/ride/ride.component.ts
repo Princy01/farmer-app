@@ -50,12 +50,12 @@ interface CheckoutData {
 }
 
 interface TransportData {
-  delivery_type: string;
+  delivery_type: TransportType;
   distance: number;
   load_type: string;
   status: string;
-  urgency?: string;
-  base_price?: number;
+  urgency: 'low' | 'standard' | 'high';
+  base_price: number;
 }
 
 @Component({
@@ -131,6 +131,7 @@ export class RideComponent implements OnInit {
       this.distance = navData['distance'] || 0;
 
       this.existingTransportData = navData['transportData'] || null;
+      console.log('Existing transport data:', this.existingTransportData);
       if (this.existingTransportData?.delivery_type) {
         this.selectedTransportType = this.existingTransportData.delivery_type as TransportType;
       }
@@ -223,6 +224,11 @@ export class RideComponent implements OnInit {
         } as any;
       }
 
+      console.log({
+        ...this.checkoutData,
+        transportData: transportDataToPass,
+        hasTransport: !!transportDataToPass
+      })
       this.router.navigate(['/buyer/checkout'], {
         state: {
           ...this.checkoutData,
@@ -255,7 +261,7 @@ export class RideComponent implements OnInit {
       await loading.present();
 
       const basePrice = this.getBaseDeliveryCharge();
-      const urgency = this.selectedTransportType === 'priority' ? 'urgent' : 'normal';
+      const urgency = this.selectedTransportType === 'priority' ? 'high' : 'standard';
 
       const transportRequestData = {
         delivery_type: this.selectedTransportType,
