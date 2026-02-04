@@ -123,6 +123,26 @@
           </ion-item>
         </ion-menu-toggle>
 
+        <ion-menu-toggle>
+          <ion-item
+            routerLink="/transport/profile"
+            [ngClass]="{ selected: isActive('/transport/profile') }"
+          >
+            <ion-icon name="person-circle-outline" slot="start"></ion-icon>
+            <ion-label>Profile</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item
+            routerLink="/transport/settings"
+            [ngClass]="{ selected: isActive('/transport/settings') }"
+          >
+            <ion-icon name="settings-outline" slot="start"></ion-icon>
+            <ion-label>Settings</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
         <!-- <ion-menu-toggle>
           <ion-item
             routerLink="/transport/notifications"

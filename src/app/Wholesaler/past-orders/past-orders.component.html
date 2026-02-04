@@ -23,20 +23,20 @@
       </div>
       <ion-card-content class="card-content">
         <ion-item>
-          <ion-label position="stacked">{{ 'PAST_ORDERS.FILTER_ORDERS' | translate }}</ion-label>
-          <ion-select 
-            [(ngModel)]="selectedFilter" 
-            (ionChange)="applyFilter($event.detail.value)" 
+          <ion-label position="stacked">{{ 'PAST_ORDERS.SELECT_FILTER' | translate }}</ion-label>
+          <ion-select
+            [(ngModel)]="selectedFilter"
+            (ionChange)="applyFilter($event.detail.value)"
             [disabled]="isLoading"
             interface="popover">
             <ion-select-option *ngFor="let filter of filters" [value]="filter.value">
               {{ filter.label | translate }}
             </ion-select-option>
           </ion-select>
-          <ion-button 
-            fill="clear" 
-            slot="end" 
-            (click)="clearFilter()" 
+          <ion-button
+            fill="clear"
+            slot="end"
+            (click)="clearFilter()"
             *ngIf="selectedFilter && selectedFilter !== 'all'">
             <ion-icon name="close-circle-outline"></ion-icon>
           </ion-button>
@@ -68,9 +68,9 @@
       <h2>{{ 'PAST_ORDERS.NO_ORDERS' | translate }}</h2>
     </div>
 
-    <ion-card 
-      class="modern-card" 
-      *ngFor="let order of completedOrders; trackBy: trackById" 
+    <ion-card
+      class="modern-card"
+      *ngFor="let order of completedOrders; trackBy: trackById"
       (click)="viewOrderDetails(order)">
       <div class="card-header">
         <div class="header-content">

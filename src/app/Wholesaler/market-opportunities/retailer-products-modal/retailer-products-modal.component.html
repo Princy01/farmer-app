@@ -1,3 +1,124 @@
-<p>
-  retailer-products-modal works!
-</p>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="modern-toolbar">
+    <ion-title class="ion-text-center">
+      <div class="header-content">
+        <ion-icon name="trending-up" class="header-icon"></ion-icon>
+        <span>{{ retailer.retailer_name }}</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" class="close-button">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modern-content">
+  <!-- Retailer Summary Card -->
+  <div class="summary-card">
+    <div class="summary-header">
+      <h2>{{ 'RETAILER_DETAILS.SUMMARY' | translate }}</h2>
+    </div>
+    <div class="summary-stats">
+      <div class="stat-item">
+        <ion-icon name="cube" class="stat-icon"></ion-icon>
+        <div class="stat-content">
+          <p class="stat-label">{{ 'RETAILER_DETAILS.TOTAL_QUANTITY' | translate }}</p>
+          <p class="stat-value">{{ retailer.total_quantity | number : '1.0-2' }} kg</p>
+        </div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <ion-icon name="trending-up" class="stat-icon"></ion-icon>
+        <div class="stat-content">
+          <p class="stat-label">{{ 'RETAILER_DETAILS.TOTAL_VALUE' | translate }}</p>
+          <p class="stat-value">₹{{ retailer.total_order_value | number : '1.2-2' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Section -->
+  <div class="section-header">
+    <h3>{{ 'RETAILER_DETAILS.PRODUCTS_ORDERED' | translate }}</h3>
+    <span class="product-count">{{ retailer.products.length }} {{ 'RETAILER_DETAILS.ITEMS' | translate }}</span>
+  </div>
+
+  <div class="products-grid">
+    <div class="product-card" *ngFor="let product of retailer.products; let i = index">
+      <div class="product-header">
+        <div class="product-number">{{ i + 1 }}</div>
+        <h4>{{ product.product_name }}</h4>
+      </div>
+      <div class="product-details">
+        <div class="detail-row">
+          <span class="detail-label">{{ 'RETAILER_DETAILS.QUANTITY' | translate }}:</span>
+          <span class="detail-value">{{ product.quantity | number : '1.0-2' }} kg</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">{{ 'RETAILER_DETAILS.ORDER_VALUE' | translate }}:</span>
+          <span class="detail-value price">₹{{ product.order_value | number : '1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Make Offer Section -->
+  <div class="offer-section">
+    <div class="offer-toggle" (click)="toggleOfferSection()">
+      <h3>{{ 'RETAILER_DETAILS.MAKE_OFFER' | translate }}</h3>
+      <ion-icon [name]="showOfferSection ? 'chevron-up' : 'chevron-down'"></ion-icon>
+    </div>
+
+    <div class="offer-form" [class.expanded]="showOfferSection">
+      <div class="form-card">
+        <ion-item class="modern-input" lines="none">
+          <ion-label position="floating">
+            <ion-icon name="cash-outline"></ion-icon>
+            {{ 'RETAILER_DETAILS.OFFER_PRICE' | translate }}
+          </ion-label>
+          <ion-input
+            type="number"
+            [(ngModel)]="offerPrice"
+            min="0"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item class="modern-input" lines="none">
+          <ion-label position="floating">
+            <ion-icon name="calendar"></ion-icon>
+            {{ 'RETAILER_DETAILS.DELIVERY_DATE' | translate }}
+          </ion-label>
+          <ion-input
+            type="date"
+            [(ngModel)]="proposedDeliveryDate"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item class="modern-input textarea-input" lines="none">
+          <ion-label position="stacked">
+            <ion-icon name="chatbox-outline"></ion-icon>
+            {{ 'RETAILER_DETAILS.MESSAGE' | translate }}
+          </ion-label>
+          <ion-textarea
+            [(ngModel)]="message"
+            rows="3"
+            placeholder="{{ 'RETAILER_DETAILS.MESSAGE_PLACEHOLDER' | translate }}">
+          </ion-textarea>
+        </ion-item>
+
+        <ion-button
+          expand="block"
+          class="submit-offer-button"
+          (click)="submitOffer()"
+          [disabled]="offerPrice <= 0 || !proposedDeliveryDate || isSubmitting">
+          <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+          {{ isSubmitting ? ('RETAILER_DETAILS.SUBMITTING' | translate) : ('RETAILER_DETAILS.SUBMIT_OFFER' | translate) }}
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>

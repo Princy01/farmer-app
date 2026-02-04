@@ -1,0 +1,206 @@
+<ion-header [translucent]="true">
+  <ion-toolbar class="settings-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'DRIVER_SETTINGS.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="settings-container">
+    <!-- General Settings -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'DRIVER_SETTINGS.GENERAL' | translate }}</h2>
+      </div>
+
+      <div class="settings-group">
+        <!-- Language -->
+        <ion-item button (click)="changeLanguage()" lines="full" class="settings-item">
+          <ion-icon name="globe-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.LANGUAGE' | translate }}</h3>
+            <p>{{ currentLanguageName }}</p>
+          </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-item>
+      </div>
+    </div>
+
+    <!-- Notification Settings -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'DRIVER_SETTINGS.NOTIFICATIONS' | translate }}</h2>
+        <p>{{ 'DRIVER_SETTINGS.NOTIFICATION_DESC' | translate }}</p>
+      </div>
+
+      <div class="settings-group">
+        <!-- Delivery Reminder -->
+        <ion-item lines="full" class="settings-item">
+          <ion-icon name="notifications-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.DELIVERY_REMINDER' | translate }}</h3>
+            <p>{{ 'DRIVER_SETTINGS.DELIVERY_REMINDER_DESC' | translate }}</p>
+          </ion-label>
+          <ion-toggle
+            [(ngModel)]="settings.notifications.delivery_reminder"
+            (ionChange)="toggleNotification('delivery_reminder')"
+            slot="end">
+          </ion-toggle>
+        </ion-item>
+
+        <!-- Payment Received -->
+        <ion-item lines="full" class="settings-item">
+          <ion-icon name="notifications-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.PAYMENT_RECEIVED' | translate }}</h3>
+            <p>{{ 'DRIVER_SETTINGS.PAYMENT_RECEIVED_DESC' | translate }}</p>
+          </ion-label>
+          <ion-toggle
+            [(ngModel)]="settings.notifications.payment_received"
+            (ionChange)="toggleNotification('payment_received')"
+            slot="end">
+          </ion-toggle>
+        </ion-item>
+
+        <!-- System Alerts -->
+        <ion-item lines="full" class="settings-item">
+          <ion-icon name="notifications-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.SYSTEM_ALERTS' | translate }}</h3>
+            <p>{{ 'DRIVER_SETTINGS.SYSTEM_ALERTS_DESC' | translate }}</p>
+          </ion-label>
+          <ion-toggle
+            [(ngModel)]="settings.notifications.system_alerts"
+            (ionChange)="toggleNotification('system_alerts')"
+            slot="end">
+          </ion-toggle>
+        </ion-item>
+      </div>
+    </div>
+
+    <!-- Security -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'DRIVER_SETTINGS.SECURITY' | translate }}</h2>
+      </div>
+
+      <div class="settings-group">
+        <!-- Change Password -->
+        <ion-item button (click)="changePassword()" lines="full" class="settings-item">
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.CHANGE_PASSWORD' | translate }}</h3>
+            <p>{{ 'DRIVER_SETTINGS.CHANGE_PASSWORD_DESC' | translate }}</p>
+          </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-item>
+      </div>
+    </div>
+
+    <!-- Data Management -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'DRIVER_SETTINGS.DATA' | translate }}</h2>
+      </div>
+
+      <div class="settings-group">
+        <!-- Clear Cache -->
+        <ion-item button (click)="clearCache()" lines="full" class="settings-item">
+          <ion-icon name="trash-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.CLEAR_CACHE' | translate }}</h3>
+            <p>{{ 'DRIVER_SETTINGS.CLEAR_CACHE_DESC' | translate }}</p>
+          </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-item>
+      </div>
+    </div>
+
+    <!-- Support -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'DRIVER_SETTINGS.SUPPORT' | translate }}</h2>
+      </div>
+
+      <div class="settings-group">
+        <!-- Contact Support -->
+        <ion-item button (click)="contactSupport()" lines="full" class="settings-item">
+          <ion-icon name="help-circle-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.CONTACT_SUPPORT' | translate }}</h3>
+            <p>{{ 'DRIVER_SETTINGS.CONTACT_SUPPORT_DESC' | translate }}</p>
+          </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-item>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'DRIVER_SETTINGS.ABOUT' | translate }}</h2>
+      </div>
+
+      <div class="settings-group">
+        <!-- Privacy Policy -->
+        <ion-item button (click)="viewPrivacyPolicy()" lines="full" class="settings-item">
+          <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.PRIVACY_POLICY' | translate }}</h3>
+          </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-item>
+
+        <!-- Terms of Service -->
+        <ion-item button (click)="viewTermsOfService()" lines="full" class="settings-item">
+          <ion-icon name="document-text-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.TERMS_OF_SERVICE' | translate }}</h3>
+          </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-item>
+
+        <!-- App Version -->
+        <ion-item lines="full" class="settings-item">
+          <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.APP_VERSION' | translate }}</h3>
+            <p>{{ appVersion }}</p>
+          </ion-label>
+        </ion-item>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="settings-section danger-section">
+      <div class="section-header">
+        <h2>{{ 'DRIVER_SETTINGS.DANGER_ZONE' | translate }}</h2>
+      </div>
+
+      <div class="settings-group">
+        <!-- Logout -->
+        <ion-item button (click)="logout()" lines="full" class="settings-item danger-item">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.LOGOUT' | translate }}</h3>
+          </ion-label>
+        </ion-item>
+
+        <!-- Delete Account -->
+        <ion-item button (click)="deleteAccount()" lines="full" class="settings-item danger-item">
+          <ion-icon name="warning-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'DRIVER_SETTINGS.DELETE_ACCOUNT' | translate }}</h3>
+            <p>{{ 'DRIVER_SETTINGS.DELETE_ACCOUNT_DESC' | translate }}</p>
+          </ion-label>
+        </ion-item>
+      </div>
+    </div>
+
+    <div class="footer-spacing"></div>
+  </div>
+</ion-content>

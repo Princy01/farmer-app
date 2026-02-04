@@ -19,6 +19,14 @@ export const routes: Routes = [
     loadComponent: () => import('./Wholesaler/product-details/product-details.component').then((m) => m.ProductDetailsComponent),
   },
   {
+    path: 'wholesaler/profile',
+    loadComponent: () => import('./Wholesaler/profile/profile.page').then((m) => m.ProfilePage),
+  },
+  {
+    path: 'wholesaler/settings',
+    loadComponent: () => import('./Wholesaler/settings/settings.page').then((m) => m.SettingsPage),
+  },
+  {
     path: 'wholesaler/orders',
     loadComponent: () => import('./Wholesaler/orders-received/orders.component').then((m) => m.OrdersComponent),
   },
@@ -53,10 +61,6 @@ export const routes: Routes = [
   {
     path: 'wholesaler/market-opportunities',
     loadComponent: () => import('./Wholesaler/market-opportunities/market-opportunities.component').then((m) => m.MarketOpportunitiesComponent),
-  },
-  {
-    path: 'wholesaler/market-opportunities/offer-modal',
-    loadComponent: () => import('./Wholesaler/offer-modal/offer-modal.component').then((m) => m.OfferModalComponent),
   },
   {
     path: 'wholesaler/restocking-recommendations',
@@ -210,6 +214,14 @@ export const routes: Routes = [
       {
         path: 'buyer-home',
         loadComponent: () => import('./buyer/buyer-home/buyer-home.component').then((m) => m.BuyerHomeComponent),
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./buyer/profile/profile.page').then((m) => m.ProfilePage),
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./buyer/settings/settings.page').then((m) => m.SettingsPage),
       },
       {
         path: 'category/:categoryId',
@@ -400,6 +412,14 @@ export const routes: Routes = [
       {
         path: 'delivery-history',
         loadComponent: () => import('./transport/delivery-history/delivery-history.component').then((m) => m.DeliveryHistoryComponent),
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./transport/profile/profile.page').then((m) => m.ProfilePage),
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./transport/settings/settings.page').then((m) => m.SettingsPage),
       },
       {
         path: 'notifications',

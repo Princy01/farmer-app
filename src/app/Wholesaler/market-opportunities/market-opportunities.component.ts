@@ -3,7 +3,6 @@ import { IonicModule, AlertController, LoadingController } from '@ionic/angular'
 import { ModalController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { WholesalerApiService, BulkOrder, TopRetailer } from '../services/wholesaler-api.service';
-import { OfferModalComponent } from '../offer-modal/offer-modal.component';
 import { addIcons } from 'ionicons';
 import { add, listOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
@@ -25,7 +24,7 @@ export class MarketOpportunitiesComponent implements OnInit {
   error: string | null = null;
   bulkOrders: BulkOrder[] = [];
   topRetailers: TopRetailer[] = [];
-  
+
   // Pagination
   currentPage = 1;
   itemsPerPage = 5;
@@ -156,40 +155,6 @@ export class MarketOpportunitiesComponent implements OnInit {
     await toast.present();
   }
 
-  async openOfferModal(order: BulkOrder) {
-    if (!this.authService.isAuthenticated()) {
-      await this.showAuthError();
-      return;
-    }
-
-    try {
-      const modal = await this.modalCtrl.create({
-        component: OfferModalComponent,
-        componentProps: { order },
-        breakpoints: [0, 0.5, 0.8],
-        initialBreakpoint: 0.8
-      });
-
-      await modal.present();
-
-      const { data } = await modal.onWillDismiss();
-      console.log('Modal dismissed with data:', data);
-
-      if (data?.success) {
-        const toast = await this.toastCtrl.create({
-          message: `${this.translate.instant('MARKET_OPPORTUNITIES.OFFER_SUBMITTED')} #${data.offer_id}`,
-          duration: 2000,
-          color: 'success',
-          position: 'bottom'
-        });
-        await toast.present();
-      }
-    } catch (error) {
-      console.error('Error presenting modal:', error);
-      this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.OFFER_ERROR'));
-    }
-  }
-
   getTopRetailersTitle(): string {
     return this.translate.instant('MARKET_OPPORTUNITIES.TOP_RETAILERS_TITLE');
   }
@@ -207,8 +172,9 @@ export class MarketOpportunitiesComponent implements OnInit {
     const modal = await this.modalCtrl.create({
       component: RetailerProductsModalComponent,
       componentProps: { retailer },
-      breakpoints: [0, 0.5, 0.8],
-      initialBreakpoint: 0.8
+      breakpoints: [0, 0.25, 0.5, 0.75, 0.95],
+      initialBreakpoint: 0.95,
+      backdropDismiss: true
     });
     await modal.present();
   }

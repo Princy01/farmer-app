@@ -1,0 +1,263 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'RETAILER_SETTINGS.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="settings-container">
+
+    <!-- General Settings Section -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'RETAILER_SETTINGS.GENERAL' | translate }}</h2>
+      </div>
+
+      <!-- Language Selection -->
+      <ion-item button (click)="selectLanguage()">
+        <ion-icon name="language-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.LANGUAGE' | translate }}</h3>
+          <p>{{ getCurrentLanguageName() }}</p>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+
+      <!-- Auto Refresh -->
+      <ion-item>
+        <ion-icon name="sunny-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.AUTO_REFRESH' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.AUTO_REFRESH_DESC' | translate }}</p>
+        </ion-label>
+        <ion-toggle
+          [(ngModel)]="settings.autoRefresh"
+          (ionChange)="toggleAutoRefresh($event)">
+        </ion-toggle>
+      </ion-item>
+
+      <!-- Sound Effects -->
+      <ion-item>
+        <ion-icon name="notifications-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.SOUND_EFFECTS' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.SOUND_EFFECTS_DESC' | translate }}</p>
+        </ion-label>
+        <ion-toggle
+          [(ngModel)]="settings.soundEffects"
+          (ionChange)="toggleSoundEffects($event)">
+        </ion-toggle>
+      </ion-item>
+    </div>
+
+    <!-- Notifications Section -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'RETAILER_SETTINGS.NOTIFICATIONS' | translate }}</h2>
+      </div>
+
+      <!-- Order Updates -->
+      <ion-item>
+        <ion-icon name="receipt-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.ORDER_UPDATES' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.ORDER_UPDATES_DESC' | translate }}</p>
+        </ion-label>
+        <ion-toggle
+          [(ngModel)]="settings.notifications.orderUpdates"
+          (ionChange)="toggleNotification('orderUpdates', $event)">
+        </ion-toggle>
+      </ion-item>
+
+      <!-- Price Alerts -->
+      <ion-item>
+        <ion-icon name="pricetag-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.PRICE_ALERTS' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.PRICE_ALERTS_DESC' | translate }}</p>
+        </ion-label>
+        <ion-toggle
+          [(ngModel)]="settings.notifications.priceAlerts"
+          (ionChange)="toggleNotification('priceAlerts', $event)">
+        </ion-toggle>
+      </ion-item>
+
+      <!-- Stock Alerts -->
+      <ion-item>
+        <ion-icon name="cube-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.STOCK_ALERTS' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.STOCK_ALERTS_DESC' | translate }}</p>
+        </ion-label>
+        <ion-toggle
+          [(ngModel)]="settings.notifications.stockAlerts"
+          (ionChange)="toggleNotification('stockAlerts', $event)">
+        </ion-toggle>
+      </ion-item>
+
+      <!-- Marketing Emails -->
+      <ion-item>
+        <ion-icon name="mail-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.MARKETING_EMAILS' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.MARKETING_EMAILS_DESC' | translate }}</p>
+        </ion-label>
+        <ion-toggle
+          [(ngModel)]="settings.notifications.marketingEmails"
+          (ionChange)="toggleNotification('marketingEmails', $event)">
+        </ion-toggle>
+      </ion-item>
+
+      <!-- SMS Notifications -->
+      <ion-item>
+        <ion-icon name="phone-portrait-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.SMS_NOTIFICATIONS' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.SMS_NOTIFICATIONS_DESC' | translate }}</p>
+        </ion-label>
+        <ion-toggle
+          [(ngModel)]="settings.notifications.smsNotifications"
+          (ionChange)="toggleNotification('smsNotifications', $event)">
+        </ion-toggle>
+      </ion-item>
+    </div>
+
+    <!-- Security Section -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'RETAILER_SETTINGS.SECURITY' | translate }}</h2>
+      </div>
+
+      <!-- Change Password -->
+      <ion-item button (click)="changePassword()" detail>
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.CHANGE_PASSWORD' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.CHANGE_PASSWORD_DESC' | translate }}</p>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+
+      <!-- Two-Factor Authentication -->
+      <ion-item button detail>
+        <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.TWO_FACTOR_AUTH' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.TWO_FACTOR_AUTH_DESC' | translate }}</p>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+    </div>
+
+    <!-- Data & Storage Section -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'RETAILER_SETTINGS.DATA_STORAGE' | translate }}</h2>
+      </div>
+
+      <!-- Clear Cache -->
+      <ion-item button (click)="clearCache()" detail>
+        <ion-icon name="trash-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.CLEAR_CACHE' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.CLEAR_CACHE_DESC' | translate }}</p>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+
+      <!-- Download Data -->
+      <ion-item button (click)="downloadData()" detail>
+        <ion-icon name="download-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.DOWNLOAD_DATA' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.DOWNLOAD_DATA_DESC' | translate }}</p>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+    </div>
+
+    <!-- Support Section -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'RETAILER_SETTINGS.SUPPORT' | translate }}</h2>
+      </div>
+
+      <!-- Help Center -->
+      <ion-item button (click)="openHelp()" detail>
+        <ion-icon name="help-circle-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.HELP_CENTER' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.HELP_CENTER_DESC' | translate }}</p>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+
+      <!-- Contact Support -->
+      <ion-item button (click)="contactSupport()" detail>
+        <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.CONTACT_SUPPORT' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.CONTACT_SUPPORT_DESC' | translate }}</p>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+    </div>
+
+    <!-- About Section -->
+    <div class="settings-section">
+      <div class="section-header">
+        <h2>{{ 'RETAILER_SETTINGS.ABOUT' | translate }}</h2>
+      </div>
+
+      <!-- App Version -->
+      <ion-item>
+        <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.APP_VERSION' | translate }}</h3>
+          <p>{{ appVersion }}</p>
+        </ion-label>
+      </ion-item>
+
+      <!-- Privacy Policy -->
+      <ion-item button (click)="openPrivacyPolicy()" detail>
+        <ion-icon name="document-text-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.PRIVACY_POLICY' | translate }}</h3>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+
+      <!-- Terms of Service -->
+      <ion-item button (click)="openTermsOfService()" detail>
+        <ion-icon name="document-text-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>{{ 'RETAILER_SETTINGS.TERMS_OF_SERVICE' | translate }}</h3>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+      </ion-item>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="settings-section danger-zone">
+      <div class="section-header">
+        <h2>{{ 'RETAILER_SETTINGS.DANGER_ZONE' | translate }}</h2>
+      </div>
+
+      <!-- Delete Account -->
+      <ion-item button (click)="deleteAccount()" detail class="danger-item">
+        <ion-icon name="trash-outline" slot="start" color="danger"></ion-icon>
+        <ion-label color="danger">
+          <h3>{{ 'RETAILER_SETTINGS.DELETE_ACCOUNT' | translate }}</h3>
+          <p>{{ 'RETAILER_SETTINGS.DELETE_ACCOUNT_DESC' | translate }}</p>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end" color="danger"></ion-icon>
+      </ion-item>
+    </div>
+
+  </div>
+</ion-content>

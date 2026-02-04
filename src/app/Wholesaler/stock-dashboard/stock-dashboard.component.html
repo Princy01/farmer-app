@@ -47,7 +47,7 @@
           <ion-col size="8">
             <h2>{{ item.product_name }} <span class="category-name">({{ item.category_name }})</span></h2>
             <p><b>{{ 'STOCK_DASHBOARD.CURRENT_STOCK' | translate }}:</b> {{ item.current_stock }} {{item.units_name}}</p>
-            <p><b>{{ 'STOCK_DASHBOARD.PRICE' | translate }}:</b> ₹{{ item.price_per_unit }}</p>
+            <p><b>{{ 'STOCK_DASHBOARD.PRICE_PER_KG' | translate }}:</b> ₹{{ item.price_per_unit }}</p>
             @if (item.last_date_of_entry) {
             <p><b>{{ 'STOCK_DASHBOARD.LAST_UPDATED' | translate }}:</b> {{ item.last_date_of_entry | date:'mediumDate' }}</p>
             }

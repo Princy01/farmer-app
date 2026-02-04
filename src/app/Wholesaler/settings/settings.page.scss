@@ -1,0 +1,262 @@
+.settings-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  --border-color: transparent;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.settings-container {
+  min-height: 100%;
+  background: linear-gradient(to bottom, #f8f9ff 0%, #ffffff 50%);
+  padding: 0 0 2rem 0;
+}
+
+// Section Styles
+.settings-section {
+  margin: 1.5rem 0;
+
+  &:first-child {
+    margin-top: 1rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1.25rem 0.75rem 1.25rem;
+
+    ion-icon {
+      font-size: 1.5rem;
+      color: #667eea;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+// Card Styles
+.settings-card {
+  margin: 0 1rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+
+  ion-item {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --inner-padding-end: 0;
+    --min-height: 64px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      --background: rgba(102, 126, 234, 0.05);
+    }
+
+    &:active {
+      --background: rgba(102, 126, 234, 0.1);
+    }
+
+    ion-label {
+      margin: 0.5rem 0;
+
+      h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+        margin: 0 0 0.25rem 0;
+      }
+
+      p {
+        font-size: 0.85rem;
+        color: var(--ion-color-medium);
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+.item-icon {
+  font-size: 1.5rem;
+  color: #667eea;
+  margin-right: 1rem;
+}
+
+.chevron-icon {
+  font-size: 1.2rem;
+  color: var(--ion-color-medium);
+  margin-left: 0.5rem;
+}
+
+// Toggle Styles
+ion-toggle {
+  --handle-width: 24px;
+  --handle-height: 24px;
+  --handle-spacing: 2px;
+  --track-background: #e0e0e0;
+  --track-background-checked: #667eea;
+  --handle-background: white;
+  --handle-background-checked: white;
+}
+
+// Danger Zone Styles
+.danger-zone {
+  .section-header {
+    ion-icon {
+      color: var(--ion-color-danger);
+    }
+
+    h2 {
+      color: var(--ion-color-danger);
+    }
+  }
+}
+
+.danger-card {
+  border: 2px solid rgba(var(--ion-color-danger-rgb), 0.2);
+  background: rgba(var(--ion-color-danger-rgb), 0.02);
+
+  ion-item {
+    --background: transparent;
+
+    &:hover {
+      --background: rgba(var(--ion-color-danger-rgb), 0.05);
+    }
+
+    ion-label {
+      h3 {
+        font-weight: 600;
+      }
+
+      p {
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+}
+
+// Footer Spacing
+.footer-spacing {
+  height: 2rem;
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .settings-section {
+    margin: 1rem 0;
+
+    .section-header {
+      padding: 0 1rem 0.5rem 1rem;
+
+      h2 {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .settings-card {
+    margin: 0 0.75rem;
+
+    ion-item {
+      --min-height: 56px;
+
+      ion-label {
+        h3 {
+          font-size: 0.95rem;
+        }
+
+        p {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+
+  .item-icon {
+    font-size: 1.3rem;
+    margin-right: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-container {
+    padding: 0 0 1rem 0;
+  }
+
+  .settings-section {
+    margin: 0.75rem 0;
+
+    .section-header {
+      padding: 0 0.75rem 0.5rem 0.75rem;
+
+      ion-icon {
+        font-size: 1.3rem;
+      }
+
+      h2 {
+        font-size: 0.95rem;
+      }
+    }
+  }
+
+  .settings-card {
+    margin: 0 0.5rem;
+    border-radius: 12px;
+
+    ion-item {
+      --padding-start: 0.75rem;
+      --padding-end: 0.75rem;
+      --min-height: 52px;
+    }
+  }
+}
+
+// Dark Mode Styles
+body.dark {
+  .settings-container {
+    background: linear-gradient(to bottom, #1a1a2e 0%, #0f0f1e 50%);
+  }
+
+  .settings-section .section-header {
+    h2 {
+      color: var(--ion-color-light);
+    }
+  }
+
+  .settings-card {
+    background: #1a1a2e;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+    ion-item {
+      --background: #1a1a2e;
+      --color: var(--ion-color-light);
+
+      &:hover {
+        --background: rgba(102, 126, 234, 0.15);
+      }
+
+      ion-label {
+        h3 {
+          color: var(--ion-color-light);
+        }
+
+        p {
+          color: var(--ion-color-medium);
+        }
+      }
+    }
+  }
+
+  .danger-card {
+    background: rgba(var(--ion-color-danger-rgb), 0.05);
+    border-color: rgba(var(--ion-color-danger-rgb), 0.3);
+  }
+}

@@ -27,6 +27,7 @@ interface ProductData {
 export class SalesTrendsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private currentLoading: HTMLIonLoadingElement | null = null;
+  private loadingCount: number = 0;
   selectedView: string = 'trends';
   selectedPeriod: string = 'monthly';
   selectedMetric: string = 'volume';
@@ -58,7 +59,9 @@ export class SalesTrendsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
     if (this.currentLoading) {
       this.currentLoading.dismiss();
+      this.currentLoading = null;
     }
+    this.loadingCount = 0;
   }
 
   private checkAuthAndLoadData() {
@@ -108,29 +111,31 @@ export class SalesTrendsComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  private async showLoading(): Promise<HTMLIonLoadingElement> {
-    // Dismiss any existing loader first
-    if (this.currentLoading) {
-      await this.currentLoading.dismiss();
-    }
+  private async showLoading(): Promise<void> {
+    this.loadingCount++;
+    if (this.loadingCount === 1) {
+      // Dismiss any existing loader first
+      if (this.currentLoading) {
+        await this.currentLoading.dismiss();
+      }
 
-    this.isLoading = true;
-    this.currentLoading = await this.loadingController.create({
-      message: this.translate.instant('SALES_TRENDS.LOADING'),
-      spinner: 'crescent'
-    });
-    await this.currentLoading.present();
-    return this.currentLoading;
+      this.isLoading = true;
+      this.currentLoading = await this.loadingController.create({
+        message: this.translate.instant('SALES_TRENDS.LOADING'),
+        spinner: 'crescent'
+      });
+      await this.currentLoading.present();
+    }
   }
 
-  private async hideLoading() {
-    this.isLoading = false;
-    console.log(this.currentLoading)
-    if (this.currentLoading) {
-      console.log('Dismissing loader'); 
-      await this.currentLoading.dismiss();
-      console.log('Loader dismissed');
-      this.currentLoading = null;
+  private async hideLoading(): Promise<void> {
+    this.loadingCount--;
+    if (this.loadingCount === 0) {
+      this.isLoading = false;
+      if (this.currentLoading) {
+        await this.currentLoading.dismiss();
+        this.currentLoading = null;
+      }
     }
   }
 
@@ -177,7 +182,7 @@ export class SalesTrendsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const loading = await this.showLoading();
+    await this.showLoading();
     try {
       let dataObservable;
       switch (this.selectedPeriod) {
@@ -299,7 +304,7 @@ export class SalesTrendsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const loading = await this.showLoading();
+    await this.showLoading();
     try {
       let dataObservable;
       switch (this.selectedPeriod) {

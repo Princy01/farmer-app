@@ -1,0 +1,244 @@
+<ion-header [translucent]="true">
+  <ion-toolbar class="profile-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'DRIVER_PROFILE.TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="!isEditing" (click)="toggleEdit()">
+        <ion-icon name="create-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="profile-container">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>{{ 'DRIVER_PROFILE.LOADING' | translate }}</p>
+    </div>
+
+    <!-- Profile Content -->
+    <div *ngIf="!isLoading" class="profile-content">
+      <!-- Profile Header -->
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <div class="avatar-circle">
+            <img *ngIf="profile.profile_image" [src]="profile.profile_image" alt="Profile">
+            <ion-icon *ngIf="!profile.profile_image" name="person-outline"></ion-icon>
+          </div>
+          <ion-button
+            *ngIf="isEditing"
+            class="change-photo-btn"
+            size="small"
+            fill="solid"
+            (click)="changeProfileImage()">
+            <ion-icon name="camera-outline" slot="start"></ion-icon>
+            {{ 'DRIVER_PROFILE.CHANGE_PHOTO' | translate }}
+          </ion-button>
+        </div>
+
+        <div class="profile-name">
+          <h1 *ngIf="!isEditing">{{ profile.name }}</h1>
+          <ion-input
+            *ngIf="isEditing"
+            [(ngModel)]="profile.name"
+            placeholder="{{ 'DRIVER_PROFILE.NAME_PLACEHOLDER' | translate }}"
+            class="edit-input name-input">
+          </ion-input>
+
+          <div class="profile-status">
+            <ion-icon
+              [name]="profile.active_status ? 'checkmark-circle-outline' : 'close-circle-outline'"
+              [color]="profile.active_status ? 'success' : 'danger'">
+            </ion-icon>
+            <span>{{ profile.active_status ? ('DRIVER_PROFILE.ACTIVE' | translate) : ('DRIVER_PROFILE.INACTIVE' | translate) }}</span>
+          </div>
+        </div>
+
+        <div class="profile-stats">
+          <div class="stat-item">
+            <ion-icon name="car-outline"></ion-icon>
+            <div class="stat-content">
+              <span class="stat-value">{{ profile.total_deliveries }}</span>
+              <span class="stat-label">{{ 'DRIVER_PROFILE.TOTAL_DELIVERIES' | translate }}</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <div class="stat-content">
+              <span class="stat-value">{{ profile.registration_date | date: 'MMM yyyy' }}</span>
+              <span class="stat-label">{{ 'DRIVER_PROFILE.MEMBER_SINCE' | translate }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Details -->
+      <ion-card class="details-card">
+        <ion-card-header>
+          <div class="card-header-content">
+            <ion-icon name="person-outline" class="header-icon"></ion-icon>
+            <ion-card-title>{{ 'DRIVER_PROFILE.PERSONAL_INFO' | translate }}</ion-card-title>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="detail-group">
+            <!-- Email -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="mail-outline"></ion-icon>
+                <span>{{ 'DRIVER_PROFILE.EMAIL' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.email }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.email"
+                type="email"
+                placeholder="{{ 'DRIVER_PROFILE.EMAIL_PLACEHOLDER' | translate }}"
+                class="edit-input">
+              </ion-input>
+            </div>
+
+            <!-- Mobile -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="call-outline"></ion-icon>
+                <span>{{ 'DRIVER_PROFILE.MOBILE' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.mobile_num }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.mobile_num"
+                type="tel"
+                placeholder="{{ 'DRIVER_PROFILE.MOBILE_PLACEHOLDER' | translate }}"
+                class="edit-input">
+              </ion-input>
+            </div>
+
+            <!-- Address -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>{{ 'DRIVER_PROFILE.ADDRESS' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.address }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.address"
+                type="text"
+                placeholder="{{ 'DRIVER_PROFILE.ADDRESS_PLACEHOLDER' | translate }}"
+                class="edit-input">
+              </ion-input>
+            </div>
+
+            <!-- Location -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="navigate-outline"></ion-icon>
+                <span>{{ 'DRIVER_PROFILE.LOCATION' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.location_name }}</div>
+            </div>
+
+            <!-- Pincode -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="locate-outline"></ion-icon>
+                <span>{{ 'DRIVER_PROFILE.PINCODE' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.pincode }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.pincode"
+                type="text"
+                maxlength="6"
+                placeholder="{{ 'DRIVER_PROFILE.PINCODE_PLACEHOLDER' | translate }}"
+                class="edit-input">
+              </ion-input>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Vehicle Details -->
+      <ion-card class="details-card">
+        <ion-card-header>
+          <div class="card-header-content">
+            <ion-icon name="car-outline" class="header-icon"></ion-icon>
+            <ion-card-title>{{ 'DRIVER_PROFILE.VEHICLE_INFO' | translate }}</ion-card-title>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="detail-group">
+            <!-- License Number -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="card-outline"></ion-icon>
+                <span>{{ 'DRIVER_PROFILE.LICENSE_NUMBER' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.license_number }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.license_number"
+                type="text"
+                placeholder="{{ 'DRIVER_PROFILE.LICENSE_PLACEHOLDER' | translate }}"
+                class="edit-input">
+              </ion-input>
+            </div>
+
+            <!-- Vehicle Type -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="car-outline"></ion-icon>
+                <span>{{ 'DRIVER_PROFILE.VEHICLE_TYPE' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.vehicle_type }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.vehicle_type"
+                type="text"
+                placeholder="{{ 'DRIVER_PROFILE.VEHICLE_TYPE_PLACEHOLDER' | translate }}"
+                class="edit-input">
+              </ion-input>
+            </div>
+
+            <!-- Vehicle Number -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="pricetag-outline"></ion-icon>
+                <span>{{ 'DRIVER_PROFILE.VEHICLE_NUMBER' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.vehicle_number }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.vehicle_number"
+                type="text"
+                placeholder="{{ 'DRIVER_PROFILE.VEHICLE_NUMBER_PLACEHOLDER' | translate }}"
+                class="edit-input">
+              </ion-input>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons" *ngIf="isEditing">
+        <ion-button expand="block" (click)="saveProfile()" color="primary">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ 'DRIVER_PROFILE.SAVE' | translate }}
+        </ion-button>
+        <ion-button expand="block" (click)="toggleEdit()" color="medium" fill="outline">
+          <ion-icon name="close-outline" slot="start"></ion-icon>
+          {{ 'DRIVER_PROFILE.CANCEL' | translate }}
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>
