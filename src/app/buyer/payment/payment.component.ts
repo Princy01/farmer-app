@@ -283,7 +283,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
           : null,
         load_type: transportData.load_type || 'general',
         status: 'open',
-        order_ids: orderIds
+        order_ids: orderIds,
+        base_price: transportData.base_price || 0
       };
 
       console.log('Creating transport job with request:', transportRequest);

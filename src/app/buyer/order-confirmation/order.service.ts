@@ -38,11 +38,12 @@ export interface CreateOrderResponse {
 export interface TransportRequestWithOrders {
   distance: number;
   delivery_type: string;
-  urgency?: string | null;
+  urgency: 'low' | 'standard' | 'high';
   requested_date?: Date | null;
   load_type: string;
   status: string;
   order_ids: number[];
+  base_price: number;
 }
 
 export interface RetailerOrderResponse {
