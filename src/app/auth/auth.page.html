@@ -28,22 +28,13 @@
       <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="mail-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-input
-              [placeholder]="'AUTH.EMAIL_PHONE_PLACEHOLDER' | translate"
-              formControlName="identifier"
-              class="input-field"
-            >
+            <ion-icon name="mail-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-input [placeholder]="'AUTH.EMAIL_PHONE_PLACEHOLDER' | translate" formControlName="identifier"
+              class="input-field">
             </ion-input>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="loginForm.get('identifier')?.touched && loginForm.get('identifier')?.errors"
-          >
+          <div class="error-message"
+            *ngIf="loginForm.get('identifier')?.touched && loginForm.get('identifier')?.errors">
             <span *ngIf="loginForm.get('identifier')?.errors?.['required']">
               {{ 'AUTH.EMAIL_PHONE_REQUIRED' | translate }}
             </span>
@@ -55,30 +46,15 @@
 
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="lock-closed-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-input
-              [type]="showLoginPassword ? 'text' : 'password'"
-              [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
-              formControlName="password"
-              class="input-field"
-            >
+            <ion-icon name="lock-closed-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-input [type]="showLoginPassword ? 'text' : 'password'"
+              [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate" formControlName="password" class="input-field">
             </ion-input>
-            <ion-icon
-              [name]="showLoginPassword ? 'eye-off-outline' : 'eye-outline'"
-              slot="end"
-              class="password-toggle"
-              (click)="toggleLoginPasswordVisibility()"
-            >
+            <ion-icon [name]="showLoginPassword ? 'eye-off-outline' : 'eye-outline'" slot="end" class="password-toggle"
+              (click)="toggleLoginPasswordVisibility()">
             </ion-icon>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors"
-          >
+          <div class="error-message" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors">
             <span *ngIf="loginForm.get('password')?.errors?.['required']">
               {{ 'AUTH.PASSWORD_REQUIRED' | translate }}
             </span>
@@ -92,22 +68,9 @@
           <a class="forgot-password-link">{{ 'AUTH.FORGOT_PASSWORD' | translate }}</a>
         </div>
 
-        <ion-button
-          type="submit"
-          expand="block"
-          class="login-button"
-          [disabled]="loginForm.invalid || isLoading"
-        >
-          <ion-spinner
-            *ngIf="isLoading"
-            name="circles"
-            slot="start"
-          ></ion-spinner>
-          <ion-icon
-            *ngIf="!isLoading"
-            name="log-in-outline"
-            slot="start"
-          ></ion-icon>
+        <ion-button type="submit" expand="block" class="login-button" [disabled]="loginForm.invalid || isLoading">
+          <ion-spinner *ngIf="isLoading" name="circles" slot="start"></ion-spinner>
+          <ion-icon *ngIf="!isLoading" name="log-in-outline" slot="start"></ion-icon>
           {{ isLoading ? ('AUTH.SIGNING_IN' | translate) : ('AUTH.SIGN_IN' | translate) }}
         </ion-button>
       </form>
@@ -118,44 +81,26 @@
       <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="person-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-input
-              [placeholder]="'AUTH.FULL_NAME_PLACEHOLDER' | translate"
-              formControlName="name"
-              class="input-field"
-            >
+            <ion-icon name="person-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-input [placeholder]="'AUTH.FULL_NAME_PLACEHOLDER' | translate" formControlName="name"
+              class="input-field">
             </ion-input>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.errors?.['required']"
-          >
+          <div class="error-message"
+            *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.errors?.['required']">
             {{ 'AUTH.FULL_NAME_REQUIRED' | translate }}
           </div>
         </div>
 
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="mail-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-input
-              [placeholder]="'AUTH.EMAIL_PHONE_PLACEHOLDER' | translate"
-              formControlName="identifier"
-              class="input-field"
-            >
+            <ion-icon name="mail-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-input [placeholder]="'AUTH.EMAIL_PHONE_PLACEHOLDER' | translate" formControlName="identifier"
+              class="input-field">
             </ion-input>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('identifier')?.touched && registerForm.get('identifier')?.errors"
-          >
+          <div class="error-message"
+            *ngIf="registerForm.get('identifier')?.touched && registerForm.get('identifier')?.errors">
             <span *ngIf="registerForm.get('identifier')?.errors?.['required']">
               {{ 'AUTH.EMAIL_PHONE_REQUIRED' | translate }}
             </span>
@@ -167,30 +112,16 @@
 
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="lock-closed-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-input
-              [type]="showRegisterPassword ? 'text' : 'password'"
-              [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
-              formControlName="password"
-              class="input-field"
-            >
+            <ion-icon name="lock-closed-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-input [type]="showRegisterPassword ? 'text' : 'password'"
+              [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate" formControlName="password" class="input-field">
             </ion-input>
-            <ion-icon
-              [name]="showRegisterPassword ? 'eye-off-outline' : 'eye-outline'"
-              slot="end"
-              class="password-toggle"
-              (click)="toggleRegisterPasswordVisibility()"
-            >
+            <ion-icon [name]="showRegisterPassword ? 'eye-off-outline' : 'eye-outline'" slot="end"
+              class="password-toggle" (click)="toggleRegisterPasswordVisibility()">
             </ion-icon>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors"
-          >
+          <div class="error-message"
+            *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors">
             <span *ngIf="registerForm.get('password')?.errors?.['required']">
               {{ 'AUTH.PASSWORD_REQUIRED' | translate }}
             </span>
@@ -203,33 +134,16 @@
         <!-- State field (first in cascade) -->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="map-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-select
-              [placeholder]="'AUTH.SELECT_STATE' | translate"
-              formControlName="state"
-              class="role-select"
-            >
-              <ion-select-option
-                *ngFor="let state of states"
-                [value]="state.id"
-              >
+            <ion-icon name="map-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-select [placeholder]="'AUTH.SELECT_STATE' | translate" formControlName="state" class="role-select">
+              <ion-select-option *ngFor="let state of states" [value]="state.id">
                 {{ state.state_name }}
               </ion-select-option>
             </ion-select>
-            <ion-spinner
-              *ngIf="isLoadingStates"
-              name="dots"
-              slot="end"
-            ></ion-spinner>
+            <ion-spinner *ngIf="isLoadingStates" name="dots" slot="end"></ion-spinner>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('state')?.touched && registerForm.get('state')?.errors?.['required']"
-          >
+          <div class="error-message"
+            *ngIf="registerForm.get('state')?.touched && registerForm.get('state')?.errors?.['required']">
             {{ 'AUTH.STATE_REQUIRED' | translate }}
           </div>
         </div>
@@ -237,31 +151,17 @@
         <!-- City field (second in cascade) -->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="business-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-select
-              [placeholder]="'AUTH.SELECT_CITY' | translate"
-              formControlName="city"
-              class="role-select"
-              [disabled]="!registerForm.get('state')?.value"
-            >
+            <ion-icon name="business-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-select [placeholder]="'AUTH.SELECT_CITY' | translate" formControlName="city" class="role-select"
+              [disabled]="!registerForm.get('state')?.value">
               <ion-select-option *ngFor="let city of cities" [value]="city.id">
                 {{ city.city_name }}
               </ion-select-option>
             </ion-select>
-            <ion-spinner
-              *ngIf="isLoadingCities"
-              name="dots"
-              slot="end"
-            ></ion-spinner>
+            <ion-spinner *ngIf="isLoadingCities" name="dots" slot="end"></ion-spinner>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('city')?.touched && registerForm.get('city')?.errors?.['required']"
-          >
+          <div class="error-message"
+            *ngIf="registerForm.get('city')?.touched && registerForm.get('city')?.errors?.['required']">
             {{ 'AUTH.CITY_REQUIRED' | translate }}
           </div>
         </div>
@@ -269,34 +169,17 @@
         <!-- Location field (third in cascade) -->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="location-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-select
-              [placeholder]="'AUTH.SELECT_LOCATION' | translate"
-              formControlName="location"
-              class="role-select"
-              [disabled]="!registerForm.get('city')?.value"
-            >
-              <ion-select-option
-                *ngFor="let location of locations"
-                [value]="location.id"
-              >
+            <ion-icon name="location-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-select [placeholder]="'AUTH.SELECT_LOCATION' | translate" formControlName="location"
+              class="role-select" [disabled]="!registerForm.get('city')?.value">
+              <ion-select-option *ngFor="let location of locations" [value]="location.id">
                 {{ location.location_name }}
               </ion-select-option>
             </ion-select>
-            <ion-spinner
-              *ngIf="isLoadingLocations"
-              name="dots"
-              slot="end"
-            ></ion-spinner>
+            <ion-spinner *ngIf="isLoadingLocations" name="dots" slot="end"></ion-spinner>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('location')?.touched && registerForm.get('location')?.errors?.['required']"
-          >
+          <div class="error-message"
+            *ngIf="registerForm.get('location')?.touched && registerForm.get('location')?.errors?.['required']">
             {{ 'AUTH.LOCATION_REQUIRED' | translate }}
           </div>
         </div>
@@ -304,22 +187,13 @@
         <!-- Address field (after location selection) -->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="storefront-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-input
-              [placeholder]="'AUTH.ADDRESS_PLACEHOLDER' | translate"
-              formControlName="address"
-              class="input-field"
-            >
+            <ion-icon name="storefront-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-input [placeholder]="'AUTH.ADDRESS_PLACEHOLDER' | translate" formControlName="address"
+              class="input-field">
             </ion-input>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('address')?.touched && registerForm.get('address')?.errors?.['required']"
-          >
+          <div class="error-message"
+            *ngIf="registerForm.get('address')?.touched && registerForm.get('address')?.errors?.['required']">
             {{ 'AUTH.ADDRESS_REQUIRED' | translate }}
           </div>
         </div>
@@ -327,22 +201,13 @@
         <!-- Pincode field -->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="mail-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-input
-              [placeholder]="'AUTH.PINCODE_PLACEHOLDER' | translate"
-              formControlName="pincode"
-              class="input-field"
-            >
+            <ion-icon name="mail-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-input [placeholder]="'AUTH.PINCODE_PLACEHOLDER' | translate" formControlName="pincode"
+              class="input-field">
             </ion-input>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('pincode')?.touched && registerForm.get('pincode')?.errors?.['required']"
-          >
+          <div class="error-message"
+            *ngIf="registerForm.get('pincode')?.touched && registerForm.get('pincode')?.errors?.['required']">
             {{ 'AUTH.PINCODE_REQUIRED' | translate }}
           </div>
         </div>
@@ -350,51 +215,55 @@
         <!-- Role selection -->
         <div class="input-group">
           <ion-item class="custom-input" lines="none">
-            <ion-icon
-              name="business-outline"
-              slot="start"
-              class="input-icon"
-            ></ion-icon>
-            <ion-select
-              [placeholder]="'AUTH.SELECT_ROLE' | translate"
-              formControlName="role_id"
-              class="role-select"
-            >
-              <ion-select-option
-                *ngFor="let role of userRoles"
-                [value]="role.id"
-              >
+            <ion-icon name="business-outline" slot="start" class="input-icon"></ion-icon>
+            <ion-select [placeholder]="'AUTH.SELECT_ROLE' | translate" formControlName="role_id" class="role-select">
+              <ion-select-option *ngFor="let role of userRoles" [value]="role.id">
                 {{ role.name | translate }}
               </ion-select-option>
             </ion-select>
           </ion-item>
-          <div
-            class="error-message"
-            *ngIf="registerForm.get('role_id')?.touched && registerForm.get('role_id')?.errors?.['required']"
-          >
+          <div class="error-message"
+            *ngIf="registerForm.get('role_id')?.touched && registerForm.get('role_id')?.errors?.['required']">
             {{ 'AUTH.ROLE_REQUIRED' | translate }}
           </div>
         </div>
 
-        <ion-button
-          type="submit"
-          expand="block"
-          class="register-button"
-          [disabled]="registerForm.invalid || isLoading"
-        >
-          <ion-spinner
-            *ngIf="isLoading"
-            name="circles"
-            slot="start"
-          ></ion-spinner>
-          <ion-icon
-            *ngIf="!isLoading"
-            name="person-add-outline"
-            slot="start"
-          ></ion-icon>
+        <ion-button type="submit" expand="block" class="register-button" [disabled]="registerForm.invalid || isLoading">
+          <ion-spinner *ngIf="isLoading" name="circles" slot="start"></ion-spinner>
+          <ion-icon *ngIf="!isLoading" name="person-add-outline" slot="start"></ion-icon>
           {{ isLoading ? ('AUTH.CREATING_ACCOUNT' | translate) : ('AUTH.CREATE_ACCOUNT' | translate) }}
         </ion-button>
       </form>
+    </div>
+
+    <div class="form-container" *ngIf="authMode === 'verify-email'">
+      <div class="verification-container">
+        <div class="verification-icon-wrapper">
+          <ion-icon name="mail-outline" class="verification-icon"></ion-icon>
+        </div>
+
+        <h2 class="verification-title">{{ 'AUTH.VERIFY_EMAIL_TITLE' | translate }}</h2>
+
+        <p class="verification-message">
+          {{ 'AUTH.VERIFY_EMAIL_MESSAGE' | translate }}
+        </p>
+
+        <p class="verification-email">{{ pendingVerificationEmail }}</p>
+
+        <ion-button expand="block" class="resend-button" (click)="resendVerificationEmail()"
+          [disabled]="isResending || resendCooldown > 0">
+          <ion-spinner *ngIf="isResending" name="circles" slot="start"></ion-spinner>
+          <ion-icon *ngIf="!isResending" name="refresh-outline" slot="start"></ion-icon>
+          {{ resendCooldown > 0 ?
+          ('AUTH.RESEND_IN' | translate: {seconds: resendCooldown}) :
+          ('AUTH.RESEND_EMAIL' | translate) }}
+        </ion-button>
+
+        <ion-button expand="block" fill="clear" class="back-button" (click)="backToLogin()">
+          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+          {{ 'AUTH.BACK_TO_LOGIN' | translate }}
+        </ion-button>
+      </div>
     </div>
 
     <!-- Features Section -->
@@ -408,10 +277,7 @@
         <span class="feature-text">{{ 'AUTH.FEATURE_DELIVERY' | translate }}</span>
       </div>
       <div class="feature-item">
-        <ion-icon
-          name="shield-checkmark-outline"
-          class="feature-icon"
-        ></ion-icon>
+        <ion-icon name="shield-checkmark-outline" class="feature-icon"></ion-icon>
         <span class="feature-text">{{ 'AUTH.FEATURE_SECURE' | translate }}</span>
       </div>
     </div>

@@ -1,0 +1,59 @@
+<ion-content class="verification-content">
+  <div class="background-overlay"></div>
+
+  <div class="verification-wrapper">
+    <!-- Loading State -->
+    <div class="verification-state" *ngIf="isVerifying">
+      <div class="spinner-container">
+        <ion-spinner name="crescent" class="large-spinner"></ion-spinner>
+      </div>
+      <h2>{{ 'AUTH.VERIFYING_EMAIL' | translate }}</h2>
+      <p>{{ 'AUTH.PLEASE_WAIT' | translate }}</p>
+    </div>
+
+    <!-- Success State -->
+    <div class="verification-state success-state" *ngIf="verificationSuccess">
+      <div class="icon-container success-icon">
+        <ion-icon name="checkmark-circle"></ion-icon>
+      </div>
+      <h2>{{ 'AUTH.EMAIL_VERIFIED_TITLE' | translate }}</h2>
+      <p>{{ 'AUTH.EMAIL_VERIFIED_MESSAGE' | translate }}</p>
+      
+      <div class="countdown-container">
+        <p class="countdown-text">
+          {{ 'AUTH.REDIRECTING_IN' | translate: {seconds: countdown} }}
+        </p>
+        <ion-progress-bar [value]="countdown / 5" color="success"></ion-progress-bar>
+      </div>
+
+      <ion-button
+        expand="block"
+        class="action-button success-button"
+        (click)="goToLogin()">
+        <ion-icon name="log-in-outline" slot="start"></ion-icon>
+        {{ 'AUTH.GO_TO_LOGIN' | translate }}
+      </ion-button>
+    </div>
+
+    <!-- Error State -->
+    <div class="verification-state error-state" *ngIf="verificationError">
+      <div class="icon-container error-icon">
+        <ion-icon name="close-circle"></ion-icon>
+      </div>
+      <h2>{{ 'AUTH.VERIFICATION_FAILED_TITLE' | translate }}</h2>
+      <p class="error-message">{{ errorMessage }}</p>
+      
+      <div class="help-text">
+        <p>{{ 'AUTH.VERIFICATION_HELP' | translate }}</p>
+      </div>
+
+      <ion-button
+        expand="block"
+        class="action-button error-button"
+        (click)="goToLogin()">
+        <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+        {{ 'AUTH.BACK_TO_LOGIN' | translate }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

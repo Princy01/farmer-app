@@ -61,6 +61,22 @@ export interface City {
   city_name: string;
 }
 
+export interface RegistrationResponse {
+  message: string;
+  user_id?: number;
+  email_verification_required?: boolean;
+  verification_sent?: boolean;
+}
+
+export interface LoginResponse {
+  message: string;
+  role_id?: number;
+  access_token?: string;
+  refresh_token?: string;
+  error?: string;
+  email_verification_required?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -73,12 +89,12 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
-  login(credentials: LoginCredentials): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials)
+  login(credentials: LoginCredentials): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials)
       .pipe(
         tap(response => {
           if (response.access_token && response.refresh_token) {
-            this.setAuthData(response.access_token, response.refresh_token, response.role_id);
+            this.setAuthData(response.access_token, response.refresh_token, response.role_id!);
           }
         })
       );
@@ -114,9 +130,9 @@ export class AuthService {
       );
   }
 
-  registerUser(userData: UserRegistration): Observable<any> {
+  registerUser(userData: UserRegistration): Observable<RegistrationResponse> {
     const url = `${this.apiUrl}/auth/register-user`;
-    return this.http.post(url, userData)
+    return this.http.post<RegistrationResponse>(url, userData)
       .pipe(
         catchError(error => {
           return throwError(() => error);
@@ -224,7 +240,7 @@ export class AuthService {
     return userRole ? roles.includes(userRole) : false;
   }
 
-   getStates(): Observable<State[]> {
+  getStates(): Observable<State[]> {
     return this.http.get<State[]>(`${this.apiUrl}/getStates`)
       .pipe(
         catchError(error => {
@@ -249,5 +265,13 @@ export class AuthService {
           return throwError(() => error);
         })
       );
+  }
+
+  verifyEmail(token: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/verify-email`, { token });
+  }
+
+  resendVerification(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/resend-verification`, { email });
   }
 }

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { VerifyEmailPage } from './verify-email/verify-email.page';
 
 export const routes: Routes = [
   {
@@ -9,6 +10,10 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./auth/auth.page').then((m) => m.LoginPage),
+  },
+  {
+    path: 'verify-email',
+    component: VerifyEmailPage
   },
   {
     path: 'wholesaler/home',

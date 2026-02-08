@@ -62,6 +62,7 @@ export class BusinessRegistrationComponent implements OnInit {
   private checkBusinessExistence() {
     this.businessRegistrationService.getBusinessExistsOrNot().subscribe({
       next: (exists: boolean) => {
+        console.log('Business existence check result:', exists);  
         if (exists) {
           this.router.navigate(['/buyer/buyer-home']);
         } else {

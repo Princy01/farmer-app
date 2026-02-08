@@ -31,7 +31,7 @@ enum UserRole {
 export class LoginPage {
   loginForm: FormGroup;
   registerForm: FormGroup;
-  authMode: 'login' | 'register' = 'login';
+  authMode: 'login' | 'register' | 'verify-email' = 'login';
   showLoginPassword = false;
   showRegisterPassword = false;
   isLoading = false;
@@ -41,6 +41,11 @@ export class LoginPage {
   isLoadingStates = false;
   isLoadingCities = false;
   isLoadingLocations = false;
+
+  pendingVerificationEmail: string = '';
+  isResending: boolean = false;
+  resendCooldown: number = 0;
+  private cooldownTimer: any;
 
   userRoles = [
     { id: UserRole.Wholesaler, name: 'AUTH.ROLE_WHOLESALER' },
@@ -157,11 +162,22 @@ export class LoginPage {
     this.authService.login(credentials).subscribe({
       next: (response) => {
         this.isLoading = false;
+
+        // Check if email verification is required
+        if (response.email_verification_required) {
+          this.pendingVerificationEmail = credentials.identifier;
+          this.authMode = 'verify-email';
+          this.presentToast(
+            this.translate.instant('AUTH.EMAIL_NOT_VERIFIED'),
+            'warning'
+          );
+          return;
+        }
+
         this.presentToast(this.translate.instant('AUTH.LOGIN_SUCCESS'), 'success');
 
         const userRole = this.authService.getUserRole();
-
-        // Navigate based on role
+        console.log('Logged in user role:', userRole);
         setTimeout(() => {
           switch (userRole) {
             case 'admin':
@@ -188,9 +204,13 @@ export class LoginPage {
 
         let errorMessage = this.translate.instant('AUTH.LOGIN_ERROR');
 
-        if (error.error && error.error.error) {
-          if (error.error.error.includes('invalid credentials') ||
-            error.error.error.includes('Login failed')) {
+        // Check for email verification error
+        if (error.status === 403 && error.error && error.error.error === 'email_not_verified') {
+          this.pendingVerificationEmail = credentials.identifier;
+          this.authMode = 'verify-email';
+          errorMessage = this.translate.instant('AUTH.EMAIL_NOT_VERIFIED');
+        } else if (error.error && error.error.error) {
+          if (error.error.error.includes('invalid credentials')) {
             errorMessage = this.translate.instant('AUTH.INVALID_CREDENTIALS');
           }
         } else if (error.status === 0) {
@@ -202,6 +222,7 @@ export class LoginPage {
     });
   }
 
+
   onRegisterSubmit() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -209,19 +230,16 @@ export class LoginPage {
     }
 
     this.isLoading = true;
-
-    // Create a copy of the form data
     const formData = { ...this.registerForm.value };
 
-    // Map form data to match backend expectations
     const userData = {
       identifier: formData.identifier,
       password: formData.password,
       name: formData.name,
       address: formData.address,
       pincode: formData.pincode,
-      location: formData.location, // This is the location ID
-      state: formData.state, // This is the state ID
+      location: formData.location,
+      state: formData.state,
       role_id: formData.role_id,
       active_status: formData.active_status
     };
@@ -229,20 +247,30 @@ export class LoginPage {
     this.authService.registerUser(userData).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.presentToast(this.translate.instant('AUTH.REGISTER_SUCCESS'), 'success');
 
-        // Reset the form and return to login mode
-        this.registerForm.reset({
-          state: null,
-          city: null,
-          location: null,
-          address: '',
-          pincode: '',
-          active_status: 1
-        });
-        this.cities = [];
-        this.locations = [];
-        this.authMode = 'login';
+        // Check if email verification is required
+        if (response.email_verification_required) {
+          this.pendingVerificationEmail = formData.identifier;
+          this.authMode = 'verify-email';
+          this.presentToast(
+            this.translate.instant('AUTH.VERIFICATION_EMAIL_SENT'),
+            'success'
+          );
+        } else {
+          // Phone registration - no verification needed
+          this.presentToast(this.translate.instant('AUTH.REGISTER_SUCCESS'), 'success');
+          this.registerForm.reset({
+            state: null,
+            city: null,
+            location: null,
+            address: '',
+            pincode: '',
+            active_status: 1
+          });
+          this.cities = [];
+          this.locations = [];
+          this.authMode = 'login';
+        }
       },
       error: (error) => {
         this.isLoading = false;
@@ -266,6 +294,7 @@ export class LoginPage {
       }
     });
   }
+
 
   loadStates() {
     this.isLoadingStates = true;
@@ -310,5 +339,49 @@ export class LoginPage {
         this.presentToast(this.translate.instant('AUTH.LOAD_LOCATIONS_ERROR'), 'danger');
       }
     });
+  }
+
+  async resendVerificationEmail() {
+    if (this.resendCooldown > 0) return;
+
+    this.isResending = true;
+    this.authService.resendVerification(this.pendingVerificationEmail).subscribe({
+      next: () => {
+        this.isResending = false;
+        this.presentToast(this.translate.instant('AUTH.VERIFICATION_EMAIL_RESENT'), 'success');
+        this.startCooldown(60);
+      },
+      error: (error) => {
+        this.isResending = false;
+        let errorMessage = this.translate.instant('AUTH.RESEND_FAILED');
+        if (error.error && error.error.error === 'Email already verified') {
+          errorMessage = this.translate.instant('AUTH.EMAIL_ALREADY_VERIFIED');
+          this.authMode = 'login';
+        }
+        this.presentToast(errorMessage, 'danger');
+      }
+    });
+  }
+
+  private startCooldown(seconds: number) {
+    this.resendCooldown = seconds;
+    this.cooldownTimer = setInterval(() => {
+      this.resendCooldown--;
+      if (this.resendCooldown <= 0) {
+        clearInterval(this.cooldownTimer);
+      }
+    }, 1000);
+  }
+
+  backToLogin() {
+    this.authMode = 'login';
+    this.pendingVerificationEmail = '';
+    this.loginForm.reset();
+  }
+
+  ngOnDestroy() {
+    if (this.cooldownTimer) {
+      clearInterval(this.cooldownTimer);
+    }
   }
 }
