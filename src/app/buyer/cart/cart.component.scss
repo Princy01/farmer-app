@@ -2,7 +2,6 @@
   --background: #f8f9fa;
 }
 
-/* ─── Header ──────────────────────────────────────────────────────────────── */
 .cart-toolbar {
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --color: #fff;
@@ -31,7 +30,6 @@
   margin-right: 8px;
 }
 
-/* ─── Loading overlay ─────────────────────────────────────────────────────── */
 .loading-overlay {
   position: fixed;
   inset: 0;
@@ -50,7 +48,6 @@
   font-weight: 500;
 }
 
-/* ─── Select All row ──────────────────────────────────────────────────────── */
 .select-all-row {
   display: flex;
   align-items: center;

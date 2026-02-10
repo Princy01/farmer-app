@@ -201,7 +201,7 @@ export class CartComponent implements OnInit, OnDestroy {
           items: [],
           subtotal: 0,
           isSelected: prev?.isSelected ?? false,   // default not selected when single-select
-          isExpanded: prev?.isExpanded ?? false  // default collapsed
+          isExpanded: prev?.isExpanded ?? true  // default expanded
         });
       }
 
@@ -417,7 +417,7 @@ export class CartComponent implements OnInit, OnDestroy {
       state: {
         cartItems: selectedItems,
         discount: this.discount,
-        totalPrice: this.selectedSubtotal,  
+        totalPrice: this.selectedSubtotal,
         wholesalerGroups: selected.map((g: WholesalerGroup) => ({
           wholesalerId: g.wholesalerId,
           branchId: g.branchId,
@@ -425,7 +425,7 @@ export class CartComponent implements OnInit, OnDestroy {
           branchName: g.branchName,
           itemCount: g.items.length,
           subtotal: g.subtotal,
-          items: g.items 
+          items: g.items
         }))
       }
     });

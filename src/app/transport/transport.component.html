@@ -7,6 +7,17 @@
     </ion-header>
     <ion-content class="ion-padding">
       <ion-list>
+
+         <ion-menu-toggle>
+          <ion-item
+            routerLink="/transport/profile"
+            [ngClass]="{ selected: isActive('/transport/profile') }"
+          >
+            <ion-icon name="person-circle-outline" slot="start"></ion-icon>
+            <ion-label>Profile</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
         <ion-menu-toggle>
           <ion-item
             routerLink="/transport/transport-dashboard"
@@ -69,6 +80,16 @@
           </ion-item>
         </ion-menu-toggle>
 
+        <ion-menu-toggle>
+          <ion-item
+            routerLink="/transport/driver-info"
+            [ngClass]="{ selected: isActive('/transport/driver-info') }"
+          >
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-label>Driver Information</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
         <!-- <ion-menu-toggle>
           <ion-item
             routerLink="/transport/live-tracking"
@@ -120,16 +141,6 @@
           >
             <ion-icon name="time-outline" slot="start"></ion-icon>
             <ion-label>Delivery History</ion-label>
-          </ion-item>
-        </ion-menu-toggle>
-
-        <ion-menu-toggle>
-          <ion-item
-            routerLink="/transport/profile"
-            [ngClass]="{ selected: isActive('/transport/profile') }"
-          >
-            <ion-icon name="person-circle-outline" slot="start"></ion-icon>
-            <ion-label>Profile</ion-label>
           </ion-item>
         </ion-menu-toggle>
 

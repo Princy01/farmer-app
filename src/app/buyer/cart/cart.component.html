@@ -79,6 +79,11 @@
               <span class="subtotal-amount">₹{{ group.subtotal }}</span>
             </div>
 
+            <!-- Delete group button -->
+            <ion-button fill="clear" class="remove-group-btn" (click)="$event.stopPropagation(); removeGroup(group)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+
             <!-- Expand / collapse chevron -->
             <ion-icon
               [name]="group.isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"
@@ -89,13 +94,6 @@
           <!-- ─── Expanded item list ──────────────────────────────────────── -->
           @if (group.isExpanded) {
             <div class="group-items">
-
-              <!-- Delete-group button (top right of expanded area) -->
-              <div class="group-actions">
-                <ion-button fill="clear" class="remove-group-btn" (click)="removeGroup(group)">
-                  <ion-icon name="trash-outline"></ion-icon>
-                </ion-button>
-              </div>
 
               @for (item of group.items; track item.selected_id; let i = $index) {
                 <div class="item-row">

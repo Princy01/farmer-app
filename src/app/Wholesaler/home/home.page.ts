@@ -21,7 +21,7 @@ import {
   logOutOutline, createOutline, notificationsOutline,
   receiptOutline, searchOutline, chevronDownCircleOutline,
   languageOutline, chevronDownOutline, checkmarkOutline,
-  carOutline
+  carOutline, informationCircleOutline
 } from 'ionicons/icons';
 
 import { WholesalerApiService, WholesalerProduct } from '../services/wholesaler-api.service';
@@ -47,7 +47,6 @@ interface Language {
 export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  // ===== DATA =====
   items: WholesalerProduct[] = [];
   filteredItems: WholesalerProduct[] = [];
   currentPage = 0;
@@ -55,15 +54,12 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   isInfiniteScrollEnabled = true;
   isLoading = false;
 
-  // ===== SEARCH =====
   searchTerm = '';
   private searchTimeout: any;
 
-  // ===== UI =====
   notifications = 0;
   messages = 0;
 
-  // ===== LANGUAGE =====
   languages: Language[] = [];
   currentLanguage = 'English';
 
@@ -90,15 +86,11 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       logOutOutline, createOutline, notificationsOutline,
       receiptOutline, searchOutline, chevronDownCircleOutline,
       languageOutline, chevronDownOutline, checkmarkOutline,
-      carOutline
+      carOutline, informationCircleOutline
     });
 
     this.translate.setDefaultLang('en');
   }
-
-  // =====================================================
-  // LIFECYCLE
-  // =====================================================
 
   ngOnInit() {
     this.setItemsPerPage();
@@ -122,10 +114,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // =====================================================
-  // AUTH + INITIAL LOAD
-  // =====================================================
-
   private checkAuthAndLoad() {
     if (!this.authService.isAuthenticated()) {
       this.showAuthError();
@@ -139,10 +127,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
     this.loadProducts(true);
   }
-
-  // =====================================================
-  // DATA LOADING
-  // =====================================================
 
   async loadProducts(reset = false) {
     if (this.isLoading) return;
@@ -191,10 +175,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     this.checkAuthAndLoad();
   }
 
-  // =====================================================
-  // INFINITE SCROLL
-  // =====================================================
-
   onInfiniteScroll(event: any) {
     this.loadProducts();
     event.target.complete();
@@ -214,10 +194,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // =====================================================
-  // SEARCH
-  // =====================================================
-
   searchItems(event: any) {
     const value = event.target.value || '';
 
@@ -230,10 +206,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       this.loadProducts(true);
     }, 300);
   }
-
-  // =====================================================
-  // NAVIGATION
-  // =====================================================
 
   viewDetails(item: WholesalerProduct) {
     try {
@@ -259,6 +231,10 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   async navigateToBusinessLocations() {
     await this.safeNavigate('/wholesaler/business-locations');
+  }
+
+  async navigateToBusinessInfo() {
+    await this.safeNavigate('/wholesaler/business-info');
   }
 
   async navigateToUpdateBusiness() {
@@ -318,10 +294,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // =====================================================
-  // MENU
-  // =====================================================
-
   async openMenu() {
     try {
       await this.menuService.openMenu();
@@ -372,10 +344,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     await alert.present();
   }
 
-  // =====================================================
-  // HEADER ACTIONS
-  // =====================================================
-
   openNotifications() {
     try {
       this.router.navigate(['/wholesaler/notifications']);
@@ -391,10 +359,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       console.error('Error opening trends:', error);
     }
   }
-
-  // =====================================================
-  // LANGUAGE
-  // =====================================================
 
   private loadLanguagePreference() {
     const savedLang = localStorage.getItem('wholesaler_language');
@@ -461,10 +425,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
         }
       });
   }
-
-  // =====================================================
-  // UTILS
-  // =====================================================
 
   private setItemsPerPage() {
     if (window.innerWidth >= 1536) this.itemsPerPage = 20;

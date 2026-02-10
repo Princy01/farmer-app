@@ -4,6 +4,7 @@
       "Menu": "Menu",
       "Profile": "Profile",
       "Business Locations": "Business Locations",
+      "Business Info": "Business Info",
       "Update Business": "Update Business",
       "Orders Received": "Orders Received",
       "Stock Dashboard": "Stock Dashboard",
@@ -209,6 +210,15 @@
       "SERVICE_UNAVAILABLE": "Service is temporarily unavailable. Please try again later.",
       "MISSING_REQUIRED_FIELDS": "Missing required fields. Please fill in all required information."
     },
+
+    "WHOLESALER_BUSINESS_INFO": {
+    "Business Info": "Business Info",
+    "Save Changes": "Save Changes",
+    "UPDATING": "Updating business info...",
+    "UPDATE_SUCCESS": "Business info updated successfully!",
+    "FIX_ERRORS": "Please fix the errors before submitting."
+  },
+
     "ORDER_DETAILS": {
       "Order": "Order",
       "Status": "Status",
@@ -1011,6 +1021,38 @@
       "CREATED": "Created",
       "LAST_UPDATED": "Last Updated"
     },
+
+    "RETAILER_BUSINESS_INFO": {
+    "Business Info": "Business Info",
+    "Business Information": "Business Information",
+    "Registration Number": "Registration Number",
+    "Owner Name": "Owner Name",
+    "Business Category": "Business Category",
+    "Business Type": "Business Type",
+    "Established Year": "Established Year",
+    "Location Information": "Location Information",
+    "State": "State",
+    "City": "City",
+    "Location": "Location",
+    "Address": "Address",
+    "Address is required": "Address is required",
+    "Contact Information": "Contact Information",
+    "Mobile Number": "Mobile Number",
+    "Email": "Email",
+    "Mobile number is required": "Mobile number is required",
+    "Please enter a valid 10-digit mobile number": "Please enter a valid 10-digit mobile number",
+    "Email is required": "Email is required",
+    "Please enter a valid email address": "Please enter a valid email address",
+    "Legal Information": "Legal Information",
+    "GST Number": "GST Number",
+    "PAN Number": "PAN Number",
+    "GST number is required": "GST number is required",
+    "Save Changes": "Save Changes",
+    "FIX_ERRORS": "Please fix the errors before saving",
+    "UPDATING": "Updating...",
+    "UPDATE_SUCCESS": "Business info updated successfully"
+  },
+
     "BUSINESS_REGISTRATION": {
       "PAGE_TITLE": "Business Registration",
       "FORM_TITLE": "Register Your Business",
@@ -1108,6 +1150,7 @@
       "APP_TITLE": "Farmer App",
       "MENU_TITLE": "Menu",
       "PROFILE": "Profile",
+      "BUSINESS_INFO": "Business Info",
       "ORDER_HISTORY": "Order History",
       "BUSINESS_LOCATIONS": "Business Locations",
       "UPDATE_BUSINESS": "Update Business",
@@ -1397,9 +1440,9 @@
       "URGENT": "Urgent",
       "NORMAL": "Standard",
       "PAY_NOW": "Pay Now",
-      "ERROR_NO_ITEMS": "No items found in the order",
-      "ERROR_ORDER_CREATION": "Failed to create order. Please try again.",
-      "ERROR_TRANSPORT_JOB": "Order placed but transport request failed. Please contact support."
+    "ORDER_PLACED_SUCCESS": "Order placed successfully!",
+    "PAYMENT_SUCCESS": "Payment successful!",
+    "PAYMENT_FAILED_MSG": "Payment failed. Please try again."
     },
     "RETAILER_ORDER_DETAILS": {
       "TITLE": "Order Details",
@@ -1689,6 +1732,28 @@
       "CHARGES": "Charges",
       "RESOLVE_DISPUTE": "Resolve Dispute"
     },
+
+    "DRIVER_INFO": {
+    "Driver Information": "Driver Information",
+    "LOADING": "Loading driver information...",
+    "ERROR_LOADING": "Failed to load driver information",
+    "INVALID_FORM": "Please correct the errors in the form",
+    "UPDATING": "Updating driver information...",
+    "UPDATE_SUCCESS": "Driver information updated successfully",
+    "UPDATE_ERROR": "Failed to update driver information",
+    "Contact number is required": "Contact number is required",
+    "Please enter a valid 10-digit mobile number": "Please enter a valid 10-digit mobile number",
+    "Please enter a valid email address": "Please enter a valid email address",
+    "Street is required": "Street is required",
+    "Pin code is required": "Pin code is required",
+    "Please enter a valid 6-digit pin code": "Please enter a valid 6-digit pin code",
+    "Bank account number is required": "Bank account number is required",
+    "Bank name is required": "Bank name is required",
+    "IFSC code is required": "IFSC code is required",
+    "Please enter a valid IFSC code": "Please enter a valid IFSC code",
+    "Save Changes": "Save Changes"
+  },
+
     "DRIVER_REGISTRATION": {
       "CHECKING_STATUS": "Checking registration status...",
       "STEP": "Step",

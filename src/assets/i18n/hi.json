@@ -4,6 +4,7 @@
     "Menu": "मेनू",
     "Profile": "प्रोफ़ाइल",
     "Business Locations": "व्यवसाय स्थान",
+    "Business Info": "व्यापार जानकारी",
     "Update Business": "व्यवसाय अपडेट करें",
     "Orders Received": "मिले हुए ऑर्डर",
     "Stock Dashboard": "स्टॉक जानकारी",
@@ -221,6 +222,14 @@
   "SERVER_ERROR": "सर्वर में समस्या है। कृपया थोड़ी देर बाद कोशिश करें।",
   "SERVICE_UNAVAILABLE": "सेवा अभी उपलब्ध नहीं है। कृपया बाद में प्रयास करें।",
   "MISSING_REQUIRED_FIELDS": "कुछ जरूरी जानकारी भरना बाकी है। कृपया सभी जरूरी फ़ील्ड भरें।"
+  },
+
+  "WHOLESALER_BUSINESS_INFO": {
+    "Business Info": "व्यवसाय जानकारी",
+    "Save Changes": "परिवर्तन सहेजें",
+    "UPDATING": "व्यवसाय जानकारी अपडेट हो रही है...",
+    "UPDATE_SUCCESS": "व्यवसाय जानकारी सफलतापूर्वक अपडेट हो गई!",
+    "FIX_ERRORS": "कृपया सबमिट करने से पहले त्रुटियाँ ठीक करें।"
   },
 
   "ORDER_DETAILS": {
@@ -1055,6 +1064,38 @@
     "CREATED": "निर्मित",
     "LAST_UPDATED": "अंतिम अपडेट"
   },
+
+  "RETAILER_BUSINESS_INFO": {
+    "Business Info": "व्यापार जानकारी",
+    "Business Information": "व्यापार जानकारी",
+    "Registration Number": "पंजीकरण संख्या",
+    "Owner Name": "मालिक का नाम",
+    "Business Category": "व्यापार श्रेणी",
+    "Business Type": "व्यापार प्रकार",
+    "Established Year": "स्थापना वर्ष",
+    "Location Information": "स्थान जानकारी",
+    "State": "राज्य",
+    "City": "शहर",
+    "Location": "स्थान",
+    "Address": "पता",
+    "Address is required": "पता आवश्यक है",
+    "Contact Information": "संपर्क जानकारी",
+    "Mobile Number": "मोबाइल नंबर",
+    "Email": "ईमेल",
+    "Mobile number is required": "मोबाइल नंबर आवश्यक है",
+    "Please enter a valid 10-digit mobile number": "कृपया एक वैध 10-अंकीय मोबाइल नंबर दर्ज करें",
+    "Email is required": "ईमेल आवश्यक है",
+    "Please enter a valid email address": "कृपया एक वैध ईमेल पता दर्ज करें",
+    "Legal Information": "कानूनी जानकारी",
+    "GST Number": "जीएसटी संख्या",
+    "PAN Number": "पैन संख्या",
+    "GST number is required": "जीएसटी संख्या आवश्यक है",
+    "Save Changes": "परिवर्तन सहेजें",
+    "FIX_ERRORS": "सहेजने से पहले कृपया त्रुटियों को ठीक करें",
+    "UPDATING": "अपडेट हो रहा है...",
+    "UPDATE_SUCCESS": "व्यापार जानकारी सफलतापूर्वक अपडेट हुई"
+  },
+
   "BUSINESS_REGISTRATION": {
     "PAGE_TITLE": "व्यवसाय पंजीकरण",
     "FORM_TITLE": "अपना व्यवसाय रजिस्टर करें",
@@ -1159,6 +1200,7 @@
     "MENU_TITLE": "मेनू",
     "PROFILE": "प्रोफ़ाइल",
     "ORDER_HISTORY": "ऑर्डर सूची",
+    "BUSINESS_INFO": "व्यापार जानकारी",
     "BUSINESS_LOCATIONS": "व्यवसाय स्थान",
     "UPDATE_BUSINESS": "व्यवसाय अपडेट करें",
     "SETTINGS": "सेटिंग्स",
@@ -1452,9 +1494,9 @@
     "URGENT": "तत्काल",
     "NORMAL": "सामान्य",
     "PAY_NOW": "अभी भुगतान करें",
-  "ERROR_NO_ITEMS": "ऑर्डर में कोई सामान नहीं मिला",
-  "ERROR_ORDER_CREATION": "ऑर्डर बन नहीं पाया। कृपया दोबारा कोशिश करें।",
-  "ERROR_TRANSPORT_JOB": "ऑर्डर हो गया है, लेकिन डिलीवरी की व्यवस्था नहीं हो पाई। कृपया सहायता से संपर्क करें।"
+    "ORDER_PLACED_SUCCESS": "ऑर्डर सफलतापूर्वक रखा गया!",
+    "PAYMENT_SUCCESS": "भुगतान सफल!",
+    "PAYMENT_FAILED_MSG": "भुगतान विफल। कृपया पुनः प्रयास करें।"
   },
 
 
@@ -1749,6 +1791,27 @@
     "KG": "किलो",
     "CHARGES": "शुल्क",
     "RESOLVE_DISPUTE": "विवाद का समाधान करें"
+  },
+
+  "DRIVER_INFO": {
+    "Driver Information": "ड्राइवर जानकारी",
+    "LOADING": "ड्राइवर जानकारी लोड हो रही है...",
+    "ERROR_LOADING": "ड्राइवर जानकारी लोड करने में विफल",
+    "INVALID_FORM": "कृपया फॉर्म में त्रुटियों को ठीक करें",
+    "UPDATING": "ड्राइवर जानकारी अपडेट हो रही है...",
+    "UPDATE_SUCCESS": "ड्राइवर जानकारी सफलतापूर्वक अपडेट हुई",
+    "UPDATE_ERROR": "ड्राइवर जानकारी अपडेट करने में विफल",
+    "Contact number is required": "संपर्क संख्या आवश्यक है",
+    "Please enter a valid 10-digit mobile number": "कृपया एक वैध 10-अंकीय मोबाइल संख्या दर्ज करें",
+    "Please enter a valid email address": "कृपया एक वैध ईमेल पता दर्ज करें",
+    "Street is required": "सड़क आवश्यक है",
+    "Pin code is required": "पिन कोड आवश्यक है",
+    "Please enter a valid 6-digit pin code": "कृपया एक वैध 6-अंकीय पिन कोड दर्ज करें",
+    "Bank account number is required": "बैंक खाता संख्या आवश्यक है",
+    "Bank name is required": "बैंक का नाम आवश्यक है",
+    "IFSC code is required": "IFSC कोड आवश्यक है",
+    "Please enter a valid IFSC code": "कृपया एक वैध IFSC कोड दर्ज करें",
+    "Save Changes": "परिवर्तन सहेजें"
   },
 
   "DRIVER_REGISTRATION": {

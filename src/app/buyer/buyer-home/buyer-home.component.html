@@ -75,10 +75,14 @@
         ></ion-icon>
         <ion-label>{{ "BUYER_HOME.ORDER_HISTORY" | translate }}</ion-label>
       </ion-item>
-      <!-- <ion-item button (click)="navigateToBusinessLocations()" lines="none" class="menu-item">
+      <ion-item button (click)="navigateToBusinessLocations()" lines="none" class="menu-item">
         <ion-icon name="location-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'BUYER_HOME.BUSINESS_LOCATIONS' | translate }}</ion-label>
-      </ion-item> -->
+      </ion-item>
+      <ion-item button (click)="navigateToBusinessInfo()" lines="none" class="menu-item">
+        <ion-icon name="business-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'BUYER_HOME.BUSINESS_INFO' | translate }}</ion-label>
+      </ion-item>
       <ion-item
         button
         (click)="navigateToUpdateBusiness()"

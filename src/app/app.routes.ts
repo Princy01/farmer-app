@@ -76,6 +76,10 @@ export const routes: Routes = [
     loadComponent: () => import('./Wholesaler/business-registration/business-registration.component').then((m) => m.BusinessRegistrationComponent),
   },
   {
+    path: 'wholesaler/business-info',
+    loadComponent: () => import('./Wholesaler/business-info/business-info.component').then((m) => m.BusinessInfoComponent),
+  },
+  {
     path: 'wholesaler/business-locations',
     loadComponent: () => import('./Wholesaler/business-locations/business-locations.component').then((m) => m.BusinessLocationsComponent),
   },
@@ -203,6 +207,10 @@ export const routes: Routes = [
       {
         path: 'business-registration',
         loadComponent: () => import('./buyer/business-registration/business-registration.component').then((m) => m.BusinessRegistrationComponent),
+      },
+      {
+        path: 'business-info',
+        loadComponent: () => import('./buyer/business-info/business-info.component').then((m) => m.BusinessInfoComponent),
       },
       {
         path: 'business-locations',
@@ -445,6 +453,10 @@ export const routes: Routes = [
       {
         path: 'location-selection',
         loadComponent: () => import('./transport/location-selection/location-selection.component').then((m) => m.LocationSelectionModalComponent),
+      },
+      {
+        path: 'driver-info',
+        loadComponent: () => import('./transport/driver-info/driver-info.component').then((m) => m.DriverInfoComponent),
       }
     ]
   }

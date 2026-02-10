@@ -28,6 +28,7 @@ export class TransportComponent implements OnInit {
 
   // Mapping of routes to titles
   titleMap: { [key: string]: string } = {
+    '/transport/profile': 'Profile',
     '/transport/transport-dashboard': 'Dashboard',
     '/transport/transport-update-rates': 'Update Rates',
     '/transport/manage-vehicles': 'Manage Vehicles',
@@ -43,6 +44,8 @@ export class TransportComponent implements OnInit {
     '/transport/earnings-dashboard': 'Earnings & Reports',
     '/transport/delivery-history': 'Delivery History',
     '/transport/notifications': 'Notifications',
+    '/transport/settings': 'Settings',
+    '/transport/driver-info': 'Driver Information'
   };
 
   constructor(private router: Router) {

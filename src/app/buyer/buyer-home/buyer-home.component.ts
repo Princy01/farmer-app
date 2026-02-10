@@ -26,7 +26,8 @@ import {
   createOutline,
   logOutOutline,
   languageOutline,
-  chevronDownOutline
+  chevronDownOutline,
+  businessOutline
 } from 'ionicons/icons';
 import { LanguagePopoverComponent } from './language-popover.component';
 import { TranslateApiService } from '../services/translate-api.service';
@@ -93,7 +94,8 @@ export class BuyerHomeComponent implements OnDestroy {
       createOutline,
       logOutOutline,
       languageOutline,
-      chevronDownOutline
+      chevronDownOutline,
+      businessOutline
     });
 
     this.translate.setDefaultLang('en');
@@ -282,6 +284,26 @@ export class BuyerHomeComponent implements OnDestroy {
       });
     } catch (error) {
       console.error('Error navigating to order history:', error);
+      this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
+    }
+  }
+
+  async navigateToBusinessLocations() {
+    try {
+      await this.closeMenu();
+      await this.router.navigate(['/buyer/business-locations']);
+    } catch (error) {
+      console.error('Error navigating to business locations:', error);
+      this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
+    }
+  }
+
+  async navigateToBusinessInfo() {
+    try {
+      await this.closeMenu();
+      await this.router.navigate(['/buyer/business-info']);
+    } catch (error) {
+      console.error('Error navigating to business info:', error);
       this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
     }
   }

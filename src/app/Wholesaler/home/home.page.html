@@ -51,14 +51,22 @@
         ></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Profile' | translate }}</ion-label>
       </ion-item>
-      <!-- <ion-item button (click)="navigateToBusinessLocations()" lines="none">
+      <ion-item button (click)="navigateToBusinessLocations()" lines="none">
         <ion-icon
           name="business-outline"
           slot="start"
           class="menu-icon"
         ></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Business Locations' | translate }}</ion-label>
-      </ion-item> -->
+        </ion-item>
+      <ion-item button (click)="navigateToBusinessInfo()" lines="none">
+        <ion-icon
+          name="information-circle-outline"
+          slot="start"
+          class="menu-icon"
+        ></ion-icon>
+        <ion-label>{{ 'WHOLESALER_HOME.Business Info' | translate }}</ion-label>
+      </ion-item>
       <ion-item button (click)="navigateToUpdateBusiness()" lines="none">
         <ion-icon
           name="create-outline"
@@ -169,7 +177,6 @@
       </ion-item>
     </ion-list>
 
-    <!-- Empty State -->
     <div
       class="empty-state"
       *ngIf="!isLoading && filteredItems.length === 0"
@@ -179,7 +186,6 @@
       <p>{{ 'WHOLESALER_HOME.Try adjusting your search' | translate }}</p>
     </div>
 
-    <!-- Infinite Scroll -->
     <ion-infinite-scroll
       threshold="100px"
       (ionInfinite)="onInfiniteScroll($event)"
