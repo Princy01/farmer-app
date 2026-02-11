@@ -2,13 +2,13 @@
   <ion-toolbar class="profile-toolbar">
     <ion-buttons slot="start">
       <ion-button (click)="goBack()">
-        <ion-icon name="arrow-back-outline"></ion-icon>
+        <ion-icon color="light" name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title>{{ 'PROFILE.TITLE' | translate }}</ion-title>
     <ion-buttons slot="end">
       <ion-button *ngIf="!isEditing" (click)="toggleEdit()">
-        <ion-icon name="create-outline"></ion-icon>
+        <ion-icon color="light" name="create"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -28,7 +28,7 @@
       <div class="profile-header">
         <div class="profile-avatar">
           <div class="avatar-circle">
-            <img *ngIf="profile.profile_image" [src]="profile.profile_image" alt="Profile">
+            <img *ngIf="profile.profile_image" [src]="getImageSrc(profile.profile_image)" alt="Profile">
             <ion-icon *ngIf="!profile.profile_image" name="person-outline"></ion-icon>
           </div>
           <ion-button
@@ -53,10 +53,10 @@
 
           <div class="profile-status">
             <ion-icon
-              [name]="profile.active_status ? 'checkmark-circle-outline' : 'close-circle-outline'"
-              [color]="profile.active_status ? 'success' : 'danger'">
+              [name]="profile.status === 'active' ? 'checkmark-circle-outline' : 'close-circle-outline'"
+              [color]="profile.status === 'active' ? 'success' : 'danger'">
             </ion-icon>
-            <span>{{ profile.active_status ? ('PROFILE.ACTIVE' | translate) : ('PROFILE.INACTIVE' | translate) }}</span>
+            <span>{{ profile.status === 'active' ? ('PROFILE.ACTIVE' | translate) : ('PROFILE.INACTIVE' | translate) }}</span>
           </div>
         </div>
 
@@ -71,7 +71,7 @@
           <div class="stat-item">
             <ion-icon name="calendar-outline"></ion-icon>
             <div class="stat-content">
-              <span class="stat-value">{{ profile.registration_date | date: 'MMM yyyy' }}</span>
+              <span class="stat-value">{{ profile.member_since | date: 'MMM yyyy' }}</span>
               <span class="stat-label">{{ 'PROFILE.MEMBER_SINCE' | translate }}</span>
             </div>
           </div>
@@ -111,10 +111,10 @@
                 <ion-icon name="call-outline"></ion-icon>
                 <span>{{ 'PROFILE.MOBILE' | translate }}</span>
               </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.mobile_num }}</div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.mobile }}</div>
               <ion-input
                 *ngIf="isEditing"
-                [(ngModel)]="profile.mobile_num"
+                [(ngModel)]="profile.mobile"
                 type="tel"
                 placeholder="{{ 'PROFILE.MOBILE_PLACEHOLDER' | translate }}"
                 class="edit-input">
@@ -144,7 +144,7 @@
                 <span>{{ 'PROFILE.LOCATION' | translate }}</span>
               </div>
               <div class="detail-value">
-                {{ profile.location_name }}, {{ profile.state_name }}
+                {{ profile.location }}
               </div>
             </div>
 
