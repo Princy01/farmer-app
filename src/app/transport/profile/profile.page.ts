@@ -1,246 +1,265 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
   IonicModule,
   NavController,
-  AlertController,
   LoadingController,
   ToastController
 } from '@ionic/angular';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import {
-  personOutline, mailOutline, callOutline, locationOutline,
-  carOutline, arrowBackOutline, createOutline, saveOutline,
-  closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline,
-  cardOutline, calendarOutline
+  chevronBack,
+  create,
+  personOutline,
+  cardOutline,
+  callOutline,
+  fingerPrintOutline,
+  locationOutline,
+  businessOutline,
+  carOutline,
+  save,
+  checkmarkCircleOutline,
+  calendarOutline
 } from 'ionicons/icons';
-
-import { AuthService } from 'src/app/auth/auth.service';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Subject, takeUntil } from 'rxjs';
-
-interface DriverProfile {
-  driver_id: number;
-  name: string;
-  email: string;
-  mobile_num: string;
-  address: string;
-  pincode: string;
-  state_id: number;
-  state_name: string;
-  location_id: number;
-  location_name: string;
-  registration_date: string;
-  active_status: boolean;
-  license_number: string;
-  vehicle_type: string;
-  vehicle_number: string;
-  total_deliveries: number;
-  profile_image?: string;
-}
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    IonicModule
+  ]
 })
-export class ProfilePage implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
-
-  profile: DriverProfile = {
-    driver_id: 0,
-    name: '',
-    email: '',
-    mobile_num: '',
-    address: '',
-    pincode: '',
-    state_id: 0,
-    state_name: '',
-    location_id: 0,
-    location_name: '',
-    registration_date: '',
-    active_status: true,
-    license_number: '',
-    vehicle_type: '',
-    vehicle_number: '',
-    total_deliveries: 0
-  };
-
-  isEditing = false;
-  isLoading = false;
+export class ProfilePage implements OnInit {
+  form!: FormGroup;
+  isEditMode = false;
+  driverData: any = {};
+  today = new Date().toISOString().split('T')[0];
 
   constructor(
+    private fb: FormBuilder,
     private navCtrl: NavController,
-    private router: Router,
-    private authService: AuthService,
-    private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private translate: TranslateService
+    // private driverService: DriverService
   ) {
     addIcons({
-      personOutline, mailOutline, callOutline, locationOutline,
-      carOutline, arrowBackOutline, createOutline, saveOutline,
-      closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline,
-      cardOutline, calendarOutline
+      'chevron-back': chevronBack,
+      'create': create,
+      'person-outline': personOutline,
+      'card-outline': cardOutline,
+      'call-outline': callOutline,
+      'finger-print-outline': fingerPrintOutline,
+      'location-outline': locationOutline,
+      'business-outline': businessOutline,
+      'car-outline': carOutline,
+      'save': save,
+      'checkmark-circle-outline': checkmarkCircleOutline,
+      'calendar-outline': calendarOutline
     });
   }
 
   ngOnInit() {
-    this.loadProfile();
+    this.initForm();
+    this.loadDriverInfo();
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  initForm() {
+    this.form = this.fb.group({
+      // Personal Information (Read-only)
+      first_name: [{ value: '', disabled: true }],
+      last_name: [{ value: '', disabled: true }],
+      dob: [{ value: '', disabled: true }],
+
+      // License Information (Read-only)
+      licence_no: [{ value: '', disabled: true }],
+      licence_type: [{ value: '', disabled: true }],
+      licence_issued_date: [{ value: '', disabled: true }],
+      licence_expiry_date: [{ value: '', disabled: true }],
+
+      // Contact Information (Editable)
+      contact_num: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      contact_num_addl: ['', [Validators.pattern('^[0-9]{10}$')]],
+      email: ['', [Validators.email]],
+
+      // Identity Information (Read-only)
+      aadhar: [{ value: '', disabled: true }],
+      pan: [{ value: '', disabled: true }],
+
+      // Address Information (Editable)
+      address_door_no: [''],
+      address_street: ['', Validators.required],
+      address_state: [{ value: '', disabled: true }],
+      address_town: [{ value: '', disabled: true }],
+      address_pin_code: ['', [Validators.required, Validators.pattern('^[0-9]{6}$')]],
+      address_landmark: [''],
+
+      // Bank Information (Editable)
+      bank_ac_no: ['', Validators.required],
+      bank_name: ['', Validators.required],
+      bank_branch: ['', Validators.required],
+      ifsc: ['', [Validators.required, Validators.pattern('^[A-Z]{4}0[A-Z0-9]{6}$')]],
+      bank_address: ['', Validators.required],
+
+      // Vehicle Information (Read-only)
+      veh_number: [{ value: '', disabled: true }],
+      reg_date: [{ value: '', disabled: true }],
+      vehicle_state: [{ value: '', disabled: true }],
+      type_id: [{ value: '', disabled: true }],
+      load_capacity: [{ value: '', disabled: true }],
+      fuel_type: [{ value: '', disabled: true }],
+    });
   }
 
-  async loadProfile() {
-    if (!this.authService.isAuthenticated()) {
-      this.showAuthError();
-      return;
-    }
+  async loadDriverInfo() {
+    const loading = await this.loadingCtrl.create({
+      message: this.translate.instant('DRIVER_INFO.LOADING'),
+    });
+    await loading.present();
 
-    this.isLoading = true;
+    try {
+      // Replace with actual service call
+      // const data = await this.driverService.getDriverInfo().toPromise();
 
-    // Using dummy data - replace with actual API call
-    setTimeout(() => {
-      this.profile = {
-        driver_id: 1,
-        name: 'Ramesh Kumar',
-        email: 'ramesh.driver@example.com',
-        mobile_num: '+91 98765 43210',
-        address: '123, Driver Colony, Mayur Vihar',
-        pincode: '110091',
-        state_id: 7,
-        state_name: 'Delhi',
-        location_id: 45,
-        location_name: 'Mayur Vihar',
-        registration_date: '2023-03-20',
+      // Mock data for demonstration
+      const data = {
+        first_name: 'John',
+        last_name: 'Doe',
+        dob: '1990-01-15',
+        licence_no: 'DL1234567890',
+        licence_type: 'HMV',
+        licence_issued_date: '2015-01-01',
+        licence_expiry_date: '2030-01-01',
+        contact_num: '9876543210',
+        contact_num_addl: '9876543211',
+        email: 'john.doe@example.com',
+        aadhar: '123456789012',
+        pan: 'ABCDE1234F',
+        address_door_no: '123',
+        address_street: 'Main Street',
+        address_state: 'TN',
+        address_town: 'Chennai',
+        address_pin_code: '600001',
+        address_landmark: 'Near Temple',
+        bank_ac_no: '1234567890',
+        bank_name: 'State Bank',
+        bank_branch: 'Main Branch',
+        ifsc: 'SBIN0001234',
+        bank_address: 'Bank Street, Chennai',
+        veh_number: 'TN01AB1234',
+        reg_date: '2020-01-01',
+        vehicle_state: 'TN',
+        type_id: '1',
+        load_capacity: '5000',
+        fuel_type: 'Diesel',
+        profile_image: undefined,
         active_status: true,
-        license_number: 'DL-1420110012345',
-        vehicle_type: 'Truck',
-        vehicle_number: 'DL-1CAA-1234',
         total_deliveries: 456,
-        profile_image: undefined
+        registration_date: '2023-03-20'
       };
-      this.isLoading = false;
-    }, 500);
+
+      this.driverData = data;
+      this.form.patchValue(data);
+    } catch (error) {
+      console.error('Error loading driver info:', error);
+      await this.showToast('DRIVER_INFO.ERROR_LOADING', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
   }
 
-  toggleEdit() {
-    this.isEditing = !this.isEditing;
+  enableEdit() {
+    this.isEditMode = true;
+    // Enable only editable fields
+    this.form.get('contact_num')?.enable();
+    this.form.get('contact_num_addl')?.enable();
+    this.form.get('email')?.enable();
+    this.form.get('address_door_no')?.enable();
+    this.form.get('address_street')?.enable();
+    this.form.get('address_pin_code')?.enable();
+    this.form.get('address_landmark')?.enable();
+    this.form.get('bank_ac_no')?.enable();
+    this.form.get('bank_name')?.enable();
+    this.form.get('bank_branch')?.enable();
+    this.form.get('ifsc')?.enable();
+    this.form.get('bank_address')?.enable();
   }
 
-  async saveProfile() {
-    if (!this.validateProfile()) {
+  async onSubmit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      await this.showToast('DRIVER_INFO.INVALID_FORM', 'warning');
       return;
     }
 
     const loading = await this.loadingCtrl.create({
-      message: this.translate.instant('DRIVER_PROFILE.SAVING')
+      message: this.translate.instant('DRIVER_INFO.UPDATING'),
     });
     await loading.present();
 
-    // Simulate API call
-    setTimeout(async () => {
-      await loading.dismiss();
-      this.isEditing = false;
+    try {
+      const updateData = {
+        contact_num: this.form.get('contact_num')?.value,
+        contact_num_addl: this.form.get('contact_num_addl')?.value,
+        email: this.form.get('email')?.value,
+        address_door_no: this.form.get('address_door_no')?.value,
+        address_street: this.form.get('address_street')?.value,
+        address_pin_code: this.form.get('address_pin_code')?.value,
+        address_landmark: this.form.get('address_landmark')?.value,
+        bank_ac_no: this.form.get('bank_ac_no')?.value,
+        bank_name: this.form.get('bank_name')?.value,
+        bank_branch: this.form.get('bank_branch')?.value,
+        ifsc: this.form.get('ifsc')?.value,
+        bank_address: this.form.get('bank_address')?.value,
+      };
 
-      const toast = await this.toastCtrl.create({
-        message: this.translate.instant('DRIVER_PROFILE.SAVE_SUCCESS'),
-        duration: 2000,
-        color: 'success',
-        position: 'top'
+      // Replace with actual service call
+      // await this.driverService.updateDriverInfo(updateData).toPromise();
+
+      await this.showToast('DRIVER_INFO.UPDATE_SUCCESS', 'success');
+      this.isEditMode = false;
+
+      // Disable editable fields
+      Object.keys(updateData).forEach(key => {
+        this.form.get(key)?.disable();
       });
-      await toast.present();
-    }, 1000);
-  }
 
-  validateProfile(): boolean {
-    if (!this.profile.name || !this.profile.email || !this.profile.mobile_num) {
-      this.showErrorAlert(
-        this.translate.instant('DRIVER_PROFILE.VALIDATION_ERROR'),
-        this.translate.instant('DRIVER_PROFILE.REQUIRED_FIELDS')
-      );
-      return false;
+    } catch (error) {
+      console.error('Error updating driver info:', error);
+      await this.showToast('DRIVER_INFO.UPDATE_ERROR', 'danger');
+    } finally {
+      await loading.dismiss();
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.profile.email)) {
-      this.showErrorAlert(
-        this.translate.instant('DRIVER_PROFILE.VALIDATION_ERROR'),
-        this.translate.instant('DRIVER_PROFILE.INVALID_EMAIL')
-      );
-      return false;
-    }
-
-    return true;
-  }
-
-  async changeProfileImage() {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('DRIVER_PROFILE.CHANGE_IMAGE'),
-      message: this.translate.instant('DRIVER_PROFILE.IMAGE_SOURCE'),
-      buttons: [
-        {
-          text: this.translate.instant('DRIVER_PROFILE.CAMERA'),
-          handler: () => {
-            this.captureImage();
-          }
-        },
-        {
-          text: this.translate.instant('DRIVER_PROFILE.GALLERY'),
-          handler: () => {
-            this.selectImage();
-          }
-        },
-        {
-          text: this.translate.instant('DRIVER_PROFILE.CANCEL'),
-          role: 'cancel'
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  captureImage() {
-    console.log('Capture image from camera');
-  }
-
-  selectImage() {
-    console.log('Select image from gallery');
   }
 
   goBack() {
     this.navCtrl.back();
   }
 
-  private async showAuthError() {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('DRIVER_PROFILE.AUTH_ERROR'),
-      message: this.translate.instant('DRIVER_PROFILE.SESSION_EXPIRED'),
-      buttons: [{
-        text: this.translate.instant('DRIVER_PROFILE.OK'),
-        handler: () => {
-          this.authService.logout();
-          this.router.navigate(['/login']);
-        }
-      }]
+  async showToast(messageKey: string, color: string) {
+    const toast = await this.toastCtrl.create({
+      message: this.translate.instant(messageKey),
+      duration: 3000,
+      color: color,
+      position: 'bottom',
     });
-    await alert.present();
+    await toast.present();
   }
 
-  private async showErrorAlert(header: string, message: string) {
-    const alert = await this.alertCtrl.create({
-      header,
-      message,
-      buttons: [this.translate.instant('DRIVER_PROFILE.OK')]
-    });
-    await alert.present();
+  getVehicleTypeName(typeId: string): string {
+    const types: { [key: string]: string } = {
+      '1': 'DRIVER_REGISTRATION.TRUCK',
+      '2': 'DRIVER_REGISTRATION.VAN',
+      '3': 'DRIVER_REGISTRATION.TEMPO',
+      '4': 'DRIVER_REGISTRATION.OTHER',
+    };
+    return types[typeId] || typeId;
   }
 }

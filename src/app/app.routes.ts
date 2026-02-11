@@ -453,10 +453,6 @@ export const routes: Routes = [
       {
         path: 'location-selection',
         loadComponent: () => import('./transport/location-selection/location-selection.component').then((m) => m.LocationSelectionModalComponent),
-      },
-      {
-        path: 'driver-info',
-        loadComponent: () => import('./transport/driver-info/driver-info.component').then((m) => m.DriverInfoComponent),
       }
     ]
   }

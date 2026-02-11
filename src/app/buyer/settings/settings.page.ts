@@ -74,6 +74,14 @@ export class SettingsPage implements OnInit, OnDestroy {
 
   appVersion = '1.0.0';
   isLoading = false;
+  passwordRequirements = [
+    'At least 8 characters',
+    'One uppercase letter (A-Z)',
+    'One lowercase letter (a-z)',
+    'One number (0-9)',
+    'One special character (!@#$%^&* etc.)',
+    'Different from current password'
+  ];
 
   constructor(
     private navCtrl: NavController,
@@ -206,8 +214,11 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   async changePassword() {
+    const requirementsText = this.passwordRequirements.join(', ');
+
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('RETAILER_SETTINGS.CHANGE_PASSWORD'),
+      message: `Password requirements: ${requirementsText}`,
       inputs: [
         {
           name: 'currentPassword',
@@ -253,8 +264,34 @@ export class SettingsPage implements OnInit, OnDestroy {
       return false;
     }
 
-    if (data.newPassword.length < 6) {
-      this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_TOO_SHORT'), 'danger');
+    // Frontend validation matching backend rules
+    if (data.newPassword.length < 8) {
+      this.showToast('Password must be at least 8 characters long', 'danger');
+      return false;
+    }
+
+    if (data.currentPassword === data.newPassword) {
+      this.showToast('New password must be different from current password', 'danger');
+      return false;
+    }
+
+    if (!/[A-Z]/.test(data.newPassword)) {
+      this.showToast('Password must contain at least one uppercase letter', 'danger');
+      return false;
+    }
+
+    if (!/[a-z]/.test(data.newPassword)) {
+      this.showToast('Password must contain at least one lowercase letter', 'danger');
+      return false;
+    }
+
+    if (!/[0-9]/.test(data.newPassword)) {
+      this.showToast('Password must contain at least one number', 'danger');
+      return false;
+    }
+
+    if (!/[^a-zA-Z0-9]/.test(data.newPassword)) {
+      this.showToast('Password must contain at least one special character', 'danger');
       return false;
     }
 
@@ -263,7 +300,7 @@ export class SettingsPage implements OnInit, OnDestroy {
     });
     await loading.present();
 
-    // Simulate API call
+    // Simulate API call - replace with actual service call when available
     setTimeout(async () => {
       await loading.dismiss();
       this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_CHANGED'), 'success');

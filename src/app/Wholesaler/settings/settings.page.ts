@@ -25,6 +25,14 @@ export class SettingsPage implements OnInit, OnDestroy {
 
   appVersion = '1.0.0';
   isLoading = false;
+  passwordRequirements = [
+    'At least 8 characters',
+    'One uppercase letter (A-Z)',
+    'One lowercase letter (a-z)',
+    'One number (0-9)',
+    'One special character (!@#$%^&* etc.)',
+    'Different from current password'
+  ];
 
   constructor(
     private navCtrl: NavController,
@@ -110,8 +118,11 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   async changePassword() {
+    const requirementsText = this.passwordRequirements.join(', ');
+
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('SETTINGS.CHANGE_PASSWORD'),
+      message: `Password requirements: ${requirementsText}`,
       inputs: [
         {
           name: 'currentPassword',
@@ -146,6 +157,47 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   async handlePasswordChange(data: any) {
+    // Frontend validation matching backend rules
+    if (!data.currentPassword || !data.newPassword || !data.confirmPassword) {
+      this.showToast(this.translate.instant('SETTINGS.ALL_FIELDS_REQUIRED'), 'danger');
+      return;
+    }
+
+    if (data.newPassword !== data.confirmPassword) {
+      this.showToast(this.translate.instant('SETTINGS.PASSWORD_MISMATCH'), 'danger');
+      return;
+    }
+
+    if (data.newPassword.length < 8) {
+      this.showToast('Password must be at least 8 characters long', 'danger');
+      return;
+    }
+
+    if (data.currentPassword === data.newPassword) {
+      this.showToast('New password must be different from current password', 'danger');
+      return;
+    }
+
+    if (!/[A-Z]/.test(data.newPassword)) {
+      this.showToast('Password must contain at least one uppercase letter', 'danger');
+      return;
+    }
+
+    if (!/[a-z]/.test(data.newPassword)) {
+      this.showToast('Password must contain at least one lowercase letter', 'danger');
+      return;
+    }
+
+    if (!/[0-9]/.test(data.newPassword)) {
+      this.showToast('Password must contain at least one number', 'danger');
+      return;
+    }
+
+    if (!/[^a-zA-Z0-9]/.test(data.newPassword)) {
+      this.showToast('Password must contain at least one special character', 'danger');
+      return;
+    }
+
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('SETTINGS.CHANGING_PASSWORD')
     });

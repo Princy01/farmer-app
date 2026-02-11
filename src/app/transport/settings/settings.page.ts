@@ -29,6 +29,7 @@ import {
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
+import { SettingsService, DriverNotificationSettings, UpdatePasswordRequest, DeleteAccountRequest } from './settings.service';
 
 interface Language {
   id: number;
@@ -73,6 +74,14 @@ export class SettingsPage implements OnInit, OnDestroy {
 
   currentLanguageName = 'English';
   appVersion = '1.0.0';
+  passwordRequirements = [
+    'At least 8 characters',
+    'One uppercase letter (A-Z)',
+    'One lowercase letter (a-z)',
+    'One number (0-9)',
+    'One special character (!@#$%^&* etc.)',
+    'Different from current password'
+  ];
 
   constructor(
     private navCtrl: NavController,
@@ -81,7 +90,8 @@ export class SettingsPage implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private settingsService: SettingsService
   ) {
     addIcons({
       arrowBackOutline,
@@ -112,6 +122,15 @@ export class SettingsPage implements OnInit, OnDestroy {
 
   loadSettings() {
     this.settings.language = this.translate.currentLang || 'en';
+    this.settingsService.getNotificationSettings().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (notifications: DriverNotificationSettings) => {
+        this.settings.notifications = notifications;
+      },
+      error: (err) => {
+        console.error('Failed to load notification settings', err);
+        // Keep defaults or show error
+      }
+    });
   }
 
   updateCurrentLanguage() {
@@ -156,15 +175,27 @@ export class SettingsPage implements OnInit, OnDestroy {
     });
     await loading.present();
 
-    setTimeout(async () => {
-      await loading.dismiss();
-      this.showToast(this.translate.instant('DRIVER_SETTINGS.SETTINGS_UPDATED'));
-    }, 500);
+    this.settingsService.updateNotificationSettings(this.settings.notifications).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        loading.dismiss();
+        this.showToast(this.translate.instant('DRIVER_SETTINGS.SETTINGS_UPDATED'));
+      },
+      error: (err) => {
+        loading.dismiss();
+        console.error('Failed to update notifications', err);
+        this.showErrorAlert(this.translate.instant('DRIVER_SETTINGS.ERROR'), err.error?.error || 'Failed to update settings');
+        // Revert the toggle
+        (this.settings.notifications as any)[type] = !(this.settings.notifications as any)[type];
+      }
+    });
   }
 
   async changePassword() {
+    const requirementsText = this.passwordRequirements.join(', ');
+
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('DRIVER_SETTINGS.CHANGE_PASSWORD'),
+      message: `Password requirements: ${requirementsText}`,
       inputs: [
         {
           name: 'currentPassword',
@@ -206,10 +237,51 @@ export class SettingsPage implements OnInit, OnDestroy {
               return false;
             }
 
-            if (data.newPassword.length < 6) {
+            // Frontend validation matching backend rules
+            if (data.newPassword.length < 8) {
               this.showErrorAlert(
                 this.translate.instant('DRIVER_SETTINGS.ERROR'),
-                this.translate.instant('DRIVER_SETTINGS.PASSWORD_TOO_SHORT')
+                'Password must be at least 8 characters long'
+              );
+              return false;
+            }
+
+            if (data.currentPassword === data.newPassword) {
+              this.showErrorAlert(
+                this.translate.instant('DRIVER_SETTINGS.ERROR'),
+                'New password must be different from current password'
+              );
+              return false;
+            }
+
+            if (!/[A-Z]/.test(data.newPassword)) {
+              this.showErrorAlert(
+                this.translate.instant('DRIVER_SETTINGS.ERROR'),
+                'Password must contain at least one uppercase letter'
+              );
+              return false;
+            }
+
+            if (!/[a-z]/.test(data.newPassword)) {
+              this.showErrorAlert(
+                this.translate.instant('DRIVER_SETTINGS.ERROR'),
+                'Password must contain at least one lowercase letter'
+              );
+              return false;
+            }
+
+            if (!/[0-9]/.test(data.newPassword)) {
+              this.showErrorAlert(
+                this.translate.instant('DRIVER_SETTINGS.ERROR'),
+                'Password must contain at least one number'
+              );
+              return false;
+            }
+
+            if (!/[^a-zA-Z0-9]/.test(data.newPassword)) {
+              this.showErrorAlert(
+                this.translate.instant('DRIVER_SETTINGS.ERROR'),
+                'Password must contain at least one special character'
               );
               return false;
             }
@@ -219,40 +291,26 @@ export class SettingsPage implements OnInit, OnDestroy {
             });
             await loading.present();
 
-            setTimeout(async () => {
-              await loading.dismiss();
-              this.showToast(this.translate.instant('DRIVER_SETTINGS.PASSWORD_CHANGED'));
-            }, 1000);
+            const req: UpdatePasswordRequest = {
+              currentPassword: data.currentPassword,
+              newPassword: data.newPassword,
+              confirmPassword: data.confirmPassword
+            };
+
+            this.settingsService.updatePassword(req).pipe(takeUntil(this.destroy$)).subscribe({
+              next: () => {
+                loading.dismiss();
+                this.showToast(this.translate.instant('DRIVER_SETTINGS.PASSWORD_CHANGED'));
+              },
+              error: (err) => {
+                loading.dismiss();
+                console.error('Failed to change password', err);
+                this.showErrorAlert(this.translate.instant('DRIVER_SETTINGS.ERROR'), err.error?.error || 'Failed to change password');
+                return false;
+              }
+            });
 
             return true;
-          }
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  async clearCache() {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('DRIVER_SETTINGS.CLEAR_CACHE'),
-      message: this.translate.instant('DRIVER_SETTINGS.CLEAR_CACHE_CONFIRM'),
-      buttons: [
-        {
-          text: this.translate.instant('DRIVER_SETTINGS.CANCEL'),
-          role: 'cancel'
-        },
-        {
-          text: this.translate.instant('DRIVER_SETTINGS.CLEAR'),
-          handler: async () => {
-            const loading = await this.loadingCtrl.create({
-              message: this.translate.instant('DRIVER_SETTINGS.CLEARING_CACHE')
-            });
-            await loading.present();
-
-            setTimeout(async () => {
-              await loading.dismiss();
-              this.showToast(this.translate.instant('DRIVER_SETTINGS.CACHE_CLEARED'));
-            }, 1000);
           }
         }
       ]
@@ -280,6 +338,11 @@ export class SettingsPage implements OnInit, OnDestroy {
                   name: 'password',
                   type: 'password',
                   placeholder: this.translate.instant('DRIVER_SETTINGS.ENTER_PASSWORD')
+                },
+                {
+                  name: 'confirmation',
+                  type: 'text',
+                  placeholder: 'Type "DELETE" to confirm'
                 }
               ],
               buttons: [
@@ -297,17 +360,37 @@ export class SettingsPage implements OnInit, OnDestroy {
                       );
                       return false;
                     }
+                    if (data.confirmation !== 'DELETE') {
+                      this.showErrorAlert(
+                        this.translate.instant('DRIVER_SETTINGS.ERROR'),
+                        'Please type "DELETE" to confirm'
+                      );
+                      return false;
+                    }
 
                     const loading = await this.loadingCtrl.create({
                       message: this.translate.instant('DRIVER_SETTINGS.DELETING_ACCOUNT')
                     });
                     await loading.present();
 
-                    setTimeout(async () => {
-                      await loading.dismiss();
-                      this.authService.logout();
-                      this.router.navigate(['/login']);
-                    }, 1500);
+                    const req: DeleteAccountRequest = {
+                      password: data.password,
+                      confirmation: data.confirmation
+                    };
+
+                    this.settingsService.deleteAccount(req).pipe(takeUntil(this.destroy$)).subscribe({
+                      next: () => {
+                        loading.dismiss();
+                        this.authService.logout();
+                        this.router.navigate(['/login']);
+                      },
+                      error: (err) => {
+                        loading.dismiss();
+                        console.error('Failed to delete account', err);
+                        this.showErrorAlert(this.translate.instant('DRIVER_SETTINGS.ERROR'), err.error?.error || 'Failed to delete account');
+                        return false;
+                      }
+                    });
 
                     return true;
                   }

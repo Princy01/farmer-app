@@ -45,7 +45,6 @@ export class TransportComponent implements OnInit {
     '/transport/delivery-history': 'Delivery History',
     '/transport/notifications': 'Notifications',
     '/transport/settings': 'Settings',
-    '/transport/driver-info': 'Driver Information'
   };
 
   constructor(private router: Router) {

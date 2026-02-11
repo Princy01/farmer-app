@@ -90,25 +90,6 @@
       </div>
     </div>
 
-    <!-- Data Management -->
-    <div class="settings-section">
-      <div class="section-header">
-        <h2>{{ 'DRIVER_SETTINGS.DATA' | translate }}</h2>
-      </div>
-
-      <div class="settings-group">
-        <!-- Clear Cache -->
-        <ion-item button (click)="clearCache()" lines="full" class="settings-item">
-          <ion-icon name="trash-outline" slot="start"></ion-icon>
-          <ion-label>
-            <h3>{{ 'DRIVER_SETTINGS.CLEAR_CACHE' | translate }}</h3>
-            <p>{{ 'DRIVER_SETTINGS.CLEAR_CACHE_DESC' | translate }}</p>
-          </ion-label>
-          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
-        </ion-item>
-      </div>
-    </div>
-
     <!-- Support -->
     <div class="settings-section">
       <div class="section-header">
@@ -164,15 +145,15 @@
       </div>
     </div>
 
-    <!-- Danger Zone -->
-    <div class="settings-section danger-section">
+    <!-- Account -->
+    <div class="settings-section account-section">
       <div class="section-header">
-        <h2>{{ 'DRIVER_SETTINGS.DANGER_ZONE' | translate }}</h2>
+        <h2>{{ 'DRIVER_SETTINGS.ACCOUNT' | translate }}</h2>
       </div>
 
       <div class="settings-group">
         <!-- Logout -->
-        <ion-item button (click)="logout()" lines="full" class="settings-item danger-item">
+        <ion-item button (click)="logout()" lines="full" class="settings-item account-item">
           <ion-icon name="log-out-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.LOGOUT' | translate }}</h3>
@@ -180,7 +161,7 @@
         </ion-item>
 
         <!-- Delete Account -->
-        <ion-item button (click)="deleteAccount()" lines="full" class="settings-item danger-item">
+        <ion-item button (click)="deleteAccount()" lines="full" class="settings-item account-item">
           <ion-icon name="warning-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.DELETE_ACCOUNT' | translate }}</h3>

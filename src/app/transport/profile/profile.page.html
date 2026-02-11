@@ -1,228 +1,277 @@
 <ion-content [fullscreen]="true">
-  <div class="profile-container">
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="loading-container">
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>{{ 'DRIVER_PROFILE.LOADING' | translate }}</p>
+  <div class="container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          <img *ngIf="driverData.profile_image" [src]="driverData.profile_image" alt="Profile">
+          <ion-icon *ngIf="!driverData.profile_image" name="person-outline"></ion-icon>
+        </div>
+      </div>
+
+      <div class="profile-name">
+        <h1>{{ driverData.first_name + ' ' + driverData.last_name }}</h1>
+        <div class="profile-status">
+          <ion-icon
+            [name]="driverData.active_status ? 'checkmark-circle-outline' : 'close-circle-outline'"
+            [color]="driverData.active_status ? 'success' : 'danger'">
+          </ion-icon>
+          <span>{{ driverData.active_status ? 'Active' : 'Inactive' }}</span>
+        </div>
+      </div>
+
+      <div class="profile-stats">
+        <div class="stat-item">
+          <ion-icon name="car-outline"></ion-icon>
+          <div class="stat-content">
+            <span class="stat-value">{{ driverData.total_deliveries }}</span>
+            <span class="stat-label">Total Deliveries</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <div class="stat-content">
+            <span class="stat-value">{{ driverData.registration_date | date: 'MMM yyyy' }}</span>
+            <span class="stat-label">Member Since</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Profile Content -->
-    <div *ngIf="!isLoading" class="profile-content">
-      <!-- Profile Header -->
-      <div class="profile-header">
-        <div class="profile-avatar">
-          <div class="avatar-circle">
-            <img *ngIf="profile.profile_image" [src]="profile.profile_image" alt="Profile">
-            <ion-icon *ngIf="!profile.profile_image" name="person-outline"></ion-icon>
+    <ion-card>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <!-- Personal Information Section -->
+        <div class="info-section">
+          <div class="section-header">
+            <ion-icon name="person-outline"></ion-icon>
+            <h3>{{ 'DRIVER_REGISTRATION.PERSONAL_INFO' | translate }}</h3>
           </div>
-          <ion-button
-            *ngIf="isEditing"
-            class="change-photo-btn"
-            size="small"
-            fill="solid"
-            (click)="changeProfileImage()">
-            <ion-icon name="camera-outline" slot="start"></ion-icon>
-            {{ 'DRIVER_PROFILE.CHANGE_PHOTO' | translate }}
-          </ion-button>
+          <ion-list>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.FIRST_NAME' | translate }}</ion-label>
+              <ion-input formControlName="first_name" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.LAST_NAME' | translate }}</ion-label>
+              <ion-input formControlName="last_name" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.DOB' | translate }}</ion-label>
+              <ion-input formControlName="dob" type="date" readonly></ion-input>
+            </ion-item>
+          </ion-list>
         </div>
 
-        <div class="profile-name">
-          <h1 *ngIf="!isEditing">{{ profile.name }}</h1>
-          <ion-input
-            *ngIf="isEditing"
-            [(ngModel)]="profile.name"
-            placeholder="{{ 'DRIVER_PROFILE.NAME_PLACEHOLDER' | translate }}"
-            class="edit-input name-input">
-          </ion-input>
+        <!-- License Information Section -->
+        <div class="info-section">
+          <div class="section-header">
+            <ion-icon name="card-outline"></ion-icon>
+            <h3>{{ 'DRIVER_REGISTRATION.LICENSE_INFO' | translate }}</h3>
+          </div>
+          <ion-list>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.LICENSE_NUMBER' | translate }}</ion-label>
+              <ion-input formControlName="licence_no" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.LICENSE_TYPE' | translate }}</ion-label>
+              <ion-input formControlName="licence_type" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.LICENSE_ISSUED_DATE' | translate }}</ion-label>
+              <ion-input formControlName="licence_issued_date" type="date" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.LICENSE_EXPIRY_DATE' | translate }}</ion-label>
+              <ion-input formControlName="licence_expiry_date" type="date" readonly></ion-input>
+            </ion-item>
+          </ion-list>
+        </div>
 
-          <div class="profile-status">
-            <ion-icon
-              [name]="profile.active_status ? 'checkmark-circle-outline' : 'close-circle-outline'"
-              [color]="profile.active_status ? 'success' : 'danger'">
-            </ion-icon>
-            <span>{{ profile.active_status ? ('DRIVER_PROFILE.ACTIVE' | translate) : ('DRIVER_PROFILE.INACTIVE' | translate) }}</span>
+        <!-- Contact Information Section -->
+        <div class="info-section">
+          <div class="section-header">
+            <ion-icon name="call-outline"></ion-icon>
+            <h3>{{ 'DRIVER_REGISTRATION.CONTACT_INFO' | translate }}</h3>
+          </div>
+          <ion-list>
+            <ion-item [class.ion-invalid]="form.get('contact_num')?.invalid && form.get('contact_num')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.CONTACT_NUMBER' | translate }}</ion-label>
+              <ion-input formControlName="contact_num" type="tel" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+            <ion-item [class.ion-invalid]="form.get('contact_num_addl')?.invalid && form.get('contact_num_addl')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.ADDITIONAL_CONTACT' | translate }}</ion-label>
+              <ion-input formControlName="contact_num_addl" type="tel" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+            <ion-item [class.ion-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.EMAIL' | translate }}</ion-label>
+              <ion-input formControlName="email" type="email" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+          </ion-list>
+          <div class="error-message" *ngIf="form.get('contact_num')?.invalid && form.get('contact_num')?.touched">
+            <span *ngIf="form.get('contact_num')?.errors?.['required']">
+              {{ 'DRIVER_INFO.Contact number is required' | translate }}
+            </span>
+            <span *ngIf="form.get('contact_num')?.errors?.['pattern']">
+              {{ 'DRIVER_INFO.Please enter a valid 10-digit mobile number' | translate }}
+            </span>
+          </div>
+          <div class="error-message" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+            <span *ngIf="form.get('email')?.errors?.['email']">
+              {{ 'DRIVER_INFO.Please enter a valid email address' | translate }}
+            </span>
           </div>
         </div>
 
-        <div class="profile-stats">
-          <div class="stat-item">
+        <!-- Identity Information Section -->
+        <div class="info-section">
+          <div class="section-header">
+            <ion-icon name="finger-print-outline"></ion-icon>
+            <h3>{{ 'DRIVER_REGISTRATION.IDENTITY_INFO' | translate }}</h3>
+          </div>
+          <ion-list>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.AADHAR_NUMBER' | translate }}</ion-label>
+              <ion-input formControlName="aadhar" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.PAN_NUMBER' | translate }}</ion-label>
+              <ion-input formControlName="pan" readonly></ion-input>
+            </ion-item>
+          </ion-list>
+        </div>
+
+        <!-- Address Information Section -->
+        <div class="info-section">
+          <div class="section-header">
+            <ion-icon name="location-outline"></ion-icon>
+            <h3>{{ 'DRIVER_REGISTRATION.ADDRESS_INFO' | translate }}</h3>
+          </div>
+          <ion-list>
+            <ion-item [class.ion-invalid]="form.get('address_door_no')?.invalid && form.get('address_door_no')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.DOOR_NUMBER' | translate }}</ion-label>
+              <ion-input formControlName="address_door_no" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+            <ion-item [class.ion-invalid]="form.get('address_street')?.invalid && form.get('address_street')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.STREET' | translate }}</ion-label>
+              <ion-input formControlName="address_street" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.STATE' | translate }}</ion-label>
+              <ion-input formControlName="address_state" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.TOWN_CITY' | translate }}</ion-label>
+              <ion-input formControlName="address_town" readonly></ion-input>
+            </ion-item>
+            <ion-item [class.ion-invalid]="form.get('address_pin_code')?.invalid && form.get('address_pin_code')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.PIN_CODE' | translate }}</ion-label>
+              <ion-input formControlName="address_pin_code" type="text" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+            <ion-item [class.ion-invalid]="form.get('address_landmark')?.invalid && form.get('address_landmark')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.LANDMARK' | translate }}</ion-label>
+              <ion-input formControlName="address_landmark" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+          </ion-list>
+          <div class="error-message" *ngIf="form.get('address_street')?.invalid && form.get('address_street')?.touched">
+            {{ 'DRIVER_INFO.Street is required' | translate }}
+          </div>
+          <div class="error-message" *ngIf="form.get('address_pin_code')?.invalid && form.get('address_pin_code')?.touched">
+            <span *ngIf="form.get('address_pin_code')?.errors?.['required']">
+              {{ 'DRIVER_INFO.Pin code is required' | translate }}
+            </span>
+            <span *ngIf="form.get('address_pin_code')?.errors?.['pattern']">
+              {{ 'DRIVER_INFO.Please enter a valid 6-digit pin code' | translate }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Bank Information Section -->
+        <div class="info-section">
+          <div class="section-header">
+            <ion-icon name="business-outline"></ion-icon>
+            <h3>{{ 'DRIVER_REGISTRATION.BANK_INFO' | translate }}</h3>
+          </div>
+          <ion-list>
+            <ion-item [class.ion-invalid]="form.get('bank_ac_no')?.invalid && form.get('bank_ac_no')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.BANK_ACCOUNT_NUMBER' | translate }}</ion-label>
+              <ion-input formControlName="bank_ac_no" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+            <ion-item [class.ion-invalid]="form.get('bank_name')?.invalid && form.get('bank_name')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.BANK_NAME' | translate }}</ion-label>
+              <ion-input formControlName="bank_name" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+            <ion-item [class.ion-invalid]="form.get('bank_branch')?.invalid && form.get('bank_branch')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.BANK_BRANCH' | translate }}</ion-label>
+              <ion-input formControlName="bank_branch" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+            <ion-item [class.ion-invalid]="form.get('ifsc')?.invalid && form.get('ifsc')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.IFSC_CODE' | translate }}</ion-label>
+              <ion-input formControlName="ifsc" [readonly]="!isEditMode"></ion-input>
+            </ion-item>
+            <ion-item [class.ion-invalid]="form.get('bank_address')?.invalid && form.get('bank_address')?.touched">
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.BANK_ADDRESS' | translate }}</ion-label>
+              <ion-textarea formControlName="bank_address" [readonly]="!isEditMode"></ion-textarea>
+            </ion-item>
+          </ion-list>
+          <div class="error-message" *ngIf="form.get('bank_ac_no')?.invalid && form.get('bank_ac_no')?.touched">
+            {{ 'DRIVER_INFO.Bank account number is required' | translate }}
+          </div>
+          <div class="error-message" *ngIf="form.get('bank_name')?.invalid && form.get('bank_name')?.touched">
+            {{ 'DRIVER_INFO.Bank name is required' | translate }}
+          </div>
+          <div class="error-message" *ngIf="form.get('ifsc')?.invalid && form.get('ifsc')?.touched">
+            <span *ngIf="form.get('ifsc')?.errors?.['required']">
+              {{ 'DRIVER_INFO.IFSC code is required' | translate }}
+            </span>
+            <span *ngIf="form.get('ifsc')?.errors?.['pattern']">
+              {{ 'DRIVER_INFO.Please enter a valid IFSC code' | translate }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Vehicle Information Section -->
+        <div class="info-section">
+          <div class="section-header">
             <ion-icon name="car-outline"></ion-icon>
-            <div class="stat-content">
-              <span class="stat-value">{{ profile.total_deliveries }}</span>
-              <span class="stat-label">{{ 'DRIVER_PROFILE.TOTAL_DELIVERIES' | translate }}</span>
-            </div>
+            <h3>{{ 'DRIVER_REGISTRATION.VEHICLE_INFO' | translate }}</h3>
           </div>
-          <div class="stat-item">
-            <ion-icon name="calendar-outline"></ion-icon>
-            <div class="stat-content">
-              <span class="stat-value">{{ profile.registration_date | date: 'MMM yyyy' }}</span>
-              <span class="stat-label">{{ 'DRIVER_PROFILE.MEMBER_SINCE' | translate }}</span>
-            </div>
-          </div>
+          <ion-list>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.VEHICLE_NUMBER' | translate }}</ion-label>
+              <ion-input formControlName="veh_number" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.REGISTRATION_DATE' | translate }}</ion-label>
+              <ion-input formControlName="reg_date" type="date" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.STATE' | translate }}</ion-label>
+              <ion-input formControlName="vehicle_state" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.VEHICLE_TYPE' | translate }}</ion-label>
+              <ion-input [value]="getVehicleTypeName(form.get('type_id')?.value) | translate" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.LOAD_CAPACITY' | translate }}</ion-label>
+              <ion-input formControlName="load_capacity" readonly>
+                <div slot="end">kg</div>
+              </ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.FUEL_TYPE' | translate }}</ion-label>
+              <ion-input formControlName="fuel_type" readonly></ion-input>
+            </ion-item>
+          </ion-list>
         </div>
-      </div>
 
-      <!-- Profile Details -->
-      <ion-card class="details-card">
-        <ion-card-header>
-          <div class="card-header-content">
-            <ion-icon name="person-outline" class="header-icon"></ion-icon>
-            <ion-card-title>{{ 'DRIVER_PROFILE.PERSONAL_INFO' | translate }}</ion-card-title>
-          </div>
-        </ion-card-header>
-
-        <ion-card-content>
-          <div class="detail-group">
-            <!-- Email -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="mail-outline"></ion-icon>
-                <span>{{ 'DRIVER_PROFILE.EMAIL' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.email }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.email"
-                type="email"
-                placeholder="{{ 'DRIVER_PROFILE.EMAIL_PLACEHOLDER' | translate }}"
-                class="edit-input">
-              </ion-input>
-            </div>
-
-            <!-- Mobile -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="call-outline"></ion-icon>
-                <span>{{ 'DRIVER_PROFILE.MOBILE' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.mobile_num }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.mobile_num"
-                type="tel"
-                placeholder="{{ 'DRIVER_PROFILE.MOBILE_PLACEHOLDER' | translate }}"
-                class="edit-input">
-              </ion-input>
-            </div>
-
-            <!-- Address -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="location-outline"></ion-icon>
-                <span>{{ 'DRIVER_PROFILE.ADDRESS' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.address }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.address"
-                type="text"
-                placeholder="{{ 'DRIVER_PROFILE.ADDRESS_PLACEHOLDER' | translate }}"
-                class="edit-input">
-              </ion-input>
-            </div>
-
-            <!-- Location -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="navigate-outline"></ion-icon>
-                <span>{{ 'DRIVER_PROFILE.LOCATION' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.location_name }}</div>
-            </div>
-
-            <!-- Pincode -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="locate-outline"></ion-icon>
-                <span>{{ 'DRIVER_PROFILE.PINCODE' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.pincode }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.pincode"
-                type="text"
-                maxlength="6"
-                placeholder="{{ 'DRIVER_PROFILE.PINCODE_PLACEHOLDER' | translate }}"
-                class="edit-input">
-              </ion-input>
-            </div>
-          </div>
-        </ion-card-content>
-      </ion-card>
-
-      <!-- Vehicle Details -->
-      <ion-card class="details-card">
-        <ion-card-header>
-          <div class="card-header-content">
-            <ion-icon name="car-outline" class="header-icon"></ion-icon>
-            <ion-card-title>{{ 'DRIVER_PROFILE.VEHICLE_INFO' | translate }}</ion-card-title>
-          </div>
-        </ion-card-header>
-
-        <ion-card-content>
-          <div class="detail-group">
-            <!-- License Number -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="card-outline"></ion-icon>
-                <span>{{ 'DRIVER_PROFILE.LICENSE_NUMBER' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.license_number }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.license_number"
-                type="text"
-                placeholder="{{ 'DRIVER_PROFILE.LICENSE_PLACEHOLDER' | translate }}"
-                class="edit-input">
-              </ion-input>
-            </div>
-
-            <!-- Vehicle Type -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="car-outline"></ion-icon>
-                <span>{{ 'DRIVER_PROFILE.VEHICLE_TYPE' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.vehicle_type }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.vehicle_type"
-                type="text"
-                placeholder="{{ 'DRIVER_PROFILE.VEHICLE_TYPE_PLACEHOLDER' | translate }}"
-                class="edit-input">
-              </ion-input>
-            </div>
-
-            <!-- Vehicle Number -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="pricetag-outline"></ion-icon>
-                <span>{{ 'DRIVER_PROFILE.VEHICLE_NUMBER' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.vehicle_number }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.vehicle_number"
-                type="text"
-                placeholder="{{ 'DRIVER_PROFILE.VEHICLE_NUMBER_PLACEHOLDER' | translate }}"
-                class="edit-input">
-              </ion-input>
-            </div>
-          </div>
-        </ion-card-content>
-      </ion-card>
-
-      <!-- Action Buttons -->
-      <div class="action-buttons" *ngIf="isEditing">
-        <ion-button expand="block" (click)="saveProfile()" color="primary">
-          <ion-icon name="save-outline" slot="start"></ion-icon>
-          {{ 'DRIVER_PROFILE.SAVE' | translate }}
+        <ion-button expand="block" type="submit" *ngIf="isEditMode" [disabled]="form.invalid">
+          <ion-icon name="save" slot="start"></ion-icon>
+          {{ 'DRIVER_INFO.Save Changes' | translate }}
         </ion-button>
-        <ion-button expand="block" (click)="toggleEdit()" color="medium" fill="outline">
-          <ion-icon name="close-outline" slot="start"></ion-icon>
-          {{ 'DRIVER_PROFILE.CANCEL' | translate }}
-        </ion-button>
-      </div>
-    </div>
+      </form>
+    </ion-card>
   </div>
 </ion-content>
