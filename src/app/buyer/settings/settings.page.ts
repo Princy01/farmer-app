@@ -180,10 +180,11 @@ export class SettingsPage implements OnInit, OnDestroy {
     const lang = this.languages.find(l => l.code === langCode);
     if (!lang) return;
 
-    this.selectedLanguage = langCode;
-    this.settings.language = langCode;
-    this.translate.use(langCode);
-    localStorage.setItem('retailer_language', langCode);
+    const normalizedLangCode = langCode.toLowerCase();
+    this.selectedLanguage = normalizedLangCode;
+    this.settings.language = normalizedLangCode;
+    this.translate.use(normalizedLangCode);
+    localStorage.setItem('retailer_language', normalizedLangCode);
 
     // Save to backend
     this.translateApiService.setLanguagePreference(lang.id)

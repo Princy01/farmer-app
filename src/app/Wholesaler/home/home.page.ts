@@ -42,7 +42,7 @@ interface Language {
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, TranslatePipe, LanguagePopoverComponent]
+  imports: [IonicModule, CommonModule, TranslatePipe]
 })
 export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -363,7 +363,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private loadLanguagePreference() {
     const savedLang = localStorage.getItem('wholesaler_language');
     if (savedLang) {
-      this.translate.use(savedLang);
+      this.translate.use(savedLang.toLowerCase());
     }
   }
 
@@ -387,13 +387,14 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   async openLanguagePopover(event: Event) {
     try {
+      const currentLangCode = this.languages.find(l => l.name === this.currentLanguage)?.code.toLowerCase() || 'en';
       const popover = await this.popoverCtrl.create({
         component: LanguagePopoverComponent,
         event,
         translucent: true,
         componentProps: {
           languages: this.languages,
-          currentLanguage: this.currentLanguage,
+          currentLanguage: currentLangCode,
           onSelect: (lang: Language) => this.saveLanguagePreference(lang.code)
         }
       });
@@ -408,13 +409,14 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     const lang = this.languages.find(l => l.code === langCode);
     if (!lang) return;
 
+    const normalizedLangCode = langCode.toLowerCase();
     this.wholesalerService.setLanguagePreference(lang.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.translate.use(langCode);
+          this.translate.use(normalizedLangCode);
           this.currentLanguage = lang.name;
-          localStorage.setItem('wholesaler_language', langCode);
+          localStorage.setItem('wholesaler_language', normalizedLangCode);
         },
         error: (error) => {
           console.error('Error saving language preference:', error);

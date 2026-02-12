@@ -156,8 +156,9 @@ export class SettingsPage implements OnInit, OnDestroy {
           text: this.translate.instant('DRIVER_SETTINGS.OK'),
           handler: (selectedCode: string) => {
             if (selectedCode) {
-              this.settings.language = selectedCode;
-              this.translate.use(selectedCode);
+              const normalizedCode = selectedCode.toLowerCase();
+              this.settings.language = normalizedCode;
+              this.translate.use(normalizedCode);
               this.updateCurrentLanguage();
               this.showToast(this.translate.instant('DRIVER_SETTINGS.LANGUAGE_CHANGED'));
             }

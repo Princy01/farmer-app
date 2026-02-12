@@ -13,7 +13,7 @@ interface Language {
     <ion-list>
       <ion-item *ngFor="let lang of languages" button (click)="selectLanguage(lang)">
         <ion-label>{{ lang.name }}</ion-label>
-        <ion-icon *ngIf="lang.name === currentLanguage" name="checkmark-outline" slot="end"></ion-icon>
+        <ion-icon *ngIf="lang.code === currentLanguage" name="checkmark-outline" slot="end"></ion-icon>
       </ion-item>
     </ion-list>
   `,

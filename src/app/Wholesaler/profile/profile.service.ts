@@ -12,11 +12,14 @@ export interface WholesalerProfile {
   mobile: string | null;
   address: string | null;
   location: string | null;
+  location_id: number | null;
+  state_id: number | null;
+  state_name: string | null;
   pincode: string | null;
   status: string;
   profile_image: string | null;
   total_branches: number;
-  member_since: string;
+  member_since: string | null;
 }
 
 export interface UpdateUserProfileRequest {
@@ -25,6 +28,7 @@ export interface UpdateUserProfileRequest {
   mobile: string;
   address: string;
   location: number;
+  state: number;
   pincode: string;
 }
 

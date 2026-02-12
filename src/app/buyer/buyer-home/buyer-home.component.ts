@@ -46,7 +46,7 @@ interface Language {
 @Component({
   selector: 'app-buyer-home',
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterModule, TranslateModule, LanguagePopoverComponent],
+  imports: [CommonModule, IonicModule, RouterModule, TranslateModule],
   templateUrl: './buyer-home.component.html',
   styleUrls: ['./buyer-home.component.scss'],
 })
@@ -99,7 +99,6 @@ export class BuyerHomeComponent implements OnDestroy {
     });
 
     this.translate.setDefaultLang('en');
-    this.translate.use('en');
   }
 
   ngOnInit() {
@@ -136,13 +135,16 @@ export class BuyerHomeComponent implements OnDestroy {
   }
 
   fetchUserPreference() {
+    // First check localStorage
+    const savedLangCode = localStorage.getItem('retailer_language') || 'en';
+
     this.translateApiService.getUserPreference()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (pref) => {
           if (!pref || !pref.code) {
             this.userPreference = { language: 'en', code: 'en' };
-            this.setLanguage('en');
+            this.setLanguage(savedLangCode.toLowerCase());
             return;
           }
           const normalizedLang = pref.code.toLowerCase();
@@ -151,31 +153,36 @@ export class BuyerHomeComponent implements OnDestroy {
         },
         error: (error) => {
           console.error('Error fetching user preference:', error);
-          this.userPreference = { language: 'en', code: 'en' };
-          this.setLanguage('en');
+          this.userPreference = { language: savedLangCode, code: savedLangCode };
+          this.setLanguage(savedLangCode.toLowerCase());
         }
       });
   }
 
   setLanguage(langCode: string) {
-    this.translate.use(langCode)
+    const normalizedLangCode = langCode.toLowerCase();
+    this.translate.use(normalizedLangCode)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          const lang = this.languages.find(l => l.code === langCode);
+          const lang = this.languages.find(l => l.code === normalizedLangCode);
           this.currentLanguage = lang?.name || 'English';
+          // Save to localStorage for persistence
+          localStorage.setItem('retailer_language', normalizedLangCode);
         },
         error: (err) => {
-          console.error('Error loading translation file for', langCode, err);
+          console.error('Error loading translation file for', normalizedLangCode, err);
           this.translate.use('en');
           this.currentLanguage = 'English';
+          localStorage.setItem('retailer_language', 'en');
           this.showErrorToast('BUYER_HOME.ERROR_LOADING_TRANSLATIONS');
         }
       });
   }
 
   saveLanguagePreference(langCode: string) {
-    const lang = this.languages.find(l => l.code === langCode);
+    const normalizedLangCode = langCode.toLowerCase();
+    const lang = this.languages.find(l => l.code === normalizedLangCode);
     if (!lang) {
       console.error('Language not found:', langCode);
       return;
@@ -185,11 +192,13 @@ export class BuyerHomeComponent implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.setLanguage(langCode);
+          this.setLanguage(normalizedLangCode);
           this.showSuccessToast('BUYER_HOME.LANGUAGE_UPDATED');
         },
         error: (error) => {
           console.error('Error saving language preference:', error);
+          // Still change language locally even if backend save fails
+          this.setLanguage(normalizedLangCode);
           this.showErrorToast('BUYER_HOME.ERROR_SAVING_LANGUAGE');
         }
       });
@@ -197,13 +206,14 @@ export class BuyerHomeComponent implements OnDestroy {
 
   async openLanguagePopover(event: Event) {
     try {
+      const currentLangCode = this.languages.find(l => l.name === this.currentLanguage)?.code.toLowerCase() || 'en';
       const popover = await this.popoverCtrl.create({
         component: LanguagePopoverComponent,
         event: event,
         translucent: true,
         componentProps: {
           languages: this.languages,
-          currentLanguage: this.currentLanguage,
+          currentLanguage: currentLangCode,
           onSelect: (lang: Language) => this.saveLanguagePreference(lang.code)
         }
       });

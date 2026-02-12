@@ -11,8 +11,8 @@ export class AppComponent {
 
   constructor(private translate: TranslateService) {
     this.translate.addLangs(['en', 'hi']);
-    this.translate.setFallbackLang('en');
-    const lang = localStorage.getItem('appLang') || 'en';
-    this.translate.use('lang');
+    this.translate.setDefaultLang('en');
+    const lang = (localStorage.getItem('appLang') || 'en').toLowerCase();
+    this.translate.use(lang);
   }
 }

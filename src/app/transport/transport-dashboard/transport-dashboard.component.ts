@@ -11,15 +11,10 @@ import { DeliveryService } from './delivery.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PopoverController } from '@ionic/angular';
 import { LanguagePopoverComponent } from './language-popover.component';
+import { TransportLanguageService, Language } from '../services/transport-language.service';
 
 interface UserPreference {
   language: string;
-}
-
-interface Language {
-  id: number;
-  code: string;
-  name: string;
 }
 
 @Component({
@@ -27,7 +22,7 @@ interface Language {
   standalone: true,
   templateUrl: './transport-dashboard.component.html',
   styleUrls: ['./transport-dashboard.component.scss'],
-  imports: [IonicModule, CommonModule, FormsModule, RouterModule, TranslatePipe, LanguagePopoverComponent]
+  imports: [IonicModule, CommonModule, FormsModule, RouterModule, TranslatePipe]
 })
 export class TransportDashboardComponent implements OnInit {
   selectedTab = 'active';
@@ -42,11 +37,14 @@ export class TransportDashboardComponent implements OnInit {
   currentLanguage = 'English'; // Default
   userPreference: UserPreference | null = null;
 
-  constructor(private deliveryService: DeliveryService, private translate: TranslateService, private popoverCtrl: PopoverController) {
+  constructor(
+    private deliveryService: DeliveryService,
+    private translate: TranslateService,
+    private popoverCtrl: PopoverController,
+    private languageService: TransportLanguageService
+  ) {
     this.translate.setDefaultLang('en');
-    this.translate.use('en');
-
-    addIcons({ languageOutline, carOutline, timeOutline, checkmarkCircleOutline }); // Removed unused icons
+    addIcons({ languageOutline, carOutline, timeOutline, checkmarkCircleOutline });
   }
 
   ngOnInit() {
@@ -56,52 +54,93 @@ export class TransportDashboardComponent implements OnInit {
   }
 
   fetchLanguages() {
-    // Assuming a service method exists; adjust as needed (e.g., from a shared service)
-    // For now, using fallback data similar to home.page
-    this.languages = [
-      { id: 1, code: 'en', name: 'English' },
-      { id: 2, code: 'hi', name: 'हिंदी' }
-    ];
+    this.languageService.getLanguages().subscribe({
+      next: (langs) => {
+        this.languages = langs;
+      },
+      error: (err) => {
+        console.error('Error fetching languages:', err);
+        // Fallback to default languages if API fails
+        this.languages = [
+          { id: 1, code: 'en', name: 'English' },
+          { id: 2, code: 'hi', name: 'हिंदी' }
+        ];
+      }
+    });
   }
 
   fetchUserPreference() {
-    // Assuming a service method exists; adjust as needed
-    // For now, using fallback
-    this.userPreference = { language: 'en' };
-    this.setLanguage('en');
+    // First check localStorage for saved language
+    const savedLangCode = this.languageService.getStoredLanguageCode();
+
+    // Try to get user preference from backend
+    this.languageService.getUserPreference().subscribe({
+      next: (pref) => {
+        this.userPreference = pref;
+        // Use backend preference if available, otherwise use localStorage
+        // Normalize to lowercase to match JSON files
+        const langCode = (pref.language || savedLangCode).toLowerCase();
+        this.setLanguage(langCode);
+      },
+      error: (err) => {
+        console.error('Error fetching user preference:', err);
+        // Fallback to localStorage if API fails
+        this.userPreference = { language: savedLangCode };
+        this.setLanguage(savedLangCode.toLowerCase());
+      }
+    });
   }
 
   setLanguage(langCode: string) {
-    this.translate.use(langCode).subscribe({
+    // Ensure language code is lowercase to match JSON files (en.json, hi.json)
+    const normalizedLangCode = langCode.toLowerCase();
+
+    this.translate.use(normalizedLangCode).subscribe({
       next: () => {
-        const lang = this.languages.find(l => l.code === langCode);
+        const lang = this.languages.find(l => l.code.toLowerCase() === normalizedLangCode);
         this.currentLanguage = lang ? lang.name : 'English';
+        // Save to localStorage for persistence
+        this.languageService.saveLanguageCode(normalizedLangCode);
       },
       error: (err) => {
-        console.error('Error loading translation file for', langCode, err);
+        console.error('Error loading translation file for', normalizedLangCode, err);
         this.translate.use('en');
         this.currentLanguage = 'English';
+        this.languageService.saveLanguageCode('en');
       }
     });
   }
 
   saveLanguagePreference(langCode: string) {
-    const lang = this.languages.find(l => l.code === langCode);
+    // Normalize to lowercase for consistency
+    const normalizedLangCode = langCode.toLowerCase();
+    const lang = this.languages.find(l => l.code.toLowerCase() === normalizedLangCode);
+
     if (lang) {
-      // Assuming a service method exists; adjust as needed
-      // this.someService.setLanguagePreference(lang.id).subscribe({...});
-      this.setLanguage(langCode);
+      // Save to backend
+      this.languageService.setLanguagePreference(lang.id).subscribe({
+        next: (response) => {
+          console.log('Language preference saved to backend:', response);
+          this.setLanguage(normalizedLangCode);
+        },
+        error: (err) => {
+          console.error('Error saving language preference to backend:', err);
+          // Still change language locally even if backend save fails
+          this.setLanguage(normalizedLangCode);
+        }
+      });
     }
   }
 
   async openLanguagePopover(event: Event) {
+    const currentLangCode = this.languages.find(l => l.name === this.currentLanguage)?.code.toLowerCase() || 'en';
     const popover = await this.popoverCtrl.create({
       component: LanguagePopoverComponent,
       event: event,
       translucent: true,
       componentProps: {
         languages: this.languages,
-        currentLanguage: this.currentLanguage,
+        currentLanguage: currentLangCode,
         onSelect: (lang: Language) => this.saveLanguagePreference(lang.code)
       }
     });

@@ -163,7 +163,10 @@
         lines="none"
         (click)="viewDetails(item)"
         button
+        [detail]="false"
       >
+<!-- I removed the double arrows of ios with [detail]="false" -->
+
         <ion-label>
           <h2>{{ item.product_name }}</h2>
           <p>

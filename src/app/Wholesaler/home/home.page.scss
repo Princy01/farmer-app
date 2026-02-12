@@ -86,7 +86,6 @@ ion-menu {
     transition: all 0.3s ease;
 
     &:hover {
-      transform: translateX(4px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
     }
 
@@ -287,20 +286,4 @@ ion-skeleton-text {
       }
     }
   }
-}
-
-// Animations
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-ion-item {
-  animation: fadeInUp 0.4s ease-out;
 }

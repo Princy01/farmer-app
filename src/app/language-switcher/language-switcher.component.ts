@@ -17,7 +17,8 @@ export class LanguageSwitcherComponent {
         constructor(private translate: TranslateService) { }
 
         switchLanguage(lang: string) {
-                this.translate.use(lang);
-                localStorage.setItem('appLang', lang);
+                const normalizedLang = lang.toLowerCase();
+                this.translate.use(normalizedLang);
+                localStorage.setItem('appLang', normalizedLang);
         }
 }

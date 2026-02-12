@@ -23,7 +23,7 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(
-      withInterceptors([authInterceptor,])
+      withInterceptors([authInterceptor, translationInterceptor])
     ),
     provideTranslateService({
       loader: provideTranslateHttpLoader({

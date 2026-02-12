@@ -39,11 +39,14 @@ export class ProfilePage implements OnInit, OnDestroy {
     mobile: null,
     address: null,
     location: null,
+    location_id: null,
+    state_id: null,
+    state_name: null,
     pincode: null,
     status: '',
     profile_image: null,
     total_branches: 0,
-    member_since: ''
+    member_since: null
   };
 
   isEditing = false;
@@ -96,6 +99,9 @@ export class ProfilePage implements OnInit, OnDestroy {
           mobile: backendProfile.mobile,
           address: backendProfile.address,
           location: backendProfile.location,
+          location_id: backendProfile.location_id,
+          state_id: backendProfile.state_id,
+          state_name: backendProfile.state_name,
           pincode: backendProfile.pincode,
           status: backendProfile.status,
           profile_image: backendProfile.profile_image,
@@ -137,7 +143,8 @@ export class ProfilePage implements OnInit, OnDestroy {
       email: this.profile.email || '',
       mobile: this.profile.mobile || '',
       address: this.profile.address || '',
-      location: 0, // Default to 0 since location is not editable
+      location: this.profile.location_id || 0,
+      state: this.profile.state_id || 0,
       pincode: this.profile.pincode || ''
     };
 

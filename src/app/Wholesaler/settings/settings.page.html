@@ -25,7 +25,7 @@
             <h3>{{ 'SETTINGS.AUTO_REFRESH' | translate }}</h3>
             <p>{{ 'SETTINGS.AUTO_REFRESH_DESC' | translate }}</p>
           </ion-label>
-          <ion-toggle formControlName="autoRefresh" (ionChange)="toggleAutoRefresh($event)"></ion-toggle>
+          <ion-toggle [checked]="settingsForm.get('autoRefresh')?.value" (ionChange)="toggleAutoRefresh($event)"></ion-toggle>
         </ion-item>
       </ion-card>
     </div>
@@ -37,7 +37,7 @@
         <h2>{{ 'SETTINGS.NOTIFICATIONS' | translate }}</h2>
       </div>
 
-      <ion-card class="settings-card">
+      <ion-card class="settings-card" [formGroup]="settingsForm">
         <ion-item lines="full">
           <ion-icon name="receipt-outline" slot="start" class="item-icon"></ion-icon>
           <ion-label>

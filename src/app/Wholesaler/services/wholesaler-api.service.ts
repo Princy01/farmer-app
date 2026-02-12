@@ -5,9 +5,7 @@ import { map, catchError, retry } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
-/**
- * Error response from API
- */
+
 export interface ApiErrorResponse {
   error?: {
     message?: string;
@@ -357,11 +355,6 @@ export class WholesalerApiService {
     });
   }
 
-  /**
-   * Handle HTTP errors and return user-friendly error messages
-   * @param error - The HTTP error response
-   * @returns Observable that throws formatted error
-   */
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'ERRORS.UNKNOWN_ERROR';
 
@@ -403,10 +396,6 @@ export class WholesalerApiService {
     return throwError(() => ({ message: errorMessage, originalError: error }));
   }
 
-  /**
-   * Get order summary for the authenticated wholesaler
-   * @returns Observable of order summaries
-   */
   getOrderSummary(): Observable<OrderSummary[]> {
     const headers = this.getAuthHeaders();
     return this.http.get<OrderSummary[]>(
@@ -418,10 +407,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get detailed information for all order items
-   * @returns Observable of order item details
-   */
   getOrderItemDetails(): Observable<OrderItemDetails[]> {
     const headers = this.getAuthHeaders();
     return this.http.get<OrderItemDetails[]>(
@@ -433,11 +418,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get detailed view of a specific order
-   * @param orderId - The ID of the order to retrieve
-   * @returns Observable of detailed order view
-   */
   getOrderDetails(orderId: number): Observable<OrderDetailedView> {
     const headers = this.getAuthHeaders();
     return this.http.get<OrderDetailedView>(
@@ -449,11 +429,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get complete details of a specific order including all products
-   * @param orderId - The ID of the order to retrieve
-   * @returns Observable of full order details
-   */
   getOrderFullDetails(orderId: number): Observable<OrderFullDetails> {
     const headers = this.getAuthHeaders();
     return this.http.get<OrderFullDetails>(
@@ -465,12 +440,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get completed orders for the authenticated wholesaler
-   * @param wholesalerId - (Deprecated) Wholesaler ID - kept for backward compatibility, uses JWT instead
-   * @param daysAgo - Optional filter to get orders from the last N days
-   * @returns Observable of completed order details
-   */
   getCompletedOrders(wholesalerId?: number, daysAgo?: number): Observable<OrderItemDetails[]> {
     const headers = this.getAuthHeaders();
 
@@ -494,11 +463,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get restocking recommendations based on sales data
-   * @param daysBack - Number of days to look back for analysis (default: 30)
-   * @returns Observable of products needing restocking
-   */
   getRestockingRecommendations(daysBack: number = 30): Observable<RestockProduct[]> {
     const headers = this.getAuthHeaders();
     return this.http.get<RestockProduct[]>(
@@ -510,10 +474,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get all bulk orders for market opportunities
-   * @returns Observable of bulk orders
-   */
   getBulkOrders(): Observable<BulkOrder[]> {
     const headers = this.getAuthHeaders();
     return this.http.get<BulkOrder[]>(
@@ -525,10 +485,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get top retailers with their product orders and aggregated totals
-   * @returns Observable of top retailers with product details
-   */
   getTopRetailers(): Observable<TopRetailer[]> {
     const headers = this.getAuthHeaders();
 
@@ -542,12 +498,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Transform flat retailer-product response into grouped TopRetailer structure
-   * Groups products by retailer and calculates aggregated totals
-   * @param response - Flat array of retailer-product data from API
-   * @returns Array of retailers with grouped product information
-   */
   private transformTopRetailers(response: RetailerProductResponse[]): TopRetailer[] {
     const retailerMap = new Map<number, TopRetailer>();
 
@@ -579,11 +529,6 @@ export class WholesalerApiService {
     return Array.from(retailerMap.values());
   }
 
-  /**
-   * Create a new offer for a bulk order
-   * @param offer - The offer details to submit
-   * @returns Observable of created offer response with offer ID
-   */
   createOffer(offer: CreateOfferRequest): Observable<CreateOfferResponse> {
     const headers = this.getAuthHeaders();
 
@@ -601,12 +546,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Create a new wholesaler entry for sale
-   * @param entry - The entry details including product, quantity, price, etc.
-   * @returns Observable of entry creation response
-   * @throws Error if required fields are missing
-   */
   createWholesellerEntry(entry: WholesellerEntry): Observable<WholesellerEntryResponse> {
     const headers = this.getAuthHeaders();
 
@@ -632,11 +571,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get all products available for the wholesaler
-   * @param wholesalerId - (Deprecated) Wholesaler ID - kept for backward compatibility, uses JWT instead
-   * @returns Observable of products with ID and name
-   */
   getProducts(wholesalerId?: number): Observable<{ product_id: number, product_name: string }[]> {
     const headers = this.getAuthHeaders();
 
@@ -649,10 +583,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get all mandis (markets) associated with the wholesaler
-   * @returns Observable of mandi details
-   */
   getMandis(): Observable<Mandi[]> {
     const headers = this.getAuthHeaders();
     return this.http.get<Mandi[]>(
@@ -664,11 +594,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Add a new mandi (market) for the wholesaler
-   * @param mandi - The mandi details to create
-   * @returns Observable of creation response
-   */
   addMandi(mandi: any): Observable<any> {
     const headers = this.getAuthHeaders();
     return this.http.post<any>(
@@ -680,11 +605,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get all warehouses for the authenticated wholesaler
-   * @param wholesalerId - (Deprecated) Wholesaler ID - kept for backward compatibility, uses JWT instead
-   * @returns Observable of warehouses with ID and name
-   */
   getWarehouses(wholesalerId?: number): Observable<{ warehouse_id: number, warehouse_name: string }[]> {
     const headers = this.getAuthHeaders();
 
@@ -697,10 +617,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get all available units of measurement
-   * @returns Observable of units with ID and name
-   */
   getUnits(): Observable<{ unit_id: number, unit_name: string }[]> {
     const headers = this.getAuthHeaders();
     return this.http.get<{ unit_id: number, unit_name: string }[]>(
@@ -712,10 +628,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Check if the wholesaler has a registered business
-   * @returns Observable of boolean indicating business existence
-   */
   getBusinessExistsOrNot(): Observable<boolean> {
     const headers = this.getAuthHeaders();
     return this.http.get<boolean>(
@@ -727,10 +639,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get all available languages for the application
-   * @returns Observable of available languages
-   */
   getLanguages(): Observable<Language[]> {
     return this.http.get<Language[]>(
       `${this.apiUrl}/getAllLanguages`
@@ -740,10 +648,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get user's language preference
-   * @returns Observable of user preferences including language
-   */
   getUserPreference(): Observable<UserPreference> {
     return this.http.get<UserPreference>(
       `${this.apiUrl}/getUserLanguagePreference`,
@@ -754,11 +658,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Set user's language preference
-   * @param langId - The language ID to set as preference
-   * @returns Observable of update response
-   */
   setLanguagePreference(langId: number): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/setUserLanguagePreference`,
@@ -769,13 +668,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get paginated list of wholesaler products with optional search
-   * @param page - Page number for pagination
-   * @param limit - Number of items per page
-   * @param search - Optional search query to filter products
-   * @returns Observable of wholesaler products
-   */
   getWholesalerProducts(
     page?: number,
     limit?: number,
@@ -803,11 +695,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Get detailed information for a specific wholesaler product
-   * @param productId - The ID of the product to retrieve details for
-   * @returns Observable of detailed product information including mandi-wise data and order stats
-   */
   getWholesalerProductDetails(
     productId: number
   ): Observable<WholesalerProductDetails> {
@@ -822,13 +709,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Update product stock quantity for a specific mandi
-   * @param productId - The ID of the product to update
-   * @param mandiId - The ID of the mandi where stock is being updated
-   * @param newQuantity - The new stock quantity
-   * @returns Observable of update response
-   */
   updateProductStockForMandi(
     productId: number,
     mandiId: number,
@@ -847,13 +727,6 @@ export class WholesalerApiService {
     );
   }
 
-  /**
-   * Update product price for a specific mandi
-   * @param productId - The ID of the product to update
-   * @param mandiId - The ID of the mandi where price is being updated
-   * @param newPrice - The new price per unit
-   * @returns Observable of update response
-   */
   updateProductPriceForMandi(
     productId: number,
     mandiId: number,
