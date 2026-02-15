@@ -24,6 +24,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { TranslateApiService } from '../services/translate-api.service';
 import { Subject, takeUntil } from 'rxjs';
+import { RetailerSettingsService } from './settings.service';
 
 interface Language {
   id: number;
@@ -92,7 +93,8 @@ export class SettingsPage implements OnInit, OnDestroy {
     private toastCtrl: ToastController,
     private actionSheetCtrl: ActionSheetController,
     private translate: TranslateService,
-    private translateApiService: TranslateApiService
+    private translateApiService: TranslateApiService,
+    private settingsService: RetailerSettingsService
   ) {
     addIcons({
       arrowBackOutline, notificationsOutline, languageOutline,
@@ -120,7 +122,7 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   loadSettings() {
-    // Load from localStorage
+    // Load from localStorage first
     const savedSettings = localStorage.getItem('retailer_settings');
     if (savedSettings) {
       this.settings = JSON.parse(savedSettings);
@@ -131,6 +133,24 @@ export class SettingsPage implements OnInit, OnDestroy {
       this.selectedLanguage = savedLang;
       this.settings.language = savedLang;
     }
+
+    // Load from API
+    this.settingsService.getSettings().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (apiSettings: any) => {
+        this.settings.notifications = {
+          orderUpdates: apiSettings.orderUpdates,
+          priceAlerts: apiSettings.priceAlerts,
+          stockAlerts: apiSettings.stockAlerts,
+          marketingEmails: apiSettings.marketingEmails,
+          smsNotifications: apiSettings.smsNotifications
+        };
+        this.settings.autoRefresh = apiSettings.autoRefresh;
+        localStorage.setItem('retailer_settings', JSON.stringify(this.settings));
+      },
+      error: (error: any) => {
+        console.error('Error loading settings from API:', error);
+      }
+    });
   }
 
   fetchLanguages() {
@@ -143,6 +163,22 @@ export class SettingsPage implements OnInit, OnDestroy {
 
   async saveSettings() {
     localStorage.setItem('retailer_settings', JSON.stringify(this.settings));
+
+    this.settingsService.updateSettings({
+      orderUpdates: this.settings.notifications.orderUpdates,
+      priceAlerts: this.settings.notifications.priceAlerts,
+      stockAlerts: this.settings.notifications.stockAlerts,
+      marketingEmails: this.settings.notifications.marketingEmails,
+      smsNotifications: this.settings.notifications.smsNotifications,
+      autoRefresh: this.settings.autoRefresh
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        // Already saved to localStorage
+      },
+      error: (error) => {
+        this.showToast(error.message || this.translate.instant('RETAILER_SETTINGS.SAVE_ERROR'), 'danger');
+      }
+    });
 
     const toast = await this.toastCtrl.create({
       message: this.translate.instant('RETAILER_SETTINGS.SAVE_SUCCESS'),
@@ -301,11 +337,16 @@ export class SettingsPage implements OnInit, OnDestroy {
     });
     await loading.present();
 
-    // Simulate API call - replace with actual service call when available
-    setTimeout(async () => {
-      await loading.dismiss();
-      this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_CHANGED'), 'success');
-    }, 1000);
+    this.settingsService.changePassword(data).pipe(takeUntil(this.destroy$)).subscribe({
+      next: async () => {
+        await loading.dismiss();
+        this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_CHANGED'), 'success');
+      },
+      error: async (error: any) => {
+        await loading.dismiss();
+        this.showToast(error.message || this.translate.instant('RETAILER_SETTINGS.PASSWORD_CHANGE_ERROR'), 'danger');
+      }
+    });
 
     return true;
   }
@@ -367,6 +408,11 @@ export class SettingsPage implements OnInit, OnDestroy {
       message: this.translate.instant('RETAILER_SETTINGS.DELETE_ACCOUNT_WARNING'),
       inputs: [
         {
+          name: 'password',
+          type: 'password',
+          placeholder: this.translate.instant('RETAILER_SETTINGS.CURRENT_PASSWORD')
+        },
+        {
           name: 'confirmation',
           type: 'text',
           placeholder: this.translate.instant('RETAILER_SETTINGS.TYPE_DELETE')
@@ -381,8 +427,8 @@ export class SettingsPage implements OnInit, OnDestroy {
           text: this.translate.instant('RETAILER_SETTINGS.DELETE'),
           role: 'destructive',
           handler: (data) => {
-            if (data.confirmation === 'DELETE') {
-              this.handleAccountDeletion();
+            if (data.confirmation === 'DELETE' && data.password) {
+              this.handleAccountDeletion(data.password);
               return true;
             } else {
               this.showToast(this.translate.instant('RETAILER_SETTINGS.INVALID_CONFIRMATION'), 'danger');
@@ -396,22 +442,30 @@ export class SettingsPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  async handleAccountDeletion() {
+  async handleAccountDeletion(password: string) {
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('RETAILER_SETTINGS.DELETING_ACCOUNT')
     });
     await loading.present();
 
-    // Simulate API call
-    setTimeout(async () => {
-      await loading.dismiss();
-      this.authService.logout();
-      await this.router.navigate(['/login']);
-    }, 2000);
+    this.settingsService.deleteAccount({
+      password: password,
+      confirmation: 'DELETE'
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: async () => {
+        await loading.dismiss();
+        this.authService.logout();
+        await this.router.navigate(['/login']);
+      },
+      error: async (error: any) => {
+        await loading.dismiss();
+        this.showToast(error.message || this.translate.instant('RETAILER_SETTINGS.DELETE_ERROR'), 'danger');
+      }
+    });
   }
 
   openHelp() {
-    this.router.navigate(['/buyer/help']);
+    this.router.navigate(['/retailer/help']);
   }
 
   openPrivacyPolicy() {

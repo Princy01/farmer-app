@@ -5,30 +5,29 @@ import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
-export interface WholesalerProfile {
-  id: number;
+export interface RetailerProfile {
+  retailer_id: number;
   name: string;
-  email: string | null;
-  mobile: string | null;
-  address: string | null;
-  location: string | null;
-  location_id: number | null;
-  state_id: number | null;
-  state_name: string | null;
-  pincode: string | null;
-  status: string;
-  profile_image: string | null;
-  total_branches: number;
-  member_since: string | null;
+  email: string;
+  mobile_num: string;
+  address: string;
+  pincode: string;
+  state_id: number;
+  state_name: string;
+  location_id: number;
+  location_name: string;
+  registration_date: string;
+  active_status: boolean;
+  total_orders: number;
+  profile_image?: string;
 }
 
 export interface UpdateUserProfileRequest {
   name: string;
   email: string;
-  mobile: string;
+  mobile_num: string;
   address: string;
   state_name: string;
-  city_name: string;
   location_name: string;
   pincode: string;
 }
@@ -36,7 +35,7 @@ export interface UpdateUserProfileRequest {
 @Injectable({
   providedIn: 'root'
 })
-export class WholesalerProfileService {
+export class RetailerProfileService {
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private authService: AuthService) { }
@@ -49,23 +48,23 @@ export class WholesalerProfileService {
     });
   }
 
-  getProfile(): Observable<WholesalerProfile> {
+  getProfile(): Observable<RetailerProfile> {
     const headers = this.getAuthHeaders();
-    return this.http.get<WholesalerProfile>(`${this.apiUrl}/wholesaler/profile`, { headers }).pipe(
+    return this.http.get<RetailerProfile>(`${this.apiUrl}/retailer/profile`, { headers }).pipe(
       catchError(this.handleError)
     );
   }
 
   updateProfile(profileData: UpdateUserProfileRequest): Observable<any> {
     const headers = this.getAuthHeaders();
-    return this.http.put(`${this.apiUrl}/wholesaler/profile`, profileData, { headers }).pipe(
+    return this.http.put(`${this.apiUrl}/retailer/profile`, profileData, { headers }).pipe(
       catchError(this.handleError)
     );
   }
 
   uploadProfileImage(imageBase64: string): Observable<any> {
     const headers = this.getAuthHeaders();
-    return this.http.post(`${this.apiUrl}/wholesaler//profile/image`, { image: imageBase64 }, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/retailer/profile/image`, { image: imageBase64 }, { headers }).pipe(
       catchError(this.handleError)
     );
   }

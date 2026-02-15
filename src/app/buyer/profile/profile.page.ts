@@ -18,25 +18,9 @@ import {
 } from 'ionicons/icons';
 
 import { AuthService } from 'src/app/auth/auth.service';
+import { RetailerProfile, RetailerProfileService, UpdateUserProfileRequest } from './profile.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
-
-interface RetailerProfile {
-  retailer_id: number;
-  name: string;
-  email: string;
-  mobile_num: string;
-  address: string;
-  pincode: string;
-  state_id: number;
-  state_name: string;
-  location_id: number;
-  location_name: string;
-  registration_date: string;
-  active_status: boolean;
-  total_orders: number;
-  profile_image?: string;
-}
 
 @Component({
   selector: 'app-profile',
@@ -75,7 +59,8 @@ export class ProfilePage implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private retailerProfileService: RetailerProfileService
   ) {
     addIcons({
       personOutline, mailOutline, callOutline, locationOutline,
@@ -102,26 +87,17 @@ export class ProfilePage implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    // Using dummy data since API might not have profile endpoint
-    setTimeout(() => {
-      this.profile = {
-        retailer_id: 1,
-        name: 'Fresh Mart Store',
-        email: 'freshmart@example.com',
-        mobile_num: '+91 98765 43210',
-        address: '456, Retail Complex, Connaught Place',
-        pincode: '110001',
-        state_id: 7,
-        state_name: 'Delhi',
-        location_id: 45,
-        location_name: 'Connaught Place',
-        registration_date: '2023-01-15',
-        active_status: true,
-        total_orders: 127,
-        profile_image: undefined
-      };
-      this.isLoading = false;
-    }, 500);
+    this.retailerProfileService.getProfile().subscribe({
+      next: (profile: RetailerProfile) => {
+        this.profile = profile;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading profile:', error);
+        this.isLoading = false;
+        this.showErrorAlert('Error', 'Failed to load profile');
+      }
+    });
   }
 
   toggleEdit() {
@@ -138,19 +114,34 @@ export class ProfilePage implements OnInit, OnDestroy {
     });
     await loading.present();
 
-    // Simulate API call
-    setTimeout(async () => {
-      await loading.dismiss();
-      this.isEditing = false;
+    const profileData: UpdateUserProfileRequest = {
+      name: this.profile.name,
+      email: this.profile.email,
+      mobile_num: this.profile.mobile_num,
+      address: this.profile.address,
+      state_name: this.profile.state_name,
+      location_name: this.profile.location_name,
+      pincode: this.profile.pincode
+    };
 
-      const toast = await this.toastCtrl.create({
-        message: this.translate.instant('RETAILER_PROFILE.SAVE_SUCCESS'),
-        duration: 2000,
-        color: 'success',
-        position: 'top'
-      });
-      await toast.present();
-    }, 1000);
+    this.retailerProfileService.updateProfile(profileData).subscribe({
+      next: async () => {
+        await loading.dismiss();
+        this.isEditing = false;
+        const toast = await this.toastCtrl.create({
+          message: this.translate.instant('RETAILER_PROFILE.SAVE_SUCCESS'),
+          duration: 2000,
+          color: 'success',
+          position: 'top'
+        });
+        await toast.present();
+      },
+      error: async (error) => {
+        await loading.dismiss();
+        console.error('Error saving profile:', error);
+        this.showErrorAlert('Error', 'Failed to save profile');
+      }
+    });
   }
 
   validateProfile(): boolean {

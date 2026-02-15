@@ -143,8 +143,9 @@ export class ProfilePage implements OnInit, OnDestroy {
       email: this.profile.email || '',
       mobile: this.profile.mobile || '',
       address: this.profile.address || '',
-      location: this.profile.location_id || 0,
-      state: this.profile.state_id || 0,
+      state_name: this.profile.state_name || '',
+      city_name: this.profile.location || '',
+      location_name: this.profile.location || '',
       pincode: this.profile.pincode || ''
     };
 
