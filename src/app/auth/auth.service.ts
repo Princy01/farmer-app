@@ -182,6 +182,9 @@ export class AuthService {
     // Remove any legacy keys
     localStorage.removeItem('auth_token');
     localStorage.removeItem('wholesalerId');
+
+    // clear all
+    localStorage.clear();
   }
 
   // Updated authentication check methods

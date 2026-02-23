@@ -11,10 +11,12 @@ import { DeliveryService } from './delivery.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PopoverController } from '@ionic/angular';
 import { LanguagePopoverComponent } from './language-popover.component';
-import { TransportLanguageService, Language } from '../services/transport-language.service';
+import { TranslateApiService } from '@/services/translate-api.service';
 
-interface UserPreference {
-  language: string;
+interface Language {
+  id: number;
+  code: string;
+  name: string;
 }
 
 @Component({
@@ -35,13 +37,12 @@ export class TransportDashboardComponent implements OnInit {
 
   languages: Language[] = [];
   currentLanguage = 'English'; // Default
-  userPreference: UserPreference | null = null;
 
   constructor(
     private deliveryService: DeliveryService,
     private translate: TranslateService,
     private popoverCtrl: PopoverController,
-    private languageService: TransportLanguageService
+    private translateApiService: TranslateApiService
   ) {
     this.translate.setDefaultLang('en');
     addIcons({ languageOutline, carOutline, timeOutline, checkmarkCircleOutline });
@@ -49,18 +50,25 @@ export class TransportDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loadDeliveries('active');
-    this.fetchUserPreference();
+    this.applyStoredLanguage();
     this.fetchLanguages();
   }
 
+  private applyStoredLanguage() {
+    const savedLang = localStorage.getItem('preferred_language') || 'en';
+    this.translate.use(savedLang);
+  }
+
   fetchLanguages() {
-    this.languageService.getLanguages().subscribe({
+    this.translateApiService.getLanguages().subscribe({
       next: (langs) => {
-        this.languages = langs;
+        this.languages = langs.map(l => ({ ...l, code: l.code.toLowerCase() }));
+        const currentLang = this.translate.currentLang || 'en';
+        const lang = this.languages.find(l => l.code === currentLang);
+        if (lang) this.currentLanguage = lang.name;
       },
       error: (err) => {
         console.error('Error fetching languages:', err);
-        // Fallback to default languages if API fails
         this.languages = [
           { id: 1, code: 'en', name: 'English' },
           { id: 2, code: 'hi', name: 'हिंदी' }
@@ -69,27 +77,6 @@ export class TransportDashboardComponent implements OnInit {
     });
   }
 
-  fetchUserPreference() {
-    // First check localStorage for saved language
-    const savedLangCode = this.languageService.getStoredLanguageCode();
-
-    // Try to get user preference from backend
-    this.languageService.getUserPreference().subscribe({
-      next: (pref) => {
-        this.userPreference = pref;
-        // Use backend preference if available, otherwise use localStorage
-        // Normalize to lowercase to match JSON files
-        const langCode = (pref.language || savedLangCode).toLowerCase();
-        this.setLanguage(langCode);
-      },
-      error: (err) => {
-        console.error('Error fetching user preference:', err);
-        // Fallback to localStorage if API fails
-        this.userPreference = { language: savedLangCode };
-        this.setLanguage(savedLangCode.toLowerCase());
-      }
-    });
-  }
 
   setLanguage(langCode: string) {
     // Ensure language code is lowercase to match JSON files (en.json, hi.json)
@@ -100,13 +87,13 @@ export class TransportDashboardComponent implements OnInit {
         const lang = this.languages.find(l => l.code.toLowerCase() === normalizedLangCode);
         this.currentLanguage = lang ? lang.name : 'English';
         // Save to localStorage for persistence
-        this.languageService.saveLanguageCode(normalizedLangCode);
+        localStorage.setItem('preferred_language', normalizedLangCode);
       },
       error: (err) => {
         console.error('Error loading translation file for', normalizedLangCode, err);
         this.translate.use('en');
         this.currentLanguage = 'English';
-        this.languageService.saveLanguageCode('en');
+        localStorage.setItem('preferred_language', 'en');
       }
     });
   }
@@ -118,7 +105,7 @@ export class TransportDashboardComponent implements OnInit {
 
     if (lang) {
       // Save to backend
-      this.languageService.setLanguagePreference(lang.id).subscribe({
+      this.translateApiService.setLanguagePreference(lang.id).subscribe({
         next: (response) => {
           console.log('Language preference saved to backend:', response);
           this.setLanguage(normalizedLangCode);

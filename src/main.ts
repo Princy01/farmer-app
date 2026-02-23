@@ -32,7 +32,7 @@ bootstrapApplication(AppComponent, {
       }),
       fallbackLang: 'en',
       lang: 'en'
-      }
+    }
     )
   ],
 });

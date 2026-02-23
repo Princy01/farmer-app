@@ -22,7 +22,7 @@ import {
 
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { TranslateApiService } from '../services/translate-api.service';
+import { TranslateApiService } from '../../services/translate-api.service';
 import { Subject, takeUntil } from 'rxjs';
 import { RetailerSettingsService } from './settings.service';
 
@@ -128,7 +128,7 @@ export class SettingsPage implements OnInit, OnDestroy {
       this.settings = JSON.parse(savedSettings);
     }
 
-    const savedLang = localStorage.getItem('retailer_language');
+    const savedLang = localStorage.getItem('preferred_language');
     if (savedLang) {
       this.selectedLanguage = savedLang;
       this.settings.language = savedLang;
@@ -220,7 +220,7 @@ export class SettingsPage implements OnInit, OnDestroy {
     this.selectedLanguage = normalizedLangCode;
     this.settings.language = normalizedLangCode;
     this.translate.use(normalizedLangCode);
-    localStorage.setItem('retailer_language', normalizedLangCode);
+    localStorage.setItem('preferred_language', normalizedLangCode);
 
     // Save to backend
     this.translateApiService.setLanguagePreference(lang.id)

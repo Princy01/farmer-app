@@ -13,6 +13,8 @@ import {
 } from 'ionicons/icons';
 import { AuthService, UserRegistration, LoginCredentials, Location, State, City } from './auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateApiService } from '@/services/translate-api.service';
+
 
 enum UserRole {
   Admin = 1,
@@ -58,7 +60,8 @@ export class LoginPage {
     private router: Router,
     private authService: AuthService,
     private toastController: ToastController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private translateApiService: TranslateApiService
   ) {
     addIcons({
       eye, eyeOff, eyeOutline, eyeOffOutline,
@@ -88,6 +91,32 @@ export class LoginPage {
 
     this.loadStates();
     this.setupFormValueChanges();
+  }
+
+  private initUserLanguage() {
+    const legacy = localStorage.getItem('wholesaler_language')
+      || localStorage.getItem('retailer_language');
+    if (legacy) {
+      localStorage.setItem('preferred_language', legacy);
+      localStorage.removeItem('wholesaler_language');
+      localStorage.removeItem('retailer_language');
+    }
+
+    const savedLang = localStorage.getItem('preferred_language') || 'en';
+
+
+    this.translate.use(savedLang);
+
+    this.translateApiService.getUserPreference().subscribe({
+      next: (pref) => {
+        const code = pref?.code?.toLowerCase() || savedLang;
+        this.translate.use(code);
+        localStorage.setItem('retailer_language', code);
+      },
+      error: () => {
+        // Already applied saved/default above, nothing to do
+      }
+    });
   }
 
   setupFormValueChanges() {
@@ -175,6 +204,8 @@ export class LoginPage {
         }
 
         this.presentToast(this.translate.instant('AUTH.LOGIN_SUCCESS'), 'success');
+        this.initUserLanguage();
+
 
         const userRole = this.authService.getUserRole();
         console.log('Logged in user role:', userRole);

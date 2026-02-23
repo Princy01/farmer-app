@@ -94,7 +94,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.setItemsPerPage();
-    this.loadLanguagePreference();
+    this.applyStoredLanguage();
     this.checkAuthAndLoad();
     this.fetchLanguages();
   }
@@ -112,6 +112,11 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     }
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private applyStoredLanguage() {
+    const savedLang = localStorage.getItem('preferred_language') || 'en';
+    this.translate.use(savedLang);
   }
 
   private checkAuthAndLoad() {
@@ -360,13 +365,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private loadLanguagePreference() {
-    const savedLang = localStorage.getItem('wholesaler_language');
-    if (savedLang) {
-      this.translate.use(savedLang.toLowerCase());
-    }
-  }
-
   fetchLanguages() {
     this.wholesalerService.getLanguages()
       .pipe(takeUntil(this.destroy$))
@@ -416,7 +414,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
         next: () => {
           this.translate.use(normalizedLangCode);
           this.currentLanguage = lang.name;
-          localStorage.setItem('wholesaler_language', normalizedLangCode);
+          localStorage.setItem('preferred_language', normalizedLangCode);
         },
         error: (error) => {
           console.error('Error saving language preference:', error);

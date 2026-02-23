@@ -7,7 +7,7 @@
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable, of, switchMap } from 'rxjs';
-import { TranslateApiService } from 'src/app/buyer/services/translate-api.service';
+import { TranslateApiService } from '@/services/translate-api.service';
 import { SKIP_TRANSLATION } from './translation.context';
 
 /**

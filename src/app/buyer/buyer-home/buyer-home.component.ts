@@ -30,7 +30,7 @@ import {
   businessOutline
 } from 'ionicons/icons';
 import { LanguagePopoverComponent } from './language-popover.component';
-import { TranslateApiService } from '../services/translate-api.service';
+import { TranslateApiService } from '../../services/translate-api.service';
 
 interface UserPreference {
   language: string;
@@ -103,13 +103,18 @@ export class BuyerHomeComponent implements OnDestroy {
 
   ngOnInit() {
     this.fetchCategories();
-    this.fetchUserPreference();
     this.fetchLanguages();
+    this.applyStoredLanguage();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private applyStoredLanguage() {
+    const savedLang = localStorage.getItem('preferred_language') || 'en';
+    this.setLanguage(savedLang);
   }
 
   fetchLanguages() {
@@ -134,31 +139,6 @@ export class BuyerHomeComponent implements OnDestroy {
       });
   }
 
-  fetchUserPreference() {
-    // First check localStorage
-    const savedLangCode = localStorage.getItem('retailer_language') || 'en';
-
-    this.translateApiService.getUserPreference()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (pref) => {
-          if (!pref || !pref.code) {
-            this.userPreference = { language: 'en', code: 'en' };
-            this.setLanguage(savedLangCode.toLowerCase());
-            return;
-          }
-          const normalizedLang = pref.code.toLowerCase();
-          this.userPreference = { ...pref, language: normalizedLang };
-          this.setLanguage(normalizedLang);
-        },
-        error: (error) => {
-          console.error('Error fetching user preference:', error);
-          this.userPreference = { language: savedLangCode, code: savedLangCode };
-          this.setLanguage(savedLangCode.toLowerCase());
-        }
-      });
-  }
-
   setLanguage(langCode: string) {
     const normalizedLangCode = langCode.toLowerCase();
     this.translate.use(normalizedLangCode)
@@ -168,13 +148,13 @@ export class BuyerHomeComponent implements OnDestroy {
           const lang = this.languages.find(l => l.code === normalizedLangCode);
           this.currentLanguage = lang?.name || 'English';
           // Save to localStorage for persistence
-          localStorage.setItem('retailer_language', normalizedLangCode);
+          localStorage.setItem('preferred_language', normalizedLangCode);
         },
         error: (err) => {
           console.error('Error loading translation file for', normalizedLangCode, err);
           this.translate.use('en');
           this.currentLanguage = 'English';
-          localStorage.setItem('retailer_language', 'en');
+          localStorage.setItem('preferred_language', 'en');
           this.showErrorToast('BUYER_HOME.ERROR_LOADING_TRANSLATIONS');
         }
       });
