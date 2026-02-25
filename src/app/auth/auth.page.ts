@@ -111,7 +111,7 @@ export class LoginPage {
       next: (pref) => {
         const code = pref?.code?.toLowerCase() || savedLang;
         this.translate.use(code);
-        localStorage.setItem('retailer_language', code);
+        localStorage.setItem('preferred_language', code);
       },
       error: () => {
         // Already applied saved/default above, nothing to do
