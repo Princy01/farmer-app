@@ -221,7 +221,18 @@
   "NOT_FOUND": "मांगी गई जानकारी नहीं मिली।",
   "SERVER_ERROR": "सर्वर में समस्या है। कृपया थोड़ी देर बाद कोशिश करें।",
   "SERVICE_UNAVAILABLE": "सेवा अभी उपलब्ध नहीं है। कृपया बाद में प्रयास करें।",
-  "MISSING_REQUIRED_FIELDS": "कुछ जरूरी जानकारी भरना बाकी है। कृपया सभी जरूरी फ़ील्ड भरें।"
+  "MISSING_REQUIRED_FIELDS": "कुछ जरूरी जानकारी भरना बाकी है। कृपया सभी जरूरी फ़ील्ड भरें।",
+    "LOCATION_REQUIRED": "स्थान आवश्यक है। कृपया लोकेशन एक्सेस की अनुमति दें।",
+    "LOCATION_PERMISSION_DENIED": "लोकेशन अनुमति अस्वीकृत। कृपया अनुमति दें।",
+    "LOCATION_ERROR": "आपका स्थान प्राप्त नहीं हो सका। कृपया पुनः प्रयास करें।",
+    "GPS_REQUIRED_HEADER": "स्थान आवश्यक",
+    "GPS_REQUIRED_MSG": "कृपया अपने डिवाइस की सेटिंग्स में GPS/स्थान सेवा चालू करें और फिर प्रयास करें।",
+    "OK": "ठीक है",
+    "CONFIRM_LOCATION_HEADER": "स्थान की पुष्टि करें",
+    "LOCATION_DETAILS": "अक्षांश",
+    "LONGITUDE": "देशांतर",
+    "RETAKE": "फिर से लें",
+    "CONFIRM": "पुष्टि करें"
   },
 
   "WHOLESALER_BUSINESS_INFO": {
@@ -334,7 +345,27 @@
     "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
     "ACCESS_DENIED": "प्रवेश अस्वीकृत",
     "NO_PERMISSION": "आपको इस पृष्ठ तक पहुंच की अनुमति नहीं है।",
-    "OK": "ठीक है"
+    "OK": "ठीक है",
+    "SHOP_LOCATION_IMAGE": "दुकान की लोकेशन की फोटो",
+    "CAPTURE_SHOP_IMAGE": "दुकान की फोटो लें",
+    "CAPTURE_HELP_TEXT": "अपनी दुकान पर खड़े होकर एक साफ फोटो लें। अपनी लोकेशन (GPS) चालू रखें ताकि हम आपकी सही लोकेशन अपने आप प्राप्त कर सकें।",
+    "LOCATION_CAPTURED": "लोकेशन कैप्चर हो गई",
+    "LATITUDE": "अक्षांश",
+    "LONGITUDE": "देशांतर",
+    "RETAKE": "फिर से फोटो लें",
+    "REMOVE": "फोटो हटाएं",
+    "CAPTURING_IMAGE": "फोटो ली जा रही है...",
+    "CAMERA_PERMISSION_DENIED": "कैमरा की अनुमति नहीं मिली",
+    "IMAGE_CAPTURE_FAILED": "फोटो लेने में असफल",
+    "IMAGE_CAPTURE_ERROR": "फोटो लेते समय त्रुटि हुई",
+    "LOCATION_PERMISSION_DENIED": "लोकेशन की अनुमति नहीं मिली",
+    "LOCATION_FROM_DEVICE": "लोकेशन GPS से प्राप्त हुई",
+    "LOCATION_ERROR": "लोकेशन प्राप्त नहीं हो सकी",
+    "CONFIRM_LOCATION": "लोकेशन की पुष्टि करें",
+    "LOCATION_DETAILS": "अक्षांश: {{latitude}}, देशांतर: {{longitude}}",
+    "CONFIRM": "पुष्टि करें",
+    "LOCATION_CONFIRMED": "लोकेशन सफलतापूर्वक पुष्टि हो गई",
+    "CAPTURE_LOCATION_FIRST": "कृपया पहले दुकान की फोटो लेकर लोकेशन कैप्चर करें"
   },
   "PRODUCTS_IN_BRANCH": {
     "TITLE": "शाखा में उत्पाद:",

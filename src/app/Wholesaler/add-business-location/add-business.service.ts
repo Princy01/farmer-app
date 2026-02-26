@@ -47,6 +47,9 @@ export interface BusinessBranch {
   privilege_user: boolean;
   established_year: string;
   active_status: boolean;
+  latitude: number;
+  longitude: number;
+  image: string;
 }
 
 @Injectable({ providedIn: 'root' })
