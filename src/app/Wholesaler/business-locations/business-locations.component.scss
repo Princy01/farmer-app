@@ -399,6 +399,20 @@
   outline-offset: 2px;
 }
 
+/* Shop Image */
+.location-image {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.shop-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .locations-header {

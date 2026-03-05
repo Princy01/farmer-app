@@ -260,6 +260,91 @@
   75% { transform: translateX(5px); }
 }
 
+// GPS Section Styles
+.gps-section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(102, 126, 234, 0.1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(102, 126, 234, 0.05), transparent 50%);
+    pointer-events: none;
+  }
+
+  .gps-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    z-index: 1;
+
+    .gps-icon {
+      font-size: 1.75rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .gps-title {
+      font-weight: 700;
+      font-size: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.01em;
+    }
+  }
+
+  .location-btn {
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --background-hover: linear-gradient(135deg, #5568d3 0%, #68408d 100%);
+    --color: white;
+    --border-radius: 12px;
+    font-weight: 600;
+    height: 3rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+
+    &:hover {
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+      transform: translateY(-2px);
+    }
+
+    &[disabled] {
+      --background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+      --color: #64748b;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      opacity: 0.7;
+    }
+
+    ion-spinner {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .form-row {
+    position: relative;
+    z-index: 1;
+  }
+}
+
 .submit-btn {
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --background-hover: linear-gradient(135deg, #5568d3 0%, #68408d 100%);
@@ -390,6 +475,25 @@
     }
   }
 
+  .gps-section {
+    padding: 1.25rem;
+
+    .gps-header {
+      .gps-icon {
+        font-size: 1.5rem;
+      }
+
+      .gps-title {
+        font-size: 0.95rem;
+      }
+    }
+
+    .location-btn {
+      height: 2.75rem;
+      font-size: 0.95rem;
+    }
+  }
+
   .submit-btn {
     height: 3.25rem;
     font-size: 0.95rem;
@@ -420,6 +524,16 @@
   .form-section {
     .section-title {
       font-size: 1rem;
+    }
+  }
+
+  .gps-section {
+    padding: 1rem;
+
+    .gps-header {
+      .gps-title {
+        font-size: 0.9rem;
+      }
     }
   }
 

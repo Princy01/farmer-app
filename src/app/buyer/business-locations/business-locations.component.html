@@ -42,6 +42,11 @@
 
             <ion-card-content>
               <ion-list lines="none">
+                <!-- Location Image -->
+                <div *ngIf="location.image" class="location-image-container">
+                  <img [src]="location.image" alt="Shop Location" class="location-image" />
+                </div>
+
                 <ion-item>
                   <ion-icon
                     name="location"
@@ -50,6 +55,15 @@
                   <ion-label>
                     <h3>{{ 'BUSINESS_LOCATIONS.LOCATION_LABEL' | translate }}: {{ location.location_name }}, {{ 'BUSINESS_LOCATIONS.STATE_LABEL' | translate }}: {{ location.state_name }}, {{ 'BUSINESS_LOCATIONS.CITY_LABEL' | translate }}: {{ location.city_name }}</h3>
                     <p>{{ location.address }}</p>
+                  </ion-label>
+                </ion-item>
+
+                <!-- GPS Coordinates -->
+                <ion-item *ngIf="location.latitude && location.longitude">
+                  <ion-icon name="pin" slot="start"></ion-icon>
+                  <ion-label>
+                    <p><strong>{{ 'BUSINESS_LOCATIONS.COORDINATES' | translate }}:</strong></p>
+                    <p class="coordinates-text">{{ location.latitude.toFixed(6) }}, {{ location.longitude.toFixed(6) }}</p>
                   </ion-label>
                 </ion-item>
 

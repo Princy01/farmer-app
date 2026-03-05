@@ -1,43 +1,873 @@
+// Add Business Location Component Styles
+// Matching the modern purple gradient design system
+
+/* Toolbar - Purple Gradient */
+ion-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  --border-color: transparent;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+
+  ion-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    letter-spacing: 0.3px;
+  }
+
+  ion-back-button {
+    --color: white;
+    --icon-font-size: 1.5rem;
+    --background: transparent;
+    --background-activated: rgba(255, 255, 255, 0.15);
+    --border-radius: 12px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  .header-badge {
+    --background: transparent;
+    --padding-start: 0;
+    --padding-end: 0;
+
+    ion-badge {
+      font-weight: 600;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      letter-spacing: 0.5px;
+      animation: slideInDown 0.4s ease-out;
+    }
+  }
+}
+
+/* Content Background */
+ion-content {
+  --background: linear-gradient(180deg, #f8f9fa 0%, #f0f2ff 100%);
+}
+
+/* Container */
 .container {
-  padding: 16px;
+  padding: 2rem 1rem;
+  max-width: 850px;
+  margin: 0 auto;
+
+  form {
+    animation: fadeInUp 0.5s ease-out;
+  }
 }
 
-ion-item {
-  --highlight-height: 2px;
-  --highlight-color-focused: var(--ion-color-primary);
-  margin-bottom: 10px;
+/* Form Progress Indicator */
+.form-progress {
+  height: 3px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 10px;
+  margin-bottom: 2.5rem;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.4);
+  }
+}
+
+/* Form Section Styling */
+.form-section {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(102, 126, 234, 0.08);
+  border-left: 4px solid #667eea;
+  animation: fadeInUp 0.4s ease-out;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.12);
+    border-color: rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+
+    ion-icon {
+      font-size: 1.5rem;
+      color: #667eea;
+      min-width: 24px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+      letter-spacing: 0.3px;
+    }
+  }
+
+  ion-item {
+    --background: transparent;
+    --border-color: rgba(102, 126, 234, 0.12);
+    --highlight-color-focused: #667eea;
+    margin-bottom: 1.25rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+/* Camera Section - Enhanced Design */
+.camera-section {
+  margin-bottom: 2.5rem;
+
+  .section-subtitle {
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+    margin: 0.5rem 0 0 0;
+    line-height: 1.5;
+  }
+
+  ion-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    margin: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 28px rgba(102, 126, 234, 0.18);
+      border-color: #667eea;
+    }
+  }
+
+  ion-card-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.03));
+    padding: 1.5rem;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+  }
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ion-color-dark);
+    margin: 0;
+    letter-spacing: 0.3px;
+
+    ion-icon {
+      color: #667eea;
+      font-size: 1.5rem;
+    }
+  }
+
+  ion-card-content {
+    padding: 1.75rem;
+  }
+}
+
+/* Capture Prompt - Enhanced */
+.capture-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  gap: 1.5rem;
+
+  .capture-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s ease-in-out infinite;
+
+    ion-icon {
+      font-size: 3rem;
+      color: #667eea;
+    }
+  }
+
+  .capture-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+
+  .capture-button {
+    width: 100%;
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --color: white;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    --padding-top: 1rem;
+    --padding-bottom: 1rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    ion-icon {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+/* Image Preview - Fixed Display */
+.image-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  img {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(135deg, #f8f9fa, #f0f2ff);
+    padding: 0.5rem;
+    border: 2px solid rgba(102, 126, 234, 0.15);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: scale(1.01);
+      box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+    }
+  }
+}
+
+/* Location Info Card */
+.location-info {
+  background: linear-gradient(135deg, rgba(40, 199, 111, 0.08), rgba(40, 199, 111, 0.03));
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  padding: 1.25rem;
+  border: 2px solid rgba(40, 199, 111, 0.25);
+  border-left: 4px solid var(--ion-color-success);
+  animation: slideInRight 0.4s ease-out;
+
+  ion-chip {
+    margin: 0 0 1rem 0;
+    --background: rgba(40, 199, 111, 0.12);
+    --color: var(--ion-color-success);
+    font-weight: 600;
+    border-radius: 20px;
+
+    ion-icon {
+      color: var(--ion-color-success);
+      font-size: 1.1rem;
+      margin-right: 0.5rem;
+    }
+
+    ion-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  }
+
+  .coordinates {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+    line-height: 1.9;
+    font-family: 'Courier New', monospace;
+    background: rgba(102, 126, 234, 0.04);
+    padding: 0.75rem;
+    border-radius: 8px;
+
+    strong {
+      color: var(--ion-color-dark);
+      font-weight: 600;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+  }
 }
 
+/* Action Buttons for Image */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  ion-button {
+    flex: 1;
+    min-width: 140px;
+    --border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin: 0;
+
+    &[color="primary"] {
+      --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --color: white;
+      --box-shadow: 0 3px 12px rgba(102, 126, 234, 0.25);
+
+      &:hover {
+        transform: translateY(-2px);
+        --box-shadow: 0 5px 16px rgba(102, 126, 234, 0.35);
+      }
+    }
+
+    &[color="danger"] {
+      --border-color: var(--ion-color-danger);
+      --color: var(--ion-color-danger);
+      --background-activated: rgba(245, 101, 101, 0.1);
+
+      &:hover {
+        transform: translateY(-2px);
+        --box-shadow: 0 4px 12px rgba(245, 101, 101, 0.2);
+      }
+    }
+
+    ion-icon {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+/* Form Items - Enhanced Design */
+ion-item {
+  --background: white;
+  --border-color: rgba(102, 126, 234, 0.12);
+  --border-radius: 12px;
+  --border-width: 1px;
+  --border-style: solid;
+  --padding-start: 1.1rem;
+  --padding-end: 1.1rem;
+  --inner-padding-end: 0;
+  --highlight-height: 2px;
+  --highlight-color-focused: #667eea;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    --border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 3px 12px rgba(102, 126, 234, 0.08);
+  }
+
+  &.item-has-focus {
+    --border-color: #667eea;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+    transform: translateY(-1px);
+  }
+
+  &.ion-invalid {
+    --border-color: var(--ion-color-danger);
+    --highlight-color-focused: var(--ion-color-danger);
+    animation: shake 0.4s ease-in-out;
+
+    &.item-has-focus {
+      box-shadow: 0 4px 16px rgba(245, 101, 101, 0.15);
+    }
+  }
+}
+
+/* Labels */
 ion-label {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ion-color-dark);
+  margin-bottom: 0.65rem;
+  letter-spacing: 0.3px;
+
+  &[position="stacked"] {
+    margin-bottom: 0.65rem;
+    transform: none !important;
+  }
 }
 
+/* Inputs */
 ion-input,
 ion-textarea,
 ion-select {
-  --padding-start: 12px;
-  --padding-end: 12px;
-  font-size: 15px;
+  --padding-start: 0.75rem;
+  --padding-end: 0.75rem;
+  --padding-top: 0.65rem;
+  --padding-bottom: 0.65rem;
+  font-size: 0.95rem;
+  color: var(--ion-color-dark);
+
+  &::part(native) {
+    padding: 0.65rem 0.75rem;
+  }
 }
 
+ion-textarea {
+  --padding-top: 0.85rem;
+  --padding-bottom: 0.85rem;
+  min-height: 100px;
+}
+
+ion-select {
+  --placeholder-color: var(--ion-color-medium);
+  --placeholder-opacity: 0.7;
+
+  &::part(icon) {
+    color: #667eea;
+    opacity: 0.8;
+  }
+}
+
+/* Error Messages */
 .error-message {
   color: var(--ion-color-danger);
-  font-size: 13px;
-  margin: 2px 0 10px 12px;
-}
-
-.submit-btn {
-  margin-top: 20px;
-  border-radius: 12px;
+  font-size: 0.8rem;
   font-weight: 600;
+  margin: -0.8rem 0 1.1rem 1rem;
+  padding: 0.4rem 0.7rem;
+  background: rgba(245, 101, 101, 0.08);
+  border-radius: 8px;
+  border-left: 3px solid var(--ion-color-danger);
+  display: inline-block;
+  animation: shake 0.3s ease-in-out;
 }
 
-ion-button[disabled] {
-  opacity: 0.6;
+/* Submit Button */
+.submit-btn {
+  margin-top: 2.5rem;
+  margin-bottom: 2rem;
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: white;
+  --border-radius: 14px;
+  --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  --padding-top: 1rem;
+  --padding-bottom: 1rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+
+  &:hover:not([disabled]) {
+    transform: translateY(-3px);
+    --box-shadow: 0 8px 28px rgba(102, 126, 234, 0.4);
+  }
+
+  &:active:not([disabled]) {
+    transform: translateY(-1px);
+  }
+
+  &[disabled] {
+    opacity: 0.5;
+    --background: linear-gradient(135deg, rgba(102, 126, 234, 0.5) 0%, rgba(118, 75, 162, 0.5) 100%);
+    cursor: not-allowed;
+  }
+
+  ion-icon {
+    font-size: 1.3rem;
+  }
 }
 
-ion-select::part(icon) {
-  color: var(--ion-color-medium);
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Staggered Animation for Form Items */
+ion-item {
+  animation: fadeInUp 0.4s ease-out;
+  animation-fill-mode: both;
+
+  &:nth-child(1) { animation-delay: 0.05s; }
+  &:nth-child(2) { animation-delay: 0.1s; }
+  &:nth-child(3) { animation-delay: 0.15s; }
+  &:nth-child(4) { animation-delay: 0.2s; }
+  &:nth-child(5) { animation-delay: 0.25s; }
+  &:nth-child(6) { animation-delay: 0.3s; }
+  &:nth-child(7) { animation-delay: 0.35s; }
+  &:nth-child(8) { animation-delay: 0.4s; }
+  &:nth-child(9) { animation-delay: 0.45s; }
+  &:nth-child(10) { animation-delay: 0.5s; }
+}
+
+/* Focus States for Accessibility */
+ion-button:focus-visible {
+  outline: 2px solid rgba(102, 126, 234, 0.5);
+  outline-offset: 2px;
+}
+
+ion-item:focus-within {
+  --border-color: #667eea;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.25rem 0.75rem;
+  }
+
+  ion-toolbar ion-title {
+    font-size: 1.1rem;
+  }
+
+  .form-progress {
+    margin-bottom: 2rem;
+  }
+
+  .form-section {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+
+    .section-header {
+      margin-bottom: 1.25rem;
+      gap: 0.5rem;
+
+      h2 {
+        font-size: 1rem;
+      }
+
+      ion-icon {
+        font-size: 1.3rem;
+      }
+    }
+
+    ion-item {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .camera-section {
+    ion-card-header {
+      padding: 1.25rem;
+    }
+
+    ion-card-content {
+      padding: 1.25rem;
+    }
+
+    ion-card-title {
+      font-size: 1rem;
+    }
+  }
+
+  .capture-prompt {
+    padding: 2rem 1rem;
+
+    .capture-icon-wrapper {
+      width: 70px;
+      height: 70px;
+
+      ion-icon {
+        font-size: 2.5rem;
+      }
+    }
+  }
+
+  .image-preview img {
+    max-height: 300px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+
+    ion-button {
+      width: 100%;
+      min-width: auto;
+    }
+  }
+
+  ion-item {
+    --padding-start: 0.9rem;
+    --padding-end: 0.9rem;
+  }
+
+  ion-label {
+    font-size: 0.85rem;
+  }
+
+  ion-input,
+  ion-textarea,
+  ion-select {
+    font-size: 0.9rem;
+  }
+
+  .submit-btn {
+    margin-top: 2rem;
+    font-size: 1rem;
+    --padding-top: 0.9rem;
+    --padding-bottom: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+
+  ion-toolbar ion-title {
+    font-size: 1rem;
+  }
+
+  .form-progress {
+    margin-bottom: 1.5rem;
+    height: 2px;
+  }
+
+  .form-section {
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    padding-left: 3px;
+
+    .section-header {
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+
+      h2 {
+        font-size: 0.9rem;
+      }
+
+      ion-icon {
+        font-size: 1.2rem;
+        min-width: 20px;
+      }
+    }
+
+    ion-item {
+      margin-bottom: 0.9rem;
+    }
+  }
+
+  .capture-prompt {
+    padding: 1.5rem 0.75rem;
+    gap: 1rem;
+
+    .capture-icon-wrapper {
+      width: 60px;
+      height: 60px;
+
+      ion-icon {
+        font-size: 2rem;
+      }
+    }
+
+    .capture-title {
+      font-size: 1rem;
+    }
+  }
+
+  .location-info {
+    padding: 0.9rem;
+
+    .coordinates {
+      font-size: 0.8rem;
+      padding: 0.5rem;
+      line-height: 1.7;
+    }
+
+    ion-chip {
+      margin: 0 0 0.75rem 0;
+    }
+  }
+
+  .action-buttons {
+    gap: 0.5rem;
+
+    ion-button {
+      font-size: 0.85rem;
+      min-width: auto;
+      --padding-start: 0.7rem;
+      --padding-end: 0.7rem;
+
+      ion-icon {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .submit-btn {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    --padding-top: 0.85rem;
+    --padding-bottom: 0.85rem;
+  }
+
+  ion-label {
+    font-size: 0.8rem;
+  }
+
+  ion-input,
+  ion-textarea,
+  ion-select {
+    font-size: 0.85rem;
+  }
+
+  .error-message {
+    font-size: 0.75rem;
+    margin: -0.6rem 0 0.8rem 0.8rem;
+    padding: 0.3rem 0.5rem;
+  }
+}
+
+/* Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+  ion-content {
+    --background: linear-gradient(180deg, #1a1a1a 0%, #1e1e2e 100%);
+  }
+
+  .form-section {
+    background: #2d2d3a;
+    border-color: rgba(102, 126, 234, 0.2);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+
+    .section-header {
+      border-bottom-color: rgba(102, 126, 234, 0.2);
+    }
+  }
+
+  .camera-section ion-card,
+  ion-item {
+    --background: #2d2d3a;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .camera-section ion-card {
+    border-color: rgba(102, 126, 234, 0.2);
+
+    ion-card-header {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05));
+      border-bottom-color: rgba(102, 126, 234, 0.2);
+    }
+  }
+
+  .image-preview img {
+    background: #1a1a1a;
+    border-color: rgba(102, 126, 234, 0.2);
+  }
+
+  .location-info {
+    background: linear-gradient(135deg, rgba(40, 199, 111, 0.08), rgba(40, 199, 111, 0.04));
+    border-color: rgba(40, 199, 111, 0.3);
+  }
+
+  ion-item {
+    --border-color: rgba(102, 126, 234, 0.2);
+  }
+
+  .error-message {
+    background: rgba(245, 101, 101, 0.1);
+  }
+
+  ion-label {
+    color: #e8e8f0;
+  }
+
+  ion-input,
+  ion-textarea,
+  ion-select {
+    color: #e8e8f0;
+  }
+}
+
+/* Print Styles */
+@media print {
+  ion-toolbar,
+  .submit-btn,
+  .action-buttons,
+  .form-progress {
+    display: none;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  .form-section {
+    page-break-inside: avoid;
+    box-shadow: none;
+  }
+
+  ion-item {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
 }

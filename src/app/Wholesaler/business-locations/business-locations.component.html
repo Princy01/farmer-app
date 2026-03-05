@@ -45,6 +45,9 @@
             </ion-card-header>
 
             <ion-card-content>
+              <div class="location-image" *ngIf="location.image">
+                <img [src]="location.image" alt="Shop Image" class="shop-image" />
+              </div>
               <div class="location-details">
                 <div>
                   <ion-icon

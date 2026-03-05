@@ -426,6 +426,36 @@ ion-content {
   }
 }
 
+/* Location Button - Get Current Location */
+.location-btn {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background-hover: linear-gradient(135deg, #5568d3 0%, #68408d 100%);
+  --color: white;
+  --border-radius: 12px;
+  font-weight: 600;
+  height: 3rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  transition: all 0.3s ease;
+
+  &:hover:not([disabled]) {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+    transform: translateY(-2px);
+  }
+
+  &[disabled] {
+    --background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+    --color: #64748b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0.7;
+  }
+
+  ion-spinner {
+    width: 20px;
+    height: 20px;
+  }
+}
+
 // Focus visible for accessibility
 ion-item:focus-visible {
   outline: 2px solid var(--ion-color-primary);

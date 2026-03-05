@@ -37,7 +37,7 @@
           {{ 'RETAILER_ORDER_DETAILS.ORDER_NUMBER' | translate }} #{{ order.order_id }}
         </ion-card-title>
         <ion-card-subtitle>
-          {{ order.date_of_order | date: 'medium' }}
+          {{ order.date_of_order | date: 'dd MMM yyyy, HH:mm:ss' }}
         </ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
@@ -55,7 +55,7 @@
           <ion-icon name="checkmark-done-circle" color="success"></ion-icon>
           <div>
             <strong>{{ 'RETAILER_ORDER_DETAILS.DELIVERED_AT' | translate }}:</strong>
-            <p>{{ order.actual_delivery_date | date: 'medium' }}</p>
+            <p>{{ order.actual_delivery_date | date: 'dd MMM yyyy, HH:mm:ss' }}</p>
           </div>
         </div>
 
@@ -75,35 +75,46 @@
         <ion-card-title>{{ 'RETAILER_ORDER_DETAILS.ORDER_ITEMS' | translate }}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <ion-list lines="full">
-          <ion-item *ngFor="let item of order.items">
-            <div class="item-details">
-              <div class="item-header">
-                <h3>{{ item.product_name || ('RETAILER_ORDER_DETAILS.PRODUCT_ID' | translate: { id: item.product_id }) }}</h3>
-                <p class="item-price">₹{{ item.price | number:'1.2-2' }} × {{ item.quantity }}</p>
+        <div class="items-list">
+          <ng-container *ngFor="let item of order.items; let last = last">
+            <!-- Wholeseller Header (only on first item and when seller changes) -->
+            <div class="wholeseller-group">
+              <div class="wholeseller-header">
+                <ion-icon name="business-outline" color="primary"></ion-icon>
+                <strong>{{ item.wholeseller_name }}</strong>
               </div>
 
-              <div class="item-breakdown">
-                <div class="breakdown-row">
-                  <span>{{ 'RETAILER_ORDER_DETAILS.SUBTOTAL' | translate }}</span>
-                  <span>₹{{ getItemTotal(item) | number:'1.2-2' }}</span>
+              <!-- Item Details -->
+              <div class="item-details" [class.last-item]="last">
+                <div class="item-header">
+                  <div class="product-info">
+                    <h3>{{ item.product_name }}</h3>
+                    <p class="item-meta">{{ item.quantity }} {{ item.unit_name }} &#64; ₹{{ item.price | number:'1.2-2' }}/unit</p>
+                  </div>
                 </div>
-                <div class="breakdown-row" *ngIf="getItemDiscount(item) > 0">
-                  <span>{{ 'RETAILER_ORDER_DETAILS.DISCOUNT' | translate }}</span>
-                  <span class="discount">-₹{{ getItemDiscount(item) | number:'1.2-2' }}</span>
-                </div>
-                <div class="breakdown-row" *ngIf="getItemTax(item) > 0">
-                  <span>{{ 'RETAILER_ORDER_DETAILS.TAX' | translate }}</span>
-                  <span>₹{{ getItemTax(item) | number:'1.2-2' }}</span>
-                </div>
-                <div class="breakdown-row total-row">
-                  <span><strong>{{ 'RETAILER_ORDER_DETAILS.ITEM_TOTAL' | translate }}</strong></span>
-                  <span><strong>₹{{ getItemFinalTotal(item) | number:'1.2-2' }}</strong></span>
+
+                <div class="item-breakdown">
+                  <div class="breakdown-row">
+                    <span>{{ 'RETAILER_ORDER_DETAILS.SUBTOTAL' | translate }}</span>
+                    <span>₹{{ getItemTotal(item) | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="breakdown-row" *ngIf="getItemDiscount(item) > 0">
+                    <span>{{ 'RETAILER_ORDER_DETAILS.DISCOUNT' | translate }}</span>
+                    <span class="discount">-₹{{ getItemDiscount(item) | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="breakdown-row" *ngIf="getItemTax(item) > 0">
+                    <span>{{ 'RETAILER_ORDER_DETAILS.TAX' | translate }}</span>
+                    <span>₹{{ getItemTax(item) | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="breakdown-row total-row">
+                    <span><strong>{{ 'RETAILER_ORDER_DETAILS.ITEM_TOTAL' | translate }}</strong></span>
+                    <span><strong>₹{{ getItemFinalTotal(item) | number:'1.2-2' }}</strong></span>
+                  </div>
                 </div>
               </div>
             </div>
-          </ion-item>
-        </ion-list>
+          </ng-container>
+        </div>
       </ion-card-content>
     </ion-card>
 

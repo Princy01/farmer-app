@@ -10,6 +10,7 @@ import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
+import { Geolocation } from '@capacitor/geolocation';
 
 @Component({
   selector: 'app-business-registration',
@@ -25,6 +26,7 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
   cities: City[] = [];
   locations: Location[] = [];
   businessTypes: BusinessType[] = [];
+  isGettingLocation = false;
 
   private destroy$ = new Subject<void>();
 
@@ -55,6 +57,8 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
       user_id: [null, Validators.required],
       gst_number: ['', Validators.required],
       pan_number: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
+      latitude: ['', Validators.required],
+      longitude: ['', Validators.required],
       privileged_user: [false],
     });
 
@@ -246,6 +250,42 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
           await this.showErrorToast(message);
         }
       });
+  }
+
+  async getCurrentLocation() {
+    this.isGettingLocation = true;
+    try {
+      // Check permissions first
+      const permission = await Geolocation.checkPermissions();
+
+      if (permission.location !== 'granted') {
+        const requestPermission = await Geolocation.requestPermissions();
+        if (requestPermission.location !== 'granted') {
+          await this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.ERROR_LOCATION_PERMISSION');
+          this.isGettingLocation = false;
+          return;
+        }
+      }
+
+      // Get current position
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+
+      this.form.patchValue({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      });
+
+      await this.showSuccessToast('WHOLESALER_BUSINESS_REGISTRATION.LOCATION_SUCCESS');
+    } catch (error) {
+      console.error('Error getting location:', error);
+      await this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.ERROR_LOCATION');
+    } finally {
+      this.isGettingLocation = false;
+    }
   }
 
   private async showErrorToast(messageKey: string): Promise<void> {

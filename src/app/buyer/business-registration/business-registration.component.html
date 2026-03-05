@@ -200,7 +200,7 @@
                 </div>
               </div>
 
-              <!-- City -->
+              <!-- City ID -->
               <div>
                 <ion-item
                   [class.ion-invalid]="
@@ -208,7 +208,11 @@
                   "
                 >
                   <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.CITY' | translate }} *</ion-label>
-                  <ion-select formControlName="city_id" [placeholder]="'BUSINESS_REGISTRATION.CITY_PLACEHOLDER' | translate">
+                  <ion-select
+                    formControlName="city_id"
+                    [placeholder]="'BUSINESS_REGISTRATION.CITY_PLACEHOLDER' | translate"
+                    [disabled]="!form.get('state_id')?.value"
+                  >
                     <ion-select-option *ngFor="let city of cities" [value]="city.id">
                       {{ city.city_name }} ({{ city.city_shortname }})
                     </ion-select-option>
@@ -222,7 +226,7 @@
                 </div>
               </div>
 
-              <!-- Location -->
+              <!-- Location ID -->
               <div>
                 <ion-item
                   [class.ion-invalid]="
@@ -230,7 +234,11 @@
                   "
                 >
                   <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.LOCATION' | translate }} *</ion-label>
-                  <ion-select formControlName="location_id" [placeholder]="'BUSINESS_REGISTRATION.LOCATION_PLACEHOLDER' | translate">
+                  <ion-select
+                    formControlName="location_id"
+                    [placeholder]="'BUSINESS_REGISTRATION.LOCATION_PLACEHOLDER' | translate"
+                    [disabled]="!form.get('city_id')?.value"
+                  >
                     <ion-select-option
                       *ngFor="let location of locations"
                       [value]="location.id"
@@ -269,6 +277,80 @@
               *ngIf="form.get('address')?.invalid && form.get('address')?.touched"
             >
               {{ 'BUSINESS_REGISTRATION.ERROR_ADDRESS' | translate }}
+            </div>
+
+            <!-- GPS Coordinates Section -->
+            <div class="gps-section">
+              <div class="gps-header">
+                <ion-icon name="navigate-circle-outline" class="gps-icon"></ion-icon>
+                <span class="gps-title">{{ 'BUSINESS_REGISTRATION.GPS_COORDINATES' | translate }}</span>
+              </div>
+
+              <ion-button
+                expand="block"
+                fill="outline"
+                (click)="getCurrentLocation()"
+                [disabled]="isGettingLocation"
+                class="location-btn"
+              >
+                <ion-icon name="locate-outline" slot="start" *ngIf="!isGettingLocation"></ion-icon>
+                <ion-spinner *ngIf="isGettingLocation" slot="start"></ion-spinner>
+                {{ isGettingLocation ? ('BUSINESS_REGISTRATION.GETTING_LOCATION' | translate) : ('BUSINESS_REGISTRATION.GET_CURRENT_LOCATION' | translate) }}
+              </ion-button>
+
+              <div class="form-row">
+                <!-- Latitude -->
+                <div>
+                  <ion-item
+                    [class.ion-invalid]="
+                      form.get('latitude')?.invalid && form.get('latitude')?.touched
+                    "
+                  >
+                    <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.LATITUDE' | translate }} *</ion-label>
+                    <ion-input
+                      formControlName="latitude"
+                      [placeholder]="'BUSINESS_REGISTRATION.LATITUDE_PLACEHOLDER' | translate"
+                      type="number"
+                      step="any"
+                    >
+                    </ion-input>
+                  </ion-item>
+                  <div
+                    class="error-message"
+                    *ngIf="
+                      form.get('latitude')?.invalid && form.get('latitude')?.touched
+                    "
+                  >
+                    {{ 'BUSINESS_REGISTRATION.ERROR_LATITUDE' | translate }}
+                  </div>
+                </div>
+
+                <!-- Longitude -->
+                <div>
+                  <ion-item
+                    [class.ion-invalid]="
+                      form.get('longitude')?.invalid && form.get('longitude')?.touched
+                    "
+                  >
+                    <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.LONGITUDE' | translate }} *</ion-label>
+                    <ion-input
+                      formControlName="longitude"
+                      [placeholder]="'BUSINESS_REGISTRATION.LONGITUDE_PLACEHOLDER' | translate"
+                      type="number"
+                      step="any"
+                    >
+                    </ion-input>
+                  </ion-item>
+                  <div
+                    class="error-message"
+                    *ngIf="
+                      form.get('longitude')?.invalid && form.get('longitude')?.touched
+                    "
+                  >
+                    {{ 'BUSINESS_REGISTRATION.ERROR_LONGITUDE' | translate }}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

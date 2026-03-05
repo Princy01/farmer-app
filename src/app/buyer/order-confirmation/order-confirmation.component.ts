@@ -58,34 +58,57 @@ export class OrderConfirmationComponent implements OnInit {
     });
 
     const navigation = this.router.getCurrentNavigation();
-    this.orderData = navigation?.extras?.state?.['orderData'];
+    const state = navigation?.extras?.state;
+
+    // Expected state structure after order creation:
+    // {
+    //   orderData: {
+    //     order_ids: number[],         // From CreateBatchOrderResponse
+    //     grand_total: number,         // From CreateBatchOrderResponse
+    //     orders_total: number,        // From CreateBatchOrderResponse
+    //     delivery_cost: number,       // From CreateBatchOrderResponse
+    //     deliveryAddress: string,     // From original request
+    //     orderDate: string,           // From original request
+    //   },
+    //   hasTransport: boolean,
+    //   transportData: any
+    // }
+
+    this.orderData = state?.['orderData'];
+    this.hasTransport = state?.['hasTransport'] || false;
+    this.transportInfo = state?.['transportData'] || null;
 
     if (!this.orderData) {
+      console.error('No order data found in navigation state');
       this.router.navigate(['/buyer/home']);
       return;
     }
 
-    // Extract transport info safely
-    this.hasTransport = this.orderData?.hasTransport || false;
-    this.transportInfo = this.orderData?.transportData || null;
-
-    console.log('Order confirmation data:', this.orderData);
-    console.log('Has transport:', this.hasTransport);
+    console.log('Order confirmation received:', {
+      orderData: this.orderData,
+      hasTransport: this.hasTransport,
+      transportInfo: this.transportInfo
+    });
   }
 
   async ngOnInit() {
     this.calculateDeliveryTime();
 
-    // Fetch full order details if orderIds are available
-    if (this.orderData?.orderIds && this.orderData.orderIds.length > 0) {
-      await this.fetchOrderDetails(this.orderData.orderIds[0]);
-    }
-
-    setTimeout(() => {
+    // Show animation for 3 seconds, then fetch full details
+    setTimeout(async () => {
       this.showAnimation = false;
+
+      // Fetch detailed order information for the first order ID
+      if (this.orderData?.order_ids && this.orderData.order_ids.length > 0) {
+        await this.fetchOrderDetails(this.orderData.order_ids[0]);
+      }
     }, 3000);
   }
 
+  /**
+   * Fetch full order details from backend
+   * GET /getRetailerOrderDetails/:id
+   */
   private async fetchOrderDetails(orderId: number): Promise<void> {
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('ORDER_CONFIRMATION.LOADING_DETAILS'),
@@ -96,35 +119,66 @@ export class OrderConfirmationComponent implements OnInit {
 
     this.orderService.getRetailerOrderDetails(orderId).subscribe({
       next: (response: RetailerOrderResponse) => {
+        console.log('Backend response:', response);
+
+        // Merge backend response with existing data
         this.orderData = {
           ...this.orderData,
+          // Core order info
           orderId: response.order_id,
           orderDate: response.date_of_order,
-          deliveryAddress: response.delivery_address,
-          grandTotal: response.final_amount,
           orderStatus: response.order_status,
+          actualDeliveryDate: response.actual_delivery_date,
+
+          // IDs
+          retailerId: response.retailer_id,
+          wholesellerIds: response.wholeseller_ids,
+
+          // Address
+          deliveryAddress: response.delivery_address,
+
+          // Amounts from this specific order
+          totalOrderAmount: response.total_order_amount,
+          discountAmount: response.discount_amount,
+          taxAmount: response.tax_amount,
+          finalAmount: response.final_amount,
+
+          // Keep grand_total from original (includes all orders + delivery)
+          grandTotal: this.orderData.grand_total || response.final_amount,
+
+          // Items with full details
           items: response.items.map(item => ({
-            ...item,
+            product_id: item.product_id,
             product_name: item.product_name || this.translate.instant('ORDER_CONFIRMATION.UNKNOWN_PRODUCT'),
+            quantity: item.quantity,
+            unit_id: item.unit_id,
             unit_name: item.unit_name || this.translate.instant('ORDER_CONFIRMATION.UNIT'),
-            price: item.price
+            price: item.price,
+            discount_amount: item.discount_amount,
+            tax_amount: item.tax_amount,
+            wholeseller_id: item.wholeseller_id,
+            wholeseller_name: item.wholeseller_name || ''
           }))
         };
-        console.log('Fetched order details:', this.orderData);
-        loading.dismiss();
+
+        console.log('Processed order data:', this.orderData);
         this.isLoading = false;
+        loading.dismiss();
       },
       error: async (err) => {
         console.error('Failed to fetch order details:', err);
-        await loading.dismiss();
         this.isLoading = false;
+        await loading.dismiss();
         await this.showErrorToast('ORDER_CONFIRMATION.FETCH_ERROR');
       }
     });
   }
 
+  /**
+   * Navigate to order tracking page
+   */
   trackOrder() {
-    const orderId = this.orderData?.orderIds?.[0] || this.orderData?.orderId;
+    const orderId = this.orderData?.order_ids?.[0] || this.orderData?.orderId;
     if (!orderId) {
       this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_ID');
       return;
@@ -134,16 +188,25 @@ export class OrderConfirmationComponent implements OnInit {
     });
   }
 
+  /**
+   * Navigate to order history
+   */
   goToOrderHistory() {
     this.router.navigate(['/buyer/retailer-order-history']);
   }
 
+  /**
+   * Navigate to home page
+   */
   goHome() {
     this.router.navigate(['/buyer/buyer-home']);
   }
 
+  /**
+   * Download invoice (placeholder implementation)
+   */
   async downloadInvoice() {
-    const orderId = this.orderData?.orderIds?.[0] || this.orderData?.orderId;
+    const orderId = this.orderData?.order_ids?.[0] || this.orderData?.orderId;
     if (!orderId) {
       await this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_ID');
       return;
@@ -154,6 +217,9 @@ export class OrderConfirmationComponent implements OnInit {
     await this.showSuccessToast('ORDER_CONFIRMATION.DOWNLOAD_COMING_SOON');
   }
 
+  /**
+   * Calculate estimated delivery time based on transport type
+   */
   private calculateDeliveryTime(): void {
     if (this.hasTransport && this.transportInfo) {
       const deliveryType = this.transportInfo.delivery_type;
@@ -175,6 +241,9 @@ export class OrderConfirmationComponent implements OnInit {
     }
   }
 
+  /**
+   * Get transport type display name
+   */
   getTransportTypeName(): string {
     if (!this.transportInfo) return '';
 
@@ -191,6 +260,9 @@ export class OrderConfirmationComponent implements OnInit {
     }
   }
 
+  /**
+   * Format date for display
+   */
   getFormattedDate(date: Date | string): string {
     if (!date) return '';
     return new Date(date).toLocaleDateString('en-IN', {
@@ -202,6 +274,9 @@ export class OrderConfirmationComponent implements OnInit {
     });
   }
 
+  /**
+   * Get status text based on order_status number
+   */
   getStatusText(status: number): string {
     switch (status) {
       case 1:
@@ -213,6 +288,9 @@ export class OrderConfirmationComponent implements OnInit {
     }
   }
 
+  /**
+   * Show error toast
+   */
   private async showErrorToast(messageKey: string): Promise<void> {
     const toast = await this.toastCtrl.create({
       message: this.translate.instant(messageKey),
@@ -223,6 +301,9 @@ export class OrderConfirmationComponent implements OnInit {
     await toast.present();
   }
 
+  /**
+   * Show success toast
+   */
   private async showSuccessToast(messageKey: string): Promise<void> {
     const toast = await this.toastCtrl.create({
       message: this.translate.instant(messageKey),

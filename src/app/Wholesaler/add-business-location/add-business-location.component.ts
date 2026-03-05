@@ -252,12 +252,12 @@ export class AddBusinessLocationComponent implements OnInit {
 					});
 
 					// Load existing image and coordinates if available
-					if ((location as any).image) {
-						this.capturedImage = (location as any).image;
+					if (location.image) {
+						this.capturedImage = location.image;
 					}
-					if ((location as any).latitude && (location as any).longitude) {
-						this.latitude = (location as any).latitude;
-						this.longitude = (location as any).longitude;
+					if (location.latitude && location.longitude) {
+						this.latitude = location.latitude;
+						this.longitude = location.longitude;
 						this.locationCaptured = true;
 					}
 

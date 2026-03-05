@@ -47,6 +47,9 @@ export interface BusinessBranchWithNames {
     created_at: string;
     updated_at: string;
     active_status: boolean;
+    latitude: number;
+    longitude: number;
+    image: string;
 }
 
 export interface BusinessBranchRequest {

@@ -44,6 +44,9 @@ export interface BusinessBranchWithNames {
     pan_num: string;
     privilege_user: boolean;
     established_year: string;
+    latitude: number;
+    longitude: number;
+    image: string;
     created_at: string;
     updated_at: string;
     active_status: boolean;

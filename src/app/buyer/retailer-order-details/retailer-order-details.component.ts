@@ -13,8 +13,9 @@ import {
   carOutline,
   bicycleOutline,
   checkmarkDoneCircle,
-  closeCircleOutline,
-  helpOutline,
+  businessOutline,
+  locationOutline,
+  arrowBackOutline,
 } from 'ionicons/icons';
 import { RetailerOrderService, RetailerOrderDetails, OrderItem } from './retailer-order-details.service';
 
@@ -46,8 +47,9 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       carOutline,
       bicycleOutline,
       checkmarkDoneCircle,
-      closeCircleOutline,
-      helpOutline,
+      businessOutline,
+      locationOutline,
+      arrowBackOutline,
     });
   }
 
@@ -94,9 +96,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/buyer/retailer-order-history']);
   }
 
-  getStatusLabel(status: number | null): string {
-    if (status === null) return 'Cancelled';
-
+  getStatusLabel(status: number): string {
     const labels: { [key: number]: string } = {
       1: 'Placed',
       2: 'Confirmed',
@@ -105,12 +105,10 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       5: 'In Transit',
       6: 'Delivered',
     };
-    return labels[status] || 'Cancelled';
+    return labels[status] || 'Unknown';
   }
 
-  getStatusColor(status: number | null): string {
-    if (status === null) return 'danger';
-
+  getStatusColor(status: number): string {
     const colors: { [key: number]: string } = {
       1: 'medium',
       2: 'primary',
@@ -122,9 +120,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     return colors[status] || 'medium';
   }
 
-  getStatusIcon(status: number | null): string {
-    if (status === null) return 'close-circle-outline';
-
+  getStatusIcon(status: number): string {
     const icons: { [key: number]: string } = {
       1: 'time-outline',
       2: 'checkmark-circle-outline',
@@ -136,7 +132,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     return icons[status] || 'help-outline';
   }
 
-  getTranslatedStatus(status: number | null): string {
+  getTranslatedStatus(status: number): string {
     const label = this.getStatusLabel(status);
     const key = `RETAILER_ORDER_DETAILS.STATUS_${label.toUpperCase().replace(/\s+/g, '_')}`;
     const translation = this.translate.instant(key);

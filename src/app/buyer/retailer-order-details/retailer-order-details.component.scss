@@ -247,36 +247,75 @@ ion-card {
 }
 
 // ===================================
+// ===================================
+// Items List
+// ===================================
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.wholeseller-group {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(102, 126, 234, 0.15);
+  background: #fafbfc;
+}
+
+.wholeseller-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.04) 100%);
+  border-bottom: 2px solid rgba(102, 126, 234, 0.12);
+
+  ion-icon {
+    font-size: 1.25rem;
+  }
+
+  strong {
+    font-size: 0.95rem;
+    color: var(--ion-color-dark);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+}
+
+// ===================================
 // Item Details
 // ===================================
 .item-details {
-  width: 100%;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  &.last-item {
+    border-bottom: none;
+  }
 
   .item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
     margin-bottom: var(--spacing-md);
-    gap: var(--spacing-md);
 
-    h3 {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--ion-color-dark);
-      margin: 0;
-      flex: 1;
-      line-height: 1.4;
-    }
+    .product-info {
+      h3 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+        margin: 0 0 0.5rem 0;
+        line-height: 1.4;
+      }
 
-    .item-price {
-      font-size: 0.9rem;
-      color: var(--ion-color-medium);
-      font-weight: 500;
-      white-space: nowrap;
-      background: var(--ion-color-light);
-      padding: 6px 12px;
-      border-radius: 8px;
-      margin: 0;
+      .item-meta {
+        font-size: 0.85rem;
+        color: var(--ion-color-medium);
+        font-weight: 500;
+        margin: 0;
+        background: var(--ion-color-light);
+        padding: 6px 12px;
+        border-radius: 8px;
+        display: inline-block;
+      }
     }
   }
 
@@ -454,13 +493,46 @@ ion-card {
   }
 
   .item-details {
-    .item-header {
-      flex-direction: column;
-      gap: var(--spacing-sm);
+    padding: var(--spacing-sm) !important;
 
-      .item-price {
-        align-self: flex-start;
+    .item-header {
+      margin-bottom: var(--spacing-sm);
+
+      .product-info {
+        h3 {
+          font-size: 0.95rem;
+        }
+
+        .item-meta {
+          font-size: 0.8rem;
+          padding: 4px 8px;
+        }
       }
+    }
+
+    .item-breakdown {
+      padding: var(--spacing-sm);
+
+      .breakdown-row {
+        font-size: 0.85rem;
+        padding: 6px 0;
+      }
+
+      .total-row {
+        padding-top: var(--spacing-sm);
+
+        span {
+          font-size: 0.95rem;
+        }
+      }
+    }
+  }
+
+  .wholeseller-header {
+    padding: var(--spacing-sm);
+
+    strong {
+      font-size: 0.9rem;
     }
   }
 

@@ -6,15 +6,81 @@
       ></ion-back-button>
     </ion-buttons>
     <ion-title>{{ pageTitle | translate }}</ion-title>
+    <ion-item slot="end" lines="none" class="header-badge">
+      <ion-badge color="success">{{ (isEditMode ? 'EDIT_MODE' : 'CREATE_MODE') | translate }}</ion-badge>
+    </ion-item>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <div class="container">
+    <!-- Form Progress Indicator -->
+    <div class="form-progress">
+      <div class="progress-bar" [style.width]="(getFormProgress() + '%')"></div>
+    </div>
+
     <form [formGroup]="businessForm" (ngSubmit)="onSubmit()">
 
-      <!-- Shop Name -->
-      <ion-item
+      <!-- Camera Capture Section -->
+      <div class="camera-section">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="camera"></ion-icon>
+              {{ 'ADD_BUSINESS_LOCATION.SHOP_LOCATION_IMAGE' | translate }}
+            </ion-card-title>
+            <p class="section-subtitle">{{ 'ADD_BUSINESS_LOCATION.CAPTURE_HELP_TEXT' | translate }}</p>
+          </ion-card-header>
+          <ion-card-content>
+            <div *ngIf="!capturedImage" class="capture-prompt">
+              <div class="capture-icon-wrapper">
+                <ion-icon name="camera-outline"></ion-icon>
+              </div>
+              <h3 class="capture-title">{{ 'ADD_BUSINESS_LOCATION.CAPTURE_SHOP_IMAGE' | translate }}</h3>
+              <ion-button expand="block" (click)="captureShopImage()" color="primary" class="capture-button">
+                <ion-icon name="camera" slot="start"></ion-icon>
+                {{ 'ADD_BUSINESS_LOCATION.CAPTURE_SHOP_IMAGE' | translate }}
+              </ion-button>
+            </div>
+
+            <div *ngIf="capturedImage" class="image-preview">
+              <img [src]="capturedImage" alt="Shop Image" />
+              <div class="location-info" *ngIf="locationCaptured">
+                <ion-chip color="success">
+                  <ion-icon name="location"></ion-icon>
+                  <ion-label>
+                    {{ 'ADD_BUSINESS_LOCATION.LOCATION_CAPTURED' | translate }}
+                  </ion-label>
+                </ion-chip>
+                <p class="coordinates">
+                  <strong>{{ 'ADD_BUSINESS_LOCATION.LATITUDE' | translate }}:</strong> {{ latitude.toFixed(6) }}<br>
+                  <strong>{{ 'ADD_BUSINESS_LOCATION.LONGITUDE' | translate }}:</strong> {{ longitude.toFixed(6) }}
+                </p>
+              </div>
+              <div class="action-buttons">
+                <ion-button size="small" (click)="captureShopImage()" color="primary">
+                  <ion-icon name="camera" slot="start"></ion-icon>
+                  {{ 'ADD_BUSINESS_LOCATION.RETAKE' | translate }}
+                </ion-button>
+                <ion-button size="small" (click)="removeImage()" color="danger" fill="outline">
+                  <ion-icon name="trash" slot="start"></ion-icon>
+                  {{ 'ADD_BUSINESS_LOCATION.REMOVE' | translate }}
+                </ion-button>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Basic Business Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <ion-icon name="information-circle"></ion-icon>
+          <h2>{{ 'ADD_BUSINESS_LOCATION.BASIC_INFO' | translate }}</h2>
+        </div>
+
+        <!-- Shop Name -->
+        <ion-item
         [class.ion-invalid]="
           businessForm.get('shopName')?.invalid &&
           businessForm.get('shopName')?.touched
@@ -52,9 +118,17 @@
       <div class="error-message" *ngIf="getErrorMessage('number')">
         {{ getErrorMessage("number") }}
       </div>
+      </div>
 
-      <!-- State -->
-      <ion-item
+      <!-- Location Details Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <ion-icon name="location"></ion-icon>
+          <h2>{{ 'ADD_BUSINESS_LOCATION.LOCATION_DETAILS' | translate }}</h2>
+        </div>
+
+        <!-- State -->
+        <ion-item
         [class.ion-invalid]="
           businessForm.get('state')?.invalid &&
           businessForm.get('state')?.touched
@@ -140,9 +214,17 @@
       <div class="error-message" *ngIf="getErrorMessage('address')">
         {{ getErrorMessage("address") }}
       </div>
+      </div>
 
-      <!-- Email (editable in edit mode) -->
-      <ion-item
+      <!-- Business Identity Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <ion-icon name="business"></ion-icon>
+          <h2>{{ 'ADD_BUSINESS_LOCATION.BUSINESS_IDENTITY' | translate }}</h2>
+        </div>
+
+        <!-- Email (editable in edit mode) -->
+        <ion-item
         [class.ion-invalid]="
           businessForm.get('email')?.invalid &&
           businessForm.get('email')?.touched
@@ -219,6 +301,7 @@
       <div class="error-message" *ngIf="getErrorMessage('establishedYear')">
         {{ getErrorMessage("establishedYear") }}
       </div>
+      </div>
 
       <!-- Submit Button -->
       <ion-button
@@ -226,7 +309,7 @@
         type="submit"
         color="primary"
         class="submit-btn"
-        [disabled]="businessForm.invalid"
+        [disabled]="businessForm.invalid || !locationCaptured"
       >
         <ion-icon name="save" slot="start"></ion-icon>
         {{ (isEditMode ? 'ADD_BUSINESS_LOCATION.UPDATE_BUTTON' : 'ADD_BUSINESS_LOCATION.SAVE_BUTTON') | translate }}

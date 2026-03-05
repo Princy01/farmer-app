@@ -19,7 +19,7 @@ import {
 import { PaymentService } from './payment.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { OrderService, Item, CreateOrderRequest, TransportRequestWithOrders } from '../order-confirmation/order.service';
+import { OrderService, Item, CreateBatchOrderRequest, TransportRequestWithOrders } from '../order-confirmation/order.service';
 
 @Component({
   selector: 'app-payment',

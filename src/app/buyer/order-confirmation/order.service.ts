@@ -13,52 +13,8 @@ export interface Item {
   wholeseller_id: number;
   product_name: string;
   unit_name: string;
+  wholeseller_name?: string;
   branch_id?: number;
-}
-
-export interface CreateOrderRequest {
-  date_of_order: string;
-  order_status: number;
-  delivery_address: string;
-  items: Item[];
-  retailer_id?: number;
-  wholeseller_id?: number;
-  delivery_amount?: number;
-  total_order_amount?: number;
-  discount_amount?: number;
-  tax_amount?: number;
-  final_amount?: number;
-}
-
-export interface CreateOrderResponse {
-  message: string;
-  order_ids: number[];
-}
-
-export interface TransportRequestWithOrders {
-  distance: number;
-  delivery_type: string;
-  urgency: 'low' | 'standard' | 'high';
-  requested_date?: Date | null;
-  load_type: string;
-  status: string;
-  order_ids: number[];
-  base_price: number;
-}
-
-export interface RetailerOrderResponse {
-  order_id: number;
-  date_of_order: string;
-  order_status: number;
-  actual_delivery_date?: string;
-  retailer_id: number;
-  wholeseller_ids: number[];
-  delivery_address: string;
-  total_order_amount: number;
-  discount_amount: number;
-  tax_amount: number;
-  final_amount: number;
-  items: Item[];
 }
 
 export interface OrderGroup {
@@ -89,6 +45,32 @@ export interface CreateBatchOrderResponse {
   grand_total: number;
 }
 
+export interface RetailerOrderResponse {
+  order_id: number;
+  date_of_order: string; // ISO 8601 string from backend
+  order_status: number;
+  actual_delivery_date?: string | null;
+  retailer_id: number;
+  wholeseller_ids: number[];
+  delivery_address: string;
+  total_order_amount: number;
+  discount_amount: number;
+  tax_amount: number;
+  final_amount: number;
+  items: Item[];
+}
+
+export interface TransportRequestWithOrders {
+  distance: number;
+  delivery_type: string;
+  urgency: 'low' | 'standard' | 'high';
+  requested_date?: Date | null;
+  load_type: string;
+  status: string;
+  order_ids: number[];
+  base_price: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -97,6 +79,7 @@ export class OrderService {
 
   constructor(private http: HttpClient) { }
 
+  // Create batch order (splits into multiple orders by wholeseller)
   createOrder(orderData: CreateBatchOrderRequest): Observable<CreateBatchOrderResponse> {
     return this.http.post<CreateBatchOrderResponse>(
       `${this.apiUrl}/CreateRetailerOrder`,

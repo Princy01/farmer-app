@@ -6,20 +6,21 @@ import { environment } from 'src/environments/environment';
 
 export interface OrderItem {
   product_id: number;
+  product_name: string;
   quantity: number;
   unit_id: number;
+  unit_name: string;
   price: number;
   discount_amount: number;
   tax_amount: number;
   wholeseller_id: number;
-  product_name?: string;
-  image_url?: string;
+  wholeseller_name: string;
 }
 
 export interface RetailerOrderDetails {
   order_id: number;
   date_of_order: string;
-  order_status: number | null;
+  order_status: number;
   actual_delivery_date?: string | null;
   retailer_id: number;
   wholeseller_ids: number[];

@@ -7,7 +7,7 @@ import { addIcons } from 'ionicons';
 import {
   add, location, business, create, eye, home, list, cube, time,
   analytics, pulse, notifications, person, menu, logOut, settings,
-  bulb, barChart, close, arrowBack
+  bulb, barChart, close, arrowBack, pin
 } from 'ionicons/icons';
 
 import { BusinessLocationsService, BusinessBranchWithNames } from './business-locations.service';
@@ -39,7 +39,7 @@ export class BusinessLocationsComponent implements OnInit {
     addIcons({
       add, location, business, create, eye, home, list, cube, time,
       analytics, pulse, notifications, person, menu, logOut, settings,
-      bulb, barChart, close, arrowBack
+      bulb, barChart, close, arrowBack, pin
     });
   }
 
