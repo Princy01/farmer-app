@@ -6,9 +6,12 @@
       </ion-button>
     </ion-buttons>
     <ion-title class="page-title">{{ 'WHOLESALER_BUSINESS_INFO.Business Info' | translate }}</ion-title>
-    <ion-buttons slot="end" *ngIf="!isEditMode">
-      <ion-button (click)="enableEdit()" class="edit-btn">
+    <ion-buttons slot="end">
+      <ion-button *ngIf="!isEditMode" (click)="enableEdit()" class="edit-btn">
         <ion-icon slot="icon-only" name="create"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="isEditMode" (click)="cancelEdit()" class="cancel-btn" color="medium">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -74,42 +77,35 @@
             </ion-item>
           </ion-list>
           <div class="error-message" *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
-            {{ 'WHOLESALER_BUSINESS_REGISTRATION.Address is required' | translate }}
+            <span *ngIf="form.get('address')?.errors?.['required']">
+              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Address is required' | translate }}
+            </span>
+            <span *ngIf="form.get('address')?.errors?.['minlength']">
+              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Address must be at least 5 characters' | translate }}
+            </span>
           </div>
         </div>
 
-        <!-- Contact Information Section -->
+        <!-- Contact Information Section (read-only; editable via OTP dialog) -->
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="call-outline"></ion-icon>
             <h3>{{ 'WHOLESALER_BUSINESS_REGISTRATION.Contact Information' | translate }}</h3>
           </div>
           <ion-list>
-            <ion-item [class.ion-invalid]="form.get('mobile_number')?.invalid && form.get('mobile_number')?.touched">
+            <ion-item>
               <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Mobile Number' | translate }}</ion-label>
-              <ion-input formControlName="mobile_number" type="tel" [readonly]="!isEditMode"></ion-input>
+              <ion-input formControlName="mobile_number" type="tel" readonly></ion-input>
             </ion-item>
-            <ion-item [class.ion-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
+            <ion-item>
               <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Email' | translate }}</ion-label>
-              <ion-input formControlName="email" type="email" [readonly]="!isEditMode"></ion-input>
+              <ion-input formControlName="email" type="email" readonly></ion-input>
             </ion-item>
           </ion-list>
-          <div class="error-message" *ngIf="form.get('mobile_number')?.invalid && form.get('mobile_number')?.touched">
-            <span *ngIf="form.get('mobile_number')?.errors?.['required']">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Mobile number is required' | translate }}
-            </span>
-            <span *ngIf="form.get('mobile_number')?.errors?.['pattern']">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Please enter a valid 10-digit mobile number' | translate }}
-            </span>
-          </div>
-          <div class="error-message" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
-            <span *ngIf="form.get('email')?.errors?.['required']">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Email is required' | translate }}
-            </span>
-            <span *ngIf="form.get('email')?.errors?.['email']">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Please enter a valid email address' | translate }}
-            </span>
-          </div>
+          <p class="helper-text">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            {{ 'WHOLESALER_BUSINESS_INFO.CONTACT_OTP_HINT' | translate }}
+          </p>
         </div>
 
         <!-- Legal Information Section -->
@@ -121,7 +117,7 @@
           <ion-list>
             <ion-item [class.ion-invalid]="form.get('gst_number')?.invalid && form.get('gst_number')?.touched">
               <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.GST Number' | translate }}</ion-label>
-              <ion-input formControlName="gst_number" [readonly]="!isEditMode"></ion-input>
+              <ion-input formControlName="gst_number" [readonly]="!isEditMode" autocapitalize="characters"></ion-input>
             </ion-item>
             <ion-item>
               <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.PAN Number' | translate }}</ion-label>
@@ -129,14 +125,22 @@
             </ion-item>
           </ion-list>
           <div class="error-message" *ngIf="form.get('gst_number')?.invalid && form.get('gst_number')?.touched">
-            {{ 'WHOLESALER_BUSINESS_REGISTRATION.GST number is required' | translate }}
+            <span *ngIf="form.get('gst_number')?.errors?.['required']">
+              {{ 'WHOLESALER_BUSINESS_REGISTRATION.GST number is required' | translate }}
+            </span>
+            <span *ngIf="form.get('gst_number')?.errors?.['pattern']">
+              {{ 'WHOLESALER_BUSINESS_REGISTRATION.GST must be 15 alphanumeric characters' | translate }}
+            </span>
           </div>
         </div>
 
-        <ion-button expand="block" type="submit" *ngIf="isEditMode" [disabled]="form.invalid">
-          <ion-icon name="save" slot="start"></ion-icon>
-          {{ 'WHOLESALER_BUSINESS_INFO.Save Changes' | translate }}
-        </ion-button>
+        <div class="form-actions" *ngIf="isEditMode">
+          <ion-button expand="block" type="submit" [disabled]="form.invalid">
+            <ion-icon name="save" slot="start"></ion-icon>
+            {{ 'WHOLESALER_BUSINESS_INFO.Save Changes' | translate }}
+          </ion-button>
+        </div>
+
       </form>
     </ion-card>
   </div>

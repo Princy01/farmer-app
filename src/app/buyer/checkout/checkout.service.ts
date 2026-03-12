@@ -29,6 +29,8 @@ export interface BusinessBranch {
   updated_at: string;
   active_status: boolean;
   pincode: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 @Injectable({

@@ -46,11 +46,6 @@
           <span class="detail-label">{{ 'ORDER_CONFIRMATION.TOTAL_AMOUNT' | translate }}:</span>
           <span class="detail-value">₹{{ orderData?.grandTotal | number:'1.2-2' }}</span>
         </div>
-
-        <div class="detail-row">
-          <span class="detail-label">{{ 'ORDER_CONFIRMATION.DELIVERY_ADDRESS' | translate }}:</span>
-          <span class="detail-value">{{ orderData?.deliveryAddress }}</span>
-        </div>
       </ion-card-content>
     </ion-card>
   </div>
@@ -66,9 +61,24 @@
       </div>
 
       <ion-card-content class="card-content">
-        <div class="delivery-estimate">
+        <div class="detail-row">
+          <span class="detail-label">{{ 'ORDER_CONFIRMATION.DELIVERY_ADDRESS' | translate }}:</span>
+          <span class="detail-value">{{ orderData?.deliveryAddress }}</span>
+        </div>
+
+        <div class="detail-row">
           <span class="detail-label">{{ 'ORDER_CONFIRMATION.ESTIMATED_DELIVERY' | translate }}:</span>
           <span class="detail-value">{{ estimatedDelivery }}</span>
+        </div>
+
+        <div class="detail-row" *ngIf="hasTransport && transportInfo">
+          <span class="detail-label">{{ 'ORDER_CONFIRMATION.DELIVERY_TYPE' | translate }}:</span>
+          <span class="detail-value">{{ getTransportTypeName() }}</span>
+        </div>
+
+        <div class="detail-row" *ngIf="hasTransport && transportInfo?.distance">
+          <span class="detail-label">{{ 'ORDER_CONFIRMATION.DISTANCE' | translate }}:</span>
+          <span class="detail-value">{{ transportInfo.distance }} {{ 'ORDER_CONFIRMATION.KM' | translate }}</span>
         </div>
       </ion-card-content>
     </ion-card>

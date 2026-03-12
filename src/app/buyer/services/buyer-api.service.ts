@@ -261,4 +261,47 @@ export class BuyerApiService {
       catchError(this.handleError.bind(this))
     );
   }
+
+  // Transport and Delivery APIs
+  getRouteMetrics(
+    pickupLat: number,
+    pickupLon: number,
+    dropLat: number,
+    dropLon: number
+  ): Observable<{ distance_meters: number; duration_seconds: number }> {
+    const payload = {
+      pickup_lat: pickupLat,
+      pickup_lon: pickupLon,
+      drop_lat: dropLat,
+      drop_lon: dropLon
+    };
+
+    return this.http.post<{ distance_meters: number; duration_seconds: number }>(
+      `${this.apiUrl}/route-metrics`,
+      payload,
+      { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
+    ).pipe(
+      retry(this.retryCount),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  calculateTransportJobPrice(
+    jobId: number,
+    distance: number
+  ): Observable<{ job_id: number; price: number }> {
+    const payload = {
+      job_id: jobId,
+      distance: distance
+    };
+
+    return this.http.post<{ job_id: number; price: number }>(
+      `${this.apiUrl}/calculate-transport-job-price`,
+      payload,
+      { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
+    ).pipe(
+      retry(this.retryCount),
+      catchError(this.handleError.bind(this))
+    );
+  }
 }

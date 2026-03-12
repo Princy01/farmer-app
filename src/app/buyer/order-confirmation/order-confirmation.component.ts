@@ -9,14 +9,9 @@ import {
   receiptOutline,
   navigateOutline,
   homeOutline,
-  timeOutline,
   locationOutline,
-  callOutline,
   downloadOutline,
-  bagOutline,
-  cardOutline,
-  cashOutline,
-  rocketOutline
+  bagOutline
 } from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -47,14 +42,9 @@ export class OrderConfirmationComponent implements OnInit {
       receiptOutline,
       navigateOutline,
       homeOutline,
-      timeOutline,
       locationOutline,
-      callOutline,
       downloadOutline,
-      bagOutline,
-      cardOutline,
-      cashOutline,
-      rocketOutline
+      bagOutline
     });
 
     const navigation = this.router.getCurrentNavigation();
@@ -99,8 +89,18 @@ export class OrderConfirmationComponent implements OnInit {
       this.showAnimation = false;
 
       // Fetch detailed order information for the first order ID
-      if (this.orderData?.order_ids && this.orderData.order_ids.length > 0) {
-        await this.fetchOrderDetails(this.orderData.order_ids[0]);
+      const orderId = this.orderData?.orderIds?.[0] || this.orderData?.orderId;
+
+      console.log('ngOnInit - Attempting to fetch order details:', {
+        orderId,
+        orderData: this.orderData,
+        orderIds: this.orderData?.orderIds
+      });
+
+      if (orderId) {
+        await this.fetchOrderDetails(orderId);
+      } else {
+        console.warn('No order ID found in orderData. Order details will not be fetched.');
       }
     }, 3000);
   }
@@ -110,6 +110,8 @@ export class OrderConfirmationComponent implements OnInit {
    * GET /getRetailerOrderDetails/:id
    */
   private async fetchOrderDetails(orderId: number): Promise<void> {
+    console.log('fetchOrderDetails called with orderId:', orderId);
+
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('ORDER_CONFIRMATION.LOADING_DETAILS'),
     });
@@ -117,9 +119,10 @@ export class OrderConfirmationComponent implements OnInit {
 
     this.isLoading = true;
 
+    console.log('Starting API call to getRetailerOrderDetails...');
     this.orderService.getRetailerOrderDetails(orderId).subscribe({
       next: (response: RetailerOrderResponse) => {
-        console.log('Backend response:', response);
+        console.log('✅ Backend response received:', response);
 
         // Merge backend response with existing data
         this.orderData = {
@@ -166,7 +169,9 @@ export class OrderConfirmationComponent implements OnInit {
         loading.dismiss();
       },
       error: async (err) => {
-        console.error('Failed to fetch order details:', err);
+        console.error('❌ Failed to fetch order details:', err);
+        console.error('Error status:', err?.status);
+        console.error('Error message:', err?.message);
         this.isLoading = false;
         await loading.dismiss();
         await this.showErrorToast('ORDER_CONFIRMATION.FETCH_ERROR');
@@ -178,7 +183,7 @@ export class OrderConfirmationComponent implements OnInit {
    * Navigate to order tracking page
    */
   trackOrder() {
-    const orderId = this.orderData?.order_ids?.[0] || this.orderData?.orderId;
+    const orderId = this.orderData?.orderIds?.[0] || this.orderData?.orderId;
     if (!orderId) {
       this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_ID');
       return;
@@ -206,7 +211,7 @@ export class OrderConfirmationComponent implements OnInit {
    * Download invoice (placeholder implementation)
    */
   async downloadInvoice() {
-    const orderId = this.orderData?.order_ids?.[0] || this.orderData?.orderId;
+    const orderId = this.orderData?.orderIds?.[0] || this.orderData?.orderId;
     if (!orderId) {
       await this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_ID');
       return;

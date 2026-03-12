@@ -233,15 +233,43 @@
     "ERROR_LONGITUDE": "देशांतर आवश्यक है",
     "LOCATION_SUCCESS": "स्थान सफलतापूर्वक कैप्चर किया गया",
     "ERROR_LOCATION": "वर्तमान स्थान प्राप्त करने में विफल",
-    "ERROR_LOCATION_PERMISSION": "स्थान तक पहुंचने की अनुमति नहीं दी गई"
+    "ERROR_LOCATION_PERMISSION": "स्थान तक पहुंचने की अनुमति नहीं दी गई",
+    "Business Information": "व्यवसाय की जानकारी",
+    "Registration Number": "पंजीकरण संख्या",
+    "Owner Name": "मालिक का नाम",
+    "Business Category": "व्यवसाय श्रेणी",
+    "Business Type": "व्यवसाय प्रकार",
+    "Established Year": "स्थापना वर्ष",
+    "Location Information": "स्थान की जानकारी",
+    "State": "राज्य",
+    "City": "शहर",
+    "Location": "स्थान",
+    "Address": "पता",
+    "Address is required": "पता आवश्यक है",
+    "Contact Information": "संपर्क जानकारी",
+    "Mobile Number": "मोबाइल नंबर",
+    "Mobile number is required": "मोबाइल नंबर आवश्यक है",
+    "Please enter a valid 10-digit mobile number": "कृपया मान्य 10-अंकीय मोबाइल नंबर दर्ज करें",
+    "Email": "ईमेल",
+    "Email is required": "ईमेल आवश्यक है",
+    "Please enter a valid email address": "कृपया मान्य ईमेल पता दर्ज करें",
+    "Legal Information": "कानूनी जानकारी",
+    "GST Number": "जीएसटी नंबर",
+    "GST number is required": "जीएसटी नंबर आवश्यक है",
+    "PAN Number": "पैन नंबर"
   },
 
   "WHOLESALER_BUSINESS_INFO": {
     "Business Info": "व्यवसाय जानकारी",
     "Save Changes": "परिवर्तन सहेजें",
+    "FIX_ERRORS": "कृपया सब त्रुटियाँ ठीक करें।",
     "UPDATING": "व्यवसाय जानकारी अपडेट हो रही है...",
-    "UPDATE_SUCCESS": "व्यवसाय जानकारी सफलतापूर्वक अपडेट हो गई!",
-    "FIX_ERRORS": "कृपया सबमिट करने से पहले त्रुटियाँ ठीक करें।"
+    "UPDATE_SUCCESS": "व्यवसाय जानकारी सफलतापूर्वक अपडेट हुई।",
+    "UPDATE_FAILED": "व्यवसाय जानकारी अपडेट नहीं हो सकी।",
+    "GST_EXISTS": "यह जीएसटी नंबर पहले से मौजूद है।",
+    "NO_CHANGES": "कोई बदलाव नहीं किया गया।",
+    "ADDRESS_TOO_SHORT": "पता कम से कम 5 अक्षर का होना चाहिए।",
+    "LOAD_ERROR": "व्यवसाय जानकारी लोड नहीं हो सकी।"
   },
 
   "ORDER_DETAILS": {

@@ -220,15 +220,43 @@
       "ERROR_LONGITUDE": "Longitude is required",
       "LOCATION_SUCCESS": "Location captured successfully",
       "ERROR_LOCATION": "Failed to get current location",
-      "ERROR_LOCATION_PERMISSION": "Permission to access location was denied"
+      "ERROR_LOCATION_PERMISSION": "Permission to access location was denied",
+      "Business Information": "Business Information",
+    "Registration Number": "Registration Number",
+    "Owner Name": "Owner Name",
+    "Business Category": "Business Category",
+    "Business Type": "Business Type",
+    "Established Year": "Established Year",
+    "Location Information": "Location Information",
+    "State": "State",
+    "City": "City",
+    "Location": "Location",
+    "Address": "Address",
+    "Address is required": "Address is required",
+    "Contact Information": "Contact Information",
+    "Mobile Number": "Mobile Number",
+    "Mobile number is required": "Mobile number is required",
+    "Please enter a valid 10-digit mobile number": "Please enter a valid 10-digit mobile number",
+    "Email": "Email",
+    "Email is required": "Email is required",
+    "Please enter a valid email address": "Please enter a valid email address",
+    "Legal Information": "Legal Information",
+    "GST Number": "GST Number",
+    "GST number is required": "GST number is required",
+    "PAN Number": "PAN Number"
     },
 
     "WHOLESALER_BUSINESS_INFO": {
-    "Business Info": "Business Info",
+     "Business Info": "Business Info",
     "Save Changes": "Save Changes",
+    "FIX_ERRORS": "Please fix the errors before submitting.",
     "UPDATING": "Updating business info...",
-    "UPDATE_SUCCESS": "Business info updated successfully!",
-    "FIX_ERRORS": "Please fix the errors before submitting."
+    "UPDATE_SUCCESS": "Business information updated successfully.",
+    "UPDATE_FAILED": "Failed to update business information.",
+    "GST_EXISTS": "GST number already exists.",
+    "NO_CHANGES": "No changes detected.",
+    "ADDRESS_TOO_SHORT": "Address must be at least 5 characters.",
+    "LOAD_ERROR": "Failed to load business information."
   },
 
     "ORDER_DETAILS": {

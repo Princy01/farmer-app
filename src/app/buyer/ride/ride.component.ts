@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
+import { BuyerApiService } from '../services/buyer-api.service';
 import { addIcons } from 'ionicons';
 import {
   chevronBack,
@@ -52,6 +53,7 @@ interface CheckoutData {
 interface TransportData {
   delivery_type: TransportType;
   distance: number;
+  distance_km: number;
   load_type: string;
   status: string;
   urgency: 'low' | 'standard' | 'high';
@@ -68,13 +70,19 @@ interface TransportData {
 export class RideComponent implements OnInit {
   private checkoutData: CheckoutData = {};
   private existingTransportData: TransportData | null = null;
+  private pickupLat: number = 0;
+  private pickupLon: number = 0;
+  private dropoffLat: number = 0;
+  private dropoffLon: number = 0;
+  private jobId: number = 0;
 
   selectedTransportType: TransportType | null = null;
 
   totalWeight: number = 0;
   pickupLocation: string = '';
   dropoffLocation: string = '';
-  distance: number = 0;
+  distance: number = 0; // Distance in km
+  isLoadingDistance: boolean = false;
 
   isPremiumUser: boolean = false;
 
@@ -83,7 +91,8 @@ export class RideComponent implements OnInit {
     private translate: TranslateService,
     private route: ActivatedRoute,
     private alertController: AlertController,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private buyerApiService: BuyerApiService
   ) {
     addIcons({
       chevronBack,
@@ -105,7 +114,11 @@ export class RideComponent implements OnInit {
   ngOnInit(): void {
     this.initializeFromQueryParams();
 
-    if (this.distance === 0) {
+    // If coordinates are available, calculate actual distance from backend
+    if (this.pickupLat && this.pickupLon && this.dropoffLat && this.dropoffLon) {
+      this.calculateDistanceFromBackend();
+    } else if (this.distance === 0) {
+      // Fallback to dummy distance if no coordinates
       this.distance = this.calculateDummyDistance();
     }
 
@@ -113,6 +126,29 @@ export class RideComponent implements OnInit {
     if (!this.validateRequiredData()) {
       this.showErrorAndNavigateBack();
     }
+  }
+
+  private calculateDistanceFromBackend(): void {
+    this.isLoadingDistance = true;
+    this.buyerApiService.getRouteMetrics(
+      this.pickupLat,
+      this.pickupLon,
+      this.dropoffLat,
+      this.dropoffLon
+    ).subscribe({
+      next: (response) => {
+        // Convert meters to km and round to 2 decimal places
+        this.distance = Math.round((response.distance_meters / 1000) * 100) / 100;
+        console.log(`Distance calculated: ${this.distance} km from ${response.distance_meters} meters`);
+        this.isLoadingDistance = false;
+      },
+      error: (error) => {
+        console.error('Error calculating distance:', error);
+        // Fallback to dummy distance on error
+        this.distance = this.calculateDummyDistance();
+        this.isLoadingDistance = false;
+      }
+    });
   }
 
   private initializeFromNavigationState(): void {
@@ -134,6 +170,26 @@ export class RideComponent implements OnInit {
       console.log('Existing transport data:', this.existingTransportData);
       if (this.existingTransportData?.delivery_type) {
         this.selectedTransportType = this.existingTransportData.delivery_type as TransportType;
+      }
+
+      // Extract coordinates from available data
+      if (navData['selectedBranch']) {
+        const branch = navData['selectedBranch'];
+        if (branch.latitude && branch.longitude) {
+          this.dropoffLat = branch.latitude;
+          this.dropoffLon = branch.longitude;
+        }
+      }
+
+      // Try to get wholeseller/retailer coordinates
+      if (navData['wholeseller'] && navData['wholeseller'].latitude && navData['wholeseller'].longitude) {
+        this.pickupLat = navData['wholeseller'].latitude;
+        this.pickupLon = navData['wholeseller'].longitude;
+      }
+
+      // Try to get job ID from wholeseller or other source
+      if (navData['wholeseller'] && navData['wholeseller'].id) {
+        this.jobId = navData['wholeseller'].id;
       }
 
       this.checkoutData = {
@@ -216,12 +272,13 @@ export class RideComponent implements OnInit {
 
         transportDataToPass = {
           delivery_type: this.selectedTransportType,
-          distance: this.distance,
+          distance: this.distance * 1000, // Store in meters
+          distance_km: this.distance,
           load_type: 'general',
           status: 'pending',
           urgency: urgency,
           base_price: basePrice
-        } as any;
+        } as TransportData;
       }
 
       console.log({
@@ -263,14 +320,15 @@ export class RideComponent implements OnInit {
       const basePrice = this.getBaseDeliveryCharge();
       const urgency = this.selectedTransportType === 'priority' ? 'high' : 'standard';
 
-      const transportRequestData = {
+      const transportRequestData: TransportData = {
         delivery_type: this.selectedTransportType,
-        distance: this.distance,
+        distance: this.distance * 1000, // Store in meters
+        distance_km: this.distance,
         load_type: 'general',
         status: 'pending',
         urgency: urgency,
         base_price: basePrice
-      } as any;
+      };
 
       console.log('Confirmed transport data:', transportRequestData);
 
@@ -387,9 +445,16 @@ export class RideComponent implements OnInit {
   }
 
   getBaseDeliveryCharge(): number {
-    if (!this.selectedTransportType) {
+    if (!this.selectedTransportType || this.distance === 0) {
       return 0;
     }
+
+    // Delivery type multipliers (currently all 1, will be customizable later)
+    const multipliers: Record<TransportType, number> = {
+      standard: 1,
+      express: 1,
+      priority: 1
+    };
 
     const ratesPerKm: Record<TransportType, number> = {
       standard: DELIVERY_RATES.STANDARD,
@@ -398,7 +463,10 @@ export class RideComponent implements OnInit {
     };
 
     const rate = ratesPerKm[this.selectedTransportType] || 0;
-    return Math.max(DELIVERY_RATES.MIN_CHARGE, Math.round(rate * this.distance));
+    const multiplier = multipliers[this.selectedTransportType] || 1;
+    const calculatedPrice = rate * this.distance * multiplier;
+
+    return Math.max(DELIVERY_RATES.MIN_CHARGE, Math.round(calculatedPrice));
   }
 
   getTotalDeliveryCost(): number {
