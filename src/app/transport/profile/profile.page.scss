@@ -498,3 +498,117 @@ ion-button[type="submit"] {
     }
   }
 }
+// FAB Edit / Cancel Button
+ion-fab[vertical="bottom"][horizontal="end"] {
+  ion-fab-button {
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --background-hover: linear-gradient(135deg, #5568d3 0%, #663a8f 100%);
+    --background-activated: linear-gradient(135deg, #5568d3 0%, #663a8f 100%);
+    --box-shadow: 0 4px 15px rgba(102, 126, 234, 0.45);
+    --color: white;
+    --border-radius: 16px;
+
+    &[color="medium"] {
+      --background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      --background-hover: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+      --box-shadow: 0 4px 15px rgba(107, 114, 128, 0.35);
+    }
+
+    ion-icon {
+      font-size: 1.4rem;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.55);
+    }
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-fab[vertical="bottom"][horizontal="end"] {
+    ion-fab-button {
+      --box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6);
+    }
+  }
+}
+// Avatar Upload
+.avatar-upload {
+  cursor: pointer;
+  position: relative;
+
+  .avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+
+    ion-icon {
+      font-size: 1.8rem;
+      color: white;
+    }
+  }
+
+  &:hover .avatar-overlay,
+  &:active .avatar-overlay {
+    opacity: 1;
+  }
+
+  &.uploading {
+    pointer-events: none;
+    opacity: 0.75;
+  }
+
+  ion-spinner {
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+  }
+}
+.avatar-circle {
+  // ADD these to the existing block:
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;  // already there, keep it
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      // fills the circle, crops edges
+    object-position: center; // always centered
+    display: block;
+  }
+
+  .avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    ion-icon {
+      font-size: 1.8rem;
+      color: white;
+    }
+
+    ion-spinner {
+      --color: white;
+    }
+  }
+
+  &:hover .avatar-overlay,
+  .avatar-overlay.uploading {
+    opacity: 1;
+  }
+}

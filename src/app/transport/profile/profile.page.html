@@ -3,10 +3,28 @@
     <!-- Profile Header -->
     <div class="profile-header">
       <div class="profile-avatar">
-        <div class="avatar-circle">
+
+        <!-- Hidden file input — triggered programmatically -->
+        <input
+          type="file"
+          id="profileImageInput"
+          accept="image/*"
+          style="display: none"
+          (change)="onImageSelected($event)"
+        />
+
+        <!-- Avatar circle with camera overlay -->
+        <div class="avatar-circle" (click)="triggerImagePicker()">
           <img *ngIf="driverData.profile_image" [src]="driverData.profile_image" alt="Profile">
           <ion-icon *ngIf="!driverData.profile_image" name="person-outline"></ion-icon>
+
+          <!-- Camera overlay — always visible on hover, spinner while uploading -->
+          <div class="avatar-overlay" [class.uploading]="isUploadingImage">
+            <ion-spinner *ngIf="isUploadingImage" name="crescent" color="light"></ion-spinner>
+            <ion-icon *ngIf="!isUploadingImage" name="camera-outline"></ion-icon>
+          </div>
         </div>
+
       </div>
 
       <div class="profile-name">
@@ -41,7 +59,7 @@
     <ion-card>
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-        <!-- Personal Information Section -->
+        <!-- Personal Information Section (Read-only) -->
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="person-outline"></ion-icon>
@@ -63,7 +81,7 @@
           </ion-list>
         </div>
 
-        <!-- License Information Section -->
+        <!-- License Information Section (Read-only) -->
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="card-outline"></ion-icon>
@@ -89,42 +107,38 @@
           </ion-list>
         </div>
 
-        <!-- Contact Information Section -->
+        <!-- Contact Information Section — OTP-verified edits only -->
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="call-outline"></ion-icon>
             <h3>{{ 'DRIVER_REGISTRATION.CONTACT_INFO' | translate }}</h3>
           </div>
           <ion-list>
-            <ion-item [class.ion-invalid]="form.get('contact_num')?.invalid && form.get('contact_num')?.touched">
+            <ion-item>
               <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.CONTACT_NUMBER' | translate }}</ion-label>
-              <ion-input formControlName="contact_num" type="tel" [readonly]="!isEditMode"></ion-input>
+              <ion-input formControlName="contact_num" type="tel" readonly></ion-input>
+              <ion-button slot="end" fill="clear" size="small" (click)="onEditContactNum()">
+                <ion-icon name="create" slot="icon-only"></ion-icon>
+              </ion-button>
             </ion-item>
-            <ion-item [class.ion-invalid]="form.get('contact_num_addl')?.invalid && form.get('contact_num_addl')?.touched">
+            <ion-item>
               <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.ADDITIONAL_CONTACT' | translate }}</ion-label>
-              <ion-input formControlName="contact_num_addl" type="tel" [readonly]="!isEditMode"></ion-input>
+              <ion-input formControlName="contact_num_addl" type="tel" readonly></ion-input>
+              <ion-button slot="end" fill="clear" size="small" (click)="onEditContactNumAddl()">
+                <ion-icon name="create" slot="icon-only"></ion-icon>
+              </ion-button>
             </ion-item>
-            <ion-item [class.ion-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
+            <ion-item>
               <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.EMAIL' | translate }}</ion-label>
-              <ion-input formControlName="email" type="email" [readonly]="!isEditMode"></ion-input>
+              <ion-input formControlName="email" type="email" readonly></ion-input>
+              <ion-button slot="end" fill="clear" size="small" (click)="onEditEmail()">
+                <ion-icon name="create" slot="icon-only"></ion-icon>
+              </ion-button>
             </ion-item>
           </ion-list>
-          <div class="error-message" *ngIf="form.get('contact_num')?.invalid && form.get('contact_num')?.touched">
-            <span *ngIf="form.get('contact_num')?.errors?.['required']">
-              {{ 'DRIVER_INFO.Contact number is required' | translate }}
-            </span>
-            <span *ngIf="form.get('contact_num')?.errors?.['pattern']">
-              {{ 'DRIVER_INFO.Please enter a valid 10-digit mobile number' | translate }}
-            </span>
-          </div>
-          <div class="error-message" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
-            <span *ngIf="form.get('email')?.errors?.['email']">
-              {{ 'DRIVER_INFO.Please enter a valid email address' | translate }}
-            </span>
-          </div>
         </div>
 
-        <!-- Identity Information Section -->
+        <!-- Identity Information Section (Read-only) -->
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="finger-print-outline"></ion-icon>
@@ -142,7 +156,7 @@
           </ion-list>
         </div>
 
-        <!-- Address Information Section -->
+        <!-- Address Information Section (Editable in edit mode) -->
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="location-outline"></ion-icon>
@@ -187,7 +201,7 @@
           </div>
         </div>
 
-        <!-- Bank Information Section -->
+        <!-- Bank Information Section (Editable in edit mode) -->
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="business-outline"></ion-icon>
@@ -231,7 +245,7 @@
           </div>
         </div>
 
-        <!-- Vehicle Information Section -->
+        <!-- Vehicle Information Section (Read-only) -->
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="car-outline"></ion-icon>
@@ -267,11 +281,28 @@
           </ion-list>
         </div>
 
-        <ion-button expand="block" type="submit" *ngIf="isEditMode" [disabled]="form.invalid">
-          <ion-icon name="save" slot="start"></ion-icon>
-          {{ 'DRIVER_INFO.Save Changes' | translate }}
-        </ion-button>
+        <!-- Save / Cancel buttons (edit mode only) -->
+        <div class="action-buttons" *ngIf="isEditMode">
+          <ion-button expand="block" type="submit" [disabled]="form.invalid">
+            <ion-icon name="save" slot="start"></ion-icon>
+            {{ 'DRIVER_INFO.Save Changes' | translate }}
+          </ion-button>
+          <ion-button expand="block" fill="outline" color="medium" type="button" (click)="cancelEdit()">
+            {{ 'DRIVER_INFO.Cancel' | translate }}
+          </ion-button>
+        </div>
+
       </form>
     </ion-card>
   </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button *ngIf="!isEditMode" (click)="enableEdit()" color="primary">
+      <ion-icon name="create"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-button *ngIf="isEditMode" (click)="cancelEdit()" color="medium">
+      <ion-icon name="close"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
 </ion-content>
