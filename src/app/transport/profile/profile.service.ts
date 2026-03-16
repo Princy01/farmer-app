@@ -56,6 +56,17 @@ export interface UploadProfileImageRequest {
   image: string; // base64 encoded string
 }
 
+export interface RequestEmailChangeResponse {
+  message: string;
+  verification_sent: boolean;
+  verification_token: string;
+}
+
+export interface VerifyEmailChangeResponse {
+  message: string;
+  verified: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -85,5 +96,21 @@ export class DriverProfileService {
   uploadProfileImage(data: UploadProfileImageRequest): Observable<{ message: string }> {
     const headers = this.getAuthHeaders();
     return this.http.post<{ message: string }>(`${this.apiUrl}/driver/profile/image`, data, { headers });
+  }
+
+  requestEmailChange(newEmail: string): Observable<RequestEmailChangeResponse> {
+    return this.http.post<RequestEmailChangeResponse>(
+      `${this.apiUrl}/request-email-change`,
+      { new_email: newEmail },
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  verifyEmailChange(token: string): Observable<VerifyEmailChangeResponse> {
+    return this.http.post<VerifyEmailChangeResponse>(
+      `${this.apiUrl}/verify-email`,
+      { token },
+      { headers: this.getAuthHeaders() }
+    );
   }
 }

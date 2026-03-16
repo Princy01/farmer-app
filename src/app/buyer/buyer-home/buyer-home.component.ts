@@ -298,16 +298,6 @@ export class BuyerHomeComponent implements OnDestroy {
     }
   }
 
-  async navigateToUpdateBusiness() {
-    try {
-      await this.closeMenu();
-      await this.router.navigate(['/buyer/business-update']);
-    } catch (error) {
-      console.error('Error navigating to business update:', error);
-      this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
-    }
-  }
-
   async navigateToSettings() {
     try {
       await this.closeMenu();

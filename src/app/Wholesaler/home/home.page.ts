@@ -242,10 +242,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     await this.safeNavigate('/wholesaler/business-info');
   }
 
-  async navigateToUpdateBusiness() {
-    await this.safeNavigate('/wholesaler/business-update');
-  }
-
   async navigateToMyOrders() {
     await this.safeNavigate('/wholesaler/orders');
   }

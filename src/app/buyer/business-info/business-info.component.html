@@ -89,9 +89,10 @@
               <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Mobile Number' | translate }}</ion-label>
               <ion-input formControlName="mobile_number" type="tel" [readonly]="!isEditMode"></ion-input>
             </ion-item>
-            <ion-item [class.ion-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
+            <ion-item button="true" (click)="openEmailVerificationModal()" [class.ion-invalid]="form.get('email')?.invalid && form.get('email')?.touched" class="editable-item">
               <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Email' | translate }}</ion-label>
-              <ion-input formControlName="email" type="email" [readonly]="!isEditMode"></ion-input>
+              <ion-input formControlName="email" type="email" readonly></ion-input>
+              <ion-icon name="create" slot="end" class="edit-icon"></ion-icon>
             </ion-item>
           </ion-list>
           <div class="error-message" *ngIf="form.get('mobile_number')?.invalid && form.get('mobile_number')?.touched">

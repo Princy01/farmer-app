@@ -5,7 +5,8 @@ import {
   IonicModule,
   NavController,
   LoadingController,
-  ToastController
+  ToastController,
+  ModalController
 } from '@ionic/angular';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
@@ -27,6 +28,7 @@ import {
   cameraOutline
 } from 'ionicons/icons';
 import { DriverProfileService, UpdateDriverProfileRequest } from './profile.service';
+import { EmailVerificationModalComponent } from './email-verification-modal.component';
 
 @Component({
   selector: 'app-profile',
@@ -52,6 +54,7 @@ export class ProfilePage implements OnInit {
     private navCtrl: NavController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
+    private modalCtrl: ModalController,
     private translate: TranslateService,
     private driverProfileService: DriverProfileService
   ) {
@@ -165,8 +168,6 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  // ── Image Upload ────────────────────────────────────────────────────────────
-
   triggerImagePicker() {
     const input = document.getElementById('profileImageInput') as HTMLInputElement;
     input?.click();
@@ -237,8 +238,6 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  // ── Edit / Save / Cancel ────────────────────────────────────────────────────
-
   enableEdit() {
     this.isEditMode = true;
     this.form.get('address_door_no')?.enable();
@@ -308,8 +307,6 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  // ── OTP stubs ───────────────────────────────────────────────────────────────
-
   onEditContactNum() {
     // TODO: Open OTP verification dialog for contact number change
   }
@@ -318,11 +315,18 @@ export class ProfilePage implements OnInit {
     // TODO: Open OTP verification dialog for additional contact number change
   }
 
-  onEditEmail() {
-    // TODO: Open OTP verification dialog for email change
-  }
+  async onEditEmail() {
+    const modal = await this.modalCtrl.create({
+      component: EmailVerificationModalComponent,
+    });
+    await modal.present();
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
+    const { data } = await modal.onDidDismiss();
+    // Optionally refresh driver info after successful email change
+    if (data?.emailUpdated) {
+      this.loadDriverInfo();
+    }
+  }
 
   goBack() {
     this.navCtrl.back();

@@ -1,13 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonicModule, ToastController, LoadingController } from '@ionic/angular';
+import { IonicModule, ToastController, LoadingController, ModalController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { save, create, chevronBack, close } from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { BusinessInfoService } from './business-info.service';
+import { EmailVerificationModalComponent } from './email-verification-modal.component';
 
 @Component({
   selector: 'app-business-info',
@@ -27,6 +28,7 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
+    private modalCtrl: ModalController,
     private translate: TranslateService,
     private router: Router,
     private businessInfoService: BusinessInfoService
@@ -150,5 +152,18 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
 
   goBack() {
     this.router.navigate(['/wholesaler/home']);
+  }
+
+  async openEmailVerificationModal() {
+    const modal = await this.modalCtrl.create({
+      component: EmailVerificationModalComponent,
+    });
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    // Optionally refresh business info after successful email change
+    if (data?.emailUpdated) {
+      this.loadBusinessInfo();
+    }
   }
 }

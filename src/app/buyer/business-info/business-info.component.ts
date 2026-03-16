@@ -1,12 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonicModule, ToastController, LoadingController } from '@ionic/angular';
+import { IonicModule, ToastController, LoadingController, ModalController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { save, create, chevronBack } from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil, of } from 'rxjs';
 import { Router } from '@angular/router';
+import { EmailVerificationModalComponent } from './email-verification-modal.component';
+import { BusinessInfoService, UpdateBusinessRequest } from './business-info.service';
 
 @Component({
   selector: 'app-business-info',
@@ -26,8 +28,10 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
+    private modalCtrl: ModalController,
     private translate: TranslateService,
-    private router: Router
+    private router: Router,
+    private businessInfoService: BusinessInfoService
   ) {
     this.form = this.fb.group({
       b_registration_num: [{ value: '', disabled: true }],
@@ -58,24 +62,27 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
   }
 
   private loadBusinessInfo(): void {
-    // TODO: Replace with API call
-    const mockData = {
-      b_registration_num: 'REG123456',
-      b_owner_name: 'John Doe',
-      b_category_name: 'Grains',
-      b_type_name: 'Private Ltd',
-      established_year: '2015',
-      state_name: 'Maharashtra',
-      city_name: 'Mumbai',
-      location_name: 'Andheri',
-      address: '123, Main Street, Andheri',
-      mobile_number: '9876543210',
-      email: 'john@example.com',
-      gst_number: '27ABCDE1234F1Z5',
-      pan_number: 'ABCDE1234F',
-    };
-    this.businessInfo = mockData;
-    this.form.patchValue(mockData);
+    this.loadingCtrl.create({
+      message: this.translate.instant('RETAILER_BUSINESS_INFO.LOADING'),
+    }).then(async (loading) => {
+      await loading.present();
+
+      this.businessInfoService
+        .getBusinessInfo()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (res) => {
+            this.businessInfo = res.data;
+            this.form.patchValue(res.data);
+            loading.dismiss();
+          },
+          error: async (err) => {
+            await loading.dismiss();
+            const msg = err?.error?.error ?? 'RETAILER_BUSINESS_INFO.LOAD_ERROR';
+            await this.showToast(msg, 'danger');
+          },
+        });
+    });
   }
 
   enableEdit() {
@@ -87,23 +94,61 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       await this.showToast('RETAILER_BUSINESS_INFO.FIX_ERRORS', 'danger');
+      return;
+    }
 
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('RETAILER_BUSINESS_INFO.UPDATING'),
     });
     await loading.present();
 
-    // TODO: Replace with API call
-    setTimeout(async () => {
-      await loading.dismiss();
-      this.isEditMode = false;
-      this.form.get('address')?.disable();
-      this.form.get('mobile_number')?.disable();
-      this.form.get('email')?.disable();
-      this.form.get('gst_number')?.disable();
-      await this.showToast('RETAILER_BUSINESS_INFO.UPDATE_SUCCESS', 'success');
-    }, 1200);
+    const payload: UpdateBusinessRequest = {
+      address: this.form.get('address')?.value,
+      gst_number: this.form.get('gst_number')?.value,
+    };
+
+    this.businessInfoService
+      .updateBusiness(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async () => {
+          await loading.dismiss();
+          this.businessInfo = { ...this.businessInfo, ...payload };
+          this.isEditMode = false;
+          this.cancelEdit();
+          await this.showToast('RETAILER_BUSINESS_INFO.UPDATE_SUCCESS', 'success');
+        },
+        error: async (err) => {
+          await loading.dismiss();
+          const serverMsg: string = err?.error?.error ?? '';
+          let toastMsg: string;
+
+          if (serverMsg.includes('GST number already exists')) {
+            toastMsg = this.translate.instant('RETAILER_BUSINESS_INFO.GST_EXISTS');
+          } else if (serverMsg.includes('No changes detected')) {
+            toastMsg = this.translate.instant('RETAILER_BUSINESS_INFO.NO_CHANGES');
+          } else if (serverMsg.includes('Address must be at least')) {
+            toastMsg = this.translate.instant('RETAILER_BUSINESS_INFO.ADDRESS_TOO_SHORT');
+          } else {
+            toastMsg = this.translate.instant('RETAILER_BUSINESS_INFO.UPDATE_FAILED');
+          }
+
+          await this.showToast(toastMsg, 'danger');
+        },
+      });
+  }
+
+  cancelEdit() {
+    this.isEditMode = false;
+    this.form.patchValue(this.businessInfo);
+    this.form.get('address')?.disable();
+    this.form.get('mobile_number')?.disable();
+    this.form.get('email')?.disable();
+    this.form.get('gst_number')?.disable();
+    this.form.markAsUntouched();
   }
 
   private async showToast(messageKey: string, color: string) {
@@ -116,7 +161,20 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
     await toast.present();
   }
 
-   goBack() {
+  async openEmailVerificationModal() {
+    const modal = await this.modalCtrl.create({
+      component: EmailVerificationModalComponent,
+    });
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    // Optionally refresh business info after successful email change
+    if (data?.emailUpdated) {
+      this.loadBusinessInfo();
+    }
+  }
+
+  goBack() {
     this.router.navigate(['/buyer/buyer-home']);
   }
 }
