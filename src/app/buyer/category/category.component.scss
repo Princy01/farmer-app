@@ -14,6 +14,27 @@ ion-back-button {
   --icon-font-size: 20px;
 }
 
+ion-header ion-buttons ion-button {
+  --color: #fff;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --icon-font-size: 22px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  ion-icon {
+    color: #fff;
+  }
+}
+
 .custom-title {
   font-size: 18px;
   font-weight: bold;
@@ -650,11 +671,23 @@ ion-searchbar {
   --placeholder-color: rgba(255, 255, 255, 0.7);
   --icon-color: #fff;
   --clear-button-color: #fff;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .wholesaler-vertical-scroll:has(.no-wholesalers-message) {
-  grid-template-columns: 1fr; 
-  justify-items: center; 
+  grid-template-columns: 1fr;
+  justify-items: center;
 }
 .no-wholesalers-message {
   text-align: center;
@@ -662,18 +695,18 @@ ion-searchbar {
   background: #f8f9fa;
   border-radius: 12px;
   margin: 16px 0;
-  
+
   ion-icon {
     font-size: 48px;
     margin-bottom: 12px;
     opacity: 0.6;
   }
-  
+
   p {
     color: #666;
     font-size: 16px;
     margin: 8px 0;
-    
+
     &.suggestion {
       font-size: 14px;
       color: #999;

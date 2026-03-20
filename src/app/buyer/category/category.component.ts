@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, IonModal, AlertController, LoadingController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { chevronBack, close, search, funnelOutline, swapVerticalOutline, cartOutline, alertCircleOutline, star } from 'ionicons/icons';
+import { chevronBack, close, search, funnelOutline, swapVerticalOutline, cartOutline, alertCircleOutline, star, refreshOutline } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import { BuyerApiService, Product, ProductAll, Category } from '../services/buyer-api.service';
 import { CartService, AddCartItemRequest } from '../cart/cart.service';
@@ -32,6 +32,9 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
   private readonly DEFAULT_LOADING_TIMEOUT = 10000; // 10 seconds
   private readonly DEFAULT_UNIT_ID = 1;
   private readonly DEFAULT_INITIAL_QUANTITY = 1;
+
+  /** Polling interval for auto-refresh */
+  private pollInterval: any;
 
   // Navigation and Selection
   superCategoryId: number = -1;
@@ -99,7 +102,7 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private mandiService: MandiService
   ) {
-    addIcons({ chevronBack, close, search, alertCircleOutline, funnelOutline, swapVerticalOutline, cartOutline, star });
+    addIcons({ chevronBack, close, search, alertCircleOutline, funnelOutline, swapVerticalOutline, cartOutline, star, refreshOutline });
   }
 
 
@@ -309,6 +312,7 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
 
         // Automatically load all products
         this.loadAllProducts();
+        this.startPolling();
       },
       error: (error) => {
         console.error('Error loading categories:', error);
@@ -323,8 +327,28 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
    * Cleans up subscriptions to prevent memory leaks
    */
   ngOnDestroy() {
+    this.stopPolling();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Starts polling for product updates every 1 minute
+   */
+  private startPolling(): void {
+    this.pollInterval = setInterval(() => {
+      this.loadAllProducts();
+    }, 60000);
+  }
+
+  /**
+   * Stops polling for product updates
+   */
+  private stopPolling(): void {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
   }
 
   /**

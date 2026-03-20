@@ -56,6 +56,16 @@ export interface UploadProfileImageRequest {
   image: string; // base64 encoded string
 }
 
+/**
+ * Request body for the driver email-change endpoint.
+ * `new_email` is nullable — send null (or omit) when the driver has no existing email
+ * and is adding one for the first time, or send an empty string to clear it.
+ * The backend accepts: { "new_email": "user@example.com" } | { "new_email": null }
+ */
+export interface RequestDriverEmailChangeRequest {
+  new_email: string | null;
+}
+
 export interface RequestEmailChangeResponse {
   message: string;
   verification_sent: boolean;
@@ -98,14 +108,32 @@ export class DriverProfileService {
     return this.http.post<{ message: string }>(`${this.apiUrl}/driver/profile/image`, data, { headers });
   }
 
-  requestEmailChange(newEmail: string): Observable<RequestEmailChangeResponse> {
+  /**
+   * Requests a driver email change.
+   * Posts to POST /auth/request-driver-email-change (requires Bearer token).
+   * The backend validates the email, invalidates old email_change_driver tokens,
+   * generates a new JWT verification token, stores its hash, and sends the
+   * verification email to the new address.
+   *
+   * @param newEmail - The new email address, or null if the driver has no email yet.
+   */
+  requestDriverEmailChange(newEmail: string | null): Observable<RequestEmailChangeResponse> {
+    const body: RequestDriverEmailChangeRequest = { new_email: newEmail };
     return this.http.post<RequestEmailChangeResponse>(
-      `${this.apiUrl}/request-email-change`,
-      { new_email: newEmail },
+      `${this.apiUrl}/auth/request-driver-email-change`,
+      body,
       { headers: this.getAuthHeaders() }
     );
   }
 
+  /**
+   * Verifies the email-change token clicked from the driver's inbox.
+   * The backend's VerifyEmail handler resolves the token type internally:
+   * - "email_change_driver" → updates the driver's email via UpdateDriverEmail()
+   * No token-type parameter is needed from the client side.
+   *
+   * @param token - The JWT token extracted from the verification link query param.
+   */
   verifyEmailChange(token: string): Observable<VerifyEmailChangeResponse> {
     return this.http.post<VerifyEmailChangeResponse>(
       `${this.apiUrl}/verify-email`,

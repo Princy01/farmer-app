@@ -275,7 +275,10 @@
       "Your email has been successfully updated": "Your email has been successfully updated",
       "Done": "Done",
       "FAILED_TO_SEND_EMAIL": "Failed to send verification email. Please try again.",
-      "INVALID_TOKEN": "Invalid or expired verification token. Please request a new one."
+      "INVALID_TOKEN": "Invalid or expired verification token. Please request a new one.",
+    "We will send a verification link to your new address": "We'll send a verification link to your new address",
+    "Check Your Inbox": "Check Your Inbox",
+    "Click the link in the email to confirm your new address": "Click the link in the email to confirm your new address"
     },
 
     "ORDER_DETAILS": {
@@ -1938,7 +1941,10 @@
     "Your email has been successfully updated": "Your email has been successfully updated",
     "Done": "Done",
     "FAILED_TO_SEND_EMAIL": "Failed to send verification email. Please try again.",
-    "INVALID_TOKEN": "Invalid or expired verification token. Please request a new one."
+    "INVALID_TOKEN": "Invalid or expired verification token. Please request a new one.",
+    "We will send a verification link to your new address": "We'll send a verification link to your new address.",
+    "Check Your Inbox": "Check Your Inbox",
+    "Click the link in the email to confirm your new address": "Click the link in that email to confirm your new address. The link expires in 48 hours."
   },
 
     "DRIVER_REGISTRATION": {

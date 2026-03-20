@@ -4,7 +4,6 @@ import { map, Observable, catchError, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
-// Driver Info Request Interface
 export interface DriverInfoRequest {
   first_name: string;
   last_name: string;
@@ -36,7 +35,6 @@ export interface DriverInfoResponse extends DriverInfoRequest {
   driver_id: number;
 }
 
-// Driver Document Request Interface
 export interface DriverDocumentRequest {
   driver_id: number;
   aadhar_img: string;
@@ -55,7 +53,6 @@ export interface DriverDocumentResponse {
   created_at: string;
 }
 
-// Driver Vehicle Interface
 export interface DriverVehicle {
   veh_number: string;
   reg_date: string;
@@ -74,7 +71,6 @@ export interface DriverVehicleResponse extends DriverVehicle {
   vehicle_id: number;
 }
 
-// Vehicle Insurance Interface
 export interface DriverVehicleInsurance {
   vehicle_id: number;
   frm_date: string;
@@ -89,7 +85,6 @@ export interface DriverVehicleInsuranceResponse extends DriverVehicleInsurance {
   created_at?: string;
 }
 
-// Response Interfaces
 export interface DriverResponse {
   message: string;
   driver_id: number;

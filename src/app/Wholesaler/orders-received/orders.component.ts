@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
 import {
   searchOutline, ellipsisVertical, menuOutline, closeOutline, chevronDownCircleOutline,
-  chevronForwardOutline, receiptOutline
+  chevronForwardOutline, receiptOutline, refreshOutline
 } from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
@@ -53,6 +53,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   filteredOrders: DisplayOrder[] = [];
 
   private subscriptions = new Subscription();
+  private pollInterval: any;
 
   constructor(
     private wholesalerService: WholesalerApiService,
@@ -66,18 +67,20 @@ export class OrdersComponent implements OnInit, OnDestroy {
   ) {
     addIcons({
       searchOutline, ellipsisVertical, menuOutline, closeOutline,
-      chevronDownCircleOutline, chevronForwardOutline, receiptOutline
+      chevronDownCircleOutline, chevronForwardOutline, receiptOutline, refreshOutline
     });
   }
 
   ngOnInit() {
     this.checkAuthAndLoadData();
+    this.startPolling();
   }
 
   /**
    * Cleanup subscriptions to prevent memory leaks
    */
   ngOnDestroy() {
+    this.stopPolling();
     this.subscriptions.unsubscribe();
   }
 
@@ -93,6 +96,25 @@ export class OrdersComponent implements OnInit, OnDestroy {
     }
 
     this.loadOrders();
+  }
+
+  /**
+   * Starts polling for order updates every 1 minute
+   */
+  private startPolling(): void {
+    this.pollInterval = setInterval(() => {
+      this.loadOrders();
+    }, 60000);
+  }
+
+  /**
+   * Stops polling for order updates
+   */
+  private stopPolling(): void {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
   }
 
   private async showAuthError(): Promise<void> {

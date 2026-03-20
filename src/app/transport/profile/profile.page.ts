@@ -315,14 +315,40 @@ export class ProfilePage implements OnInit {
     // TODO: Open OTP verification dialog for additional contact number change
   }
 
+  /**
+   * Opens the email verification modal and triggers the driver email-change flow.
+   *
+   * The current email (or null if the driver has no email yet) is passed into the
+   * modal so it can display it and allow the driver to enter a new address.
+   *
+   * Flow:
+   *  1. Modal collects the new email from the driver.
+   *  2. Modal calls DriverProfileService.requestDriverEmailChange(newEmail) which
+   *     hits POST /auth/request-driver-email-change.
+   *  3. Backend sends a verification email to the new address.
+   *  4. Driver clicks the link → app handles /verify-email?token=... route.
+   *  5. On modal dismiss with { emailUpdated: true }, the profile is refreshed.
+   *
+   * Passing `currentEmail` as null is valid — the backend accepts a nullable
+   * new_email field and handles the "adding email for the first time" case.
+   */
   async onEditEmail() {
+    const currentEmail: string | null = this.driverData.email ?? null;
+
     const modal = await this.modalCtrl.create({
       component: EmailVerificationModalComponent,
+      componentProps: {
+        // Provide current email so the modal can show it and pass it along
+        // if needed, and pass the service method reference for initiating the change.
+        currentEmail,
+      },
     });
     await modal.present();
 
     const { data } = await modal.onDidDismiss();
-    // Optionally refresh driver info after successful email change
+
+    // Refresh profile after a successful email change so the displayed
+    // email reflects the newly verified address.
     if (data?.emailUpdated) {
       this.loadDriverInfo();
     }

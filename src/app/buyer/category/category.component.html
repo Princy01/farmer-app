@@ -11,6 +11,13 @@
       <ion-button (click)="toggleSearch()">
         <ion-icon [name]="isSearchActive ? 'close' : 'search'"></ion-icon>
       </ion-button>
+      <ion-button (click)="loadAllProducts()">
+        <ion-icon
+          name="refresh-outline"
+          color="dark"
+          slot="icon-only">
+        </ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 

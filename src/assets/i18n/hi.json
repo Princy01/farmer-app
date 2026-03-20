@@ -288,7 +288,10 @@
     "Your email has been successfully updated": "आपका ईमेल सफलतापूर्वक अपडेट हो गया है",
     "Done": "पूर्ण",
     "FAILED_TO_SEND_EMAIL": "सत्यापन ईमेल भेजने में विफल। कृपया पुनः प्रयास करें।",
-    "INVALID_TOKEN": "अमान्य या समाप्त सत्यापन टोकन। कृपया एक नया अनुरोध करें।"
+    "INVALID_TOKEN": "अमान्य या समाप्त सत्यापन टोकन। कृपया एक नया अनुरोध करें।",
+    "We will send a verification link to your new address": "हम आपके नए ईमेल पर एक लिंक भेजेंगे",
+    "Check Your Inbox": "अपना इनबॉक्स देखें",
+    "Click the link in the email to confirm your new address": "अपना नया ईमेल कन्फर्म करने के लिए ईमेल में दिए लिंक पर क्लिक करें"
   },
 
   "ORDER_DETAILS": {
@@ -2015,7 +2018,10 @@
     "Your email has been successfully updated": "आपका ईमेल सफलतापूर्वक अपडेट हो गया है",
     "Done": "पूर्ण",
     "FAILED_TO_SEND_EMAIL": "सत्यापन ईमेल भेजने में विफल। कृपया पुनः प्रयास करें।",
-    "INVALID_TOKEN": "अमान्य या समाप्त सत्यापन टोकन। कृपया एक नया अनुरोध करें।"
+    "INVALID_TOKEN": "अमान्य या समाप्त सत्यापन टोकन। कृपया एक नया अनुरोध करें।",
+    "We will send a verification link to your new address": "हम आपकी नई ईमेल पर एक वेरिफिकेशन लिंक भेजेंगे।",
+    "Check Your Inbox": "अपना इनबॉक्स देखें",
+    "Click the link in the email to confirm your new address": "ईमेल में दिए लिंक पर क्लिक करके नई ईमेल कन्फर्म करें। यह लिंक 48 घंटे में खत्म हो जाएगी।"
   },
 
   "DRIVER_REGISTRATION": {

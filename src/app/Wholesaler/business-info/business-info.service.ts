@@ -74,7 +74,7 @@ export class BusinessInfoService {
 
   requestEmailChange(newEmail: string): Observable<RequestEmailChangeResponse> {
     return this.http.post<RequestEmailChangeResponse>(
-      `${this.apiUrl}/request-email-change`,
+      `${this.apiUrl}/auth/request-email-change`,
       { new_email: newEmail },
       { headers: this.getAuthHeaders() }
     );

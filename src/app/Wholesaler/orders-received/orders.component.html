@@ -18,6 +18,13 @@
     </ion-searchbar>
 
     <ion-buttons slot="end">
+      <ion-button (click)="loadOrders()">
+        <ion-icon
+          name="refresh-outline"
+          color="dark"
+          slot="icon-only">
+        </ion-icon>
+      </ion-button>
       <ion-button (click)="toggleSearch()">
         <ion-icon
           [name]="isSearchVisible ? 'close-outline' : 'search-outline'"

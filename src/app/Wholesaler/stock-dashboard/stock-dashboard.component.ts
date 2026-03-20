@@ -8,7 +8,7 @@ import { StockService, ProductPriceData, BusinessBranchWithNames } from 'src/app
 import { AddStockComponent } from '../add-stock/add-stock.component';
 import { UpdateStockComponent } from '../update-stock/update-stock.component';
 import { addIcons } from 'ionicons';
-import { add } from 'ionicons/icons';
+import { add, refreshOutline } from 'ionicons/icons';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -46,6 +46,9 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
   /** Subscription manager for cleanup */
   private subscriptions = new Subscription();
 
+  /** Polling interval for auto-refresh */
+  private pollInterval: any;
+
   constructor(
     private stockService: StockService,
     private authService: AuthService,
@@ -54,7 +57,7 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController
   ) {
-    addIcons({ add });
+    addIcons({ add, refreshOutline });
   }
 
   /**
@@ -70,6 +73,7 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
     }
 
     this.fetchBranches();
+    this.startPolling();
   }
 
   /**
@@ -77,7 +81,27 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
    * Unsubscribes from all active subscriptions
    */
   ngOnDestroy(): void {
+    this.stopPolling();
     this.subscriptions.unsubscribe();
+  }
+
+  /**
+   * Starts polling for stock updates every 1 minute
+   */
+  private startPolling(): void {
+    this.pollInterval = setInterval(() => {
+      this.loadTodayStock();
+    }, 60000);
+  }
+
+  /**
+   * Stops polling for stock updates
+   */
+  private stopPolling(): void {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
   }
 
   /**

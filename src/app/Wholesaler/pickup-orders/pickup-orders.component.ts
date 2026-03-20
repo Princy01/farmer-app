@@ -320,7 +320,7 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
           next: async (data) => {
             order.otp = data.otp_code;
             order.order_status = 'otp_generated';
-            this.otpVisible[order.order_id.toString()] = true;
+            this.otpVisible[order.order_id.toString()] = false;
             await loading.dismiss();
             await this.showToast(
               this.translate.instant('PICKUP_ORDERS.OTP_GENERATED_SUCCESS'),

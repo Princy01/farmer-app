@@ -63,6 +63,9 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   languages: Language[] = [];
   currentLanguage = 'English';
 
+  /** Polling interval for auto-refresh */
+  private pollInterval: any;
+
   constructor(
     private navCtrl: NavController,
     private router: Router,
@@ -97,6 +100,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     this.applyStoredLanguage();
     this.checkAuthAndLoad();
     this.fetchLanguages();
+    this.startPolling();
   }
 
   ngAfterViewInit() {
@@ -110,8 +114,28 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
+    this.stopPolling();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Starts polling for product updates every 1 minute
+   */
+  private startPolling(): void {
+    this.pollInterval = setInterval(() => {
+      this.refreshItems();
+    }, 60000);
+  }
+
+  /**
+   * Stops polling for product updates
+   */
+  private stopPolling(): void {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
   }
 
   private applyStoredLanguage() {
