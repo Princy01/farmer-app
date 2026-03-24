@@ -157,7 +157,6 @@ export class PastOrdersComponent implements AfterViewInit, OnDestroy {
           }
         },
         error: async (error) => {
-          console.error('Error loading completed orders:', error);
           await loading.dismiss();
           this.isLoading = false;
           this.hasError = true;
@@ -179,7 +178,6 @@ export class PastOrdersComponent implements AfterViewInit, OnDestroy {
       await loading.dismiss();
       this.isLoading = false;
       this.hasError = true;
-      console.error('Unexpected error loading completed orders:', error);
 
       await this.showError(
         this.translate.instant('PAST_ORDERS.UNEXPECTED_ERROR'),
@@ -349,7 +347,6 @@ export class PastOrdersComponent implements AfterViewInit, OnDestroy {
    */
   viewOrderDetails(order: OrderItemDetails): void {
     if (!order || !order.order_id) {
-      console.error('Invalid order data');
       return;
     }
 
@@ -373,8 +370,6 @@ export class PastOrdersComponent implements AfterViewInit, OnDestroy {
     try {
       await this.loadCompletedOrders();
     } catch (error) {
-      console.error('Error refreshing orders:', error);
-    } finally {
       event?.target?.complete();
     }
   }

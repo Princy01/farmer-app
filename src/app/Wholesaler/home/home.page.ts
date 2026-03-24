@@ -29,7 +29,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { MenuService } from '../services/menu.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LanguagePopoverComponent } from './language-popover.component';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, debounceTime, switchMap } from 'rxjs';
 
 interface Language {
   id: number;
@@ -46,6 +46,7 @@ interface Language {
 })
 export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private search$ = new Subject<string>();
 
   items: WholesalerProduct[] = [];
   filteredItems: WholesalerProduct[] = [];
@@ -53,9 +54,9 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   itemsPerPage = 10;
   isInfiniteScrollEnabled = true;
   isLoading = false;
+  isSearching = false;
 
   searchTerm = '';
-  private searchTimeout: any;
 
   notifications = 0;
   messages = 0;
@@ -101,6 +102,38 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     this.checkAuthAndLoad();
     this.fetchLanguages();
     this.startPolling();
+    this.initializeSearch();
+  }
+
+  //  Initialize search with debounce and switchMap to prevent race conditions
+
+  private initializeSearch(): void {
+    this.search$
+      .pipe(
+        debounceTime(300),
+        switchMap(searchTerm => {
+          this.isSearching = true;
+          this.searchTerm = searchTerm;
+          return this.wholesalerService.getWholesalerProducts(0, this.itemsPerPage, searchTerm || undefined);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (data) => {
+          this.items = data;
+          this.filteredItems = data;
+          this.currentPage = 0;
+          this.isSearching = false;
+          this.isInfiniteScrollEnabled = data.length >= this.itemsPerPage;
+        },
+        error: () => {
+          this.isSearching = false;
+          this.showErrorAlert(
+            this.translate.instant('WHOLESALER_HOME.ERROR'),
+            this.translate.instant('WHOLESALER_HOME.SEARCH_ERROR')
+          );
+        }
+      });
   }
 
   ngAfterViewInit() {
@@ -111,26 +144,21 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
     this.stopPolling();
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  /**
-   * Starts polling for product updates every 1 minute
-   */
+    // Starts polling for product updates every 1 minute
+
   private startPolling(): void {
     this.pollInterval = setInterval(() => {
       this.refreshItems();
     }, 60000);
   }
 
-  /**
-   * Stops polling for product updates
-   */
+  //  Stops polling for product updates
+
   private stopPolling(): void {
     if (this.pollInterval) {
       clearInterval(this.pollInterval);
@@ -190,11 +218,11 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
           this.isLoading = false;
         },
         error: async (error) => {
-          console.error('Error loading products:', error);
           this.isLoading = false;
+          const errorMsg = this.getErrorMessage(error);
           await this.showErrorAlert(
             this.translate.instant('WHOLESALER_HOME.ERROR'),
-            this.translate.instant('WHOLESALER_HOME.LOAD_PRODUCTS_ERROR')
+            errorMsg
           );
         }
       });
@@ -216,8 +244,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   async handleRefresh(event: any) {
     try {
       await this.loadProducts(true);
-    } catch (error) {
-      console.error('Error refreshing products:', error);
     } finally {
       event.target.complete();
     }
@@ -225,27 +251,11 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   searchItems(event: any) {
     const value = event.target.value || '';
-
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-
-    this.searchTimeout = setTimeout(() => {
-      this.searchTerm = value;
-      this.loadProducts(true);
-    }, 300);
+    this.search$.next(value);
   }
 
   viewDetails(item: WholesalerProduct) {
-    try {
-      this.router.navigate(['/wholesaler/product-details', item.product_id]);
-    } catch (error) {
-      console.error('Navigation error:', error);
-      this.showErrorAlert(
-        this.translate.instant('WHOLESALER_HOME.ERROR'),
-        this.translate.instant('WHOLESALER_HOME.NAVIGATION_ERROR')
-      );
-    }
+    this.router.navigate(['/wholesaler/product-details', item.product_id]);
   }
 
   async navigateToHome() {
@@ -254,7 +264,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       const content = document.querySelector('ion-content');
       content?.scrollToTop(300);
     } catch (error) {
-      console.error('Navigation error:', error);
+      // Navigation to home failed - silently continue
     }
   }
 
@@ -302,7 +312,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.router.navigate(['/wholesaler/for-sale']);
     } catch (error) {
-      console.error('Navigation error:', error);
+      // Navigation to order creation failed - silently continue
     }
   }
 
@@ -311,7 +321,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       await this.menuService.closeMenu();
       await this.router.navigate([route]);
     } catch (error) {
-      console.error('Navigation error:', error);
       await this.showErrorAlert(
         this.translate.instant('WHOLESALER_HOME.ERROR'),
         this.translate.instant('WHOLESALER_HOME.NAVIGATION_ERROR')
@@ -323,7 +332,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     try {
       await this.menuService.openMenu();
     } catch (error) {
-      console.error('Error opening menu:', error);
+      // Menu failed to open - user can try again
     }
   }
 
@@ -331,7 +340,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     try {
       await this.menuService.closeMenu();
     } catch (error) {
-      console.error('Error closing menu:', error);
+      // Menu failed to close - silently continue
     }
   }
 
@@ -339,7 +348,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     try {
       await this.menuCtrl.toggle();
     } catch (error) {
-      console.error('Error toggling menu:', error);
+      // Error handling for menu operation
     }
   }
 
@@ -360,7 +369,9 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
               this.authService.logout();
               await this.router.navigate(['/login']);
             } catch (error) {
-              console.error('Error during logout:', error);
+              // Logout failed - redirect anyway
+              this.authService.logout();
+              await this.router.navigate(['/login']);
             }
           }
         }
@@ -370,19 +381,11 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openNotifications() {
-    try {
-      this.router.navigate(['/wholesaler/notifications']);
-    } catch (error) {
-      console.error('Error opening notifications:', error);
-    }
+    this.router.navigate(['/wholesaler/notifications']);
   }
 
   openTrends() {
-    try {
-      this.router.navigate(['/wholesaler/trends']);
-    } catch (error) {
-      console.error('Error opening trends:', error);
-    }
+    this.router.navigate(['/wholesaler/trends']);
   }
 
   fetchLanguages() {
@@ -397,8 +400,9 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
             this.currentLanguage = lang.name;
           }
         },
-        error: (error) => {
-          console.error('Error fetching languages:', error);
+        error: () => {
+          // Languages failed to fetch - use defaults
+          // This is non-critical, app continues with current language
         }
       });
   }
@@ -419,7 +423,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       await popover.present();
       await popover.onDidDismiss();
     } catch (error) {
-      console.error('Error opening language popover:', error);
+      // Language popover failed to open - user can dismiss and continue
     }
   }
 
@@ -437,7 +441,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
           localStorage.setItem('preferred_language', normalizedLangCode);
         },
         error: (error) => {
-          console.error('Error saving language preference:', error);
           this.showErrorAlert(
             this.translate.instant('WHOLESALER_HOME.ERROR'),
             this.translate.instant('WHOLESALER_HOME.LANGUAGE_SAVE_ERROR')
@@ -476,6 +479,52 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       buttons: [this.translate.instant('WHOLESALER_HOME.OK')]
     });
     await alert.present();
+  }
+
+  /**
+   * Map error response to user-friendly message
+   */
+  private getErrorMessage(error: any): string {
+    if (!error) {
+      return this.translate.instant('WHOLESALER_HOME.LOAD_PRODUCTS_ERROR');
+    }
+
+    // Network timeout
+    if (error.name === 'TimeoutError') {
+      return this.translate.instant('WHOLESALER_HOME.REQUEST_TIMEOUT_ERROR');
+    }
+
+    // Network error (no connection)
+    if (error.status === 0 || error.error?.type === 'error') {
+      return this.translate.instant('WHOLESALER_HOME.NETWORK_ERROR');
+    }
+
+    // 401 Unauthorized
+    if (error.status === 401) {
+      return this.translate.instant('WHOLESALER_HOME.SESSION_EXPIRED');
+    }
+
+    // 403 Forbidden
+    if (error.status === 403) {
+      return this.translate.instant('WHOLESALER_HOME.NO_PERMISSION');
+    }
+
+    // 404 Not Found
+    if (error.status === 404) {
+      return this.translate.instant('WHOLESALER_HOME.NOT_FOUND');
+    }
+
+    // 429 Too Many Requests
+    if (error.status === 429) {
+      return this.translate.instant('WHOLESALER_HOME.RATE_LIMIT_ERROR');
+    }
+
+    // 500+ Server errors
+    if (error.status >= 500) {
+      return this.translate.instant('WHOLESALER_HOME.SERVER_ERROR');
+    }
+
+    return this.translate.instant('WHOLESALER_HOME.LOAD_PRODUCTS_ERROR');
   }
 
   private async showErrorAlert(header: string, message: string) {

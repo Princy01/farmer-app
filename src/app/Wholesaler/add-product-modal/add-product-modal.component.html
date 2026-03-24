@@ -13,7 +13,15 @@
 </ion-header>
 
 <ion-content class="modal-content-wrapper">
-  <div class="content-container">
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <ion-spinner></ion-spinner>
+      <p>{{ "ADD_PRODUCT.LOADING" | translate }}</p>
+    </div>
+  </div>
+
+  <div class="content-container" [ngClass]="{ 'content-disabled': isLoading }">
     <!-- Main View (Search and List) -->
     <div *ngIf="!showDetails && !showAddNew" class="search-section">
       <!-- Search Bar Card -->
@@ -23,6 +31,7 @@
             <ion-searchbar
               [(ngModel)]="searchTerm"
               [placeholder]="'ADD_PRODUCT.SEARCH_PLACEHOLDER' | translate"
+              [disabled]="isLoading"
             ></ion-searchbar>
           </div>
         </ion-card-content>
@@ -45,6 +54,7 @@
               *ngFor="let product of filteredProducts()"
               (click)="selectProduct(product)"
               class="product-item"
+              [disabled]="isLoading"
             >
               <ion-label>
                 <h3>{{ product.product_name }}</h3>
@@ -52,7 +62,7 @@
               </ion-label>
             </ion-item>
           </div>
-          <div *ngIf="filteredProducts().length === 0" class="no-products">
+          <div *ngIf="filteredProducts().length === 0 && !isLoading" class="no-products">
             <p>{{ "ADD_PRODUCT.NO_PRODUCTS" | translate }}</p>
           </div>
         </ion-card-content>
@@ -61,10 +71,18 @@
 
     <!-- Product Details View -->
     <div *ngIf="showDetails" class="details-section">
-      <ion-card class="modern-card details-card">
+      <!-- Adding Overlay -->
+      <div *ngIf="isAddingProduct" class="loading-overlay">
+        <div class="loading-content">
+          <ion-spinner></ion-spinner>
+          <p>{{ "ADD_PRODUCT.ADDING_PRODUCT" | translate }}</p>
+        </div>
+      </div>
+
+      <ion-card class="modern-card details-card" [ngClass]="{ 'card-disabled': isAddingProduct }">
         <div class="card-header">
           <div class="header-content">
-            <ion-button fill="clear" (click)="backToList()">
+            <ion-button fill="clear" (click)="backToList()" [disabled]="isAddingProduct">
               <ion-icon name="arrow-back"></ion-icon>
             </ion-button>
             <h2 class="card-title">
@@ -80,6 +98,7 @@
               <ion-select
                 [(ngModel)]="selectedProductForDetails!.unitId"
                 [placeholder]="'ADD_PRODUCT.SELECT_UNIT' | translate"
+                [disabled]="isAddingProduct"
                 required
               >
                 <ion-select-option
@@ -97,6 +116,7 @@
                   type="number"
                   [(ngModel)]="selectedProductForDetails!.stock"
                   [placeholder]="'ADD_PRODUCT.STOCK_PLACEHOLDER' | translate"
+                  [disabled]="isAddingProduct"
                   required
                 ></ion-input>
               </div>
@@ -106,6 +126,7 @@
                   type="number"
                   [(ngModel)]="selectedProductForDetails!.price"
                   [placeholder]="'ADD_PRODUCT.PRICE_PLACEHOLDER' | translate"
+                  [disabled]="isAddingProduct"
                   required
                 ></ion-input>
               </div>
@@ -116,6 +137,7 @@
               <ion-select
                 [(ngModel)]="selectedProductForDetails!.qualityId"
                 [placeholder]="'ADD_PRODUCT.SELECT_QUALITY' | translate"
+                [disabled]="isAddingProduct"
                 required
               >
                 <ion-select-option
@@ -132,6 +154,7 @@
               <ion-select
                 [(ngModel)]="selectedProductForDetails!.wastageMeasureId"
                 [placeholder]="'ADD_PRODUCT.SELECT_WASTAGE_MEASURE' | translate"
+                [disabled]="isAddingProduct"
                 required
               >
                 <ion-select-option
@@ -142,8 +165,14 @@
               </ion-select>
             </div>
           </div>
-          <ion-button expand="block" (click)="addProduct()" class="add-btn">
-            {{ "ADD_PRODUCT.ADD_PRODUCT" | translate }}
+          <ion-button
+            expand="block"
+            (click)="addProduct()"
+            class="add-btn"
+            [disabled]="isAddingProduct"
+          >
+            <span *ngIf="!isAddingProduct">{{ "ADD_PRODUCT.ADD_PRODUCT" | translate }}</span>
+            <span *ngIf="isAddingProduct">{{ "ADD_PRODUCT.ADDING" | translate }}</span>
           </ion-button>
         </ion-card-content>
       </ion-card>
@@ -151,7 +180,7 @@
 
     <!-- Recommend New Product Form -->
     <div *ngIf="showAddNew" class="form-section">
-      <ion-card class="modern-card form-card">
+      <ion-card class="modern-card form-card" [ngClass]="{ 'card-disabled': isAddingProduct }">
         <div class="card-header">
           <div class="header-content">
             <ion-icon name="add-circle-outline" class="header-icon"></ion-icon>
@@ -169,6 +198,7 @@
               <ion-input
                 [(ngModel)]="newProduct.name"
                 name="name"
+                [disabled]="isAddingProduct"
                 required
               ></ion-input>
             </ion-item>
@@ -179,6 +209,7 @@
               <ion-select
                 [(ngModel)]="newProduct.category"
                 name="category"
+                [disabled]="isAddingProduct"
                 required
               >
                 <ion-select-option
@@ -188,7 +219,7 @@
                 >
               </ion-select>
             </ion-item>
-            <ion-button type="submit" expand="block" class="add-btn">
+            <ion-button type="submit" expand="block" class="add-btn" [disabled]="isAddingProduct">
               {{ "ADD_PRODUCT.ADD_PRODUCT" | translate }}
             </ion-button>
           </form>

@@ -60,7 +60,7 @@
         <ion-icon name="calendar-outline"></ion-icon>
         <ion-label>{{ getDateLabel(group.date) }}</ion-label>
       </div>
-      
+
       <ion-card
         *ngFor="let order of group.orders"
         class="order-card"
@@ -100,6 +100,7 @@
               fill="solid"
               size="small"
               expand="block"
+              [disabled]="otpLoading[order.order_id.toString()]"
               (click)="generateOtp(order, $event)"
             >
               <ion-icon name="checkmark-circle" slot="start"></ion-icon>
@@ -133,14 +134,14 @@
       <ion-card-header>
         <div class="details-header">
           <div>
-            <ion-card-title>#{{ selectedOrderDetails.order_id }}</ion-card-title>
+            <ion-card-title>{{ selectedOrderDetails.order_id ? '#' + selectedOrderDetails.order_id : 'N/A' }}</ion-card-title>
             <ion-card-subtitle>
               <ion-icon name="calendar-outline"></ion-icon>
-              {{ selectedOrderDetails.date_of_order | date: 'MMM dd, yyyy' }}
+              {{ selectedOrderDetails.date_of_order ? (selectedOrderDetails.date_of_order | date: 'MMM dd, yyyy') : 'N/A' }}
             </ion-card-subtitle>
           </div>
-          <ion-badge [color]="getStatusColor(selectedOrderDetails.order_status_id)">
-            {{ selectedOrderDetails.order_status }}
+          <ion-badge [color]="getStatusColor(selectedOrderDetails.order_status_id || 0)">
+            {{ selectedOrderDetails.order_status || 'Unknown' }}
           </ion-badge>
         </div>
       </ion-card-header>
@@ -150,59 +151,63 @@
           <div class="info-item">
             <ion-icon name="person-circle"></ion-icon>
             <span class="label">{{ "PICKUP_ORDERS.RETAILER_ID" | translate }}</span>
-            <span class="value">{{ selectedOrderDetails.retailer_id }}</span>
+            <span class="value">{{ selectedOrderDetails.retailer_id || 'N/A' }}</span>
           </div>
           <div class="info-item">
             <ion-icon name="cash-outline"></ion-icon>
             <span class="label">{{ "PICKUP_ORDERS.TOTAL_AMOUNT" | translate }}</span>
-            <span class="value">₹{{ selectedOrderDetails.total_order_amount | number:'1.2-2' }}</span>
+            <span class="value">₹{{ selectedOrderDetails.total_order_amount ? (selectedOrderDetails.total_order_amount | number:'1.2-2') : '0.00' }}</span>
           </div>
           <div class="info-item">
             <ion-icon name="cash-outline"></ion-icon>
             <span class="label">{{ "PICKUP_ORDERS.FINAL_AMOUNT" | translate }}</span>
-            <span class="value">₹{{ selectedOrderDetails.final_amount | number:'1.2-2' }}</span>
+            <span class="value">₹{{ selectedOrderDetails.final_amount ? (selectedOrderDetails.final_amount | number:'1.2-2') : '0.00' }}</span>
           </div>
           <div class="info-item full">
             <ion-icon name="location-outline"></ion-icon>
             <span class="label">{{ "PICKUP_ORDERS.DELIVERY_ADDRESS" | translate }}</span>
-            <span class="value">{{ selectedOrderDetails.delivery_address }}</span>
+            <span class="value">{{ selectedOrderDetails.delivery_address || 'N/A' }}</span>
           </div>
         </div>
 
-        <div class="otp-section-details" *ngIf="selectedOrder.canGenerateOtp">
+        <div class="otp-section-details" *ngIf="selectedOrder?.canGenerateOtp">
           <ion-button
-            *ngIf="!selectedOrder.otp"
+            *ngIf="!selectedOrder?.otp"
             color="primary"
             expand="block"
+            [disabled]="otpLoading[selectedOrder!.order_id.toString()]"
             (click)="generateOtp(selectedOrder)"
           >
             <ion-icon name="checkmark-circle" slot="start"></ion-icon>
             {{ "PICKUP_ORDERS.GENERATE_OTP" | translate }}
           </ion-button>
 
-          <div *ngIf="selectedOrder.otp" class="otp-display-large">
+          <div *ngIf="selectedOrder?.otp" class="otp-display-large">
             <span class="otp-label">{{ "PICKUP_ORDERS.OTP" | translate }}</span>
             <div class="otp-value-row">
-              <span class="otp-value" *ngIf="otpVisible[selectedOrder.order_id]">{{ selectedOrder.otp }}</span>
-              <span class="otp-value hidden" *ngIf="!otpVisible[selectedOrder.order_id]">••••••</span>
+              <span class="otp-value" *ngIf="otpVisible[selectedOrder!.order_id.toString()]">{{ selectedOrder.otp }}</span>
+              <span class="otp-value hidden" *ngIf="!otpVisible[selectedOrder!.order_id.toString()]">••••••</span>
               <ion-button fill="clear" (click)="toggleOtpVisibility(selectedOrder)">
-                <ion-icon [name]="otpVisible[selectedOrder.order_id] ? 'eye-off' : 'eye-outline'" slot="icon-only"></ion-icon>
+                <ion-icon [name]="otpVisible[selectedOrder!.order_id.toString()] ? 'eye-off' : 'eye-outline'" slot="icon-only"></ion-icon>
               </ion-button>
             </div>
           </div>
         </div>
 
         <h3>{{ "PICKUP_ORDERS.ITEMS" | translate }}</h3>
-        <ion-list class="items-list">
+        <div *ngIf="!selectedOrderDetails.items || selectedOrderDetails.items.length === 0" class="empty-items">
+          <p>{{ "PICKUP_ORDERS.NO_ITEMS" | translate }}</p>
+        </div>
+        <ion-list class="items-list" *ngIf="selectedOrderDetails.items && selectedOrderDetails.items.length > 0">
           <ion-item *ngFor="let item of selectedOrderDetails.items">
             <div class="item-content">
               <div class="item-header">
-                <h4>{{ item.product_name }}</h4>
-                <ion-badge color="medium">{{ item.category_name }}</ion-badge>
+                <h4>{{ item?.product_name || 'Unknown Product' }}</h4>
+                <ion-badge color="medium">{{ item?.category_name || 'Unknown' }}</ion-badge>
               </div>
               <div class="item-details">
-                <span>{{ "PICKUP_ORDERS.QUANTITY" | translate }}: {{ item.quantity }}</span>
-                <span>{{ "PICKUP_ORDERS.PRICE" | translate }}: ₹{{ item.wholeseller_price | number:'1.2-2' }}</span>
+                <span>{{ "PICKUP_ORDERS.QUANTITY" | translate }}: {{ item?.quantity || 0 }}</span>
+                <span>{{ "PICKUP_ORDERS.PRICE" | translate }}: ₹{{ item?.wholeseller_price ? (item.wholeseller_price | number:'1.2-2') : '0.00' }}</span>
               </div>
             </div>
           </ion-item>

@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import {  ModalController, LoadingController, ToastController } from '@ionic/angular/standalone';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { StockService, ProductPriceData, BusinessBranchWithNames } from 'src/app/Wholesaler/services/stock.service';
 import { AddStockComponent } from '../add-stock/add-stock.component';
 import { UpdateStockComponent } from '../update-stock/update-stock.component';
@@ -43,8 +44,8 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
   /** Error message to display */
   errorMessage: string = '';
 
-  /** Subscription manager for cleanup */
-  private subscriptions = new Subscription();
+  /** Subject for managing subscriptions cleanup */
+  private readonly destroy$ = new Subject<void>();
 
   /** Polling interval for auto-refresh */
   private pollInterval: any;
@@ -78,11 +79,12 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
 
   /**
    * Component cleanup
-   * Unsubscribes from all active subscriptions
+   * Unsubscribes from all active subscriptions and stops polling
    */
   ngOnDestroy(): void {
     this.stopPolling();
-    this.subscriptions.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   /**
@@ -118,29 +120,29 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const subscription = this.stockService.getBranchesByUser(this.userId).subscribe({
-      next: (data) => {
-        this.branches = data;
+    const subscription = this.stockService.getBranchesByUser(this.userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.branches = data || [];
 
-        if (this.branches.length > 0) {
-          this.selectedBranchId = this.branches[0].branch_id;
-          this.loadTodayStock();
-        } else {
-          this.errorMessage = 'STOCK_DASHBOARD.ERRORS.NO_BRANCHES';
+          if (this.branches.length > 0) {
+            this.selectedBranchId = this.branches[0].branch_id;
+            this.loadTodayStock();
+          } else {
+            this.errorMessage = 'STOCK_DASHBOARD.ERRORS.NO_BRANCHES';
+            this.isLoading = false;
+          }
+
+          loading.dismiss();
+        },
+        error: (error) => {
+          this.isLoading = false;
+          loading.dismiss();
+          const errorMsg = error?.message || 'STOCK_DASHBOARD.ERRORS.FETCH_BRANCHES_FAILED';
+          this.showError(errorMsg);
         }
-
-        this.isLoading = false;
-        loading.dismiss();
-      },
-      error: (error) => {
-        console.error('Error fetching branches:', error);
-        this.isLoading = false;
-        loading.dismiss();
-        this.showError(error?.message || 'STOCK_DASHBOARD.ERRORS.FETCH_BRANCHES_FAILED');
-      }
-    });
-
-    this.subscriptions.add(subscription);
+      });
   }
 
   /**
@@ -158,20 +160,19 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
 
     const subscription = this.stockService
       .getProductsStockOfBranchForDate(this.selectedBranchId, today)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
           this.todayStock = data || [];
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading stock:', error);
           this.isLoading = false;
           this.todayStock = [];
-          this.showError(error?.message || 'STOCK_DASHBOARD.ERRORS.LOAD_STOCK_FAILED');
+          const errorMsg = error?.message || 'STOCK_DASHBOARD.ERRORS.LOAD_STOCK_FAILED';
+          this.showError(errorMsg);
         }
       });
-
-    this.subscriptions.add(subscription);
   }
 
   /**
@@ -183,23 +184,18 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    try {
-      const modal = await this.modalCtrl.create({
-        component: AddStockComponent,
-        componentProps: { branchId: this.selectedBranchId }
-      });
+    const modal = await this.modalCtrl.create({
+      component: AddStockComponent,
+      componentProps: { branchId: this.selectedBranchId }
+    });
 
-      await modal.present();
+    await modal.present();
 
-      const { data, role } = await modal.onWillDismiss();
+    const { data, role } = await modal.onWillDismiss();
 
-      if (role === 'confirm' || data?.success) {
-        this.loadTodayStock();
-        this.showSuccess('STOCK_DASHBOARD.SUCCESS.STOCK_ADDED');
-      }
-    } catch (error) {
-      console.error('Error opening add stock modal:', error);
-      this.showError('STOCK_DASHBOARD.ERRORS.MODAL_ERROR');
+    if (role === 'confirm' || data?.success) {
+      this.loadTodayStock();
+      this.showSuccess('STOCK_DASHBOARD.SUCCESS.STOCK_ADDED');
     }
   }
 
@@ -218,42 +214,46 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    try {
-      const modal = await this.modalCtrl.create({
-        component: UpdateStockComponent,
-        componentProps: {
-          stockItem: item,
-          branchId: this.selectedBranchId
-        },
-        breakpoints: [0, 0.4, 0.8],
-        initialBreakpoint: 0.4
-      });
+    const modal = await this.modalCtrl.create({
+      component: UpdateStockComponent,
+      componentProps: {
+        stockItem: item,
+        branchId: this.selectedBranchId
+      },
+      breakpoints: [0, 0.4, 0.8],
+      initialBreakpoint: 0.4
+    });
 
-      await modal.present();
+    await modal.present();
 
-      const { data, role } = await modal.onWillDismiss();
+    const { data, role } = await modal.onWillDismiss();
 
-      if (role === 'confirm' || data?.success) {
-        this.loadTodayStock();
-        this.showSuccess('STOCK_DASHBOARD.SUCCESS.STOCK_UPDATED');
-      }
-    } catch (error) {
-      console.error('Error opening update stock modal:', error);
-      this.showError('STOCK_DASHBOARD.ERRORS.MODAL_ERROR');
+    if (role === 'confirm' || data?.success) {
+      this.loadTodayStock();
+      this.showSuccess('STOCK_DASHBOARD.SUCCESS.STOCK_UPDATED');
     }
   }
 
   /**
-   * Show loading indicator
+   * Show loading indicator with timeout to prevent indefinite display
    * @param messageKey - Translation key for loading message
    * @returns Promise resolving to loading controller
    */
   private async showLoading(messageKey: string): Promise<HTMLIonLoadingElement> {
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant(messageKey),
-      spinner: 'circular'
+      spinner: 'circular',
+      backdropDismiss: false
     });
     await loading.present();
+
+    // Safety timeout: automatically dismiss loading after 30 seconds
+    setTimeout(() => {
+      loading.dismiss().catch(() => {
+        // Loading already dismissed, ignore error
+      });
+    }, 30000);
+
     return loading;
   }
 

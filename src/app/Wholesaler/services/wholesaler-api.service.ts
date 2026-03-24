@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { map, catchError, retry } from 'rxjs/operators';
+import { Observable, throwError, timer, MonoTypeOperatorFunction } from 'rxjs';
+import { map, catchError, retryWhen, concatMap, finalize, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -15,9 +15,7 @@ export interface ApiErrorResponse {
   statusCode?: number;
 }
 
-/**
- * Order summary for home screen
- */
+//  Order summary for home screen
 interface OrderSummary {
   wholeseller_id: number;
   mandi_id: number;
@@ -27,9 +25,7 @@ interface OrderSummary {
   stock_in: number;
 }
 
-/**
- * Order item for My Orders screen
- */
+//  Order item for My Orders screen
 interface OrderItem {
   order_item_id: number;
   product_id: number;
@@ -54,9 +50,7 @@ export interface OrderItemDetails {
   created_at: string;
 }
 
-/**
- * Detailed order view for Order Details screen
- */
+//  Detailed order view for Order Details screen
 interface OrderDetailedView extends OrderItemDetails {
   mandi_name: string;
   mandi_location: string;
@@ -69,9 +63,7 @@ interface OrderDetailedView extends OrderItemDetails {
   special_instructions?: string;
 }
 
-/**
- * Response from create order API
- */
+//  Response from create order API
 interface CreateOrderResponse {
   order_id: number;
   status: string;
@@ -113,9 +105,7 @@ export interface ProductDetail {
   branch_number?: string;
 }
 
-/**
- * Mandi stock information
- */
+//  Mandi stock information
 interface MandiStock {
   mandi_id: number;
   mandi_name: string;
@@ -137,9 +127,7 @@ export interface RestockProduct {
   sales_trend: WeeklyTrend[];
 }
 
-/**
- * Bulk order item for market opportunities screen
- */
+//  Bulk order item for market opportunities screen
 interface BulkOrderItem {
   product_id: number;
   product_name: string;
@@ -156,9 +144,7 @@ export interface BulkOrder {
   items: BulkOrderItem[];
 }
 
-/**
- * Response interface for retailer products (flat structure from API)
- */
+//  Response interface for retailer products (flat structure from API)
 export interface RetailerProductResponse {
   retailer_id: number;
   retailer_name: string;
@@ -169,9 +155,7 @@ export interface RetailerProductResponse {
   order_value: number;
 }
 
-/**
- * Product information for a retailer
- */
+//  Product information for a retailer
 export interface RetailerProduct {
   product_id: number;
   product_name: string;
@@ -180,9 +164,7 @@ export interface RetailerProduct {
   order_value: number;
 }
 
-/**
- * Top retailer with aggregated product information
- */
+//  Top retailer with aggregated product information
 export interface TopRetailer {
   retailer_id: number;
   retailer_name: string;
@@ -191,9 +173,7 @@ export interface TopRetailer {
   products: RetailerProduct[];
 }
 
-/**
- * Request payload for creating an offer
- */
+//  Request payload for creating an offer
 export interface CreateOfferRequest {
   order_id: number;
   wholeseller_id: number;
@@ -202,16 +182,12 @@ export interface CreateOfferRequest {
   message?: string;
 }
 
-/**
- * Response from create offer API
- */
+//  Response from create offer API
 export interface CreateOfferResponse {
   offer_id: number;
 }
 
-/**
- * Wholesaler entry for sale screen
- */
+//  Wholesaler entry for sale screen
 export interface WholesellerEntry {
   product_id: number;
   quality: string;
@@ -225,17 +201,15 @@ export interface WholesellerEntry {
   unit_id: number;
 }
 
-/**
- * Response from wholesaler entry creation
- */
+//  Response from wholesaler entry creation
+
 export interface WholesellerEntryResponse {
   message: string;
   entry_id: number;
 }
 
-/**
- * Mandi (market) information
- */
+//  Mandi (market) information
+
 export interface Mandi {
   mandi_id: number;
   mandi_location: string;
@@ -253,18 +227,14 @@ export interface Mandi {
   city_shortnames: string;
 }
 
-/**
- * Language information
- */
 interface Language {
   id: number;
   code: string;
   name: string;
 }
 
-/**
- * Wholesaler product summary
- */
+//  Wholesaler product summary
+
 export interface WholesalerProduct {
   product_id: number;
   product_name: string;
@@ -272,9 +242,8 @@ export interface WholesalerProduct {
   total_orders: number;
 }
 
-/**
- * Detailed wholesaler product information
- */
+  // Detailed wholesaler product information
+
 export interface WholesalerProductDetails {
   product_id: number;
   product_name: string;
@@ -298,9 +267,8 @@ export interface WholesalerProductDetails {
   };
 }
 
-/**
- * Branch stock information
- */
+  // Branch stock information
+
 export interface BranchStock {
   branch_id: number;
   branch_name: string;
@@ -313,17 +281,14 @@ export interface BranchStock {
   last_updated: string;
 }
 
-/**
- * Weekly sales trend data
- */
+  // Weekly sales trend data
+ 
 export interface WeeklyTrend {
   week: number;
   sales: number;
 }
 
-/**
- * User preference settings
- */
+  // User preference settings
 interface UserPreference {
   language: string;
 }
@@ -355,19 +320,46 @@ export class WholesalerApiService {
     });
   }
 
+  /**
+   * Exponential backoff retry strategy: 1s, 2s, 4s (max 3 attempts)
+   * Applies to GET requests and retryable POST operations
+   * Returns a MonoTypeOperatorFunction to preserve type through the operator chain
+   */
+  private getExponentialBackoffRetry<T>(): MonoTypeOperatorFunction<T> {
+    return (source: Observable<T>) =>
+      source.pipe(
+        retryWhen(errors =>
+          errors.pipe(
+            concatMap((error, index) => {
+              // Do not retry on client errors (4xx) except 429 (rate limit)
+              if (error.status >= 400 && error.status < 500 && error.status !== 429) {
+                return throwError(() => error);
+              }
+              // Allow up to 3 retries
+              if (index < 3) {
+                const delayMs = Math.pow(2, index) * 1000; // 1s, 2s, 4s
+                return timer(delayMs);
+              }
+              return throwError(() => error);
+            }),
+            finalize(() => {
+              // Cleanup any pending operations
+            })
+          )
+        )
+      );
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'ERRORS.UNKNOWN_ERROR';
 
     if (error.error instanceof ErrorEvent) {
-      // Client-side or network error
-      console.error('Client-side error:', error.error.message);
+      // Client-side or network error - do NOT log the full message
+      // Just record that a network error occurred
       errorMessage = 'ERRORS.NETWORK_ERROR';
     } else {
       // Backend returned an unsuccessful response code
-      console.error(
-        `Backend returned code ${error.status}, ` +
-        `body was: ${JSON.stringify(error.error)}`
-      );
+      // Do NOT log the full response body - it may contain sensitive data
 
       switch (error.status) {
         case 400:
@@ -382,6 +374,9 @@ export class WholesalerApiService {
         case 404:
           errorMessage = 'ERRORS.NOT_FOUND';
           break;
+        case 429:
+          errorMessage = 'ERRORS.RATE_LIMIT_EXCEEDED';
+          break;
         case 500:
           errorMessage = 'ERRORS.SERVER_ERROR';
           break;
@@ -389,7 +384,7 @@ export class WholesalerApiService {
           errorMessage = 'ERRORS.SERVICE_UNAVAILABLE';
           break;
         default:
-          errorMessage = error.error?.message || 'ERRORS.UNKNOWN_ERROR';
+          errorMessage = 'ERRORS.UNKNOWN_ERROR';
       }
     }
 
@@ -402,7 +397,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getOrderSummary`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -413,7 +409,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getOrderItemDetails`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -424,7 +421,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getOrderDetails/${orderId}`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -435,7 +433,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getAllOrderDetails/${orderId}`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -447,8 +446,9 @@ export class WholesalerApiService {
       `${this.apiUrl}/getCompletedOrderSummary`,
       { headers }
     ).pipe(
-      retry(1),
-      map(orders => {
+      timeout(30000),
+      this.getExponentialBackoffRetry<OrderItemDetails[]>(),
+      map((orders: OrderItemDetails[]) => {
         if (daysAgo) {
           const filterDate = new Date();
           filterDate.setDate(filterDate.getDate() - daysAgo);
@@ -469,7 +469,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getReStockProductsHandler?days_back=${daysBack}`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -480,7 +481,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getAllBulkOrderDetails`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -492,8 +494,9 @@ export class WholesalerApiService {
       `${this.apiUrl}/getTopRetailerDetails`,
       { headers }
     ).pipe(
-      retry(1),
-      map(response => this.transformTopRetailers(response)),
+      timeout(30000),
+      this.getExponentialBackoffRetry<RetailerProductResponse[]>(),
+      map((response: RetailerProductResponse[]) => this.transformTopRetailers(response)),
       catchError(this.handleError.bind(this))
     );
   }
@@ -542,6 +545,8 @@ export class WholesalerApiService {
       offerData,
       { headers }
     ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -567,6 +572,8 @@ export class WholesalerApiService {
       entryData,
       { headers }
     ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -578,7 +585,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getProducts`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -589,7 +597,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getAllMandiDetails`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -601,6 +610,8 @@ export class WholesalerApiService {
       mandi,
       { headers }
     ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -612,7 +623,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getWarehouses`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -623,7 +635,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getUnits`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -634,7 +647,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getBusinessExistsOrNot`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -643,7 +657,8 @@ export class WholesalerApiService {
     return this.http.get<Language[]>(
       `${this.apiUrl}/getAllLanguages`
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -653,7 +668,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/getUserLanguagePreference`,
       { headers: this.getAuthHeaders() }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -664,6 +680,8 @@ export class WholesalerApiService {
       { lang_id: langId },
       { headers: this.getAuthHeaders() }
     ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -690,7 +708,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/wholesaler/products`,
       { headers, params }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -704,7 +723,8 @@ export class WholesalerApiService {
       `${this.apiUrl}/wholesaler/products/${productId}`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -723,6 +743,8 @@ export class WholesalerApiService {
       },
       { headers: this.getAuthHeaders() }
     ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -741,6 +763,8 @@ export class WholesalerApiService {
       },
       { headers: this.getAuthHeaders() }
     ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
   }

@@ -56,12 +56,19 @@
     cursor: pointer;
     transition: background-color 0.2s;
 
-    &:hover {
+    &:hover:not([disabled]) {
       --background: rgba(102, 126, 234, 0.05);
     }
 
-    &:active {
+    &:active:not([disabled]) {
       --background: rgba(102, 126, 234, 0.1);
+    }
+
+    &:disabled,
+    &[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
     }
 
     ion-label {
@@ -105,6 +112,12 @@ ion-toggle {
   --track-background-checked: #667eea;
   --handle-background: white;
   --handle-background-checked: white;
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 // Danger Zone Styles

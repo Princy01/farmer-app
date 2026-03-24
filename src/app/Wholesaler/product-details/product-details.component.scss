@@ -11,6 +11,13 @@
   --padding-start: 16px;
   --padding-end: 16px;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+
+  ion-button {
+    &:focus-visible {
+      outline: 2px solid white;
+      outline-offset: 2px;
+    }
+  }
 }
 
 .product-info-card {
@@ -27,11 +34,21 @@
       border-radius: 12px;
       overflow: hidden;
       flex-shrink: 0;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
       img {
         width: 100%;
         height: 100%;
         object-fit: contain;
+        transition: opacity 0.2s ease;
+
+        &[alt] {
+          // Fallback styling for images with alt text
+          background: white;
+        }
       }
     }
 
@@ -83,16 +100,19 @@
     border-radius: 12px;
     color: white;
     text-align: center;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 
     .label {
       font-size: 1rem;
       margin-bottom: 8px;
-      opacity: 0.9;
+      opacity: 0.95;
+      font-weight: 500;
     }
 
     .value.large {
       font-size: 2.2rem;
       font-weight: 700;
+      line-height: 1.1;
     }
   }
 }
@@ -114,21 +134,35 @@
       background: #f8f9fa;
       border-radius: 8px;
       padding: 16px;
+      transition: box-shadow 0.2s ease;
+
+      &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
 
       .mandi-info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
         margin-bottom: 8px;
+        align-items: start;
 
         .mandi-name {
           font-weight: 500;
           color: #333;
+          word-break: break-word;
         }
 
         .mandi-quantity {
           font-weight: 600;
           color: #3880ff;
+          white-space: nowrap;
+        }
+
+        .mandi-price {
+          grid-column: 1 / -1;
+          font-size: 0.9rem;
+          color: #666;
         }
       }
 
@@ -143,6 +177,7 @@
           height: 100%;
           background: linear-gradient(90deg, #3880ff, #5a9cff);
           transition: width 0.3s ease;
+          min-width: 0;
         }
       }
     }
@@ -160,11 +195,18 @@
     padding: 16px;
     background: #f8f9fa;
     border-radius: 8px;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+    border: 1px solid transparent;
 
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ion-color-primary);
+      outline-offset: 2px;
     }
 
     .number {
@@ -178,6 +220,7 @@
     .label {
       font-size: 0.9rem;
       color: #666;
+      line-height: 1.3;
     }
   }
 }
@@ -191,6 +234,22 @@
   ion-button {
     margin: 0;
     height: 48px;
+    min-width: 44px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ion-color-primary);
+      outline-offset: 2px;
+    }
+
+    &[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -207,6 +266,10 @@
     .product-image {
       align-self: center;
     }
+
+    .product-basic-info {
+      width: 100%;
+    }
   }
 
   .orders-grid {
@@ -222,18 +285,98 @@
       font-size: 1.8rem;
     }
   }
+
+  .quantity-card,
+  .orders-card {
+    ion-card-title {
+      font-size: 1rem;
+    }
+  }
 }
 
 @media (max-width: 480px) {
+  .product-container {
+    padding: 8px;
+  }
+
+  .product-header {
+    gap: 12px;
+  }
+
   .orders-grid {
     grid-template-columns: 1fr;
   }
 
-  .mandi-grid {
-    .mandi-info {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
+  .mandi-section {
+    h4 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .mandi-grid {
+      gap: 8px;
+
+      .mandi-item {
+        padding: 12px;
+
+        .mandi-info {
+          grid-template-columns: 1fr;
+          gap: 4px;
+
+          .mandi-name,
+          .mandi-quantity {
+            width: 100%;
+          }
+
+          .mandi-price {
+            grid-column: 1 / -1;
+            margin-top: 4px;
+          }
+        }
+      }
+    }
+  }
+
+  .actions-grid {
+    ion-button {
+      font-size: 0.85rem;
+    }
+  }
+
+  .total-quantity-item {
+    padding: 16px 12px;
+
+    .value.large {
+      font-size: 1.6rem;
+    }
+
+    .label {
+      font-size: 0.9rem;
+    }
+  }
+
+  .orders-grid {
+    .order-stat-item {
+      padding: 12px;
+
+      .number {
+        font-size: 1.3rem;
+      }
+
+      .label {
+        font-size: 0.8rem;
+      }
+    }
+  }
+
+  .quantity-card,
+  .orders-card {
+    ion-card-title {
+      font-size: 0.95rem;
+
+      ion-icon {
+        font-size: 1rem;
+      }
     }
   }
 }
@@ -279,3 +422,26 @@
   }
 }
 
+// Empty State
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #e0e0e0;
+
+  ion-icon {
+    color: var(--ion-color-medium);
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+}

@@ -25,14 +25,7 @@ export class SettingsPage implements OnInit, OnDestroy {
 
   appVersion = '1.0.0';
   isLoading = false;
-  passwordRequirements = [
-    'At least 8 characters',
-    'One uppercase letter (A-Z)',
-    'One lowercase letter (a-z)',
-    'One number (0-9)',
-    'One special character (!@#$%^&* etc.)',
-    'Different from current password'
-  ];
+  passwordRequirements: string[] = []; // Will be populated from translations
 
   constructor(
     private navCtrl: NavController,
@@ -65,6 +58,7 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.loadPasswordRequirements();
     this.loadSettings();
   }
 
@@ -73,15 +67,32 @@ export class SettingsPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  /**
+   * Load password requirements from translations
+   */
+  private loadPasswordRequirements(): void {
+    this.passwordRequirements = [
+      this.translate.instant('SETTINGS.PASSWORD_REQ_LENGTH'),
+      this.translate.instant('SETTINGS.PASSWORD_REQ_UPPERCASE'),
+      this.translate.instant('SETTINGS.PASSWORD_REQ_LOWERCASE'),
+      this.translate.instant('SETTINGS.PASSWORD_REQ_NUMBER'),
+      this.translate.instant('SETTINGS.PASSWORD_REQ_SPECIAL'),
+      this.translate.instant('SETTINGS.PASSWORD_REQ_DIFFERENT')
+    ];
+  }
+
   loadSettings() {
+    this.isLoading = true;
     this.settingsService.getSettings().pipe(takeUntil(this.destroy$)).subscribe({
       next: (settings: UserSettings) => {
         this.settingsForm.patchValue(settings);
         localStorage.setItem('wholesaler_settings', JSON.stringify(settings));
+        this.isLoading = false;
       },
       error: (error: any) => {
-        console.error('Error loading settings:', error);
+        this.isLoading = false;
         this.loadFromLocalStorage();
+        this.showToast(error.message || this.translate.instant('SETTINGS.LOAD_ERROR'), 'danger');
       }
     });
   }
@@ -94,14 +105,22 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   async saveSettings() {
-    if (this.settingsForm.invalid) return;
+    if (this.settingsForm.invalid) {
+      this.showToast(this.translate.instant('SETTINGS.FORM_INVALID'), 'danger');
+      return;
+    }
+
     const settings = this.settingsForm.value;
+    this.isLoading = true;
+
     this.settingsService.updateSettings(settings).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
+        this.isLoading = false;
         localStorage.setItem('wholesaler_settings', JSON.stringify(settings));
         this.showToast(this.translate.instant('SETTINGS.SAVE_SUCCESS'), 'success');
       },
       error: (error) => {
+        this.isLoading = false;
         this.showToast(error.message || this.translate.instant('SETTINGS.SAVE_ERROR'), 'danger');
       }
     });
@@ -122,7 +141,7 @@ export class SettingsPage implements OnInit, OnDestroy {
 
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('SETTINGS.CHANGE_PASSWORD'),
-      message: `Password requirements: ${requirementsText}`,
+      message: `${this.translate.instant('SETTINGS.PASSWORD_REQUIREMENTS')}: ${requirementsText}`,
       inputs: [
         {
           name: 'currentPassword',
@@ -169,32 +188,32 @@ export class SettingsPage implements OnInit, OnDestroy {
     }
 
     if (data.newPassword.length < 8) {
-      this.showToast('Password must be at least 8 characters long', 'danger');
+      this.showToast(this.translate.instant('SETTINGS.PASSWORD_REQ_LENGTH'), 'danger');
       return;
     }
 
     if (data.currentPassword === data.newPassword) {
-      this.showToast('New password must be different from current password', 'danger');
+      this.showToast(this.translate.instant('SETTINGS.PASSWORD_REQ_DIFFERENT'), 'danger');
       return;
     }
 
     if (!/[A-Z]/.test(data.newPassword)) {
-      this.showToast('Password must contain at least one uppercase letter', 'danger');
+      this.showToast(this.translate.instant('SETTINGS.PASSWORD_REQ_UPPERCASE'), 'danger');
       return;
     }
 
     if (!/[a-z]/.test(data.newPassword)) {
-      this.showToast('Password must contain at least one lowercase letter', 'danger');
+      this.showToast(this.translate.instant('SETTINGS.PASSWORD_REQ_LOWERCASE'), 'danger');
       return;
     }
 
     if (!/[0-9]/.test(data.newPassword)) {
-      this.showToast('Password must contain at least one number', 'danger');
+      this.showToast(this.translate.instant('SETTINGS.PASSWORD_REQ_NUMBER'), 'danger');
       return;
     }
 
     if (!/[^a-zA-Z0-9]/.test(data.newPassword)) {
-      this.showToast('Password must contain at least one special character', 'danger');
+      this.showToast(this.translate.instant('SETTINGS.PASSWORD_REQ_SPECIAL'), 'danger');
       return;
     }
 

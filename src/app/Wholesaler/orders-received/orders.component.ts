@@ -3,7 +3,8 @@ import { IonicModule, LoadingController, AlertController } from '@ionic/angular'
 import { FormsModule } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { addIcons } from 'ionicons';
 import {
   searchOutline, ellipsisVertical, menuOutline, closeOutline, chevronDownCircleOutline,
@@ -48,12 +49,14 @@ export class OrdersComponent implements OnInit, OnDestroy {
   selectedFilter = OrderFilter.DATE;
   searchTerm: string = '';
   isSearchVisible: boolean = false;
+  isLoading: boolean = false;
 
   orders: DisplayOrder[] = [];
   filteredOrders: DisplayOrder[] = [];
 
-  private subscriptions = new Subscription();
+  private destroy$ = new Subject<void>();
   private pollInterval: any;
+  private searchSubject = new Subject<string>();
 
   constructor(
     private wholesalerService: WholesalerApiService,
@@ -72,8 +75,22 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.setupSearchDebounce();
     this.checkAuthAndLoadData();
     this.startPolling();
+  }
+
+  /**
+   * Setup search input debounce to prevent excessive filtering
+   */
+  private setupSearchDebounce(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe((searchTerm: string) => {
+      this.performSearch(searchTerm);
+    });
   }
 
   /**
@@ -81,7 +98,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
    */
   ngOnDestroy() {
     this.stopPolling();
-    this.subscriptions.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private checkAuthAndLoadData(): void {
@@ -164,12 +182,18 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Filters orders based on search term
+   * Filters orders based on search term (delegates to debounced handler)
    * Searches across order ID, total amount, and item descriptions
    */
   handleSearch(event: any): void {
     const searchTerm = event?.target?.value?.toLowerCase() || '';
+    this.searchSubject.next(searchTerm);
+  }
 
+  /**
+   * Performs the actual search after debounce
+   */
+  private performSearch(searchTerm: string): void {
     if (!searchTerm.trim()) {
       this.filteredOrders = [...this.orders];
       return;
@@ -195,6 +219,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.isLoading = true;
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('ORDERS_RECEIVED.LOADING'),
       spinner: 'circular'
@@ -203,38 +228,40 @@ export class OrdersComponent implements OnInit, OnDestroy {
     try {
       await loading.present();
 
-      const subscription = this.wholesalerService.getOrderItemDetails().subscribe({
-        next: (data) => {
-          this.orders = data.map(order => ({
-            id: order.order_id,
-            items: this.formatOrderItems(order.order_items),
-            total: order.total_order_amount
-          }));
+      this.wholesalerService.getOrderItemDetails()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (data) => {
+            this.orders = data.map(order => ({
+              id: order.order_id,
+              items: this.formatOrderItems(order.order_items),
+              total: order.total_order_amount
+            }));
 
-          // Sort by order ID descending (most recent first)
-          this.orders.sort((a, b) => b.id - a.id);
+            // Sort by order ID descending (most recent first)
+            this.orders.sort((a, b) => b.id - a.id);
 
-          this.filteredOrders = [...this.orders];
-          loading.dismiss();
-        },
-        error: async (error) => {
-          await loading.dismiss();
+            this.filteredOrders = [...this.orders];
+            this.isLoading = false;
+            loading.dismiss();
+          },
+          error: async (error) => {
+            this.isLoading = false;
+            await loading.dismiss();
 
-          // Handle authentication errors
-          if (error?.status === 401) {
-            await this.showAuthError();
-            return;
+            // Handle authentication errors
+            if (error?.status === 401) {
+              await this.showAuthError();
+              return;
+            }
+
+            // Handle other errors
+            await this.showLoadError(error);
           }
-
-          // Handle other errors
-          await this.showLoadError(error);
-        }
-      });
-
-      this.subscriptions.add(subscription);
+        });
     } catch (err) {
+      this.isLoading = false;
       await loading.dismiss();
-      console.error('Unexpected error loading orders:', err);
 
       const alert = await this.alertCtrl.create({
         header: this.translate.instant('ORDERS_RECEIVED.ERROR'),
@@ -337,16 +364,16 @@ export class OrdersComponent implements OnInit, OnDestroy {
   async handleRefresh(event: any): Promise<void> {
     try {
       await this.loadOrders();
-    } catch (error) {
-      console.error('Error refreshing orders:', error);
     } finally {
       event?.target?.complete();
     }
   }
 
+  /**
+   * Navigates to order details page
+   */
   viewDetails(order: DisplayOrder): void {
     if (!order || !order.id) {
-      console.error('Invalid order data');
       return;
     }
 

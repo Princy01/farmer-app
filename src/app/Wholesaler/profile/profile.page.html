@@ -1,13 +1,13 @@
 <ion-header [translucent]="true">
   <ion-toolbar class="profile-toolbar">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button (click)="goBack()" [disabled]="isLoading">
         <ion-icon color="light" name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title>{{ 'PROFILE.TITLE' | translate }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button *ngIf="!isEditing" (click)="toggleEdit()">
+      <ion-button *ngIf="!isEditing" (click)="toggleEdit()" [disabled]="isLoading">
         <ion-icon color="light" name="create"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -36,7 +36,8 @@
             class="change-photo-btn"
             size="small"
             fill="solid"
-            (click)="changeProfileImage()">
+            (click)="changeProfileImage()"
+            [disabled]="isLoading">
             <ion-icon name="camera-outline" slot="start"></ion-icon>
             {{ 'PROFILE.CHANGE_PHOTO' | translate }}
           </ion-button>
@@ -47,8 +48,11 @@
           <ion-input
             *ngIf="isEditing"
             [(ngModel)]="profile.name"
+            (ngModelChange)="onProfileFieldChange()"
             placeholder="{{ 'PROFILE.NAME_PLACEHOLDER' | translate }}"
-            class="edit-input name-input">
+            class="edit-input name-input"
+            aria-label="Business name"
+            required>
           </ion-input>
 
           <div class="profile-status">
@@ -99,9 +103,12 @@
               <ion-input
                 *ngIf="isEditing"
                 [(ngModel)]="profile.email"
+                (ngModelChange)="onProfileFieldChange()"
                 type="email"
                 placeholder="{{ 'PROFILE.EMAIL_PLACEHOLDER' | translate }}"
-                class="edit-input">
+                class="edit-input"
+                aria-label="Email address"
+                required>
               </ion-input>
             </div>
 
@@ -115,9 +122,12 @@
               <ion-input
                 *ngIf="isEditing"
                 [(ngModel)]="profile.mobile"
+                (ngModelChange)="onProfileFieldChange()"
                 type="tel"
                 placeholder="{{ 'PROFILE.MOBILE_PLACEHOLDER' | translate }}"
-                class="edit-input">
+                class="edit-input"
+                aria-label="Mobile number"
+                required>
               </ion-input>
             </div>
 
@@ -131,9 +141,11 @@
               <ion-textarea
                 *ngIf="isEditing"
                 [(ngModel)]="profile.address"
+                (ngModelChange)="onProfileFieldChange()"
                 rows="3"
                 placeholder="{{ 'PROFILE.ADDRESS_PLACEHOLDER' | translate }}"
-                class="edit-input">
+                class="edit-input"
+                aria-label="Address">
               </ion-textarea>
             </div>
 
@@ -169,10 +181,12 @@
               <ion-input
                 *ngIf="isEditing"
                 [(ngModel)]="profile.pincode"
+                (ngModelChange)="onProfileFieldChange()"
                 type="text"
                 maxlength="6"
                 placeholder="{{ 'PROFILE.PINCODE_PLACEHOLDER' | translate }}"
-                class="edit-input">
+                class="edit-input"
+                aria-label="Pincode">
               </ion-input>
             </div>
           </div>
@@ -181,11 +195,11 @@
 
       <!-- Action Buttons -->
       <div class="action-buttons" *ngIf="isEditing">
-        <ion-button expand="block" (click)="saveProfile()" color="primary">
+        <ion-button expand="block" (click)="saveProfile()" color="primary" [disabled]="isLoading">
           <ion-icon name="save-outline" slot="start"></ion-icon>
           {{ 'PROFILE.SAVE' | translate }}
         </ion-button>
-        <ion-button expand="block" (click)="toggleEdit()" color="medium" fill="outline">
+        <ion-button expand="block" (click)="toggleEdit()" color="medium" fill="outline" [disabled]="isLoading">
           <ion-icon name="close-outline" slot="start"></ion-icon>
           {{ 'PROFILE.CANCEL' | translate }}
         </ion-button>

@@ -326,10 +326,10 @@
     <ion-button
       class="save-stock-btn"
       (click)="addStock()"
-      [disabled]="!isFormValid()"
+      [disabled]="!isFormValid() || isSubmitting"
     >
       <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-      {{ "ADD_STOCK.SAVE" | translate }}
+      {{ isSubmitting ? ('ADD_STOCK.SUBMITTING' | translate) : ('ADD_STOCK.SAVE' | translate) }}
     </ion-button>
   </div>
 </ion-footer>

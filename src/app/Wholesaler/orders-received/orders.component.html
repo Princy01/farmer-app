@@ -18,14 +18,14 @@
     </ion-searchbar>
 
     <ion-buttons slot="end">
-      <ion-button (click)="loadOrders()">
+      <ion-button (click)="loadOrders()" [disabled]="isLoading" aria-label="Refresh orders">
         <ion-icon
           name="refresh-outline"
           color="dark"
           slot="icon-only">
         </ion-icon>
       </ion-button>
-      <ion-button (click)="toggleSearch()">
+      <ion-button (click)="toggleSearch()" [disabled]="isLoading" aria-label="Toggle search">
         <ion-icon
           [name]="isSearchVisible ? 'close-outline' : 'search-outline'"
           color="dark"
@@ -36,7 +36,7 @@
   </ion-toolbar>
 
   <ion-toolbar class="filter-toolbar" mode="ios">
-    <ion-segment [value]="selectedFilter" (ionChange)="handleFilterChange($event)" scrollable>
+    <ion-segment [value]="selectedFilter" (ionChange)="handleFilterChange($event)" scrollable [attr.aria-label]="'Filter orders by ' + (selectedFilter | translate)">
       <ion-segment-button *ngFor="let filter of filterOptions" [value]="filter.value">
         <ion-label>{{ filter.name | translate }}</ion-label>
       </ion-segment-button>
@@ -80,6 +80,8 @@
                 fill="solid"
                 size="small"
                 class="view-details-btn"
+                [disabled]="isLoading"
+                [attr.aria-label]="'View details for order ' + order.id"
                 (click)="viewDetails(order)">
                 {{ 'ORDERS_RECEIVED.VIEW_DETAILS' | translate }}
                 <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>

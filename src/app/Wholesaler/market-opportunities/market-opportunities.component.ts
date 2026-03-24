@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
 import { ModalController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -9,8 +9,9 @@ import { Router } from '@angular/router';
 import { RetailerProductsModalComponent } from './retailer-products-modal/retailer-products-modal.component';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
 import { chevronBack, chevronForward } from 'ionicons/icons';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-market-opportunities',
@@ -19,7 +20,7 @@ import { chevronBack, chevronForward } from 'ionicons/icons';
   standalone: true,
   imports: [IonicModule, CommonModule, TranslatePipe]
 })
-export class MarketOpportunitiesComponent implements OnInit {
+export class MarketOpportunitiesComponent implements OnInit, OnDestroy {
   isLoading = false;
   error: string | null = null;
   bulkOrders: BulkOrder[] = [];
@@ -28,6 +29,8 @@ export class MarketOpportunitiesComponent implements OnInit {
   // Pagination
   currentPage = 1;
   itemsPerPage = 5;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private wholesalerService: WholesalerApiService,
@@ -44,6 +47,14 @@ export class MarketOpportunitiesComponent implements OnInit {
 
   ngOnInit() {
     this.checkAuthAndLoadData();
+  }
+
+  /**
+   * Cleanup subscriptions to prevent memory leaks
+   */
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private checkAuthAndLoadData() {
@@ -113,33 +124,30 @@ export class MarketOpportunitiesComponent implements OnInit {
       forkJoin({
         bulkOrders: this.wholesalerService.getBulkOrders(),
         topRetailers: this.wholesalerService.getTopRetailers()
-      }).subscribe({
-        next: (data) => {
-          this.bulkOrders = data.bulkOrders;
-          this.topRetailers = data.topRetailers;
-          console.log('Bulk orders loaded:', this.bulkOrders);
-          console.log('Top retailers loaded:', this.topRetailers);
-          this.isLoading = false;
-          loading.dismiss();
-        },
-        error: async (error) => {
-          console.error('Failed to load market opportunities:', error);
-          this.isLoading = false;
-          loading.dismiss();
+      }).pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (data) => {
+            this.bulkOrders = data.bulkOrders;
+            this.topRetailers = data.topRetailers;
+            this.isLoading = false;
+            loading.dismiss();
+          },
+          error: async (error) => {
+            this.isLoading = false;
+            loading.dismiss();
 
-          if (error.status === 401) {
-            await this.showAuthError();
-            return;
+            if (error.status === 401) {
+              await this.showAuthError();
+              return;
+            }
+
+            this.error = this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR');
+            this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR'));
           }
-
-          this.error = this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR');
-          this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR'));
-        }
-      });
+        });
     } catch (err) {
       this.isLoading = false;
       loading.dismiss();
-      console.error('Failed to load data:', err);
       this.error = this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR');
       this.showErrorToast(this.translate.instant('MARKET_OPPORTUNITIES.LOAD_ERROR'));
     }
@@ -168,7 +176,6 @@ export class MarketOpportunitiesComponent implements OnInit {
   }
 
   async openRetailerProductsModal(retailer: TopRetailer) {
-    console.log('Opening products modal for retailer:', retailer);
     const modal = await this.modalCtrl.create({
       component: RetailerProductsModalComponent,
       componentProps: { retailer },

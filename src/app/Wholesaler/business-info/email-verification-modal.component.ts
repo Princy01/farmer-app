@@ -299,6 +299,9 @@ export class EmailVerificationModalComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  /**
+   * Request email change with user-friendly error handling
+   */
   requestEmailChange(): void {
     if (this.emailForm.invalid) {
       this.emailForm.markAllAsTouched();
@@ -319,22 +322,61 @@ export class EmailVerificationModalComponent implements OnInit, OnDestroy {
         },
         error: async (err) => {
           this.isLoading = false;
-          const msg = err?.error?.error ?? 'WHOLESALER_BUSINESS_INFO.FAILED_TO_SEND_EMAIL';
-          await this.showToast(msg, 'danger', false);
+          const userMsg = this.getErrorMessage(err);
+          await this.showToast(userMsg, 'danger');
         },
       });
   }
 
-  closeModal(): void {
-    this.modalCtrl.dismiss();
+  /**
+   * Convert technical errors to user-friendly messages
+   */
+  private getErrorMessage(error: any): string {
+    if (!error) return 'WHOLESALER_BUSINESS_INFO.UNKNOWN_ERROR';
+
+    if (error.name === 'TimeoutError') {
+      return 'WHOLESALER_BUSINESS_INFO.REQUEST_TIMEOUT';
+    }
+    if (error.status === 0) {
+      return 'WHOLESALER_BUSINESS_INFO.NETWORK_ERROR';
+    }
+    if (error.status === 401) {
+      return 'WHOLESALER_BUSINESS_INFO.SESSION_EXPIRED';
+    }
+    if (error.status === 409) {
+      const detail = error?.error?.error ?? '';
+      if (detail.includes('already')) {
+        return 'WHOLESALER_BUSINESS_INFO.EMAIL_ALREADY_EXISTS';
+      }
+    }
+    if (error.status >= 500) {
+      return 'WHOLESALER_BUSINESS_INFO.SERVER_ERROR';
+    }
+
+    return error?.error?.error ?? 'WHOLESALER_BUSINESS_INFO.FAILED_TO_SEND_EMAIL';
   }
 
+  /**
+   * Close modal with optional success data
+   * @param emailUpdated Whether email was successfully updated
+   */
+  closeModal(emailUpdated = false): void {
+    this.modalCtrl.dismiss({ emailUpdated });
+  }
+
+  /**
+   * Display toast notification with auto-translation
+   */
   private async showToast(message: string, color: string, useTranslate = true) {
     const toast = await this.toastCtrl.create({
       message: useTranslate ? this.translate.instant(message) : message,
-      duration: 2500,
+      duration: color === 'success' ? 2500 : 3500,
       color,
       position: 'bottom',
+      buttons: [{
+        text: this.translate.instant('COMMON.DISMISS'),
+        role: 'cancel',
+      }],
     });
     await toast.present();
   }

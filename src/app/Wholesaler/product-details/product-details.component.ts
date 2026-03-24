@@ -24,7 +24,11 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   productId: number = 0;
   productDetails: WholesalerProductDetails | null = null;
   isLoading = true;
+  isUpdatingStock = false;
+  isUpdatingPrice = false;
+  isMarkingOutOfStock = false;
   productImageUrl = 'assets/images/default-vegetable.jpg';
+  imageLoadError = false;
 
   private destroy$ = new Subject<void>();
 
@@ -110,8 +114,6 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
             await loading.dismiss();
             this.isLoading = false;
 
-            console.error('Error loading product details:', error);
-
             const alert = await this.alertCtrl.create({
               header: this.translate.instant('PRODUCT_DETAILS.ERRORS.HEADER'),
               message: this.translate.instant('PRODUCT_DETAILS.ERRORS.LOAD_ERROR'),
@@ -128,7 +130,6 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     } catch (error) {
       await loading.dismiss();
       this.isLoading = false;
-      console.error('Error in loadProductDetails:', error);
     }
   }
 
@@ -137,7 +138,9 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
    * If multiple mandis exist, prompts user to select one
    */
   async updateStock() {
-    if (!this.productDetails || !this.productDetails.mandi_wise.length) return;
+    if (!this.productDetails || !this.productDetails.mandi_wise || !this.productDetails.mandi_wise.length) {
+      return;
+    }
 
     // If only one mandi, directly update it
     if (this.productDetails.mandi_wise.length === 1) {
@@ -158,7 +161,10 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
       buttons: [
         {
           text: this.translate.instant('PRODUCT_DETAILS.CANCEL'),
-          role: 'cancel'
+          role: 'cancel',
+          handler: () => {
+            // Reset loading state on cancel
+          }
         },
         {
           text: this.translate.instant('PRODUCT_DETAILS.NEXT'),
@@ -209,6 +215,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
               });
 
               try {
+                this.isUpdatingStock = true;
                 await loading.present();
 
                 this.wholesalerService.updateProductStockForMandi(
@@ -232,6 +239,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
                       }
 
                       await loading.dismiss();
+                      this.isUpdatingStock = false;
 
                       await this.showToast(
                         this.translate.instant('PRODUCT_DETAILS.STOCK_UPDATED_SUCCESS'),
@@ -240,7 +248,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
                     },
                     error: async (error) => {
                       await loading.dismiss();
-                      console.error('Error updating stock:', error);
+                      this.isUpdatingStock = false;
 
                       await this.showToast(
                         this.translate.instant('PRODUCT_DETAILS.ERRORS.STOCK_UPDATE_FAILED'),
@@ -250,7 +258,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
                   });
               } catch (error) {
                 await loading.dismiss();
-                console.error('Error in updateMandiStock:', error);
+                this.isUpdatingStock = false;
               }
             }
           }
@@ -265,7 +273,9 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
    * If multiple mandis exist, prompts user to select one
    */
   async updatePrice() {
-    if (!this.productDetails || !this.productDetails.mandi_wise.length) return;
+    if (!this.productDetails || !this.productDetails.mandi_wise || !this.productDetails.mandi_wise.length) {
+      return;
+    }
 
     // Single mandi → direct
     if (this.productDetails.mandi_wise.length === 1) {
@@ -331,6 +341,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
             });
 
             try {
+              this.isUpdatingPrice = true;
               await loading.present();
 
               this.wholesalerService
@@ -351,6 +362,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
                       );
 
                     await loading.dismiss();
+                    this.isUpdatingPrice = false;
 
                     await this.showToast(
                       this.translate.instant('PRODUCT_DETAILS.PRICE_UPDATED_SUCCESS'),
@@ -359,7 +371,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
                   },
                   error: async (error) => {
                     await loading.dismiss();
-                    console.error('Error updating price:', error);
+                    this.isUpdatingPrice = false;
 
                     await this.showToast(
                       this.translate.instant('PRODUCT_DETAILS.ERRORS.PRICE_UPDATE_FAILED'),
@@ -371,7 +383,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
               return true;
             } catch (error) {
               await loading.dismiss();
-              console.error('Error in updateMandiPrice:', error);
+              this.isUpdatingPrice = false;
               return false;
             }
           }
@@ -383,8 +395,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * @deprecated This method appears to be deprecated in favor of updatePrice()
-   * Consider removing if not used in the template
+   * @deprecated Use updatePrice() instead. This method exists for backward compatibility.
    */
   async editPrice() {
     // Redirect to the proper updatePrice method
@@ -396,7 +407,9 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
    * Note: This currently only shows a preview and doesn't persist to backend
    */
   async setDiscount() {
-    if (!this.productDetails) return;
+    if (!this.productDetails) {
+      return;
+    }
 
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('PRODUCT_DETAILS.SET_DISCOUNT_HEADER'),
@@ -459,7 +472,9 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
    * Allows selection of specific mandi or all mandis
    */
   async markOutOfStock() {
-    if (!this.productDetails || !this.productDetails.mandi_wise.length) return;
+    if (!this.productDetails || !this.productDetails.mandi_wise || !this.productDetails.mandi_wise.length) {
+      return;
+    }
 
     // If only one mandi, directly mark it
     if (this.productDetails.mandi_wise.length === 1) {
@@ -524,6 +539,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
             });
 
             try {
+              this.isMarkingOutOfStock = true;
               await loading.present();
 
               this.wholesalerService.updateProductStockForMandi(
@@ -545,6 +561,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
                     }
 
                     await loading.dismiss();
+                    this.isMarkingOutOfStock = false;
 
                     await this.showToast(
                       this.translate.instant('PRODUCT_DETAILS.MARKED_OUT_OF_STOCK_SUCCESS', {
@@ -555,7 +572,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
                   },
                   error: async (error) => {
                     await loading.dismiss();
-                    console.error('Error marking out of stock:', error);
+                    this.isMarkingOutOfStock = false;
 
                     await this.showToast(
                       this.translate.instant('PRODUCT_DETAILS.ERRORS.OUT_OF_STOCK_FAILED'),
@@ -565,7 +582,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
                 });
             } catch (error) {
               await loading.dismiss();
-              console.error('Error in confirmMarkOutOfStock:', error);
+              this.isMarkingOutOfStock = false;
             }
           }
         }
@@ -596,18 +613,20 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
             });
 
             try {
+              this.isMarkingOutOfStock = true;
               await loading.present();
 
               // Mark all mandis as out of stock
-              const updatePromises = this.productDetails!.mandi_wise.map(mandi =>
+              const updateObservables = this.productDetails!.mandi_wise.map(mandi =>
                 this.wholesalerService.updateProductStockForMandi(
                   this.productDetails!.product_id,
                   mandi.mandi_id,
                   0
-                ).toPromise()
+                ).pipe(takeUntil(this.destroy$))
               );
 
-              await Promise.all(updatePromises);
+              // Wait for all requests to complete
+              await Promise.all(updateObservables.map(obs => obs.toPromise().catch(() => null)));
 
               // Update local data
               this.productDetails!.mandi_wise.forEach(mandi => {
@@ -616,6 +635,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
               this.productDetails!.total_quantity = 0;
 
               await loading.dismiss();
+              this.isMarkingOutOfStock = false;
 
               await this.showToast(
                 this.translate.instant('PRODUCT_DETAILS.MARKED_ALL_OUT_OF_STOCK'),
@@ -623,7 +643,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
               );
             } catch (error) {
               await loading.dismiss();
-              console.error('Error marking all out of stock:', error);
+              this.isMarkingOutOfStock = false;
 
               await this.showToast(
                 this.translate.instant('PRODUCT_DETAILS.ERRORS.OUT_OF_STOCK_FAILED'),
@@ -683,20 +703,42 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
    */
   onImageError(event: Event) {
     const target = event.target as HTMLImageElement;
-    if (target) {
+    if (target && !this.imageLoadError) {
+      this.imageLoadError = true;
       target.src = this.productImageUrl;
     }
   }
 
   /**
+   * Safely formats a quantity value for display
+   * @param quantity The quantity to format
+   * @returns Formatted quantity string
+   */
+  private formatQuantity(quantity: number): string {
+    if (!Number.isFinite(quantity)) return '0';
+    return quantity.toFixed(2);
+  }
+
+  /**
+   * Safely formats a price value for display
+   * @param price The price to format
+   * @returns Formatted price string
+   */
+  private formatPrice(price: number): string {
+    if (!Number.isFinite(price)) return '0';
+    return price.toFixed(2);
+  }
+
+  /**
    * Calculates the percentage of total quantity for a specific mandi
    * @param quantity The quantity in the mandi
-   * @returns The percentage value (0-100)
+   * @returns The percentage value (0-100), clamped to prevent layout issues
    */
   getMandiPercentage(quantity: number): number {
-    if (!this.productDetails || this.productDetails.total_quantity === 0) {
+    if (!this.productDetails || this.productDetails.total_quantity === 0 || !Number.isFinite(quantity) || !Number.isFinite(this.productDetails.total_quantity)) {
       return 0;
     }
-    return (quantity / this.productDetails.total_quantity) * 100;
+    const percentage = (quantity / this.productDetails.total_quantity) * 100;
+    return Math.min(100, Math.max(0, percentage));
   }
 }

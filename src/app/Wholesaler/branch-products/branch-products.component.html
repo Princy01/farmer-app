@@ -12,6 +12,12 @@
 </ion-header>
 
 <ion-content class="products-content">
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>{{ "PRODUCTS_IN_BRANCH.LOADING" | translate }}</p>
+  </div>
+
   <!-- Header Section -->
   <div class="content-header">
     <ion-card class="modern-card header-card">
@@ -28,7 +34,7 @@
             </p>
           </div>
         </div>
-        <ion-button class="add-product-btn" (click)="addProduct()">
+        <ion-button class="add-product-btn" (click)="addProduct()" [disabled]="isLoading">
           <ion-icon name="add-outline" slot="start"></ion-icon>
           {{ "PRODUCTS_IN_BRANCH.ADD_PRODUCT" | translate }}
         </ion-button>
@@ -43,6 +49,7 @@
         [(ngModel)]="searchTerm"
         [placeholder]="'PRODUCTS_IN_BRANCH.SEARCH_PLACEHOLDER' | translate"
         class="custom-searchbar"
+        [disabled]="isLoading"
       ></ion-searchbar>
     </div>
   </div>
@@ -78,7 +85,6 @@
             </div>
             <div class="product-info">
               <h3 class="product-name">{{ product.name }}</h3>
-              <!-- Removed unit_name from here -->
             </div>
           </div>
 
@@ -115,6 +121,7 @@
               expand="block"
               class="remove-btn"
               (click)="removeProduct(i)"
+              [disabled]="isRemoving || isLoading"
             >
               <ion-icon name="trash-outline" slot="start"></ion-icon>
               {{ "PRODUCTS_IN_BRANCH.REMOVE" | translate }}
@@ -125,7 +132,7 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="filteredProducts().length === 0" class="empty-state">
+    <div *ngIf="filteredProducts().length === 0 && !isLoading" class="empty-state">
       <div class="empty-icon-container">
         <ion-icon name="cube-outline" class="empty-icon"></ion-icon>
       </div>
@@ -135,7 +142,7 @@
       <p class="empty-text">
         {{ "PRODUCTS_IN_BRANCH.NO_PRODUCTS" | translate }}
       </p>
-      <ion-button class="add-first-btn" (click)="addProduct()">
+      <ion-button class="add-first-btn" (click)="addProduct()" [disabled]="isLoading">
         <ion-icon name="add-outline" slot="start"></ion-icon>
         {{ "PRODUCTS_IN_BRANCH.ADD_FIRST_PRODUCT" | translate }}
       </ion-button>

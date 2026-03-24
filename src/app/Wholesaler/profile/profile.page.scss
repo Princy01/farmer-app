@@ -3,6 +3,14 @@
   --color: white;
   --border-color: transparent;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+
+  ion-button {
+    &:focus-visible {
+      outline: 2px solid white;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  }
 }
 
 .profile-container {
@@ -85,6 +93,9 @@
     font-weight: 700;
     color: var(--ion-color-dark);
     margin: 0 0 0.5rem 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 
   .name-input {
@@ -96,6 +107,11 @@
     font-weight: 600;
     text-align: center;
     margin-bottom: 0.5rem;
+
+    &:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
   }
 
   .profile-status {
@@ -110,6 +126,7 @@
 
     ion-icon {
       font-size: 1.1rem;
+      flex-shrink: 0;
     }
 
     span {
@@ -212,6 +229,7 @@
     ion-icon {
       font-size: 1rem;
       color: #667eea;
+      flex-shrink: 0;
     }
   }
 
@@ -220,6 +238,9 @@
     color: var(--ion-color-dark);
     line-height: 1.5;
     padding-left: 1.5rem;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 }
 
@@ -235,6 +256,19 @@
   &:focus-within {
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+
+  &:invalid {
+    border-color: #ff6b6b;
+
+    &:focus-within {
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 }
 
@@ -250,6 +284,20 @@
     --border-radius: 12px;
     font-weight: 600;
     height: 48px;
+    min-width: 44px;
+
+    &:focus-visible {
+      outline: 2px solid #667eea;
+      outline-offset: 2px;
+    }
+
+    &[disabled] {
+      opacity: 0.6;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 }
 

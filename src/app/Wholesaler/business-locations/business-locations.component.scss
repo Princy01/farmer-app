@@ -1,9 +1,23 @@
+/* CSS Variables for Theming */
+:host {
+  --primary-color: #667eea;
+  --primary-dark: #764ba2;
+  --success-color: #28c76f;
+  --danger-color: #f56565;
+  --light-bg: #f8f9fa;
+  --card-bg: white;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 2px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 24px rgba(102, 126, 234, 0.15);
+  --focus-outline: 2px solid rgba(102, 126, 234, 0.5);
+}
+
 .business-locations-content {
-  --background: #f8f9fa;
+  --background: var(--light-bg);
 }
 
 .business-locations-toolbar {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   --color: white;
   --border-color: transparent;
   --padding-start: 16px;
@@ -39,7 +53,7 @@
 .add-location-card {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   margin: 0 0 1.5rem 0;
   overflow: visible;
 }
@@ -55,7 +69,7 @@
 
 .add-header-icon {
   font-size: 1.5rem;
-  color: #667eea;
+  color: var(--primary-color);
 }
 
 .add-card-title {
@@ -70,7 +84,7 @@
 }
 
 .add-location-btn {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   --color: white;
   --border-radius: 12px;
   --box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
@@ -98,7 +112,7 @@
 .locations-card {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   margin: 0;
   overflow: visible;
 }
@@ -120,7 +134,7 @@
 
 .header-icon {
   font-size: 1.5rem;
-  color: #667eea;
+  color: var(--primary-color);
 }
 
 .card-title {
@@ -147,16 +161,17 @@
 .location-card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
   border: 1px solid rgba(102, 126, 234, 0.1);
   margin: 0 0 1rem 0;
   transition: all 0.3s ease;
   overflow: hidden;
+  animation: scaleIn 0.4s ease-out;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 24px rgba(102, 126, 234, 0.15);
-    border-color: #667eea;
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
   }
 }
 
@@ -177,7 +192,7 @@
 }
 
 .location-icon {
-  color: #667eea;
+  color: var(--primary-color);
   font-size: 1.2rem;
 }
 
@@ -239,23 +254,23 @@
   font-weight: 600;
 
   &.active {
-    background: rgba(40, 199, 111, 0.1);
-    color: var(--ion-color-success);
+    background: rgba(40, 199, 111, 0.15);
+    color: #1a7a3a;
   }
 
   &.inactive {
-    background: rgba(245, 101, 101, 0.1);
-    color: #f56565;
+    background: rgba(245, 65, 65, 0.15);
+    color: #c53030;
   }
 
   &.privileged {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+    background: rgba(102, 126, 234, 0.15);
+    color: #4c2f7a;
   }
 
   &.not-privileged {
-    background: rgba(136, 136, 136, 0.1);
-    color: var(--ion-color-medium);
+    background: rgba(100, 100, 100, 0.15);
+    color: #333333;
   }
 }
 
@@ -274,8 +289,8 @@
     transition: all 0.3s ease;
 
     &.view-btn {
-      --color: #667eea;
-      --border-color: #667eea;
+      --color: var(--primary-color);
+      --border-color: var(--primary-color);
       --background-activated: rgba(102, 126, 234, 0.1);
 
       &:hover {
@@ -285,7 +300,7 @@
     }
 
     &.modify-btn {
-      --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
       --color: white;
       --box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 
@@ -303,11 +318,11 @@
   padding: 4rem 2rem;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   margin: 1rem 0;
 
   ion-spinner {
-    --color: #667eea;
+    --color: var(--primary-color);
     margin-bottom: 1rem;
   }
 
@@ -324,7 +339,7 @@
   padding: 4rem 2rem;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   margin: 1rem 0;
 
   .no-locations-icon {
@@ -378,24 +393,23 @@
   animation: fadeInUp 0.6s ease-out;
 }
 
-.location-card {
-  animation: scaleIn 0.4s ease-out;
-  animation-fill-mode: both;
-}
-
 .location-card:nth-child(1) { animation-delay: 0.1s; }
 .location-card:nth-child(2) { animation-delay: 0.2s; }
 .location-card:nth-child(3) { animation-delay: 0.3s; }
 .location-card:nth-child(4) { animation-delay: 0.4s; }
+.location-card:nth-child(5) { animation-delay: 0.5s; }
+.location-card:nth-child(6) { animation-delay: 0.6s; }
+.location-card:nth-child(7) { animation-delay: 0.7s; }
+.location-card:nth-child(n+8) { animation-delay: 0.8s; }
 
 /* Focus States */
 .add-location-btn:focus-visible {
-  outline: 2px solid rgba(102, 126, 234, 0.5);
+  outline: var(--focus-outline);
   outline-offset: 2px;
 }
 
 .action-buttons ion-button:focus-visible {
-  outline: 2px solid rgba(102, 126, 234, 0.5);
+  outline: var(--focus-outline);
   outline-offset: 2px;
 }
 
@@ -432,5 +446,52 @@
   .detail-row {
     flex-direction: column;
     gap: 0.5rem;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :host {
+    --light-bg: #1a1a2e;
+    --card-bg: #16212e;
+  }
+
+  .business-locations-content {
+    --background: var(--light-bg);
+  }
+
+  .add-location-card,
+  .locations-card,
+  .location-card,
+  .loading-container,
+  .no-locations {
+    background: var(--card-bg);
+  }
+
+  .location-details,
+  .detail-row {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .card-title,
+  .location-card-title,
+  .add-card-title,
+  .detail-label,
+  .no-locations h2 {
+    color: #ffffff;
+  }
+
+  .detail-value,
+  .loading-text,
+  .no-locations p {
+    color: #b0b0b0;
+  }
+
+  .no-locations-icon {
+    color: rgba(102, 126, 234, 0.2);
+  }
+
+  .back-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
   }
 }

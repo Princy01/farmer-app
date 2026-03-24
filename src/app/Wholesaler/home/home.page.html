@@ -12,17 +12,18 @@
       <ion-button
         (click)="openLanguagePopover($event)"
         class="header-btn language-btn"
+        [disabled]="isLoading"
       >
         <ion-icon name="language-outline" slot="end"></ion-icon>
         <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
       </ion-button>
-      <ion-button (click)="openNotifications()">
+      <ion-button (click)="openNotifications()" [disabled]="isLoading">
         <ion-badge *ngIf="notifications > 0" class="custom-badge">
           {{ notifications }}
         </ion-badge>
         <ion-icon name="notifications-outline" slot="icon-only"></ion-icon>
       </ion-button>
-      <ion-button (click)="openTrends()">
+      <ion-button (click)="openTrends()" [disabled]="isLoading">
         <ion-icon name="stats-chart-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -136,20 +137,21 @@
         [placeholder]="'WHOLESALER_HOME.Search items...' | translate"
         (ionInput)="searchItems($event)"
         mode="ios"
+        [disabled]="isSearching"
       ></ion-searchbar>
-      <ion-button (click)="refreshItems()" fill="solid" color="light">
+      <ion-button (click)="refreshItems()" fill="solid" color="light" [disabled]="isLoading || isSearching">
         <ion-icon name="reload-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </div>
 
     <!-- Loading State -->
-    <div *ngIf="isLoading && items.length === 0" class="loading-state">
+    <div *ngIf="(isLoading || isSearching) && items.length === 0" class="loading-state">
       <ion-spinner name="circular"></ion-spinner>
       <p>{{ 'WHOLESALER_HOME.Loading products...' | translate }}</p>
     </div>
 
     <!-- Product List -->
-    <ion-list *ngIf="!isLoading || items.length > 0">
+    <ion-list *ngIf="(!isLoading && !isSearching) || items.length > 0">
       <ion-item
         *ngFor="let item of filteredItems"
         lines="none"
@@ -162,7 +164,7 @@
         <ion-label>
           <h2>{{ item.product_name }}</h2>
           <p>
-            {{ 'WHOLESALER_HOME.Total Stock' | translate }}: {{ item.total_stock | number:'1.0-2' }} KG
+            {{ 'WHOLESALER_HOME.Total Stock' | translate }}: {{ item.total_stock | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
           </p>
           <p>
             {{ 'WHOLESALER_HOME.Total Orders' | translate }}: {{ item.total_orders }}
@@ -174,7 +176,7 @@
 
     <div
       class="empty-state"
-      *ngIf="!isLoading && filteredItems.length === 0"
+      *ngIf="!isLoading && !isSearching && filteredItems.length === 0"
     >
       <ion-icon name="search-outline"></ion-icon>
       <h3>{{ 'WHOLESALER_HOME.No items found' | translate }}</h3>

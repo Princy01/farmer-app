@@ -19,7 +19,7 @@
         <div class="filter-row">
           <ion-icon name="calendar" class="filter-icon"></ion-icon>
           <ion-label>{{ 'RESTOCK_RECS.TIME_PERIOD' | translate }}</ion-label>
-          <ion-select [(ngModel)]="daysBack" (ionChange)="onDaysBackChange()" interface="popover" class="days-select">
+          <ion-select [(ngModel)]="daysBack" (ionChange)="onDaysBackChange()" [disabled]="isLoading" interface="popover" class="days-select">
             <ion-select-option *ngFor="let option of filterOptions" [value]="option.value">
               {{ option.label | translate }}
             </ion-select-option>

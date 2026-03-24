@@ -1,18 +1,19 @@
 <ion-header mode="ios">
   <ion-toolbar class="business-info-toolbar">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()" class="back-btn">
+      <ion-button (click)="goBack()" class="back-btn" aria-label="Go back">
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title class="page-title">{{ 'WHOLESALER_BUSINESS_INFO.Business Info' | translate }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button *ngIf="!isEditMode" (click)="enableEdit()" class="edit-btn">
+      <ion-button *ngIf="!isEditMode && !isLoading" (click)="enableEdit()" class="edit-btn" aria-label="Edit business info">
         <ion-icon slot="icon-only" name="create"></ion-icon>
       </ion-button>
-      <ion-button *ngIf="isEditMode" (click)="cancelEdit()" class="cancel-btn" color="medium">
+      <ion-button *ngIf="isEditMode" (click)="cancelEdit()" class="cancel-btn" color="medium" aria-label="Cancel editing">
         <ion-icon slot="icon-only" name="close"></ion-icon>
       </ion-button>
+      <ion-spinner *ngIf="isLoading" name="crescent" class="header-spinner"></ion-spinner>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -73,7 +74,7 @@
             </ion-item>
             <ion-item [class.ion-invalid]="form.get('address')?.invalid && form.get('address')?.touched">
               <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Address' | translate }}</ion-label>
-              <ion-textarea formControlName="address" [readonly]="!isEditMode"></ion-textarea>
+              <ion-textarea formControlName="address" [readonly]="!isEditMode" maxlength="500" rows="3"></ion-textarea>
             </ion-item>
           </ion-list>
           <div class="error-message" *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
@@ -82,6 +83,9 @@
             </span>
             <span *ngIf="form.get('address')?.errors?.['minlength']">
               {{ 'WHOLESALER_BUSINESS_REGISTRATION.Address must be at least 5 characters' | translate }}
+            </span>
+            <span *ngIf="form.get('address')?.errors?.['maxlength']">
+              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Address cannot exceed 500 characters' | translate }}
             </span>
           </div>
         </div>
@@ -97,10 +101,11 @@
               <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Mobile Number' | translate }}</ion-label>
               <ion-input formControlName="mobile_number" type="tel" readonly></ion-input>
             </ion-item>
-            <ion-item button="true" (click)="openEmailVerificationModal()" class="editable-item">
+            <ion-item button="true" (click)="openEmailVerificationModal()" class="editable-item" [class.disabled]="isLoading">
               <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Email' | translate }}</ion-label>
               <ion-input formControlName="email" type="email" readonly></ion-input>
-              <ion-icon name="create" slot="end" class="edit-icon"></ion-icon>
+              <ion-icon name="create" slot="end" class="edit-icon" *ngIf="!isLoading"></ion-icon>
+              <ion-spinner slot="end" *ngIf="isLoading" name="crescent"></ion-spinner>
             </ion-item>
           </ion-list>
           <p class="helper-text">
@@ -135,9 +140,11 @@
           </div>
         </div>
 
-        <div class="form-actions" *ngIf="isEditMode">
-          <ion-button expand="block" type="submit" [disabled]="form.invalid">
-            <ion-icon name="save" slot="start"></ion-icon>
+        <!-- Form Actions -->
+        <div *ngIf="isEditMode" class="form-actions">
+          <ion-button expand="block" type="submit" [disabled]="form.invalid || isLoading" class="submit-btn">
+            <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
+            <ion-icon *ngIf="!isLoading" name="save" slot="start"></ion-icon>
             {{ 'WHOLESALER_BUSINESS_INFO.Save Changes' | translate }}
           </ion-button>
         </div>

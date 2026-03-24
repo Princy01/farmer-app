@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, of } from 'rxjs';
+import { catchError, timeout, retryWhen, concatMap, finalize, shareReplay } from 'rxjs/operators';
+import { timer } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface WholesalerOrderItem {
@@ -71,6 +72,12 @@ export interface OrderStatus {
 })
 export class WholesalerOrderService {
   private apiUrl = environment.apiUrl;
+  private statusesCache: OrderStatus[] | null = null;
+  private statusesCacheExpiry: number = 0;
+  private statusesObservableCache: Observable<OrderStatus[]> | null = null;
+  private readonly CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+  private readonly HTTP_TIMEOUT_MS = 30000; // 30 seconds
+  private readonly MAX_RETRIES = 3;
 
   constructor(private http: HttpClient) { }
 
@@ -80,22 +87,163 @@ export class WholesalerOrderService {
       params = params.set('status', status.join(','));
     }
     return this.http.get<WholesalerOrderSummary[]>(`${this.apiUrl}/GetWholesalerOrders`, { params })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        timeout(this.HTTP_TIMEOUT_MS),
+        retryWhen(errors => errors.pipe(
+          concatMap((err, idx) => {
+            if (idx < this.MAX_RETRIES && this.isRetryableError(err)) {
+              const delay = Math.pow(2, idx) * 1000;
+              return timer(delay);
+            }
+            return throwError(() => err);
+          })
+        )),
+        catchError(err => this.handleError(err))
+      );
   }
 
   getWholesalerOrderDetails(id: number): Observable<WholesalerOrderDetails> {
+    if (!id || id <= 0) {
+      return throwError(() => ({
+        message: 'PICKUP_ORDERS.ERRORS.INVALID_ORDER_ID',
+        status: 400
+      }));
+    }
+
     return this.http.get<WholesalerOrderDetails>(`${this.apiUrl}/GetWholesalerOrders/${id}`)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        timeout(this.HTTP_TIMEOUT_MS),
+        retryWhen(errors => errors.pipe(
+          concatMap((err, idx) => {
+            if (idx < this.MAX_RETRIES && this.isRetryableError(err)) {
+              const delay = Math.pow(2, idx) * 1000;
+              return timer(delay);
+            }
+            return throwError(() => err);
+          })
+        )),
+        catchError(err => this.handleError(err))
+      );
   }
 
   generatePickupOtp(orderId: number): Observable<PickupOTP> {
-    return this.http.post<PickupOTP>(`${this.apiUrl}/transportation/delivery/generate-pickup-otp`, { order_id: orderId })
-      .pipe(catchError(this.handleError));
+    if (!orderId || orderId <= 0) {
+      return throwError(() => ({
+        message: 'PICKUP_ORDERS.ERRORS.INVALID_ORDER_ID',
+        status: 400
+      }));
+    }
+
+    return this.http.post<PickupOTP>(
+      `${this.apiUrl}/transportation/delivery/generate-pickup-otp`,
+      { order_id: orderId }
+    )
+      .pipe(
+        timeout(this.HTTP_TIMEOUT_MS),
+        retryWhen(errors => errors.pipe(
+          concatMap((err, idx) => {
+            // Only retry on network/timeout errors, not on 4xx/5xx application errors
+            if (idx < this.MAX_RETRIES && this.isRetryableError(err)) {
+              const delay = Math.pow(2, idx) * 1000;
+              return timer(delay);
+            }
+            return throwError(() => err);
+          })
+        )),
+        catchError(err => this.handleError(err))
+      );
   }
 
   getOrderStatuses(): Observable<OrderStatus[]> {
-    return this.http.get<OrderStatus[]>(`${this.apiUrl}/GetWholesalerOrderStatuses`)
-      .pipe(catchError(this.handleError));
+    // Return cached data if available and not expired
+    if (this.statusesCache && this.statusesCacheExpiry > Date.now()) {
+      return of(this.statusesCache);
+    }
+
+    // Return cached observable if request is already in progress
+    if (this.statusesObservableCache) {
+      return this.statusesObservableCache;
+    }
+
+    // Create and cache the observable for this request
+    this.statusesObservableCache = this.http.get<OrderStatus[]>(`${this.apiUrl}/GetWholesalerOrderStatuses`)
+      .pipe(
+        timeout(this.HTTP_TIMEOUT_MS),
+        retryWhen(errors => errors.pipe(
+          concatMap((err, idx) => {
+            if (idx < this.MAX_RETRIES && this.isRetryableError(err)) {
+              const delay = Math.pow(2, idx) * 1000;
+              return timer(delay);
+            }
+            return throwError(() => err);
+          })
+        )),
+        finalize(() => {
+          // Clear request cache when request completes
+          this.statusesObservableCache = null;
+        }),
+        catchError(err => {
+          // Clear observable cache on error
+          this.statusesObservableCache = null;
+          return this.handleError(err);
+        }),
+        shareReplay(1), // Share the observable and replay the last value for new subscribers
+      );
+
+    return this.statusesObservableCache;
+  }
+
+  /**
+   * Determines if an error is retryable (network/timeout errors).
+   * Does NOT retry application errors (4xx, 5xx from server).
+   * @param error The error to check
+   * @returns true if the error is retryable
+   */
+  private isRetryableError(error: any): boolean {
+    // Retry on timeout errors
+    if (error.name === 'TimeoutError') {
+      return true;
+    }
+
+    // Retry on network errors (no response at all)
+    if (error instanceof HttpErrorResponse && error.status === 0) {
+      return true;
+    }
+
+    // Retry on 5xx server errors (server is overloaded or crashed)
+    if (error instanceof HttpErrorResponse && error.status >= 500) {
+      return true;
+    }
+
+    // Do NOT retry on 4xx client errors (bad request, auth, etc.)
+    return false;
+  }
+
+  /**
+   * Cache the order statuses response
+   * @param statuses The order statuses to cache
+   */
+  private cacheOrderStatuses(statuses: OrderStatus[]): void {
+    this.statusesCache = statuses;
+    this.statusesCacheExpiry = Date.now() + this.CACHE_DURATION_MS;
+  }
+
+  /**
+   * Clears all cached data from the service.
+   * Should be called on user logout to prevent stale data.
+   */
+  clearCache(): void {
+    this.statusesCache = null;
+    this.statusesCacheExpiry = 0;
+    this.statusesObservableCache = null;
+  }
+
+  /**
+   * Pre-fetches order statuses for better UX
+   * Can be called on app initialization
+   */
+  prefetchOrderStatuses(): Observable<OrderStatus[]> {
+    return this.getOrderStatuses();
   }
 
   /**
@@ -103,22 +251,31 @@ export class WholesalerOrderService {
    * @param error The HTTP error response
    * @returns An observable that throws an error with a user-friendly message
    */
-  private handleError(error: HttpErrorResponse) {
+  private handleError(error: any) {
     let errorMessage = 'PICKUP_ORDERS.ERRORS.GENERIC';
+    let status = 0;
+
+    // Handle timeout errors
+    if (error.name === 'TimeoutError') {
+      errorMessage = 'PICKUP_ORDERS.ERRORS.TIMEOUT';
+      status = 0;
+      return throwError(() => ({ message: errorMessage, status }));
+    }
 
     if (error.error instanceof ErrorEvent) {
       // Client-side or network error
-      console.error('Client error occurred:', error.error.message);
       errorMessage = 'PICKUP_ORDERS.ERRORS.NETWORK';
-    } else {
+      status = 0;
+    } else if (error instanceof HttpErrorResponse) {
       // Backend returned an unsuccessful response code
-      console.error(
-        `Backend returned code ${error.status}, ` +
-        `body was:`, error.error
-      );
+      status = error.status;
 
       // Map specific HTTP status codes to appropriate error messages
       switch (error.status) {
+        case 0:
+          // Network error - no response from server
+          errorMessage = 'PICKUP_ORDERS.ERRORS.NETWORK';
+          break;
         case 400:
           errorMessage = error.error?.message || 'PICKUP_ORDERS.ERRORS.BAD_REQUEST';
           break;
@@ -131,14 +288,23 @@ export class WholesalerOrderService {
         case 404:
           errorMessage = 'PICKUP_ORDERS.ERRORS.NOT_FOUND';
           break;
+        case 429:
+          errorMessage = 'PICKUP_ORDERS.ERRORS.RATE_LIMITED';
+          break;
         case 500:
+        case 502:
+        case 503:
+        case 504:
           errorMessage = 'PICKUP_ORDERS.ERRORS.SERVER';
           break;
         default:
           errorMessage = error.error?.message || 'PICKUP_ORDERS.ERRORS.GENERIC';
       }
+    } else {
+      // Unknown error type
+      errorMessage = 'PICKUP_ORDERS.ERRORS.GENERIC';
     }
 
-    return throwError(() => ({ message: errorMessage, status: error.status }));
+    return throwError(() => ({ message: errorMessage, status }));
   }
 }

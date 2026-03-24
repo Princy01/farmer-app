@@ -211,7 +211,6 @@ ion-list {
   }
 }
 
-// Refresher
 ion-refresher {
   ion-refresher-content {
     --spinner-color: #667eea;
@@ -219,7 +218,6 @@ ion-refresher {
   }
 }
 
-// Infinite Scroll
 ion-infinite-scroll {
   ion-infinite-scroll-content {
     --spinner-color: #667eea;
@@ -227,7 +225,6 @@ ion-infinite-scroll {
   }
 }
 
-// Empty State
 .empty-state {
   display: flex;
   flex-direction: column;

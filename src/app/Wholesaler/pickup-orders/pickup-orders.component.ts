@@ -42,6 +42,7 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
   orders: PickupOrder[] = [];
   groupedOrders: { date: string, orders: PickupOrder[] }[] = [];
   otpVisible: { [orderId: string]: boolean } = {};
+  otpLoading: { [orderId: string]: boolean } = {};
   viewMode: 'list' | 'details' = 'list';
   selectedOrderDetails: WholesalerOrderDetails | null = null;
   orderStatuses: OrderStatus[] = [];
@@ -108,24 +109,23 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: async (data) => {
-            this.orderStatuses = data;
-            this.selectedStatuses = data.map(s => s.order_status_id);
+            this.orderStatuses = data || [];
+            this.selectedStatuses = (data || []).map(s => s.order_status_id);
             await loading.dismiss();
             await this.loadOrders();
           },
           error: async (err) => {
-            console.error('Failed to load order statuses:', err);
             await loading.dismiss();
             this.hasError = true;
             await this.showError(
               this.translate.instant('PICKUP_ORDERS.ERRORS.LOAD_STATUSES_FAILED'),
-              err.message || 'PICKUP_ORDERS.ERRORS.GENERIC'
+              err?.message || 'PICKUP_ORDERS.ERRORS.GENERIC'
             );
           }
         });
     } catch (error) {
       await loading.dismiss();
-      console.error('Error in loadOrderStatuses:', error);
+      this.hasError = true;
     }
   }
 
@@ -153,7 +153,7 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: async (data) => {
-            this.orders = data.map(order => ({
+            this.orders = (data || []).map(order => ({
               ...order,
               totalWeight: `${order.total_quantity} ${this.translate.instant('PICKUP_ORDERS.KG')}`,
               driverName: this.translate.instant('PICKUP_ORDERS.NOT_ASSIGNED'),
@@ -164,25 +164,24 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
             await loading.dismiss();
             this.isLoading = false;
 
-            if (data.length === 0) {
+            if (data && data.length === 0) {
               await this.showToast(this.translate.instant('PICKUP_ORDERS.NO_ORDERS'));
             }
           },
           error: async (err) => {
-            console.error('Failed to load orders:', err);
             await loading.dismiss();
             this.isLoading = false;
             this.hasError = true;
             await this.showError(
               this.translate.instant('PICKUP_ORDERS.ERRORS.LOAD_ORDERS_FAILED'),
-              this.translate.instant(err.message) || this.translate.instant('PICKUP_ORDERS.ERRORS.GENERIC')
+              this.translate.instant(err?.message) || this.translate.instant('PICKUP_ORDERS.ERRORS.GENERIC')
             );
           }
         });
     } catch (error) {
       await loading.dismiss();
       this.isLoading = false;
-      console.error('Error in loadOrders:', error);
+      this.hasError = true;
     }
   }
 
@@ -248,7 +247,11 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
    * Loads and displays detailed information for a specific order
    * @param order The order to view details for
    */
-  async viewOrderDetails(order: PickupOrder) {
+  async viewOrderDetails(order: PickupOrder | null) {
+    if (!order || !order.order_id) {
+      return;
+    }
+
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('PICKUP_ORDERS.LOADING_DETAILS'),
       spinner: 'circular'
@@ -261,23 +264,29 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: async (data) => {
+            if (!data) {
+              await loading.dismiss();
+              await this.showError(
+                this.translate.instant('PICKUP_ORDERS.ERRORS.LOAD_DETAILS_FAILED'),
+                this.translate.instant('PICKUP_ORDERS.ERRORS.GENERIC')
+              );
+              return;
+            }
             this.selectedOrderDetails = data;
             this.selectedOrder = order;
             this.viewMode = 'details';
             await loading.dismiss();
           },
           error: async (err) => {
-            console.error('Failed to load order details:', err);
             await loading.dismiss();
             await this.showError(
               this.translate.instant('PICKUP_ORDERS.ERRORS.LOAD_DETAILS_FAILED'),
-              this.translate.instant(err.message) || this.translate.instant('PICKUP_ORDERS.ERRORS.GENERIC')
+              this.translate.instant(err?.message) || this.translate.instant('PICKUP_ORDERS.ERRORS.GENERIC')
             );
           }
         });
     } catch (error) {
       await loading.dismiss();
-      console.error('Error in viewOrderDetails:', error);
     }
   }
 
@@ -294,7 +303,11 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
    * Generates a pickup OTP for the specified order
    * @param order The order to generate OTP for
    */
-  async generateOtp(order: PickupOrder, event?: Event) {
+  async generateOtp(order: PickupOrder | null, event?: Event) {
+    if (!order || !order.order_id) {
+      return;
+    }
+
     if (event) {
       event.stopPropagation();
     }
@@ -306,39 +319,42 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
       );
       return;
     }
-    const loading = await this.loadingCtrl.create({
-      message: this.translate.instant('PICKUP_ORDERS.GENERATING_OTP'),
-      spinner: 'circular'
-    });
+
+    // Mark this order as loading
+    this.otpLoading[order.order_id.toString()] = true;
 
     try {
-      await loading.present();
-
       this.orderService.generatePickupOtp(order.order_id)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: async (data) => {
+            if (!data || !data.otp_code) {
+              this.otpLoading[order.order_id.toString()] = false;
+              await this.showError(
+                this.translate.instant('PICKUP_ORDERS.ERRORS.GENERATE_OTP_FAILED'),
+                this.translate.instant('PICKUP_ORDERS.ERRORS.GENERIC')
+              );
+              return;
+            }
             order.otp = data.otp_code;
             order.order_status = 'otp_generated';
             this.otpVisible[order.order_id.toString()] = false;
-            await loading.dismiss();
+            this.otpLoading[order.order_id.toString()] = false;
             await this.showToast(
               this.translate.instant('PICKUP_ORDERS.OTP_GENERATED_SUCCESS'),
               'success'
             );
           },
           error: async (err) => {
-            console.error('Failed to generate OTP:', err);
-            await loading.dismiss();
+            this.otpLoading[order.order_id.toString()] = false;
             await this.showError(
               this.translate.instant('PICKUP_ORDERS.ERRORS.GENERATE_OTP_FAILED'),
-              this.translate.instant(err.message) || this.translate.instant('PICKUP_ORDERS.ERRORS.GENERIC')
+              this.translate.instant(err?.message) || this.translate.instant('PICKUP_ORDERS.ERRORS.GENERIC')
             );
           }
         });
     } catch (error) {
-      await loading.dismiss();
-      console.error('Error in generateOtp:', error);
+      this.otpLoading[order.order_id.toString()] = false;
     }
   }
 
@@ -355,7 +371,10 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
    * Toggles OTP visibility for a specific order
    * @param order The order to toggle OTP visibility for
    */
-  toggleOtpVisibility(order: PickupOrder, event?: Event) {
+  toggleOtpVisibility(order: PickupOrder | null, event?: Event) {
+    if (!order || !order.order_id) {
+      return;
+    }
     if (event) {
       event.stopPropagation();
     }
@@ -367,7 +386,10 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
    * Hides the OTP for a specific order
    * @param order The order to hide OTP for
    */
-  hideOtp(order: PickupOrder) {
+  hideOtp(order: PickupOrder | null) {
+    if (!order || !order.order_id) {
+      return;
+    }
     this.otpVisible[order.order_id.toString()] = false;
   }
 
@@ -392,21 +414,27 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
    * @param message The error message
    */
   private async showError(header: string, message: string) {
-    const alert = await this.alertCtrl.create({
-      header,
-      message,
-      buttons: [
-        {
-          text: this.translate.instant('PICKUP_ORDERS.DISMISS'),
-          role: 'cancel'
-        },
-        {
-          text: this.translate.instant('PICKUP_ORDERS.RETRY'),
-          handler: () => {
+    const buttons: any[] = [
+      {
+        text: this.translate.instant('PICKUP_ORDERS.DISMISS'),
+        role: 'cancel'
+      },
+      {
+        text: this.translate.instant('PICKUP_ORDERS.RETRY'),
+        handler: () => {
+          if (this.viewMode === 'details') {
+            this.loadOrders();
+          } else {
             this.loadOrders();
           }
         }
-      ]
+      }
+    ];
+
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons
     });
     await alert.present();
   }

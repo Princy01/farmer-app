@@ -52,6 +52,9 @@ yarn-error.log
 !.vscode/extensions.json
 .history/*
 
+# Copilot Configuration
+.copilot-instructions.md
+
 
 # Miscellaneous
 /.angular

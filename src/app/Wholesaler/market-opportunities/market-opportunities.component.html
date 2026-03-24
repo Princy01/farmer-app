@@ -24,7 +24,7 @@
     <ion-card-content class="ion-text-center">
       <ion-icon name="alert-circle" color="danger" size="large"></ion-icon>
       <p>{{ error }}</p>
-      <ion-button (click)="loadData()" fill="outline" color="danger">
+      <ion-button (click)="loadData()" [disabled]="isLoading" fill="outline" color="danger">
         {{ "MARKET_OPPORTUNITIES.TRY_AGAIN" | translate }}
       </ion-button>
     </ion-card-content>

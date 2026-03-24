@@ -1,6 +1,7 @@
 .business-info-toolbar {
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --color: white;
+  position: relative;
 
   .back-btn {
     --color: white;
@@ -14,6 +15,11 @@
   .edit-btn {
     --color: white;
     font-weight: 500;
+  }
+
+  .header-spinner {
+    color: white;
+    margin-right: 12px;
   }
 }
 
@@ -160,6 +166,15 @@ ion-content {
         &:hover .edit-icon {
           opacity: 1;
         }
+
+        &.disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+
+          .edit-icon {
+            opacity: 0;
+          }
+        }
       }
     }
   }
@@ -185,11 +200,46 @@ ion-content {
       font-size: 1rem;
     }
   }
+
+  .helper-text {
+    font-size: 0.85rem;
+    color: #6b7280;
+    padding: 0 1.5rem 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    line-height: 1.4;
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 3px solid var(--ion-color-primary);
+
+    ion-icon {
+      flex-shrink: 0;
+      font-size: 1rem;
+      color: var(--ion-color-primary);
+    }
+
+    @media (max-width: 768px) {
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+    }
+  }
 }
 
-// Submit Button
+// Submit Button & Form Actions
+.form-actions {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-top: 1px solid var(--ion-color-light);
+  animation: slideUp 0.3s ease;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
 ion-button[type="submit"] {
-  margin: 1.5rem;
+  margin: 0;
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --background-hover: linear-gradient(135deg, #5568d3 0%, #663a8f 100%);
   --border-radius: 12px;
@@ -203,6 +253,12 @@ ion-button[type="submit"] {
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
 
+  &.submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   &:hover:not([disabled]) {
     transform: translateY(-2px);
     --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
@@ -212,11 +268,17 @@ ion-button[type="submit"] {
     --background: #d1d5db;
     --box-shadow: none;
     opacity: 0.6;
+    cursor: not-allowed;
   }
 
   ion-icon {
     font-size: 1.3rem;
     margin-right: 8px;
+  }
+
+  ion-spinner {
+    margin-right: 8px;
+    --color: white;
   }
 }
 
@@ -231,6 +293,17 @@ ion-button[type="submit"] {
   from {
     opacity: 0;
     transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
     opacity: 1;

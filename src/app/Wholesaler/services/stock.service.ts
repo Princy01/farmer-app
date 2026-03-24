@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { catchError, retry } from 'rxjs/operators';
+import { catchError, retry, timeout, shareReplay } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -56,6 +56,18 @@ export interface UpdateStockPayload {
 })
 export class StockService {
   private apiUrl = environment.apiUrl;
+  private readonly HTTP_TIMEOUT_MS = 30000; // 30 seconds
+  private readonly MAX_RETRIES = 3;
+  private readonly RETRY_DELAY_MS = 1000; // 1 second base delay
+
+  // Cache for reference data (24-hour TTL)
+  private branchesCache: { [userId: number]: { data: BusinessBranchWithNames[], timestamp: number } } = {};
+  private productsCache: { data: any[], timestamp: number } | null = null;
+  private qualitiesCache: { data: any[], timestamp: number } | null = null;
+  private wastageMeasuresCache: { data: any[], timestamp: number } | null = null;
+  private unitsCache: { data: any[], timestamp: number } | null = null;
+
+  private readonly CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
   constructor(
     private http: HttpClient,
@@ -75,7 +87,7 @@ export class StockService {
 
     if (error.error instanceof ErrorEvent) {
       // Client-side or network error
-      errorMessage = `Network error: ${error.error.message}`;
+      errorMessage = 'Network error. Please check your internet connection.';
     } else {
       // Backend returned an unsuccessful response code
       switch (error.status) {
@@ -91,13 +103,45 @@ export class StockService {
         case 500:
           errorMessage = 'Server error. Please try again later.';
           break;
+        case 0:
+          // Network timeout or no internet
+          errorMessage = 'Network timeout. Please check your internet connection.';
+          break;
         default:
-          errorMessage = `Server error: ${error.status}`;
+          errorMessage = 'An error occurred. Please try again.';
       }
     }
 
-    console.error('Stock Service Error:', errorMessage, error);
-    return throwError(() => error);
+    return throwError(() => ({ message: errorMessage, status: error.status, originalError: error }));
+  }
+
+  /**
+   * Retry logic with exponential backoff: 1s -> 2s -> 4s
+   * @param attempt Current attempt number (0-indexed)
+   * @returns Delay in milliseconds
+   */
+  private getExponentialBackoffDelay(attempt: number): number {
+    return this.RETRY_DELAY_MS * Math.pow(2, attempt);
+  }
+
+  /**
+   * Check if cache is still valid (within TTL)
+   * @param timestamp Cache timestamp
+   * @returns true if cache is still fresh
+   */
+  private isCacheValid(timestamp: number): boolean {
+    return Date.now() - timestamp < this.CACHE_TTL_MS;
+  }
+
+  /**
+   * Clear all caches (e.g., on logout or session change)
+   */
+  clearCache(): void {
+    this.branchesCache = {};
+    this.productsCache = null;
+    this.qualitiesCache = null;
+    this.wastageMeasuresCache = null;
+    this.unitsCache = null;
   }
 
   getProductsStockOfBranchForDate(branchId: number, date: string): Observable<ProductPriceData[]> {
@@ -106,19 +150,43 @@ export class StockService {
       `${this.apiUrl}/getAllProductsStockOfBusinessBranchOfTheDate/${branchId}/${date}`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(this.HTTP_TIMEOUT_MS),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          const backoffDelay = this.getExponentialBackoffDelay(retryCount);
+          return new Promise<void>(resolve => setTimeout(() => resolve(), backoffDelay));
+        }
+      }),
       catchError(this.handleError.bind(this))
     );
   }
 
   getBranchesByUser(userId: number): Observable<BusinessBranchWithNames[]> {
+    // Check cache first
+    const cachedData = this.branchesCache[userId];
+    if (cachedData && this.isCacheValid(cachedData.timestamp)) {
+      return new Observable(observer => {
+        observer.next(cachedData.data);
+        observer.complete();
+      });
+    }
+
     const headers = this.getAuthHeaders();
     return this.http.get<BusinessBranchWithNames[]>(
       `${this.apiUrl}/getAllBusinessBranchesWithNamesByUser?userId=${userId}`,
       { headers }
     ).pipe(
-      retry(1),
-      catchError(this.handleError.bind(this))
+      timeout(this.HTTP_TIMEOUT_MS),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          const backoffDelay = this.getExponentialBackoffDelay(retryCount);
+          return new Promise<void>(resolve => setTimeout(() => resolve(), backoffDelay));
+        }
+      }),
+      catchError(this.handleError.bind(this)),
+      shareReplay(1)
     );
   }
 
@@ -129,6 +197,14 @@ export class StockService {
       data,
       { headers }
     ).pipe(
+      timeout(this.HTTP_TIMEOUT_MS),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          const backoffDelay = this.getExponentialBackoffDelay(retryCount);
+          return new Promise<void>(resolve => setTimeout(() => resolve(), backoffDelay));
+        }
+      }),
       catchError(this.handleError.bind(this))
     );
   }
@@ -140,51 +216,123 @@ export class StockService {
       data,
       { headers }
     ).pipe(
+      timeout(this.HTTP_TIMEOUT_MS),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          const backoffDelay = this.getExponentialBackoffDelay(retryCount);
+          return new Promise<void>(resolve => setTimeout(() => resolve(), backoffDelay));
+        }
+      }),
       catchError(this.handleError.bind(this))
     );
   }
 
   getProducts(): Observable<any[]> {
+    // Check cache first
+    if (this.productsCache && this.isCacheValid(this.productsCache.timestamp)) {
+      return new Observable(observer => {
+        observer.next(this.productsCache!.data);
+        observer.complete();
+      });
+    }
+
     const headers = this.getAuthHeaders();
     return this.http.get<any[]>(
       `${this.apiUrl}/getAllProducts`,
       { headers }
     ).pipe(
-      retry(1),
-      catchError(this.handleError.bind(this))
+      timeout(this.HTTP_TIMEOUT_MS),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          const backoffDelay = this.getExponentialBackoffDelay(retryCount);
+          return new Promise<void>(resolve => setTimeout(() => resolve(), backoffDelay));
+        }
+      }),
+      catchError(this.handleError.bind(this)),
+      shareReplay(1)
     );
   }
 
   getQualities(): Observable<any[]> {
+    // Check cache first
+    if (this.qualitiesCache && this.isCacheValid(this.qualitiesCache.timestamp)) {
+      return new Observable(observer => {
+        observer.next(this.qualitiesCache!.data);
+        observer.complete();
+      });
+    }
+
     const headers = this.getAuthHeaders();
     return this.http.get<any[]>(
       `${this.apiUrl}/getAllQualityLevels`,
       { headers }
     ).pipe(
-      retry(1),
-      catchError(this.handleError.bind(this))
+      timeout(this.HTTP_TIMEOUT_MS),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          const backoffDelay = this.getExponentialBackoffDelay(retryCount);
+          return new Promise<void>(resolve => setTimeout(() => resolve(), backoffDelay));
+        }
+      }),
+      catchError(this.handleError.bind(this)),
+      shareReplay(1)
     );
   }
 
   getWastageMeasures(): Observable<any[]> {
+    // Check cache first
+    if (this.wastageMeasuresCache && this.isCacheValid(this.wastageMeasuresCache.timestamp)) {
+      return new Observable(observer => {
+        observer.next(this.wastageMeasuresCache!.data);
+        observer.complete();
+      });
+    }
+
     const headers = this.getAuthHeaders();
     return this.http.get<any[]>(
       `${this.apiUrl}/getAllWastageMeasures`,
       { headers }
     ).pipe(
-      retry(1),
-      catchError(this.handleError.bind(this))
+      timeout(this.HTTP_TIMEOUT_MS),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          const backoffDelay = this.getExponentialBackoffDelay(retryCount);
+          return new Promise<void>(resolve => setTimeout(() => resolve(), backoffDelay));
+        }
+      }),
+      catchError(this.handleError.bind(this)),
+      shareReplay(1)
     );
   }
 
   getUnits(): Observable<any[]> {
+    // Check cache first
+    if (this.unitsCache && this.isCacheValid(this.unitsCache.timestamp)) {
+      return new Observable(observer => {
+        observer.next(this.unitsCache!.data);
+        observer.complete();
+      });
+    }
+
     const headers = this.getAuthHeaders();
     return this.http.get<any[]>(
       `${this.apiUrl}/getAllUnits`,
       { headers }
     ).pipe(
-      retry(1),
-      catchError(this.handleError.bind(this))
+      timeout(this.HTTP_TIMEOUT_MS),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          const backoffDelay = this.getExponentialBackoffDelay(retryCount);
+          return new Promise<void>(resolve => setTimeout(() => resolve(), backoffDelay));
+        }
+      }),
+      catchError(this.handleError.bind(this)),
+      shareReplay(1)
     );
   }
 }

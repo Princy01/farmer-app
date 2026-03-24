@@ -40,6 +40,7 @@ export class AddProductModalComponent implements OnInit, OnDestroy {
 
   newProduct = { name: '', category: '', price: 0 };
   isLoading: boolean = false;
+  isAddingProduct: boolean = false;
 
   private destroy$ = new Subject<void>();
 
@@ -76,12 +77,11 @@ export class AddProductModalComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  /**
+   * Loads all required data for the modal (products, units, qualities, wastage measures)
+   */
   private async loadInitialData(): Promise<void> {
-    const loading = await this.loadingCtrl.create({
-      message: this.translate.instant('ADD_PRODUCT.LOADING'),
-      spinner: 'crescent'
-    });
-    await loading.present();
+    this.isLoading = true;
 
     forkJoin({
       products: this.addProductService.getAllProductsForAdmin(),
@@ -104,19 +104,26 @@ export class AddProductModalComponent implements OnInit, OnDestroy {
         this.units = data.units;
         this.qualities = data.qualities;
         this.wastageMeasures = data.wastageMeasures;
-        loading.dismiss();
+        this.isLoading = false;
       },
       error: (err) => {
-        loading.dismiss();
-        this.showToast(this.translate.instant(err.message || 'ADD_PRODUCT.ERROR_LOADING_DATA'), 'danger');
+        this.isLoading = false;
+        const errorMsg = this.translate.instant(err.message || 'ADD_PRODUCT.ERROR_LOADING_DATA');
+        this.showToast(errorMsg, 'danger');
       }
     });
   }
 
+  /**
+   * Closes the modal
+   */
   close(): void {
     this.modalCtrl.dismiss();
   }
 
+  /**
+   * Filters products based on search term
+   */
   filteredProducts(): ProductDetails[] {
     if (!this.searchTerm.trim()) {
       return this.products;
@@ -128,6 +135,9 @@ export class AddProductModalComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Selects a product and shows details form
+   */
   selectProduct(product: ProductAll): void {
     this.selectedProductForDetails = {
       ...product,
@@ -140,6 +150,28 @@ export class AddProductModalComponent implements OnInit, OnDestroy {
     this.showDetails = true;
   }
 
+  /**
+   * Navigates back to product list from details view
+   */
+  backToList(): void {
+    this.showDetails = false;
+    this.selectedProductForDetails = null;
+  }
+
+  /**
+   * Validates product details before adding
+   */
+  private validateProductDetails(prod: ProductDetails): boolean {
+    return prod.stock !== undefined &&
+           prod.price !== undefined &&
+           prod.unitId !== undefined &&
+           prod.qualityId !== undefined &&
+           prod.wastageMeasureId !== undefined;
+  }
+
+  /**
+   * Adds the selected product to the branch
+   */
   async addProduct(): Promise<void> {
     if (!this.selectedProductForDetails) {
       return;
@@ -147,27 +179,25 @@ export class AddProductModalComponent implements OnInit, OnDestroy {
 
     const prod = this.selectedProductForDetails;
 
-    // Validation
+    // Validate all fields are filled
     if (!this.validateProductDetails(prod)) {
       this.showToast(this.translate.instant('ADD_PRODUCT.FILL_ALL_FIELDS'), 'warning');
       return;
     }
 
+    // Validate stock quantity
     if (prod.stock! <= 0) {
       this.showToast(this.translate.instant('ADD_PRODUCT.ERROR_INVALID_STOCK'), 'warning');
       return;
     }
 
+    // Validate price
     if (prod.price! <= 0) {
       this.showToast(this.translate.instant('ADD_PRODUCT.ERROR_INVALID_PRICE'), 'warning');
       return;
     }
 
-    const loading = await this.loadingCtrl.create({
-      message: this.translate.instant('ADD_PRODUCT.ADDING_PRODUCT'),
-      spinner: 'crescent'
-    });
-    await loading.present();
+    this.isAddingProduct = true;
 
     this.addProductService.addProductToBranch(
       this.bid,
@@ -181,37 +211,21 @@ export class AddProductModalComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: () => {
-        loading.dismiss();
+        this.isAddingProduct = false;
         this.showToast(this.translate.instant('ADD_PRODUCT.PRODUCT_ADDED_SUCCESS'), 'success');
         this.modalCtrl.dismiss('success');
       },
       error: (err) => {
-        loading.dismiss();
-        this.showToast(
-          this.translate.instant(err.message || 'ADD_PRODUCT.ERROR_ADDING_PRODUCT'),
-          'danger'
-        );
+        this.isAddingProduct = false;
+        const errorMsg = this.translate.instant(err.message || 'ADD_PRODUCT.ERROR_ADDING_PRODUCT');
+        this.showToast(errorMsg, 'danger');
       }
     });
   }
 
-  private validateProductDetails(prod: ProductDetails): boolean {
-    return prod.stock !== undefined &&
-           prod.price !== undefined &&
-           prod.unitId !== undefined &&
-           prod.qualityId !== undefined &&
-           prod.wastageMeasureId !== undefined;
-  }
-
-  backToList(): void {
-    this.showDetails = false;
-    this.selectedProductForDetails = null;
-  }
-
-  async addNew(): Promise<void> {
-    await this.showToast(this.translate.instant('ADD_PRODUCT.ADD_NEW_NOT_INTEGRATED'), 'warning');
-  }
-
+  /**
+   * Shows toast notification
+   */
   private async showToast(message: string, color: string): Promise<void> {
     const toast = await this.toastCtrl.create({
       message,
@@ -220,5 +234,12 @@ export class AddProductModalComponent implements OnInit, OnDestroy {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  /**
+   * Placeholder for adding new product (not yet implemented)
+   */
+  async addNew(): Promise<void> {
+    await this.showToast(this.translate.instant('ADD_PRODUCT.ADD_NEW_NOT_INTEGRATED'), 'warning');
   }
 }

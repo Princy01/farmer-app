@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -13,6 +13,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
 import * as exifr from 'exifr';
+import { Subject, EMPTY } from 'rxjs';
+import { takeUntil, switchMap } from 'rxjs/operators';
 
 @Component({
 	selector: 'app-add-business-location',
@@ -26,7 +28,7 @@ import * as exifr from 'exifr';
 		TranslatePipe,
 	]
 })
-export class AddBusinessLocationComponent implements OnInit {
+export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 	businessForm: FormGroup;
 	isEditMode = false;
 	locationId: number | null = null;
@@ -55,6 +57,8 @@ export class AddBusinessLocationComponent implements OnInit {
 		establishedYear: 'ADD_BUSINESS_FORM.ESTABLISHED_YEAR',
 		active_status: 'ADD_BUSINESS_FORM.ACTIVE_STATUS'
 	};
+
+	private destroy$ = new Subject<void>();
 
 	constructor(
 		private formBuilder: FormBuilder,
@@ -109,23 +113,60 @@ export class AddBusinessLocationComponent implements OnInit {
 		this.loadBusinessTypes();
 		this.loadStates();
 
-		this.businessForm.get('state')?.valueChanges.subscribe((stateId) => {
-			if (stateId) {
-				this.loadCities(stateId);
-				this.businessForm.get('city')?.reset();
-				this.businessForm.get('location')?.reset();
-				this.cities = [];
-				this.locations = [];
-			}
-		});
+		this.businessForm.get('state')?.valueChanges
+			.pipe(
+				switchMap((stateId) => {
+					if (stateId) {
+						this.businessForm.get('city')?.reset();
+						this.businessForm.get('location')?.reset();
+						this.cities = [];
+						this.locations = [];
+						return this.addBusinessService.getCitiesOfState(stateId);
+					}
+					return EMPTY;
+				}),
+				takeUntil(this.destroy$)
+			)
+			.subscribe({
+				next: (data: City[]) => {
+					this.cities = data;
+				},
+				error: () => {
+					this.showToast(
+						this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_CITIES'),
+						'danger'
+					);
+				}
+			});
 
-		this.businessForm.get('city')?.valueChanges.subscribe((cityId) => {
-			if (cityId) {
-				this.loadLocations(cityId);
-				this.businessForm.get('location')?.reset();
-				this.locations = [];
-			}
-		});
+		this.businessForm.get('city')?.valueChanges
+			.pipe(
+				switchMap((cityId) => {
+					if (cityId) {
+						this.businessForm.get('location')?.reset();
+						this.locations = [];
+						return this.addBusinessService.getLocationsByCity(cityId);
+					}
+					return EMPTY;
+				}),
+				takeUntil(this.destroy$)
+			)
+			.subscribe({
+				next: (data: Location[]) => {
+					this.locations = data;
+				},
+				error: () => {
+					this.showToast(
+						this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_LOCATIONS'),
+						'danger'
+					);
+				}
+			});
+	}
+
+	ngOnDestroy() {
+		this.destroy$.next();
+		this.destroy$.complete();
 	}
 
 	async showAuthError() {
@@ -162,59 +203,67 @@ export class AddBusinessLocationComponent implements OnInit {
 	}
 
 	loadStates() {
-		this.addBusinessService.getStates().subscribe({
-			next: (data: State[]) => {
-				this.states = data;
-			},
-			error: (error: any) => {
-				console.error('Error loading states:', error);
-				this.showToast(
-					this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_STATES'),
-					'danger'
-				);
-			}
-		});
+		this.addBusinessService.getStates()
+			.pipe(takeUntil(this.destroy$))
+			.subscribe({
+				next: (data: State[]) => {
+					this.states = data;
+				},
+				error: () => {
+					this.showToast(
+						this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_STATES'),
+						'danger'
+					);
+				}
+			});
 	}
 
 	loadCities(stateId: number) {
-		this.addBusinessService.getCitiesOfState(stateId).subscribe({
-			next: (data: City[]) => {
-				this.cities = data;
-			},
-			error: (error: any) => {
-				console.error('Error loading cities:', error);
-				this.showToast(
-					this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_CITIES'),
-					'danger'
-				);
-			}
-		});
+		this.addBusinessService.getCitiesOfState(stateId)
+			.pipe(takeUntil(this.destroy$))
+			.subscribe({
+				next: (data: City[]) => {
+					this.cities = data;
+				},
+				error: () => {
+					this.showToast(
+						this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_CITIES'),
+						'danger'
+					);
+				}
+			});
 	}
 
 	loadLocations(cityId: number) {
-		this.addBusinessService.getLocationsByCity(cityId).subscribe({
-			next: (data: Location[]) => {
-				this.locations = data;
-			},
-			error: (error: any) => {
-				console.error('Error loading locations:', error);
-				this.showToast(
-					this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_LOCATIONS'),
-					'danger'
-				);
-			}
-		});
+		this.addBusinessService.getLocationsByCity(cityId)
+			.pipe(takeUntil(this.destroy$))
+			.subscribe({
+				next: (data: Location[]) => {
+					this.locations = data;
+				},
+				error: () => {
+					this.showToast(
+						this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_LOCATIONS'),
+						'danger'
+					);
+				}
+			});
 	}
 
 	loadBusinessTypes() {
-		this.addBusinessService.getBusinessTypes().subscribe({
-			next: (data: BusinessType[]) => {
-				this.businessTypes = data;
-			},
-			error: (error: any) => {
-				console.error('Error loading business types:', error);
-			}
-		});
+		this.addBusinessService.getBusinessTypes()
+			.pipe(takeUntil(this.destroy$))
+			.subscribe({
+				next: (data: BusinessType[]) => {
+					this.businessTypes = data;
+				},
+				error: () => {
+					this.showToast(
+						this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_TYPES'),
+						'danger'
+					);
+				}
+			});
 	}
 
 	loadLocationData() {
@@ -223,7 +272,6 @@ export class AddBusinessLocationComponent implements OnInit {
 			const navigation = this.router.getCurrentNavigation();
 			if (navigation && navigation.extras.state) {
 				let location = navigation.extras.state['location'] as BusinessBranchWithNames | null;
-				console.log('Location from state:', location);
 
 				if (location) {
 					// Load cities and locations based on state
@@ -267,52 +315,53 @@ export class AddBusinessLocationComponent implements OnInit {
 			}
 
 			// Fallback: Load data from API if navigation state is not available
-			this.addBusinessService.getBusinessBranchById(this.locationId).subscribe({
-				next: (data: BusinessBranch) => {
-					// Load cities and locations based on state
-					if (data.state) {
-						this.loadCities(data.state);
-					}
-					if (data.city_id) {
-						this.loadLocations(data.city_id);
-					}
+			this.addBusinessService.getBusinessBranchById(this.locationId)
+				.pipe(takeUntil(this.destroy$))
+				.subscribe({
+					next: (data: BusinessBranch) => {
+						// Load cities and locations based on state
+						if (data.state) {
+							this.loadCities(data.state);
+						}
+						if (data.city_id) {
+							this.loadLocations(data.city_id);
+						}
 
-					this.businessForm.patchValue({
-						shopName: data.shop_name || '',
-						number: data.number || '',
-						state: data.state || null,
-						city: data.city_id || null,
-						location: data.location || null,
-						address: data.address || '',
-						email: data.email || '',
-						gstNumber: data.gst_num || '',
-						pan: data.pan_num || '',
-						privilegedUser: data.privilege_user || false,
-						active_status: data.active_status,
-						b_type_id: data.type_id || 3,
-						establishedYear: data.established_year || ''
-					});
+						this.businessForm.patchValue({
+							shopName: data.shop_name || '',
+							number: data.number || '',
+							state: data.state || null,
+							city: data.city_id || null,
+							location: data.location || null,
+							address: data.address || '',
+							email: data.email || '',
+							gstNumber: data.gst_num || '',
+							pan: data.pan_num || '',
+							privilegedUser: data.privilege_user || false,
+							active_status: data.active_status,
+							b_type_id: data.type_id || 3,
+							establishedYear: data.established_year || ''
+						});
 
-					// Load existing image and coordinates
-					if (data.image) {
-						this.capturedImage = data.image;
-					}
-					if (data.latitude && data.longitude) {
-						this.latitude = data.latitude;
-						this.longitude = data.longitude;
-						this.locationCaptured = true;
-					}
+						// Load existing image and coordinates
+						if (data.image) {
+							this.capturedImage = data.image;
+						}
+						if (data.latitude && data.longitude) {
+							this.latitude = data.latitude;
+							this.longitude = data.longitude;
+							this.locationCaptured = true;
+						}
 
-					this.setEditModeFieldStates();
-				},
-				error: (error: any) => {
-					console.error('Error loading location data:', error);
-					this.showToast(
-						this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_DATA'),
-						'danger'
-					);
-				}
-			});
+						this.setEditModeFieldStates();
+					},
+					error: () => {
+						this.showToast(
+							this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_DATA'),
+							'danger'
+						);
+					}
+				});
 		}
 	}
 
@@ -403,7 +452,6 @@ export class AddBusinessLocationComponent implements OnInit {
 			}
 
 		} catch (error) {
-			console.error('Error capturing image:', error);
 			await this.showToast(
 				this.translate.instant('ADD_BUSINESS_FORM.IMAGE_CAPTURE_ERROR'),
 				'danger'
@@ -500,13 +548,11 @@ export class AddBusinessLocationComponent implements OnInit {
 				this.latitude = exifData.latitude;
 				this.longitude = exifData.longitude;
 				this.locationCaptured = true;
-				console.log('GPS from EXIF:', this.latitude, this.longitude);
 				return true;
 			}
 
 			return false;
 		} catch (error) {
-			console.error('Error extracting EXIF data:', error);
 			return false;
 		}
 	}
@@ -551,7 +597,6 @@ export class AddBusinessLocationComponent implements OnInit {
 
 		} catch (error) {
 			loading.dismiss();
-			console.error('Error getting device location:', error);
 			await this.showToast(
 				this.translate.instant('ADD_BUSINESS_FORM.LOCATION_ERROR'),
 				'danger'
@@ -651,24 +696,25 @@ export class AddBusinessLocationComponent implements OnInit {
 				if (this.isEditMode && this.locationId) {
 					// For update, add the branch_id
 					formData.branch_id = this.locationId;
-					this.addBusinessService.modifyBusinessBranch(formData).subscribe({
-						next: async () => {
-							loading.dismiss();
-							await this.showToast(
-								this.translate.instant('ADD_BUSINESS_FORM.UPDATE_SUCCESS'),
-								'success'
-							);
-							this.router.navigate(['/wholesaler/business-locations']);
-						},
-						error: async (error: any) => {
-							loading.dismiss();
-							console.error('Update error:', error);
-							await this.showToast(
-								this.translate.instant('ADD_BUSINESS_FORM.UPDATE_ERROR'),
-								'danger'
-							);
-						}
-					});
+					this.addBusinessService.modifyBusinessBranch(formData)
+						.pipe(takeUntil(this.destroy$))
+						.subscribe({
+							next: async () => {
+								loading.dismiss();
+								await this.showToast(
+									this.translate.instant('ADD_BUSINESS_FORM.UPDATE_SUCCESS'),
+									'success'
+								);
+								this.router.navigate(['/wholesaler/business-locations']);
+							},
+							error: async () => {
+								loading.dismiss();
+								await this.showToast(
+									this.translate.instant('ADD_BUSINESS_FORM.UPDATE_ERROR'),
+									'danger'
+								);
+							}
+						});
 				} else {
 					this.addBusinessService.createBusinessBranch(formData).subscribe({
 						next: async () => {

@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, LoadingController, ModalController, ActionSheetController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {
   add, location, business, create, eye, home, list, cube, time,
   analytics, pulse, notifications, person, menu, logOut, settings,
@@ -21,9 +23,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule, TranslatePipe]
 })
-export class BusinessLocationsComponent implements OnInit {
+export class BusinessLocationsComponent implements OnInit, OnDestroy {
   businessLocations: BusinessBranchWithNames[] = [];
   isLoading = true;
+  isRetrying = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private businessService: BusinessLocationsService,
@@ -44,6 +48,11 @@ export class BusinessLocationsComponent implements OnInit {
 
   ngOnInit() {
     this.checkAuthAndLoadLocations();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ionViewWillEnter() {
@@ -68,6 +77,7 @@ export class BusinessLocationsComponent implements OnInit {
     const alert = await this.alertController.create({
       header: this.translate.instant('BUSINESS_LOCATIONS.AUTH_ERROR'),
       message: this.translate.instant('BUSINESS_LOCATIONS.SESSION_EXPIRED'),
+      backdropDismiss: false,
       buttons: [
         {
           text: this.translate.instant('BUSINESS_LOCATIONS.OK'),
@@ -114,55 +124,115 @@ export class BusinessLocationsComponent implements OnInit {
         return;
       }
 
-      this.businessService.getAllBusinessesWithNameOfWholesaler().subscribe({
-        next: (locations: BusinessBranchWithNames[]) => {
-          this.businessLocations = locations || [];
-          this.isLoading = false;
-        },
-        error: async (error: any) => {
-          this.isLoading = false;
-          this.businessLocations = [];
-          loading.dismiss();
+      this.businessService.getAllBusinessesWithNameOfWholesaler()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (locations: BusinessBranchWithNames[]) => {
+            if (!locations || !Array.isArray(locations)) {
+              this.businessLocations = [];
+            } else {
+              this.businessLocations = locations;
+            }
+            this.isLoading = false;
+            this.isRetrying = false;
+          },
+          error: async (error: any) => {
+            this.isLoading = false;
+            this.businessLocations = [];
+            loading.dismiss();
 
-          console.error('Error loading business locations:', error);
+            if (error?.status === 401) {
+              await this.showAuthError();
+              return;
+            }
 
-          if (error.status === 401) {
-            await this.showAuthError();
-            return;
+            if (error?.status === 403) {
+              await this.showUnauthorizedError();
+              return;
+            }
+
+            let errorMessage = 'BUSINESS_LOCATIONS.LOAD_ERROR';
+            if (error?.status === 0 || error?.status === undefined) {
+              errorMessage = 'BUSINESS_LOCATIONS.NETWORK_ERROR';
+            } else if (error?.status === 500 || error?.status >= 500) {
+              errorMessage = 'BUSINESS_LOCATIONS.SERVER_ERROR';
+            } else if (error?.status === 404) {
+              errorMessage = 'BUSINESS_LOCATIONS.NOT_FOUND_ERROR';
+            }
+
+            const alert = await this.alertController.create({
+              header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),
+              message: this.translate.instant(errorMessage),
+              backdropDismiss: false,
+              buttons: [
+                {
+                  text: this.translate.instant('BUSINESS_LOCATIONS.RETRY'),
+                  handler: () => {
+                    this.isRetrying = true;
+                    this.loadBusinessLocations();
+                  }
+                },
+                {
+                  text: this.translate.instant('BUSINESS_LOCATIONS.BACK'),
+                  handler: () => {
+                    this.goBack();
+                  }
+                }
+              ]
+            });
+            await alert.present();
+          },
+          complete: () => {
+            loading.dismiss();
           }
-
-          const alert = await this.alertController.create({
-            header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),
-            message: this.translate.instant('BUSINESS_LOCATIONS.LOAD_ERROR'),
-            buttons: [this.translate.instant('BUSINESS_LOCATIONS.OK')]
-          });
-          await alert.present();
-        },
-        complete: () => {
-          loading.dismiss();
-        }
-      });
+        });
     } catch (error) {
       this.isLoading = false;
       this.businessLocations = [];
       loading.dismiss();
 
-      console.error('Unexpected error:', error);
-
       const alert = await this.alertController.create({
         header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),
         message: this.translate.instant('BUSINESS_LOCATIONS.UNEXPECTED_ERROR'),
-        buttons: [this.translate.instant('BUSINESS_LOCATIONS.OK')]
+        backdropDismiss: false,
+        buttons: [
+          {
+            text: this.translate.instant('BUSINESS_LOCATIONS.RETRY'),
+            handler: () => {
+              this.isRetrying = true;
+              this.loadBusinessLocations();
+            }
+          },
+          {
+            text: this.translate.instant('BUSINESS_LOCATIONS.BACK'),
+            handler: () => {
+              this.goBack();
+            }
+          }
+        ]
       });
       await alert.present();
     }
   }
 
   addNewLocation() {
+    if (!this.authService.isAuthenticated()) {
+      this.showAuthError();
+      return;
+    }
     this.router.navigate(['/wholesaler/add-business-location']);
   }
 
   async modifyLocation(location: BusinessBranchWithNames) {
+    if (!location?.branch_id) {
+      const alert = await this.alertController.create({
+        header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),
+        message: this.translate.instant('BUSINESS_LOCATIONS.INVALID_LOCATION'),
+        buttons: [this.translate.instant('BUSINESS_LOCATIONS.OK')]
+      });
+      await alert.present();
+      return;
+    }
     this.router.navigate(['/wholesaler/add-business-location'], {
       queryParams: {
         mode: 'edit',
@@ -174,7 +244,16 @@ export class BusinessLocationsComponent implements OnInit {
     });
   }
 
-  viewProducts(location: BusinessBranchWithNames) {
+  async viewProducts(location: BusinessBranchWithNames) {
+    if (!location?.branch_id || !location?.shop_name) {
+      const alert = await this.alertController.create({
+        header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),
+        message: this.translate.instant('BUSINESS_LOCATIONS.INVALID_LOCATION'),
+        buttons: [this.translate.instant('BUSINESS_LOCATIONS.OK')]
+      });
+      await alert.present();
+      return;
+    }
     this.router.navigate(['/wholesaler/branch-products'], {
       queryParams: { branchId: location.branch_id, branchName: location.shop_name }
     });

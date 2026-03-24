@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
+import { retry, timeout, catchError } from 'rxjs/operators';
 
 export interface BusinessLocation {
     branch_id: number;
@@ -88,11 +89,29 @@ export class BusinessLocationsService {
 
     getAllBusinessesOfWholesaler(): Observable<BusinessLocation[]> {
         const headers = this.getAuthHeaders();
-        return this.http.get<BusinessLocation[]>(`${this.apiUrl}/getAllBusinessBranchesByUser`, { headers });
+        return this.http.get<BusinessLocation[]>(
+            `${this.apiUrl}/getAllBusinessBranchesByUser`,
+            { headers }
+        ).pipe(
+            timeout(30000),
+            retry({ count: 2, delay: 1000 }),
+            catchError((error: HttpErrorResponse) => {
+                return throwError(() => error);
+            })
+        );
     }
 
     getAllBusinessesWithNameOfWholesaler(): Observable<BusinessBranchWithNames[]> {
         const headers = this.getAuthHeaders();
-        return this.http.get<BusinessBranchWithNames[]>(`${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`, { headers });
+        return this.http.get<BusinessBranchWithNames[]>(
+            `${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`,
+            { headers }
+        ).pipe(
+            timeout(30000),
+            retry({ count: 2, delay: 1000 }),
+            catchError((error: HttpErrorResponse) => {
+                return throwError(() => error);
+            })
+        );
     }
 }

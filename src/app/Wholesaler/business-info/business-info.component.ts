@@ -20,6 +20,7 @@ import { EmailVerificationModalComponent } from './email-verification-modal.comp
 export class BusinessInfoComponent implements OnInit, OnDestroy {
   form: FormGroup;
   isEditMode = false;
+  isLoading = false;
   businessInfo: any = null;
 
   private destroy$ = new Subject<void>();
@@ -42,7 +43,7 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
       state_name: [{ value: '', disabled: true }],
       city_name: [{ value: '', disabled: true }],
       location_name: [{ value: '', disabled: true }],
-      address: ['', [Validators.required, Validators.minLength(5)]],
+      address: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(500)]],
       mobile_number: [{ value: '', disabled: true }],
       email: [{ value: '', disabled: true }],
       gst_number: ['', [Validators.required, Validators.pattern(/^[A-Z0-9]{15}$/)]],
@@ -61,36 +62,86 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  /**
+   * Load business information from API with user-friendly error handling
+   */
   private loadBusinessInfo(): void {
+    this.isLoading = true;
     this.businessInfoService
       .getBusinessInfo()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          this.businessInfo = res.data;
-          this.form.patchValue(res.data);
+          this.isLoading = false;
+          if (res?.data) {
+            this.businessInfo = res.data;
+            this.form.patchValue(res.data);
+          } else {
+            this.showToast('WHOLESALER_BUSINESS_INFO.INVALID_DATA', 'danger');
+          }
         },
         error: async (err) => {
-          const msg = err?.error?.error ?? 'WHOLESALER_BUSINESS_INFO.LOAD_ERROR';
-          await this.showToast(msg, 'danger', false);
+          this.isLoading = false;
+          const userMsg = this.getErrorMessage(err);
+          await this.showToast(userMsg, 'danger');
         },
       });
   }
 
+  /**
+   * Convert technical errors to user-friendly messages
+   */
+  private getErrorMessage(error: any): string {
+    if (!error) return 'WHOLESALER_BUSINESS_INFO.UNKNOWN_ERROR';
+
+    if (error.name === 'TimeoutError') {
+      return 'WHOLESALER_BUSINESS_INFO.REQUEST_TIMEOUT';
+    }
+    if (error.status === 0) {
+      return 'WHOLESALER_BUSINESS_INFO.NETWORK_ERROR';
+    }
+    if (error.status === 401) {
+      return 'WHOLESALER_BUSINESS_INFO.SESSION_EXPIRED';
+    }
+    if (error.status === 403) {
+      return 'WHOLESALER_BUSINESS_INFO.PERMISSION_DENIED';
+    }
+    if (error.status === 404) {
+      return 'WHOLESALER_BUSINESS_INFO.NOT_FOUND';
+    }
+    if (error.status >= 500) {
+      return 'WHOLESALER_BUSINESS_INFO.SERVER_ERROR';
+    }
+
+    return error?.error?.error ?? 'WHOLESALER_BUSINESS_INFO.LOAD_ERROR';
+  }
+
   enableEdit() {
     this.isEditMode = true;
-    this.form.get('address')?.enable();
-    this.form.get('gst_number')?.enable();
+    const addressControl = this.form.get('address');
+    const gstControl = this.form.get('gst_number');
+
+    if (addressControl) addressControl.enable();
+    if (gstControl) gstControl.enable();
   }
 
   cancelEdit() {
     this.isEditMode = false;
-    this.form.patchValue(this.businessInfo);
-    this.form.get('address')?.disable();
-    this.form.get('gst_number')?.disable();
+    if (this.businessInfo) {
+      this.form.patchValue(this.businessInfo);
+    }
+    const addressControl = this.form.get('address');
+    const gstControl = this.form.get('gst_number');
+
+    if (addressControl) addressControl.disable();
+    if (gstControl) gstControl.disable();
+
     this.form.markAsUntouched();
   }
 
+  /**
+   * Submit form with validation and user feedback
+   */
   async onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -98,14 +149,24 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const addressVal = this.form.get('address')?.value;
+    const gstVal = this.form.get('gst_number')?.value;
+
+    // Ensure we have required values
+    if (!addressVal || !gstVal) {
+      await this.showToast('WHOLESALER_BUSINESS_INFO.FIX_ERRORS', 'danger');
+      return;
+    }
+
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('WHOLESALER_BUSINESS_INFO.UPDATING'),
+      spinner: 'crescent',
     });
     await loading.present();
 
     const payload = {
-      address: this.form.get('address')?.value,
-      gst_number: this.form.get('gst_number')?.value,
+      address: addressVal.trim(),
+      gst_number: gstVal.trim().toUpperCase(),
     };
 
     this.businessInfoService
@@ -114,38 +175,68 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async () => {
           await loading.dismiss();
-          this.businessInfo = { ...this.businessInfo, ...payload };
+          if (this.businessInfo) {
+            this.businessInfo = { ...this.businessInfo, ...payload };
+          }
           this.isEditMode = false;
-          this.form.get('address')?.disable();
-          this.form.get('gst_number')?.disable();
+          const addressControl = this.form.get('address');
+          const gstControl = this.form.get('gst_number');
+          if (addressControl) addressControl.disable();
+          if (gstControl) gstControl.disable();
+          this.form.markAsUntouched();
           await this.showToast('WHOLESALER_BUSINESS_INFO.UPDATE_SUCCESS', 'success');
         },
         error: async (err) => {
           await loading.dismiss();
-          const serverMsg: string = err?.error?.error ?? '';
-
-          let toastMsg: string;
-          if (serverMsg.includes('GST number already exists')) {
-            toastMsg = this.translate.instant('WHOLESALER_BUSINESS_INFO.GST_EXISTS');
-          } else if (serverMsg.includes('No changes detected')) {
-            toastMsg = this.translate.instant('WHOLESALER_BUSINESS_INFO.NO_CHANGES');
-          } else if (serverMsg.includes('Address must be at least')) {
-            toastMsg = this.translate.instant('WHOLESALER_BUSINESS_INFO.ADDRESS_TOO_SHORT');
-          } else {
-            toastMsg = this.translate.instant('WHOLESALER_BUSINESS_INFO.UPDATE_FAILED');
-          }
-
-          await this.showToast(toastMsg, 'danger', false);
+          const userMsg = this.getUpdateErrorMessage(err);
+          await this.showToast(userMsg, 'danger');
         },
       });
   }
 
+  /**
+   * Convert technical update errors to user-friendly messages
+   */
+  private getUpdateErrorMessage(error: any): string {
+    if (!error) return 'WHOLESALER_BUSINESS_INFO.UPDATE_FAILED';
+
+    if (error.name === 'TimeoutError') {
+      return 'WHOLESALER_BUSINESS_INFO.REQUEST_TIMEOUT';
+    }
+    if (error.status === 0) {
+      return 'WHOLESALER_BUSINESS_INFO.NETWORK_ERROR';
+    }
+    if (error.status === 401) {
+      return 'WHOLESALER_BUSINESS_INFO.SESSION_EXPIRED';
+    }
+
+    const serverMsg: string = error?.error?.error ?? '';
+    if (serverMsg.includes('GST number already exists')) {
+      return 'WHOLESALER_BUSINESS_INFO.GST_EXISTS';
+    }
+    if (serverMsg.includes('No changes detected')) {
+      return 'WHOLESALER_BUSINESS_INFO.NO_CHANGES';
+    }
+    if (serverMsg.includes('Address must be at least')) {
+      return 'WHOLESALER_BUSINESS_INFO.ADDRESS_TOO_SHORT';
+    }
+
+    return 'WHOLESALER_BUSINESS_INFO.UPDATE_FAILED';
+  }
+
+  /**
+   * Display toast notification with auto-translation
+   */
   private async showToast(message: string, color: string, useTranslate = true) {
     const toast = await this.toastCtrl.create({
       message: useTranslate ? this.translate.instant(message) : message,
-      duration: 2500,
+      duration: color === 'success' ? 2500 : 3500,
       color,
       position: 'bottom',
+      buttons: [{
+        text: this.translate.instant('COMMON.DISMISS'),
+        role: 'cancel',
+      }],
     });
     await toast.present();
   }

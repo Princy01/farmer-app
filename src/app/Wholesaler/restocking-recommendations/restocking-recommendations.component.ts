@@ -174,7 +174,6 @@ export class RestockingRecommendationsComponent implements OnInit, OnDestroy {
             }
           },
           error: async (error) => {
-            console.error('Failed to load restocking recommendations:', error);
             this.isLoading = false;
             await loading.dismiss();
 
@@ -190,7 +189,6 @@ export class RestockingRecommendationsComponent implements OnInit, OnDestroy {
     } catch (error) {
       await loading.dismiss();
       this.isLoading = false;
-      console.error('Error in loadRestockingRecommendations:', error);
 
       const alert = await this.alertCtrl.create({
         header: this.translate.instant('RESTOCK_RECS.ERRORS.UNEXPECTED_ERROR'),
@@ -207,7 +205,7 @@ export class RestockingRecommendationsComponent implements OnInit, OnDestroy {
   private async showErrorAlert() {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('RESTOCK_RECS.ERROR_TITLE'),
-      message: this.translate.instant('RESTOCK_RECS.LOAD_ERROR'),
+      message: this.translate.instant('RESTOCK_RECS.ERRORS.LOAD_ERROR'),
       buttons: [
         {
           text: this.translate.instant('RESTOCK_RECS.DISMISS'),
@@ -323,8 +321,6 @@ export class RestockingRecommendationsComponent implements OnInit, OnDestroy {
   async handleRefresh(event: any) {
     try {
       await this.loadRestockingRecommendations();
-    } catch (error) {
-      console.error('Error during refresh:', error);
     } finally {
       event.target.complete();
     }
