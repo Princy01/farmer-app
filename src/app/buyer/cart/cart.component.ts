@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController, ToastController, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { Subscription, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { addIcons } from 'ionicons';
 import {
   trashOutline,
@@ -72,7 +72,7 @@ export class CartComponent implements OnInit, OnDestroy {
   selectedGroupCount = 0;
   selectedItemCount = 0;
 
-  private subscriptions: Subscription[] = [];
+  private destroy$ = new Subject<void>();
   private quantityUpdateSubject = new Subject<QuantityUpdate>();
   private deleteItemSubject = new Subject<number>();
 
@@ -118,7 +118,8 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.destroy$.next();
+    this.destroy$.complete();
     this.quantityUpdateSubject.complete();
     this.deleteItemSubject.complete();
     this.cartService.clearPendingOperations();
@@ -126,20 +127,20 @@ export class CartComponent implements OnInit, OnDestroy {
 
   // ─── Debounce setup ────────────────────────────────────────────────────────
   private setupQuantityDebounce(): void {
-    const sub = this.quantityUpdateSubject.pipe(
+    this.quantityUpdateSubject.pipe(
       debounceTime(800),
       distinctUntilChanged((a, b) =>
         a.selectedId === b.selectedId && a.quantity === b.quantity
-      )
+      ),
+      takeUntil(this.destroy$)
     ).subscribe(update => this.executeQuantityUpdate(update));
-    this.subscriptions.push(sub);
   }
 
   private setupDeleteDebounce(): void {
-    const sub = this.deleteItemSubject.pipe(
-      debounceTime(500)
+    this.deleteItemSubject.pipe(
+      debounceTime(500),
+      takeUntil(this.destroy$)
     ).subscribe(selectedId => this.executeRemoveItem(selectedId));
-    this.subscriptions.push(sub);
   }
 
   // ─── Load & group ──────────────────────────────────────────────────────────
@@ -151,13 +152,16 @@ export class CartComponent implements OnInit, OnDestroy {
     });
     await loading.present();
 
-    this.cartService.getCartItems(this.selectedDate).subscribe({
+    this.cartService.getCartItems(this.selectedDate).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (items) => {
         this.cartProducts = items;
         this.buildGroups();
       },
-      error: async () => {
-        await this.showToast(this.translate.instant('CART.FAILED_LOAD'), 'danger');
+      error: async (error) => {
+        const errorMessage = this.getErrorMessage(error, 'CART.FAILED_LOAD');
+        await this.showToast(errorMessage, 'danger');
       },
       complete: async () => {
         this.isLoading = false;
@@ -313,9 +317,10 @@ export class CartComponent implements OnInit, OnDestroy {
         await this.showToast(this.translate.instant('CART.QUANTITY_UPDATED'), 'success');
         this.loadCartItems(); // re-sync
       },
-      error: async () => {
+      error: async (error) => {
         this.isLoading = false;
-        await this.showToast(this.translate.instant('CART.FAILED_UPDATE_QUANTITY'), 'danger');
+        const errorMessage = this.getErrorMessage(error, 'CART.FAILED_UPDATE_QUANTITY');
+        await this.showToast(errorMessage, 'danger');
         this.loadCartItems(); // revert
       }
     });
@@ -347,9 +352,10 @@ export class CartComponent implements OnInit, OnDestroy {
         await this.showToast(this.translate.instant('CART.ITEM_REMOVED'), 'success');
         this.loadCartItems();
       },
-      error: async () => {
+      error: async (error) => {
         this.isLoading = false;
-        await this.showToast(this.translate.instant('CART.FAILED_REMOVE_ITEM'), 'danger');
+        const errorMessage = this.getErrorMessage(error, 'CART.FAILED_REMOVE_ITEM');
+        await this.showToast(errorMessage, 'danger');
         this.loadCartItems();
       }
     });
@@ -437,6 +443,49 @@ export class CartComponent implements OnInit, OnDestroy {
 
   getSelectAllIconName(wholesalerGroups: WholesalerGroup[]): string {
     return wholesalerGroups.every(g => g.isSelected) ? 'checkbox-outline' : 'square-outline';
+  }
+
+  /**
+   * Translate HTTP errors to user-friendly messages
+   */
+  private getErrorMessage(error: any, defaultKey: string): string {
+    // Check for timeout error
+    if (error?.name === 'TimeoutError') {
+      return this.translate.instant('CART.ERROR_TIMEOUT');
+    }
+
+    // Check for network error
+    if (error?.status === 0 || error?.error?.status === 0) {
+      return this.translate.instant('CART.ERROR_NETWORK');
+    }
+
+    // Check for 401 Unauthorized
+    if (error?.status === 401) {
+      return this.translate.instant('CART.ERROR_SESSION');
+    }
+
+    // Check for 403 Forbidden
+    if (error?.status === 403) {
+      return this.translate.instant('CART.ERROR_PERMISSION');
+    }
+
+    // Check for 404 Not Found
+    if (error?.status === 404) {
+      return this.translate.instant('CART.ERROR_NOT_FOUND');
+    }
+
+    // Check for 429 Too Many Requests
+    if (error?.status === 429) {
+      return this.translate.instant('CART.ERROR_RATE_LIMIT');
+    }
+
+    // Check for 5xx Server Errors
+    if (error?.status >= 500) {
+      return this.translate.instant('CART.ERROR_SERVER');
+    }
+
+    // Default error message
+    return this.translate.instant(defaultKey);
   }
 
   private async showToast(message: string, color = 'dark'): Promise<void> {

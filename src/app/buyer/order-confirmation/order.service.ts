@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, timer, throwError } from 'rxjs';
+import { retry, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 export interface Item {
@@ -75,28 +76,58 @@ export interface TransportRequestWithOrders {
   providedIn: 'root'
 })
 export class OrderService {
+  private readonly requestTimeoutMs = 30000;
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
   // Create batch order (splits into multiple orders by wholeseller)
   createOrder(orderData: CreateBatchOrderRequest): Observable<CreateBatchOrderResponse> {
-    return this.http.post<CreateBatchOrderResponse>(
+    return this.withResilience(this.http.post<CreateBatchOrderResponse>(
       `${this.apiUrl}/CreateRetailerOrder`,
       orderData
-    );
+    ));
   }
 
-  createTransportJob(transportData: TransportRequestWithOrders): Observable<any> {
-    return this.http.post(
+  createTransportJob(transportData: TransportRequestWithOrders): Observable<unknown> {
+    return this.withResilience(this.http.post(
       `${this.apiUrl}/transportation/requests/create-transport-job-with-orderids-request`,
       transportData
-    );
+    ));
   }
 
   getRetailerOrderDetails(orderId: number): Observable<RetailerOrderResponse> {
-    return this.http.get<RetailerOrderResponse>(
+    return this.withResilience(this.http.get<RetailerOrderResponse>(
       `${this.apiUrl}/getRetailerOrderDetails/${orderId}`
+    ));
+  }
+
+  private withResilience<T>(request$: Observable<T>): Observable<T> {
+    return request$.pipe(
+      timeout(this.requestTimeoutMs),
+      retry({
+        count: 3,
+        delay: (error: unknown, retryCount: number) => {
+          if (!this.shouldRetry(error)) {
+            return throwError(() => error);
+          }
+
+          const delayMs = Math.pow(2, retryCount - 1) * 1000;
+          return timer(delayMs);
+        }
+      })
     );
+  }
+
+  private shouldRetry(error: unknown): boolean {
+    if (!(error instanceof HttpErrorResponse)) {
+      return false;
+    }
+
+    if (error.status === 0) {
+      return true;
+    }
+
+    return error.status === 408 || error.status === 429 || error.status >= 500;
   }
 }

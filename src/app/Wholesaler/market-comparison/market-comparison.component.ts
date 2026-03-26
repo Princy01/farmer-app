@@ -536,7 +536,7 @@ export class MarketComparisonComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/wholesaler/home']).catch(err =>
+    this.router.navigate(['/wholesaler/trends']).catch(err =>
       console.error('Navigation error:', err)
     );
   }

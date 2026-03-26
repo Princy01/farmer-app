@@ -22,7 +22,8 @@ import {
   arrowUndoOutline,
 } from 'ionicons/icons';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { RetailerOrderHistoryService, RetailerOrderHistory } from './retailer-order-history.service';
 
 interface DisplayOrder {
@@ -50,8 +51,9 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   selectedFilter: string = 'all';
   isLoading = true;
   hasError = false;
+  errorMessage: string = '';
 
-  private subscriptions = new Subscription();
+  private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
@@ -83,62 +85,66 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadOrders(): void {
     this.isLoading = true;
     this.hasError = false;
+    this.errorMessage = '';
 
-    const subscription = this.orderService.getOrderHistory().subscribe({
-      next: (response) => {
-        try {
-          const allOrders: DisplayOrder[] = [];
+    this.orderService.getOrderHistory()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          try {
+            const allOrders: DisplayOrder[] = [];
 
-          // Current orders (status 1 to 5)
-          if (response.current_orders && Array.isArray(response.current_orders)) {
-            response.current_orders.forEach((o) => {
-              allOrders.push(this.mapToDisplayOrder(o, true));
-            });
-          }
-
-          // Past orders (delivered, cancelled, or null status)
-          if (response.order_history && Array.isArray(response.order_history)) {
-            response.order_history.forEach((o) => {
-              allOrders.push(this.mapToDisplayOrder(o, false));
-            });
-          }
-
-          // Sort newest first
-          allOrders.sort((a, b) => {
-            const dateA = new Date(a.placedAt).getTime();
-            const dateB = new Date(b.placedAt).getTime();
-
-            // First, compare by date
-            if (dateB !== dateA) {
-              return dateB - dateA;
+            // Current orders (status 1 to 5)
+            if (response.current_orders && Array.isArray(response.current_orders)) {
+              response.current_orders.forEach((o) => {
+                allOrders.push(this.mapToDisplayOrder(o, true));
+              });
             }
 
-            // If dates are equal, compare by order ID
-            return b.rawOrderId - a.rawOrderId;
-          });
-          this.orders = allOrders;
-          this.filterOrders(this.selectedFilter);
-          this.isLoading = false;
-        } catch (error) {
-          console.error('Error processing order data:', error);
+            // Past orders (delivered, cancelled, or null status)
+            if (response.order_history && Array.isArray(response.order_history)) {
+              response.order_history.forEach((o) => {
+                allOrders.push(this.mapToDisplayOrder(o, false));
+              });
+            }
+
+            // Sort newest first
+            allOrders.sort((a, b) => {
+              const dateA = new Date(a.placedAt).getTime();
+              const dateB = new Date(b.placedAt).getTime();
+
+              // First, compare by date
+              if (dateB !== dateA) {
+                return dateB - dateA;
+              }
+
+              // If dates are equal, compare by order ID
+              return b.rawOrderId - a.rawOrderId;
+            });
+            this.orders = allOrders;
+            this.filterOrders(this.selectedFilter);
+            this.isLoading = false;
+          } catch (error) {
+            // Error in data processing - show generic message
+            this.errorMessage = this.translate.instant('RETAILER_ORDER_HISTORY.ERROR_MESSAGE');
+            this.hasError = true;
+            this.isLoading = false;
+          }
+        },
+        error: (err) => {
+          // Error comes from service with user-friendly message
+          this.errorMessage = err?.message || this.translate.instant('RETAILER_ORDER_HISTORY.ERROR_MESSAGE');
           this.hasError = true;
           this.isLoading = false;
-        }
-      },
-      error: (err) => {
-        console.error('Failed to load order history:', err);
-        this.hasError = true;
-        this.isLoading = false;
-      },
-    });
-
-    this.subscriptions.add(subscription);
+        },
+      });
   }
 
   private mapToDisplayOrder(o: RetailerOrderHistory, isCurrent: boolean): DisplayOrder {

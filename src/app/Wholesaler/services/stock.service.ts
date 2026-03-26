@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { catchError, retry, timeout, shareReplay } from 'rxjs/operators';
+import { catchError, retry, timeout, shareReplay, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -134,6 +134,18 @@ export class StockService {
   }
 
   /**
+   * Store data in cache for reference data (24-hour TTL)
+   * @param cacheObject The cache object to store
+   * @param data The data to cache
+   */
+  private storeInCache<T>(cacheObject: { data: T[], timestamp: number } | null, data: T[]): { data: T[], timestamp: number } {
+    return {
+      data,
+      timestamp: Date.now()
+    };
+  }
+
+  /**
    * Clear all caches (e.g., on logout or session change)
    */
   clearCache(): void {
@@ -187,6 +199,13 @@ export class StockService {
       }),
       catchError(this.handleError.bind(this)),
       shareReplay(1)
+    ).pipe(
+      tap((data: BusinessBranchWithNames[]) => {
+        this.branchesCache[userId] = {
+          data,
+          timestamp: Date.now()
+        };
+      })
     );
   }
 
@@ -251,7 +270,13 @@ export class StockService {
         }
       }),
       catchError(this.handleError.bind(this)),
-      shareReplay(1)
+      shareReplay(1),
+      tap((data: any[]) => {
+        this.productsCache = {
+          data,
+          timestamp: Date.now()
+        };
+      })
     );
   }
 
@@ -278,7 +303,13 @@ export class StockService {
         }
       }),
       catchError(this.handleError.bind(this)),
-      shareReplay(1)
+      shareReplay(1),
+      tap((data: any[]) => {
+        this.qualitiesCache = {
+          data,
+          timestamp: Date.now()
+        };
+      })
     );
   }
 
@@ -305,7 +336,13 @@ export class StockService {
         }
       }),
       catchError(this.handleError.bind(this)),
-      shareReplay(1)
+      shareReplay(1),
+      tap((data: any[]) => {
+        this.wastageMeasuresCache = {
+          data,
+          timestamp: Date.now()
+        };
+      })
     );
   }
 
@@ -332,7 +369,13 @@ export class StockService {
         }
       }),
       catchError(this.handleError.bind(this)),
-      shareReplay(1)
+      shareReplay(1),
+      tap((data: any[]) => {
+        this.unitsCache = {
+          data,
+          timestamp: Date.now()
+        };
+      })
     );
   }
 }

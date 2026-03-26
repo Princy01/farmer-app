@@ -58,6 +58,21 @@ ion-button[fill='clear'] {
   margin-bottom: 6px;
 }
 
+/* ===== Empty State ===== */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+  margin: 12px 0;
+
+  ion-text {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
 /* ======================================================
    OTP CARD – MODERN APP STYLE
 ====================================================== */

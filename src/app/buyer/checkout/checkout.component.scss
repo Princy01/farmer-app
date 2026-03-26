@@ -24,6 +24,12 @@
   }
 }
 
+
+// CORE CARD COMPONENT STYLES
+ 
+// Modern card design with gradient headers
+// Used consistently across all sections
+
 .modern-card {
   border-radius: 16px;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
@@ -79,7 +85,10 @@
   }
 }
 
-// Order Details Styles
+
+// ORDER DETAILS & LABELS
+
+// Displays buyer and seller information
 .detail-item {
   display: flex;
   justify-content: space-between;
@@ -120,7 +129,12 @@
   }
 }
 
-// Delivery Address Styles
+
+// DELIVERY ADDRESS SELECTION
+
+// Interactive address cards with visual feedback
+// Supports multiple addresses with selection state
+// Mobile-responsive layout
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -177,6 +191,11 @@
     border-color: var(--ion-color-primary-tint);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
     transform: translateY(-1px);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
   }
 
   &.selected {
@@ -292,7 +311,10 @@
   }
 }
 
-// Cart Items Styles
+
+// CART ITEMS DISPLAY
+
+// Itemized list showing products, quantities, prices
 .items-list {
   .item-card {
     display: flex;
@@ -353,7 +375,11 @@
   }
 }
 
-// Transport Options Styles
+
+// TRANSPORT OPTIONS & DELIVERY
+
+// Transport arrangement UI with cost calculation
+// States: No transport selected, transport configured, driver assigned
 .transport-card {
   .transport-content {
     .transport-offer {
@@ -547,7 +573,11 @@
   }
 }
 
-// Order Summary Styles
+
+// ORDER SUMMARY & PRICING
+
+// Displays itemized breakdown and grand total
+// Supports discounts and transport costs
 .summary-card {
   .summary-list {
     .summary-row {
@@ -592,7 +622,11 @@
   }
 }
 
-// Footer Styles
+
+// STICKY FOOTER & CALL-TO-ACTION
+
+// Fixed footer with total and payment button
+// Remains visible during scroll for easy access
 .checkout-footer {
   .footer-content {
     padding: 1rem 1.5rem;
@@ -637,7 +671,9 @@
   height: 1rem;
 }
 
-// Animation for selection
+
+// ANIMATIONS & INTERACTIONS
+
 @keyframes selectAddress {
   0% {
     transform: scale(1);
@@ -654,7 +690,11 @@
   animation: selectAddress 0.3s ease;
 }
 
-// Mobile Responsive
+
+// RESPONSIVE DESIGN
+
+// Mobile-first approach with tablet/desktop breakpoints
+// Optimized for: mobile < 576px, tablet 576px-768px, desktop > 768px
 @media (max-width: 768px) {
   .address-card {
     .address-details .contact-details {

@@ -40,21 +40,20 @@
     "LOGOUT": "लॉगआउट",
     "LOGOUT_CONFIRMATION": "क्या आप वाकई लॉगआउट करना चाहते हैं?",
     "CANCEL": "रद्द करें",
-  "LOAD_PRODUCTS_ERROR": "प्रोडक्ट लोड नहीं हो पाए। कृपया दोबारा कोशिश करें।",
-  "NAVIGATION_ERROR": "स्क्रीन खोलने में समस्या आई। कृपया फिर से कोशिश करें।",
-  "LANGUAGE_SAVE_ERROR": "भाषा सेव नहीं हो पाई।",
-  "REQUEST_TIMEOUT_ERROR": "अनुरोध में बहुत समय लग गया। कृपया अपना इंटरनेट कनेक्शन जांचें और फिर से कोशिश करें।",
-  "NETWORK_ERROR": "इंटरनेट कनेक्शन नहीं है। कृपया अपना इंटरनेट जांचें और फिर से कोशिश करें।",
-  "NOT_FOUND": "यह प्रोडक्ट नहीं मिला।",
-  "RATE_LIMIT_ERROR": "बहुत सारे अनुरोध किए गए। कृपया एक पल प्रतीक्षा करें और फिर से कोशिश करें।",
-  "SERVER_ERROR": "सर्वर में समस्या है। कृपया बाद में कोशिश करें।",
-  "SEARCH_ERROR": "खोज विफल रही। कृपया फिर से कोशिश करें।",
-  "UNIT_KG": "किलोग्राम",
-  "UNIT_GRAM": "ग्राम",
-  "UNIT_QUINTAL": "क्विंटल",
-  "UNIT_TON": "टन"
+    "LOAD_PRODUCTS_ERROR": "प्रोडक्ट लोड नहीं हो पाए। कृपया दोबारा कोशिश करें।",
+    "NAVIGATION_ERROR": "स्क्रीन खोलने में समस्या आई। कृपया फिर से कोशिश करें।",
+    "LANGUAGE_SAVE_ERROR": "भाषा सेव नहीं हो पाई।",
+    "REQUEST_TIMEOUT_ERROR": "अनुरोध में बहुत समय लग गया। कृपया अपना इंटरनेट कनेक्शन जांचें और फिर से कोशिश करें।",
+    "NETWORK_ERROR": "इंटरनेट कनेक्शन नहीं है। कृपया अपना इंटरनेट जांचें और फिर से कोशिश करें।",
+    "NOT_FOUND": "यह प्रोडक्ट नहीं मिला।",
+    "RATE_LIMIT_ERROR": "बहुत सारे अनुरोध किए गए। कृपया एक पल प्रतीक्षा करें और फिर से कोशिश करें।",
+    "SERVER_ERROR": "सर्वर में समस्या है। कृपया बाद में कोशिश करें।",
+    "SEARCH_ERROR": "खोज विफल रही। कृपया फिर से कोशिश करें।",
+    "UNIT_KG": "किलोग्राम",
+    "UNIT_GRAM": "ग्राम",
+    "UNIT_QUINTAL": "क्विंटल",
+    "UNIT_TON": "टन"
   },
-
   "MENU": {
     "DISMISS": "बंद करें",
     "NAVIGATION_ERROR": "नेविगेशन में समस्या है। कृपया दोबारा कोशिश करें।",
@@ -76,12 +75,10 @@
     "SETTINGS": "सेटिंग्स",
     "LOGOUT": "लॉगआउट"
   },
-
   "LANGUAGE_POPOVER": {
-  "SELECT": "{{language}} भाषा चुनें",
-  "SELECTED": "अभी चुनी हुई भाषा"
-},
-
+    "SELECT": "{{language}} भाषा चुनें",
+    "SELECTED": "अभी चुनी हुई भाषा"
+  },
   "WHOLESALER_BUSINESS_LOCATIONS": {
     "Business Locations": "व्यवसाय स्थान",
     "Add New Location": "नया स्थान जोड़ें",
@@ -115,17 +112,14 @@
     "NO_LOCATIONS": "कोई व्यवसाय स्थान नहीं मिला",
     "NO_LOCATIONS_MESSAGE": "शुरू करने के लिए अपना पहला व्यवसाय स्थान जोड़ें"
   },
-
   "WHOLESALER_BUSINESS_UPDATE": {
     "PAGE_TITLE": "व्यवसाय अपडेट करें",
     "CARD_TITLE": "व्यवसाय की जानकारी",
     "SUBTITLE": "अपने व्यवसाय का विवरण अपडेट करें",
-
     "EMAIL_LABEL": "ईमेल पता",
     "EMAIL_PLACEHOLDER": "अपने व्यवसाय का ईमेल दर्ज करें",
     "EMAIL_REQUIRED": "ईमेल आवश्यक है",
     "INVALID_EMAIL": "कृपया सही ईमेल पता दर्ज करें",
-
     "MOBILE_LABEL": "मोबाइल नंबर",
     "MOBILE_PLACEHOLDER": "अपना मोबाइल नंबर दर्ज करें",
     "MOBILE_HELPER": "10 से 15 अंकों का मोबाइल नंबर दर्ज करें",
@@ -133,32 +127,25 @@
     "INVALID_MOBILE": "कृपया सही मोबाइल नंबर दर्ज करें (10–15 अंक)",
     "MOBILE_NUMBER_MIN_LENGTH": "मोबाइल नंबर कम से कम {{min}} अंकों का होना चाहिए",
     "MOBILE_NUMBER_MAX_LENGTH": "मोबाइल नंबर {{max}} अंकों से अधिक नहीं हो सकता",
-
     "ADDRESS_LABEL": "व्यवसाय का पता",
     "ADDRESS_PLACEHOLDER": "अपने व्यवसाय का पूरा पता दर्ज करें",
     "ADDRESS_REQUIRED": "पता आवश्यक है",
     "ADDRESS_MIN_LENGTH": "पता कम से कम {{min}} अक्षरों का होना चाहिए",
     "ADDRESS_MAX_LENGTH": "पता {{max}} अक्षरों से अधिक नहीं हो सकता",
-
     "BUSINESS_STATUS_LABEL": "व्यवसाय की स्थिति",
     "ACTIVE": "व्यवसाय सक्रिय है",
     "INACTIVE": "व्यवसाय निष्क्रिय है",
-
     "UPDATE_BUTTON": "व्यवसाय अपडेट करें",
     "UPDATING": "अपडेट किया जा रहा है...",
-
     "UPDATE_SUCCESS": "व्यवसाय सफलतापूर्वक अपडेट हो गया",
     "UPDATE_FAILED": "व्यवसाय अपडेट नहीं हो सका",
     "FILL_REQUIRED_FIELDS": "कृपया सभी आवश्यक जानकारी सही तरीके से भरें",
-
     "ACCESS_DENIED": "प्रवेश की अनुमति नहीं है। केवल थोक विक्रेता के लिए।",
     "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
     "CONNECTION_ERROR": "सर्वर से कनेक्ट नहीं हो पा रहा है। कृपया इंटरनेट जांचें।",
     "UNEXPECTED_ERROR": "कोई अनजान त्रुटि हुई है। कृपया दोबारा प्रयास करें।",
     "INVALID_FIELD": "इस फ़ील्ड में गलत जानकारी है"
   },
-
-
   "WHOLESALER_BUSINESS_REGISTRATION": {
     "PAGE_TITLE": "व्यवसाय पंजीकरण",
     "FORM_TITLE": "अपना व्यवसाय रजिस्टर करें",
@@ -190,7 +177,7 @@
     "ERROR_CITY": "शहर आवश्यक है",
     "LOCATION": "स्थान",
     "LOCATION_PLACEHOLDER": "स्थान चुनें",
-    "ERROR_LOCATION": "स्थान आवश्यक है",
+    "ERROR_LOCATION": "वर्तमान स्थान प्राप्त करने में विफल",
     "ADDRESS": "पता",
     "ADDRESS_PLACEHOLDER": "पूरा पता दर्ज करें",
     "ERROR_ADDRESS": "पता आवश्यक है",
@@ -242,8 +229,9 @@
     "LONGITUDE_PLACEHOLDER": "देशांतर दर्ज करें (उदा. 77.2090)",
     "ERROR_LONGITUDE": "देशांतर आवश्यक है",
     "LOCATION_SUCCESS": "स्थान सफलतापूर्वक कैप्चर किया गया",
-    "ERROR_LOCATION": "वर्तमान स्थान प्राप्त करने में विफल",
     "ERROR_LOCATION_PERMISSION": "स्थान तक पहुंचने की अनुमति नहीं दी गई",
+    "NO_CITIES_FOUND": "इस राज्य के लिए कोई शहर नहीं मिला",
+    "NO_LOCATIONS_FOUND": "इस शहर के लिए कोई स्थान नहीं मिला",
     "Business Information": "व्यवसाय की जानकारी",
     "Registration Number": "पंजीकरण संख्या",
     "Owner Name": "मालिक का नाम",
@@ -270,7 +258,6 @@
     "GST number is required": "जीएसटी नंबर आवश्यक है",
     "PAN Number": "पैन नंबर"
   },
-
   "WHOLESALER_BUSINESS_INFO": {
     "Business Info": "व्यवसाय जानकारी",
     "Save Changes": "परिवर्तन सहेजें",
@@ -315,7 +302,6 @@
     "EMAIL_ALREADY_EXISTS": "यह ईमेल पता पहले से उपयोग में है। कृपया अलग ईमेल का उपयोग करें।",
     "EMAIL_PLACEHOLDER": "name@example.com"
   },
-
   "ORDER_DETAILS": {
     "Order": "ऑर्डर",
     "Status": "स्थिति",
@@ -339,27 +325,20 @@
     "Delivery Charges": "डिलीवरी शुल्क",
     "Final Amount": "अंतिम राशि",
     "Retry": "दोबारा कोशिश करें",
-
     "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
     "SESSION_EXPIRED": "आपका सेशन समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
     "OK": "ठीक है",
-
     "ACCESS_DENIED": "प्रवेश अस्वीकृत",
     "NO_PERMISSION": "आपको इस पेज को देखने की अनुमति नहीं है।",
     "ORDER_ACCESS_DENIED": "आप इस ऑर्डर को देखने के लिए अधिकृत नहीं हैं।",
-
     "INVALID_ORDER": "अमान्य ऑर्डर",
     "INVALID_ORDER_ID": "ऑर्डर आईडी गलत है। कृपया दोबारा प्रयास करें।",
-
     "NOT_FOUND": "नहीं मिला",
     "ORDER_NOT_FOUND": "मांगा गया ऑर्डर नहीं मिला।",
-
     "ERROR": "त्रुटि",
     "LOAD_ERROR": "ऑर्डर की जानकारी लोड नहीं हो सकी। कृपया बाद में पुनः प्रयास करें।",
-
     "DISMISS": "बंद करें",
     "RETRY": "दोबारा कोशिश करें",
-
     "STATUS_PROCESSING": "प्रोसेस हो रहा है",
     "STATUS_CONFIRMED": "पुष्ट किया गया",
     "STATUS_PAYMENT_PENDING": "भुगतान लंबित",
@@ -370,7 +349,6 @@
     "STATUS_RETURN_REQUESTED": "वापसी का अनुरोध",
     "STATUS_UNKNOWN": "अज्ञात"
   },
-
   "ADD_BUSINESS_FORM": {
     "PAGE_TITLE": "व्यवसाय स्थान जोड़ें",
     "EDIT_PAGE_TITLE": "व्यवसाय स्थान संपादित करें",
@@ -551,7 +529,6 @@
       "INVALID_FORM": "कृपया सभी आवश्यक क्षेत्र वैध मान से भरें।"
     }
   },
-
   "MARKET_COMPARISON": {
     "PAGE_TITLE": "बाज़ार तुलना",
     "LOADING": "डेटा लोड हो रहा है...",
@@ -647,7 +624,18 @@
     "VALIDATION_ERROR": "मान्यता त्रुटि",
     "ERROR": "त्रुटि",
     "SUBMIT_ERROR": "प्रस्ताव जमा करने में विफल। कृपया पुनः प्रयास करें।",
-    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई।"
+    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई।",
+    "OFFER_SUBMISSION_FAILED": "प्रस्ताव जमा करने में विफल। अपने इंटरनेट कनेक्शन की जांच करें और दोबारा प्रयास करें।",
+    "OFFER_ERROR_HINT": "यह एक अस्थायी नेटवर्क समस्या के कारण हो सकता है। कृपया पुनः प्रयास करें।",
+    "OFFER_ERROR_UNKNOWN": "एक अप्रत्याशित त्रुटि हुई। कृपया दोबारा प्रयास करें।",
+    "OFFER_ERROR_NETWORK": "अपने इंटरनेट कनेक्शन की जांच करें और दोबारा प्रयास करें।",
+    "OFFER_ERROR_TIMEOUT": "अनुरोध बहुत लंबा हो गया। अपने कनेक्शन की जांच करें और दोबारा प्रयास करें।",
+    "OFFER_ERROR_PERMISSION": "आपको प्रस्ताव जमा करने की अनुमति नहीं है। कृपया अपने खाते की जांच करें।",
+    "OFFER_ERROR_RATE_LIMIT": "बहुत सारे अनुरोध हैं। कृपया एक पल प्रतीक्षा करें और पुनः प्रयास करें।",
+    "OFFER_ERROR_SERVER": "सर्वर त्रुटि। कृपया बाद में दोबारा प्रयास करें।",
+    "OFFER_ERROR_VALIDATION": "अमान्य प्रस्ताव विवरण। कृपया जांच करें और पुनः प्रयास करें।",
+    "RETRY": "पुनः प्रयास करें",
+    "RETRYING_OFFER": "पुनः प्रयास किया जा रहा है... प्रयास {{attempt}}/{{max}}"
   },
   "MAKE_OFFER": {
     "TITLE": "प्रस्ताव दें",
@@ -667,7 +655,6 @@
     "SUBMIT_ERROR": "ऑफर जमा करने में विफल। कृपया पुनः प्रयास करें।",
     "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई।"
   },
-
   "ORDERS_RECEIVED": {
     "PAGE_TITLE": "प्राप्त ऑर्डर",
     "SEARCH_PLACEHOLDER": "ऑर्डर खोजें...",
@@ -698,7 +685,6 @@
     "ITEM_LABEL": "आइटम {{number}}",
     "PRICE_PER_UNIT": "₹{{price}}/{{unit}}"
   },
-
   "PAST_ORDERS": {
     "PAGE_TITLE": "पूर्ण किए गए ऑर्डर",
     "FILTER_ORDERS": "ऑर्डर फ़िल्टर करें",
@@ -744,8 +730,6 @@
     "NO_ORDERS_IN_RANGE": "चयनित तिथि सीमा में कोई ऑर्डर नहीं मिला",
     "INVALID_DATE_RANGE": "शुरुआत की तारीख समाप्ति की तारीख से पहले होनी चाहिए"
   },
-
-
   "PRODUCT_DETAILS": {
     "TITLE": "उत्पाद विवरण",
     "LOADING": "उत्पाद की जानकारी लोड हो रही है...",
@@ -804,14 +788,13 @@
       "INVALID_PRICE": "कृपया 0 से अधिक मान्य कीमत दर्ज करें"
     }
   },
-
   "COMMON": {
     "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
     "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
     "ACCESS_DENIED": "पहुँच अस्वीकृत",
     "NO_PERMISSION": "आपके पास इस संसाधन तक पहुँचने की अनुमति नहीं है।",
     "LOAD_FAILED": "डेटा लोड करने में विफल। कृपया पुनः प्रयास करें।",
-     "CANCEL": "रद्द करें",
+    "CANCEL": "रद्द करें",
     "CONFIRM": "पुष्टि करें",
     "SUCCESS": "सफल",
     "DISMISS": "बंद करें",
@@ -820,7 +803,6 @@
     "GO_BACK": "वापस जाएं",
     "CLOSE": "बंद करें"
   },
-
   "RESTOCK_RECS": {
     "PAGE_TITLE": "पुनः स्टॉक सुझाव",
     "TIME_PERIOD": "समय अवधि",
@@ -863,46 +845,44 @@
       "TRY_LATER": "कोई समस्या आई है। कृपया थोड़ी देर बाद कोशिश करें।"
     }
   },
-
   "SALES_TRENDS": {
     "PAGE_TITLE": "बिक्री रुझान",
-  "SALES_TRENDS": "बिक्री रुझान",
-  "TOP_PRODUCTS": "शीर्ष उत्पाद",
-  "SELECT_PERIOD": "अवधि चुनें",
-  "WEEKLY": "साप्ताहिक",
-  "MONTHLY": "मासिक",
-  "YEARLY": "वार्षिक",
-  "VIEW_BY": "देखें",
-  "BY_VOLUME": "मात्रा के अनुसार",
-  "BY_REVENUE": "राजस्व के अनुसार",
-  "LOADING": "डेटा लोड हो रहा है...",
-  "DISMISS": "बंद करें",
-  "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
-  "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
-  "OK": "ठीक है",
-  "ACCESS_DENIED": "पहुंच अस्वीकृत",
-  "NO_PERMISSION": "आपके पास इस पृष्ठ तक पहुंचने की अनुमति नहीं है।",
-  "ERROR_LOADING_DATA": "डेटा लोड करने में विफल। कृपया पुनः प्रयास करें।",
-  "NO_DATA_AVAILABLE": "चयनित अवधि के लिए कोई डेटा उपलब्ध नहीं है।",
-  "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई। कृपया पुनः प्रयास करें।",
-  "TOTAL_REVENUE": "कुल राजस्व",
-  "TOTAL_ORDERS": "कुल ऑर्डर",
-  "REVENUE_LABEL": "राजस्व (₹)",
-  "ORDERS_LABEL": "ऑर्डर",
-  "SALES_TRENDS_TITLE": "बिक्री रुझान - {{period}}",
-  "PERIOD_WEEKLY": "साप्ताहिक",
-  "PERIOD_MONTHLY": "मासिक",
-  "PERIOD_YEARLY": "वार्षिक",
-  "VOLUME_KG": "मात्रा (किग्रा)",
-  "REVENUE_INR": "राजस्व (₹)",
-  "PRODUCTS": "उत्पाद",
-  "VOLUME_LABEL": "मात्रा (किग्रा)",
-  "UNKNOWN_PRODUCT": "अज्ञात उत्पाद",
-  "TOP_PRODUCTS_TITLE": "शीर्ष 10 उत्पाद - {{period}} ({{metric}})",
-  "METRIC_VOLUME": "मात्रा के अनुसार",
-  "METRIC_PRICE": "राजस्व के अनुसार"
+    "SALES_TRENDS": "बिक्री रुझान",
+    "TOP_PRODUCTS": "शीर्ष उत्पाद",
+    "SELECT_PERIOD": "अवधि चुनें",
+    "WEEKLY": "साप्ताहिक",
+    "MONTHLY": "मासिक",
+    "YEARLY": "वार्षिक",
+    "VIEW_BY": "देखें",
+    "BY_VOLUME": "मात्रा के अनुसार",
+    "BY_REVENUE": "राजस्व के अनुसार",
+    "LOADING": "डेटा लोड हो रहा है...",
+    "DISMISS": "बंद करें",
+    "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
+    "OK": "ठीक है",
+    "ACCESS_DENIED": "पहुंच अस्वीकृत",
+    "NO_PERMISSION": "आपके पास इस पृष्ठ तक पहुंचने की अनुमति नहीं है।",
+    "ERROR_LOADING_DATA": "डेटा लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "NO_DATA_AVAILABLE": "चयनित अवधि के लिए कोई डेटा उपलब्ध नहीं है।",
+    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई। कृपया पुनः प्रयास करें।",
+    "TOTAL_REVENUE": "कुल राजस्व",
+    "TOTAL_ORDERS": "कुल ऑर्डर",
+    "REVENUE_LABEL": "राजस्व (₹)",
+    "ORDERS_LABEL": "ऑर्डर",
+    "SALES_TRENDS_TITLE": "बिक्री रुझान - {{period}}",
+    "PERIOD_WEEKLY": "साप्ताहिक",
+    "PERIOD_MONTHLY": "मासिक",
+    "PERIOD_YEARLY": "वार्षिक",
+    "VOLUME_KG": "मात्रा (किग्रा)",
+    "REVENUE_INR": "राजस्व (₹)",
+    "PRODUCTS": "उत्पाद",
+    "VOLUME_LABEL": "मात्रा (किग्रा)",
+    "UNKNOWN_PRODUCT": "अज्ञात उत्पाद",
+    "TOP_PRODUCTS_TITLE": "शीर्ष 10 उत्पाद - {{period}} ({{metric}})",
+    "METRIC_VOLUME": "मात्रा के अनुसार",
+    "METRIC_PRICE": "राजस्व के अनुसार"
   },
-
   "STOCK_DASHBOARD": {
     "PAGE_TITLE": "स्टॉक डैशबोर्ड",
     "BRANCH_LABEL": "शाखा चुनें",
@@ -931,94 +911,84 @@
       "STOCK_UPDATED": "स्टॉक सफलतापूर्वक अपडेट किया गया!"
     }
   },
-
   "STOCK_INSIGHTS": {
     "PAGE_TITLE": "स्टॉक जानकारी",
     "LOADING": "लोड हो रहा है...",
     "LOADING_MESSAGE": "डेटा लोड किया जा रहा है...",
     "RETRY": "पुनः प्रयास करें",
     "OK": "ठीक है",
-
     "SEGMENT_STOCK_LEVELS": "स्टॉक स्तर",
     "SEGMENT_LOW_STOCK": "कम स्टॉक",
     "SEGMENT_SLOW_MOVING": "धीरे बिकने वाले",
-
     "SELECT_WAREHOUSE": "गोदाम चुनें",
     "STOCK_LEVELS_TITLE": "स्टॉक स्तर",
+    "CHART_SERIES_NAME": "वर्तमान स्टॉक",
     "NO_STOCK_DATA": "इस गोदाम के लिए कोई स्टॉक डेटा उपलब्ध नहीं है",
-
     "LOW_STOCK_HEADER": "कम स्टॉक अलर्ट",
     "NO_LOW_STOCK": "अभी कोई कम स्टॉक आइटम नहीं है",
     "TOTAL_LABEL": "कुल",
     "KG_UNIT": "किग्रा",
     "CURRENT_STOCK": "वर्तमान स्टॉक",
-
     "SLOW_MOVING_HEADER": "धीरे बिकने वाले उत्पाद",
     "NO_SLOW_MOVING": "अभी कोई धीरे बिकने वाले उत्पाद नहीं हैं",
     "DAYS_IN_STOCK": "स्टॉक में दिन",
     "LOCATION": "स्थान",
     "WEEKLY_SALES": "साप्ताहिक बिक्री",
-
     "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
     "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
     "ACCESS_DENIED": "पहुँच अस्वीकृत",
     "NO_PERMISSION": "आपको इस सुविधा का उपयोग करने की अनुमति नहीं है।",
-
     "NO_MANDIS": "कोई गोदाम नहीं मिला",
-    "LOAD_MANDI_ERROR": "गोदाम लोड करने में विफल",
-    "LOAD_LOW_STOCK_ERROR": "कम स्टॉक आइटम लोड करने में विफल",
-    "LOAD_SLOW_MOVING_ERROR": "धीरे बिकने वाले उत्पाद लोड करने में विफल",
-    "LOAD_STOCK_ERROR": "स्टॉक डेटा लोड करने में विफल",
-    "ERROR_FETCHING_PRODUCT_STOCK": "उत्पाद स्टॉक डेटा लोड करने में विफल",
-
-    "NETWORK_ERROR": "नेटवर्क त्रुटि। कृपया कनेक्शन जांचें।",
+    "LOAD_MANDI_ERROR": "गोदाम लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "LOAD_LOW_STOCK_ERROR": "कम स्टॉक आइटम लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "LOAD_SLOW_MOVING_ERROR": "धीरे बिकने वाले उत्पाद लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "LOAD_STOCK_ERROR": "स्टॉक डेटा लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "ERROR_FETCHING_PRODUCT_STOCK": "उत्पाद स्टॉक डेटा लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "NETWORK_ERROR": "नेटवर्क त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें।",
     "SERVER_ERROR": "सर्वर त्रुटि। बाद में पुनः प्रयास करें।",
-    "FORBIDDEN_ERROR": "पहुँच निषिद्ध। कृपया अनुमति जांचें।",
+    "FORBIDDEN_ERROR": "पहुँच निषिद्ध। कृपया अपनी अनुमति जांचें।",
     "NOT_FOUND_ERROR": "संसाधन नहीं मिला।",
-    "UNEXPECTED_ERROR": "कुछ गलत हुआ।"
+    "UNEXPECTED_ERROR": "कुछ गलत हुआ। कृपया बाद में पुनः प्रयास करें।"
   },
-
   "TRENDS": {
     "PAGE_TITLE": "रुझान",
     "SALES_TRENDS": "बिक्री रुझान",
     "DEMAND_TRENDS": "मांग रुझान",
     "STOCK_INSIGHTS": "स्टॉक विश्लेषण",
-    "MARKET_COMPARISON": "बाज़ार तुलना"
+    "MARKET_COMPARISON": "बाज़ार तुलना",
+    "NAVIGATION_ERROR": "नेविगेशन विफल। कृपया पुनः प्रयास करें।"
   },
-
   "DEMAND_TRENDS": {
     "TITLE": "रुझान",
     "TIME_RANGE": "समय अवधि",
-
     "WEEKLY": "साप्ताहिक",
     "MONTHLY": "मासिक",
     "QUARTERLY": "त्रैमासिक",
     "YEARLY": "वार्षिक",
-
     "SELECT_PRODUCTS": "उत्पाद चुनें",
     "CHOOSE_PRODUCTS_SUBTITLE": "चार्ट में दिखाने के लिए उत्पाद चुनें",
     "SEARCH_PRODUCTS": "उत्पाद खोजें",
     "SELECT_ALL": "सभी चुनें",
-
     "SEASONAL_DEMAND_PATTERNS": "मौसमी मांग का पैटर्न",
     "PRODUCT_DEMAND_COMPARISON": "उत्पादों की मांग की तुलना",
-
     "CURRENT_PERIOD": "वर्तमान अवधि",
     "PREVIOUS_PERIOD": "पिछली अवधि",
-
     "DEMAND_KG": "मांग (किलोग्राम)",
-
     "LOADING": "डेटा लोड हो रहा है...",
     "NO_DATA_AVAILABLE": "चुनी गई अवधि के लिए कोई डेटा उपलब्ध नहीं है",
-
+    "SELECT_PRODUCTS_TO_VIEW": "रुझान देखने के लिए फ़िल्टर से उत्पाद चुनें",
     "ERROR_MESSAGE": "डेटा लोड नहीं हो सका। कृपया दोबारा प्रयास करें।",
     "ERROR_LOADING_PRODUCTS": "उत्पाद लोड नहीं हो सके",
     "ERROR_LOADING_DATA": "मांग का डेटा लोड नहीं हो सका",
-
-    "SELECT_AT_LEAST_ONE_PRODUCT": "कृपया कम से कम एक उत्पाद चुनें"
+    "ERROR_NETWORK": "अपने इंटरनेट कनेक्शन की जांच करें और दोबारा प्रयास करें।",
+    "ERROR_TIMEOUT": "अनुरोध बहुत लंबा हो गया। अपने कनेक्शन की जांच करें और दोबारा प्रयास करें।",
+    "ERROR_UNAUTHORIZED": "आपको इस डेटा को देखने की अनुमति नहीं है। कृपया दोबारा साइन इन करें।",
+    "ERROR_SERVER": "सर्वर त्रुटि। कृपया बाद में दोबारा प्रयास करें।",
+    "ERROR_NOT_FOUND": "डेटा नहीं मिला।",
+    "ERROR_INVALID_RANGE": "अमान्य समय अवधि चुनी गई।",
+    "SELECT_AT_LEAST_ONE_PRODUCT": "कृपया कम से कम एक उत्पाद चुनें",
+    "RETRY": "दोबारा प्रयास करें"
   },
-
-
   "UPDATE_STOCK": {
     "PAGE_TITLE": "स्टॉक अपडेट करें",
     "CLOSE": "बंद करें",
@@ -1102,15 +1072,16 @@
     "TOKEN_EXPIRED": "यह सत्यापन लिंक समाप्त हो गया है। कृपया एक नया लिंक का अनुरोध करें।",
     "VERIFICATION_HELP": "यदि आपको अपने ईमेल को सत्यापित करने में समस्या आ रही है, तो लॉगिन पृष्ठ से एक नया सत्यापन लिंक का अनुरोध करने का प्रयास करें।",
     "GO_TO_LOGIN": "लॉगिन पर जाएं",
-    "REDIRECTING_IN": "{{seconds}} सेकंड में रीडायरेक्ट किया जा रहा है..."
+    "REDIRECTING_IN": "{{seconds}} सेकंड में रीडायरेक्ट किया जा रहा है...",
+    "SELECT_AUTH_MODE": "प्रमाणीकरण मोड चुनें - साइन इन या साइन अप",
+    "SHOW_PASSWORD": "पासवर्ड दिखाएं",
+    "HIDE_PASSWORD": "पासवर्ड छिपाएं"
   },
   "EDIT_MODE": "संपादन मोड",
   "CREATE_MODE": "निर्माण मोड",
-
   "ADD_BUSINESS_LOCATION": {
     "PAGE_TITLE_ADD": "व्यवसाय स्थान जोड़ें",
     "PAGE_TITLE_EDIT": "व्यवसाय स्थान संपादित करें",
-
     "SHOP_LOCATION_IMAGE": "दुकान स्थान छवि",
     "CAPTURE_HELP_TEXT": "अपनी दुकान की फोटो लें। सटीक स्थान कैप्चर करने के लिए GPS को चालू रखें।",
     "CAPTURE_SHOP_IMAGE": "दुकान की छवि कैप्चर करें",
@@ -1119,44 +1090,31 @@
     "LONGITUDE": "देशांतर",
     "RETAKE": "फिर से लें",
     "REMOVE": "हटाएं",
-
     "BASIC_INFO": "बुनियादी जानकारी",
-    "LOCATION_DETAILS": "स्थान विवरण",
+    "LOCATION_DETAILS": "अक्षांश: {{latitude}}, देशांतर: {{longitude}}",
     "BUSINESS_IDENTITY": "व्यवसाय पहचान",
-
     "SHOP_NAME": "दुकान का नाम",
     "SHOP_NAME_PLACEHOLDER": "दुकान का नाम दर्ज करें",
-
     "PHONE_NUMBER": "फोन नंबर",
     "PHONE_PLACEHOLDER": "फोन नंबर दर्ज करें (10 अंक)",
-
     "STATE": "राज्य",
     "SELECT_STATE": "अपना राज्य चुनें",
-
     "CITY": "शहर",
     "SELECT_CITY": "अपना शहर चुनें",
-
     "LOCATION": "स्थान/क्षेत्र",
     "SELECT_LOCATION": "अपना स्थान या क्षेत्र चुनें",
-
     "ADDRESS": "पूरा पता",
     "ADDRESS_PLACEHOLDER": "पूरा पता दर्ज करें",
-
     "EMAIL": "ईमेल पता",
     "EMAIL_PLACEHOLDER": "ईमेल पता दर्ज करें",
-
     "GST_NUMBER": "जीएसटी नंबर",
     "GST_PLACEHOLDER": "15 अंकों का जीएसटी नंबर दर्ज करें",
-
     "PAN_NUMBER": "पैन नंबर",
     "PAN_PLACEHOLDER": "10 वर्णों का पैन नंबर दर्ज करें",
-
     "ESTABLISHED_YEAR": "स्थापना वर्ष",
     "YEAR_PLACEHOLDER": "वर्ष दर्ज करें (उदा. 2020)",
-
     "SAVE_BUTTON": "व्यवसाय स्थान सहेजें",
     "UPDATE_BUTTON": "व्यवसाय स्थान अपडेट करें",
-
     "ERROR_REQUIRED": "{{field}} आवश्यक है",
     "ERROR_EMAIL": "कृपया मान्य ईमेल पता दर्ज करें",
     "ERROR_PHONE": "कृपया मान्य 10 अंकों का फोन नंबर दर्ज करें",
@@ -1164,13 +1122,11 @@
     "ERROR_PAN": "कृपया मान्य पैन नंबर दर्ज करें",
     "ERROR_YEAR": "कृपया मान्य 4 अंकों का वर्ष दर्ज करें",
     "ERROR_INVALID": "कृपया मान्य मान दर्ज करें",
-
     "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
     "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
     "ACCESS_DENIED": "पहुँच अस्वीकृत",
     "NO_PERMISSION": "आपको इस पृष्ठ तक पहुँचने की अनुमति नहीं है।",
     "OK": "ठीक है",
-
     "CAPTURING_IMAGE": "छवि कैप्चर की जा रही है...",
     "CAMERA_PERMISSION_DENIED": "छवि कैप्चर करने के लिए कैमरे की अनुमति आवश्यक है",
     "IMAGE_CAPTURE_FAILED": "छवि कैप्चर करने में विफल। कृपया पुनः प्रयास करें।",
@@ -1180,15 +1136,34 @@
     "LOCATION_FROM_IMAGE": "छवि EXIF डेटा से स्थान निकाला गया",
     "LOCATION_FROM_DEVICE": "डिवाइस से स्थान प्राप्त",
     "CONFIRM_LOCATION": "स्थान की पुष्टि करें",
-    "LOCATION_DETAILS": "अक्षांश: {{latitude}}, देशांतर: {{longitude}}",
     "CONFIRM": "पुष्टि करें",
     "LOCATION_CONFIRMED": "स्थान सफलतापूर्वक पुष्टि किया गया",
     "CAPTURE_LOCATION_FIRST": "कृपया पहले दुकान की छवि और स्थान कैप्चर करें",
-
     "UPDATING": "स्थान अपडेट किया जा रहा है...",
     "CREATING": "स्थान बनाया जा रहा है...",
     "VALIDATION_ERROR": "कृपया सभी आवश्यक जानकारी सही तरीके से भरें।",
-    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई।"
+    "UNEXPECTED_ERROR": "एक अप्रत्याशित त्रुटि हुई।",
+    "UPDATE_SUCCESS": "स्थान सफलतापूर्वक अपडेट किया गया",
+    "CREATE_SUCCESS": "स्थान सफलतापूर्वक बनाया गया",
+    "UPDATE_ERROR": "स्थान अपडेट करने में विफल। कृपया पुनः प्रयास करें।",
+    "CREATE_ERROR": "स्थान बनाने में विफल। कृपया पुनः प्रयास करें।",
+    "LOAD_BUSINESS_TYPES_ERROR": "व्यवसाय प्रकार लोड करने में विफल",
+    "LOAD_STATES_ERROR": "राज्य लोड करने में विफल",
+    "LOAD_CITIES_ERROR": "शहर लोड करने में विफल",
+    "LOAD_LOCATIONS_ERROR": "स्थान लोड करने में विफल",
+    "EDIT_MODE": "संपादन मोड",
+    "CREATE_MODE": "निर्माण मोड",
+    "PRIVILEGED_USER": "विशेषाधिकार प्राप्त उपयोगकर्ता",
+    "ACTIVE_STATUS": "सक्रिय स्थिति",
+    "BUSINESS_TYPE": "व्यवसाय प्रकार"
+  },
+  "HTTP_ERROR": {
+    "FORBIDDEN": "अनुमति अस्वीकृत। आपको इस संसाधन तक पहुंचने की अनुमति नहीं है।",
+    "NOT_FOUND": "अनुरोधित संसाधन नहीं मिला।",
+    "SERVER_ERROR": "सर्वर त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।",
+    "NETWORK_ERROR": "नेटवर्क त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।",
+    "TIMEOUT": "अनुरोध में बहुत अधिक समय लगा। कृपया पुनः प्रयास करें।",
+    "UNAUTHORIZED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।"
   },
   "BUSINESS_LOCATIONS": {
     "PAGE_TITLE": "व्यवसाय स्थान",
@@ -1250,7 +1225,6 @@
     "CREATED": "निर्मित",
     "LAST_UPDATED": "अंतिम अपडेट"
   },
-
   "RETAILER_BUSINESS_INFO": {
     "Business Info": "व्यापार जानकारी",
     "Business Information": "व्यापार जानकारी",
@@ -1301,115 +1275,91 @@
     "Your email has been successfully updated": "आपका ईमेल सफलतापूर्वक अपडेट हो गया है",
     "Done": "पूर्ण",
     "FAILED_TO_SEND_EMAIL": "सत्यापन ईमेल भेजने में विफल। कृपया पुनः प्रयास करें।",
-    "INVALID_TOKEN": "अमान्य या समाप्त सत्यापन टोकन। कृपया एक नया अनुरोध करें।"
+    "INVALID_TOKEN": "अमान्य या समाप्त सत्यापन टोकन। कृपया एक नया अनुरोध करें।",
+    "EMAIL_ALREADY_EXISTS": "यह ईमेल पहले से पंजीकृत है। कृपया एक अलग ईमेल का उपयोग करें।",
+    "INVALID_EMAIL_FORMAT": "कृपया एक मान्य ईमेल पता प्रारूप दर्ज करें।",
+    "TOKEN_EXPIRED": "आपका सत्यापन टोकन समाप्त हो गया है। कृपया एक नया अनुरोध करें।",
+    "EMAIL_ALREADY_VERIFIED": "यह ईमेल पहले से सत्यापित है।"
   },
-
   "BUSINESS_REGISTRATION": {
-  "PAGE_TITLE": "व्यवसाय पंजीकरण",
-  "FORM_TITLE": "अपना व्यवसाय दर्ज करें",
-
-  "SECTION_BUSINESS_INFO": "व्यवसाय की जानकारी",
-  "SECTION_LOCATION_INFO": "स्थान की जानकारी",
-  "SECTION_CONTACT_INFO": "संपर्क जानकारी",
-  "SECTION_LEGAL_INFO": "कानूनी जानकारी",
-  "SECTION_ACCOUNT_SETTINGS": "खाता सेटिंग्स",
-
-  "REGISTRATION_NUMBER": "पंजीकरण नंबर",
-  "REGISTRATION_NUMBER_PLACEHOLDER": "पंजीकरण नंबर दर्ज करें",
-  "ERROR_REGISTRATION_NUMBER": "पंजीकरण नंबर आवश्यक है",
-
-  "OWNER_NAME": "मालिक का नाम",
-  "OWNER_NAME_PLACEHOLDER": "मालिक का नाम दर्ज करें",
-  "ERROR_OWNER_NAME": "मालिक का नाम आवश्यक है",
-
-  "BUSINESS_CATEGORY": "व्यवसाय श्रेणी",
-  "BUSINESS_CATEGORY_PLACEHOLDER": "व्यवसाय श्रेणी चुनें",
-  "ERROR_BUSINESS_CATEGORY": "व्यवसाय श्रेणी चुनना आवश्यक है",
-
-  "BUSINESS_TYPE": "व्यवसाय का प्रकार",
-  "BUSINESS_TYPE_PLACEHOLDER": "व्यवसाय का प्रकार चुनें",
-  "ERROR_BUSINESS_TYPE": "व्यवसाय का प्रकार चुनना आवश्यक है",
-
-  "ESTABLISHED_YEAR": "स्थापना वर्ष",
-  "ESTABLISHED_YEAR_PLACEHOLDER": "वर्ष दर्ज करें (जैसे 2020)",
-  "ERROR_ESTABLISHED_YEAR_REQUIRED": "स्थापना वर्ष आवश्यक है",
-  "ERROR_ESTABLISHED_YEAR_PATTERN": "कृपया सही 4 अंकों का वर्ष दर्ज करें",
-
-  "STATE": "राज्य",
-  "STATE_PLACEHOLDER": "राज्य चुनें",
-  "ERROR_STATE": "राज्य चुनना आवश्यक है",
-
-  "CITY": "शहर",
-  "CITY_PLACEHOLDER": "शहर चुनें",
-  "ERROR_CITY": "शहर चुनना आवश्यक है",
-
-  "LOCATION": "स्थान",
-  "LOCATION_PLACEHOLDER": "स्थान चुनें",
-  "ERROR_LOCATION": "स्थान चुनना आवश्यक है",
-
-  "ADDRESS": "पूरा पता",
-  "ADDRESS_PLACEHOLDER": "पूरा पता दर्ज करें",
-  "ERROR_ADDRESS": "पता आवश्यक है",
-
-  "MOBILE_NUMBER": "मोबाइल नंबर",
-  "MOBILE_NUMBER_PLACEHOLDER": "10 अंकों का मोबाइल नंबर दर्ज करें",
-  "ERROR_MOBILE_REQUIRED": "मोबाइल नंबर आवश्यक है",
-  "ERROR_MOBILE_PATTERN": "कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें",
-
-  "EMAIL": "ईमेल",
-  "EMAIL_PLACEHOLDER": "ईमेल दर्ज करें",
-  "ERROR_EMAIL_REQUIRED": "ईमेल आवश्यक है",
-  "ERROR_EMAIL_INVALID": "कृपया सही ईमेल दर्ज करें",
-
-  "GST_NUMBER": "GST नंबर",
-  "GST_NUMBER_PLACEHOLDER": "GST नंबर दर्ज करें",
-  "ERROR_GST_NUMBER": "GST नंबर आवश्यक है",
-
-  "PAN_NUMBER": "PAN नंबर",
-  "PAN_NUMBER_PLACEHOLDER": "PAN नंबर दर्ज करें",
-  "ERROR_PAN_REQUIRED": "PAN नंबर आवश्यक है",
-  "ERROR_PAN_PATTERN": "कृपया सही PAN नंबर दर्ज करें (जैसे ABCDE1234F)",
-
-  "PRIVILEGED_USER": "विशेष उपयोगकर्ता",
-  "ACTIVE_STATUS": "सक्रिय स्थिति",
-
-  "SUBMIT_BUTTON": "पंजीकरण जमा करें",
-
-  "SUCCESS_MESSAGE": "व्यवसाय सफलतापूर्वक दर्ज हो गया!",
-  "ERROR_REGISTER": "व्यवसाय दर्ज करने में समस्या आई",
-  "ERROR_FORM_INVALID": "कृपया फॉर्म की गलतियों को ठीक करें",
-
-  "ERROR_LOAD_CATEGORIES": "व्यवसाय श्रेणियाँ लोड करने में समस्या",
-  "ERROR_LOAD_TYPES": "व्यवसाय प्रकार लोड करने में समस्या",
-  "ERROR_LOAD_STATES": "राज्य लोड करने में समस्या",
-  "ERROR_LOAD_CITIES": "शहर लोड करने में समस्या",
-  "ERROR_LOAD_LOCATIONS": "स्थान लोड करने में समस्या",
-
-  "GPS_COORDINATES": "GPS स्थान",
-  "GET_CURRENT_LOCATION": "वर्तमान स्थान प्राप्त करें",
-  "GETTING_LOCATION": "स्थान प्राप्त किया जा रहा है...",
-
-  "LATITUDE": "अक्षांश",
-  "LATITUDE_PLACEHOLDER": "जैसे 34.0522",
-
-  "LONGITUDE": "देशांतर",
-  "LONGITUDE_PLACEHOLDER": "जैसे -118.2437",
-
-  "BUSINESS_IMAGE": "व्यवसाय की तस्वीर",
-  "UPLOAD_IMAGE": "तस्वीर अपलोड करें",
-
-  "ERROR_LATITUDE": "अक्षांश आवश्यक है",
-  "ERROR_LONGITUDE": "देशांतर आवश्यक है",
-
-  "ERROR_LOCATION_PERMISSION": "स्थान की अनुमति नहीं मिली",
-
-  "ERROR_INVALID_IMAGE": "कृपया सही तस्वीर फ़ाइल चुनें",
-  "ERROR_IMAGE_SIZE": "तस्वीर का आकार 5MB से कम होना चाहिए",
-  "ERROR_IMAGE_READ": "तस्वीर पढ़ने में समस्या",
-
-  "LOCATION_SUCCESS": "स्थान सफलतापूर्वक प्राप्त हुआ"
-},
-
+    "PAGE_TITLE": "व्यवसाय पंजीकरण",
+    "FORM_TITLE": "अपना व्यवसाय दर्ज करें",
+    "SECTION_BUSINESS_INFO": "व्यवसाय की जानकारी",
+    "SECTION_LOCATION_INFO": "स्थान की जानकारी",
+    "SECTION_CONTACT_INFO": "संपर्क जानकारी",
+    "SECTION_LEGAL_INFO": "कानूनी जानकारी",
+    "SECTION_ACCOUNT_SETTINGS": "खाता सेटिंग्स",
+    "REGISTRATION_NUMBER": "पंजीकरण नंबर",
+    "REGISTRATION_NUMBER_PLACEHOLDER": "पंजीकरण नंबर दर्ज करें",
+    "ERROR_REGISTRATION_NUMBER": "पंजीकरण नंबर आवश्यक है",
+    "OWNER_NAME": "मालिक का नाम",
+    "OWNER_NAME_PLACEHOLDER": "मालिक का नाम दर्ज करें",
+    "ERROR_OWNER_NAME": "मालिक का नाम आवश्यक है",
+    "BUSINESS_CATEGORY": "व्यवसाय श्रेणी",
+    "BUSINESS_CATEGORY_PLACEHOLDER": "व्यवसाय श्रेणी चुनें",
+    "ERROR_BUSINESS_CATEGORY": "व्यवसाय श्रेणी चुनना आवश्यक है",
+    "BUSINESS_TYPE": "व्यवसाय का प्रकार",
+    "BUSINESS_TYPE_PLACEHOLDER": "व्यवसाय का प्रकार चुनें",
+    "ERROR_BUSINESS_TYPE": "व्यवसाय का प्रकार चुनना आवश्यक है",
+    "ESTABLISHED_YEAR": "स्थापना वर्ष",
+    "ESTABLISHED_YEAR_PLACEHOLDER": "वर्ष दर्ज करें (जैसे 2020)",
+    "ERROR_ESTABLISHED_YEAR_REQUIRED": "स्थापना वर्ष आवश्यक है",
+    "ERROR_ESTABLISHED_YEAR_PATTERN": "कृपया सही 4 अंकों का वर्ष दर्ज करें",
+    "STATE": "राज्य",
+    "STATE_PLACEHOLDER": "राज्य चुनें",
+    "ERROR_STATE": "राज्य चुनना आवश्यक है",
+    "CITY": "शहर",
+    "CITY_PLACEHOLDER": "शहर चुनें",
+    "ERROR_CITY": "शहर चुनना आवश्यक है",
+    "LOCATION": "स्थान",
+    "LOCATION_PLACEHOLDER": "स्थान चुनें",
+    "ERROR_LOCATION": "स्थान चुनना आवश्यक है",
+    "ADDRESS": "पूरा पता",
+    "ADDRESS_PLACEHOLDER": "पूरा पता दर्ज करें",
+    "ERROR_ADDRESS": "पता आवश्यक है",
+    "MOBILE_NUMBER": "मोबाइल नंबर",
+    "MOBILE_NUMBER_PLACEHOLDER": "10 अंकों का मोबाइल नंबर दर्ज करें",
+    "ERROR_MOBILE_REQUIRED": "मोबाइल नंबर आवश्यक है",
+    "ERROR_MOBILE_PATTERN": "कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें",
+    "EMAIL": "ईमेल",
+    "EMAIL_PLACEHOLDER": "ईमेल दर्ज करें",
+    "ERROR_EMAIL_REQUIRED": "ईमेल आवश्यक है",
+    "ERROR_EMAIL_INVALID": "कृपया सही ईमेल दर्ज करें",
+    "GST_NUMBER": "GST नंबर",
+    "GST_NUMBER_PLACEHOLDER": "GST नंबर दर्ज करें",
+    "ERROR_GST_NUMBER": "GST नंबर आवश्यक है",
+    "PAN_NUMBER": "PAN नंबर",
+    "PAN_NUMBER_PLACEHOLDER": "PAN नंबर दर्ज करें",
+    "ERROR_PAN_REQUIRED": "PAN नंबर आवश्यक है",
+    "ERROR_PAN_PATTERN": "कृपया सही PAN नंबर दर्ज करें (जैसे ABCDE1234F)",
+    "PRIVILEGED_USER": "विशेष उपयोगकर्ता",
+    "ACTIVE_STATUS": "सक्रिय स्थिति",
+    "SUBMIT_BUTTON": "पंजीकरण जमा करें",
+    "SUCCESS_MESSAGE": "व्यवसाय सफलतापूर्वक दर्ज हो गया!",
+    "ERROR_REGISTER": "व्यवसाय दर्ज करने में समस्या आई",
+    "ERROR_FORM_INVALID": "कृपया फॉर्म की गलतियों को ठीक करें",
+    "ERROR_LOAD_CATEGORIES": "व्यवसाय श्रेणियाँ लोड करने में समस्या",
+    "ERROR_LOAD_TYPES": "व्यवसाय प्रकार लोड करने में समस्या",
+    "ERROR_LOAD_STATES": "राज्य लोड करने में समस्या",
+    "ERROR_LOAD_CITIES": "शहर लोड करने में समस्या",
+    "ERROR_LOAD_LOCATIONS": "स्थान लोड करने में समस्या",
+    "GPS_COORDINATES": "GPS स्थान",
+    "GET_CURRENT_LOCATION": "वर्तमान स्थान प्राप्त करें",
+    "GETTING_LOCATION": "स्थान प्राप्त किया जा रहा है...",
+    "LATITUDE": "अक्षांश",
+    "LATITUDE_PLACEHOLDER": "जैसे 34.0522",
+    "LONGITUDE": "देशांतर",
+    "LONGITUDE_PLACEHOLDER": "जैसे -118.2437",
+    "BUSINESS_IMAGE": "व्यवसाय की तस्वीर",
+    "UPLOAD_IMAGE": "तस्वीर अपलोड करें",
+    "ERROR_LATITUDE": "अक्षांश आवश्यक है",
+    "ERROR_LONGITUDE": "देशांतर आवश्यक है",
+    "ERROR_LOCATION_PERMISSION": "स्थान की अनुमति नहीं मिली",
+    "ERROR_INVALID_IMAGE": "कृपया सही तस्वीर फ़ाइल चुनें",
+    "ERROR_IMAGE_SIZE": "तस्वीर का आकार 5MB से कम होना चाहिए",
+    "ERROR_IMAGE_READ": "तस्वीर पढ़ने में समस्या",
+    "LOCATION_SUCCESS": "स्थान सफलतापूर्वक प्राप्त हुआ"
+  },
   "BUSINESS_UPDATE": {
     "PAGE_TITLE": "व्यवसाय अपडेट करें",
     "CARD_TITLE": "व्यवसाय अपडेट",
@@ -1460,15 +1410,14 @@
     "LOGOUT_CONFIRM_HEADER": "लॉगआउट की पुष्टि करें",
     "LOGOUT_CONFIRM_MESSAGE": "क्या आप वाकई लॉगआउट करना चाहते हैं?",
     "CANCEL": "रद्द करें",
-     "ERROR_LOADING_LANGUAGES": "भाषाएँ लोड नहीं हो पाईं",
-  "ERROR_LOADING_TRANSLATIONS": "अनुवाद लोड नहीं हो पाए",
-  "LANGUAGE_UPDATED": "भाषा सफलतापूर्वक बदल दी गई है",
-  "ERROR_SAVING_LANGUAGE": "भाषा की सेटिंग सेव नहीं हो पाई",
-  "ERROR_OPENING_MENU": "मेनू खोलने में समस्या हुई",
-  "NAVIGATION_ERROR": "पेज खोलने में समस्या हुई",
-  "LOGOUT_ERROR": "लॉगआउट नहीं हो पाया, कृपया दोबारा कोशिश करें"
+    "ERROR_LOADING_LANGUAGES": "भाषाएँ लोड नहीं हो पाईं",
+    "ERROR_LOADING_TRANSLATIONS": "अनुवाद लोड नहीं हो पाए",
+    "LANGUAGE_UPDATED": "भाषा सफलतापूर्वक बदल दी गई है",
+    "ERROR_SAVING_LANGUAGE": "भाषा की सेटिंग सेव नहीं हो पाई",
+    "ERROR_OPENING_MENU": "मेनू खोलने में समस्या हुई",
+    "NAVIGATION_ERROR": "पेज खोलने में समस्या हुई",
+    "LOGOUT_ERROR": "लॉगआउट नहीं हो पाया, कृपया दोबारा कोशिश करें"
   },
-
   "CART": {
     "TITLE": "खरीदारी की टोकरी",
     "LOADING_CART": "आपकी टोकरी लोड हो रही है...",
@@ -1506,15 +1455,22 @@
     "SELECT_ALL": "सभी चुनें",
     "STORES": "दुकानें",
     "SELECT_ITEMS_FIRST": "कृपया चेकआउट करने के लिए कम से कम एक दुकान चुनें",
-    "REMOVE_GROUP_MESSAGE": "{{wholesaler}} से सभी {{count}} सामान हटाएं?"
+    "REMOVE_GROUP_MESSAGE": "{{wholesaler}} से सभी {{count}} सामान हटाएं?",
+    "ERROR_TIMEOUT": "अनुरोध में बहुत समय लग गया। कृपया अपना इंटरनेट कनेक्शन जांचें और फिर से कोशिश करें।",
+    "ERROR_NETWORK": "इंटरनेट कनेक्शन नहीं है। कृपया अपना इंटरनेट जांचें और फिर से कोशिश करें।",
+    "ERROR_NOT_FOUND": "टोकरी में सामान नहीं मिला।",
+    "ERROR_RATE_LIMIT": "बहुत सारे अनुरोध किए गए। कृपया एक पल प्रतीक्षा करें और फिर से कोशिश करें।",
+    "ERROR_SERVER": "सर्वर में समस्या है। कृपया बाद में कोशिश करें।",
+    "ERROR_SESSION": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
+    "ERROR_PERMISSION": "अनुमति नहीं है। कृपया फिर से कोशिश करें।"
   },
-
   "CATEGORY": {
     "SEARCH_PLACEHOLDER": "उत्पाद खोजें...",
     "LOADING_CATEGORIES": "श्रेणियाँ लोड हो रही हैं...",
     "ERROR_LOADING_CATEGORIES": "श्रेणियाँ लोड नहीं हो पाईं",
     "RETRY": "दोबारा कोशिश करें",
     "ALL": "सभी",
+    "PRODUCTS_DEFAULT": "उत्पाद",
     "LOADING_PRODUCTS": "उत्पाद लोड हो रहे हैं...",
     "ERROR_LOADING_PRODUCTS": "उत्पाद लोड नहीं हो पाए। कृपया पुनः प्रयास करें।",
     "NO_DESCRIPTION": "विवरण उपलब्ध नहीं है।",
@@ -1576,7 +1532,6 @@
     "INVALID_WHOLESALER": "थोक विक्रेता की जानकारी अमान्य है।",
     "PRODUCTS_FALLBACK": "उत्पाद"
   },
-
   "CHECKOUT": {
     "PAGE_TITLE": "चेकआउट",
     "ORDER_DETAILS": "ऑर्डर विवरण",
@@ -1638,9 +1593,10 @@
     "DRIVER_INFO_TITLE": "ड्राइवर असाइनमेंट",
     "DRIVER_INFO_MSG": "पेमेंट की पुष्टि के बाद आपके ऑर्डर के लिए एक ड्राइवर असाइन किया जाएगा।",
     "DISCOUNT": "छूट",
-    "EMPTY_CART_ERROR": "आपकी कार्ट खाली है। भुगतान से पहले कृपया कुछ सामान जोड़ें।"
+    "EMPTY_CART_ERROR": "आपकी कार्ट खाली है। भुगतान से पहले कृपया कुछ सामान जोड़ें।",
+    "WHOLESALERS": "थोक विक्रेता",
+    "NO_ITEMS_ERROR": "ऑर्डर में कोई आइटम नहीं हैं। भुगतान से पहले कृपया आइटम जोड़ें।"
   },
-
   "ORDER_CONFIRMATION": {
     "PAGE_TITLE": "ऑर्डर की पुष्टि",
     "SUCCESS_TITLE": "ऑर्डर सफलतापूर्वक हो गया!",
@@ -1652,15 +1608,28 @@
     "DELIVERY_ADDRESS": "डिलीवरी का पता",
     "DELIVERY_INFO": "डिलीवरी की जानकारी",
     "ESTIMATED_DELIVERY": "अनुमानित डिलीवरी",
+    "DELIVERY_TYPE": "डिलीवरी प्रकार",
+    "DISTANCE": "दूरी",
+    "KM": "किमी",
     "ORDER_ITEMS": "ऑर्डर किए गए आइटम",
     "ITEMS": "आइटम",
+    "NO_ITEMS": "ऑर्डर में कोई आइटम उपलब्ध नहीं है।",
     "TRACK_ORDER": "ऑर्डर ट्रैक करें",
     "DOWNLOAD_INVOICE": "इनवॉइस डाउनलोड करें",
     "VIEW_ALL_ORDERS": "सभी ऑर्डर देखें",
     "CONTINUE_SHOPPING": "खरीदारी जारी रखें",
     "LOADING_DETAILS": "ऑर्डर की जानकारी लोड हो रही है...",
     "FETCH_ERROR": "ऑर्डर की जानकारी लोड नहीं हो पाई। कृपया दोबारा कोशिश करें।",
+    "NETWORK_ERROR": "अपना इंटरनेट कनेक्शन जांचें और फिर से प्रयास करें।",
+    "TIMEOUT_ERROR": "अनुरोध में बहुत समय लगा, कृपया फिर से प्रयास करें।",
+    "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
+    "PERMISSION_DENIED": "अनुमति नहीं है।",
+    "NOT_FOUND": "ऑर्डर की जानकारी नहीं मिली।",
+    "SERVER_ERROR": "सर्वर त्रुटि। कृपया बाद में प्रयास करें।",
     "NO_ORDER_ID": "ऑर्डर आईडी नहीं मिली",
+    "NO_ORDER_DATA": "ऑर्डर विवरण उपलब्ध नहीं है। आपको होम स्क्रीन पर भेजा जा रहा है।",
+    "PARTIAL_DATA_WARNING": "कुछ विवरण अपडेट नहीं हो सके। उपलब्ध जानकारी दिखाई जा रही है।",
+    "RETRY": "पुनः प्रयास करें",
     "DOWNLOAD_COMING_SOON": "इनवॉइस डाउनलोड की सुविधा जल्द आ रही है!",
     "UNKNOWN_PRODUCT": "अज्ञात उत्पाद",
     "UNIT": "इकाई",
@@ -1674,9 +1643,9 @@
     "DELIVERY_NO_TRANSPORT": "2-3 कार्य दिवस",
     "TRANSPORT_STANDARD": "सामान्य डिलीवरी",
     "TRANSPORT_EXPRESS": "तेज़ डिलीवरी",
-    "TRANSPORT_PRIORITY": "प्राथमिक डिलीवरी"
+    "TRANSPORT_PRIORITY": "प्राथमिक डिलीवरी",
+    "TRANSPORT_UNKNOWN": "अज्ञात डिलीवरी प्रकार"
   },
-
   "PAYMENT": {
     "PAGE_TITLE": "भुगतान",
     "ORDER_SUMMARY": "ऑर्डर सारांश",
@@ -1743,8 +1712,6 @@
     "PAYMENT_SUCCESS": "भुगतान सफल!",
     "PAYMENT_FAILED_MSG": "भुगतान विफल। कृपया पुनः प्रयास करें।"
   },
-
-
   "RETAILER_ORDER_DETAILS": {
     "TITLE": "ऑर्डर विवरण",
     "LOADING": "ऑर्डर की जानकारी लोड हो रही है...",
@@ -1765,6 +1732,8 @@
     "ORDER_SUMMARY": "ऑर्डर सारांश",
     "TOTAL_ORDER_AMOUNT": "कुल ऑर्डर राशि",
     "FINAL_AMOUNT": "अंतिम भुगतान राशि",
+    "NO_ITEMS": "ऑर्डर में कोई आइटम नहीं",
+    "NO_ITEMS_MESSAGE": "इस ऑर्डर में कोई आइटम नहीं हैं।",
     "STATUS_PLACED": "ऑर्डर किया गया",
     "STATUS_CONFIRMED": "पुष्टि हो गई",
     "STATUS_PACKED": "पैक किया गया",
@@ -1773,11 +1742,16 @@
     "STATUS_DELIVERED": "डिलीवर हो गया",
     "STATUS_CANCELLED": "रद्द किया गया"
   },
-
   "RETAILER_ORDER_HISTORY": {
     "PAGE_TITLE": "ऑर्डर इतिहास",
     "ERROR_TITLE": "ऑर्डर लोड नहीं हो पाए",
     "ERROR_MESSAGE": "ऑर्डर लोड करते समय कुछ समस्या आ गई। कृपया दोबारा कोशिश करें।",
+    "ERROR_NETWORK": "अपने इंटरनेट कनेक्शन को जांचें और दोबारा कोशिश करें।",
+    "ERROR_UNAUTHORIZED": "आप अधिकृत नहीं हैं। कृपया फिर से लॉगिन करें।",
+    "ERROR_FORBIDDEN": "इसे देखने की आपको अनुमति नहीं है।",
+    "ERROR_NOT_FOUND": "ऑर्डर की जानकारी नहीं मिली।",
+    "ERROR_TIMEOUT": "अनुरोध बहुत लंबे समय तक चला। कृपया अपना कनेक्शन जांचें और पुनः प्रयास करें।",
+    "ERROR_SERVER": "सर्वर में त्रुटि। कृपया बाद में प्रयास करें।",
     "RETRY": "फिर से कोशिश करें",
     "FILTER_ALL": "सभी",
     "FILTER_ACTIVE": "चल रहे",
@@ -1800,7 +1774,6 @@
     "STATUS_DELIVERED": "डिलीवर हो गया",
     "STATUS_CANCELLED": "रद्द कर दिया गया"
   },
-
   "RIDE": {
     "PAGE_TITLE": "परिवहन विकल्प",
     "HERO_TITLE": "अपनी डिलीवरी चुनें",
@@ -1831,7 +1804,7 @@
     "ESTIMATED_DISTANCE": "अनुमानित दूरी",
     "RATE_PER_KM": "प्रति किलोमीटर दर",
     "DISTANCE": "दूरी",
-     "ERROR_TITLE": "त्रुटि",
+    "ERROR_TITLE": "त्रुटि",
     "MISSING_DATA_ERROR": "डिलीवरी की ज़रूरी जानकारी नहीं मिली। कृपया दोबारा कोशिश करें।",
     "PREMIUM_REQUIRED_TITLE": "प्रीमियम ज़रूरी है",
     "UPGRADE_NOW": "अभी अपग्रेड करें",
@@ -1840,7 +1813,6 @@
     "CONFIRMING_SELECTION": "आपका चयन पक्का किया जा रहा है...",
     "CONFIRMATION_ERROR": "चयन पक्का नहीं हो सका। कृपया दोबारा कोशिश करें।"
   },
-
   "ERRORS": {
     "UNKNOWN_ERROR": "कुछ गलत हो गया। कृपया फिर से कोशिश करें।",
     "NETWORK_ERROR": "इंटरनेट कनेक्शन नहीं मिल रहा। कृपया अपना नेटवर्क जांचें।",
@@ -1854,7 +1826,6 @@
     "INVALID_PRODUCT_ID": "चुना गया प्रोडक्ट सही नहीं है।",
     "INVALID_ID": "दी गई जानकारी सही नहीं है।"
   },
-
   "TRANSPORT_DASHBOARD": {
     "ACTIVE": "सक्रिय",
     "UPCOMING": "आने वाली",
@@ -1880,7 +1851,9 @@
     "STATUS_DELIVERED": "डिलीवर किया गया",
     "INVOICE": "बिल",
     "RATING": "रेटिंग",
-    "STATUS_DELAYED": "देरी हुई"
+    "STATUS_DELAYED": "देरी हुई",
+    "LOAD_DELIVERIES_ERROR": "डिलीवरी लोड करने में विफल। कृपया दोबारा प्रयास करें।",
+    "JOB_ID": "जॉब #"
   },
   "TRANSPORT_REQUESTS": {
     "SERVICE_AREAS": "सर्विस क्षेत्र",
@@ -1985,6 +1958,7 @@
     "FILTER_BY_STATUS": "स्थिति के अनुसार फ़िल्टर करें",
     "SELECT_STATUSES": "स्थिति चुनें",
     "NO_ORDERS": "कोई निर्धारित पिकअप नहीं है।",
+    "NO_JOBS": "कोई उपलब्ध जॉब नहीं है",
     "NO_ITEMS": "इस ऑर्डर में कोई आइटम नहीं है।",
     "ORDER_NUMBER": "ऑर्डर",
     "DRIVER": "ड्राइवर",
@@ -2002,6 +1976,11 @@
     "PRICE": "कीमत",
     "KG": "किलो",
     "NOT_ASSIGNED": "उपलब्ध नहीं",
+    "STATUS_ACCEPTED": "स्वीकृत",
+    "STATUS_PICKED_UP": "पिकअप हो गया",
+    "STATUS_PARTIALLY_PICKED": "आंशिक रूप से पिकअप हुआ",
+    "STATUS_UNKNOWN": "अज्ञात",
+    "INVALID_OTP_FORMAT": "ओटीपी 6 अंकों का होना चाहिए",
     "LOADING": "लोड हो रहा है...",
     "LOADING_ORDERS": "ऑर्डर लोड हो रहे हैं...",
     "LOADING_DETAILS": "ऑर्डर विवरण लोड हो रहा है...",
@@ -2042,7 +2021,29 @@
     "CHARGES": "शुल्क",
     "RESOLVE_DISPUTE": "विवाद का समाधान करें"
   },
-
+  "ORDER_MODAL": {
+    "TOTAL_ORDERS": "कुल ऑर्डर",
+    "TOTAL_ITEMS": "कुल आइटम",
+    "ORDER_VALUE": "ऑर्डर मूल्य",
+    "ORDER": "ऑर्डर",
+    "ITEMS": "आइटम",
+    "UNITS": "यूनिट",
+    "SUBTOTAL": "उप-कुल",
+    "DISCOUNT": "छूट",
+    "TAX": "कर",
+    "TOTAL_AMOUNT": "कुल राशि"
+  },
+  "ORDER_STATUS": {
+    "PROCESSING": "प्रोसेसिंग में",
+    "CONFIRMED": "पुष्टि की गई",
+    "PAYMENT_PENDING": "भुगतान लंबित",
+    "REJECTED": "अस्वीकृत",
+    "SUCCESSFUL": "सफल",
+    "CANCELLED": "रद्द",
+    "RETURNED": "लौटाया गया",
+    "RETURN_INITIATED": "रिटर्न शुरू",
+    "UNKNOWN": "अज्ञात"
+  },
   "DRIVER_INFO": {
     "Driver Information": "ड्राइवर जानकारी",
     "LOADING": "ड्राइवर जानकारी लोड हो रही है...",
@@ -2088,9 +2089,12 @@
     "INVALID_TOKEN": "अमान्य या समाप्त सत्यापन टोकन। कृपया एक नया अनुरोध करें।",
     "We will send a verification link to your new address": "हम आपकी नई ईमेल पर एक वेरिफिकेशन लिंक भेजेंगे।",
     "Check Your Inbox": "अपना इनबॉक्स देखें",
-    "Click the link in the email to confirm your new address": "ईमेल में दिए लिंक पर क्लिक करके नई ईमेल कन्फर्म करें। यह लिंक 48 घंटे में खत्म हो जाएगी।"
+    "Click the link in the email to confirm your new address": "ईमेल में दिए लिंक पर क्लिक करके नई ईमेल कन्फर्म करें। यह लिंक 48 घंटे में खत्म हो जाएगी।",
+    "ACTIVE": "सक्रिय",
+    "INACTIVE": "निष्क्रिय",
+    "TOTAL_DELIVERIES": "कुल डिलीवरीज",
+    "MEMBER_SINCE": "सदस्य बना हुआ है"
   },
-
   "DRIVER_REGISTRATION": {
     "CHECKING_STATUS": "पंजीकरण स्थिति जांची जा रही है...",
     "STEP": "चरण",
@@ -2099,7 +2103,6 @@
     "STEP_2_TITLE": "दस्तावेज़ अपलोड करें",
     "STEP_3_TITLE": "वाहन की जानकारी",
     "STEP_4_TITLE": "बीमा की जानकारी",
-
     "PERSONAL_DETAILS": "व्यक्तिगत विवरण",
     "PERSONAL_DETAILS_SUBTITLE": "अपनी व्यक्तिगत जानकारी दर्ज करें",
     "PERSONAL_INFO": "व्यक्तिगत जानकारी",
@@ -2108,14 +2111,12 @@
     "IDENTITY_INFO": "पहचान की जानकारी",
     "ADDRESS_INFO": "पते की जानकारी",
     "BANK_INFO": "बैंक की जानकारी",
-
     "FIRST_NAME": "पहला नाम",
     "FIRST_NAME_PLACEHOLDER": "पहला नाम दर्ज करें",
     "LAST_NAME": "अंतिम नाम",
     "LAST_NAME_PLACEHOLDER": "अंतिम नाम दर्ज करें",
     "DOB": "जन्म तिथि",
     "SELECT_DATE": "तारीख चुनें",
-
     "LICENSE_NUMBER": "लाइसेंस नंबर",
     "LICENSE_NUMBER_PLACEHOLDER": "लाइसेंस नंबर दर्ज करें",
     "LICENSE_TYPE": "लाइसेंस का प्रकार",
@@ -2126,18 +2127,15 @@
     "LICENSE_TRANSPORT": "परिवहन वाहन",
     "LICENSE_ISSUED_DATE": "लाइसेंस जारी करने की तारीख",
     "LICENSE_EXPIRY_DATE": "लाइसेंस समाप्ति तिथि",
-
     "CONTACT_NUMBER": "संपर्क नंबर",
     "CONTACT_NUMBER_PLACEHOLDER": "10 अंकों का मोबाइल नंबर दर्ज करें",
     "ADDITIONAL_CONTACT": "अतिरिक्त संपर्क नंबर",
     "EMAIL": "ईमेल पता",
     "EMAIL_PLACEHOLDER": "ईमेल पता दर्ज करें (वैकल्पिक)",
-
     "AADHAR_NUMBER": "आधार नंबर",
     "AADHAR_PLACEHOLDER": "12 अंकों का आधार नंबर दर्ज करें",
     "PAN_NUMBER": "पैन नंबर",
     "PAN_PLACEHOLDER": "पैन नंबर दर्ज करें",
-
     "DOOR_NUMBER": "दरवाजा/मकान नंबर",
     "DOOR_NUMBER_PLACEHOLDER": "दरवाजा/मकान नंबर दर्ज करें",
     "STREET": "गली/क्षेत्र",
@@ -2150,7 +2148,6 @@
     "PIN_CODE_PLACEHOLDER": "6 अंकों का पिन कोड दर्ज करें",
     "LANDMARK": "प्रसिद्ध स्थान",
     "LANDMARK_PLACEHOLDER": "नजदीकी प्रसिद्ध स्थान दर्ज करें (वैकल्पिक)",
-
     "BANK_ACCOUNT_NUMBER": "बैंक खाता नंबर",
     "BANK_ACCOUNT_PLACEHOLDER": "बैंक खाता नंबर दर्ज करें",
     "BANK_NAME": "बैंक का नाम",
@@ -2161,7 +2158,6 @@
     "IFSC_PLACEHOLDER": "आईएफएससी कोड दर्ज करें",
     "BANK_ADDRESS": "बैंक का पता",
     "BANK_ADDRESS_PLACEHOLDER": "बैंक का पूरा पता दर्ज करें",
-
     "DOCUMENT_UPLOAD": "दस्तावेज़ अपलोड करें",
     "DOCUMENT_UPLOAD_SUBTITLE": "आवश्यक दस्तावेज़ अपलोड करें",
     "LICENSE_DOCUMENT": "ड्राइविंग लाइसेंस",
@@ -2177,7 +2173,6 @@
     "UPLOADED": "अपलोड हो गया",
     "CLEARED": "हटा दिया गया",
     "UPLOADING": "दस्तावेज़ अपलोड हो रहा है...",
-
     "VEHICLE_INFO": "वाहन की जानकारी",
     "VEHICLE_INFO_SUBTITLE": "अपने वाहन का विवरण दर्ज करें",
     "VEHICLE_NUMBER": "वाहन नंबर",
@@ -2206,7 +2201,6 @@
     "KG": "किलो",
     "KM": "किमी",
     "KMS_TRAVELLED": "कुल दूरी तय की गई",
-
     "REVIEW_SUBMIT": "समीक्षा और सबमिट करें",
     "REVIEW_SUBMIT_SUBTITLE": "कृपया सबमिट करने से पहले अपनी जानकारी की समीक्षा करें",
     "DRIVER_INFO": "ड्राइवर की जानकारी",
@@ -2216,8 +2210,7 @@
     "AADHAR": "आधार",
     "PAN": "पैन",
     "ADDRESS": "पता",
-    "DOCUMENTS_UPLOADED": "दस्तावेज़ अपलोड किए गए",
-
+    "DOCUMENTS_UPLOADED": "दस्तावेज़ सफलतापूर्वक अपलोड किए गए",
     "PREVIOUS": "पिछला",
     "SAVE_NEXT": "सहेजें और आगे बढ़ें",
     "COMPLETE_REGISTRATION": "पंजीकरण पूर्ण करें",
@@ -2227,7 +2220,6 @@
     "CONTINUE": "जारी रखें",
     "CLEAR": "हटाएं",
     "GO_TO_DASHBOARD": "डैशबोर्ड पर जाएं",
-
     "REQUIRED_FIELD": "यह फील्ड आवश्यक है",
     "INVALID_EMAIL": "कृपया सही ईमेल पता दर्ज करें",
     "INVALID_PHONE": "कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें",
@@ -2244,7 +2236,6 @@
     "MIN_VALUE": "न्यूनतम मान {{value}} होना चाहिए",
     "FUTURE_DATE_NOT_ALLOWED": "भविष्य की तारीख मान्य नहीं है",
     "PAST_DATE_NOT_ALLOWED": "पिछली तारीख मान्य नहीं है",
-
     "FILL_REQUIRED_FIELDS": "कृपया सभी आवश्यक फील्ड भरें",
     "FILL_FIELDS_CORRECTLY": "कृपया निम्नलिखित फील्ड सही से भरें",
     "UPLOAD_DOCUMENTS": "कृपया सभी आवश्यक दस्तावेज़ अपलोड करें",
@@ -2252,7 +2243,6 @@
     "COMPLETE_PREVIOUS_STEPS": "कृपया पहले पिछले चरण पूरे करें",
     "COMPLETE_STEP_1_FIRST": "कृपया पहले चरण 1 पूरा करें",
     "COMPLETE_STEP_3_FIRST": "कृपया पहले चरण 3 पूरा करें",
-
     "REGISTRATION_SUCCESS": "पंजीकरण पूर्ण हुआ!",
     "REGISTRATION_SUCCESS_MESSAGE": "आपका पंजीकरण सफलतापूर्वक पूर्ण हुआ। ड्राइवर ID: {{driverId}}, वाहन ID: {{vehicleId}}",
     "REGISTRATION_FAILED": "पंजीकरण विफल रहा। कृपया पुनः प्रयास करें।",
@@ -2261,7 +2251,6 @@
     "FILE_UPLOAD_ERROR": "फाइल अपलोड करने में त्रुटि। कृपया पुनः प्रयास करें।",
     "SELECT_STATE_FIRST": "कृपया पहले राज्य चुनें",
     "NO_CITIES_FOUND": "चयनित राज्य के लिए कोई शहर नहीं मिला",
-
     "LOADING": "लोड हो रहा है...",
     "SAVING": "आपकी जानकारी सहेजी जा रही है...",
     "SUBMITTING": "आपका पंजीकरण सबमिट किया जा रहा है...",
@@ -2270,39 +2259,28 @@
     "STATUS_CHECK_ERROR": "पंजीकरण स्थिति जांचने में त्रुटि। नया पंजीकरण शुरू किया जा रहा है।",
     "LOAD_DATA_ERROR": "मौजूदा डेटा लोड करने में त्रुटि। कृपया पुनः प्रयास करें।",
     "SAVE_ERROR": "डेटा सहेजने में त्रुटि। कृपया पुनः प्रयास करें।",
-
     "NEW_REGISTRATION_STARTED": "नया ड्राइवर पंजीकरण शुरू किया जा रहा है",
     "RESUME_REGISTRATION": "पंजीकरण फिर से शुरू करें",
     "RESUME_REGISTRATION_MESSAGE": "आपका पिछला पंजीकरण अधूरा था। आप जहां छोड़ा था वहीं से जारी रख सकते हैं।",
-
     "DRIVER_INFO_SAVED": "ड्राइवर की जानकारी सफलतापूर्वक सहेजी गई",
     "DRIVER_INFO_UPDATED": "ड्राइवर की जानकारी सफलतापूर्वक अपडेट की गई",
     "DRIVER_INFO_SAVE_FAILED": "ड्राइवर की जानकारी सहेजने में विफल",
-
-    "DOCUMENTS_UPLOADED": "दस्तावेज़ सफलतापूर्वक अपलोड किए गए",
     "DOCUMENTS_UPLOAD_FAILED": "दस्तावेज़ अपलोड करने में विफल",
-
     "VEHICLE_SAVED": "वाहन की जानकारी सफलतापूर्वक सहेजी गई",
     "VEHICLE_UPDATED": "वाहन की जानकारी सफलतापूर्वक अपडेट की गई",
     "VEHICLE_SAVE_FAILED": "वाहन की जानकारी सहेजने में विफल",
-
     "INSURANCE_SAVED": "बीमा की जानकारी सफलतापूर्वक सहेजी गई",
     "INSURANCE_UPDATED": "बीमा की जानकारी सफलतापूर्वक अपडेट की गई",
     "INSURANCE_SAVE_FAILED": "बीमा की जानकारी सहेजने में विफल",
-
     "STATES_LOAD_FAILED": "राज्यों को लोड करने में विफल",
     "CITIES_LOAD_FAILED": "शहरों को लोड करने में विफल",
-
     "CLEAR_DOCUMENT": "दस्तावेज़ हटाएं",
     "CLEAR_DOCUMENT_CONFIRM": "क्या आप वाकई {{document}} को हटाना चाहते हैं?",
-
     "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
     "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
     "ACCESS_DENIED": "पहुंच अस्वीकृत",
     "DRIVER_ONLY_ACCESS": "यह पेज केवल ड्राइवरों के लिए उपलब्ध है। कृपया ड्राइवर क्रेडेंशियल्स से लॉगिन करें।"
   },
-
-
   "DELIVERY_CONFIRMATION": {
     "ACTIVE_DELIVERY_JOBS": "सक्रिय डिलीवरी कार्य",
     "JOB_LABEL": "कार्य",
@@ -2365,7 +2343,6 @@
     "GOODS_DAMAGED_TRANSIT": "परिवहन में सामान क्षतिग्रस्त",
     "OTHER_ISSUE": "अन्य मुद्दा"
   },
-
   "PROFILE": {
     "TITLE": "प्रोफ़ाइल",
     "LOADING": "प्रोफ़ाइल लोड हो रही है...",
@@ -2420,7 +2397,6 @@
     "KEEP_EDITING": "संपादन जारी रखें",
     "OK": "ठीक है"
   },
-
   "SETTINGS": {
     "TITLE": "सेटिंग्स",
     "GENERAL": "सामान्य",
@@ -2513,7 +2489,6 @@
     "DELETE_ERROR": "खाता हटाने में विफल। कृपया फिर से कोशिश करें।",
     "FORM_INVALID": "कृपया सभी आवश्यक फ़ील्ड को सही ढंग से भरें।"
   },
-
   "RETAILER_PROFILE": {
     "TITLE": "मेरी प्रोफ़ाइल",
     "EDIT": "संपादित करें",
@@ -2556,9 +2531,28 @@
     "LOCATION": "स्थान",
     "PINCODE_PLACEHOLDER": "पिनकोड दर्ज करें",
     "ACTIVE": "सक्रिय",
-    "INACTIVE": "निष्क्रिय"
+    "INACTIVE": "निष्क्रिय",
+    "CAMERA": "कैमरा",
+    "GALLERY": "गैलरी",
+    "CHANGE_IMAGE": "प्रोफ़ाइल चित्र बदलें",
+    "IMAGE_SOURCE": "एक छवि स्रोत चुनें",
+    "OK": "ठीक है",
+    "REQUIRED_FIELDS": "कृपया सभी आवश्यक फ़ील्ड भरें (नाम, ईमेल, मोबाइल)।",
+    "INVALID_EMAIL": "कृपया एक मान्य ईमेल पता दर्ज करें",
+    "SAVING": "सहेजा जा रहा है...",
+    "LOAD_ERROR": "प्रोफ़ाइल लोड करने में विफल। कृपया अपने इंटरनेट कनेक्शन की जांच करें और फिर से प्रयास करें।",
+    "SAVE_ERROR_MESSAGE": "प्रोफ़ाइल सहेजने में विफल। कृपया अपने इंटरनेट कनेक्शन की जांच करें और फिर से प्रयास करें।",
+    "NETWORK_ERROR": "कोई इंटरनेट कनेक्शन नहीं। कृपया अपने इंटरनेट की जांच करें और फिर से प्रयास करें।",
+    "REQUEST_TIMEOUT_ERROR": "अनुरोध बहुत लंबा हो गया। कृपया अपने इंटरनेट कनेक्शन की जांच करें और फिर से प्रयास करें।",
+    "PERMISSION_DENIED": "आपको इस कार्य को करने की अनुमति नहीं है।",
+    "NOT_FOUND": "अनुरोधित संसाधन नहीं मिला।",
+    "SERVER_ERROR": "सर्वर त्रुटि। कृपया बाद में फिर से प्रयास करें।",
+    "SESSION_EXPIRED": "आपके सत्र की समय सीमा समाप्त हुई। कृपया फिर से लॉगिन करें।",
+    "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
+    "IMAGE_UPLOAD_ERROR": "छवि अपलोड करने में विफल। कृपया फिर से प्रयास करें।",
+    "VALIDATION_ERROR": "सत्यापन त्रुटि",
+    "ERROR": "त्रुटि"
   },
-
   "RETAILER_SETTINGS": {
     "TITLE": "सेटिंग्स",
     "GENERAL": "सामान्य सेटिंग्स",
@@ -2628,9 +2622,17 @@
     "INVALID_CONFIRMATION": "अमान्य पुष्टि। कृपया DELETE टाइप करें",
     "CHAT_COMING_SOON": "लाइव चैट जल्द आ रही है!",
     "SELECT_LANGUAGE": "भाषा चुनें",
-    "CANCEL": "रद्द करें"
+    "CANCEL": "रद्द करें",
+    "SAVE_ERROR": "सेटिंग्स सहेजने में विफल। कृपया फिर से प्रयास करें।",
+    "PASSWORD_CHANGE_ERROR": "पासवर्ड बदलने में विफल। कृपया फिर से प्रयास करें।",
+    "DELETE_ERROR": "खाता हटाने में विफल। कृपया फिर से प्रयास करें।",
+    "PASSWORD_MIN_LENGTH": "पासवर्ड कम से कम 8 अक्षर का होना चाहिए",
+    "PASSWORD_SAME_AS_CURRENT": "नया पासवर्ड वर्तमान पासवर्ड से अलग होना चाहिए",
+    "PASSWORD_UPPERCASE_REQUIRED": "पासवर्ड में कम से कम एक बड़ा अक्षर (A-Z) होना चाहिए",
+    "PASSWORD_LOWERCASE_REQUIRED": "पासवर्ड में कम से कम एक छोटा अक्षर (a-z) होना चाहिए",
+    "PASSWORD_NUMBER_REQUIRED": "पासवर्ड में कम से कम एक संख्या (0-9) होनी चाहिए",
+    "PASSWORD_SPECIAL_REQUIRED": "पासवर्ड में कम से कम एक विशेष अक्षर (!@#$%^&*) होना चाहिए"
   },
-
   "DRIVER_PROFILE": {
     "TITLE": "चालक प्रोफ़ाइल",
     "LOADING": "प्रोफ़ाइल लोड हो रही है...",
@@ -2672,7 +2674,6 @@
     "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया फिर से लॉगिन करें।",
     "OK": "ठीक है"
   },
-
   "DRIVER_SETTINGS": {
     "TITLE": "सेटिंग्स",
     "GENERAL": "सामान्य सेटिंग्स",
@@ -2732,7 +2733,39 @@
     "CLEARING_CACHE": "कैश साफ़ किया जा रहा है...",
     "CACHE_CLEARED": "कैश सफलतापूर्वक साफ़ किया गया",
     "DELETING_ACCOUNT": "खाता हटाया जा रहा है...",
+    "LOAD_SETTINGS_ERROR": "सेटिंग्स लोड करने में विफल। कृपया पुनः प्रयास करें।",
+    "NOTIFICATION_UPDATE_ERROR": "सूचनाएं अपडेट करने में विफल। कृपया पुनः प्रयास करें।",
+    "PASSWORD_MIN_LENGTH": "पासवर्ड कम से कम 8 वर्णों का होना चाहिए",
+    "PASSWORD_MUST_DIFFER": "नया पासवर्ड वर्तमान पासवर्ड से अलग होना चाहिए",
+    "PASSWORD_UPPERCASE": "पासवर्ड में कम से कम एक बड़े अक्षर (A-Z) होने चाहिए",
+    "PASSWORD_LOWERCASE": "पासवर्ड में कम से कम एक छोटे अक्षर (a-z) होने चाहिए",
+    "PASSWORD_NUMBER": "पासवर्ड में कम से कम एक संख्या (0-9) होनी चाहिए",
+    "PASSWORD_SPECIAL_CHAR": "पासवर्ड में कम से कम एक विशेष वर्ण (!@#$%^&*) होना चाहिए",
+    "PASSWORD_CHANGE_ERROR": "पासवर्ड बदलने में विफल। कृपया पुनः प्रयास करें।",
+    "DELETE_CONFIRMATION_TEXT": "खाता हटाने की पुष्टि के लिए DELETE टाइप करें",
+    "ACCOUNT_DELETE_ERROR": "खाता हटाने में विफल। कृपया पुनः प्रयास करें।",
     "CANCEL": "रद्द करें",
     "OK": "ठीक है"
+  },
+  "TRANSPORT_MENU": {
+    "MENU": "मेनू",
+    "TRANSPORT": "परिवहन",
+    "PROFILE": "प्रोफ़ाइल",
+    "DASHBOARD": "डैशबोर्ड",
+    "UPDATE_RATES": "दरें अपडेट करें",
+    "MANAGE_VEHICLES": "वाहन प्रबंधित करें",
+    "MANAGE_DRIVERS": "चालक प्रबंधित करें",
+    "DRIVER_REGISTRATION": "चालक पंजीकरण",
+    "TRANSPORT_REQUESTS": "परिवहन अनुरोध",
+    "ACTIVE_DELIVERIES": "सक्रिय डिलीवरी",
+    "LIVE_TRACKING": "लाइव ट्रैकिंग",
+    "DELIVERY_CONFIRMATION": "डिलीवरी पुष्टि",
+    "PICKUP_ORDERS": "पिकअप ऑर्डर",
+    "PICKUP_CONFIRMATION": "पिकअप पुष्टि",
+    "CUSTOMER_CHAT": "ग्राहक चैट",
+    "EARNINGS_REPORTS": "आय और विवरण",
+    "DELIVERY_HISTORY": "डिलीवरी इतिहास",
+    "NOTIFICATIONS": "सूचनाएं",
+    "SETTINGS": "सेटिंग्स"
   }
 }

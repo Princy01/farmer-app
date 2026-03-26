@@ -33,7 +33,6 @@ export class MandiService {
 
   getMandisByProduct(productId: number, cityId?: number): Observable<MandiProduct[]> {
     if (!productId || productId <= 0) {
-      console.error('Invalid product ID provided');
       return throwError(() => new Error('Invalid product ID'));
     }
 
@@ -43,9 +42,8 @@ export class MandiService {
     }
 
     return this.http.get<MandiProduct[]>(url).pipe(
-      timeout(15000), // 15 second timeout
+      timeout(30000), // 30 second timeout per production standards
       catchError(error => {
-        console.error('Error fetching mandis by product:', error);
         let errorMessage = 'Failed to fetch wholesaler information';
 
         if (error.name === 'TimeoutError') {

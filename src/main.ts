@@ -9,7 +9,6 @@ import { authInterceptor } from './app/interceptors/auth.interceptor';
 
 import { defineCustomElements } from '@ionic/core/loader';
 
-import { TRANSLATE_PROVIDERS } from './app/translate.config';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { translationInterceptor } from '@/interceptors/translation.interceptor';
@@ -27,8 +26,9 @@ bootstrapApplication(AppComponent, {
     ),
     provideTranslateService({
       loader: provideTranslateHttpLoader({
-        prefix: './assets/i18n/',
-        suffix: '.json'
+        prefix: '/assets/i18n/',
+        suffix: '.json',
+        useHttpBackend: true,
       }),
       fallbackLang: 'en',
       lang: 'en'

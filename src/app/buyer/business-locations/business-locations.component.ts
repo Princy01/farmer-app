@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, LoadingController, ModalController, ActionSheetController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {
   add, location, business, create, eye, home, list, cube, time,
   analytics, pulse, notifications, person, menu, logOut, settings,
@@ -22,9 +24,10 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule, TranslatePipe]
 })
-export class BusinessLocationsComponent implements OnInit {
+export class BusinessLocationsComponent implements OnInit, OnDestroy {
   businessLocations: BusinessBranchWithNames[] = [];
   isLoading = true;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private businessService: BusinessLocationsService,
@@ -45,6 +48,11 @@ export class BusinessLocationsComponent implements OnInit {
 
   ngOnInit() {
     this.checkAuthAndLoadLocations();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ionViewWillEnter() {
@@ -115,40 +123,38 @@ export class BusinessLocationsComponent implements OnInit {
         return;
       }
 
-      this.businessService.getAllBusinessesWithNameOfUser().subscribe({
-        next: (locations: BusinessBranchWithNames[]) => {
-          this.businessLocations = locations || [];
-          this.isLoading = false;
-        },
-        error: async (error: any) => {
-          this.isLoading = false;
-          this.businessLocations = [];
-          loading.dismiss();
+      this.businessService.getAllBusinessesWithNameOfUser()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (locations: BusinessBranchWithNames[]) => {
+            this.businessLocations = locations || [];
+            this.isLoading = false;
+          },
+          error: async (error: any) => {
+            this.isLoading = false;
+            this.businessLocations = [];
+            loading.dismiss();
 
-          console.error('Error loading business locations:', error);
+            if (error.status === 401) {
+              await this.showAuthError();
+              return;
+            }
 
-          if (error.status === 401) {
-            await this.showAuthError();
-            return;
+            const alert = await this.alertController.create({
+              header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),
+              message: this.translate.instant('BUSINESS_LOCATIONS.LOAD_ERROR'),
+              buttons: [this.translate.instant('BUSINESS_LOCATIONS.OK')]
+            });
+            await alert.present();
+          },
+          complete: () => {
+            loading.dismiss();
           }
-
-          const alert = await this.alertController.create({
-            header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),
-            message: this.translate.instant('BUSINESS_LOCATIONS.LOAD_ERROR'),
-            buttons: [this.translate.instant('BUSINESS_LOCATIONS.OK')]
-          });
-          await alert.present();
-        },
-        complete: () => {
-          loading.dismiss();
-        }
-      });
+        });
     } catch (error) {
       this.isLoading = false;
       this.businessLocations = [];
       loading.dismiss();
-
-      console.error('Unexpected error:', error);
 
       const alert = await this.alertController.create({
         header: this.translate.instant('BUSINESS_LOCATIONS.ERROR'),

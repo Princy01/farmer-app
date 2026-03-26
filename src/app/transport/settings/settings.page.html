@@ -8,7 +8,7 @@
 
       <div class="settings-group">
         <!-- Language -->
-        <ion-item button (click)="changeLanguage()" lines="full" class="settings-item">
+        <ion-item button (click)="changeLanguage()" lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="globe-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.LANGUAGE' | translate }}</h3>
@@ -28,7 +28,7 @@
 
       <div class="settings-group">
         <!-- Delivery Reminder -->
-        <ion-item lines="full" class="settings-item">
+        <ion-item lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="notifications-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.DELIVERY_REMINDER' | translate }}</h3>
@@ -37,12 +37,13 @@
           <ion-toggle
             [(ngModel)]="settings.notifications.delivery_reminder"
             (ionChange)="toggleNotification('delivery_reminder')"
+            [disabled]="isTogglingNotification"
             slot="end">
           </ion-toggle>
         </ion-item>
 
         <!-- Payment Received -->
-        <ion-item lines="full" class="settings-item">
+        <ion-item lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="notifications-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.PAYMENT_RECEIVED' | translate }}</h3>
@@ -51,12 +52,13 @@
           <ion-toggle
             [(ngModel)]="settings.notifications.payment_received"
             (ionChange)="toggleNotification('payment_received')"
+            [disabled]="isTogglingNotification"
             slot="end">
           </ion-toggle>
         </ion-item>
 
         <!-- System Alerts -->
-        <ion-item lines="full" class="settings-item">
+        <ion-item lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="notifications-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.SYSTEM_ALERTS' | translate }}</h3>
@@ -65,6 +67,7 @@
           <ion-toggle
             [(ngModel)]="settings.notifications.system_alerts"
             (ionChange)="toggleNotification('system_alerts')"
+            [disabled]="isTogglingNotification"
             slot="end">
           </ion-toggle>
         </ion-item>
@@ -79,7 +82,7 @@
 
       <div class="settings-group">
         <!-- Change Password -->
-        <ion-item button (click)="changePassword()" lines="full" class="settings-item">
+        <ion-item button (click)="changePassword()" lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.CHANGE_PASSWORD' | translate }}</h3>
@@ -98,7 +101,7 @@
 
       <div class="settings-group">
         <!-- Contact Support -->
-        <ion-item button (click)="contactSupport()" lines="full" class="settings-item">
+        <ion-item button (click)="contactSupport()" lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="help-circle-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.CONTACT_SUPPORT' | translate }}</h3>
@@ -117,7 +120,7 @@
 
       <div class="settings-group">
         <!-- Privacy Policy -->
-        <ion-item button (click)="viewPrivacyPolicy()" lines="full" class="settings-item">
+        <ion-item button (click)="viewPrivacyPolicy()" lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.PRIVACY_POLICY' | translate }}</h3>
@@ -126,7 +129,7 @@
         </ion-item>
 
         <!-- Terms of Service -->
-        <ion-item button (click)="viewTermsOfService()" lines="full" class="settings-item">
+        <ion-item button (click)="viewTermsOfService()" lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="document-text-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.TERMS_OF_SERVICE' | translate }}</h3>
@@ -153,7 +156,7 @@
 
       <div class="settings-group">
         <!-- Logout -->
-        <ion-item button (click)="logout()" lines="full" class="settings-item account-item">
+        <ion-item button (click)="logout()" lines="full" class="settings-item account-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="log-out-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.LOGOUT' | translate }}</h3>
@@ -161,7 +164,7 @@
         </ion-item>
 
         <!-- Delete Account -->
-        <ion-item button (click)="deleteAccount()" lines="full" class="settings-item account-item">
+        <ion-item button (click)="deleteAccount()" lines="full" class="settings-item account-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="warning-outline" slot="start"></ion-icon>
           <ion-label>
             <h3>{{ 'DRIVER_SETTINGS.DELETE_ACCOUNT' | translate }}</h3>

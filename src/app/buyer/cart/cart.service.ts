@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { map, catchError, tap, finalize } from 'rxjs/operators';
+import { Observable, BehaviorSubject, throwError, timer } from 'rxjs';
+import { map, catchError, tap, finalize, timeout, retry } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -52,6 +52,11 @@ export class CartService {
 
   private pendingOperations = new Set<string>();
 
+  // Configuration for network resilience
+  private readonly HTTP_TIMEOUT = 30000; // 30 seconds
+  private readonly RETRY_ATTEMPTS = 3;
+  private readonly INITIAL_BACKOFF = 1000; // 1 second
+
   constructor(
     private http: HttpClient,
     private authService: AuthService
@@ -70,6 +75,20 @@ export class CartService {
   }
 
   /**
+   * Implements exponential backoff retry strategy
+   * Attempts: 1s → 2s → 4s delays between retries
+   */
+  private getRetryStrategy() {
+    return retry({
+      count: this.RETRY_ATTEMPTS,
+      delay: (error, retryCount) => {
+        const delayMs = this.INITIAL_BACKOFF * Math.pow(2, retryCount);
+        return timer(delayMs);
+      }
+    });
+  }
+
+  /**
    * Get cart items for a specific date
    * @param doe Date in format YYYY-MM-DD (defaults to today)
    */
@@ -83,22 +102,20 @@ export class CartService {
       doe: dateOfEntry
     };
 
-    console.log('Fetching cart items for date:', dateOfEntry);
-
     return this.http.post<CartItem[]>(
       `${this.apiUrl}/GetSelectedItemsFromCart`,
       payload,
       { headers }
     ).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      this.getRetryStrategy(),
       tap((items) => {
-        console.log('Cart items fetched successfully:', items);
         // Filter out deleted items
-        const activeItems = items.filter(item => !item.is_deleted);
+        const activeItems = (items as CartItem[]).filter(item => !item.is_deleted);
         this.cartItemsSubject.next(activeItems);
       }),
-      map((items) => items.filter(item => !item.is_deleted)),
+      map((items) => (items as CartItem[]).filter(item => !item.is_deleted)),
       catchError(error => {
-        console.error('Error fetching cart items:', error);
         this.cartItemsSubject.next([]);
         return throwError(() => error);
       })
@@ -109,26 +126,20 @@ export class CartService {
     const operationKey = this.createOperationKey('add', item.product_id);
 
     if (this.pendingOperations.has(operationKey)) {
-      console.log('Add operation already in progress, skipping...');
       return throwError(() => new Error('Add operation already in progress'));
     }
 
     this.pendingOperations.add(operationKey);
     const headers = this.getAuthHeaders();
 
-    console.log('Adding item to cart:', item);
-
     return this.http.post<{ message: string; selected_id: number }>(
       `${this.apiUrl}/AddSelectedItemToCart`,
       item,
       { headers }
     ).pipe(
-      tap((response) => {
-        console.log('Item added successfully:', response);
-        console.log('Selected ID:', response.selected_id);
-      }),
+      timeout(this.HTTP_TIMEOUT),
+      this.getRetryStrategy(),
       catchError(error => {
-        console.error('Error adding item to cart:', error);
         return throwError(() => error);
       }),
       finalize(() => {
@@ -142,7 +153,6 @@ export class CartService {
     const operationKey = this.createOperationKey('update', selectedItemId);
 
     if (this.pendingOperations.has(operationKey)) {
-      console.log('Update operation already in progress, skipping...');
       return throwError(() => new Error('Update operation already in progress'));
     }
 
@@ -154,21 +164,14 @@ export class CartService {
       quantity: quantity
     };
 
-    console.log('=== Updating Item Quantity ===');
-    console.log('Request Payload:', JSON.stringify(updateRequest, null, 2));
-
     return this.http.post<{ message: string; selected_item_id: number; new_quantity: number }>(
       `${this.apiUrl}/UpdateCartItemQuantity`,
       updateRequest,
       { headers }
     ).pipe(
-      tap((response) => {
-        console.log('=== Item Updated Successfully ===');
-        console.log('Response:', response);
-      }),
+      timeout(this.HTTP_TIMEOUT),
+      this.getRetryStrategy(),
       catchError(error => {
-        console.error('=== Error Updating Item ===');
-        console.error('Error:', error);
         return throwError(() => error);
       }),
       finalize(() => {
@@ -182,7 +185,6 @@ export class CartService {
     const operationKey = this.createOperationKey('delete', selectedId);
 
     if (this.pendingOperations.has(operationKey)) {
-      console.log('Delete operation already in progress, skipping...');
       return throwError(() => new Error('Delete operation already in progress'));
     }
 
@@ -193,23 +195,20 @@ export class CartService {
       product_id: selectedId // Backend expects product_id but uses it as selected_id
     };
 
-    console.log('Deleting cart item:', selectedId);
-
     return this.http.post<{ message: string }>(
       `${this.apiUrl}/DeleteSelectedItemFromCart`,
       payload,
       { headers }
     ).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      this.getRetryStrategy(),
       tap((response) => {
-        console.log('Item deleted successfully:', response);
-
         // Update local state by removing the item
         const currentItems = this.cartItemsSubject.value;
         const updatedItems = currentItems.filter(item => item.selected_id !== selectedId);
         this.cartItemsSubject.next(updatedItems);
       }),
       catchError(error => {
-        console.error('Error deleting cart item:', error);
         return throwError(() => error);
       }),
       finalize(() => {

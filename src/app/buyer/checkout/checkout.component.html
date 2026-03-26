@@ -1,7 +1,12 @@
+<!-- Checkout Header -->
 <ion-header mode="ios">
   <ion-toolbar class="checkout-toolbar">
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()" class="back-btn">
+      <ion-button
+        (click)="goBack()"
+        class="back-btn"
+        [attr.aria-label]="'Back to cart'"
+      >
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -12,8 +17,8 @@
 </ion-header>
 
 <ion-content class="checkout-content">
-  <!-- Order Details Section -->
-  <div class="card-section">
+  <!-- Order Details Section: Displays buyer and seller information -->
+  <div class="card-section" role="region" aria-label="Order Details">
     <ion-card class="modern-card">
       <div class="card-header">
         <div class="header-content">
@@ -46,8 +51,8 @@
     </ion-card>
   </div>
 
-  <!-- Delivery Address Section -->
-  <div class="card-section">
+  <!-- Delivery Address Section: Lists available delivery branches -->
+  <div class="card-section" role="region" aria-label="Delivery Address">
     <ion-card class="modern-card">
       <div class="card-header">
         <div class="header-content">
@@ -155,8 +160,8 @@
     </ion-card>
   </div>
 
-  <!-- Cart Items List -->
-  <div class="card-section">
+  <!-- Cart Items List: Shows all items in the current order -->
+  <div class="card-section" role="region" aria-label="Order Items">
     <ion-card class="modern-card">
       <div class="card-header">
         <div class="header-content">
@@ -190,8 +195,8 @@
     </ion-card>
   </div>
 
-  <!-- Transport Options -->
-  <div class="card-section">
+  <!-- Transport Options: Allows adding or modifying delivery transport -->
+  <div class="card-section" role="region" aria-label="Transport Options">
     <ion-card class="modern-card transport-card">
       <div class="card-header">
         <div class="header-content">
@@ -212,7 +217,12 @@
                 <p>{{ "CHECKOUT.ARRANGE_TRANSPORT_MSG" | translate }}</p>
               </div>
             </div>
-            <ion-button class="arrange-btn" (click)="arrangeRide()">
+            <ion-button
+              class="arrange-btn"
+              (click)="arrangeRide()"
+              [disabled]="isLoading || !selectedBranch"
+              aria-label="Arrange Transport"
+            >
               <ion-icon name="add-outline" slot="start"></ion-icon>
               {{ "CHECKOUT.ARRANGE_TRANSPORT" | translate }}
             </ion-button>
@@ -227,7 +237,7 @@
                 <ion-icon name="flash-outline" class="summary-icon"></ion-icon>
                 {{ "CHECKOUT.DELIVERY_TYPE" | translate }}
               </div>
-              <div class="summary-value">{{ selectedDeliveryType | titlecase }}</div>
+              <div class="summary-value">{{ (selectedDeliveryType | titlecase) || 'Standard' }}</div>
             </div>
             <!-- Removed urgency summary item -->
             <div class="summary-item">
@@ -270,8 +280,8 @@
     </ion-card>
   </div>
 
-  <!-- Order Summary -->
-  <div class="card-section">
+  <!-- Order Summary: Displays pricing breakdown and total -->
+  <div class="card-section" role="region" aria-label="Order Summary">
     <ion-card class="modern-card summary-card">
       <div class="card-header">
         <div class="header-content">
@@ -326,6 +336,8 @@
       class="confirm-order-btn"
       (click)="proceedToPayment()"
       [disabled]="isLoading || !selectedBranch"
+      [attr.aria-busy]="isLoading"
+      aria-label="Proceed to payment"
     >
       <ion-icon name="arrow-forward-outline" slot="start"></ion-icon>
       {{

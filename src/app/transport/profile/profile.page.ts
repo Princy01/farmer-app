@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -8,6 +8,8 @@ import {
   ToastController,
   ModalController
 } from '@ionic/angular';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import {
@@ -42,12 +44,14 @@ import { EmailVerificationModalComponent } from './email-verification-modal.comp
     IonicModule
   ]
 })
-export class ProfilePage implements OnInit {
+export class ProfilePage implements OnInit, OnDestroy {
   form!: FormGroup;
   isEditMode = false;
   driverData: any = {};
   today = new Date().toISOString().split('T')[0];
   isUploadingImage = false;
+  isSubmitting = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -80,6 +84,11 @@ export class ProfilePage implements OnInit {
   ngOnInit() {
     this.initForm();
     this.loadDriverInfo();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   initForm() {
@@ -137,35 +146,36 @@ export class ProfilePage implements OnInit {
     });
     await loading.present();
 
-    this.driverProfileService.getDriverProfile().subscribe({
-      next: (data) => {
-        // Backend returns raw base64 — prefix it so the browser can render it
-        if (data.profile_image && !data.profile_image.startsWith('data:')) {
-          data.profile_image = `data:image/jpeg;base64,${data.profile_image}`;
+    this.driverProfileService.getDriverProfile()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          // Backend returns raw base64 — prefix it so the browser can render it
+          if (data.profile_image && !data.profile_image.startsWith('data:')) {
+            data.profile_image = `data:image/jpeg;base64,${data.profile_image}`;
+          }
+          this.driverData = data;
+          this.form.patchValue({
+            ...data,
+            contact_num_addl: data.contact_num_addl ?? '',
+            email: data.email ?? '',
+            veh_number: data.veh_number ?? '',
+            reg_date: data.reg_date ? data.reg_date.split('T')[0] : '',
+            vehicle_state: data.vehicle_state ?? '',
+            type_id: data.type_id ?? '',
+            load_capacity: data.load_capacity ?? '',
+            fuel_type: data.fuel_type ?? '',
+            dob: data.dob ? data.dob.split('T')[0] : '',
+            licence_issued_date: data.licence_issued_date ? data.licence_issued_date.split('T')[0] : '',
+            licence_expiry_date: data.licence_expiry_date ? data.licence_expiry_date.split('T')[0] : '',
+          });
+          loading.dismiss();
+        },
+        error: (err) => {
+          loading.dismiss();
+          this.showToast('DRIVER_INFO.ERROR_LOADING', 'danger');
         }
-        this.driverData = data;
-        this.form.patchValue({
-          ...data,
-          contact_num_addl: data.contact_num_addl ?? '',
-          email: data.email ?? '',
-          veh_number: data.veh_number ?? '',
-          reg_date: data.reg_date ? data.reg_date.split('T')[0] : '',
-          vehicle_state: data.vehicle_state ?? '',
-          type_id: data.type_id ?? '',
-          load_capacity: data.load_capacity ?? '',
-          fuel_type: data.fuel_type ?? '',
-          dob: data.dob ? data.dob.split('T')[0] : '',
-          licence_issued_date: data.licence_issued_date ? data.licence_issued_date.split('T')[0] : '',
-          licence_expiry_date: data.licence_expiry_date ? data.licence_expiry_date.split('T')[0] : '',
-        });
-        loading.dismiss();
-      },
-      error: (err) => {
-        console.error('Error loading driver profile:', err);
-        loading.dismiss();
-        this.showToast('DRIVER_INFO.ERROR_LOADING', 'danger');
-      }
-    });
+      });
   }
 
   triggerImagePicker() {
@@ -221,21 +231,22 @@ export class ProfilePage implements OnInit {
     });
     await loading.present();
 
-    this.driverProfileService.uploadProfileImage({ image: base64 }).subscribe({
-      next: () => {
-        // Show immediate preview without a refetch
-        this.driverData = { ...this.driverData, profile_image: `data:${mimeType};base64,${base64}` };
-        loading.dismiss();
-        this.isUploadingImage = false;
-        this.showToast('DRIVER_INFO.IMAGE_UPLOAD_SUCCESS', 'success');
-      },
-      error: (err) => {
-        console.error('Error uploading profile image:', err);
-        loading.dismiss();
-        this.isUploadingImage = false;
-        this.showToast('DRIVER_INFO.IMAGE_UPLOAD_ERROR', 'danger');
-      }
-    });
+    this.driverProfileService.uploadProfileImage({ image: base64 })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Show immediate preview without a refetch
+          this.driverData = { ...this.driverData, profile_image: `data:${mimeType};base64,${base64}` };
+          loading.dismiss();
+          this.isUploadingImage = false;
+          this.showToast('DRIVER_INFO.IMAGE_UPLOAD_SUCCESS', 'success');
+        },
+        error: (err) => {
+          loading.dismiss();
+          this.isUploadingImage = false;
+          this.showToast('DRIVER_INFO.IMAGE_UPLOAD_ERROR', 'danger');
+        }
+      });
   }
 
   enableEdit() {
@@ -274,6 +285,11 @@ export class ProfilePage implements OnInit {
       return;
     }
 
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.isSubmitting = true;
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('DRIVER_INFO.UPDATING'),
     });
@@ -291,20 +307,23 @@ export class ProfilePage implements OnInit {
       bank_address: this.form.get('bank_address')?.value || null,
     };
 
-    this.driverProfileService.updateDriverProfile(updateData).subscribe({
-      next: () => {
-        Object.assign(this.driverData, updateData);
-        loading.dismiss();
-        this.showToast('DRIVER_INFO.UPDATE_SUCCESS', 'success');
-        this.isEditMode = false;
-        this.disableEditableFields();
-      },
-      error: (err) => {
-        console.error('Error updating driver profile:', err);
-        loading.dismiss();
-        this.showToast('DRIVER_INFO.UPDATE_ERROR', 'danger');
-      }
-    });
+    this.driverProfileService.updateDriverProfile(updateData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          Object.assign(this.driverData, updateData);
+          loading.dismiss();
+          this.isSubmitting = false;
+          this.showToast('DRIVER_INFO.UPDATE_SUCCESS', 'success');
+          this.isEditMode = false;
+          this.disableEditableFields();
+        },
+        error: (err) => {
+          loading.dismiss();
+          this.isSubmitting = false;
+          this.showToast('DRIVER_INFO.UPDATE_ERROR', 'danger');
+        }
+      });
   }
 
   onEditContactNum() {

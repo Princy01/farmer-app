@@ -1,4 +1,4 @@
-<ion-header mode="ios">
+3<ion-header mode="ios">
   <ion-toolbar class="business-info-toolbar">
     <ion-buttons slot="start">
       <ion-button (click)="goBack()" class="back-btn">
@@ -87,7 +87,7 @@
           <ion-list>
             <ion-item [class.ion-invalid]="form.get('mobile_number')?.invalid && form.get('mobile_number')?.touched">
               <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Mobile Number' | translate }}</ion-label>
-              <ion-input formControlName="mobile_number" type="tel" [readonly]="!isEditMode"></ion-input>
+              <ion-input formControlName="mobile_number" type="tel" [readonly]="!isEditMode" placeholder="10-digit number"></ion-input>
             </ion-item>
             <ion-item button="true" (click)="openEmailVerificationModal()" [class.ion-invalid]="form.get('email')?.invalid && form.get('email')?.touched" class="editable-item">
               <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Email' | translate }}</ion-label>
@@ -134,10 +134,15 @@
           </div>
         </div>
 
-        <ion-button expand="block" type="submit" *ngIf="isEditMode" [disabled]="form.invalid">
-          <ion-icon name="save" slot="start"></ion-icon>
-          {{ 'RETAILER_BUSINESS_INFO.Save Changes' | translate }}
-        </ion-button>
+        <div class="button-group" *ngIf="isEditMode">
+          <ion-button expand="block" type="submit" [disabled]="form.invalid || isLoading" class="save-btn">
+            <ion-icon name="save" slot="start"></ion-icon>
+            {{ 'RETAILER_BUSINESS_INFO.Save Changes' | translate }}
+          </ion-button>
+          <ion-button expand="block" type="button" (click)="cancelEdit()" [disabled]="isLoading" class="cancel-btn" fill="outline">
+            {{ 'RETAILER_BUSINESS_INFO.Back' | translate }}
+          </ion-button>
+        </div>
       </form>
     </ion-card>
   </div>

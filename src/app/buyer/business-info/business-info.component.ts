@@ -20,6 +20,7 @@ import { BusinessInfoService, UpdateBusinessRequest } from './business-info.serv
 export class BusinessInfoComponent implements OnInit, OnDestroy {
   form: FormGroup;
   isEditMode = false;
+  isLoading = false;
   businessInfo: any = null; // Replace with your model
 
   private destroy$ = new Subject<void>();
@@ -66,17 +67,25 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
       message: this.translate.instant('RETAILER_BUSINESS_INFO.LOADING'),
     }).then(async (loading) => {
       await loading.present();
+      this.isLoading = true;
 
       this.businessInfoService
         .getBusinessInfo()
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (res) => {
+            this.isLoading = false;
+            if (!res?.data) {
+              loading.dismiss();
+              this.showToast('RETAILER_BUSINESS_INFO.LOAD_ERROR', 'danger');
+              return;
+            }
             this.businessInfo = res.data;
             this.form.patchValue(res.data);
             loading.dismiss();
           },
           error: async (err) => {
+            this.isLoading = false;
             await loading.dismiss();
             const msg = err?.error?.error ?? 'RETAILER_BUSINESS_INFO.LOAD_ERROR';
             await this.showToast(msg, 'danger');
@@ -100,10 +109,15 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.isLoading) {
+      return; // Prevent double-submit
+    }
+
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('RETAILER_BUSINESS_INFO.UPDATING'),
     });
     await loading.present();
+    this.isLoading = true;
 
     const payload: UpdateBusinessRequest = {
       address: this.form.get('address')?.value,
@@ -115,6 +129,7 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: async () => {
+          this.isLoading = false;
           await loading.dismiss();
           this.businessInfo = { ...this.businessInfo, ...payload };
           this.isEditMode = false;
@@ -122,6 +137,7 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
           await this.showToast('RETAILER_BUSINESS_INFO.UPDATE_SUCCESS', 'success');
         },
         error: async (err) => {
+          this.isLoading = false;
           await loading.dismiss();
           const serverMsg: string = err?.error?.error ?? '';
           let toastMsg: string;
@@ -149,6 +165,7 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
     this.form.get('email')?.disable();
     this.form.get('gst_number')?.disable();
     this.form.markAsUntouched();
+    this.form.markAsPristine();
   }
 
   private async showToast(messageKey: string, color: string) {

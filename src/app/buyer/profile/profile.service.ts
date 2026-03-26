@@ -70,14 +70,8 @@ export class RetailerProfileService {
   }
 
   private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'An unknown error occurred!';
-    if (error.error instanceof ErrorEvent) {
-      // Client-side or network error
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Backend returned an unsuccessful response code
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
-    }
-    return throwError(errorMessage);
+    // Return error response so component can handle it with user-friendly messages
+    // DO NOT return technical messages - let component translate errors
+    return throwError(() => error);
   }
 }

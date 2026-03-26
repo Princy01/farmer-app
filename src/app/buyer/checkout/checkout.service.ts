@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import { Observable, throwError, timer, timeout } from 'rxjs';
+import { catchError, retry, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -53,22 +53,18 @@ export class CheckoutService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'An unknown error occurred';
-
-    if (error.error instanceof ErrorEvent) {
-      // Client-side or network error
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Backend error
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
-
-      if (error.error?.message) {
-        errorMessage = error.error.message;
-      }
-    }
-
-    console.error('CheckoutService Error:', errorMessage);
     return throwError(() => error);
+  }
+
+  private validateBusinessBranches(data: any): data is BusinessBranch[] {
+    if (!Array.isArray(data)) {
+      return false;
+    }
+    return data.every(item =>
+      typeof item === 'object' &&
+      item !== null &&
+      'branch_id' in item
+    );
   }
 
   getAllBusinessBranches(): Observable<BusinessBranch[]> {
@@ -77,7 +73,21 @@ export class CheckoutService {
       `${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`,
       { headers }
     ).pipe(
-      retry(1),
+      timeout(30000), // 30 second timeout
+      map(response => {
+        if (!this.validateBusinessBranches(response)) {
+          throw new Error('Invalid business branches response format');
+        }
+        return response;
+      }),
+      retry({
+        count: 3,
+        delay: (error, retryCount) => {
+          // Exponential backoff: 1s, 2s, 4s
+          const delayMs = Math.pow(2, retryCount) * 1000;
+          return timer(delayMs);
+        }
+      }),
       catchError(this.handleError)
     );
   }

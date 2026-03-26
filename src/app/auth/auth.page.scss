@@ -97,6 +97,11 @@
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
   }
 
+  &:focus {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
+  }
+
   ion-label {
     font-size: 0.95rem;
     font-weight: 600;
@@ -129,14 +134,23 @@
   &.ion-focused {
     --background: #fff;
     border-color: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2), 0 0 0 3px rgba(102, 126, 234, 0.2);
     transform: translateY(-1px);
+    outline: none;
   }
 
   &.has-focus {
     --background: #fff;
     border-color: rgba(255, 255, 255, 0.8);
     box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+  }
+
+  &.ion-invalid.ion-touched {
+    border-color: rgba(255, 107, 107, 0.6);
+  }
+
+  &.ion-valid.ion-touched {
+    border-color: rgba(76, 175, 80, 0.6);
   }
 }
 
@@ -158,9 +172,16 @@
   font-size: 1.2rem;
   cursor: pointer;
   transition: color 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 4px;
 
   &:hover {
     color: #667eea;
+  }
+
+  &:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
   }
 }
 
@@ -223,9 +244,15 @@
     box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
   }
 
+  &:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+  }
+
   &:disabled {
     opacity: 0.7;
     transform: none;
+    cursor: not-allowed;
   }
 
   ion-icon {
@@ -389,7 +416,6 @@
 }
 
 @keyframes logoFloat {
-
   0%,
   100% {
     transform: translateY(0);
@@ -397,6 +423,28 @@
 
   50% {
     transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Respect prefers-reduced-motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
@@ -434,6 +482,43 @@ ion-spinner {
 
 .alert-radio-label.sc-ion-alert-ios {
   color: #333;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .app-title {
+    font-weight: 700;
+  }
+
+  .custom-segment {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .custom-input {
+    border-width: 2px;
+  }
+
+  .login-button,
+  .register-button,
+  .resend-button {
+    border: 2px solid #667eea;
+  }
+}
+
+/* Print styles */
+@media print {
+  .background-overlay,
+  .features-section {
+    display: none;
+  }
+
+  .login-container {
+    background: white;
+  }
+
+  .app-title {
+    color: #333;
+  }
 }
 
 .verification-container {
@@ -497,8 +582,14 @@ ion-spinner {
     box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
   }
 
+  &:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+  }
+
   &:disabled {
     opacity: 0.6;
+    cursor: not-allowed;
   }
 }
 
@@ -508,6 +599,11 @@ ion-spinner {
 
   &:hover {
     --color: #fff;
+  }
+
+  &:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
   }
 }
 

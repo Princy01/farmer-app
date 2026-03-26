@@ -27,6 +27,9 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
   locations: Location[] = [];
   businessTypes: BusinessType[] = [];
   isGettingLocation = false;
+  isSubmitting = false;
+  isLoadingCities = false;
+  isLoadingLocations = false;
 
   private destroy$ = new Subject<void>();
 
@@ -94,7 +97,6 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
         },
         error: async (err: any) => {
           await loading.dismiss();
-          console.error('[BusinessRegistration] Error checking business existence:', err);
           await this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.CHECK_BUSINESS_ERROR');
           this.initializeRegistrationForm();
         }
@@ -114,7 +116,6 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
     if (userId) {
       this.form.get('user_id')?.setValue(userId);
     } else {
-      console.error('[BusinessRegistration] User ID not found');
       this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.USER_ID_NOT_FOUND');
     }
   }
@@ -155,7 +156,6 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
           this.businessCategories = data;
         },
         error: (err) => {
-          console.error('[BusinessRegistration] Error loading business categories:', err);
           this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.LOAD_CATEGORIES_ERROR');
         },
       });
@@ -169,7 +169,6 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
           this.businessTypes = data;
         },
         error: (err) => {
-          console.error('[BusinessRegistration] Error loading business types:', err);
           this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.LOAD_TYPES_ERROR');
         },
       });
@@ -183,35 +182,40 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
           this.states = data;
         },
         error: (err) => {
-          console.error('[BusinessRegistration] Error loading states:', err);
           this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.LOAD_STATES_ERROR');
         },
       });
   }
 
   private fetchCities(stateId: number): void {
+    this.isLoadingCities = true;
     this.businessRegistrationService.getCitiesOfState(stateId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.cities = data;
+          this.cities = data && data.length > 0 ? data : [];
+          this.isLoadingCities = false;
         },
         error: (err) => {
-          console.error('[BusinessRegistration] Error loading cities:', err);
+          this.isLoadingCities = false;
+          this.cities = [];
           this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.LOAD_CITIES_ERROR');
         },
       });
   }
 
   private fetchLocations(cityId: number): void {
+    this.isLoadingLocations = true;
     this.businessRegistrationService.getLocationsByCity(cityId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.locations = data;
+          this.locations = data && data.length > 0 ? data : [];
+          this.isLoadingLocations = false;
         },
         error: (err) => {
-          console.error('[BusinessRegistration] Error loading locations:', err);
+          this.isLoadingLocations = false;
+          this.locations = [];
           this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.LOAD_LOCATIONS_ERROR');
         },
       });
@@ -224,6 +228,11 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.isSubmitting) {
+      return; // Prevent double submission
+    }
+
+    this.isSubmitting = true;
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('WHOLESALER_BUSINESS_REGISTRATION.SUBMITTING'),
     });
@@ -239,15 +248,15 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async () => {
           await loading.dismiss();
+          this.isSubmitting = false;
           await this.showSuccessToast('WHOLESALER_BUSINESS_REGISTRATION.REGISTRATION_SUCCESS');
           this.form.reset();
           this.router.navigate(['/wholesaler/home']);
         },
         error: async (err) => {
           await loading.dismiss();
-          console.error('[BusinessRegistration] Error registering business:', err);
-          const message = err?.error?.error || 'WHOLESALER_BUSINESS_REGISTRATION.REGISTRATION_FAILED';
-          await this.showErrorToast(message);
+          this.isSubmitting = false;
+          await this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.REGISTRATION_FAILED');
         }
       });
   }
@@ -281,7 +290,6 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
 
       await this.showSuccessToast('WHOLESALER_BUSINESS_REGISTRATION.LOCATION_SUCCESS');
     } catch (error) {
-      console.error('Error getting location:', error);
       await this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.ERROR_LOCATION');
     } finally {
       this.isGettingLocation = false;

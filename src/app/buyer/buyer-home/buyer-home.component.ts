@@ -128,7 +128,6 @@ export class BuyerHomeComponent implements OnDestroy {
           }));
         },
         error: (error) => {
-          console.error('Error fetching languages:', error);
           this.showErrorToast('BUYER_HOME.ERROR_LOADING_LANGUAGES');
           this.languages = [
             { id: 1, code: 'en', name: 'English' },
@@ -151,7 +150,6 @@ export class BuyerHomeComponent implements OnDestroy {
           localStorage.setItem('preferred_language', normalizedLangCode);
         },
         error: (err) => {
-          console.error('Error loading translation file for', normalizedLangCode, err);
           this.translate.use('en');
           this.currentLanguage = 'English';
           localStorage.setItem('preferred_language', 'en');
@@ -164,7 +162,6 @@ export class BuyerHomeComponent implements OnDestroy {
     const normalizedLangCode = langCode.toLowerCase();
     const lang = this.languages.find(l => l.code === normalizedLangCode);
     if (!lang) {
-      console.error('Language not found:', langCode);
       return;
     }
 
@@ -176,7 +173,6 @@ export class BuyerHomeComponent implements OnDestroy {
           this.showSuccessToast('BUYER_HOME.LANGUAGE_UPDATED');
         },
         error: (error) => {
-          console.error('Error saving language preference:', error);
           // Still change language locally even if backend save fails
           this.setLanguage(normalizedLangCode);
           this.showErrorToast('BUYER_HOME.ERROR_SAVING_LANGUAGE');
@@ -199,7 +195,6 @@ export class BuyerHomeComponent implements OnDestroy {
       });
       await popover.present();
     } catch (error) {
-      console.error('Error opening language popover:', error);
       this.showErrorToast('BUYER_HOME.ERROR_OPENING_MENU');
     }
   }
@@ -218,7 +213,6 @@ export class BuyerHomeComponent implements OnDestroy {
         error: (error) => {
           this.errorLoadingCategories = true;
           this.loadingCategories = false;
-          console.error('Error fetching categories:', error);
           this.showErrorToast('BUYER_HOME.ERROR_LOADING_CATEGORIES_DESC');
         }
       });
@@ -244,7 +238,7 @@ export class BuyerHomeComponent implements OnDestroy {
     try {
       await this.menuCtrl.open('buyer-menu');
     } catch (error) {
-      console.error('Error opening menu:', error);
+      // Silent fail - menu may already be open
     }
   }
 
@@ -252,7 +246,7 @@ export class BuyerHomeComponent implements OnDestroy {
     try {
       await this.menuCtrl.close('buyer-menu');
     } catch (error) {
-      console.error('Error closing menu:', error);
+      // Silent fail - menu may already be closed
     }
   }
 
@@ -261,7 +255,6 @@ export class BuyerHomeComponent implements OnDestroy {
       await this.closeMenu();
       await this.router.navigate(['/buyer/profile']);
     } catch (error) {
-      console.error('Error navigating to profile:', error);
       this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
     }
   }
@@ -273,7 +266,6 @@ export class BuyerHomeComponent implements OnDestroy {
         queryParams: { id: 'ORD123456' }
       });
     } catch (error) {
-      console.error('Error navigating to order history:', error);
       this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
     }
   }
@@ -283,7 +275,6 @@ export class BuyerHomeComponent implements OnDestroy {
       await this.closeMenu();
       await this.router.navigate(['/buyer/business-locations']);
     } catch (error) {
-      console.error('Error navigating to business locations:', error);
       this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
     }
   }
@@ -293,7 +284,6 @@ export class BuyerHomeComponent implements OnDestroy {
       await this.closeMenu();
       await this.router.navigate(['/buyer/business-info']);
     } catch (error) {
-      console.error('Error navigating to business info:', error);
       this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
     }
   }
@@ -303,7 +293,6 @@ export class BuyerHomeComponent implements OnDestroy {
       await this.closeMenu();
       await this.router.navigate(['/buyer/settings']);
     } catch (error) {
-      console.error('Error navigating to settings:', error);
       this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
     }
   }
@@ -327,7 +316,6 @@ export class BuyerHomeComponent implements OnDestroy {
                 await this.authService.logout();
                 await this.router.navigate(['/login']);
               } catch (error) {
-                console.error('Error during logout:', error);
                 this.showErrorToast('BUYER_HOME.LOGOUT_ERROR');
               }
             }
@@ -337,7 +325,6 @@ export class BuyerHomeComponent implements OnDestroy {
 
       await alert.present();
     } catch (error) {
-      console.error('Error showing logout confirmation:', error);
       this.showErrorToast('BUYER_HOME.ERROR_OPENING_MENU');
     }
   }
@@ -346,7 +333,6 @@ export class BuyerHomeComponent implements OnDestroy {
     try {
       await this.router.navigate(['/buyer/RetailerTrends']);
     } catch (error) {
-      console.error('Error navigating to trends:', error);
       this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
     }
   }
@@ -361,7 +347,7 @@ export class BuyerHomeComponent implements OnDestroy {
       });
       await toast.present();
     } catch (error) {
-      console.error('Error showing toast:', error);
+      // Silent fail - toast not critical
     }
   }
 
@@ -375,7 +361,7 @@ export class BuyerHomeComponent implements OnDestroy {
       });
       await toast.present();
     } catch (error) {
-      console.error('Error showing toast:', error);
+      // Silent fail - toast not critical
     }
   }
 }

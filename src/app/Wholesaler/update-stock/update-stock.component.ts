@@ -1,9 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { finalize } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { StockService } from 'src/app/Wholesaler/services/stock.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -23,12 +24,15 @@ interface StockItem {
   standalone: true,
   imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
 })
-export class UpdateStockComponent implements OnInit {
+export class UpdateStockComponent implements OnInit, OnDestroy {
   @Input() stockItem!: StockItem;
   @Input() branchId!: number;
 
   stockToDeduct: number | null = null;
   isLoading = false;
+
+  /** Subject for managing subscriptions */
+  private destroy$ = new Subject<void>();
 
   constructor(
     private stockService: StockService,
@@ -42,15 +46,29 @@ export class UpdateStockComponent implements OnInit {
     this.validateInputs();
   }
 
+  /**
+   * Cleanup subscriptions to prevent memory leaks
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Validate required inputs
+   */
   private validateInputs(): void {
     if (!this.stockItem || this.branchId == null) {
-      console.error('UpdateStockComponent: Missing required inputs', {
-        hasStockItem: !!this.stockItem,
-        hasBranchId: this.branchId != null
-      });
+      // Silent validation - issue will be caught on submit attempt
+      return;
     }
   }
 
+  /**
+   * Display toast notification
+   * @param message Message text
+   * @param color Toast color type
+   */
   private async showToast(message: string, color: 'success' | 'danger' | 'warning'): Promise<void> {
     const toast = await this.toastCtrl.create({
       message,
@@ -67,6 +85,10 @@ export class UpdateStockComponent implements OnInit {
     await toast.present();
   }
 
+  /**
+   * Show loading spinner
+   * @returns Promise of loading controller reference
+   */
   private async showLoading(): Promise<HTMLIonLoadingElement> {
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('UPDATE_STOCK.UPDATING'),
@@ -76,14 +98,26 @@ export class UpdateStockComponent implements OnInit {
     return loading;
   }
 
+  /**
+   * Get current stock from item
+   * @returns Current stock quantity
+   */
   private getCurrentStock(): number {
     return this.stockItem.current_stock ?? this.stockItem.currentStock ?? 0;
   }
 
+  /**
+   * Get product ID from item
+   * @returns Product ID or undefined
+   */
   private getProductId(): number | undefined {
     return this.stockItem.product_id ?? this.stockItem.id;
   }
 
+  /**
+   * Validate stock deduction amount
+   * @returns Validation result with error message if invalid
+   */
   private validateStockDeduction(): { isValid: boolean; errorMessage?: string } {
     if (this.stockToDeduct == null || this.stockToDeduct <= 0) {
       return {
@@ -105,6 +139,9 @@ export class UpdateStockComponent implements OnInit {
     return { isValid: true };
   }
 
+  /**
+   * Update stock with deducted quantity
+   */
   async updateStock(): Promise<void> {
     // Prevent multiple submissions
     if (this.isLoading) {
@@ -120,7 +157,6 @@ export class UpdateStockComponent implements OnInit {
 
     const productId = this.getProductId();
     if (!productId) {
-      console.error('UpdateStockComponent: Missing product ID');
       await this.showToast(
         this.translate.instant('UPDATE_STOCK.MISSING_PRODUCT_ID'),
         'danger'
@@ -142,6 +178,7 @@ export class UpdateStockComponent implements OnInit {
 
     this.stockService.updateStock(payload)
       .pipe(
+        takeUntil(this.destroy$),
         finalize(() => {
           this.isLoading = false;
           loading.dismiss();
@@ -156,8 +193,6 @@ export class UpdateStockComponent implements OnInit {
           this.modalCtrl.dismiss({ updated: true, newStock: updatedStock });
         },
         error: async (error: HttpErrorResponse) => {
-          console.error('Failed to update stock:', error);
-
           let errorMessage = this.translate.instant('UPDATE_STOCK.UPDATE_FAILED');
 
           if (error.status === 0) {
@@ -175,6 +210,9 @@ export class UpdateStockComponent implements OnInit {
       });
   }
 
+  /**
+   * Close modal without saving
+   */
   close(): void {
     if (!this.isLoading) {
       this.modalCtrl.dismiss({ updated: false });

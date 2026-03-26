@@ -1,6 +1,9 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import {
   IonApp, IonButtons, IonContent, IonHeader, IonMenu, IonMenuButton, IonMenuToggle,
   IonTitle, IonToolbar, IonRouterOutlet, IonList, IonItem, IonLabel, IonIcon
@@ -19,55 +22,63 @@ import {
   encapsulation: ViewEncapsulation.None,
   imports: [
     RouterModule, IonApp, IonButtons, IonContent, IonHeader, IonMenu, IonMenuButton, IonMenuToggle,
-    IonTitle, IonToolbar, IonRouterOutlet, IonList, IonItem, IonLabel, IonIcon, CommonModule
+    IonTitle, IonToolbar, IonRouterOutlet, IonList, IonItem, IonLabel, IonIcon, CommonModule, TranslatePipe
   ]
 })
-export class TransportComponent implements OnInit {
+export class TransportComponent implements OnInit, OnDestroy {
   pageTitle: string = 'Transport';
-  activeRoute: string = ''; // Stores the current active route
+  activeRoute: string = '';
+  private destroy$ = new Subject<void>();
 
-  // Mapping of routes to titles
+  // Mapping of routes to i18n keys
   titleMap: { [key: string]: string } = {
-    '/transport/profile': 'Profile',
-    '/transport/transport-dashboard': 'Dashboard',
-    '/transport/transport-update-rates': 'Update Rates',
-    '/transport/manage-vehicles': 'Manage Vehicles',
-    '/transport/manage-drivers': 'Manage Drivers',
-    '/transport/driver-registration': 'Driver Registration',
-    '/transport/transport-requests': 'Requests',
-    '/transport/active-deliveries': 'Active Deliveries',
-    '/transport/live-tracking': 'Live Tracking',
-    '/transport/delivery-confirmation': 'Confirmation',
-    '/transport/pickup-orders': 'Pickup Orders',
-    '/transport/pickup-confirmation': 'Pickup Confirmation',
-    '/transport/customer-chat': 'Customer Chat',
-    '/transport/earnings-dashboard': 'Earnings & Reports',
-    '/transport/delivery-history': 'Delivery History',
-    '/transport/notifications': 'Notifications',
-    '/transport/settings': 'Settings',
+    '/transport/profile': 'TRANSPORT_MENU.PROFILE',
+    '/transport/transport-dashboard': 'TRANSPORT_MENU.DASHBOARD',
+    '/transport/transport-update-rates': 'TRANSPORT_MENU.UPDATE_RATES',
+    '/transport/manage-vehicles': 'TRANSPORT_MENU.MANAGE_VEHICLES',
+    '/transport/manage-drivers': 'TRANSPORT_MENU.MANAGE_DRIVERS',
+    '/transport/driver-registration': 'TRANSPORT_MENU.DRIVER_REGISTRATION',
+    '/transport/transport-requests': 'TRANSPORT_MENU.TRANSPORT_REQUESTS',
+    '/transport/active-deliveries': 'TRANSPORT_MENU.ACTIVE_DELIVERIES',
+    '/transport/live-tracking': 'TRANSPORT_MENU.LIVE_TRACKING',
+    '/transport/delivery-confirmation': 'TRANSPORT_MENU.DELIVERY_CONFIRMATION',
+    '/transport/pickup-orders': 'TRANSPORT_MENU.PICKUP_ORDERS',
+    '/transport/pickup-confirmation': 'TRANSPORT_MENU.PICKUP_CONFIRMATION',
+    '/transport/customer-chat': 'TRANSPORT_MENU.CUSTOMER_CHAT',
+    '/transport/earnings-dashboard': 'TRANSPORT_MENU.EARNINGS_REPORTS',
+    '/transport/delivery-history': 'TRANSPORT_MENU.DELIVERY_HISTORY',
+    '/transport/notifications': 'TRANSPORT_MENU.NOTIFICATIONS',
+    '/transport/settings': 'TRANSPORT_MENU.SETTINGS'
   };
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private translate: TranslateService) {
     addIcons({speedometerOutline,documentTextOutline,personAddOutline,listOutline,checkmarkCircleOutline,timeOutline,personCircleOutline,settingsOutline,pricetagOutline,carOutline,personOutline,locationOutline,cashOutline,notificationsOutline,navigateOutline,checkmarkDoneOutline});
-    // Listen for route changes
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.activeRoute = event.urlAfterRedirects; // Store the active route
-        this.pageTitle = this.getPageTitle(this.activeRoute);
-      }
-    });
+    this.router.events
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event) => {
+        if (event instanceof NavigationEnd) {
+          this.activeRoute = event.urlAfterRedirects;
+          this.pageTitle = this.getPageTitle(this.activeRoute);
+        }
+      });
   }
 
-  ngOnInit() { }
+  ngOnInit() {}
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   // Function to get the page title dynamically
   getPageTitle(url: string): string {
     for (const route in this.titleMap) {
       if (url.startsWith(route)) {
-        return this.titleMap[route];
+        const i18nKey = this.titleMap[route];
+        return this.translate.instant(i18nKey);
       }
     }
-    return 'Transport'; // Default title
+    return this.translate.instant('TRANSPORT_MENU.TRANSPORT');
   }
 
   // Function to check if a menu item is active

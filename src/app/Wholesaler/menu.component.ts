@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -8,6 +8,7 @@ import {
 } from 'ionicons/icons';
 import { MenuService } from './services/menu.service';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-hamburger-menu',
@@ -87,7 +88,9 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, IonicModule, TranslatePipe]
 })
-export class HamburgerMenuComponent implements OnInit {
+export class HamburgerMenuComponent implements OnInit, OnDestroy {
+  /** Subject for managing subscriptions */
+  private destroy$ = new Subject<void>();
 
   constructor(public menuService: MenuService) {
     addIcons({
@@ -100,51 +103,95 @@ export class HamburgerMenuComponent implements OnInit {
     // Component initialization
   }
 
-  closeMenu(): void {
-    this.menuService.closeMenu();
+  /**
+   * Cleanup subscriptions to prevent memory leaks
+   */
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  navigateToHome(): void {
-    this.menuService.navigateToHome();
+  /**
+   * Close the menu
+   */
+  async closeMenu(): Promise<void> {
+    await this.menuService.closeMenu();
   }
 
-  navigateToBusinessLocations(): void {
-    this.menuService.navigateToBusinessLocations();
+  /**
+   * Navigate to home dashboard
+   */
+  async navigateToHome(): Promise<void> {
+    await this.menuService.navigateToHome();
   }
 
-  navigateToMyOrders(): void {
-    this.menuService.navigateToMyOrders();
+  /**
+   * Navigate to business locations
+   */
+  async navigateToBusinessLocations(): Promise<void> {
+    await this.menuService.navigateToBusinessLocations();
   }
 
-  navigateToUpdateInventory(): void {
-    this.menuService.navigateToStockDashboard();
+  /**
+   * Navigate to my orders
+   */
+  async navigateToMyOrders(): Promise<void> {
+    await this.menuService.navigateToMyOrders();
   }
 
-  navigateToPastOrders(): void {
-    this.menuService.navigateToPastOrders();
+  /**
+   * Navigate to update inventory
+   */
+  async navigateToUpdateInventory(): Promise<void> {
+    await this.menuService.navigateToStockDashboard();
   }
 
-  navigateToRestockingRecommendations(): void {
-    this.menuService.navigateToRestockingRecommendations();
+  /**
+   * Navigate to past orders
+   */
+  async navigateToPastOrders(): Promise<void> {
+    await this.menuService.navigateToPastOrders();
   }
 
-  navigateToMarketOpportunities(): void {
-    this.menuService.navigateToMarketOpportunities();
+  /**
+   * Navigate to restocking recommendations
+   */
+  async navigateToRestockingRecommendations(): Promise<void> {
+    await this.menuService.navigateToRestockingRecommendations();
   }
 
-  navigateToTrends(): void {
-    this.menuService.navigateToTrends();
+  /**
+   * Navigate to market opportunities
+   */
+  async navigateToMarketOpportunities(): Promise<void> {
+    await this.menuService.navigateToMarketOpportunities();
   }
 
-  navigateToProfile(): void {
-    this.menuService.navigateToProfile();
+  /**
+   * Navigate to trends
+   */
+  async navigateToTrends(): Promise<void> {
+    await this.menuService.navigateToTrends();
   }
 
-  navigateToSettings(): void {
-    this.menuService.navigateToSettings();
+  /**
+   * Navigate to profile
+   */
+  async navigateToProfile(): Promise<void> {
+    await this.menuService.navigateToProfile();
   }
 
-  logout(): void {
-    this.menuService.logout();
+  /**
+   * Navigate to settings
+   */
+  async navigateToSettings(): Promise<void> {
+    await this.menuService.navigateToSettings();
+  }
+
+  /**
+   * Logout the user with confirmation
+   */
+  async logout(): Promise<void> {
+    await this.menuService.logout();
   }
 }

@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { addIcons } from 'ionicons';
 import { languageOutline, carOutline, timeOutline, checkmarkCircleOutline } from 'ionicons/icons';
-import { UpcomingDeliveriesService } from 'src/app/services/upcoming-deliveries.service';
 import { DeliveryService } from './delivery.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PopoverController } from '@ionic/angular';
@@ -24,9 +23,9 @@ interface Language {
   standalone: true,
   templateUrl: './transport-dashboard.component.html',
   styleUrls: ['./transport-dashboard.component.scss'],
-  imports: [IonicModule, CommonModule, FormsModule, RouterModule, TranslatePipe]
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
 })
-export class TransportDashboardComponent implements OnInit {
+export class TransportDashboardComponent implements OnInit, OnDestroy {
   selectedTab = 'active';
 
   activeDeliveries: any[] = [];
@@ -37,6 +36,8 @@ export class TransportDashboardComponent implements OnInit {
 
   languages: Language[] = [];
   currentLanguage = 'English'; // Default
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private deliveryService: DeliveryService,
@@ -54,27 +55,34 @@ export class TransportDashboardComponent implements OnInit {
     this.fetchLanguages();
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private applyStoredLanguage() {
     const savedLang = localStorage.getItem('preferred_language') || 'en';
     this.translate.use(savedLang);
   }
 
   fetchLanguages() {
-    this.translateApiService.getLanguages().subscribe({
-      next: (langs) => {
-        this.languages = langs.map(l => ({ ...l, code: l.code.toLowerCase() }));
-        const currentLang = this.translate.currentLang || 'en';
-        const lang = this.languages.find(l => l.code === currentLang);
-        if (lang) this.currentLanguage = lang.name;
-      },
-      error: (err) => {
-        console.error('Error fetching languages:', err);
-        this.languages = [
-          { id: 1, code: 'en', name: 'English' },
-          { id: 2, code: 'hi', name: 'हिंदी' }
-        ];
-      }
-    });
+    this.translateApiService.getLanguages()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (langs) => {
+          this.languages = langs.map(l => ({ ...l, code: l.code.toLowerCase() }));
+          const currentLang = this.translate.currentLang || 'en';
+          const lang = this.languages.find(l => l.code === currentLang);
+          if (lang) this.currentLanguage = lang.name;
+        },
+        error: () => {
+          // Fallback to default languages if API fails
+          this.languages = [
+            { id: 1, code: 'en', name: 'English' },
+            { id: 2, code: 'hi', name: 'हिंदी' }
+          ];
+        }
+      });
   }
 
 
@@ -82,16 +90,15 @@ export class TransportDashboardComponent implements OnInit {
     // Ensure language code is lowercase to match JSON files (en.json, hi.json)
     const normalizedLangCode = langCode.toLowerCase();
 
-    this.translate.use(normalizedLangCode).subscribe({
+    this.translate.use(normalizedLangCode).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         const lang = this.languages.find(l => l.code.toLowerCase() === normalizedLangCode);
         this.currentLanguage = lang ? lang.name : 'English';
         // Save to localStorage for persistence
         localStorage.setItem('preferred_language', normalizedLangCode);
       },
-      error: (err) => {
-        console.error('Error loading translation file for', normalizedLangCode, err);
-        this.translate.use('en');
+      error: () => {
+        this.translate.use('en').pipe(takeUntil(this.destroy$)).subscribe();
         this.currentLanguage = 'English';
         localStorage.setItem('preferred_language', 'en');
       }
@@ -105,17 +112,17 @@ export class TransportDashboardComponent implements OnInit {
 
     if (lang) {
       // Save to backend
-      this.translateApiService.setLanguagePreference(lang.id).subscribe({
-        next: (response) => {
-          console.log('Language preference saved to backend:', response);
-          this.setLanguage(normalizedLangCode);
-        },
-        error: (err) => {
-          console.error('Error saving language preference to backend:', err);
-          // Still change language locally even if backend save fails
-          this.setLanguage(normalizedLangCode);
-        }
-      });
+      this.translateApiService.setLanguagePreference(lang.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.setLanguage(normalizedLangCode);
+          },
+          error: () => {
+            // Still change language locally even if backend save fails
+            this.setLanguage(normalizedLangCode);
+          }
+        });
     }
   }
 
@@ -157,27 +164,29 @@ export class TransportDashboardComponent implements OnInit {
         return;
     }
 
-    serviceCall.subscribe({
-      next: (res: any) => {
-        this.isLoading = false;
-        switch (tab) {
-          case 'active':
-            this.activeDeliveries = res.deliveries || [];
-            break;
-          case 'upcoming':
-            this.upcomingDeliveries = res.deliveries || [];
-            break;
-          case 'completed':
-            this.completedDeliveries = res.deliveries || [];
-            break;
+    serviceCall
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: any) => {
+          this.isLoading = false;
+          switch (tab) {
+            case 'active':
+              this.activeDeliveries = res.deliveries || [];
+              break;
+            case 'upcoming':
+              this.upcomingDeliveries = res.deliveries || [];
+              break;
+            case 'completed':
+              this.completedDeliveries = res.deliveries || [];
+              break;
+          }
+        },
+        error: (err: any) => {
+          this.isLoading = false;
+          // Use translation key from error message or fallback
+          this.errorMessage = err.message || 'TRANSPORT_DASHBOARD.LOAD_DELIVERIES_ERROR';
         }
-      },
-      error: (err: any) => {
-        this.isLoading = false;
-        this.errorMessage = err.message || 'An error occurred while loading deliveries.';
-        console.error('Error loading deliveries:', err);
-      }
-    });
+      });
   }
 
   getPickupLocations(orders: any[]): string {

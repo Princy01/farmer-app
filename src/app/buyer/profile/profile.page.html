@@ -170,11 +170,11 @@
 
       <!-- Action Buttons -->
       <div class="action-buttons" *ngIf="isEditing">
-        <ion-button expand="block" (click)="saveProfile()" color="primary">
+        <ion-button expand="block" (click)="saveProfile()" [disabled]="isLoading" color="primary">
           <ion-icon name="save-outline" slot="start"></ion-icon>
           {{ 'RETAILER_PROFILE.SAVE' | translate }}
         </ion-button>
-        <ion-button expand="block" (click)="toggleEdit()" color="medium" fill="outline">
+        <ion-button expand="block" (click)="toggleEdit()" [disabled]="isLoading" color="medium" fill="outline">
           <ion-icon name="close-outline" slot="start"></ion-icon>
           {{ 'RETAILER_PROFILE.CANCEL' | translate }}
         </ion-button>

@@ -34,7 +34,8 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { OrderService } from 'src/app/buyer/order-confirmation/order.service';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil, filter } from 'rxjs/operators';
 
 interface CartItem {
   selected_id?: number;
@@ -121,6 +122,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   wholesalerGroups: WholesalerGroupSummary[] = [];
 
   private routerSubscription?: Subscription;
+  private destroy$ = new Subject<void>();
+  private paymentInProgress: boolean = false;
 
   constructor(
     private router: Router,
@@ -160,11 +163,14 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
     this.handleNavigationState();
 
-    this.routerSubscription = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
         this.handleNavigationState();
-      }
-    });
+      });
   }
 
   ngOnInit(): void {
@@ -173,11 +179,15 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
-    }
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
+  /**
+   * Handle navigation state from router
+   * Extracts cart items, pricing, transport, and address information
+   * from the navigation state and populates component properties
+   */
   private handleNavigationState(): void {
     const navigation = this.router.getCurrentNavigation();
     const navData = navigation?.extras?.state;
@@ -185,8 +195,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     if (!navData) {
       return;
     }
-
-    console.log('Navigation state received:', navData);
 
     if (navData['cartItems']) {
       this.cartItems = (navData['cartItems'] || []).map((item: any) => {
@@ -213,13 +221,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       this.retailerInfo = navData['retailer'] || null;
       this.wholeSeller = navData['wholeseller'] || null;
       this.discount = navData['discount'] || 0;
-
-      console.log('Cart items loaded:', this.cartItems);
-      console.log('Total price:', this.totalPrice);
     }
 
     if (navData['transportData']) {
-      console.log('Transport data in navigation state:', navData['transportData']);
       this.transportData = navData['transportData'];
       this.hasRideRequest = navData['hasRideRequest'] || navData['hasTransport'] || false;
 
@@ -228,9 +232,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         this.selectedUrgency = this.transportData.urgency;
         this.estimatedRidePrice = this.transportData.base_price;
       }
-
-      console.log('Transport data received:', this.transportData);
-      console.log('Estimated ride price:', this.estimatedRidePrice);
     }
 
     if (navData['selectedBranch']) {
@@ -303,7 +304,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.checkoutService.getAllBusinessBranches().subscribe({
+      this.checkoutService.getAllBusinessBranches()
+        .pipe(
+          takeUntil(this.destroy$)
+        )
+        .subscribe({
         next: (branches: BusinessBranch[]) => {
           this.businessBranches = branches?.filter(branch => branch.active_status) || [];
 
@@ -312,16 +317,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           }
         },
         error: async (error: any) => {
-          console.error('Error loading business branches:', error);
-
           if (error.status === 401) {
             await this.showAuthError();
             return;
           }
 
-          await this.showErrorAlert(
-            this.translate.instant('CHECKOUT.LOAD_BRANCHES_ERROR')
-          );
+          const errorMessage = this.getErrorMessage(error);
+          await this.showErrorAlert(errorMessage);
         },
         complete: () => {
           this.isLoadingBranches = false;
@@ -329,7 +331,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         }
       });
     } catch (error) {
-      console.error('Unexpected error loading branches:', error);
       this.isLoadingBranches = false;
       await loading.dismiss();
       await this.showErrorAlert(
@@ -354,6 +355,14 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     return branch.branch_id;
   }
 
+  /**
+   * Allocates discount and calculates final prices for each wholesaler group
+   * Uses proportional allocation based on each group's subtotal
+   *
+   * Calculation: If group subtotal is 40% of total, gets 40% of discount
+   * Final amount = subtotal - allocatedDiscount + tax
+   * Grand total = sum of all group finals + transport cost
+   */
   private calculateGroupPricing(): void {
     if (this.wholesalerGroups.length === 0) {
       this.grandTotal = this.totalPrice - this.discount + this.estimatedRidePrice;
@@ -380,20 +389,19 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     // Grand total = sum of all order finals + transport cost
     const ordersTotal = this.wholesalerGroups.reduce((sum, g) => sum + g.finalAmount, 0);
     this.grandTotal = ordersTotal + this.estimatedRidePrice;
-
-    console.log('Group pricing calculated:', {
-      groups: this.wholesalerGroups.map(g => ({
-        wholesaler: g.wholesalerName,
-        subtotal: g.subtotal,
-        discount: g.allocatedDiscount,
-        final: g.finalAmount
-      })),
-      ordersTotal,
-      transportCost: this.estimatedRidePrice,
-      grandTotal: this.grandTotal
-    });
   }
 
+  /**
+   * Calculates estimated ride price based on transport type and distance
+   *
+   * Rates per km:
+   * - Standard: ₹8/km
+   * - Express: ₹15/km
+   * - Priority: ₹25/km
+   *
+   * Minimum charge: ₹50
+   * Final price = Math.max(50, rate * distance)
+   */
   calculateRidePrice(): void {
     if (this.hasRideRequest && this.transportData?.delivery_type && this.transportData?.distance) {
       const ratesPerKm: Record<string, number> = {
@@ -410,6 +418,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.calculateGroupPricing();
   }
 
+  /**
+   * Navigate to transport arrangement screen with current checkout context
+   * Validates that a branch is selected before allowing navigation
+   */
   arrangeRide(): void {
     if (!this.selectedBranch) {
       this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
@@ -448,36 +460,51 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   proceedToPayment(): void {
+    // Prevent double-click
+    if (this.paymentInProgress) {
+      return;
+    }
+
     if (!this.selectedBranch) {
       this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
       return;
     }
 
-    if (this.wholesalerGroups.length === 0) { 
+    if (this.wholesalerGroups.length === 0) {
       this.showErrorAlert(this.translate.instant('CHECKOUT.NO_ITEMS_ERROR'));
       return;
     }
 
+    // Set loading state
+    this.paymentInProgress = true;
+    this.isLoading = true;
+
     // Ensure pricing is calculated
     this.calculateGroupPricing();
 
-    const orderData = {
-      wholesalerGroups: this.wholesalerGroups,  
-      selectedBranch: this.selectedBranch,
-      deliveryAddress: this.selectedBranch.address || '',
-      deliveryPincode: this.selectedBranch.pincode || '',
-      discount: this.discount,
-      grandTotal: this.grandTotal,
-      hasTransport: this.hasRideRequest,
-      transportData: this.transportData,
-      transporterCost: this.estimatedRidePrice,
-      retailer: this.retailerInfo,  
-      retailerBranchId: this.selectedBranch.branch_id
-    };
+    try {
+      const orderData = {
+        wholesalerGroups: this.wholesalerGroups,
+        selectedBranch: this.selectedBranch,
+        deliveryAddress: this.selectedBranch.address || '',
+        deliveryPincode: this.selectedBranch.pincode || '',
+        discount: this.discount,
+        grandTotal: this.grandTotal,
+        hasTransport: this.hasRideRequest,
+        transportData: this.transportData,
+        transporterCost: this.estimatedRidePrice,
+        retailer: this.retailerInfo,
+        retailerBranchId: this.selectedBranch.branch_id
+      };
 
-    this.router.navigate(['/buyer/payment'], {
-      state: { orderData }
-    });
+      this.router.navigate(['/buyer/payment'], {
+        state: { orderData }
+      });
+    } finally {
+      // Reset loading state after navigation
+      this.paymentInProgress = false;
+      this.isLoading = false;
+    }
   }
 
   goBack(): void {
@@ -507,7 +534,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     if (!this.wholeSeller) {
       return this.translate.instant('CHECKOUT.DIRECT_ORDER');
     }
-    return this.wholeSeller.name || this.translate.instant('CHECKOUT.UNKNOWN_WHOLESELLER');
+    return this.wholeSeller?.name || this.translate.instant('CHECKOUT.UNKNOWN_WHOLESELLER');
   }
 
   handleImageError(event: Event): void {
@@ -522,6 +549,57 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       buttons: [this.translate.instant('CHECKOUT.OK')]
     });
     await alert.present();
+  }
+
+  /**
+   * Maps HTTP error codes and error types to user-friendly messages
+   * Handles network, timeout, and server errors gracefully
+   *
+   * @param error - The error object from HTTP call
+   * @returns Translated user-friendly error message
+   */
+  private getErrorMessage(error: any): string {
+    if (!error) {
+      return this.translate.instant('CHECKOUT.UNEXPECTED_ERROR');
+    }
+
+    // Handle timeout errors
+    if (error.name === 'TimeoutError' || error.message?.includes('timeout')) {
+      return this.translate.instant('REQUEST_TIMEOUT_ERROR');
+    }
+
+    // Handle network errors
+    if (error.status === 0 || error.message?.includes('network')) {
+      return this.translate.instant('NETWORK_ERROR');
+    }
+
+    // Handle authentication errors
+    if (error.status === 401) {
+      return this.translate.instant('CHECKOUT.SESSION_EXPIRED');
+    }
+
+    // Handle authorization errors
+    if (error.status === 403) {
+      return this.translate.instant('CHECKOUT.NO_PERMISSION');
+    }
+
+    // Handle not found errors
+    if (error.status === 404) {
+      return this.translate.instant('NOT_FOUND');
+    }
+
+    // Handle rate limit errors
+    if (error.status === 429) {
+      return this.translate.instant('RATE_LIMIT_ERROR');
+    }
+
+    // Handle server errors
+    if (error.status >= 500) {
+      return this.translate.instant('SERVER_ERROR');
+    }
+
+    // Default error message
+    return this.translate.instant('CHECKOUT.UNEXPECTED_ERROR');
   }
 
   private async showInfoAlert(header: string, message: string): Promise<void> {

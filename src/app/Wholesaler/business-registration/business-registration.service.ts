@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, timeout, retry } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 export interface BusinessCategory {
@@ -64,12 +64,26 @@ export class BusinessRegistrationService {
 
   getBusinessCategories(): Observable<BusinessCategory[]> {
     return this.http.get<BusinessCategory[]>(`${this.apiUrl}/getBusinessCategory`)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        timeout(30000),
+        retry({
+          count: 3,
+          delay: (error, retryCount) => {
+            const delayMs = Math.pow(2, retryCount - 1) * 1000;
+            return throwError(() => error);
+          }
+        }),
+        catchError(this.handleError)
+      );
   }
 
   getStates(): Observable<State[]> {
     return this.http.get<State[]>(`${this.apiUrl}/getStates`)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        timeout(30000),
+        retry({ count: 3, delay: 1000 }),
+        catchError(this.handleError)
+      );
   }
 
   getCitiesOfState(stateId: number): Observable<City[]> {
@@ -77,7 +91,11 @@ export class BusinessRegistrationService {
       return throwError(() => new Error('Invalid state ID'));
     }
     return this.http.get<City[]>(`${this.apiUrl}/getAllCitiesOfState/${stateId}`)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        timeout(30000),
+        retry({ count: 3, delay: 1000 }),
+        catchError(this.handleError)
+      );
   }
 
   getLocationsByCity(cityId: number): Observable<Location[]> {
@@ -85,31 +103,40 @@ export class BusinessRegistrationService {
       return throwError(() => new Error('Invalid city ID'));
     }
     return this.http.get<Location[]>(`${this.apiUrl}/getLocationsByCity/${cityId}`)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        timeout(30000),
+        retry({ count: 3, delay: 1000 }),
+        catchError(this.handleError)
+      );
   }
 
   getBusinessTypes(): Observable<BusinessType[]> {
     return this.http.get<BusinessType[]>(`${this.apiUrl}/getBusinessTypes`)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        timeout(30000),
+        retry({ count: 3, delay: 1000 }),
+        catchError(this.handleError)
+      );
   }
 
   addNewBusiness(business: BusinessRegistrationPayload): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/AddNewBusiness`, business)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        timeout(30000),
+        retry({
+          count: 3,
+          delay: (error, retryCount) => {
+            const delayMs = Math.pow(2, retryCount - 1) * 1000;
+            return throwError(() => error);
+          }
+        }),
+        catchError(this.handleError)
+      );
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'An unknown error occurred';
-
-    if (error.error instanceof ErrorEvent) {
-      // Client-side error
-      errorMessage = `Client Error: ${error.error.message}`;
-    } else {
-      // Server-side error
-      errorMessage = `Server Error: ${error.status} - ${error.message}`;
-    }
-
-    console.error('[BusinessRegistrationService]', errorMessage);
+    // Do not expose sensitive error details to user
+    // Return the error object for components to handle appropriately
     return throwError(() => error);
   }
 }

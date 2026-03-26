@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, timer } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { catchError, retry } from 'rxjs/operators';
+import { catchError, retryWhen, concatMap, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -82,7 +82,8 @@ interface UserPreference {
 })
 export class BuyerApiService {
   private readonly apiUrl = environment.apiUrl;
-  private readonly retryCount = 1; // Retry failed requests once
+  private readonly REQUEST_TIMEOUT = 30000; // 30 seconds
+  private readonly MAX_RETRIES = 3;
 
   constructor(
     private readonly http: HttpClient,
@@ -97,17 +98,46 @@ export class BuyerApiService {
     });
   }
 
+  /**
+   * Applies exponential backoff retry logic to observable
+   * Retries on network errors, timeouts, and 5xx status codes
+   */
+  private applyRetryLogic<T>(observable: Observable<T>): Observable<T> {
+    return observable.pipe(
+      timeout(this.REQUEST_TIMEOUT),
+      retryWhen(errors =>
+        errors.pipe(
+          concatMap((err, idx) => {
+            if (idx < this.MAX_RETRIES && this.isRetryableError(err)) {
+              const delay = Math.pow(2, idx) * 1000; // 1s, 2s, 4s
+              return timer(delay);
+            }
+            return throwError(() => err);
+          })
+        )
+      ),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  /**
+   * Determines if an error is retryable (network, timeout, 5xx errors)
+   */
+  private isRetryableError(error: any): boolean {
+    if (error.name === 'TimeoutError') return true;
+    if (error.status >= 500) return true;
+    if (error.status === 0) return true; // Network error
+    return false;
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'ERRORS.UNKNOWN_ERROR';
 
     if (error.error instanceof ErrorEvent) {
       // Client-side or network error
-      console.error('Client-side error:', error.error.message);
       errorMessage = 'ERRORS.NETWORK_ERROR';
     } else {
       // Backend error
-      console.error(`Backend error: ${error.status}, ${error.message}`);
-
       switch (error.status) {
         case 400:
           errorMessage = 'ERRORS.BAD_REQUEST';
@@ -140,11 +170,8 @@ export class BuyerApiService {
       return throwError(() => ({ message: 'ERRORS.INVALID_CATEGORY_ID', status: 400 }));
     }
 
-    return this.http.get<Category[]>(
-      `${this.apiUrl}/getCategoriesBySupID/${superCatId}`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<Category[]>(`${this.apiUrl}/getCategoriesBySupID/${superCatId}`)
     );
   }
 
@@ -153,11 +180,8 @@ export class BuyerApiService {
       return throwError(() => ({ message: 'ERRORS.INVALID_CATEGORY_ID', status: 400 }));
     }
 
-    return this.http.get<Product[]>(
-      `${this.apiUrl}/getProductByCatId/${categoryId}`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<Product[]>(`${this.apiUrl}/getProductByCatId/${categoryId}`)
     );
   }
 
@@ -166,20 +190,14 @@ export class BuyerApiService {
       return throwError(() => ({ message: 'ERRORS.INVALID_CATEGORY_ID', status: 400 }));
     }
 
-    return this.http.get<ProductAll[]>(
-      `${this.apiUrl}/getAllProductsOfSuperCategory/${superCatId}`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<ProductAll[]>(`${this.apiUrl}/getAllProductsOfSuperCategory/${superCatId}`)
     );
   }
 
   getCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(
-      `${this.apiUrl}/getCategories`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<Category[]>(`${this.apiUrl}/getCategories`)
     );
   }
 
@@ -188,11 +206,8 @@ export class BuyerApiService {
       return throwError(() => ({ message: 'ERRORS.INVALID_CATEGORY_ID', status: 400 }));
     }
 
-    return this.http.get<CategoryWithSubCategories>(
-      `${this.apiUrl}/getCategories/${categoryId}`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<CategoryWithSubCategories>(`${this.apiUrl}/getCategories/${categoryId}`)
     );
   }
 
@@ -201,20 +216,14 @@ export class BuyerApiService {
       return throwError(() => ({ message: 'ERRORS.INVALID_ID', status: 400 }));
     }
 
-    return this.http.get<ProductRegional>(
-      `${this.apiUrl}/getProductCategoryRegionalName/${id}`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<ProductRegional>(`${this.apiUrl}/getProductCategoryRegionalName/${id}`)
     );
   }
 
   getAllProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(
-      `${this.apiUrl}/getProducts`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<Product[]>(`${this.apiUrl}/getProducts`)
     );
   }
 
@@ -223,11 +232,8 @@ export class BuyerApiService {
       return throwError(() => ({ message: 'ERRORS.INVALID_PRODUCT_ID', status: 400 }));
     }
 
-    return this.http.get<Product>(
-      `${this.apiUrl}/getProducts/${productId}`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<Product>(`${this.apiUrl}/getProducts/${productId}`)
     );
   }
 
@@ -236,29 +242,20 @@ export class BuyerApiService {
       return throwError(() => ({ message: 'ERRORS.INVALID_ID', status: 400 }));
     }
 
-    return this.http.get<CategoryRegionalLanguage>(
-      `${this.apiUrl}/getProductCategoryRegional/${id}`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<CategoryRegionalLanguage>(`${this.apiUrl}/getProductCategoryRegional/${id}`)
     );
   }
 
   getModeOfPayments(): Observable<PaymentMode[]> {
-    return this.http.get<PaymentMode[]>(
-      `${this.apiUrl}/getModeOfPayments`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<PaymentMode[]>(`${this.apiUrl}/getModeOfPayments`)
     );
   }
 
   getSuperCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(
-      `${this.apiUrl}/getSuperCategories`
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.get<Category[]>(`${this.apiUrl}/getSuperCategories`)
     );
   }
 
@@ -276,13 +273,12 @@ export class BuyerApiService {
       drop_lon: dropLon
     };
 
-    return this.http.post<{ distance_meters: number; duration_seconds: number }>(
-      `${this.apiUrl}/route-metrics`,
-      payload,
-      { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.post<{ distance_meters: number; duration_seconds: number }>(
+        `${this.apiUrl}/route-metrics`,
+        payload,
+        { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
+      )
     );
   }
 
@@ -295,13 +291,12 @@ export class BuyerApiService {
       distance: distance
     };
 
-    return this.http.post<{ job_id: number; price: number }>(
-      `${this.apiUrl}/calculate-transport-job-price`,
-      payload,
-      { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
-    ).pipe(
-      retry(this.retryCount),
-      catchError(this.handleError.bind(this))
+    return this.applyRetryLogic(
+      this.http.post<{ job_id: number; price: number }>(
+        `${this.apiUrl}/calculate-transport-job-price`,
+        payload,
+        { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
+      )
     );
   }
 }

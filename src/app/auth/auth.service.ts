@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, tap, catchError, throwError, retry, timer, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface LoginCredentials {
@@ -87,6 +87,15 @@ export class AuthService {
   private roleKey = 'user_role';
   private userIdKey = 'user_id';
 
+  // Caching for reference data (24-hour TTL)
+  private statesCache: State[] | null = null;
+  private statesCacheTime: number = 0;
+  private citiesCache: Map<number, City[]> = new Map();
+  private citiesCacheTime: Map<number, number> = new Map();
+  private locationsCache: Map<number, Location[]> = new Map();
+  private locationsCacheTime: Map<number, number> = new Map();
+  private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in ms
+
   constructor(private http: HttpClient) { }
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {
@@ -157,7 +166,7 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return payload.user_id || null;
     } catch (error) {
-      console.error('Error parsing JWT token:', error);
+      // Silently fail - invalid token format
       return null;
     }
   }
@@ -183,7 +192,11 @@ export class AuthService {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('wholesalerId');
 
-    // clear all
+    // Clear caches on logout
+    this.statesCache = null;
+    this.citiesCache.clear();
+    this.locationsCache.clear();
+
     localStorage.clear();
   }
 
@@ -244,8 +257,20 @@ export class AuthService {
   }
 
   getStates(): Observable<State[]> {
+    // Return cached data if still valid
+    const now = Date.now();
+    if (this.statesCache && (now - this.statesCacheTime) < this.CACHE_DURATION) {
+      return of(this.statesCache);
+    }
+
     return this.http.get<State[]>(`${this.apiUrl}/getStates`)
       .pipe(
+        retry({ count: 3, delay: (error, count) => timer(Math.pow(2, count) * 1000) }),
+        tap(states => {
+          // Update cache
+          this.statesCache = states;
+          this.statesCacheTime = now;
+        }),
         catchError(error => {
           return throwError(() => error);
         })
@@ -253,8 +278,23 @@ export class AuthService {
   }
 
   getCitiesOfState(stateId: number): Observable<City[]> {
+    // Return cached data if still valid
+    const now = Date.now();
+    const cached = this.citiesCache.get(stateId);
+    const cacheTime = this.citiesCacheTime.get(stateId) || 0;
+
+    if (cached && (now - cacheTime) < this.CACHE_DURATION) {
+      return of(cached);
+    }
+
     return this.http.get<City[]>(`${this.apiUrl}/getAllCitiesOfState/${stateId}`)
       .pipe(
+        retry({ count: 3, delay: (error, count) => timer(Math.pow(2, count) * 1000) }),
+        tap(cities => {
+          // Update cache
+          this.citiesCache.set(stateId, cities);
+          this.citiesCacheTime.set(stateId, now);
+        }),
         catchError(error => {
           return throwError(() => error);
         })
@@ -262,8 +302,23 @@ export class AuthService {
   }
 
   getLocationsByCity(cityId: number): Observable<Location[]> {
+    // Return cached data if still valid
+    const now = Date.now();
+    const cached = this.locationsCache.get(cityId);
+    const cacheTime = this.locationsCacheTime.get(cityId) || 0;
+
+    if (cached && (now - cacheTime) < this.CACHE_DURATION) {
+      return of(cached);
+    }
+
     return this.http.get<Location[]>(`${this.apiUrl}/getLocationsByCity/${cityId}`)
       .pipe(
+        retry({ count: 3, delay: (error, count) => timer(Math.pow(2, count) * 1000) }),
+        tap(locations => {
+          // Update cache
+          this.locationsCache.set(cityId, locations);
+          this.locationsCacheTime.set(cityId, now);
+        }),
         catchError(error => {
           return throwError(() => error);
         })

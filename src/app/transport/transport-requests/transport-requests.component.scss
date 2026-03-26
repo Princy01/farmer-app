@@ -1,11 +1,49 @@
+// SCSS Variables for consistent theming
+$color-primary: rgb(136, 172, 140);
+$color-primary-dark: rgb(106, 142, 110);
+$color-primary-light: rgba(136, 172, 140, 0.1);
+$color-danger: #ff6b6b;
+$color-danger-dark: #ee5a24;
+$color-success: #4caf50;
+$color-text-dark: #333;
+$color-text-medium: #666;
+$color-text-light: #999;
+$color-border: #f0f0f0;
+$color-bg-light: #f8f9fa;
+$color-bg-card: #fff;
+
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 0.75rem;
+$spacing-lg: 1rem;
+$spacing-xl: 1.5rem;
+$spacing-2xl: 2rem;
+
+$border-radius-sm: 12px;
+$border-radius-md: 15px;
+$border-radius-lg: 20px;
+
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+$shadow-focus: 0 0 0 3px rgba(136, 172, 140, 0.2);
+
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+
+$breakpoint-mobile: 360px;
+$breakpoint-small: 480px;
+$breakpoint-tablet: 768px;
+$breakpoint-desktop: 1024px;
+
 // Base Content Styles
 .transport-requests-content {
-  --background: #f8f9fa;
+  --background: $color-bg-light;
 }
 
 // DRIVER AVAILABILITY HEADER
 .availability-header {
-  padding: 16px;
+  padding: $spacing-lg;
   background: var(--ion-color-light);
   margin-bottom: 0;
 
@@ -13,15 +51,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: $spacing-md;
+    background: $color-bg-card;
+    border-radius: $border-radius-sm;
+    box-shadow: $shadow-sm;
 
     .availability-info {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: $spacing-md;
       flex: 1;
 
       .availability-icon {
@@ -58,21 +96,27 @@
       --handle-width: 26px;
       --handle-height: 26px;
       height: 32px;
+
+      // Accessibility: Ensure toggle is keyboard accessible
+      &:focus-within {
+        box-shadow: $shadow-focus;
+        border-radius: $border-radius-sm;
+      }
     }
   }
 
   .availability-divider {
     height: 1px;
     background: var(--ion-color-medium-tint);
-    margin-top: 16px;
+    margin-top: $spacing-lg;
   }
 }
 
 // LOCATION PREFERENCES HEADER
 .preferences-header {
-  padding: 16px;
+  padding: $spacing-lg;
   background: var(--ion-color-light);
-  margin-bottom: 16px;
+  margin-bottom: $spacing-lg;
 
   .preference-info {
     display: flex;
@@ -83,7 +127,7 @@
       flex: 1;
 
       h3 {
-        margin: 0 0 4px 0;
+        margin: 0 0 $spacing-xs 0;
         font-size: 16px;
         font-weight: 600;
         color: var(--ion-color-dark);
@@ -101,24 +145,30 @@
       text-transform: none;
       font-weight: 500;
       flex-shrink: 0;
+
+      // Accessibility: Focus state
+      &:focus-visible {
+        outline: 2px solid var(--ion-color-primary);
+        outline-offset: 2px;
+      }
     }
   }
 
   .preference-divider {
     height: 1px;
     background: var(--ion-color-medium-tint);
-    margin-top: 12px;
+    margin-top: $spacing-md;
   }
 }
 
 // UNAVAILABLE MESSAGE
 .unavailable-message {
-  padding: 16px;
+  padding: $spacing-lg;
 
   ion-card {
     margin: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border-radius: 12px;
+    box-shadow: $shadow-sm;
+    border-radius: $border-radius-sm;
 
     ion-card-content {
       padding: 20px;
@@ -128,7 +178,7 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: 12px;
+        gap: $spacing-md;
 
         .message-icon {
           font-size: 48px;
@@ -137,7 +187,7 @@
 
         .message-text {
           h4 {
-            margin: 0 0 8px 0;
+            margin: 0 0 $spacing-xs 0;
             font-size: 18px;
             font-weight: 600;
             color: var(--ion-color-dark);
@@ -157,18 +207,18 @@
 
 // NO PREFERENCES MESSAGE
 .no-preferences-message {
-  padding: 0 16px;
-  margin-bottom: 16px;
+  padding: 0 $spacing-lg;
+  margin-bottom: $spacing-lg;
 
   ion-card {
     margin: 0;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow-md;
   }
 
   .message-content {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: $spacing-lg;
 
     .message-icon {
       font-size: 32px;
@@ -179,7 +229,7 @@
       flex: 1;
 
       h4 {
-        margin: 0 0 4px 0;
+        margin: 0 0 $spacing-xs 0;
         font-size: 16px;
         font-weight: 600;
         color: var(--ion-color-dark);
@@ -197,35 +247,41 @@
       text-transform: none;
       font-weight: 500;
       flex-shrink: 0;
+
+      // Accessibility: Focus state
+      &:focus-visible {
+        outline: 2px solid var(--ion-color-primary);
+        outline-offset: 2px;
+      }
     }
   }
 }
 
 // SECTION HEADERS
 .regular-section {
-  margin-bottom: 2rem;
+  margin-bottom: $spacing-2xl;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 0 1rem;
+  margin-bottom: $spacing-xl;
+  padding: 0 $spacing-lg;
 
   .section-title {
     font-size: 1.4rem;
     font-weight: 600;
-    color: #333;
+    color: $color-text-dark;
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: $spacing-sm;
   }
 
   .title-icon {
     font-size: 1.2rem;
-    color: rgb(136, 172, 140);
+    color: $color-primary;
   }
 
   .count-badge {
@@ -237,35 +293,46 @@
 // EMPTY STATE
 .empty-state {
   text-align: center;
-  padding: 3rem 1rem;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin: 0 1rem;
+  padding: 3rem $spacing-lg;
+  background: $color-bg-card;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+  margin: 0 $spacing-lg;
 
   .empty-icon {
     font-size: 4rem;
     color: #ccc;
-    margin-bottom: 1rem;
+    margin-bottom: $spacing-lg;
   }
 
   h3 {
-    color: #666;
+    color: $color-text-medium;
     font-size: 1.2rem;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 $spacing-sm 0;
   }
 
   p {
-    color: #999;
+    color: $color-text-light;
     font-size: 0.9rem;
-    margin: 0 0 1rem 0;
+    margin: 0 0 $spacing-lg 0;
     line-height: 1.4;
   }
 
   .change-location-btn {
-    margin-top: 16px;
+    margin-top: $spacing-lg;
     text-transform: none;
     font-weight: 500;
+
+    // Accessibility: Focus and hover states
+    &:focus-visible {
+      outline: 2px solid var(--ion-color-primary);
+      outline-offset: 2px;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-md;
+    }
   }
 }
 
@@ -273,52 +340,60 @@
 .requests-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 1rem;
-  padding: 0 1rem;
+  gap: $spacing-lg;
+  padding: 0 $spacing-lg;
+  animation: fadeIn 0.5s ease-out;
 }
 
 // REQUEST CARD
 .request-card {
-  background: #fff;
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f0f0f0;
-  transition: all 0.3s ease;
+  background: $color-bg-card;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+  box-shadow: $shadow-md;
+  border: 1px solid $color-border;
+  transition: all $transition-normal;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    box-shadow: $shadow-lg;
+  }
+
+  // Accessibility: Focus state for keyboard navigation
+  &:focus-within {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
   }
 }
 
 // CARD HEADER
 .card-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: $spacing-xl;
 
   .order-info {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: $spacing-sm;
 
     .order-id {
       font-size: 1.1rem;
       font-weight: 700;
-      color: #333;
+      color: $color-text-dark;
       margin: 0;
     }
 
     .header-badges {
       display: flex;
-      gap: 0.5rem;
+      gap: $spacing-sm;
       flex-wrap: wrap;
       align-items: center;
     }
   }
 }
 
-.urgency-chip, .perishable-chip {
+.urgency-chip,
+.perishable-chip {
   font-size: 0.75rem;
   font-weight: 600;
   height: 28px;
@@ -326,18 +401,18 @@
 
 .perishable-chip {
   --background: rgba(76, 175, 80, 0.1);
-  --color: #4caf50;
+  --color: $color-success;
 }
 
 // ROUTE SECTION
 .route-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: $spacing-xl;
 
   .location-item {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    margin-bottom: 1rem;
+    margin-bottom: $spacing-lg;
 
     &:last-child {
       margin-bottom: 0;
@@ -348,11 +423,11 @@
       margin-top: 0.2rem;
 
       &.pickup-icon {
-        color: rgb(136, 172, 140);
+        color: $color-primary;
       }
 
       &.delivery-icon {
-        color: #ff6b6b;
+        color: $color-danger;
       }
     }
 
@@ -362,16 +437,17 @@
       .location-label {
         font-size: 0.8rem;
         font-weight: 600;
-        color: #666;
+        color: $color-text-medium;
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
 
       .location-address {
-        color: #333;
+        color: $color-text-dark;
         font-size: 0.95rem;
         margin: 0.25rem 0 0 0;
         line-height: 1.3;
+        word-break: break-word;
       }
     }
   }
@@ -379,12 +455,12 @@
 
 // ORDER SPECIFICATIONS
 .order-specs {
-  margin-bottom: 1.5rem;
+  margin-bottom: $spacing-xl;
 
   .spec-row {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: $spacing-lg;
+    margin-bottom: $spacing-lg;
 
     &:last-child {
       margin-bottom: 0;
@@ -393,50 +469,53 @@
     .spec-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: $spacing-sm;
       flex: 1;
 
       .spec-icon {
         font-size: 1rem;
-        color: rgb(136, 172, 140);
+        color: $color-primary;
+        flex-shrink: 0;
       }
 
       .spec-info {
         display: flex;
         flex-direction: column;
+        min-width: 0;
 
         .spec-label {
           font-size: 0.75rem;
           font-weight: 500;
-          color: #666;
+          color: $color-text-medium;
         }
 
         .spec-value {
           font-size: 0.9rem;
           font-weight: 600;
-          color: #333;
+          color: $color-text-dark;
+          word-break: break-word;
         }
       }
     }
   }
 }
 
- // PRICE SECTION
- .price-section {
+// PRICE SECTION
+.price-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(136, 172, 140, 0.1);
-  padding: 1rem;
-  border-radius: 15px;
-  margin-bottom: 1rem;
-  gap: 1rem;
+  background: $color-primary-light;
+  padding: $spacing-lg;
+  border-radius: $border-radius-md;
+  margin-bottom: $spacing-lg;
+  gap: $spacing-lg;
 
   .price-item {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.25rem;
+    gap: $spacing-xs;
 
     &:last-child {
       align-items: flex-end;
@@ -445,7 +524,7 @@
     .price-label {
       font-size: 0.8rem;
       font-weight: 500;
-      color: #666;
+      color: $color-text-medium;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -453,7 +532,7 @@
     .price-amount {
       font-size: 1.3rem;
       font-weight: 700;
-      color: rgb(136, 172, 140);
+      color: $color-primary;
 
       &.order-value {
         color: #2196f3;
@@ -463,14 +542,14 @@
   }
 }
 
- // ORDER PREVIEW COMPACT BUTTON
- .order-preview-compact {
+// ORDER PREVIEW COMPACT BUTTON
+.order-preview-compact {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid $color-border;
 
   .view-orders-button {
-    --color: rgb(136, 172, 140);
+    --color: $color-primary;
     --padding-start: 0;
     --padding-end: 0;
     font-size: 0.85rem;
@@ -478,23 +557,31 @@
     text-transform: none;
     height: auto;
     margin: 0;
+    transition: all $transition-fast;
 
     ion-icon {
       font-size: 1rem;
-      margin-right: 0.5rem;
+      margin-right: $spacing-sm;
+    }
+
+    // Accessibility: Focus state
+    &:focus-visible {
+      outline: 2px solid $color-primary;
+      outline-offset: 2px;
     }
 
     &:hover {
-      --color: rgb(106, 142, 110);
+      --color: $color-primary-dark;
+      transform: translateX(2px);
     }
   }
 }
 
- // CARD FOOTER & ACTION BUTTONS
- .card-footer {
-  margin-top: 1.5rem;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 1rem;
+// CARD FOOTER & ACTION BUTTONS
+.card-footer {
+  margin-top: $spacing-xl;
+  border-top: 1px solid $color-border;
+  padding-top: $spacing-lg;
 }
 
 .action-buttons {
@@ -511,38 +598,50 @@
   height: 48px;
   font-weight: 600;
   text-transform: none;
-  --border-radius: 15px;
+  --border-radius: $border-radius-md;
   min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all $transition-fast;
 
   ion-icon {
     margin-right: 6px;
     font-size: 1rem;
   }
+
+  // Accessibility: Focus state
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  // Accessibility: Disabled state
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 .accept-button {
-  --background: linear-gradient(135deg, rgb(136, 172, 140), rgb(106, 142, 110));
+  --background: linear-gradient(135deg, $color-primary, $color-primary-dark);
   --background-activated: linear-gradient(135deg, rgb(116, 152, 120), rgb(96, 132, 100));
   --color: #fff;
   --box-shadow: 0 4px 15px rgba(136, 172, 140, 0.4);
 
-  &:hover {
+  &:hover:not(:disabled) {
     transform: translateY(-2px);
     --box-shadow: 0 6px 18px rgba(136, 172, 140, 0.5);
   }
 }
 
 .reject-button {
-  --background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  --background: linear-gradient(135deg, $color-danger, $color-danger-dark);
   --background-activated: linear-gradient(135deg, #ff5252, #e53935);
   --color: #fff;
   --box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
 
-  &:hover {
+  &:hover:not(:disabled) {
     transform: translateY(-2px);
     --box-shadow: 0 6px 18px rgba(255, 107, 107, 0.5);
   }
@@ -550,8 +649,8 @@
 
 .accepted-button {
   --background: #e8f5e8;
-  --color: rgb(136, 172, 140);
-  --border-radius: 15px;
+  --color: $color-primary;
+  --border-radius: $border-radius-md;
   height: 48px;
   font-weight: 600;
   text-transform: none;
@@ -561,8 +660,8 @@
 
 .rejected-button {
   --background: #fdeaea;
-  --color: #ff6b6b;
-  --border-radius: 15px;
+  --color: $color-danger;
+  --border-radius: $border-radius-md;
   height: 48px;
   font-weight: 600;
   text-transform: none;
@@ -570,9 +669,9 @@
   cursor: not-allowed;
 }
 
- // FILTER FOOTER
- .filter-footer {
-  --background: #fff;
+// FILTER FOOTER
+.filter-footer {
+  --background: $color-bg-card;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -586,28 +685,42 @@
 .filter-actions {
   display: flex;
   justify-content: center;
-  gap: 2rem;
-  padding: 0.5rem;
+  gap: $spacing-2xl;
+  padding: $spacing-sm;
 }
 
 .filter-button,
 .sort-button {
-  --color: rgb(136, 172, 140);
+  --color: $color-primary;
   font-weight: 500;
   text-transform: none;
+  transition: all $transition-fast;
+
+  // Accessibility: Focus state
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
 
   &:hover {
-    --background: rgba(136, 172, 140, 0.1);
+    --background: $color-primary-light;
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }
 
- // ANIMATIONS
- @keyframes slideDown {
+// ANIMATIONS
+@keyframes slideDown {
   from {
     opacity: 0;
     max-height: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     max-height: 2000px;
@@ -620,31 +733,28 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.requests-grid {
-  animation: fadeIn 0.5s ease-out;
-}
-
- // RESPONSIVE DESIGN
+// RESPONSIVE DESIGN
 
 // Tablets (768px and below)
-@media (max-width: 768px) {
+@media (max-width: $breakpoint-tablet) {
   .requests-grid {
     grid-template-columns: 1fr;
   }
 
   .spec-row {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: $spacing-sm;
   }
 
   .action-buttons {
-    gap: 0.5rem;
+    gap: $spacing-sm;
   }
 
   .accept-button,
@@ -654,19 +764,19 @@
   }
 
   .filter-actions {
-    gap: 1rem;
+    gap: $spacing-lg;
   }
 }
 
 // Mobile devices (480px and below)
-@media (max-width: 480px) {
+@media (max-width: $breakpoint-small) {
   .preferences-header {
-    padding: 12px;
+    padding: $spacing-md;
 
     .preference-info {
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.5rem;
+      gap: $spacing-sm;
 
       .preferences-button {
         align-self: flex-end;
@@ -686,7 +796,7 @@
   }
 
   .request-card {
-    padding: 1rem;
+    padding: $spacing-lg;
   }
 
   .card-header {
@@ -701,12 +811,12 @@
   }
 
   .card-footer {
-    margin-top: 1rem;
+    margin-top: $spacing-lg;
     padding-top: 0.75rem;
   }
 
   .action-buttons {
-    gap: 0.5rem;
+    gap: $spacing-sm;
   }
 
   .accept-button,
@@ -731,7 +841,7 @@
 
       &:last-child {
         align-items: flex-start;
-        padding-top: 0.5rem;
+        padding-top: $spacing-sm;
         border-top: 1px solid rgba(136, 172, 140, 0.2);
       }
     }
@@ -744,15 +854,15 @@
   }
 
   .filter-actions {
-    gap: 0.5rem;
+    gap: $spacing-sm;
     padding: 0.25rem;
   }
 }
 
 // Very small devices (360px and below)
-@media (max-width: 360px) {
+@media (max-width: $breakpoint-mobile) {
   .section-header {
-    padding: 0 0.5rem;
+    padding: 0 $spacing-sm;
 
     .section-title {
       font-size: 1.2rem;
@@ -760,7 +870,7 @@
   }
 
   .requests-grid {
-    padding: 0 0.5rem;
+    padding: 0 $spacing-sm;
   }
 
   .accept-button,
@@ -770,7 +880,7 @@
   }
 
   .empty-state {
-    padding: 2rem 1rem;
+    padding: 2rem $spacing-lg;
 
     .empty-icon {
       font-size: 3rem;
@@ -778,8 +888,8 @@
   }
 }
 
- // PRINT STYLES
- @media print {
+// PRINT STYLES
+@media print {
   .filter-footer,
   .preferences-header,
   .action-buttons {
@@ -793,8 +903,8 @@
   }
 }
 
- // DARK MODE SUPPORT (if needed)
- @media (prefers-color-scheme: dark) {
+// DARK MODE SUPPORT
+@media (prefers-color-scheme: dark) {
   .transport-requests-content {
     --background: #1a1a1a;
   }
@@ -807,21 +917,24 @@
   .empty-state {
     background: #2d2d2d;
   }
-}
 
- // MODAL STYLING (Global)
- :host ::ng-deep {
-  .order-details-modal {
-    --height: 90%;
-    --border-radius: 20px 20px 0 0;
+  .price-section {
+    background: rgba(136, 172, 140, 0.15);
+  }
+
+  .section-header .section-title {
+    color: #f0f0f0;
   }
 }
 
-ion-modal.order-details-modal {
+// MODAL STYLING
+// Note: Modal styles are component-scoped via Component.encapsulation
+// No need for ::ng-deep - the component's viewEncapsulation handles this
+.order-details-modal {
   --height: 90%;
   --border-radius: 20px 20px 0 0;
 
-  @media (min-width: 768px) {
+  @media (min-width: $breakpoint-tablet) {
     --width: 600px;
     --height: 85%;
     --border-radius: 20px;

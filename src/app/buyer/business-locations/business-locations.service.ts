@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { timeout, retry, catchError, shareReplay } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
+
+const HTTP_TIMEOUT_MS = 30000; // 30 seconds
+const RETRY_ATTEMPTS = 3;
+const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export interface BusinessLocation {
     branch_id: number;
@@ -75,6 +80,8 @@ export interface BusinessBranchRequest {
 })
 export class BusinessLocationsService {
     private apiUrl = environment.apiUrl;
+    private businessesCache$: Observable<BusinessBranchWithNames[]> | null = null;
+    private cacheTimestamp = 0;
 
     constructor(private http: HttpClient, private authService: AuthService) { }
 
@@ -88,11 +95,61 @@ export class BusinessLocationsService {
 
     getAllBusinessesOfUser(): Observable<BusinessLocation[]> {
         const headers = this.getAuthHeaders();
-        return this.http.get<BusinessLocation[]>(`${this.apiUrl}/getAllBusinessBranchesByUser`, { headers });
+        return this.http.get<BusinessLocation[]>(`${this.apiUrl}/getAllBusinessBranchesByUser`, { headers })
+            .pipe(
+                timeout(HTTP_TIMEOUT_MS),
+                retry({
+                    count: RETRY_ATTEMPTS,
+                    delay: (error, retryCount) => {
+                        // Exponential backoff: 1s, 2s, 4s
+                        const delayMs = Math.min(1000 * Math.pow(2, retryCount - 1), 4000);
+                        return new Observable(observer => {
+                            setTimeout(() => observer.next(), delayMs);
+                        });
+                    }
+                })
+            );
     }
 
     getAllBusinessesWithNameOfUser(): Observable<BusinessBranchWithNames[]> {
+            // Return cached data if still valid
+            if (this.businessesCache$ && Date.now() - this.cacheTimestamp < CACHE_DURATION_MS) {
+                return this.businessesCache$;
+            }
+
             const headers = this.getAuthHeaders();
-            return this.http.get<BusinessBranchWithNames[]>(`${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`, { headers });
+            this.businessesCache$ = this.http.get<BusinessBranchWithNames[]>(
+                `${this.apiUrl}/getAllBusinessBranchesWithNamesByUser`,
+                { headers }
+            ).pipe(
+                timeout(HTTP_TIMEOUT_MS),
+                retry({
+                    count: RETRY_ATTEMPTS,
+                    delay: (error, retryCount) => {
+                        // Exponential backoff: 1s, 2s, 4s
+                        const delayMs = Math.min(1000 * Math.pow(2, retryCount - 1), 4000);
+                        return new Observable(observer => {
+                            setTimeout(() => observer.next(), delayMs);
+                        });
+                    }
+                }),
+                shareReplay(1),
+                catchError((error) => {
+                    // Clear cache on error so next request retries
+                    this.businessesCache$ = null;
+                    throw error;
+                })
+            );
+
+            this.cacheTimestamp = Date.now();
+            return this.businessesCache$;
+        }
+
+        /**
+         * Clear cached business data (call on logout or session change)
+         */
+        clearCache(): void {
+            this.businessesCache$ = null;
+            this.cacheTimestamp = 0;
         }
 }

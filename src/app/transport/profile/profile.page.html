@@ -34,7 +34,7 @@
             [name]="driverData.active_status ? 'checkmark-circle-outline' : 'close-circle-outline'"
             [color]="driverData.active_status ? 'success' : 'danger'">
           </ion-icon>
-          <span>{{ driverData.active_status ? 'Active' : 'Inactive' }}</span>
+          <span>{{ (driverData.active_status ? 'DRIVER_INFO.ACTIVE' : 'DRIVER_INFO.INACTIVE') | translate }}</span>
         </div>
       </div>
 
@@ -43,14 +43,14 @@
           <ion-icon name="car-outline"></ion-icon>
           <div class="stat-content">
             <span class="stat-value">{{ driverData.total_deliveries }}</span>
-            <span class="stat-label">Total Deliveries</span>
+            <span class="stat-label">{{ 'DRIVER_INFO.TOTAL_DELIVERIES' | translate }}</span>
           </div>
         </div>
         <div class="stat-item">
           <ion-icon name="calendar-outline"></ion-icon>
           <div class="stat-content">
             <span class="stat-value">{{ driverData.registration_date | date: 'MMM yyyy' }}</span>
-            <span class="stat-label">Member Since</span>
+            <span class="stat-label">{{ 'DRIVER_INFO.MEMBER_SINCE' | translate }}</span>
           </div>
         </div>
       </div>
@@ -271,7 +271,7 @@
             <ion-item>
               <ion-label position="stacked">{{ 'DRIVER_REGISTRATION.LOAD_CAPACITY' | translate }}</ion-label>
               <ion-input formControlName="load_capacity" readonly>
-                <div slot="end">kg</div>
+                <div slot="end">{{ 'DRIVER_REGISTRATION.KG' | translate }}</div>
               </ion-input>
             </ion-item>
             <ion-item>
@@ -283,11 +283,11 @@
 
         <!-- Save / Cancel buttons (edit mode only) -->
         <div class="action-buttons" *ngIf="isEditMode">
-          <ion-button expand="block" type="submit" [disabled]="form.invalid">
+          <ion-button expand="block" type="submit" [disabled]="form.invalid || isSubmitting">
             <ion-icon name="save" slot="start"></ion-icon>
             {{ 'DRIVER_INFO.Save Changes' | translate }}
           </ion-button>
-          <ion-button expand="block" fill="outline" color="medium" type="button" (click)="cancelEdit()">
+          <ion-button expand="block" fill="outline" color="medium" type="button" (click)="cancelEdit()" [disabled]="isSubmitting">
             {{ 'DRIVER_INFO.Cancel' | translate }}
           </ion-button>
         </div>

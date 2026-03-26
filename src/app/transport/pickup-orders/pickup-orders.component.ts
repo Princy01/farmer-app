@@ -1,8 +1,10 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { HttpClientModule } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { PickupService, ActiveJob, JobOrder } from './pickup.service';
 
 @Component({
@@ -12,7 +14,8 @@ import { PickupService, ActiveJob, JobOrder } from './pickup.service';
   standalone: true,
   imports: [IonicModule, CommonModule, HttpClientModule, TranslatePipe],
 })
-export class PickupOrdersComponent implements OnInit {
+export class PickupOrdersComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   jobs = signal<ActiveJob[]>([]);
   selectedJob: ActiveJob | null = null;
   orders = signal<JobOrder[]>([]);
@@ -26,27 +29,24 @@ export class PickupOrdersComponent implements OnInit {
   constructor(
     private pickupService: PickupService,
     private translate: TranslateService
-  ) { }
+  ) {}
 
   getStatusTitle(status: string): string {
     switch (status) {
-      // case 'accepted':
-      //   return this.translate.instant('PICKUP_ORDERS.STATUS_ACCEPTED') || 'Accepted';
-      // case 'picked_up':
-      //   return this.translate.instant('PICKUP_ORDERS.STATUS_PICKED_UP') || 'Picked Up';
-      // case 'partially_picked':
-      //   return this.translate.instant('PICKUP_ORDERS.STATUS_PARTIALLY_PICKED') || 'Partially Picked';
-      // default:
-      //   return this.translate.instant('PICKUP_ORDERS.STATUS_UNKNOWN') || 'Unknown';
       case 'accepted':
-        return 'Accepted';
+        return this.translate.instant('PICKUP_ORDERS.STATUS_ACCEPTED');
       case 'picked_up':
-        return 'Picked Up';
+        return this.translate.instant('PICKUP_ORDERS.STATUS_PICKED_UP');
       case 'partially_picked':
-        return 'Partially Picked';
+        return this.translate.instant('PICKUP_ORDERS.STATUS_PARTIALLY_PICKED');
       default:
-        return 'Unknown';
+        return this.translate.instant('PICKUP_ORDERS.STATUS_UNKNOWN');
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngOnInit() {
@@ -55,16 +55,19 @@ export class PickupOrdersComponent implements OnInit {
 
   fetchJobs() {
     this.loading = true;
-    this.pickupService.getActiveJobs().subscribe({
-      next: jobs => {
-        this.jobs.set(jobs);
-        this.loading = false;
-      },
-      error: err => {
-        this.error = this.translate.instant('PICKUP_ORDERS.LOAD_JOBS_ERROR');
-        this.loading = false;
-      }
-    });
+    this.error = '';
+    this.pickupService.getActiveJobs()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: jobs => {
+          this.jobs.set(jobs);
+          this.loading = false;
+        },
+        error: err => {
+          this.error = this.translate.instant('PICKUP_ORDERS.LOAD_JOBS_ERROR');
+          this.loading = false;
+        }
+      });
   }
 
   sortedJobs() {
@@ -78,17 +81,20 @@ export class PickupOrdersComponent implements OnInit {
     this.selectedOrder = null;
     this.otpError = '';
     this.otpSuccess = '';
+    this.error = '';
     this.loading = true;
-    this.pickupService.getJobOrders(job.job_id).subscribe({
-      next: orders => {
-        this.orders.set(orders);
-        this.loading = false;
-      },
-      error: err => {
-        this.error = this.translate.instant('PICKUP_ORDERS.LOAD_ORDERS_ERROR');
-        this.loading = false;
-      }
-    });
+    this.pickupService.getJobOrders(job.job_id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: orders => {
+          this.orders.set(orders);
+          this.loading = false;
+        },
+        error: err => {
+          this.error = this.translate.instant('PICKUP_ORDERS.LOAD_ORDERS_ERROR');
+          this.loading = false;
+        }
+      });
   }
 
   sortedOrders() {
@@ -123,27 +129,37 @@ export class PickupOrdersComponent implements OnInit {
   }
 
   verifyOtp(enteredOtp: string) {
-    if (!enteredOtp) {
+    if (!enteredOtp?.trim()) {
       this.otpError = this.translate.instant('PICKUP_ORDERS.ENTER_OTP');
       this.otpSuccess = '';
       return;
     }
+
+    if (enteredOtp.length !== 6 || !/^\d+$/.test(enteredOtp)) {
+      this.otpError = this.translate.instant('PICKUP_ORDERS.INVALID_OTP_FORMAT');
+      this.otpSuccess = '';
+      return;
+    }
+
     if (!this.selectedOrder) return;
     this.otpLoading = true;
-    this.pickupService.confirmPickup(this.selectedOrder.order_id, enteredOtp).subscribe({
-      next: res => {
-        this.otpSuccess = res.message || this.translate.instant('PICKUP_ORDERS.PICKUP_CONFIRMED');
-        this.otpError = '';
-        this.otpLoading = false;
-        // Optionally refresh order status here
-        this.selectJob(this.selectedJob!);
-        this.selectedOrder = null;
-      },
-      error: err => {
-        this.otpError = err.error?.error || this.translate.instant('PICKUP_ORDERS.INVALID_OTP');
-        this.otpSuccess = '';
-        this.otpLoading = false;
-      }
-    });
+    this.otpError = '';
+    this.otpSuccess = '';
+    this.pickupService.confirmPickup(this.selectedOrder.order_id, enteredOtp)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: res => {
+          this.otpSuccess = res.message || this.translate.instant('PICKUP_ORDERS.PICKUP_CONFIRMED');
+          this.otpError = '';
+          this.otpLoading = false;
+          this.selectJob(this.selectedJob!);
+          this.selectedOrder = null;
+        },
+        error: err => {
+          this.otpError = err.error?.error || this.translate.instant('PICKUP_ORDERS.INVALID_OTP');
+          this.otpSuccess = '';
+          this.otpLoading = false;
+        }
+      });
   }
 }

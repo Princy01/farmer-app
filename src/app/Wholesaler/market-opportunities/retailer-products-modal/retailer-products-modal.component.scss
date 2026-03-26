@@ -272,6 +272,43 @@
     .form-card {
       padding: clamp(0.875rem, 3vw, 1.5rem);
 
+      .offer-error-alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.875rem;
+        padding: 0.875rem;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid #fed7d7;
+        border-radius: 10px;
+        margin-bottom: 0.875rem;
+
+        ion-icon {
+          font-size: 1.4rem;
+          color: #dc2626;
+          flex-shrink: 0;
+          margin-top: 0.125rem;
+        }
+
+        .error-content {
+          flex: 1;
+
+          .error-message {
+            color: #991b1b;
+            font-size: 0.9rem;
+            margin: 0 0 0.25rem 0;
+            font-weight: 500;
+            line-height: 1.4;
+          }
+
+          .error-hint {
+            color: #b91c1c;
+            font-size: 0.75rem;
+            display: block;
+            opacity: 0.8;
+          }
+        }
+      }
+
       .modern-input {
         --background: #f8f9fa;
         --border-radius: 10px;

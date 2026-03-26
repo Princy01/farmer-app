@@ -7,8 +7,11 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { catchError, switchMap, throwError, timeout } from 'rxjs';
 import { SKIP_TRANSLATION } from './translation.context';
+
+// HTTP Timeout: 30 seconds
+const HTTP_TIMEOUT_MS = 30000;
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -43,9 +46,37 @@ export const authInterceptor: HttpInterceptorFn = (
   }
 
   return next(modifiedReq).pipe(
+    timeout(HTTP_TIMEOUT_MS),
     catchError((error) => {
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        return handleUnauthorizedError(modifiedReq, next, authService);
+      if (error instanceof HttpErrorResponse) {
+        switch (error.status) {
+          case 401:
+            return handleUnauthorizedError(modifiedReq, next, authService);
+          case 403:
+            authService.logout();
+            return throwError(() => ({
+              ...error,
+              userMessage: 'HTTP_ERROR.FORBIDDEN'
+            }));
+          case 404:
+            return throwError(() => ({
+              ...error,
+              userMessage: 'HTTP_ERROR.NOT_FOUND'
+            }));
+          case 500:
+          case 502:
+          case 503:
+            return throwError(() => ({
+              ...error,
+              userMessage: 'HTTP_ERROR.SERVER_ERROR'
+            }));
+          case 0:
+            // Network error
+            return throwError(() => ({
+              ...error,
+              userMessage: 'HTTP_ERROR.NETWORK_ERROR'
+            }));
+        }
       }
       return throwError(() => error);
     })

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timer, throwError } from 'rxjs';
+import { timeout, retryWhen, take, mergeMap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 export interface ActiveJob {
@@ -33,21 +34,49 @@ export interface JobOrder {
 @Injectable({ providedIn: 'root' })
 export class PickupService {
   private apiUrl = environment.apiUrl;
+  private readonly TIMEOUT_MS = 30000; // 30 seconds
 
   constructor(private http: HttpClient) {}
 
+  private exponentialBackoffRetry() {
+    return retryWhen(errors =>
+      errors.pipe(
+        mergeMap((error, index) => {
+          if (index >= 3) {
+            return throwError(() => error);
+          }
+          const delayMs = Math.pow(2, index) * 1000;
+          return timer(delayMs);
+        })
+      )
+    );
+  }
+
   getActiveJobs(): Observable<ActiveJob[]> {
-    return this.http.get<ActiveJob[]>(`${this.apiUrl}/transportation/delivery/active-jobs`);
+    return this.http.get<ActiveJob[]>(
+      `${this.apiUrl}/transportation/delivery/active-jobs`
+    ).pipe(
+      timeout(this.TIMEOUT_MS),
+      this.exponentialBackoffRetry()
+    ) as Observable<ActiveJob[]>;
   }
 
   getJobOrders(jobId: number): Observable<JobOrder[]> {
-    return this.http.get<JobOrder[]>(`${this.apiUrl}/transportation/delivery/job-orders/${jobId}`);
+    return this.http.get<JobOrder[]>(
+      `${this.apiUrl}/transportation/delivery/job-orders/${jobId}`
+    ).pipe(
+      timeout(this.TIMEOUT_MS),
+      this.exponentialBackoffRetry()
+    ) as Observable<JobOrder[]>;
   }
 
   confirmPickup(orderId: number, otp: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/transportation/delivery/confirm-pickup-otp`, {
-      order_id: orderId,
-      otp: otp
-    });
-}
+    return this.http.post<any>(
+      `${this.apiUrl}/transportation/delivery/confirm-pickup-otp`,
+      { order_id: orderId, otp: otp }
+    ).pipe(
+      timeout(this.TIMEOUT_MS),
+      this.exponentialBackoffRetry()
+    );
+  }
 }

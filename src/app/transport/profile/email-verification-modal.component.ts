@@ -42,7 +42,7 @@ import { DriverProfileService } from './profile.service';
                 <ion-input
                   formControlName="newEmail"
                   type="email"
-                  placeholder="name@example.com"
+                  [placeholder]="'DRIVER_INFO.EMAIL_PLACEHOLDER' | translate"
                   class="custom-input">
                 </ion-input>
               </div>

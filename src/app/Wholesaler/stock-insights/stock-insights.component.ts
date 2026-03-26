@@ -343,12 +343,12 @@ export class StockInsightsComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/wholesaler/home']);
+    this.router.navigate(['/wholesaler/trends']);
   }
 
-  goToTrends(): void {
-    this.navController.navigateBack('/wholesaler/trends');
-  }
+  // goToTrends(): void {
+  //   this.navController.navigateBack('/wholesaler/trends');
+  // }
 
   async getStockByProduct(productId: number): Promise<void> {
     if (!this.authService.isAuthenticated()) {

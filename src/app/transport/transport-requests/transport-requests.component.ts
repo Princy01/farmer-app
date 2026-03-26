@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { AlertController, ToastController, IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -17,7 +17,8 @@ import { OrderDetailsModalComponent } from './order-model.component';
 import { formatDate } from '@angular/common';
 import { TransportRequestService, TransportRequest } from './transport-requests.service';
 import { LocationPreferenceService } from '../location-selection/location-selection.service';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -26,13 +27,15 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   imports: [IonicModule, CommonModule, TranslatePipe],
   templateUrl: './transport-requests.component.html',
   styleUrls: ['./transport-requests.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class TransportRequestsComponent implements OnInit, OnDestroy {
   transportRequests: TransportRequest[] = [];
   filteredRequests: TransportRequest[] = [];
+  private destroy$ = new Subject<void>();
   private subscription = new Subscription();
-  private pollInterval: any;
-  private visibilityCheckInterval: any;
+  private pollInterval: NodeJS.Timeout | undefined;
+  private visibilityCheckInterval: NodeJS.Timeout | undefined;
   private citiesCache: Map<number, string> = new Map(); // Cache city ID to name mapping
 
   // Driver configuration
@@ -40,8 +43,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   vehicleId: number = 1;
 
   // Driver Load Constraints
-  minLoad: number = 300;
-  maxLoad: number = 1000;
+  readonly minLoad: number = 300;
+  readonly maxLoad: number = 1000;
   currentLoad: number = 0;
 
   // Sorting & Filtering States
@@ -51,6 +54,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   sharedDeliveries = false;
   singleDelivery = false;
   perishableOnly = false;
+  isTogglingAvailability = false;
 
   // Request states tracking
   acceptedRequests = new Set<number>();
@@ -74,6 +78,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   isDriverAvailable: boolean = false;
   isLoadingStatus: boolean = true;
   driverStatus: string = 'inactive';
+  isLoadingRequests = false;
 
   private modalController = inject(ModalController);
 
@@ -103,19 +108,22 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
     this.subscription.unsubscribe();
     this.stopPolling();
   }
 
   private setupLocationPreferences() {
-    const prefSub = this.locationPreferenceService.preferences$.subscribe(preferences => {
-      this.hasLocationPreferences = this.locationPreferenceService.hasPreferences();
-      this.updateLocationSummary();
-      if (this.hasLocationPreferences) {
-        this.loadTransportRequests();
-      }
-    });
-    this.subscription.add(prefSub);
+    this.locationPreferenceService.preferences$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(preferences => {
+        this.hasLocationPreferences = this.locationPreferenceService.hasPreferences();
+        this.updateLocationSummary();
+        if (this.hasLocationPreferences) {
+          this.loadTransportRequests();
+        }
+      });
   }
 
   private updateLocationSummary() {
@@ -156,70 +164,71 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   private loadDriverStatus() {
     this.isLoadingStatus = true;
-    const sub = this.transportRequestService.getDriverStatus().subscribe({
-      next: (response) => {
-        this.driverStatus = response.status;
-        this.isDriverAvailable = response.status === 'active';
-        this.isLoadingStatus = false;
-        console.log(`Driver status loaded: ${this.driverStatus}`);
-      },
-      error: (error) => {
-        console.error('Failed to load driver status:', error);
-        this.isLoadingStatus = false;
-        this.showToast(this.translate.instant('TRANSPORT_REQUESTS.STATUS_LOAD_FAILED'), 'danger');
-      }
-    });
-
-    this.subscription.add(sub);
+    this.transportRequestService.getDriverStatus()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.driverStatus = response.status;
+          this.isDriverAvailable = response.status === 'active';
+          this.isLoadingStatus = false;
+        },
+        error: (error) => {
+          this.isLoadingStatus = false;
+          this.showToast(this.translate.instant('TRANSPORT_REQUESTS.STATUS_LOAD_FAILED'), 'danger');
+        }
+      });
   }
 
-  toggleDriverAvailability(event: any) {
+  toggleDriverAvailability(event: { target: HTMLIonToggleElement; detail: { checked: boolean } }) {
     const newStatus = event.detail.checked ? 'active' : 'inactive';
+    this.isTogglingAvailability = true;
+    (event.target as any).disabled = true;
 
-    const sub = this.transportRequestService.updateDriverStatus(newStatus).subscribe({
-      next: (response) => {
-        this.driverStatus = newStatus;
-        this.isDriverAvailable = newStatus === 'active';
+    this.transportRequestService.updateDriverStatus(newStatus)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.driverStatus = newStatus;
+          this.isDriverAvailable = newStatus === 'active';
+          this.isTogglingAvailability = false;
+          event.target.disabled = false;
 
-        const messageKey = this.isDriverAvailable
-          ? 'TRANSPORT_REQUESTS.NOW_AVAILABLE'
-          : 'TRANSPORT_REQUESTS.NOW_UNAVAILABLE';
+          const messageKey = this.isDriverAvailable
+            ? 'TRANSPORT_REQUESTS.NOW_AVAILABLE'
+            : 'TRANSPORT_REQUESTS.NOW_UNAVAILABLE';
 
-        this.showToast(this.translate.instant(messageKey), 'success');
+          this.showToast(this.translate.instant(messageKey), 'success');
 
-        // Reload requests when becoming available
-        if (this.isDriverAvailable) {
-          this.loadTransportRequests();
+          // Reload requests when becoming available
+          if (this.isDriverAvailable) {
+            this.loadTransportRequests();
+          }
+        },
+        error: (error) => {
+          this.isTogglingAvailability = false;
+          event.target.disabled = false;
+          // Revert toggle on error
+          event.target.checked = !event.detail.checked;
+          this.showToast(this.translate.instant('TRANSPORT_REQUESTS.STATUS_UPDATE_FAILED'), 'danger');
         }
-      },
-      error: (error) => {
-        console.error('Failed to update driver status:', error);
-        // Revert toggle on error
-        event.target.checked = !event.detail.checked;
-        this.showToast(this.translate.instant('TRANSPORT_REQUESTS.STATUS_UPDATE_FAILED'), 'danger');
-      }
-    });
-
-    this.subscription.add(sub);
+      });
   }
 
   private loadTransportRequests() {
     // Only load requests if driver is available
-    console.log(`Driver availability: ${this.isDriverAvailable}`);
     if (!this.isDriverAvailable) {
       this.transportRequests = [];
       this.filteredRequests = [];
       return;
     }
 
+    this.isLoadingRequests = true;
     const preferences = this.locationPreferenceService.getCurrentPreferences();
 
-    // Use the first city name if available (backend accepts single city parameter)
-    let cityName: string | undefined = undefined;
+    // Use the first city if available (backend accepts single city parameter)
     let cityIds: number[] = [];
     if (preferences.cities.length > 0) {
       const cityId = preferences.cities[0];
-      cityName = this.citiesCache.get(cityId);
       cityIds.push(cityId);
     }
 
@@ -228,21 +237,20 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       branchIds = preferences.branches;
     }
 
-    console.log(cityIds, branchIds);
-    const sub = this.transportRequestService.getTransportRequestDetailed(cityIds, branchIds).subscribe({
-      next: (response) => {
-        this.transportRequests = response.delivery_requests || [];
-        this.initializeRequestVisibility();
-        this.applyFilters();
-        console.log(`Loaded ${this.transportRequests.length} transport requests`);
-      },
-      error: (error) => {
-        console.error('Failed to load transport requests:', error);
-        this.showToast(this.translate.instant('TRANSPORT_REQUESTS.LOAD_FAILED'), 'danger');
-      }
-    });
-
-    this.subscription.add(sub);
+    this.transportRequestService.getTransportRequestDetailed(cityIds, branchIds)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.transportRequests = response.delivery_requests || [];
+          this.initializeRequestVisibility();
+          this.applyFilters();
+          this.isLoadingRequests = false;
+        },
+        error: (error) => {
+          this.isLoadingRequests = false;
+          this.showToast(this.translate.instant('TRANSPORT_REQUESTS.LOAD_FAILED'), 'danger');
+        }
+      });
   }
 
   async openLocationPreferences() {
@@ -331,7 +339,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
                   }
                 },
                 error: (error) => {
-                  console.error('Failed to accept request:', error);
                   loadingToast.dismiss();
                   this.showToast(this.translate.instant('TRANSPORT_REQUESTS.ACCEPT_FAILED'), 'danger');
                 }
@@ -447,28 +454,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   applyFilters() {
     let filteredOrders = [...this.transportRequests];
-
-    // filteredOrders = filteredOrders.filter(order =>
-    //   order.weight >= this.minLoad && order.weight <= this.maxLoad
-    // );
-
-    // if (this.priorityDeliveries) {
-    //   filteredOrders = filteredOrders.filter(order => order.urgency.toLowerCase() === 'high');
-    // }
-
-    // if (this.delayedDeliveries) {
-    //   filteredOrders = filteredOrders.filter(order => new Date(order.delivery_date) < new Date());
-    // }
-
-    // if (this.sharedDeliveries) {
-    //   filteredOrders = filteredOrders.filter(order => order.weight <= 500);
-    // }
-
-    // if (this.singleDelivery) {
-    //   filteredOrders = filteredOrders.filter(order => order.weight > 500);
-    // }
-
-    console.log(`Filtered down to ${filteredOrders.length} requests`);
     this.filteredRequests = filteredOrders;
 
     if (this.sortOption) {
@@ -646,7 +631,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
         const rejectedArray = JSON.parse(stored) as number[];
         this.rejectedRequests = new Set(rejectedArray);
       } catch (error) {
-        console.error('Failed to load rejected requests:', error);
+        // Silently handle JSON parse error - storage may be corrupted
       }
     }
   }
@@ -659,24 +644,24 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   // Load city names and cache them
   private loadCityNames() {
-    const sub = this.locationPreferenceService.getCities().subscribe({
-      next: (cities) => {
-        cities.forEach(city => {
-          this.citiesCache.set(city.id, city.city_name);
-        });
-        console.log(`Loaded ${cities.length} cities for mapping`);
-      },
-      error: (error) => {
-        console.error('Failed to load city names:', error);
-      }
-    });
-    this.subscription.add(sub);
+    this.locationPreferenceService.getCities()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cities) => {
+          cities.forEach(city => {
+            this.citiesCache.set(city.id, city.city_name);
+          });
+        },
+        error: (error) => {
+          // Silently handle city load error - not critical
+        }
+      });
   }
 
   // Get unique pickup locations from all order items
   getPickupLocations(request: TransportRequest): string {
     if (!request.orders || request.orders.length === 0) {
-      return 'No pickup info';
+      return this.translate.instant('TRANSPORT_REQUESTS.NO_PICKUP_INFO');
     }
 
     const pickupLocations = new Set<string>();
@@ -691,13 +676,13 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       }
     });
 
-    return Array.from(pickupLocations).join(', ') || 'Multiple locations';
+    return Array.from(pickupLocations).join(', ') || this.translate.instant('TRANSPORT_REQUESTS.MULTIPLE_LOCATIONS');
   }
 
   // Get dropoff location from retailer branch or delivery address
   getDropoffLocation(request: TransportRequest): string {
     if (!request.orders || request.orders.length === 0) {
-      return 'No delivery info';
+      return this.translate.instant('TRANSPORT_REQUESTS.NO_DELIVERY_INFO');
     }
 
     // Use first order's delivery address
@@ -711,6 +696,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
 
     // Otherwise use delivery_address
-    return firstOrder.delivery_address || 'Address not available';
+    return firstOrder.delivery_address || this.translate.instant('TRANSPORT_REQUESTS.ADDRESS_NOT_AVAILABLE');
   }
 }

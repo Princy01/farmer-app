@@ -176,6 +176,29 @@ ion-content {
   padding: 4px 8px;
 }
 
+/* Loading Indicator */
+ion-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+  --color: #667eea;
+}
+
+/* Error Message */
+.error-message {
+  background: #ffebee;
+  border-left: 4px solid #ef5350;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  font-weight: 500;
+  text-align: center;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;

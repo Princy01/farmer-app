@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, TimeoutError } from 'rxjs';
+import { catchError, retry, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 export interface OrderItem {
@@ -32,33 +32,70 @@ export interface RetailerOrderDetails {
   items: OrderItem[];
 }
 
+/**
+ * Service for managing retailer order details.
+ * Handles API communication with automatic retry and timeout logic.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class RetailerOrderService {
   private apiUrl = environment.apiUrl;
+  private readonly HTTP_TIMEOUT = 30000; // 30 seconds
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Fetches retailer order details by order ID.
+   * Includes automatic retry with exponential backoff and 30-second timeout.
+   * @param orderId The ID of the order to fetch
+   * @returns Observable of order details
+   */
   getOrderDetails(orderId: number): Observable<RetailerOrderDetails> {
-    return this.http.get<RetailerOrderDetails>(`${this.apiUrl}/getRetailerOrderDetails/${orderId}`)
-      .pipe(
-        catchError(this.handleError)
-      );
+    return this.http.get<RetailerOrderDetails>(
+      `${this.apiUrl}/getRetailerOrderDetails/${orderId}`
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      retry({
+        count: 3,
+        delay: (error, retryCount) => {
+          // Exponential backoff: 1s, 2s, 4s
+          const delayMs = Math.pow(2, retryCount - 1) * 1000;
+          return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
+        }
+      }),
+      catchError((error: HttpErrorResponse | TimeoutError) => this.handleError(error))
+    );
   }
 
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'An error occurred while fetching order details';
+  /**
+   * Handles HTTP errors and maps them to user-friendly messages.
+   * Error translation keys are returned for component-side translation.
+   * @param error The HTTP error response or timeout error
+   * @returns Observable that throws an error with a translation key
+   */
+  private handleError(error: HttpErrorResponse | TimeoutError): Observable<never> {
+    let translationKey = 'RETAILER_ORDER_DETAILS.ERROR_LOAD_FAILED';
 
-    if (error.error instanceof ErrorEvent) {
-      // Client-side error
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Server-side error
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    if (error instanceof TimeoutError) {
+      translationKey = 'REQUEST_TIMEOUT_ERROR';
+    } else if (error instanceof HttpErrorResponse) {
+      if (error.status === 0) {
+        translationKey = 'NETWORK_ERROR';
+      } else if (error.status === 401) {
+        translationKey = 'SESSION_EXPIRED';
+      } else if (error.status === 403) {
+        translationKey = 'ACCESS_DENIED';
+      } else if (error.status === 404) {
+        translationKey = 'NOT_FOUND';
+      } else if (error.status === 408) {
+        translationKey = 'REQUEST_TIMEOUT_ERROR';
+      } else if (error.status >= 500) {
+        translationKey = 'SERVER_ERROR';
+      }
     }
 
-    console.error(errorMessage);
-    return throwError(() => new Error(errorMessage));
+    const apiError = new Error(translationKey);
+    return throwError(() => apiError);
   }
 }

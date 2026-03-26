@@ -1,6 +1,38 @@
+:host {
+  // CSS Custom Properties for maintainability and dark mode support
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary-gradient-hover: linear-gradient(135deg, #5568d3 0%, #68408d 100%);
+  --primary-dark: #667eea;
+  --primary-light: #764ba2;
+  --background-light: #f8f9fa;
+  --surface-light: white;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --border-light: #e3e8ef;
+  --error-color: var(--ion-color-danger);
+
+  @media (prefers-color-scheme: dark) {
+    --background-light: #1a1a2e;
+    --surface-light: #16213e;
+    --text-primary: #e8e9ec;
+    --text-secondary: #b0b3b8;
+    --text-muted: #7a7d82;
+    --border-light: #2d3748;
+  }
+
+  @media (prefers-contrast: more) {
+    --primary-gradient: linear-gradient(135deg, #4c3aa3 0%, #5a2d7e 100%);
+    --text-primary: #000;
+    --text-secondary: #333;
+    --border-light: #000;
+  }
+}
+
 .business-registration-toolbar {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: var(--primary-gradient);
   --color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   .back-btn {
     --color: white;
@@ -13,12 +45,13 @@
 }
 
 ion-content {
-  --background: #f8f9fa;
+  --background: var(--background-light);
 
   .container {
     padding: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
+    contain: layout style;
   }
 }
 
@@ -27,14 +60,16 @@ ion-content {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   margin: 0;
   overflow: hidden;
-  background: white;
+  background: var(--surface-light);
+  contain: layout style paint;
 
   .form-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
     padding: 2.5rem 2rem;
     text-align: center;
     position: relative;
     overflow: hidden;
+    contain: layout style paint;
 
     &::before {
       content: '';
@@ -45,6 +80,11 @@ ion-content {
       height: 200%;
       background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
       animation: pulse 15s ease-in-out infinite;
+      will-change: transform;
+
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+      }
     }
 
     .header-icon {
@@ -77,13 +117,29 @@ ion-content {
     transform: translate(0, 0) scale(1);
   }
   50% {
-    transform: translate(-10%, -10%) scale(1.1);
+    transform: translate(-10%, -10%) scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
 .form-section {
   margin-bottom: 2.5rem;
   animation: fadeInUp 0.5s ease-out;
+  contain: content;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   &:last-of-type {
     margin-bottom: 1.5rem;
@@ -95,15 +151,18 @@ ion-content {
     gap: 0.75rem;
     font-size: 1.2rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--primary-dark);
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 3px solid transparent;
-    border-image: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    border-image-slice: 1;
+    border-bottom: 3px solid var(--border-light);
+
+    @supports (background-clip: text) {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      border-bottom-color: transparent;
+    }
 
     .section-icon {
       font-size: 1.5rem;
@@ -124,7 +183,7 @@ ion-content {
   }
 
   ion-item {
-    --background: #fafbfc;
+    --background: var(--background-light);
     --border-radius: 16px;
     --padding-start: 1.25rem;
     --padding-end: 1.25rem;
@@ -132,14 +191,18 @@ ion-content {
     --padding-bottom: 0.75rem;
     --inner-padding-end: 0;
     --inner-padding-start: 0;
-    --border-color: #e3e8ef;
+    --border-color: var(--border-light);
     --border-width: 2px;
     margin-bottom: 0.25rem;
     box-shadow: 0 2px 12px rgba(102, 126, 234, 0.08);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    contain: layout style;
 
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
     &::before {
       content: '';
       position: absolute;
@@ -150,59 +213,92 @@ ion-content {
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
       opacity: 0;
       transition: opacity 0.3s ease;
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
     }
 
     &:hover {
-      --border-color: #667eea;
+      --border-color: var(--primary-dark);
       box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
       transform: translateY(-2px);
 
       &::before {
         opacity: 1;
       }
+
+      @media (prefers-reduced-motion: reduce) {
+        transform: none;
+      }
     }
 
     &:focus-within {
-      --border-color: #667eea;
-      --background: white;
+      --border-color: var(--primary-dark);
+      --background: var(--surface-light);
       box-shadow: 0 4px 24px rgba(102, 126, 234, 0.2);
       transform: translateY(-2px);
+      outline: 2px solid transparent;
+      outline-offset: 2px;
 
       &::before {
         opacity: 1;
       }
 
       ion-label {
-        color: var(--ion-color-primary);
+        color: var(--primary-dark);
         font-weight: 600;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        transform: none;
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary-dark);
+      outline-offset: -2px;
+      box-shadow: inset 0 0 0 2px var(--surface-light), 0 0 0 3px var(--primary-dark);
+    }
+
+    @media (prefers-contrast: more) {
+      --border-width: 3px;
+
+      &:focus-within,
+      &:focus-visible {
+        outline-width: 3px;
       }
     }
 
     &.ion-invalid.ion-touched {
-      --border-color: var(--ion-color-danger);
+      --border-color: var(--error-color);
       --background: rgba(var(--ion-color-danger-rgb), 0.03);
 
       ion-label {
-        color: var(--ion-color-danger);
+        color: var(--error-color);
       }
     }
 
     ion-label {
       font-weight: 600;
-      color: #64748b;
+      color: var(--text-secondary);
       margin-bottom: 0.5rem;
       font-size: 0.9rem;
       letter-spacing: 0.01em;
       transition: all 0.3s ease;
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
     }
 
     ion-input,
     ion-textarea,
     ion-select {
-      --color: #1e293b;
+      --color: var(--text-primary);
       font-size: 1rem;
       font-weight: 500;
-      --placeholder-color: #94a3b8;
+      --placeholder-color: var(--text-muted);
       --placeholder-opacity: 1;
     }
 
@@ -213,10 +309,10 @@ ion-content {
     }
 
     ion-toggle {
-      --handle-background: white;
-      --handle-background-checked: white;
-      --background: #cbd5e1;
-      --background-checked: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --handle-background: var(--surface-light);
+      --handle-background-checked: var(--surface-light);
+      --background: var(--text-muted);
+      --background-checked: var(--primary-gradient);
       --handle-width: 26px;
       --handle-height: 26px;
       --handle-spacing: 4px;
@@ -225,7 +321,7 @@ ion-content {
   }
 
   .error-message {
-    color: var(--ion-color-danger);
+    color: var(--error-color);
     font-size: 0.85rem;
     margin: 0.5rem 0 1rem 1.25rem;
     font-weight: 500;
@@ -236,6 +332,24 @@ ion-content {
 
     &::before {
       content: '⚠';
+      font-size: 1rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
+  .helper-text {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    margin: 0.5rem 0 1rem 1.25rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    ion-icon {
       font-size: 1rem;
     }
   }
@@ -254,13 +368,13 @@ ion-content {
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
 }
 
 .submit-btn {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --background-hover: linear-gradient(135deg, #5568d3 0%, #68408d 100%);
+  --background: var(--primary-gradient);
+  --background-hover: var(--primary-gradient-hover);
   --color: white;
   font-weight: 700;
   height: 3.5rem;
@@ -273,6 +387,11 @@ ion-content {
   text-transform: uppercase;
   position: relative;
   overflow: hidden;
+  contain: layout style;
+  cursor: pointer;
+  border: none;
+  min-width: 44px;
+  min-height: 44px;
 
   &::before {
     content: '';
@@ -283,27 +402,54 @@ ion-content {
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
     transition: left 0.5s ease;
+    will-change: left;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 
-  &:hover {
+  &:hover:not([disabled]) {
     box-shadow: 0 12px 32px rgba(102, 126, 234, 0.45);
     transform: translateY(-3px);
 
     &::before {
       left: 100%;
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      transform: none;
+    }
   }
 
-  &:active {
+  &:active:not([disabled]) {
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+
+    @media (prefers-reduced-motion: reduce) {
+      transform: none;
+    }
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--primary-dark);
+    outline-offset: 2px;
   }
 
   &[disabled] {
     --background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-    --color: #64748b;
+    --color: var(--text-secondary);
     box-shadow: none;
     opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-contrast: more) {
+    border: 2px solid currentColor;
+
+    &:focus-visible {
+      outline-width: 2px;
+    }
   }
 
   ion-icon {
@@ -428,8 +574,8 @@ ion-content {
 
 /* Location Button - Get Current Location */
 .location-btn {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --background-hover: linear-gradient(135deg, #5568d3 0%, #68408d 100%);
+  --background: var(--primary-gradient);
+  --background-hover: var(--primary-gradient-hover);
   --color: white;
   --border-radius: 12px;
   font-weight: 600;
@@ -437,22 +583,41 @@ ion-content {
   margin-bottom: 1.25rem;
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
   transition: all 0.3s ease;
+  contain: layout style;
+  cursor: pointer;
+  border: none;
+  min-width: 44px;
+  min-height: 44px;
 
   &:hover:not([disabled]) {
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
     transform: translateY(-2px);
+
+    @media (prefers-reduced-motion: reduce) {
+      transform: none;
+    }
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--primary-dark);
+    outline-offset: 2px;
   }
 
   &[disabled] {
     --background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-    --color: #64748b;
+    --color: var(--text-secondary);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     opacity: 0.7;
+    cursor: not-allowed;
   }
 
   ion-spinner {
     width: 20px;
     height: 20px;
+  }
+
+  @media (prefers-contrast: more) {
+    border: 2px solid currentColor;
   }
 }
 
@@ -462,7 +627,24 @@ ion-item:focus-visible {
   outline-offset: 2px;
 }
 
-// Smooth scrolling
+// Smooth scrolling (respect user preferences)
 html {
   scroll-behavior: smooth;
+
+  @media (prefers-reduced-motion: reduce) {
+    scroll-behavior: auto;
+  }
+}
+
+// Print styles for production
+@media print {
+  .form-card {
+    box-shadow: none;
+    border: 1px solid var(--border-light);
+  }
+
+  .submit-btn,
+  .location-btn {
+    display: none;
+  }
 }

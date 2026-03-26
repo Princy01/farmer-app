@@ -4,9 +4,12 @@
 
 export const environment = {
   production: false,
-  apiUrl : 'http://127.0.0.1:8082',
-
-  translateApiUrl : 'http://127.0.0.1:8000'
+  apiUrl: 'http://127.0.0.1:8082',
+  translateApiUrl: 'http://127.0.0.1:8000',
+  supportEmail: 'support@farmerapp.com',
+  supportPhone: '+91-1234-567-890',
+  privacyPolicyUrl: 'https://farmerapp.com/privacy-policy',
+  termsOfServiceUrl: 'https://farmerapp.com/terms-of-service'
 };
 
 /*

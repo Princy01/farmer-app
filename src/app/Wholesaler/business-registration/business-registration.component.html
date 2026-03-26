@@ -154,9 +154,14 @@
               <div>
                 <ion-item
                   [class.ion-invalid]="form.get('city_id')?.invalid && form.get('city_id')?.touched"
+                  [disabled]="!form.get('state_id')?.value || isLoadingCities"
                 >
                   <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.CITY' | translate }} *</ion-label>
-                  <ion-select formControlName="city_id" [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.CITY_PLACEHOLDER' | translate">
+                  <ion-select
+                    formControlName="city_id"
+                    [placeholder]="(isLoadingCities ? 'WHOLESALER_BUSINESS_REGISTRATION.LOADING' : 'WHOLESALER_BUSINESS_REGISTRATION.CITY_PLACEHOLDER') | translate"
+                    [disabled]="!form.get('state_id')?.value || cities.length === 0 || isLoadingCities"
+                  >
                     <ion-select-option *ngFor="let city of cities" [value]="city.id">
                       {{ city.city_name }} ({{ city.city_shortname }})
                     </ion-select-option>
@@ -165,15 +170,23 @@
                 <div class="error-message" *ngIf="form.get('city_id')?.invalid && form.get('city_id')?.touched">
                   {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_CITY' | translate }}
                 </div>
+                <div class="helper-text" *ngIf="form.get('state_id')?.value && cities.length === 0 && !isLoadingCities">
+                  {{ 'WHOLESALER_BUSINESS_REGISTRATION.NO_CITIES_FOUND' | translate }}
+                </div>
               </div>
 
               <!-- Location -->
               <div>
                 <ion-item
                   [class.ion-invalid]="form.get('location_id')?.invalid && form.get('location_id')?.touched"
+                  [disabled]="!form.get('city_id')?.value || isLoadingLocations"
                 >
                   <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.LOCATION' | translate }} *</ion-label>
-                  <ion-select formControlName="location_id" [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.LOCATION_PLACEHOLDER' | translate">
+                  <ion-select
+                    formControlName="location_id"
+                    [placeholder]="(isLoadingLocations ? 'WHOLESALER_BUSINESS_REGISTRATION.LOADING' : 'WHOLESALER_BUSINESS_REGISTRATION.LOCATION_PLACEHOLDER') | translate"
+                    [disabled]="!form.get('city_id')?.value || locations.length === 0 || isLoadingLocations"
+                  >
                     <ion-select-option *ngFor="let location of locations" [value]="location.id">
                       {{ location.location_name }}
                     </ion-select-option>
@@ -181,6 +194,9 @@
                 </ion-item>
                 <div class="error-message" *ngIf="form.get('location_id')?.invalid && form.get('location_id')?.touched">
                   {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_LOCATION' | translate }}
+                </div>
+                <div class="helper-text" *ngIf="form.get('city_id')?.value && locations.length === 0 && !isLoadingLocations">
+                  {{ 'WHOLESALER_BUSINESS_REGISTRATION.NO_LOCATIONS_FOUND' | translate }}
                 </div>
               </div>
             </div>
@@ -388,10 +404,11 @@
             expand="block"
             type="submit"
             class="submit-btn"
-            [disabled]="form.invalid"
+            [disabled]="form.invalid || isSubmitting"
           >
-            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-            {{ 'WHOLESALER_BUSINESS_REGISTRATION.SUBMIT_BUTTON' | translate }}
+            <ion-spinner *ngIf="isSubmitting" slot="start" name="dots"></ion-spinner>
+            <ion-icon *ngIf="!isSubmitting" name="checkmark-circle-outline" slot="start"></ion-icon>
+            {{ isSubmitting ? ('WHOLESALER_BUSINESS_REGISTRATION.SUBMITTING' | translate) : ('WHOLESALER_BUSINESS_REGISTRATION.SUBMIT_BUTTON' | translate) }}
           </ion-button>
         </form>
       </div>

@@ -19,6 +19,7 @@
           fill="solid"
           class="add-location-btn"
           (click)="addNewLocation()"
+          [disabled]="isLoading"
         >
           <ion-icon name="add" slot="start"></ion-icon>
           {{ 'BUSINESS_LOCATIONS.ADD_NEW' | translate }}
@@ -88,6 +89,7 @@
                   size="small"
                   fill="outline"
                   (click)="viewLocationDetails(location)"
+                  [disabled]="isLoading"
                 >
                   <ion-icon name="eye" slot="start"></ion-icon>
                   {{ 'BUSINESS_LOCATIONS.VIEW_DETAILS' | translate }}
@@ -97,6 +99,7 @@
                   size="small"
                   fill="solid"
                   (click)="modifyLocation(location)"
+                  [disabled]="isLoading"
                 >
                   <ion-icon name="create" slot="start"></ion-icon>
                   {{ 'BUSINESS_LOCATIONS.MODIFY' | translate }}

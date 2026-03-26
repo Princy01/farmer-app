@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { addIcons } from 'ionicons';
 import {
   personOutline, mailOutline, callOutline, locationOutline,
@@ -87,17 +88,18 @@ export class ProfilePage implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    this.retailerProfileService.getProfile().subscribe({
-      next: (profile: RetailerProfile) => {
-        this.profile = profile;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading profile:', error);
-        this.isLoading = false;
-        this.showErrorAlert('Error', 'Failed to load profile');
-      }
-    });
+    this.retailerProfileService.getProfile()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (profile: RetailerProfile) => {
+          this.profile = profile;
+          this.isLoading = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.isLoading = false;
+          this.handleProfileLoadError(error);
+        }
+      });
   }
 
   toggleEdit() {
@@ -124,41 +126,46 @@ export class ProfilePage implements OnInit, OnDestroy {
       pincode: this.profile.pincode
     };
 
-    this.retailerProfileService.updateProfile(profileData).subscribe({
-      next: async () => {
-        await loading.dismiss();
-        this.isEditing = false;
-        const toast = await this.toastCtrl.create({
-          message: this.translate.instant('RETAILER_PROFILE.SAVE_SUCCESS'),
-          duration: 2000,
-          color: 'success',
-          position: 'top'
-        });
-        await toast.present();
-      },
-      error: async (error) => {
-        await loading.dismiss();
-        console.error('Error saving profile:', error);
-        this.showErrorAlert('Error', 'Failed to save profile');
-      }
-    });
+    this.retailerProfileService.updateProfile(profileData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async () => {
+          await loading.dismiss();
+          this.isEditing = false;
+          const toast = await this.toastCtrl.create({
+            message: this.translate.instant('RETAILER_PROFILE.SAVE_SUCCESS'),
+            duration: 2000,
+            color: 'success',
+            position: 'top'
+          });
+          await toast.present();
+        },
+        error: async (error: HttpErrorResponse) => {
+          await loading.dismiss();
+          this.handleProfileSaveError(error);
+        }
+      });
   }
 
   validateProfile(): boolean {
     if (!this.profile.name || !this.profile.email || !this.profile.mobile_num) {
-      this.showErrorAlert(
-        this.translate.instant('RETAILER_PROFILE.VALIDATION_ERROR'),
-        this.translate.instant('RETAILER_PROFILE.REQUIRED_FIELDS')
-      );
+      const alert = this.alertCtrl.create({
+        header: this.translate.instant('RETAILER_PROFILE.VALIDATION_ERROR'),
+        message: this.translate.instant('RETAILER_PROFILE.REQUIRED_FIELDS'),
+        buttons: [this.translate.instant('RETAILER_PROFILE.OK')]
+      });
+      alert.then(a => a.present());
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.profile.email)) {
-      this.showErrorAlert(
-        this.translate.instant('RETAILER_PROFILE.VALIDATION_ERROR'),
-        this.translate.instant('RETAILER_PROFILE.INVALID_EMAIL')
-      );
+      const alert = this.alertCtrl.create({
+        header: this.translate.instant('RETAILER_PROFILE.VALIDATION_ERROR'),
+        message: this.translate.instant('RETAILER_PROFILE.INVALID_EMAIL'),
+        buttons: [this.translate.instant('RETAILER_PROFILE.OK')]
+      });
+      alert.then(a => a.present());
       return false;
     }
 
@@ -192,13 +199,25 @@ export class ProfilePage implements OnInit, OnDestroy {
   }
 
   captureImage() {
-    // Implement camera capture
-    console.log('Capture image from camera');
+    // Camera capture functionality would be implemented here
+    // For now, show a message that this feature will be available soon
+    this.toastCtrl.create({
+      message: 'Camera feature will be available soon',
+      duration: 2000,
+      color: 'info',
+      position: 'top'
+    }).then(toast => toast.present());
   }
 
   selectImage() {
-    // Implement image selection from gallery
-    console.log('Select image from gallery');
+    // Image selection from gallery would be implemented here
+    // For now, show a message that this feature will be available soon
+    this.toastCtrl.create({
+      message: 'Gallery selection will be available soon',
+      duration: 2000,
+      color: 'info',
+      position: 'top'
+    }).then(toast => toast.present());
   }
 
   goBack() {
@@ -224,6 +243,81 @@ export class ProfilePage implements OnInit, OnDestroy {
     const alert = await this.alertCtrl.create({
       header,
       message,
+      buttons: [this.translate.instant('RETAILER_PROFILE.OK')]
+    });
+    await alert.present();
+  }
+
+  private async handleProfileLoadError(error: HttpErrorResponse) {
+    let errorKey = 'RETAILER_PROFILE.LOAD_ERROR';
+
+    if (!error) {
+      // Network error
+      errorKey = 'RETAILER_PROFILE.NETWORK_ERROR';
+    } else if (error.status === 0) {
+      // Network connectivity issue
+      errorKey = 'RETAILER_PROFILE.NETWORK_ERROR';
+    } else if (error.status === 401) {
+      // Unauthorized - session expired
+      this.showAuthError();
+      return;
+    } else if (error.status === 403) {
+      // Forbidden
+      errorKey = 'RETAILER_PROFILE.PERMISSION_DENIED';
+    } else if (error.status === 404) {
+      // Not found
+      errorKey = 'RETAILER_PROFILE.NOT_FOUND';
+    } else if (error.status === 408 || error.status === 504) {
+      // Timeout
+      errorKey = 'RETAILER_PROFILE.REQUEST_TIMEOUT_ERROR';
+    } else if (error.status >= 500) {
+      // Server error
+      errorKey = 'RETAILER_PROFILE.SERVER_ERROR';
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_PROFILE.ERROR'),
+      message: this.translate.instant(errorKey),
+      buttons: [{
+        text: this.translate.instant('RETAILER_PROFILE.OK'),
+        handler: () => {
+          // Optionally retry loading
+        }
+      }]
+    });
+    await alert.present();
+  }
+
+  private async handleProfileSaveError(error: HttpErrorResponse) {
+    let errorKey = 'RETAILER_PROFILE.SAVE_ERROR_MESSAGE';
+
+    if (!error) {
+      // Network error
+      errorKey = 'RETAILER_PROFILE.NETWORK_ERROR';
+    } else if (error.status === 0) {
+      // Network connectivity issue
+      errorKey = 'RETAILER_PROFILE.NETWORK_ERROR';
+    } else if (error.status === 401) {
+      // Unauthorized - session expired
+      this.showAuthError();
+      return;
+    } else if (error.status === 403) {
+      // Forbidden
+      errorKey = 'RETAILER_PROFILE.PERMISSION_DENIED';
+    } else if (error.status === 404) {
+      // Not found
+      errorKey = 'RETAILER_PROFILE.NOT_FOUND';
+    } else if (error.status === 408 || error.status === 504) {
+      // Timeout
+      errorKey = 'RETAILER_PROFILE.REQUEST_TIMEOUT_ERROR';
+    } else if (error.status >= 500) {
+      // Server error
+      errorKey = 'RETAILER_PROFILE.SERVER_ERROR';
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_PROFILE.ERROR'),
+      message: this.translate.instant(errorKey),
       buttons: [this.translate.instant('RETAILER_PROFILE.OK')]
     });
     await alert.present();

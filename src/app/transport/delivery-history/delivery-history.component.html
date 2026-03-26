@@ -45,8 +45,13 @@
       </ion-label>
 
       <!-- Dispute Button (Visible only if needed) -->
-      <ion-button *ngIf="delivery.hasDispute" color="danger" (click)="resolveDispute(delivery.job_id)">
-        {{ 'DELIVERY_HISTORY.RESOLVE_DISPUTE' | translate }}
+      <ion-button
+        *ngIf="delivery.hasDispute"
+        color="danger"
+        (click)="resolveDispute(delivery.job_id)"
+        [disabled]="isLoading || isResolvingDispute === delivery.job_id">
+        <span *ngIf="isResolvingDispute === delivery.job_id">{{ 'DELIVERY_HISTORY.LOADING' | translate }}</span>
+        <span *ngIf="isResolvingDispute !== delivery.job_id">{{ 'DELIVERY_HISTORY.RESOLVE_DISPUTE' | translate }}</span>
       </ion-button>
     </ion-item>
   </ion-list>

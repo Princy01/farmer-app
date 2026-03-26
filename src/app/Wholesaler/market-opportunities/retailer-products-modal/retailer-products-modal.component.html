@@ -73,6 +73,15 @@
 
     <div class="offer-form" [class.expanded]="showOfferSection">
       <div class="form-card">
+        <!-- Error State Alert -->
+        <div *ngIf="hasOfferError && lastOfferErrorType !== 'retrying'" class="offer-error-alert">
+          <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+          <div class="error-content">
+            <p class="error-message">{{ 'RETAILER_DETAILS.OFFER_SUBMISSION_FAILED' | translate }}</p>
+            <small class="error-hint">{{ 'RETAILER_DETAILS.OFFER_ERROR_HINT' | translate }}</small>
+          </div>
+        </div>
+
         <ion-item class="modern-input" lines="none">
           <ion-label position="floating">
             <ion-icon name="cash-outline"></ion-icon>
@@ -82,7 +91,8 @@
             type="number"
             [(ngModel)]="offerPrice"
             min="0"
-            required>
+            required
+            [disabled]="isSubmitting">
           </ion-input>
         </ion-item>
 
@@ -94,7 +104,8 @@
           <ion-input
             type="date"
             [(ngModel)]="proposedDeliveryDate"
-            required>
+            required
+            [disabled]="isSubmitting">
           </ion-input>
         </ion-item>
 
@@ -106,11 +117,27 @@
           <ion-textarea
             [(ngModel)]="message"
             rows="3"
-            placeholder="{{ 'RETAILER_DETAILS.MESSAGE_PLACEHOLDER' | translate }}">
+            placeholder="{{ 'RETAILER_DETAILS.MESSAGE_PLACEHOLDER' | translate }}"
+            [disabled]="isSubmitting">
           </ion-textarea>
         </ion-item>
 
+        <!-- Retry Button (shown only on error) -->
         <ion-button
+          *ngIf="hasOfferError && lastOfferErrorType !== 'retrying'"
+          expand="block"
+          color="warning"
+          fill="outline"
+          (click)="retryOffer()"
+          [disabled]="isSubmitting"
+          class="submit-offer-button">
+          <ion-icon slot="start" name="refresh-outline"></ion-icon>
+          {{ 'RETAILER_DETAILS.RETRY' | translate }}
+        </ion-button>
+
+        <!-- Submit Button (hidden on error) -->
+        <ion-button
+          *ngIf="!hasOfferError"
           expand="block"
           class="submit-offer-button"
           (click)="submitOffer()"

@@ -13,11 +13,11 @@
 
     <!-- Segmented Control -->
     <div class="segment-container">
-      <ion-segment [(ngModel)]="authMode" value="login" class="custom-segment">
-        <ion-segment-button value="login" class="segment-button">
+      <ion-segment [(ngModel)]="authMode" value="login" class="custom-segment" [attr.aria-label]="'AUTH.SELECT_AUTH_MODE' | translate">
+        <ion-segment-button value="login" class="segment-button" [attr.aria-pressed]="authMode === 'login'">
           <ion-label>{{ 'AUTH.SIGN_IN' | translate }}</ion-label>
         </ion-segment-button>
-        <ion-segment-button value="register" class="segment-button">
+        <ion-segment-button value="register" class="segment-button" [attr.aria-pressed]="authMode === 'register'">
           <ion-label>{{ 'AUTH.SIGN_UP' | translate }}</ion-label>
         </ion-segment-button>
       </ion-segment>
@@ -27,13 +27,13 @@
     <div class="form-container" *ngIf="authMode === 'login'">
       <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
         <div class="input-group">
-          <ion-item class="custom-input" lines="none">
-            <ion-icon name="mail-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-item class="custom-input" lines="none" [class.ion-invalid]="loginForm.get('identifier')?.invalid && loginForm.get('identifier')?.touched" [class.ion-touched]="loginForm.get('identifier')?.touched">
+            <ion-icon name="mail-outline" slot="start" class="input-icon" aria-hidden="true"></ion-icon>
             <ion-input [placeholder]="'AUTH.EMAIL_PHONE_PLACEHOLDER' | translate" formControlName="identifier"
-              class="input-field">
+              class="input-field" [attr.aria-required]="true" [attr.aria-invalid]="loginForm.get('identifier')?.invalid && loginForm.get('identifier')?.touched" [attr.aria-describedby]="loginForm.get('identifier')?.invalid && loginForm.get('identifier')?.touched ? 'identifier-error' : null">
             </ion-input>
           </ion-item>
-          <div class="error-message"
+          <div class="error-message" [id]="loginForm.get('identifier')?.invalid && loginForm.get('identifier')?.touched ? 'identifier-error' : null"
             *ngIf="loginForm.get('identifier')?.touched && loginForm.get('identifier')?.errors">
             <span *ngIf="loginForm.get('identifier')?.errors?.['required']">
               {{ 'AUTH.EMAIL_PHONE_REQUIRED' | translate }}
@@ -45,16 +45,16 @@
         </div>
 
         <div class="input-group">
-          <ion-item class="custom-input" lines="none">
-            <ion-icon name="lock-closed-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-item class="custom-input" lines="none" [class.ion-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" [class.ion-touched]="loginForm.get('password')?.touched">
+            <ion-icon name="lock-closed-outline" slot="start" class="input-icon" aria-hidden="true"></ion-icon>
             <ion-input [type]="showLoginPassword ? 'text' : 'password'"
-              [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate" formControlName="password" class="input-field">
+              [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate" formControlName="password" class="input-field" [attr.aria-required]="true" [attr.aria-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" [attr.aria-describedby]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched ? 'password-error' : null">
             </ion-input>
             <ion-icon [name]="showLoginPassword ? 'eye-off-outline' : 'eye-outline'" slot="end" class="password-toggle"
-              (click)="toggleLoginPasswordVisibility()">
+              (click)="toggleLoginPasswordVisibility()" [attr.aria-label]="(showLoginPassword ? 'AUTH.HIDE_PASSWORD' : 'AUTH.SHOW_PASSWORD') | translate" role="button" tabindex="0" (keydown.enter)="toggleLoginPasswordVisibility()" (keydown.space)="toggleLoginPasswordVisibility()">
             </ion-icon>
           </ion-item>
-          <div class="error-message" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors">
+          <div class="error-message" [id]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched ? 'password-error' : null" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors">
             <span *ngIf="loginForm.get('password')?.errors?.['required']">
               {{ 'AUTH.PASSWORD_REQUIRED' | translate }}
             </span>
@@ -68,9 +68,9 @@
           <a class="forgot-password-link">{{ 'AUTH.FORGOT_PASSWORD' | translate }}</a>
         </div>
 
-        <ion-button type="submit" expand="block" class="login-button" [disabled]="loginForm.invalid || isLoading">
-          <ion-spinner *ngIf="isLoading" name="circles" slot="start"></ion-spinner>
-          <ion-icon *ngIf="!isLoading" name="log-in-outline" slot="start"></ion-icon>
+        <ion-button type="submit" expand="block" class="login-button" [disabled]="loginForm.invalid || isLoading" [attr.aria-busy]="isLoading">
+          <ion-spinner *ngIf="isLoading" name="circles" slot="start" aria-hidden="true"></ion-spinner>
+          <ion-icon *ngIf="!isLoading" name="log-in-outline" slot="start" aria-hidden="true"></ion-icon>
           {{ isLoading ? ('AUTH.SIGNING_IN' | translate) : ('AUTH.SIGN_IN' | translate) }}
         </ion-button>
       </form>
@@ -80,13 +80,13 @@
     <div class="form-container" *ngIf="authMode === 'register'">
       <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
         <div class="input-group">
-          <ion-item class="custom-input" lines="none">
-            <ion-icon name="person-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-item class="custom-input" lines="none" [class.ion-invalid]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched" [class.ion-touched]="registerForm.get('name')?.touched">
+            <ion-icon name="person-outline" slot="start" class="input-icon" aria-hidden="true"></ion-icon>
             <ion-input [placeholder]="'AUTH.FULL_NAME_PLACEHOLDER' | translate" formControlName="name"
-              class="input-field">
+              class="input-field" [attr.aria-required]="true" [attr.aria-invalid]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched" [attr.aria-describedby]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched ? 'name-error' : null">
             </ion-input>
           </ion-item>
-          <div class="error-message"
+          <div class="error-message" [id]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched ? 'name-error' : null"
             *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.errors?.['required']">
             {{ 'AUTH.FULL_NAME_REQUIRED' | translate }}
           </div>
@@ -228,9 +228,9 @@
           </div>
         </div>
 
-        <ion-button type="submit" expand="block" class="register-button" [disabled]="registerForm.invalid || isLoading">
-          <ion-spinner *ngIf="isLoading" name="circles" slot="start"></ion-spinner>
-          <ion-icon *ngIf="!isLoading" name="person-add-outline" slot="start"></ion-icon>
+        <ion-button type="submit" expand="block" class="register-button" [disabled]="registerForm.invalid || isLoading" [attr.aria-busy]="isLoading">
+          <ion-spinner *ngIf="isLoading" name="circles" slot="start" aria-hidden="true"></ion-spinner>
+          <ion-icon *ngIf="!isLoading" name="person-add-outline" slot="start" aria-hidden="true"></ion-icon>
           {{ isLoading ? ('AUTH.CREATING_ACCOUNT' | translate) : ('AUTH.CREATE_ACCOUNT' | translate) }}
         </ion-button>
       </form>
@@ -251,16 +251,16 @@
         <p class="verification-email">{{ pendingVerificationEmail }}</p>
 
         <ion-button expand="block" class="resend-button" (click)="resendVerificationEmail()"
-          [disabled]="isResending || resendCooldown > 0">
-          <ion-spinner *ngIf="isResending" name="circles" slot="start"></ion-spinner>
-          <ion-icon *ngIf="!isResending" name="refresh-outline" slot="start"></ion-icon>
+          [disabled]="isResending || resendCooldown > 0" [attr.aria-busy]="isResending">
+          <ion-spinner *ngIf="isResending" name="circles" slot="start" aria-hidden="true"></ion-spinner>
+          <ion-icon *ngIf="!isResending" name="refresh-outline" slot="start" aria-hidden="true"></ion-icon>
           {{ resendCooldown > 0 ?
           ('AUTH.RESEND_IN' | translate: {seconds: resendCooldown}) :
           ('AUTH.RESEND_EMAIL' | translate) }}
         </ion-button>
 
-        <ion-button expand="block" fill="clear" class="back-button" (click)="backToLogin()">
-          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+        <ion-button expand="block" fill="clear" class="back-button" (click)="backToLogin()" [attr.aria-label]="'AUTH.BACK_TO_LOGIN' | translate">
+          <ion-icon name="arrow-back-outline" slot="start" aria-hidden="true"></ion-icon>
           {{ 'AUTH.BACK_TO_LOGIN' | translate }}
         </ion-button>
       </div>

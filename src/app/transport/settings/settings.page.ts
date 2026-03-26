@@ -57,6 +57,8 @@ interface AppSettings {
 })
 export class SettingsPage implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private previousNotificationSettings: NotificationSettings | null = null;
+  isTogglingNotification = false;
 
   settings: AppSettings = {
     notifications: {
@@ -125,10 +127,13 @@ export class SettingsPage implements OnInit, OnDestroy {
     this.settingsService.getNotificationSettings().pipe(takeUntil(this.destroy$)).subscribe({
       next: (notifications: DriverNotificationSettings) => {
         this.settings.notifications = notifications;
+        this.previousNotificationSettings = { ...notifications };
       },
-      error: (err) => {
-        console.error('Failed to load notification settings', err);
-        // Keep defaults or show error
+      error: () => {
+        this.showErrorAlert(
+          this.translate.instant('DRIVER_SETTINGS.ERROR'),
+          this.translate.instant('DRIVER_SETTINGS.LOAD_SETTINGS_ERROR')
+        );
       }
     });
   }
@@ -170,6 +175,11 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   async toggleNotification(type: keyof NotificationSettings) {
+    if (this.isTogglingNotification) {
+      return;
+    }
+
+    this.isTogglingNotification = true;
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('DRIVER_SETTINGS.UPDATING'),
       duration: 500
@@ -179,14 +189,20 @@ export class SettingsPage implements OnInit, OnDestroy {
     this.settingsService.updateNotificationSettings(this.settings.notifications).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         loading.dismiss();
+        this.previousNotificationSettings = { ...this.settings.notifications };
         this.showToast(this.translate.instant('DRIVER_SETTINGS.SETTINGS_UPDATED'));
+        this.isTogglingNotification = false;
       },
-      error: (err) => {
+      error: () => {
         loading.dismiss();
-        console.error('Failed to update notifications', err);
-        this.showErrorAlert(this.translate.instant('DRIVER_SETTINGS.ERROR'), err.error?.error || 'Failed to update settings');
-        // Revert the toggle
-        (this.settings.notifications as any)[type] = !(this.settings.notifications as any)[type];
+        this.showErrorAlert(
+          this.translate.instant('DRIVER_SETTINGS.ERROR'),
+          this.translate.instant('DRIVER_SETTINGS.NOTIFICATION_UPDATE_ERROR')
+        );
+        if (this.previousNotificationSettings) {
+          this.settings.notifications = { ...this.previousNotificationSettings };
+        }
+        this.isTogglingNotification = false;
       }
     });
   }
@@ -242,7 +258,7 @@ export class SettingsPage implements OnInit, OnDestroy {
             if (data.newPassword.length < 8) {
               this.showErrorAlert(
                 this.translate.instant('DRIVER_SETTINGS.ERROR'),
-                'Password must be at least 8 characters long'
+                this.translate.instant('DRIVER_SETTINGS.PASSWORD_MIN_LENGTH')
               );
               return false;
             }
@@ -250,7 +266,7 @@ export class SettingsPage implements OnInit, OnDestroy {
             if (data.currentPassword === data.newPassword) {
               this.showErrorAlert(
                 this.translate.instant('DRIVER_SETTINGS.ERROR'),
-                'New password must be different from current password'
+                this.translate.instant('DRIVER_SETTINGS.PASSWORD_MUST_DIFFER')
               );
               return false;
             }
@@ -258,7 +274,7 @@ export class SettingsPage implements OnInit, OnDestroy {
             if (!/[A-Z]/.test(data.newPassword)) {
               this.showErrorAlert(
                 this.translate.instant('DRIVER_SETTINGS.ERROR'),
-                'Password must contain at least one uppercase letter'
+                this.translate.instant('DRIVER_SETTINGS.PASSWORD_UPPERCASE')
               );
               return false;
             }
@@ -266,7 +282,7 @@ export class SettingsPage implements OnInit, OnDestroy {
             if (!/[a-z]/.test(data.newPassword)) {
               this.showErrorAlert(
                 this.translate.instant('DRIVER_SETTINGS.ERROR'),
-                'Password must contain at least one lowercase letter'
+                this.translate.instant('DRIVER_SETTINGS.PASSWORD_LOWERCASE')
               );
               return false;
             }
@@ -274,7 +290,7 @@ export class SettingsPage implements OnInit, OnDestroy {
             if (!/[0-9]/.test(data.newPassword)) {
               this.showErrorAlert(
                 this.translate.instant('DRIVER_SETTINGS.ERROR'),
-                'Password must contain at least one number'
+                this.translate.instant('DRIVER_SETTINGS.PASSWORD_NUMBER')
               );
               return false;
             }
@@ -282,7 +298,7 @@ export class SettingsPage implements OnInit, OnDestroy {
             if (!/[^a-zA-Z0-9]/.test(data.newPassword)) {
               this.showErrorAlert(
                 this.translate.instant('DRIVER_SETTINGS.ERROR'),
-                'Password must contain at least one special character'
+                this.translate.instant('DRIVER_SETTINGS.PASSWORD_SPECIAL_CHAR')
               );
               return false;
             }
@@ -303,10 +319,12 @@ export class SettingsPage implements OnInit, OnDestroy {
                 loading.dismiss();
                 this.showToast(this.translate.instant('DRIVER_SETTINGS.PASSWORD_CHANGED'));
               },
-              error: (err) => {
+              error: () => {
                 loading.dismiss();
-                console.error('Failed to change password', err);
-                this.showErrorAlert(this.translate.instant('DRIVER_SETTINGS.ERROR'), err.error?.error || 'Failed to change password');
+                this.showErrorAlert(
+                  this.translate.instant('DRIVER_SETTINGS.ERROR'),
+                  this.translate.instant('DRIVER_SETTINGS.PASSWORD_CHANGE_ERROR')
+                );
                 return false;
               }
             });
@@ -364,7 +382,7 @@ export class SettingsPage implements OnInit, OnDestroy {
                     if (data.confirmation !== 'DELETE') {
                       this.showErrorAlert(
                         this.translate.instant('DRIVER_SETTINGS.ERROR'),
-                        'Please type "DELETE" to confirm'
+                        this.translate.instant('DRIVER_SETTINGS.DELETE_CONFIRMATION_TEXT')
                       );
                       return false;
                     }
@@ -385,10 +403,12 @@ export class SettingsPage implements OnInit, OnDestroy {
                         this.authService.logout();
                         this.router.navigate(['/login']);
                       },
-                      error: (err) => {
+                      error: () => {
                         loading.dismiss();
-                        console.error('Failed to delete account', err);
-                        this.showErrorAlert(this.translate.instant('DRIVER_SETTINGS.ERROR'), err.error?.error || 'Failed to delete account');
+                        this.showErrorAlert(
+                          this.translate.instant('DRIVER_SETTINGS.ERROR'),
+                          this.translate.instant('DRIVER_SETTINGS.ACCOUNT_DELETE_ERROR')
+                        );
                         return false;
                       }
                     });
@@ -428,15 +448,16 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   contactSupport() {
-    console.log('Contact support');
+    const mailtoLink = 'mailto:support@go4u.app';
+    window.location.href = mailtoLink;
   }
 
   viewPrivacyPolicy() {
-    console.log('View privacy policy');
+    this.router.navigate(['/privacy-policy']);
   }
 
   viewTermsOfService() {
-    console.log('View terms of service');
+    this.router.navigate(['/terms-of-service']);
   }
 
   goBack() {

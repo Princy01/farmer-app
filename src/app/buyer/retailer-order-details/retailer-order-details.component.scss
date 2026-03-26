@@ -1,6 +1,5 @@
-// ===================================
 // Variables & Theme
-// ===================================
+
 :host {
   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
@@ -13,9 +12,9 @@
   --spacing-lg: 24px;
 }
 
-// ===================================
+
 // Loading State
-// ===================================
+
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -38,9 +37,9 @@
   }
 }
 
-// ===================================
+
 // Error State
-// ===================================
+
 .error-container {
   display: flex;
   flex-direction: column;
@@ -80,9 +79,9 @@
   }
 }
 
-// ===================================
+
 // Order Header Card
-// ===================================
+
 .order-header-card {
   border-radius: var(--border-radius);
   box-shadow: var(--card-shadow);
@@ -193,9 +192,9 @@
   }
 }
 
-// ===================================
+
 // Order Items Card
-// ===================================
+
 ion-card {
   border-radius: var(--border-radius);
   box-shadow: var(--card-shadow);
@@ -246,10 +245,10 @@ ion-card {
   }
 }
 
-// ===================================
-// ===================================
+
+
 // Items List
-// ===================================
+
 .items-list {
   display: flex;
   flex-direction: column;
@@ -283,9 +282,9 @@ ion-card {
   }
 }
 
-// ===================================
+
 // Item Details
-// ===================================
+
 .item-details {
   padding: var(--spacing-md);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
@@ -370,9 +369,9 @@ ion-card {
   }
 }
 
-// ===================================
+
 // Order Summary Card
-// ===================================
+
 .summary-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -464,9 +463,9 @@ ion-card {
   }
 }
 
-// ===================================
+
 // Responsive Design
-// ===================================
+
 @media (max-width: 576px) {
   .order-header-card {
     ion-card-header {
@@ -565,9 +564,9 @@ ion-card {
   }
 }
 
-// ===================================
+
 // Animations
-// ===================================
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -592,9 +591,9 @@ ion-card {
   }
 }
 
-// ===================================
+
 // Status Badge Specific Colors
-// ===================================
+
 ion-chip {
   &[color="success"] {
     background: var(--success-gradient);
@@ -613,16 +612,16 @@ ion-chip {
   }
 }
 
-// ===================================
+
 // Smooth Transitions
-// ===================================
+
 * {
   transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
 }
 
-// ===================================
+
 // Custom Scrollbar (for desktop)
-// ===================================
+
 ::-webkit-scrollbar {
   width: 8px;
 }

@@ -21,8 +21,8 @@
   <div *ngIf="hasError && !isLoading" class="empty-state">
     <ion-icon name="alert-circle-outline" class="empty-icon"></ion-icon>
     <h3>{{ 'RETAILER_ORDER_HISTORY.ERROR_TITLE' | translate }}</h3>
-    <p>{{ 'RETAILER_ORDER_HISTORY.ERROR_MESSAGE' | translate }}</p>
-    <ion-button fill="outline" (click)="loadOrders()">
+    <p>{{ errorMessage || ('RETAILER_ORDER_HISTORY.ERROR_MESSAGE' | translate) }}</p>
+    <ion-button fill="outline" (click)="loadOrders()" [disabled]="isLoading">
       {{ 'RETAILER_ORDER_HISTORY.RETRY' | translate }}
     </ion-button>
   </div>

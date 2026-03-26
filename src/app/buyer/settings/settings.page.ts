@@ -25,6 +25,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { TranslateApiService } from '../../services/translate-api.service';
 import { Subject, takeUntil } from 'rxjs';
 import { RetailerSettingsService } from './settings.service';
+import { environment } from 'src/environments/environment';
 
 interface Language {
   id: number;
@@ -76,12 +77,12 @@ export class SettingsPage implements OnInit, OnDestroy {
   appVersion = '1.0.0';
   isLoading = false;
   passwordRequirements = [
-    'At least 8 characters',
-    'One uppercase letter (A-Z)',
-    'One lowercase letter (a-z)',
-    'One number (0-9)',
-    'One special character (!@#$%^&* etc.)',
-    'Different from current password'
+    this.translate.instant('RETAILER_SETTINGS.PASSWORD_MIN_LENGTH'),
+    this.translate.instant('RETAILER_SETTINGS.PASSWORD_UPPERCASE_REQUIRED'),
+    this.translate.instant('RETAILER_SETTINGS.PASSWORD_LOWERCASE_REQUIRED'),
+    this.translate.instant('RETAILER_SETTINGS.PASSWORD_NUMBER_REQUIRED'),
+    this.translate.instant('RETAILER_SETTINGS.PASSWORD_SPECIAL_REQUIRED'),
+    this.translate.instant('RETAILER_SETTINGS.PASSWORD_SAME_AS_CURRENT')
   ];
 
   constructor(
@@ -148,7 +149,7 @@ export class SettingsPage implements OnInit, OnDestroy {
         localStorage.setItem('retailer_settings', JSON.stringify(this.settings));
       },
       error: (error: any) => {
-        console.error('Error loading settings from API:', error);
+        // Silently fail - use localStorage values
       }
     });
   }
@@ -222,6 +223,16 @@ export class SettingsPage implements OnInit, OnDestroy {
     this.translate.use(normalizedLangCode);
     localStorage.setItem('preferred_language', normalizedLangCode);
 
+    // Reinitialize password requirements after language change
+    this.passwordRequirements = [
+      this.translate.instant('RETAILER_SETTINGS.PASSWORD_MIN_LENGTH'),
+      this.translate.instant('RETAILER_SETTINGS.PASSWORD_UPPERCASE_REQUIRED'),
+      this.translate.instant('RETAILER_SETTINGS.PASSWORD_LOWERCASE_REQUIRED'),
+      this.translate.instant('RETAILER_SETTINGS.PASSWORD_NUMBER_REQUIRED'),
+      this.translate.instant('RETAILER_SETTINGS.PASSWORD_SPECIAL_REQUIRED'),
+      this.translate.instant('RETAILER_SETTINGS.PASSWORD_SAME_AS_CURRENT')
+    ];
+
     // Save to backend
     this.translateApiService.setLanguagePreference(lang.id)
       .pipe(takeUntil(this.destroy$))
@@ -230,7 +241,7 @@ export class SettingsPage implements OnInit, OnDestroy {
           this.showToast(this.translate.instant('RETAILER_SETTINGS.LANGUAGE_CHANGED'), 'success');
         },
         error: (error) => {
-          console.error('Error saving language preference:', error);
+          // Silently fail - language preference already set locally
         }
       });
   }
@@ -251,11 +262,11 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   async changePassword() {
-    const requirementsText = this.passwordRequirements.join(', ');
+    const requirementsText = this.passwordRequirements.join('\n');
 
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('RETAILER_SETTINGS.CHANGE_PASSWORD'),
-      message: `Password requirements: ${requirementsText}`,
+      message: requirementsText,
       inputs: [
         {
           name: 'currentPassword',
@@ -303,32 +314,32 @@ export class SettingsPage implements OnInit, OnDestroy {
 
     // Frontend validation matching backend rules
     if (data.newPassword.length < 8) {
-      this.showToast('Password must be at least 8 characters long', 'danger');
+      this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_MIN_LENGTH'), 'danger');
       return false;
     }
 
     if (data.currentPassword === data.newPassword) {
-      this.showToast('New password must be different from current password', 'danger');
+      this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_SAME_AS_CURRENT'), 'danger');
       return false;
     }
 
     if (!/[A-Z]/.test(data.newPassword)) {
-      this.showToast('Password must contain at least one uppercase letter', 'danger');
+      this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_UPPERCASE_REQUIRED'), 'danger');
       return false;
     }
 
     if (!/[a-z]/.test(data.newPassword)) {
-      this.showToast('Password must contain at least one lowercase letter', 'danger');
+      this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_LOWERCASE_REQUIRED'), 'danger');
       return false;
     }
 
     if (!/[0-9]/.test(data.newPassword)) {
-      this.showToast('Password must contain at least one number', 'danger');
+      this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_NUMBER_REQUIRED'), 'danger');
       return false;
     }
 
     if (!/[^a-zA-Z0-9]/.test(data.newPassword)) {
-      this.showToast('Password must contain at least one special character', 'danger');
+      this.showToast(this.translate.instant('RETAILER_SETTINGS.PASSWORD_SPECIAL_REQUIRED'), 'danger');
       return false;
     }
 
@@ -469,13 +480,11 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   openPrivacyPolicy() {
-    // Open privacy policy page or external link
-    window.open('https://example.com/privacy-policy', '_blank');
+    window.open(environment.privacyPolicyUrl, '_blank');
   }
 
   openTermsOfService() {
-    // Open terms page or external link
-    window.open('https://example.com/terms-of-service', '_blank');
+    window.open(environment.termsOfServiceUrl, '_blank');
   }
 
   async contactSupport() {
@@ -486,14 +495,14 @@ export class SettingsPage implements OnInit, OnDestroy {
           text: this.translate.instant('RETAILER_SETTINGS.EMAIL_SUPPORT'),
           icon: 'mail-outline',
           handler: () => {
-            window.location.href = 'mailto:support@example.com';
+            window.location.href = `mailto:${environment.supportEmail}`;
           }
         },
         {
           text: this.translate.instant('RETAILER_SETTINGS.CALL_SUPPORT'),
           icon: 'phone-portrait-outline',
           handler: () => {
-            window.location.href = 'tel:+911234567890';
+            window.location.href = `tel:${environment.supportPhone}`;
           }
         },
         {

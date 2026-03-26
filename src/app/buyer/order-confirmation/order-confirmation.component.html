@@ -27,24 +27,24 @@
           <h2 class="card-title">{{ 'ORDER_CONFIRMATION.ORDER_DETAILS' | translate }}</h2>
         </div>
         <div class="order-id-badge">
-          #{{ orderData?.orderId }}
+          #{{ orderData.orderId }}
         </div>
       </div>
 
       <ion-card-content class="card-content">
         <div class="detail-row">
           <span class="detail-label">{{ 'ORDER_CONFIRMATION.ORDER_DATE' | translate }}:</span>
-          <span class="detail-value">{{ orderData?.orderDate | date:'mediumDate' }}</span>
+          <span class="detail-value">{{ orderData.orderDate | date:'mediumDate' }}</span>
         </div>
 
         <div class="detail-row">
           <span class="detail-label">{{ 'ORDER_CONFIRMATION.STATUS' | translate }}:</span>
-          <span class="detail-value">{{ getStatusText(orderData?.orderStatus) }}</span>
+          <span class="detail-value">{{ getStatusText(orderData.orderStatus) }}</span>
         </div>
 
         <div class="detail-row">
           <span class="detail-label">{{ 'ORDER_CONFIRMATION.TOTAL_AMOUNT' | translate }}:</span>
-          <span class="detail-value">₹{{ orderData?.grandTotal | number:'1.2-2' }}</span>
+          <span class="detail-value">{{ getOrderGrandTotal() | currency:'INR':'symbol':'1.2-2' }}</span>
         </div>
       </ion-card-content>
     </ion-card>
@@ -63,7 +63,7 @@
       <ion-card-content class="card-content">
         <div class="detail-row">
           <span class="detail-label">{{ 'ORDER_CONFIRMATION.DELIVERY_ADDRESS' | translate }}:</span>
-          <span class="detail-value">{{ orderData?.deliveryAddress }}</span>
+          <span class="detail-value">{{ orderData.deliveryAddress }}</span>
         </div>
 
         <div class="detail-row">
@@ -78,14 +78,14 @@
 
         <div class="detail-row" *ngIf="hasTransport && transportInfo?.distance">
           <span class="detail-label">{{ 'ORDER_CONFIRMATION.DISTANCE' | translate }}:</span>
-          <span class="detail-value">{{ transportInfo.distance }} {{ 'ORDER_CONFIRMATION.KM' | translate }}</span>
+          <span class="detail-value">{{ transportInfo?.distance }} {{ 'ORDER_CONFIRMATION.KM' | translate }}</span>
         </div>
       </ion-card-content>
     </ion-card>
   </div>
 
   <!-- Order Items -->
-  <div class="card-section" *ngIf="!showAnimation && orderData?.items?.length > 0">
+  <div class="card-section" *ngIf="!showAnimation && hasOrderItems()">
     <ion-card class="modern-card items-card">
       <div class="card-header">
         <div class="header-content">
@@ -101,10 +101,34 @@
             <div class="item-details">
               <span class="item-name">{{ item.product_name }}</span>
               <span class="item-quantity">{{ item.quantity }} {{ item.unit_name }}</span>
-              <span class="item-price">₹{{ item.price | number:'1.2-2' }}</span>
+              <span class="item-price">{{ item.price | currency:'INR':'symbol':'1.2-2' }}</span>
             </div>
           </div>
         </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Empty Items State -->
+  <div class="card-section" *ngIf="!showAnimation && !isLoading && orderData && !hasOrderItems()">
+    <ion-card class="modern-card state-card">
+      <ion-card-content class="state-content">
+        <ion-icon name="bag-outline" class="state-icon"></ion-icon>
+        <p class="state-message">{{ 'ORDER_CONFIRMATION.NO_ITEMS' | translate }}</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Error State -->
+  <div class="card-section" *ngIf="!showAnimation && !isLoading && loadErrorMessageKey">
+    <ion-card class="modern-card state-card error-card">
+      <ion-card-content class="state-content">
+        <ion-icon name="receipt-outline" class="state-icon"></ion-icon>
+        <p class="state-message">{{ loadErrorMessageKey | translate }}</p>
+        <p class="state-hint">{{ 'ORDER_CONFIRMATION.PARTIAL_DATA_WARNING' | translate }}</p>
+        <ion-button expand="block" fill="outline" (click)="retryFetchOrderDetails()">
+          {{ 'ORDER_CONFIRMATION.RETRY' | translate }}
+        </ion-button>
       </ion-card-content>
     </ion-card>
   </div>
@@ -114,11 +138,11 @@
     <ion-card class="modern-card actions-card">
       <ion-card-content class="actions-content">
         <div class="action-buttons">
-          <ion-button expand="block" fill="outline" (click)="trackOrder()">
+          <ion-button expand="block" fill="outline" [disabled]="isLoading" (click)="trackOrder()">
             <ion-icon name="navigate-outline" slot="start"></ion-icon>
             {{ 'ORDER_CONFIRMATION.TRACK_ORDER' | translate }}
           </ion-button>
-          <ion-button expand="block" fill="outline" (click)="downloadInvoice()">
+          <ion-button expand="block" fill="outline" [disabled]="isLoading" (click)="downloadInvoice()">
             <ion-icon name="download-outline" slot="start"></ion-icon>
             {{ 'ORDER_CONFIRMATION.DOWNLOAD_INVOICE' | translate }}
           </ion-button>
@@ -133,6 +157,7 @@
       expand="block"
       fill="clear"
       class="bottom-btn"
+      [disabled]="isLoading"
       (click)="goToOrderHistory()">
       <ion-icon name="receipt-outline" slot="start"></ion-icon>
       {{ 'ORDER_CONFIRMATION.VIEW_ALL_ORDERS' | translate }}
@@ -142,6 +167,7 @@
       expand="block"
       fill="clear"
       class="bottom-btn"
+      [disabled]="isLoading"
       (click)="goHome()">
       <ion-icon name="home-outline" slot="start"></ion-icon>
       {{ 'ORDER_CONFIRMATION.CONTINUE_SHOPPING' | translate }}

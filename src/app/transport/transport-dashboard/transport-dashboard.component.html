@@ -1,7 +1,7 @@
 <ion-header mode="ios">
   <ion-toolbar class="header-toolbar">
     <ion-buttons slot="end">
-      <ion-button (click)="openLanguagePopover($event)" class="header-btn language-btn">
+      <ion-button (click)="openLanguagePopover($event)" class="header-btn language-btn" [disabled]="isLoading">
         <ion-icon name="language-outline" slot="start"></ion-icon>
         <span>{{ currentLanguage }}</span>
         <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
@@ -14,7 +14,7 @@
 
   <!-- Segment Control -->
   <div class="segment-container">
-    <ion-segment [(ngModel)]="selectedTab" (ionChange)="onTabChange()" class="custom-segment">
+    <ion-segment [(ngModel)]="selectedTab" (ionChange)="onTabChange()" class="custom-segment" [disabled]="isLoading">
       <ion-segment-button value="active" class="segment-button">
         <ion-icon name="car-outline"></ion-icon>
         <ion-label>{{ 'TRANSPORT_DASHBOARD.ACTIVE' | translate }}</ion-label>
@@ -36,7 +36,7 @@
     <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
 
     <!-- Error Message -->
-    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+    <p *ngIf="errorMessage" class="error-message">{{ errorMessage | translate }}</p>
 
     <!-- Active Deliveries -->
     <ng-container *ngIf="selectedTab === 'active'">
@@ -56,7 +56,7 @@
           <div class="delivery-card active-card" *ngFor="let order of activeDeliveries">
             <div class="card-header">
               <div class="job-info">
-                <h3 class="job-id">Job ID: {{ order.job_id }}</h3>
+                <h3 class="job-id">{{ 'TRANSPORT_DASHBOARD.JOB_ID' | translate }} {{ order.job_id }}</h3>
                 <span class="job-type">{{ 'TRANSPORT_DASHBOARD.WHOLESALER_TO_RETAILER' | translate }}</span>
               </div>
             </div>
@@ -64,11 +64,11 @@
             <div class="card-content">
               <div class="location-section">
                 <div class="location-item pickup">
-                  <span>Pickup Location: {{ getPickupLocations(order.orders) }}</span>
+                  <span>{{ 'TRANSPORT_DASHBOARD.PICKUP_LOCATION' | translate }}: {{ getPickupLocations(order.orders) }}</span>
                 </div>
 
                 <div class="location-item delivery">
-                  <span>Delivery Location: {{ getDropoffLocation(order.orders) }}</span>
+                  <span>{{ 'TRANSPORT_DASHBOARD.DELIVERY_LOCATION' | translate }}: {{ getDropoffLocation(order.orders) }}</span>
                 </div>
               </div>
             </div>
@@ -95,7 +95,7 @@
           <div class="delivery-card upcoming-card" *ngFor="let order of upcomingDeliveries">
             <div class="card-header">
               <div class="job-info">
-                <h3 class="job-id">Job ID: {{ order.job_id }}</h3>
+                <h3 class="job-id">{{ 'TRANSPORT_DASHBOARD.JOB_ID' | translate }} {{ order.job_id }}</h3>
                 <span class="job-type">{{ 'TRANSPORT_DASHBOARD.WHOLESALER_TO_RETAILER' | translate }}</span>
               </div>
             </div>
@@ -103,11 +103,11 @@
             <div class="card-content">
               <div class="location-section">
                 <div class="location-item pickup">
-                  <span>Pickup Location: {{ getPickupLocations(order.orders) }}</span>
+                  <span>{{ 'TRANSPORT_DASHBOARD.PICKUP_LOCATION' | translate }}: {{ getPickupLocations(order.orders) }}</span>
                 </div>
 
                 <div class="location-item delivery">
-                  <span>Delivery Location: {{ getDropoffLocation(order.orders) }}</span>
+                  <span>{{ 'TRANSPORT_DASHBOARD.DELIVERY_LOCATION' | translate }}: {{ getDropoffLocation(order.orders) }}</span>
                 </div>
               </div>
             </div>
@@ -134,7 +134,7 @@
           <div class="delivery-card completed-card" *ngFor="let order of completedDeliveries">
             <div class="card-header">
               <div class="job-info">
-                <h3 class="job-id">Job ID: {{ order.job_id }}</h3>
+                <h3 class="job-id">{{ 'TRANSPORT_DASHBOARD.JOB_ID' | translate }} {{ order.job_id }}</h3>
                 <span class="job-type">{{ 'TRANSPORT_DASHBOARD.WHOLESALER_TO_RETAILER' | translate }}</span>
               </div>
             </div>
@@ -142,11 +142,11 @@
             <div class="card-content">
               <div class="location-section">
                 <div class="location-item pickup">
-                  <span>Pickup Location: {{ getPickupLocations(order.orders) }}</span>
+                  <span>{{ 'TRANSPORT_DASHBOARD.PICKUP_LOCATION' | translate }}: {{ getPickupLocations(order.orders) }}</span>
                 </div>
 
                 <div class="location-item delivery">
-                  <span>Delivery Location: {{ getDropoffLocation(order.orders) }}</span>
+                  <span>{{ 'TRANSPORT_DASHBOARD.DELIVERY_LOCATION' | translate }}: {{ getDropoffLocation(order.orders) }}</span>
                 </div>
               </div>
             </div>

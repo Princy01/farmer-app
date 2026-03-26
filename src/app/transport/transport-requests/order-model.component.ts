@@ -1,12 +1,34 @@
 import { Component, Input } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { TransportRequest } from './transport-requests.service';
+
+export interface OrderItem {
+  quantity: number;
+  wholeseller_price: number;
+  product: {
+    product_name: string;
+    nutrition_factor?: string;
+  };
+}
+
+export interface Order {
+  order_id: number;
+  date_of_order: string;
+  delivery_address: string;
+  order_status: number;
+  items: OrderItem[];
+  discount_amount: number;
+  tax_amount: number;
+  total_order_amount: number;
+  final_amount: number;
+}
 
 @Component({
   selector: 'app-order-details-modal',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, TranslatePipe],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -26,21 +48,21 @@ import { TransportRequest } from './transport-requests.service';
           <div class="summary-item">
             <ion-icon name="cart-outline" class="summary-icon"></ion-icon>
             <div class="summary-info">
-              <span class="summary-label">Total Orders</span>
+              <span class="summary-label">{{ 'ORDER_MODAL.TOTAL_ORDERS' | translate }}</span>
               <span class="summary-value">{{ request?.orders?.length || 0 }}</span>
             </div>
           </div>
           <div class="summary-item">
             <ion-icon name="cube-outline" class="summary-icon"></ion-icon>
             <div class="summary-info">
-              <span class="summary-label">Total Items</span>
+              <span class="summary-label">{{ 'ORDER_MODAL.TOTAL_ITEMS' | translate }}</span>
               <span class="summary-value">{{ getTotalItemCount() }}</span>
             </div>
           </div>
           <div class="summary-item">
             <ion-icon name="pricetag-outline" class="summary-icon"></ion-icon>
             <div class="summary-info">
-              <span class="summary-label">Order Value</span>
+              <span class="summary-label">{{ 'ORDER_MODAL.ORDER_VALUE' | translate }}</span>
               <span class="summary-value primary">₹{{ getTotalOrderValue() }}</span>
             </div>
           </div>
@@ -49,11 +71,11 @@ import { TransportRequest } from './transport-requests.service';
 
       <!-- Orders List -->
       <div class="orders-container">
-        <div class="order-card" *ngFor="let order of request?.orders; let i = index">
+          <div class="order-card" *ngFor="let order of request?.orders">
           <div class="order-card-header">
             <div class="order-number">
               <ion-icon name="receipt-outline"></ion-icon>
-              <span>Order #{{ order.order_id }}</span>
+              <span>{{ 'ORDER_MODAL.ORDER' | translate }} #{{ order.order_id }}</span>
             </div>
             <div class="order-badge">
               <ion-badge [color]="getOrderStatusColor(order.order_status)">
@@ -76,14 +98,14 @@ import { TransportRequest } from './transport-requests.service';
           <!-- Order Items -->
           <div class="items-section">
             <div class="items-header">
-              <span>Items ({{ order.items.length }})</span>
+              <span>{{ 'ORDER_MODAL.ITEMS' | translate }} ({{ order.items.length }})</span>
             </div>
             <div class="item-list">
               <div class="item-row" *ngFor="let item of order.items">
                 <div class="item-main">
                   <div class="item-name">{{ item.product.product_name }}</div>
                   <div class="item-details">
-                    <span class="item-quantity">{{ item.quantity }} units</span>
+                    <span class="item-quantity">{{ item.quantity }} {{ 'ORDER_MODAL.UNITS' | translate }}</span>
                     <span class="item-separator">×</span>
                     <span class="item-price">₹{{ item.wholeseller_price }}</span>
                   </div>
@@ -102,19 +124,19 @@ import { TransportRequest } from './transport-requests.service';
           <!-- Order Summary -->
           <div class="order-summary">
             <div class="summary-row" *ngIf="order.discount_amount > 0">
-              <span>Subtotal</span>
+              <span>{{ 'ORDER_MODAL.SUBTOTAL' | translate }}</span>
               <span>₹{{ (order.total_order_amount + order.discount_amount).toFixed(2) }}</span>
             </div>
             <div class="summary-row" *ngIf="order.discount_amount > 0">
-              <span>Discount</span>
+              <span>{{ 'ORDER_MODAL.DISCOUNT' | translate }}</span>
               <span class="discount">-₹{{ order.discount_amount.toFixed(2) }}</span>
             </div>
             <div class="summary-row" *ngIf="order.tax_amount > 0">
-              <span>Tax</span>
+              <span>{{ 'ORDER_MODAL.TAX' | translate }}</span>
               <span>₹{{ order.tax_amount.toFixed(2) }}</span>
             </div>
             <div class="summary-row total">
-              <span>Total Amount</span>
+              <span>{{ 'ORDER_MODAL.TOTAL_AMOUNT' | translate }}</span>
               <span>₹{{ order.final_amount.toFixed(2) }}</span>
             </div>
           </div>
@@ -126,7 +148,7 @@ import { TransportRequest } from './transport-requests.service';
       <ion-toolbar>
         <div class="modal-footer">
           <ion-button expand="block" color="primary" (click)="dismiss()">
-            Close
+            {{ 'COMMON.CLOSE' | translate }}
           </ion-button>
         </div>
       </ion-toolbar>
@@ -396,7 +418,7 @@ import { TransportRequest } from './transport-requests.service';
 export class OrderDetailsModalComponent {
   @Input() request?: TransportRequest;
 
-  constructor(private modalCtrl: ModalController) {}
+  constructor(private modalCtrl: ModalController, private translate: TranslateService) {}
 
   dismiss() {
     this.modalCtrl.dismiss();
@@ -404,54 +426,55 @@ export class OrderDetailsModalComponent {
 
   getTotalItemCount(): number {
     if (!this.request?.orders) return 0;
-    return this.request.orders.reduce((total: number, order:any) => 
-      total + order.items.reduce((itemTotal: number, item: any) => itemTotal + item.quantity, 0), 0
+    return this.request.orders.reduce((total: number, order: Order) =>
+      total + order.items.reduce((itemTotal: number, item: OrderItem) => itemTotal + item.quantity, 0), 0
     );
   }
 
   getTotalOrderValue(): string {
     if (!this.request?.orders) return '0.00';
-    const total = this.request.orders.reduce((sum: number, order: any) => sum + order.final_amount, 0);
+    const total = this.request.orders.reduce((sum: number, order: Order) => sum + order.final_amount, 0);
     return total.toFixed(2);
   }
 
   getOrderStatusColor(status: number): string {
     switch (status) {
-      case 2: return 'warning';  // Confirmed
-      case 3: return 'success';  // Payment
-      case 4: return 'primary';  // rejected
-      case 5: return 'danger';   // Successful
-      case 6: return 'success';  // Cancellation
+      case 1: return 'warning';  // Processing
+      case 2: return 'success';  // Confirmed
+      case 3: return 'warning';  // Payment Pending
+      case 4: return 'danger';   // Rejected
+      case 5: return 'success';  // Successful
+      case 6: return 'medium';   // Cancelled
       case 7: return 'danger';   // Returned
       case 8: return 'warning';  // Processing
-      case 9: return 'warning';  // return
-      case 10: return 'danger';  // rejected
+      case 9: return 'medium';   // Return Initiated
+      case 10: return 'danger';  // Rejected
       default: return 'medium';
     }
   }
 
   getOrderStatusText(status: number): string {
-    switch (status) {
-      case 1: return 'Processing';
-      case 2: return 'Confirmed';
-      case 3: return 'Payment';
-      case 4: return 'rejected';
-      case 5: return 'Successful';
-      case 6: return 'Cancellation';
-      case 7: return 'Returned';
-      case 8: return 'Processing';
-      case 9: return 'return';
-      case 10: return 'rejected';
-      default: return 'Unknown';
-    }
+    const statusMap: { [key: number]: string } = {
+      1: 'ORDER_STATUS.PROCESSING',
+      2: 'ORDER_STATUS.CONFIRMED',
+      3: 'ORDER_STATUS.PAYMENT_PENDING',
+      4: 'ORDER_STATUS.REJECTED',
+      5: 'ORDER_STATUS.SUCCESSFUL',
+      6: 'ORDER_STATUS.CANCELLED',
+      7: 'ORDER_STATUS.RETURNED',
+      8: 'ORDER_STATUS.PROCESSING',
+      9: 'ORDER_STATUS.RETURN_INITIATED',
+      10: 'ORDER_STATUS.REJECTED'
+    };
+    return this.translate.instant(statusMap[status] || 'ORDER_STATUS.UNKNOWN');
   }
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric' 
+    return date.toLocaleDateString(this.translate.currentLang || 'en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
     });
   }
 }

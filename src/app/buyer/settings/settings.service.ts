@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 export interface UserSettings {
@@ -45,6 +45,7 @@ export class RetailerSettingsService {
   getSettings(): Observable<UserSettings> {
     const headers = this.getAuthHeaders();
     return this.http.get<UserSettings>(`${this.apiUrl}/settings`, { headers }).pipe(
+      timeout(30000),
       catchError(this.handleError)
     );
   }
@@ -52,6 +53,7 @@ export class RetailerSettingsService {
   updateSettings(settings: UserSettings): Observable<any> {
     const headers = this.getAuthHeaders();
     return this.http.put(`${this.apiUrl}/settings`, settings, { headers }).pipe(
+      timeout(30000),
       catchError(this.handleError)
     );
   }
@@ -59,6 +61,7 @@ export class RetailerSettingsService {
   changePassword(data: UpdatePasswordRequest): Observable<any> {
     const headers = this.getAuthHeaders();
     return this.http.put(`${this.apiUrl}/settings/password`, data, { headers }).pipe(
+      timeout(30000),
       catchError(this.handleError)
     );
   }
@@ -66,6 +69,7 @@ export class RetailerSettingsService {
   deleteAccount(data: DeleteAccountRequest): Observable<any> {
     const headers = this.getAuthHeaders();
     return this.http.delete(`${this.apiUrl}/account`, { headers, body: data }).pipe(
+      timeout(30000),
       catchError(this.handleError)
     );
   }
@@ -75,7 +79,6 @@ export class RetailerSettingsService {
     if (error.error && typeof error.error === 'object' && error.error.error) {
       errorMessage = error.error.error; // Match backend error format
     }
-    console.error('API Error:', error);
     return throwError(() => new Error(errorMessage));
   }
 }

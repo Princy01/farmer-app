@@ -188,14 +188,11 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
         price: wholesaler.price_per_unit
       };
 
-      console.log('Adding to cart:', cartRequest);
-
       this.cartService.addItemToCart(cartRequest).pipe(
         takeUntil(this.destroy$)
       ).subscribe({
         next: async (response) => {
           await loading.dismiss();
-          console.log('Item added to cart:', response);
 
           const alert = await this.alertCtrl.create({
             header: this.translate.instant('CATEGORY.SUCCESS'),
@@ -217,15 +214,8 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
         },
         error: async (error) => {
           await loading.dismiss();
-          console.error('Error adding to cart:', error);
 
-          let errorMessage = this.translate.instant('CATEGORY.FAILED_ADD_TO_CART');
-
-          if (error.error && error.error.message) {
-            errorMessage = error.error.message;
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
+          const errorMessage = this.translate.instant('CATEGORY.FAILED_ADD_TO_CART');
 
           const alert = await this.alertCtrl.create({
             header: this.translate.instant('CATEGORY.ERROR'),
@@ -238,7 +228,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
 
     } catch (error) {
       await loading.dismiss();
-      console.error('Error adding to cart:', error);
 
       const alert = await this.alertCtrl.create({
         header: this.translate.instant('CATEGORY.ERROR'),
@@ -276,12 +265,12 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
               this.category = currentSuperCategory;
 
               // Set the selected category name
-              this.selectedCategoryName = `All ${this.categoryName}`;
+              this.selectedCategoryName = `${this.translate.instant('CATEGORY.ALL')} ${this.categoryName}`;
               this.selectedSubcategory = this.selectedCategoryName;
             } else {
-              this.categoryName = 'Products';
+              this.categoryName = this.translate.instant('CATEGORY.PRODUCTS_DEFAULT');
               this.superCategoryName = this.categoryName;
-              this.selectedCategoryName = `All ${this.categoryName}`;
+              this.selectedCategoryName = `${this.translate.instant('CATEGORY.ALL')} ${this.categoryName}`;
               this.selectedSubcategory = this.selectedCategoryName;
             }
 
@@ -289,7 +278,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
             return this.buyerApiService.getCategoryBySuperCategoryId(this.superCategoryId);
           }),
           catchError(error => {
-            console.error('Error fetching categories:', error);
             this.errorLoadingCategories = true;
             this.loadingCategories = false;
             // Fallback to generic name
@@ -315,7 +303,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
         this.startPolling();
       },
       error: (error) => {
-        console.error('Error loading categories:', error);
         this.errorLoadingCategories = true;
         this.loadingCategories = false;
       }
@@ -361,7 +348,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
     this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
       takeUntil(this.destroy$),
       catchError(error => {
-        console.error('Error fetching all products of super category:', error);
         this.errorLoadingProducts = true;
         this.loadingProducts = false;
         return of([]);
@@ -373,7 +359,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
         this.loadingProducts = false;
       },
       error: (error) => {
-        console.error('Error loading all products of super category:', error);
         this.errorLoadingProducts = true;
         this.loadingProducts = false;
       }
@@ -397,7 +382,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
       this.buyerApiService.getAllProductsOfSuperCategory(this.superCategoryId).pipe(
         takeUntil(this.destroy$),
         catchError(error => {
-          console.error('Error fetching all products of super category:', error);
           this.errorLoadingProducts = true;
           this.loadingProducts = false;
           return of([]);
@@ -409,7 +393,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
           this.loadingProducts = false;
         },
         error: (error) => {
-          console.error('Error loading all products of super category:', error);
           this.errorLoadingProducts = true;
           this.loadingProducts = false;
         }
@@ -418,7 +401,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
       this.buyerApiService.getProductsByCategoryId(category.category_id).pipe(
         takeUntil(this.destroy$),
         catchError(error => {
-          console.error('Error fetching products:', error);
           this.errorLoadingProducts = true;
           this.loadingProducts = false;
           return of([]);
@@ -440,7 +422,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
           this.loadingProducts = false;
         },
         error: (error) => {
-          console.error('Error loading products:', error);
           this.errorLoadingProducts = true;
           this.loadingProducts = false;
         }
@@ -459,7 +440,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
     this.wholesalers = [];
 
     if (!product?.product_id) {
-      console.warn('No product ID provided');
       return;
     }
 
@@ -481,7 +461,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
           await loading.dismiss();
         },
         error: async (err) => {
-          console.error('Failed to load mandis:', err);
           this.wholesalers = [];
           await loading.dismiss();
 
@@ -506,7 +485,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
       });
     } catch (error) {
       await loading.dismiss();
-      console.error('Unexpected error in selectProduct:', error);
     }
   }
 
@@ -628,7 +606,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
 
   goToProductDetails(product: ProductAll) {
     if (!product?.product_id) {
-      console.error('Cannot navigate: Invalid product');
       return;
     }
     this.router.navigate(['/buyer/product-details', product.product_id]);

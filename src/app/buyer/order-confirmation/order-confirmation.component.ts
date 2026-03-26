@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { OrderService, RetailerOrderResponse } from './order.service';
+import { Subject, takeUntil } from 'rxjs';
 import { addIcons } from 'ionicons';
 import {
   checkmarkCircle,
@@ -15,6 +17,49 @@ import {
 } from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+interface TransportInfo {
+  distance?: number;
+  delivery_type?: string;
+}
+
+interface OrderConfirmationItem {
+  product_id: number;
+  product_name: string;
+  quantity: number;
+  unit_id: number;
+  unit_name: string;
+  price: number;
+  discount_amount: number;
+  tax_amount: number;
+  wholeseller_id: number;
+  wholeseller_name: string;
+}
+
+interface OrderConfirmationData {
+  order_ids?: number[];
+  orderIds?: number[];
+  orderId?: number;
+  orderDate?: string;
+  orderStatus?: number;
+  actualDeliveryDate?: string | null;
+  retailerId?: number;
+  wholesellerIds?: number[];
+  deliveryAddress?: string;
+  totalOrderAmount?: number;
+  discountAmount?: number;
+  taxAmount?: number;
+  finalAmount?: number;
+  grand_total?: number;
+  grandTotal?: number;
+  items?: OrderConfirmationItem[];
+}
+
+interface OrderConfirmationNavigationState {
+  orderData?: OrderConfirmationData;
+  hasTransport?: boolean;
+  transportData?: TransportInfo;
+}
+
 @Component({
   selector: 'app-order-confirmation',
   standalone: true,
@@ -22,13 +67,17 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   templateUrl: './order-confirmation.component.html',
   styleUrls: ['./order-confirmation.component.scss'],
 })
-export class OrderConfirmationComponent implements OnInit {
-  orderData: any;
+export class OrderConfirmationComponent implements OnInit, OnDestroy {
+  orderData: OrderConfirmationData | null = null;
   estimatedDelivery: string = '';
   showAnimation: boolean = true;
   hasTransport: boolean = false;
-  transportInfo: any = null;
+  transportInfo: TransportInfo | null = null;
   isLoading: boolean = false;
+  loadErrorMessageKey: string | null = null;
+
+  private readonly destroy$ = new Subject<void>();
+  private animationTimerId: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private router: Router,
@@ -48,7 +97,7 @@ export class OrderConfirmationComponent implements OnInit {
     });
 
     const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras?.state;
+    const state = navigation?.extras?.state as OrderConfirmationNavigationState | undefined;
 
     // Expected state structure after order creation:
     // {
@@ -64,45 +113,45 @@ export class OrderConfirmationComponent implements OnInit {
     //   transportData: any
     // }
 
-    this.orderData = state?.['orderData'];
-    this.hasTransport = state?.['hasTransport'] || false;
-    this.transportInfo = state?.['transportData'] || null;
+    this.orderData = state?.orderData ?? null;
+    this.hasTransport = state?.hasTransport ?? false;
+    this.transportInfo = state?.transportData ?? null;
 
     if (!this.orderData) {
-      console.error('No order data found in navigation state');
-      this.router.navigate(['/buyer/home']);
+      this.loadErrorMessageKey = 'ORDER_CONFIRMATION.NO_ORDER_DATA';
+      void this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_DATA');
+      void this.router.navigate(['/buyer/buyer-home']);
       return;
     }
-
-    console.log('Order confirmation received:', {
-      orderData: this.orderData,
-      hasTransport: this.hasTransport,
-      transportInfo: this.transportInfo
-    });
   }
 
-  async ngOnInit() {
+  ngOnInit(): void {
     this.calculateDeliveryTime();
 
     // Show animation for 3 seconds, then fetch full details
-    setTimeout(async () => {
+    this.animationTimerId = setTimeout(() => {
       this.showAnimation = false;
 
       // Fetch detailed order information for the first order ID
-      const orderId = this.orderData?.orderIds?.[0] || this.orderData?.orderId;
-
-      console.log('ngOnInit - Attempting to fetch order details:', {
-        orderId,
-        orderData: this.orderData,
-        orderIds: this.orderData?.orderIds
-      });
+      const orderId = this.resolveOrderId();
 
       if (orderId) {
-        await this.fetchOrderDetails(orderId);
+        this.fetchOrderDetails(orderId);
       } else {
-        console.warn('No order ID found in orderData. Order details will not be fetched.');
+        this.loadErrorMessageKey = 'ORDER_CONFIRMATION.NO_ORDER_ID';
+        void this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_ID');
       }
     }, 3000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.animationTimerId) {
+      clearTimeout(this.animationTimerId);
+      this.animationTimerId = null;
+    }
+
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   /**
@@ -110,19 +159,20 @@ export class OrderConfirmationComponent implements OnInit {
    * GET /getRetailerOrderDetails/:id
    */
   private async fetchOrderDetails(orderId: number): Promise<void> {
-    console.log('fetchOrderDetails called with orderId:', orderId);
+    this.isLoading = true;
+    this.loadErrorMessageKey = null;
 
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('ORDER_CONFIRMATION.LOADING_DETAILS'),
     });
     await loading.present();
 
-    this.isLoading = true;
-
-    console.log('Starting API call to getRetailerOrderDetails...');
-    this.orderService.getRetailerOrderDetails(orderId).subscribe({
+    this.orderService.getRetailerOrderDetails(orderId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (response: RetailerOrderResponse) => {
-        console.log('✅ Backend response received:', response);
+        const safeItems = Array.isArray(response.items) ? response.items : [];
+        const existingGrandTotal = this.orderData?.grandTotal ?? this.orderData?.grand_total;
 
         // Merge backend response with existing data
         this.orderData = {
@@ -147,10 +197,10 @@ export class OrderConfirmationComponent implements OnInit {
           finalAmount: response.final_amount,
 
           // Keep grand_total from original (includes all orders + delivery)
-          grandTotal: this.orderData.grand_total || response.final_amount,
+          grandTotal: existingGrandTotal ?? response.final_amount,
 
           // Items with full details
-          items: response.items.map(item => ({
+          items: safeItems.map((item) => ({
             product_id: item.product_id,
             product_name: item.product_name || this.translate.instant('ORDER_CONFIRMATION.UNKNOWN_PRODUCT'),
             quantity: item.quantity,
@@ -164,31 +214,45 @@ export class OrderConfirmationComponent implements OnInit {
           }))
         };
 
-        console.log('Processed order data:', this.orderData);
         this.isLoading = false;
-        loading.dismiss();
+        void loading.dismiss();
       },
       error: async (err) => {
-        console.error('❌ Failed to fetch order details:', err);
-        console.error('Error status:', err?.status);
-        console.error('Error message:', err?.message);
+        const errorKey = this.getOrderErrorMessageKey(err);
+        this.loadErrorMessageKey = errorKey;
+
+        if (err instanceof HttpErrorResponse && err.status === 401) {
+          await this.router.navigate(['/login']);
+        }
+
         this.isLoading = false;
         await loading.dismiss();
-        await this.showErrorToast('ORDER_CONFIRMATION.FETCH_ERROR');
+        await this.showErrorToast(errorKey);
       }
     });
+  }
+
+  retryFetchOrderDetails(): void {
+    const orderId = this.resolveOrderId();
+    if (!orderId) {
+      void this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_ID');
+      return;
+    }
+
+    void this.fetchOrderDetails(orderId);
   }
 
   /**
    * Navigate to order tracking page
    */
-  trackOrder() {
-    const orderId = this.orderData?.orderIds?.[0] || this.orderData?.orderId;
+  trackOrder(): void {
+    const orderId = this.resolveOrderId();
     if (!orderId) {
-      this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_ID');
+      void this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_ID');
       return;
     }
-    this.router.navigate(['/buyer/order-tracking'], {
+
+    void this.router.navigate(['/buyer/order-tracking'], {
       queryParams: { orderId: orderId }
     });
   }
@@ -196,29 +260,27 @@ export class OrderConfirmationComponent implements OnInit {
   /**
    * Navigate to order history
    */
-  goToOrderHistory() {
-    this.router.navigate(['/buyer/retailer-order-history']);
+  goToOrderHistory(): void {
+    void this.router.navigate(['/buyer/retailer-order-history']);
   }
 
   /**
    * Navigate to home page
    */
-  goHome() {
-    this.router.navigate(['/buyer/buyer-home']);
+  goHome(): void {
+    void this.router.navigate(['/buyer/buyer-home']);
   }
 
   /**
    * Download invoice (placeholder implementation)
    */
-  async downloadInvoice() {
-    const orderId = this.orderData?.orderIds?.[0] || this.orderData?.orderId;
+  async downloadInvoice(): Promise<void> {
+    const orderId = this.resolveOrderId();
     if (!orderId) {
       await this.showErrorToast('ORDER_CONFIRMATION.NO_ORDER_ID');
       return;
     }
 
-    // TODO: Implement invoice download functionality
-    console.log('Downloading invoice for order:', orderId);
     await this.showSuccessToast('ORDER_CONFIRMATION.DOWNLOAD_COMING_SOON');
   }
 
@@ -261,28 +323,23 @@ export class OrderConfirmationComponent implements OnInit {
       case 'priority':
         return this.translate.instant('ORDER_CONFIRMATION.TRANSPORT_PRIORITY');
       default:
-        return type;
+        return this.translate.instant('ORDER_CONFIRMATION.TRANSPORT_UNKNOWN');
     }
   }
 
-  /**
-   * Format date for display
-   */
-  getFormattedDate(date: Date | string): string {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  getOrderGrandTotal(): number {
+    const total = this.orderData?.grandTotal ?? this.orderData?.grand_total ?? this.orderData?.finalAmount;
+    return typeof total === 'number' ? total : 0;
+  }
+
+  hasOrderItems(): boolean {
+    return (this.orderData?.items?.length ?? 0) > 0;
   }
 
   /**
    * Get status text based on order_status number
    */
-  getStatusText(status: number): string {
+  getStatusText(status: number | undefined): string {
     switch (status) {
       case 1:
         return this.translate.instant('ORDER_CONFIRMATION.STATUS_CONFIRMED');
@@ -290,6 +347,41 @@ export class OrderConfirmationComponent implements OnInit {
         return this.translate.instant('ORDER_CONFIRMATION.STATUS_PENDING');
       default:
         return this.translate.instant('ORDER_CONFIRMATION.STATUS_UNKNOWN');
+    }
+  }
+
+  private resolveOrderId(): number | undefined {
+    const idFromArray = this.orderData?.orderIds?.[0] ?? this.orderData?.order_ids?.[0];
+    return idFromArray ?? this.orderData?.orderId;
+  }
+
+  private getOrderErrorMessageKey(error: unknown): string {
+    if ((error as { name?: string })?.name === 'TimeoutError') {
+      return 'ORDER_CONFIRMATION.TIMEOUT_ERROR';
+    }
+
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'ORDER_CONFIRMATION.FETCH_ERROR';
+    }
+
+    if (error.status === 0) {
+      return 'ORDER_CONFIRMATION.NETWORK_ERROR';
+    }
+
+    switch (error.status) {
+      case 401:
+        return 'ORDER_CONFIRMATION.SESSION_EXPIRED';
+      case 403:
+        return 'ORDER_CONFIRMATION.PERMISSION_DENIED';
+      case 404:
+        return 'ORDER_CONFIRMATION.NOT_FOUND';
+      case 408:
+        return 'ORDER_CONFIRMATION.TIMEOUT_ERROR';
+      default:
+        if (error.status >= 500) {
+          return 'ORDER_CONFIRMATION.SERVER_ERROR';
+        }
+        return 'ORDER_CONFIRMATION.FETCH_ERROR';
     }
   }
 

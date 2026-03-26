@@ -34,6 +34,12 @@ export class MenuService {
     await toast.present();
   }
 
+  /**
+   * Safely navigate to a route with menu closure and error handling
+   * @param route Route path array
+   * @param extras Optional navigation extras
+   * @returns true if navigation succeeded
+   */
   private async navigateSafely(route: string[], extras?: NavigationExtras): Promise<boolean> {
     try {
       await this.closeMenu();
@@ -43,25 +49,30 @@ export class MenuService {
       }
       return result;
     } catch (error) {
-      console.error('Navigation error:', error);
       this.showErrorToast(this.translate.instant('MENU.NAVIGATION_ERROR'));
       return false;
     }
   }
 
+  /**
+   * Open the main menu
+   */
   async openMenu() {
     try {
       await this.menuCtrl.open('main-menu');
     } catch (error) {
-      console.error('Error opening menu:', error);
+      // Silently handle errors - menu might already be open
     }
   }
 
+  /**
+   * Close the main menu
+   */
   async closeMenu() {
     try {
       await this.menuCtrl.close('main-menu');
     } catch (error) {
-      console.error('Error closing menu:', error);
+      // Silently handle errors - menu might already be closed
     }
   }
 
@@ -105,6 +116,9 @@ export class MenuService {
     return this.navigateSafely(['/wholesaler/settings']);
   }
 
+  /**
+   * Perform logout with confirmation dialog and proper cleanup
+   */
   async logout() {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('MENU.LOGOUT_TITLE'),
@@ -122,7 +136,6 @@ export class MenuService {
               this.authService.logout();
               await this.router.navigate(['/login']);
             } catch (error) {
-              console.error('Error during logout:', error);
               this.showErrorToast(this.translate.instant('MENU.LOGOUT_ERROR'));
             }
           }
