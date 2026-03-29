@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
@@ -25,7 +25,7 @@ import {
     IonTitle, IonToolbar, IonRouterOutlet, IonList, IonItem, IonLabel, IonIcon, CommonModule, TranslatePipe
   ]
 })
-export class TransportComponent implements OnInit, OnDestroy {
+export class TransportComponent implements OnDestroy {
   pageTitle: string = 'Transport';
   activeRoute: string = '';
   private destroy$ = new Subject<void>();
@@ -62,8 +62,6 @@ export class TransportComponent implements OnInit, OnDestroy {
         }
       });
   }
-
-  ngOnInit() {}
 
   ngOnDestroy() {
     this.destroy$.next();

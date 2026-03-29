@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -15,13 +15,9 @@ type TrendRoute = 'sales-trends' | 'demand-trends' | 'stock-insights' | 'market-
   templateUrl: './trends.component.html',
   styleUrls: ['./trends.component.scss'],
 })
-export class TrendsComponent implements OnInit {
+export class TrendsComponent {
   constructor(private router: Router) {
     addIcons({ barChartOutline, analyticsOutline, cubeOutline, podiumOutline });
-  }
-
-  ngOnInit(): void {
-    // Component initialization
   }
 
   navigateTo(route: TrendRoute): void {

@@ -175,7 +175,6 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     try {
       this.activeJobs = await this.deliveryService.getActiveDeliveryJobs().toPromise() || [];
     } catch (error) {
-      console.error('Error loading active jobs:', error);
       await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_LOAD_ACTIVE_JOBS'), 'danger');
     } finally {
       await loading.dismiss();
@@ -191,7 +190,6 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     try {
       this.orders = await this.deliveryService.getOrdersInJob(this.jobId).toPromise() || [];
     } catch (error) {
-      console.error('Error loading job orders:', error);
       await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_LOAD_JOB_ORDERS'), 'danger');
       this.router.navigate(['/transport/transport-dashboard']);
     } finally {
@@ -264,7 +262,6 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
       this.showSuccessModal = true;
       await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.DELIVERY_CONFIRMED_SUCCESS'), 'success');
     } catch (error) {
-      console.error('Error confirming delivery:', error);
       await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_CONFIRM_DELIVERY'), 'danger');
     } finally {
       this.isVerifyingOTP = false;
@@ -304,7 +301,6 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   showOTPError() {
     this.otpDigits = '';  // Reset the string
     this.otpError = this.translate.instant('DELIVERY_CONFIRMATION.INVALID_OTP');  // Set error message
-    console.log('Invalid OTP entered');
     setTimeout(() => {
       const firstInput = document.querySelector('input[name="otp-0"]') as HTMLInputElement;
       if (firstInput) firstInput.focus();
@@ -315,7 +311,6 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     this.clearTimers();
     this.otpGenerated = false;
     this.otpDigits = '';  // Reset the string
-    console.log('OTP expired');
   }
 
   // Timer Methods

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -88,7 +88,7 @@ import { Subject } from 'rxjs';
   standalone: true,
   imports: [CommonModule, IonicModule, TranslatePipe]
 })
-export class HamburgerMenuComponent implements OnInit, OnDestroy {
+export class HamburgerMenuComponent implements OnDestroy {
   /** Subject for managing subscriptions */
   private destroy$ = new Subject<void>();
 
@@ -97,10 +97,6 @@ export class HamburgerMenuComponent implements OnInit, OnDestroy {
       home, business, list, cube, time, analytics, pulse, bulb,
       personOutline, settingsOutline, logOutOutline, closeOutline, menuOutline
     });
-  }
-
-  ngOnInit(): void {
-    // Component initialization
   }
 
   /**

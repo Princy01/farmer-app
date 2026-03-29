@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DeliveryService, Delivery } from './delivery-history.service';
 import { Subject } from 'rxjs';
-import { debounceTime, takeUntil, switchMap } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-delivery-history',
@@ -18,6 +18,7 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
   searchQuery: string = '';
   deliveries: Delivery[] = [];
   filteredDeliveries: Delivery[] = [];
+  expandedJobIds = new Set<string>();
   isLoading: boolean = false;
   isResolvingDispute: string | null = null;
   error: string | null = null;
@@ -62,10 +63,12 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
           if (response && Array.isArray(response.deliveries) && response.deliveries.length > 0) {
             this.deliveries = response.deliveries;
             this.filteredDeliveries = [...this.deliveries];
+            this.expandedJobIds.clear();
             this.error = null;
           } else {
             this.deliveries = [];
             this.filteredDeliveries = [];
+            this.expandedJobIds.clear();
           }
           this.isLoading = false;
         },
@@ -73,6 +76,7 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
           this.error = this.translate.instant('DELIVERY_HISTORY.LOAD_ERROR');
           this.deliveries = [];
           this.filteredDeliveries = [];
+          this.expandedJobIds.clear();
           this.isLoading = false;
         }
       });
@@ -89,11 +93,40 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
     }
 
     const lowerCaseQuery = query.toLowerCase();
-    this.filteredDeliveries = this.deliveries.filter(delivery =>
-      delivery.pickup_address.toLowerCase().includes(lowerCaseQuery) ||
-      delivery.drop_address.toLowerCase().includes(lowerCaseQuery) ||
-      delivery.order_id.toString().includes(lowerCaseQuery)
-    );
+    this.filteredDeliveries = this.deliveries.filter(delivery => {
+      const searchableText = [
+        delivery.job_id,
+        delivery.order_id?.toString() ?? '',
+        (delivery.order_ids ?? []).join(','),
+        delivery.pickup_address,
+        delivery.drop_address,
+        delivery.delivery_date,
+        ...(delivery.orders ?? []).flatMap(order => [
+          order.order_id?.toString() ?? '',
+          order.delivery_address,
+          order.order_status,
+          order.final_amount?.toString() ?? '',
+          ...(order.items ?? []).map(item => item.product_name),
+        ]),
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return searchableText.includes(lowerCaseQuery);
+    });
+  }
+
+  toggleDeliveryDetails(jobId: string) {
+    if (this.expandedJobIds.has(jobId)) {
+      this.expandedJobIds.delete(jobId);
+      return;
+    }
+
+    this.expandedJobIds.add(jobId);
+  }
+
+  isDeliveryExpanded(jobId: string): boolean {
+    return this.expandedJobIds.has(jobId);
   }
 
   resolveDispute(jobId: string) {

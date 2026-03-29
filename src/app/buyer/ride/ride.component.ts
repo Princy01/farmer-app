@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BuyerApiService } from '../services/buyer-api.service';
 import { addIcons } from 'ionicons';
+import { Subject, takeUntil } from 'rxjs';
 import {
   chevronBack,
   carOutline,
@@ -67,8 +68,9 @@ interface TransportData {
   templateUrl: './ride.component.html',
   styleUrls: ['./ride.component.scss'],
 })
-export class RideComponent implements OnInit {
+export class RideComponent implements OnInit, OnDestroy {
   private checkoutData: CheckoutData = {};
+  private readonly destroy$ = new Subject<void>();
   private existingTransportData: TransportData | null = null;
   private pickupLat: number = 0;
   private pickupLon: number = 0;
@@ -128,6 +130,11 @@ export class RideComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private calculateDistanceFromBackend(): void {
     this.isLoadingDistance = true;
     this.buyerApiService.getRouteMetrics(
@@ -135,15 +142,15 @@ export class RideComponent implements OnInit {
       this.pickupLon,
       this.dropoffLat,
       this.dropoffLon
+    ).pipe(
+      takeUntil(this.destroy$)
     ).subscribe({
       next: (response) => {
         // Convert meters to km and round to 2 decimal places
         this.distance = Math.round((response.distance_meters / 1000) * 100) / 100;
-        console.log(`Distance calculated: ${this.distance} km from ${response.distance_meters} meters`);
         this.isLoadingDistance = false;
       },
-      error: (error) => {
-        console.error('Error calculating distance:', error);
+      error: () => {
         // Fallback to dummy distance on error
         this.distance = this.calculateDummyDistance();
         this.isLoadingDistance = false;
@@ -157,7 +164,6 @@ export class RideComponent implements OnInit {
       const navData = navigation?.extras?.state;
 
       if (!navData) {
-        console.warn('No navigation state data found');
         return;
       }
 
@@ -167,7 +173,6 @@ export class RideComponent implements OnInit {
       this.distance = navData['distance'] || 0;
 
       this.existingTransportData = navData['transportData'] || null;
-      console.log('Existing transport data:', this.existingTransportData);
       if (this.existingTransportData?.delivery_type) {
         this.selectedTransportType = this.existingTransportData.delivery_type as TransportType;
       }
@@ -205,14 +210,16 @@ export class RideComponent implements OnInit {
         dropoffBranchId: navData['dropoffBranchId'],
         wholesalerGroups: navData['wholesalerGroups']
       };
-    } catch (error) {
-      console.error('Error initializing from navigation state:', error);
+    } catch {
+      return;
     }
   }
 
   private initializeFromQueryParams(): void {
     try {
-      this.route.queryParams.subscribe(params => {
+      this.route.queryParams.pipe(
+        takeUntil(this.destroy$)
+      ).subscribe(params => {
         if (params['totalWeight']) {
           this.totalWeight = +params['totalWeight'];
         }
@@ -226,8 +233,8 @@ export class RideComponent implements OnInit {
           this.distance = +params['distance'];
         }
       });
-    } catch (error) {
-      console.error('Error initializing from query params:', error);
+    } catch {
+      return;
     }
   }
 
@@ -281,11 +288,6 @@ export class RideComponent implements OnInit {
         } as TransportData;
       }
 
-      console.log({
-        ...this.checkoutData,
-        transportData: transportDataToPass,
-        hasTransport: !!transportDataToPass
-      })
       this.router.navigate(['/buyer/checkout'], {
         state: {
           ...this.checkoutData,
@@ -293,8 +295,8 @@ export class RideComponent implements OnInit {
           hasTransport: !!transportDataToPass
         }
       });
-    } catch (error) {
-      console.error('Error navigating back:', error);
+    } catch {
+      return;
     }
   }
 
@@ -330,8 +332,6 @@ export class RideComponent implements OnInit {
         base_price: basePrice
       };
 
-      console.log('Confirmed transport data:', transportRequestData);
-
       await loading.dismiss();
 
       await this.router.navigate(['/buyer/checkout'], {
@@ -343,7 +343,6 @@ export class RideComponent implements OnInit {
       });
     } catch (error) {
       await loading.dismiss();
-      console.error('Error confirming transport selection:', error);
 
       const errorAlert = await this.alertController.create({
         header: this.translate.instant('RIDE.ERROR_TITLE'),
@@ -375,8 +374,7 @@ export class RideComponent implements OnInit {
         {
           text: this.translate.instant('RIDE.UPGRADE_NOW'),
           handler: () => {
-            // Navigate to premium upgrade page or handle upgrade
-            console.log('Navigate to premium upgrade');
+            return;
           }
         }
       ]
@@ -432,7 +430,6 @@ export class RideComponent implements OnInit {
       await successAlert.present();
     } catch (error) {
       await loading.dismiss();
-      console.error('Error upgrading to premium:', error);
 
       const errorAlert = await this.alertController.create({
         header: this.translate.instant('RIDE.ERROR_TITLE'),

@@ -1,7 +1,8 @@
-import { Routes } from '@angular/router';
+import { CanActivateFn, Routes } from '@angular/router';
 import { VerifyEmailPage } from './verify-email/verify-email.page';
+import { authGuard, requireRolesGuard } from './auth/auth.guard';
 
-export const routes: Routes = [
+const appRoutes: Routes = [
   {
     path: '',
     redirectTo: 'login',
@@ -106,94 +107,6 @@ export const routes: Routes = [
   {
     path: 'wholesaler/pickup-orders',
     loadComponent: () => import('./Wholesaler/pickup-orders/pickup-orders.component').then((m) => m.WholesalerPickupOrdersComponent),
-  },
-
-  {
-    path: 'admin',
-    loadComponent: () => import('./admin/admin.page').then((m) => m.AdminPage),
-
-    children: [
-      {
-        path: '',
-        redirectTo: 'admin-orders',
-        pathMatch: 'full',
-      },
-      {
-        path: 'admin-orders',
-        loadComponent: () =>
-          import('./admin/admin-orders.page').then((m) => m.AdminOrdersPage),
-      },
-      {
-        path: 'admin-order-detail',
-        loadComponent: () =>
-          import('./admin/admin-order-detail.page').then((m) => m.AdminOrderDetailPage),
-      },
-
-      {
-        path: 'driver',
-        loadComponent: () => import('./forms/driver/driver.component').then((m) => m.DriverComponent),
-      },
-      {
-        path: 'states',
-        loadComponent: () => import('./forms/state/state.component').then((m) => m.StateComponent),
-      },
-      {
-        path: 'category',
-        loadComponent: () => import('./forms/category/category.component').then((m) => m.CategoryComponent),
-      },
-      {
-        path: 'location',
-        loadComponent: () => import('./forms/location/location.component').then((m) => m.LocationComponent),
-      },
-      {
-        path: 'vehicle',
-        loadComponent: () => import('./forms/vehicle/vehicle.component').then((m) => m.VehicleComponent),
-      },
-      {
-        path: 'mandi',
-        loadComponent: () => import('./forms/mandi/mandi.component').then((m) => m.MandiComponent),
-      },
-      {
-        path: 'product',
-        loadComponent: () => import('./forms/product/product.component').then((m) => m.ProductComponent),
-      },
-      {
-        path: 'violation',
-        loadComponent: () => import('./forms/violation/violation.component').then((m) => m.ViolationComponent),
-      },
-      {
-        path: 'user',
-        loadComponent: () => import('./forms/user/user.component').then((m) => m.UserComponent),
-      },
-      {
-        path: 'order-status',
-        loadComponent: () => import('./forms/order-status/order-status.component').then((m) => m.OrderStatusComponent),
-      },
-      {
-        path: 'cash-payment',
-        loadComponent: () => import('./forms/cash-payment/cash-payment.component').then((m) => m.CashPaymentComponent),
-      },
-      {
-        path: 'business',
-        loadComponent: () => import('./forms/business/business.component').then((m) => m.BusinessComponent),
-      },
-      {
-        path: 'business-type',
-        loadComponent: () => import('./forms/business-type/business-type.component').then((m) => m.BusinessTypeComponent),
-      },
-      {
-        path: 'payment-mode',
-        loadComponent: () => import('./forms/payment-mode/payment-mode.component').then((m) => m.PaymentModeComponent),
-      },
-      {
-        path: 'business-branch',
-        loadComponent: () => import('./forms/business-branch/business-branch.component').then((m) => m.BusinessBranchComponent),
-      },
-      {
-        path: 'business-category',
-        loadComponent: () => import('./forms/business-category/business-category.component').then((m) => m.BusinessCategoryComponent),
-      },
-    ]
   },
 
   {
@@ -449,3 +362,45 @@ export const routes: Routes = [
     ]
   }
 ];
+
+const publicTopLevelPaths = new Set(['', 'login', 'verify-email']);
+
+const wholesalerRoleGuard = requireRolesGuard(['wholesaler']);
+const buyerRoleGuard = requireRolesGuard(['retailer']);
+const transportRoleGuard = requireRolesGuard(['driver']);
+
+const getRoleGuardByPrefix = (path?: string): CanActivateFn | null => {
+  if (!path) {
+    return null;
+  }
+
+  if (path === 'buyer' || path.startsWith('buyer/')) {
+    return buyerRoleGuard;
+  }
+
+  if (path === 'transport' || path.startsWith('transport/')) {
+    return transportRoleGuard;
+  }
+
+  if (path.startsWith('wholesaler/')) {
+    return wholesalerRoleGuard;
+  }
+
+  return null;
+};
+
+export const routes: Routes = appRoutes.map((route) => {
+  if (publicTopLevelPaths.has(route.path ?? '')) {
+    return route;
+  }
+
+  const roleGuard = getRoleGuardByPrefix(route.path);
+  const existingCanActivate = route.canActivate ?? [];
+
+  return {
+    ...route,
+    canActivate: roleGuard
+      ? [authGuard, roleGuard, ...existingCanActivate]
+      : [authGuard, ...existingCanActivate],
+  };
+});

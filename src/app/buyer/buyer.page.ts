@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -12,11 +12,8 @@ import { RouterModule } from '@angular/router';
   encapsulation: ViewEncapsulation.None,
   imports: [CommonModule, IonicModule, RouterModule, FormsModule ]
 })
-export class BuyerPage implements OnInit {
+export class BuyerPage {
 
   constructor() { }
-
-  ngOnInit() {
-  }
 
 }

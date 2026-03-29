@@ -2019,6 +2019,16 @@
     "LOAD": "वजन",
     "KG": "किलो",
     "CHARGES": "शुल्क",
+    "JOB_ID": "जॉब आईडी",
+    "ORDER_IDS": "ऑर्डर आईडी",
+    "DELIVERY_DATE": "डिलीवरी तिथि",
+    "TOTAL_ORDERS": "कुल ऑर्डर",
+    "DELIVERY_ADDRESS": "डिलीवरी पता",
+    "ORDER_STATUS": "ऑर्डर स्थिति",
+    "FINAL_AMOUNT": "अंतिम राशि",
+    "ITEMS": "आइटम",
+    "NOT_AVAILABLE": "उपलब्ध नहीं",
+    "NO_ORDER_DETAILS": "इस डिलीवरी के लिए ऑर्डर विवरण उपलब्ध नहीं है",
     "RESOLVE_DISPUTE": "विवाद का समाधान करें"
   },
   "ORDER_MODAL": {
@@ -2745,7 +2755,8 @@
     "DELETE_CONFIRMATION_TEXT": "खाता हटाने की पुष्टि के लिए DELETE टाइप करें",
     "ACCOUNT_DELETE_ERROR": "खाता हटाने में विफल। कृपया पुनः प्रयास करें।",
     "CANCEL": "रद्द करें",
-    "OK": "ठीक है"
+    "OK": "ठीक है",
+    "ACCOUNT": "खाता"
   },
   "TRANSPORT_MENU": {
     "MENU": "मेनू",

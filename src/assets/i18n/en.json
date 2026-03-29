@@ -2020,6 +2020,16 @@
     "LOAD": "Load",
     "KG": "kg",
     "CHARGES": "Charges",
+    "JOB_ID": "Job ID",
+    "ORDER_IDS": "Order IDs",
+    "DELIVERY_DATE": "Delivery Date",
+    "TOTAL_ORDERS": "Total Orders",
+    "DELIVERY_ADDRESS": "Delivery Address",
+    "ORDER_STATUS": "Order Status",
+    "FINAL_AMOUNT": "Final Amount",
+    "ITEMS": "Items",
+    "NOT_AVAILABLE": "Not available",
+    "NO_ORDER_DETAILS": "No order details available for this delivery",
     "RESOLVE_DISPUTE": "Resolve Dispute"
   },
   "ORDER_MODAL": {
@@ -2746,7 +2756,8 @@
     "DELETE_CONFIRMATION_TEXT": "Please type DELETE to confirm account deletion",
     "ACCOUNT_DELETE_ERROR": "Failed to delete account. Please try again.",
     "CANCEL": "Cancel",
-    "OK": "OK"
+    "OK": "OK",
+    "ACCOUNT": "Account"
   },
   "TRANSPORT_MENU": {
     "MENU": "Menu",

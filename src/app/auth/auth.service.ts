@@ -196,8 +196,6 @@ export class AuthService {
     this.statesCache = null;
     this.citiesCache.clear();
     this.locationsCache.clear();
-
-    localStorage.clear();
   }
 
   // Updated authentication check methods

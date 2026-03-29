@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, ModalController, ToastController, LoadingController } from '@ionic/angular';
@@ -221,7 +221,7 @@ import { BusinessInfoService } from './business-info.service';
     }
   `]
 })
-export class EmailVerificationModalComponent implements OnInit, OnDestroy {
+export class EmailVerificationModalComponent implements OnDestroy {
   currentStep: 'email' | 'token' | 'success' = 'email';
   emailForm: FormGroup;
   tokenForm: FormGroup;
@@ -246,8 +246,6 @@ export class EmailVerificationModalComponent implements OnInit, OnDestroy {
       token: ['', [Validators.required]],
     });
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.destroy$.next();

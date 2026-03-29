@@ -114,17 +114,6 @@ export class StockInsightsService {
         }
 
         private handleError(error: HttpErrorResponse): Observable<never> {
-                let errorMessage = 'An unknown error occurred';
-
-                if (error.error instanceof ErrorEvent) {
-                        // Client-side or network error
-                        errorMessage = `Network error: ${error.error.message}`;
-                } else {
-                        // Backend error
-                        errorMessage = `Server error: ${error.status} - ${error.message}`;
-                }
-
-                console.error('Stock Insights Service Error:', errorMessage, error);
                 return throwError(() => error);
         }
 

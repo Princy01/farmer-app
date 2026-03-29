@@ -178,8 +178,6 @@ export class StockInsightsComponent implements OnInit {
   }
 
   private handleApiError(error: HttpErrorResponse, customMessage?: string): void {
-    console.error('Stock Insights API Error:', error);
-
     if (error.status === 401) {
       this.showAuthError();
       return;
@@ -329,8 +327,8 @@ export class StockInsightsComponent implements OnInit {
   async handleRefresh(event: any): Promise<void> {
     try {
       await this.initializeData();
-    } catch (error) {
-      console.error('Refresh failed:', error);
+    } catch {
+      return;
     } finally {
       event.target.complete();
     }
