@@ -134,7 +134,8 @@
                 <ion-icon name="navigate-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
                   <span class="spec-label">{{ 'TRANSPORT_REQUESTS.DISTANCE' | translate }}</span>
-                  <span class="spec-value">{{ request.distance }} km</span>
+                  <span class="spec-value" *ngIf="request.distance > 0">{{ request.distance }} km</span>
+                  <span class="spec-value" *ngIf="request.distance <= 0">{{ getRequestLocationSummary(request) }}</span>
                 </div>
               </div>
             </div>
@@ -151,7 +152,8 @@
                 <ion-icon name="calendar-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
                   <span class="spec-label">{{ 'TRANSPORT_REQUESTS.DELIVER_BY' | translate }}</span>
-                  <span class="spec-value">{{ formatDate(request.delivery_date) }}</span>
+                  <span class="spec-value" *ngIf="request.delivery_date">{{ formatDate(request.delivery_date) }}</span>
+                  <span class="spec-value" *ngIf="!request.delivery_date">{{ 'TRANSPORT_REQUESTS.NOT_SPECIFIED' | translate }}</span>
                 </div>
               </div>
             </div>

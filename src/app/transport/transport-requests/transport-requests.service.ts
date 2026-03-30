@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -51,8 +51,10 @@ export interface Order {
 }
 
 export interface TransportRequest {
+  ride_id?: number;
   job_id: number;
   id: string;
+  attempt_no?: number;
   order_ids?: number[];
   // REMOVE these fields:
   // pickup_location: string;
@@ -72,15 +74,22 @@ export interface TransportRequest {
   load_type: string;
   delivery_date_str: string;
   requested_date_str: string;
+  pickup_address?: string;
+  drop_address?: string;
+  city?: string;
+  area?: string;
+  offered_rate?: number;
+  expires_at?: string;
+  source?: 'legacy' | 'realtime';
   orders?: Order[];
 }
 
 export interface AcceptJobRequest {
-  vehicle_id: number;
+  attempt_no: number;
 }
 
 export interface RejectJobRequest {
-  // Empty - rejection handled on frontend only
+  attempt_no: number;
 }
 
 export interface DriverStatusResponse {
@@ -97,6 +106,8 @@ export interface UpdateDriverStatusRequest {
 })
 export class TransportRequestService {
   private apiUrl = environment.apiUrl;
+  private transportRealtimeUrl =
+    (environment as typeof environment & { transportRealtimeUrl?: string }).transportRealtimeUrl || environment.apiUrl;
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
@@ -119,6 +130,13 @@ export class TransportRequestService {
     return this.http.get<any>(url, { headers });
   }
 
+  getRealtimeOpenJobs(): Observable<TransportRequest[]> {
+    const headers = this.getAuthHeaders();
+    return this.http
+      .get<RealtimeOpenJob[]>(`${this.transportRealtimeUrl}/api/driver/jobs/open`, { headers })
+      .pipe(mapOffersToTransportRequests());
+  }
+
   getTransportRequestDetailed(cityIds: number[], branchIds: number[]): Observable<any> {
     const headers = this.getAuthHeaders();
     let url = `${this.apiUrl}/transportation/requests/transport-requests`;
@@ -135,20 +153,28 @@ export class TransportRequestService {
     return this.http.get<any>(url, { headers });
   }
 
-  acceptTransportRequest(jobId: number, vehicleId: number): Observable<{ status: string }> {
+  acceptTransportRequest(rideId: number, attemptNo: number): Observable<{ status: string }> {
     const headers = this.getAuthHeaders();
     const body: AcceptJobRequest = {
-      vehicle_id: vehicleId
+      attempt_no: attemptNo
     };
 
-    return this.http.post<{ status: string }>(`${this.apiUrl}/transportation/driver/jobs/${jobId}/accept`, body, { headers });
+    return this.http.post<{ status: string }>(
+      `${this.transportRealtimeUrl}/api/driver/jobs/${rideId}/accept`,
+      body,
+      { headers }
+    );
   }
 
-  rejectTransportRequest(jobId: number): Observable<{ status: string }> {
+  rejectTransportRequest(rideId: number, attemptNo: number): Observable<{ status: string }> {
     const headers = this.getAuthHeaders();
-    const body: RejectJobRequest = {};
+    const body: RejectJobRequest = { attempt_no: attemptNo };
 
-    return this.http.post<{ status: string }>(`${this.apiUrl}/transportation/driver/jobs/${jobId}/reject`, body, { headers });
+    return this.http.post<{ status: string }>(
+      `${this.transportRealtimeUrl}/api/driver/jobs/${rideId}/reject`,
+      body,
+      { headers }
+    );
   }
 
   getDriverStatus(): Observable<DriverStatusResponse> {
@@ -192,4 +218,51 @@ export class TransportRequestService {
   }
 
 
+}
+
+interface RealtimeOpenJob {
+  ride_id: number;
+  job_id: number;
+  attempt_no: number;
+  pickup_address?: string;
+  drop_address?: string;
+  load_weight_kg?: number;
+  offered_rate?: number;
+  city?: string;
+  area?: string;
+  expires_at?: string;
+  capacity_warning?: boolean;
+}
+
+function mapOffersToTransportRequests() {
+  return (source: Observable<RealtimeOpenJob[]>) =>
+    source.pipe(
+      map((jobs) =>
+        (jobs ?? []).map((job) => ({
+          ride_id: job.ride_id,
+          job_id: job.job_id || job.ride_id,
+          id: `RIDE-${job.ride_id}`,
+          attempt_no: job.attempt_no,
+          weight: job.load_weight_kg ?? 0,
+          distance: 0,
+          delivery_type: 'offer',
+          delivery_date: job.expires_at ?? '',
+          base_price: job.offered_rate ?? 0,
+          urgency: 'standard',
+          requested_date: '',
+          load_type: '',
+          delivery_date_str: job.expires_at ?? '',
+          requested_date_str: '',
+          pickup_address: job.pickup_address ?? '',
+          drop_address: job.drop_address ?? '',
+          city: job.city ?? '',
+          area: job.area ?? '',
+          offered_rate: job.offered_rate ?? 0,
+          expires_at: job.expires_at,
+          source: 'realtime' as const,
+          orders: [],
+          order_ids: [],
+        }))
+      )
+    );
 }

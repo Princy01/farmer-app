@@ -84,6 +84,15 @@ interface BackendOrder {
   }>;
 }
 
+function preferredBranchAddress(
+  branch?: {
+    branch_address?: string;
+  },
+  fallback?: string
+): string {
+  return branch?.branch_address?.trim() || fallback?.trim() || '';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -98,7 +107,7 @@ export class DeliveryService {
         deliveries: (response?.deliveries ?? []).map((delivery) => {
           const normalizedOrders = (delivery.orders ?? []).map((order) => ({
             order_id: order.order_id,
-            delivery_address: order.delivery_address ?? '',
+            delivery_address: preferredBranchAddress(order.dropoff_branch, order.delivery_address),
             order_status: order.order_status ?? '',
             final_amount: order.final_amount ?? 0,
             pickup_branch: {
@@ -129,8 +138,8 @@ export class DeliveryService {
             job_id: String(delivery.job_id),
             order_id: firstOrder?.order_id ?? delivery.order_ids?.[0] ?? 0,
             order_ids: delivery.order_ids ?? [],
-            pickup_address: firstOrder?.pickup_branch?.branch_address ?? '',
-            drop_address: firstOrder?.dropoff_branch?.branch_address ?? '',
+            pickup_address: preferredBranchAddress(firstOrder?.pickup_branch),
+            drop_address: preferredBranchAddress(firstOrder?.dropoff_branch, firstOrder?.delivery_address),
             weight_kg: delivery.weight_kg,
             base_price: delivery.base_price,
             delivery_date: delivery.delivery_date,

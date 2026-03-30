@@ -2,10 +2,27 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+function browserHost(): string {
+  if (typeof window === 'undefined') {
+    return '127.0.0.1';
+  }
+  return window.location.hostname || '127.0.0.1';
+}
+
+function runtimeOverride(key: string, fallback: string): string {
+  if (typeof window === 'undefined') {
+    return fallback;
+  }
+  return window.localStorage.getItem(key)?.trim() || fallback;
+}
+
+const host = browserHost();
+
 export const environment = {
   production: false,
-  apiUrl: 'http://127.0.0.1:8082',
-  translateApiUrl: 'http://127.0.0.1:8000',
+  apiUrl: runtimeOverride('apiUrl', `http://${host}:8080`),
+  transportRealtimeUrl: runtimeOverride('transportRealtimeUrl', `http://${host}:8088`),
+  translateApiUrl: runtimeOverride('translateApiUrl', 'http://127.0.0.1:8000'),
   supportEmail: 'support@farmerapp.com',
   supportPhone: '+91-1234-567-890',
   privacyPolicyUrl: 'https://farmerapp.com/privacy-policy',

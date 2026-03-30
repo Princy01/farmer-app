@@ -40,7 +40,6 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   // Driver configuration
   transporterId: string = 'T001';
-  vehicleId: number = 1;
 
   // Driver Load Constraints
   readonly minLoad: number = 300;
@@ -223,25 +222,11 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
 
     this.isLoadingRequests = true;
-    const preferences = this.locationPreferenceService.getCurrentPreferences();
-
-    // Use the first city if available (backend accepts single city parameter)
-    let cityIds: number[] = [];
-    if (preferences.cities.length > 0) {
-      const cityId = preferences.cities[0];
-      cityIds.push(cityId);
-    }
-
-    let branchIds: number[] = [];
-    if (preferences.branches.length > 0) {
-      branchIds = preferences.branches;
-    }
-
-    this.transportRequestService.getTransportRequestDetailed(cityIds, branchIds)
+    this.transportRequestService.getRealtimeOpenJobs()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.transportRequests = response.delivery_requests || [];
+          this.transportRequests = response || [];
           this.initializeRequestVisibility();
           this.applyFilters();
           this.isLoadingRequests = false;
@@ -325,7 +310,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
             });
             await loadingToast.present();
 
-            const sub = this.transportRequestService.acceptTransportRequest(request.job_id, this.vehicleId)
+            const rideId = request.ride_id ?? request.job_id;
+            const attemptNo = request.attempt_no ?? 1;
+            const sub = this.transportRequestService.acceptTransportRequest(rideId, attemptNo)
               .subscribe({
                 next: () => {
                   this.acceptedRequests.add(request.job_id);
@@ -370,14 +357,25 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           text: this.translate.instant('TRANSPORT_REQUESTS.REJECT'),
           role: 'destructive',
           handler: async () => {
-            this.rejectedRequests.add(request.job_id);
-            this.requestVisibilityMap.delete(request.job_id);
-            this.saveRejectedRequest(request.job_id);
-            this.applyFilters();
-            await this.showToast(
-              this.translate.instant('TRANSPORT_REQUESTS.REJECTED_SUCCESS'),
-              'medium'
-            );
+            const rideId = request.ride_id ?? request.job_id;
+            const attemptNo = request.attempt_no ?? 1;
+            const sub = this.transportRequestService.rejectTransportRequest(rideId, attemptNo)
+              .subscribe({
+                next: async () => {
+                  this.rejectedRequests.add(request.job_id);
+                  this.requestVisibilityMap.delete(request.job_id);
+                  this.saveRejectedRequest(request.job_id);
+                  this.applyFilters();
+                  await this.showToast(
+                    this.translate.instant('TRANSPORT_REQUESTS.REJECTED_SUCCESS'),
+                    'medium'
+                  );
+                },
+                error: async () => {
+                  await this.showToast(this.translate.instant('TRANSPORT_REQUESTS.REJECT_FAILED'), 'danger');
+                }
+              });
+            this.subscription.add(sub);
           },
         },
       ]
@@ -660,6 +658,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   // Get unique pickup locations from all order items
   getPickupLocations(request: TransportRequest): string {
+    if (request.pickup_address?.trim()) {
+      return request.pickup_address;
+    }
     if (!request.orders || request.orders.length === 0) {
       return this.translate.instant('TRANSPORT_REQUESTS.NO_PICKUP_INFO');
     }
@@ -681,6 +682,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   // Get dropoff location from retailer branch or delivery address
   getDropoffLocation(request: TransportRequest): string {
+    if (request.drop_address?.trim()) {
+      return request.drop_address;
+    }
     if (!request.orders || request.orders.length === 0) {
       return this.translate.instant('TRANSPORT_REQUESTS.NO_DELIVERY_INFO');
     }
@@ -697,5 +701,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     // Otherwise use delivery_address
     return firstOrder.delivery_address || this.translate.instant('TRANSPORT_REQUESTS.ADDRESS_NOT_AVAILABLE');
+  }
+
+  getRequestLocationSummary(request: TransportRequest): string {
+    const parts = [request.city, request.area].filter((value) => !!value && value.trim().length > 0);
+    return parts.join(' / ') || this.translate.instant('TRANSPORT_REQUESTS.NOT_SPECIFIED');
   }
 }
