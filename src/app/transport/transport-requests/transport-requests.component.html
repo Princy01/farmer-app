@@ -1,4 +1,42 @@
 <ion-content class="transport-requests-content">
+  <!-- Connection Status Indicator -->
+  <div class="connection-status-bar" [ngClass]="{'connecting': isReconnecting, 'connected': wsConnected && !isReconnecting}">
+    <ion-badge [color]="wsConnected && !isReconnecting ? 'success' : 'warning'" class="connection-badge">
+      <ion-icon [name]="wsConnected && !isReconnecting ? 'wifi' : 'wifi-outline'" slot="start"></ion-icon>
+      {{ wsConnectionMessage }}
+    </ion-badge>
+  </div>
+
+  <!-- Cooldown Warning -->
+  <div class="status-warning" *ngIf="isUnderCooldown">
+    <ion-card color="warning">
+      <ion-card-content>
+        <div class="warning-content">
+          <ion-icon name="timer-outline" class="warning-icon"></ion-icon>
+          <div class="warning-text">
+            <p class="warning-title">{{ 'TRANSPORT_REQUESTS.COOLDOWN_ACTIVE' | translate }}</p>
+            <p class="warning-desc">{{ 'TRANSPORT_REQUESTS.COOLDOWN_MESSAGE' | translate: {minutes: getRemainingCooldownMinutes()} }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Availability Lock Warning -->
+  <div class="status-warning" *ngIf="isAvailabilityLocked">
+    <ion-card color="danger">
+      <ion-card-content>
+        <div class="warning-content">
+          <ion-icon name="lock-closed-outline" class="warning-icon"></ion-icon>
+          <div class="warning-text">
+            <p class="warning-title">{{ 'TRANSPORT_REQUESTS.LOCKED_TITLE' | translate }}</p>
+            <p class="warning-desc">{{ 'TRANSPORT_REQUESTS.LOCKED_MESSAGE' | translate }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
   <!-- Driver Availability Toggle -->
   <div class="availability-header">
     <div class="availability-container">
@@ -74,7 +112,20 @@
       <ion-badge color="primary" class="count-badge">{{pendingDeliveries.length}}</ion-badge>
     </div>
 
-    <div class="empty-state" *ngIf="pendingDeliveries.length === 0">
+    <!-- Loading Skeleton for Initial Offers -->
+    <div class="loading-skeleton" *ngIf="isLoadingRequests">
+      <div class="skeleton-card" *ngFor="let i of [1, 2, 3]">
+        <ion-skeleton-text animated [ngStyle]="{'width': '60%', 'height': '20px', 'margin-bottom': '10px'}"></ion-skeleton-text>
+        <ion-skeleton-text animated [ngStyle]="{'width': '100%', 'height': '15px', 'margin-bottom': '8px', 'margin-top': '8px'}"></ion-skeleton-text>
+        <ion-skeleton-text animated [ngStyle]="{'width': '80%', 'height': '15px', 'margin-bottom': '8px'}"></ion-skeleton-text>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <ion-skeleton-text animated [ngStyle]="{'width': '45%', 'height': '35px', 'border-radius': '4px'}"></ion-skeleton-text>
+          <ion-skeleton-text animated [ngStyle]="{'width': '45%', 'height': '35px', 'border-radius': '4px'}"></ion-skeleton-text>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="pendingDeliveries.length === 0 && !isLoadingRequests">
       <ion-icon name="car-outline" class="empty-icon"></ion-icon>
       <h3>{{ 'TRANSPORT_REQUESTS.NO_REQUESTS_AVAILABLE' | translate }}</h3>
       <p>{{ 'TRANSPORT_REQUESTS.NO_REQUESTS_MESSAGE' | translate }}</p>
@@ -91,9 +142,9 @@
           <div class="order-info">
             <h3 class="order-id">{{ 'TRANSPORT_REQUESTS.JOB_ID' | translate }}{{ request.job_id }}</h3>
             <div class="header-badges">
-              <ion-chip class="urgency-chip" [color]="getUrgencyColor(request.urgency)">
-                <ion-icon [name]="getUrgencyIcon(request.urgency)" slot="start"></ion-icon>
-                {{ request.urgency }}
+              <ion-chip class="urgency-chip" [color]="getUrgencyColor(request)">
+                <ion-icon [name]="getUrgencyIcon(request)" slot="start"></ion-icon>
+                {{ getUrgency(request) }}
               </ion-chip>
             </div>
           </div>
@@ -107,7 +158,7 @@
               <ion-icon name="location-outline" class="location-icon pickup-icon"></ion-icon>
               <div class="location-info">
                 <span class="location-label">{{ 'TRANSPORT_REQUESTS.PICKUP' | translate }}</span>
-                <p class="location-address">{{ getPickupLocations(request) }}</p>
+                <p class="location-address">{{ request.pickup_address }}</p>
               </div>
             </div>
 
@@ -115,7 +166,7 @@
               <ion-icon name="flag-outline" class="location-icon delivery-icon"></ion-icon>
               <div class="location-info">
                 <span class="location-label">{{ 'TRANSPORT_REQUESTS.DELIVERY' | translate }}</span>
-                <p class="location-address">{{ getDropoffLocation(request) }}</p>
+                <p class="location-address">{{ request.drop_address }}</p>
               </div>
             </div>
           </div>
@@ -127,33 +178,25 @@
                 <ion-icon name="cube-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
                   <span class="spec-label">{{ 'TRANSPORT_REQUESTS.WEIGHT' | translate }}</span>
-                  <span class="spec-value">{{ request.weight }} kg</span>
+                  <span class="spec-value">{{ request.load_weight_kg }} kg</span>
                 </div>
               </div>
               <div class="spec-item">
                 <ion-icon name="navigate-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
-                  <span class="spec-label">{{ 'TRANSPORT_REQUESTS.DISTANCE' | translate }}</span>
-                  <span class="spec-value" *ngIf="request.distance > 0">{{ request.distance }} km</span>
-                  <span class="spec-value" *ngIf="request.distance <= 0">{{ getRequestLocationSummary(request) }}</span>
+                  <span class="spec-label">{{ 'TRANSPORT_REQUESTS.AREA' | translate }}</span>
+                  <span class="spec-value">{{ request.city }}, {{ request.area }}</span>
                 </div>
               </div>
             </div>
 
             <div class="spec-row">
               <div class="spec-item">
-                <ion-icon name="pricetag-outline" class="spec-icon"></ion-icon>
-                <div class="spec-info">
-                  <span class="spec-label">{{ 'TRANSPORT_REQUESTS.TYPE' | translate }}</span>
-                  <span class="spec-value">{{ request.delivery_type }}</span>
-                </div>
-              </div>
-              <div class="spec-item">
                 <ion-icon name="calendar-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
-                  <span class="spec-label">{{ 'TRANSPORT_REQUESTS.DELIVER_BY' | translate }}</span>
-                  <span class="spec-value" *ngIf="request.delivery_date">{{ formatDate(request.delivery_date) }}</span>
-                  <span class="spec-value" *ngIf="!request.delivery_date">{{ 'TRANSPORT_REQUESTS.NOT_SPECIFIED' | translate }}</span>
+                  <span class="spec-label">{{ 'TRANSPORT_REQUESTS.EXPIRES_AT' | translate }}</span>
+                  <span class="spec-value" *ngIf="request.expires_at">{{ formatDate(request.expires_at) }}</span>
+                  <span class="spec-value" *ngIf="!request.expires_at">{{ 'TRANSPORT_REQUESTS.NOT_SPECIFIED' | translate }}</span>
                 </div>
               </div>
             </div>
@@ -164,7 +207,7 @@
                 <ion-icon name="cart-outline" class="spec-icon"></ion-icon>
                 <div class="spec-info">
                   <span class="spec-label">{{ 'TRANSPORT_REQUESTS.ORDERS' | translate }}</span>
-                  <span class="spec-value">{{ request.orders!.length }}</span>
+                  <span class="spec-value">{{ getTotalItemCount(request) }}</span>
                 </div>
               </div>
               <div class="spec-item">
@@ -180,43 +223,35 @@
           <!-- Price Section -->
           <div class="price-section">
             <div class="price-item">
-              <span class="price-label">{{ 'TRANSPORT_REQUESTS.BASE_PRICE' | translate }}</span>
-              <span class="price-amount">₹{{ request.base_price }}</span>
-            </div>
-            <div class="price-item" *ngIf="hasOrders(request)">
-              <span class="price-label">{{ 'TRANSPORT_REQUESTS.ORDER_VALUE' | translate }}</span>
-              <span class="price-amount order-value">₹{{ getTotalOrderValue(request).toFixed(2) }}</span>
+              <span class="price-label">{{ 'TRANSPORT_REQUESTS.OFFERED_RATE' | translate }}</span>
+              <span class="price-amount">₹{{ request.offered_rate }}</span>
             </div>
           </div>
 
-          <!-- Compact Order Preview Button -->
-          <div class="order-preview-compact" *ngIf="hasOrders(request) && request.orders!.length > 0">
-            <ion-button fill="clear" size="small" class="view-orders-button" (click)="openOrderDetailsModal(request)">
-              <ion-icon name="list-outline" slot="start"></ion-icon>
-              {{ 'TRANSPORT_REQUESTS.VIEW_ORDER_ITEMS' | translate }} ({{ request.orders!.length }})
-            </ion-button>
-          </div>
+
         </div>
 
         <!-- Card Footer -->
         <div class="card-footer">
-          <div class="action-buttons" *ngIf="!isRequestAccepted(request.job_id) && !isRequestRejected(request.job_id)">
-            <ion-button class="accept-button" (click)="acceptOrder(request)" [disabled]="isLoadingRequests">
-              <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+          <div class="action-buttons" *ngIf="!isRequestAccepted(request.ride_id, request.attempt_no) && !isRequestRejected(request.ride_id, request.attempt_no)">
+            <ion-button class="accept-button" (click)="acceptOrder(request)" [disabled]="isLoadingRequests || isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)] || isUnderCooldown || isAvailabilityLocked">
+              <ion-spinner *ngIf="isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)]" name="crescent"></ion-spinner>
+              <ion-icon *ngIf="!isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)]" name="checkmark-circle-outline" slot="start"></ion-icon>
               {{ 'TRANSPORT_REQUESTS.ACCEPT' | translate }}
             </ion-button>
-            <ion-button class="reject-button" (click)="rejectOrder(request)" [disabled]="isLoadingRequests">
-              <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+            <ion-button class="reject-button" (click)="rejectOrder(request)" [disabled]="isLoadingRequests || isRejectingOffer[(request.ride_id + '-' + request.attempt_no)] || isUnderCooldown">
+              <ion-spinner *ngIf="isRejectingOffer[(request.ride_id + '-' + request.attempt_no)]" name="crescent"></ion-spinner>
+              <ion-icon *ngIf="!isRejectingOffer[(request.ride_id + '-' + request.attempt_no)]" name="close-circle-outline" slot="start"></ion-icon>
               {{ 'TRANSPORT_REQUESTS.REJECT' | translate }}
             </ion-button>
           </div>
 
-          <ion-button expand="block" class="accepted-button" *ngIf="isRequestAccepted(request.job_id)" disabled>
+          <ion-button expand="block" class="accepted-button" *ngIf="isRequestAccepted(request.ride_id, request.attempt_no)" disabled>
             <ion-icon name="checkmark-circle" slot="start"></ion-icon>
             {{ 'TRANSPORT_REQUESTS.ACCEPTED' | translate }}
           </ion-button>
 
-          <ion-button expand="block" class="rejected-button" *ngIf="isRequestRejected(request.job_id)" disabled>
+          <ion-button expand="block" class="rejected-button" *ngIf="isRequestRejected(request.ride_id, request.attempt_no)" disabled>
             <ion-icon name="close-circle" slot="start"></ion-icon>
             {{ 'TRANSPORT_REQUESTS.REJECTED' | translate }}
           </ion-button>

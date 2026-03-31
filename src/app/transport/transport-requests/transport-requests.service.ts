@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -50,38 +50,29 @@ export interface Order {
   items: OrderItem[];
 }
 
-export interface TransportRequest {
-  ride_id?: number;
+export interface DriverJobOffer {
+  ride_id: number;
   job_id: number;
-  id: string;
-  attempt_no?: number;
-  order_ids?: number[];
-  // REMOVE these fields:
-  // pickup_location: string;
-  // dropoff_location: string;
-  // pickup_city_id?: number;
-  // dropoff_city_id?: number;
-  // pickup_branch_id?: number;
-  // dropoff_branch_id?: number;
-
-  weight: number;
-  distance: number;
-  delivery_type: string;
-  delivery_date: string;
-  base_price: number;
-  urgency: string;
-  requested_date: string;
-  load_type: string;
-  delivery_date_str: string;
-  requested_date_str: string;
-  pickup_address?: string;
-  drop_address?: string;
-  city?: string;
-  area?: string;
-  offered_rate?: number;
+  attempt_no: number;
+  driver_id: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
   expires_at?: string;
-  source?: 'legacy' | 'realtime';
-  orders?: Order[];
+  accepted_at?: string;
+  rejected_at?: string;
+  removed_at?: string;
+  pickup_address: string;
+  drop_address: string;
+  load_weight_kg: number;
+  offered_rate: number;
+  city: string;
+  area: string;
+  capacity_warning: boolean;
+  authorized_capacity_kg?: number;
+  current_load_kg?: number;
+  projected_load_kg?: number;
+  overload_kg?: number;
 }
 
 export interface AcceptJobRequest {
@@ -106,8 +97,7 @@ export interface UpdateDriverStatusRequest {
 })
 export class TransportRequestService {
   private apiUrl = environment.apiUrl;
-  private transportRealtimeUrl =
-    (environment as typeof environment & { transportRealtimeUrl?: string }).transportRealtimeUrl || environment.apiUrl;
+  private realtimeApiUrl = environment.realtimeApiUrl;
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
@@ -119,62 +109,40 @@ export class TransportRequestService {
     });
   }
 
-  getTransportRequests(city?: string): Observable<any> {
+  getOpenJobs(): Observable<DriverJobOffer[]> {
     const headers = this.getAuthHeaders();
-    let url = `${this.apiUrl}/transportation/driver/jobs/open`;
+    const url = `${this.realtimeApiUrl}/api/driver/jobs/open`;
+    return this.http.get<DriverJobOffer[]>(url, { headers });
+  }
 
-    if (city) {
-      url += `?city=${encodeURIComponent(city)}`;
+  getTransportRequestDetailed(cityIds: number[], branchIds: number[]): Observable<DriverJobOffer[]> {
+    const headers = this.getAuthHeaders();
+    let params = new URLSearchParams();
+
+    if (cityIds && cityIds.length > 0) {
+      params.append('city_ids', cityIds.join(','));
     }
 
-    return this.http.get<any>(url, { headers });
-  }
-
-  getRealtimeOpenJobs(): Observable<TransportRequest[]> {
-    const headers = this.getAuthHeaders();
-    return this.http
-      .get<RealtimeOpenJob[]>(`${this.transportRealtimeUrl}/api/driver/jobs/open`, { headers })
-      .pipe(mapOffersToTransportRequests());
-  }
-
-  getTransportRequestDetailed(cityIds: number[], branchIds: number[]): Observable<any> {
-    const headers = this.getAuthHeaders();
-    let url = `${this.apiUrl}/transportation/requests/transport-requests`;
-    if (cityIds.length > 0) {
-      const cityParams = cityIds.map(id => `city_ids=${id}`).join('&');
-      url += `?${cityParams}`;
+    if (branchIds && branchIds.length > 0) {
+      params.append('branch_ids', branchIds.join(','));
     }
 
-    if (branchIds.length > 0) {
-      const branchParams = branchIds.map(id => `branch_ids=${id}`).join('&');
-      url += cityIds.length > 0 ? `&${branchParams}` : `?${branchParams}`;
-    }
-
-    return this.http.get<any>(url, { headers });
+    const url = `${this.realtimeApiUrl}/api/driver/jobs/open${params.toString() ? '?' + params.toString() : ''}`;
+    return this.http.get<DriverJobOffer[]>(url, { headers });
   }
 
-  acceptTransportRequest(rideId: number, attemptNo: number): Observable<{ status: string }> {
+  acceptJob(rideId: number, attemptNo: number): Observable<any> {
     const headers = this.getAuthHeaders();
-    const body: AcceptJobRequest = {
-      attempt_no: attemptNo
-    };
-
-    return this.http.post<{ status: string }>(
-      `${this.transportRealtimeUrl}/api/driver/jobs/${rideId}/accept`,
-      body,
-      { headers }
-    );
+    const body: AcceptJobRequest = { attempt_no: attemptNo };
+    const url = `${this.realtimeApiUrl}/api/driver/jobs/${rideId}/accept`;
+    return this.http.post<any>(url, body, { headers });
   }
 
-  rejectTransportRequest(rideId: number, attemptNo: number): Observable<{ status: string }> {
+  rejectJob(rideId: number, attemptNo: number): Observable<any> {
     const headers = this.getAuthHeaders();
     const body: RejectJobRequest = { attempt_no: attemptNo };
-
-    return this.http.post<{ status: string }>(
-      `${this.transportRealtimeUrl}/api/driver/jobs/${rideId}/reject`,
-      body,
-      { headers }
-    );
+    const url = `${this.realtimeApiUrl}/api/driver/jobs/${rideId}/reject`;
+    return this.http.post<any>(url, body, { headers });
   }
 
   getDriverStatus(): Observable<DriverStatusResponse> {
@@ -192,77 +160,19 @@ export class TransportRequestService {
   }
 
   // Utility methods for working with the new data structure
-  getTotalOrderValue(request: TransportRequest): number {
-    if (!request.orders || request.orders.length === 0) return 0;
-    return request.orders.reduce((total, order) => total + order.final_amount, 0);
+  getTotalOrderValue(request: DriverJobOffer): number {
+    return request.offered_rate;
   }
 
-  getTotalItemCount(request: TransportRequest): number {
-    if (!request.orders || request.orders.length === 0) return 0;
-    return request.orders.reduce((total, order) =>
-      total + order.items.reduce((itemTotal, item) => itemTotal + item.quantity, 0), 0
-    );
+  getTotalItemCount(request: DriverJobOffer): number {
+    // Not available in DriverJobOffer, return 0
+    return 0;
   }
 
-  getUniqueProductCategories(request: TransportRequest): Set<number> {
-    const categories = new Set<number>();
-    if (!request.orders) return categories;
-
-    request.orders.forEach(order => {
-      order.items.forEach(item => {
-        categories.add(item.product.category_id);
-      });
-    });
-
-    return categories;
+  getUniqueProductCategories(request: DriverJobOffer): Set<number> {
+    // Not available
+    return new Set<number>();
   }
 
 
-}
-
-interface RealtimeOpenJob {
-  ride_id: number;
-  job_id: number;
-  attempt_no: number;
-  pickup_address?: string;
-  drop_address?: string;
-  load_weight_kg?: number;
-  offered_rate?: number;
-  city?: string;
-  area?: string;
-  expires_at?: string;
-  capacity_warning?: boolean;
-}
-
-function mapOffersToTransportRequests() {
-  return (source: Observable<RealtimeOpenJob[]>) =>
-    source.pipe(
-      map((jobs) =>
-        (jobs ?? []).map((job) => ({
-          ride_id: job.ride_id,
-          job_id: job.job_id || job.ride_id,
-          id: `RIDE-${job.ride_id}`,
-          attempt_no: job.attempt_no,
-          weight: job.load_weight_kg ?? 0,
-          distance: 0,
-          delivery_type: 'offer',
-          delivery_date: job.expires_at ?? '',
-          base_price: job.offered_rate ?? 0,
-          urgency: 'standard',
-          requested_date: '',
-          load_type: '',
-          delivery_date_str: job.expires_at ?? '',
-          requested_date_str: '',
-          pickup_address: job.pickup_address ?? '',
-          drop_address: job.drop_address ?? '',
-          city: job.city ?? '',
-          area: job.area ?? '',
-          offered_rate: job.offered_rate ?? 0,
-          expires_at: job.expires_at,
-          source: 'realtime' as const,
-          orders: [],
-          order_ids: [],
-        }))
-      )
-    );
 }

@@ -13,13 +13,14 @@ import {
 import { FilterModalComponent } from '../filter-modal/filter-modal.component';
 import { SortModalComponent } from '../sort-modal/sort-modal.component';
 import { LocationSelectionModalComponent } from '../location-selection/location-selection.component';
-import { OrderDetailsModalComponent } from './order-model.component';
 import { formatDate } from '@angular/common';
-import { TransportRequestService, TransportRequest } from './transport-requests.service';
+import { TransportRequestService, DriverJobOffer } from './transport-requests.service';
+import { TransportRealtimeService } from './transport-realtime.service';
 import { LocationPreferenceService } from '../location-selection/location-selection.service';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-transport-requests',
@@ -30,20 +31,19 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   encapsulation: ViewEncapsulation.None,
 })
 export class TransportRequestsComponent implements OnInit, OnDestroy {
-  transportRequests: TransportRequest[] = [];
-  filteredRequests: TransportRequest[] = [];
+  transportRequests: DriverJobOffer[] = [];
+  filteredRequests: DriverJobOffer[] = [];
   private destroy$ = new Subject<void>();
   private subscription = new Subscription();
-  private pollInterval: NodeJS.Timeout | undefined;
-  private visibilityCheckInterval: NodeJS.Timeout | undefined;
-  private citiesCache: Map<number, string> = new Map(); // Cache city ID to name mapping
+  private expiryTimers = new Map<number, NodeJS.Timeout>();
 
-  // Driver configuration
-  transporterId: string = 'T001';
+  // Driver configuration (will be loaded dynamically)
+  transporterId: string = '';
+  vehicleId: number = 0;
 
-  // Driver Load Constraints
-  readonly minLoad: number = 300;
-  readonly maxLoad: number = 1000;
+  // Driver Load Constraints (will be loaded from API)
+  minLoad: number = 0;
+  maxLoad: number = 0;
   currentLoad: number = 0;
 
   // Sorting & Filtering States
@@ -56,18 +56,27 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   isTogglingAvailability = false;
 
   // Request states tracking
-  acceptedRequests = new Set<number>();
-  rejectedRequests = new Set<number>();
+  acceptedRequests = new Set<string>(); // ride_id-attempt_no
+  rejectedRequests = new Set<string>();
 
-  // Transit/Waiting time tracking
-  private requestVisibilityMap = new Map<number, {
-    isVisible: boolean;
-    showCount: number;
-    lastToggleTime: number;
-  }>();
-  private readonly TRANSIT_TIME_MS = 60 * 1000; // 1 minute
-  private readonly WAITING_TIME_MS = 3 * 60 * 1000; // 3 minutes
-  private readonly MAX_SHOW_COUNT = 3; // Show 3 times maximum
+  // Error recovery & retry
+  failedOperations = new Map<string, { type: string; error: string; timestamp: number }>(); // operation_id -> error info
+  isRetrying = false;
+  retryingOperationId: string | null = null;
+
+  // Loading states for different operations
+  isLoadingOffers = false;
+  isAcceptingOffer: { [key: string]: boolean } = {};
+  isRejectingOffer: { [key: string]: boolean } = {};
+  isCancellingOffer: { [key: string]: boolean } = {};
+
+  // Cooldown handling (6-hour cooldown after cancel)
+  driverCooldownUntil: Date | null = null;
+  isUnderCooldown = false;
+
+  // Availability lock handling (dispute/admin lock)
+  isAvailabilityLocked = false;
+  lockedUntil: Date | null = null;
 
   // Location preferences
   hasLocationPreferences = false;
@@ -78,6 +87,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   isLoadingStatus: boolean = true;
   driverStatus: string = 'inactive';
   isLoadingRequests = false;
+  wsConnected = false;
+  wsConnectionMessage: string = 'Connecting...';
+  isReconnecting = false;
 
   private modalController = inject(ModalController);
 
@@ -85,8 +97,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
     private transportRequestService: TransportRequestService,
+    private transportRealtimeService: TransportRealtimeService,
     private locationPreferenceService: LocationPreferenceService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private authService: AuthService
   ) {
     addIcons({
       chevronForwardOutline, funnelOutline, swapVerticalOutline, flashOutline,
@@ -98,19 +112,68 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.loadDriverConfiguration();
     this.loadRejectedRequests();
-    this.loadCityNames(); // Load city names for mapping
     this.setupLocationPreferences();
     this.loadDriverStatus();
-    this.loadTransportRequests();
-    this.startPolling();
+    this.connectRealtime();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
     this.subscription.unsubscribe();
-    this.stopPolling();
+    this.transportRealtimeService.disconnect();
+    this.clearExpiryTimers();
+    this.failedOperations.clear();
+  }
+
+  private startCooldownTimer() {
+    if (!this.driverCooldownUntil) return;
+
+    const checkCooldown = () => {
+      if (this.driverCooldownUntil && new Date() >= this.driverCooldownUntil) {
+        this.isUnderCooldown = false;
+        this.driverCooldownUntil = null;
+        this.showToast(
+          this.translate.instant('TRANSPORT_REQUESTS.COOLDOWN_EXPIRED'),
+          'success'
+        );
+      } else {
+        setTimeout(checkCooldown, 30000); // Check every 30 seconds
+      }
+    };
+    checkCooldown();
+  }
+
+  getRemainingCooldownMinutes(): number {
+    if (!this.driverCooldownUntil) return 0;
+    const remaining = this.driverCooldownUntil.getTime() - Date.now();
+    return Math.ceil(remaining / 60000);
+  }
+
+  private loadDriverConfiguration() {
+    try {
+      // Fetch driver ID from AuthService
+      const userId = this.authService.getUserId();
+      this.transporterId = userId ? String(userId) : 'UNKNOWN_DRIVER';
+
+      // Set default vehicle constraints
+      // Note: Actual vehicle config may come from dedicated driver service if needed
+      this.vehicleId = 0;
+      this.minLoad = 0;
+      this.maxLoad = 1000;
+
+      // Reset current load on initialization
+      this.currentLoad = 0;
+    } catch (error) {
+      // Fall back to defaults if fetching fails
+      this.transporterId = '';
+      this.vehicleId = 0;
+      this.minLoad = 0;
+      this.maxLoad = 1000;
+      this.currentLoad = 0;
+    }
   }
 
   private setupLocationPreferences() {
@@ -119,7 +182,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       .subscribe(preferences => {
         this.hasLocationPreferences = this.locationPreferenceService.hasPreferences();
         this.updateLocationSummary();
-        if (this.hasLocationPreferences) {
+        if (this.isDriverAvailable && this.hasLocationPreferences && this.wsConnected) {
           this.loadTransportRequests();
         }
       });
@@ -140,25 +203,138 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private startPolling() {
-    // Poll for new requests every 5 seconds
-    this.pollInterval = setInterval(() => {
-      this.loadTransportRequests();
-    }, 5000);
+  private connectRealtime() {
+    // Connect to WebSocket
+    this.transportRealtimeService.connect();
+    this.wsConnectionMessage = 'Connecting...';
+    this.isReconnecting = true;
 
-    // Check request visibility states every second
-    this.visibilityCheckInterval = setInterval(() => {
-      this.updateRequestVisibility();
-    }, 1000);
+    // Listen for connection status changes
+    this.subscription.add(
+      this.transportRealtimeService.connectionStatus$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(isConnected => {
+          this.wsConnected = isConnected;
+
+          if (isConnected) {
+            this.wsConnectionMessage = 'Connected';
+            this.isReconnecting = false;
+
+            // Load offers when connected
+            if (this.isDriverAvailable && this.hasLocationPreferences) {
+              this.loadTransportRequests();
+            }
+          } else {
+            this.wsConnectionMessage = 'Reconnecting...';
+            this.isReconnecting = true;
+          }
+        })
+    );
+
+    // Listen for all offers (initial load or updates)
+    this.subscription.add(
+      this.transportRealtimeService.offers$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(offers => {
+          this.transportRequests = offers;
+          this.applyFilters();
+          this.setupExpiryTimers();
+        })
+    );
+
+    // Listen for new offers
+    this.subscription.add(
+      this.transportRealtimeService.newOffer$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(offer => {
+          this.showToast(
+            this.translate.instant('TRANSPORT_REQUESTS.NEW_OFFER_AVAILABLE'),
+            'success'
+          );
+        })
+    );
+
+    // Listen for removed offers (accepted, expired, or rejected)
+    this.subscription.add(
+      this.transportRealtimeService.offerRemoved$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(data => {
+          this.removeExpiredOffer(data.ride_id, data.attempt_no);
+        })
+    );
+
+    // Listen for errors
+    this.subscription.add(
+      this.transportRealtimeService.error$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(error => {
+          this.showToast(error, 'danger');
+        })
+    );
+
+    // Listen for driver availability locks (dispute/admin)
+    this.subscription.add(
+      this.transportRealtimeService.availabilityLocked$
+        ?.pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          this.isAvailabilityLocked = true;
+          this.transportRequests = []; // Clear all offers
+          this.filteredRequests = [];
+          this.showToast(
+            this.translate.instant('TRANSPORT_REQUESTS.AVAILABILITY_LOCKED'),
+            'danger'
+          );
+        }) || new Subject()
+    );
+
+    // Listen for cancel cooldown
+    this.subscription.add(
+      this.transportRealtimeService.cancelCooldown$
+        ?.pipe(takeUntil(this.destroy$))
+        .subscribe((cooldownUntil: Date) => {
+          this.driverCooldownUntil = cooldownUntil;
+          this.isUnderCooldown = true;
+          this.startCooldownTimer();
+          this.showToast(
+            this.translate.instant('TRANSPORT_REQUESTS.UNDER_COOLDOWN', {
+              hours: 6
+            }),
+            'warning'
+          );
+        }) || new Subject()
+    );
   }
 
-  private stopPolling() {
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-    }
-    if (this.visibilityCheckInterval) {
-      clearInterval(this.visibilityCheckInterval);
-    }
+  private setupExpiryTimers() {
+    this.clearExpiryTimers();
+    this.transportRequests.forEach(request => {
+      if (request.expires_at) {
+        const expiryTime = new Date(request.expires_at).getTime();
+        const now = Date.now();
+        const delay = expiryTime - now;
+        if (delay > 0) {
+          const timer = setTimeout(() => {
+            this.removeExpiredOffer(request.ride_id, request.attempt_no);
+          }, delay);
+          this.expiryTimers.set(request.ride_id, timer);
+        } else {
+          // Already expired
+          this.removeExpiredOffer(request.ride_id, request.attempt_no);
+        }
+      }
+    });
+  }
+
+  private clearExpiryTimers() {
+    this.expiryTimers.forEach(timer => clearTimeout(timer));
+    this.expiryTimers.clear();
+  }
+
+  private removeExpiredOffer(rideId: number, attemptNo: number) {
+    this.transportRequests = this.transportRequests.filter(
+      r => !(r.ride_id === rideId && r.attempt_no === attemptNo)
+    );
+    this.applyFilters();
   }
 
   private loadDriverStatus() {
@@ -170,15 +346,23 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           this.driverStatus = response.status;
           this.isDriverAvailable = response.status === 'active';
           this.isLoadingStatus = false;
+          if (this.isDriverAvailable && this.hasLocationPreferences && this.wsConnected) {
+            this.loadTransportRequests();
+          }
         },
         error: (error) => {
           this.isLoadingStatus = false;
-          this.showToast(this.translate.instant('TRANSPORT_REQUESTS.STATUS_LOAD_FAILED'), 'danger');
+          this.showToast(
+            this.translate.instant('TRANSPORT_REQUESTS.STATUS_LOAD_FAILED'),
+            'danger'
+          );
         }
       });
   }
 
-  toggleDriverAvailability(event: { target: HTMLIonToggleElement; detail: { checked: boolean } }) {
+  toggleDriverAvailability(
+    event: { target: HTMLIonToggleElement; detail: { checked: boolean } }
+  ) {
     const newStatus = event.detail.checked ? 'active' : 'inactive';
     this.isTogglingAvailability = true;
     (event.target as any).disabled = true;
@@ -198,9 +382,11 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
           this.showToast(this.translate.instant(messageKey), 'success');
 
-          // Reload requests when becoming available
-          if (this.isDriverAvailable) {
+          if (this.isDriverAvailable && this.hasLocationPreferences) {
             this.loadTransportRequests();
+          } else if (!this.isDriverAvailable) {
+            this.transportRequests = [];
+            this.filteredRequests = [];
           }
         },
         error: (error) => {
@@ -208,7 +394,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           event.target.disabled = false;
           // Revert toggle on error
           event.target.checked = !event.detail.checked;
-          this.showToast(this.translate.instant('TRANSPORT_REQUESTS.STATUS_UPDATE_FAILED'), 'danger');
+          this.showToast(
+            this.translate.instant('TRANSPORT_REQUESTS.STATUS_UPDATE_FAILED'),
+            'danger'
+          );
         }
       });
   }
@@ -222,18 +411,32 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
 
     this.isLoadingRequests = true;
-    this.transportRequestService.getRealtimeOpenJobs()
+    const preferences = this.locationPreferenceService.getCurrentPreferences();
+
+    let cityIds: number[] = [];
+    if (preferences.cities.length > 0) {
+      cityIds = preferences.cities;
+    }
+
+    let branchIds: number[] = [];
+    if (preferences.branches.length > 0) {
+      branchIds = preferences.branches;
+    }
+
+    this.transportRequestService.getTransportRequestDetailed(cityIds, branchIds)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           this.transportRequests = response || [];
-          this.initializeRequestVisibility();
           this.applyFilters();
           this.isLoadingRequests = false;
         },
         error: (error) => {
           this.isLoadingRequests = false;
-          this.showToast(this.translate.instant('TRANSPORT_REQUESTS.LOAD_FAILED'), 'danger');
+          this.showToast(
+            this.translate.instant('TRANSPORT_REQUESTS.LOAD_FAILED'),
+            'danger'
+          );
         }
       });
   }
@@ -247,53 +450,49 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     const { data } = await modal.onDidDismiss();
     if (data) {
-      this.showToast(this.translate.instant('TRANSPORT_REQUESTS.PREFERENCES_UPDATED'), 'success');
+      this.showToast(
+        this.translate.instant('TRANSPORT_REQUESTS.PREFERENCES_UPDATED'),
+        'success'
+      );
     }
   }
 
-  async openOrderDetailsModal(request: TransportRequest) {
-    const modal = await this.modalController.create({
-      component: OrderDetailsModalComponent,
-      componentProps: {
-        request: request
-      },
-      cssClass: 'order-details-modal'
-    });
-
-    await modal.present();
-  }
-
-  async acceptOrder(request: TransportRequest) {
-    if (this.acceptedRequests.has(request.job_id) || this.rejectedRequests.has(request.job_id)) {
+  async acceptOrder(request: DriverJobOffer) {
+    const requestKey = `${request.ride_id}-${request.attempt_no}`;
+    if (
+      this.acceptedRequests.has(requestKey) ||
+      this.rejectedRequests.has(requestKey) ||
+      this.isUnderCooldown ||
+      this.isAvailabilityLocked
+    ) {
+      this.showToast(
+        this.isUnderCooldown
+          ? this.translate.instant('TRANSPORT_REQUESTS.CANNOT_ACCEPT_COOLDOWN')
+          : this.translate.instant('TRANSPORT_REQUESTS.CANNOT_ACCEPT_LOCKED'),
+        'warning'
+      );
       return;
     }
 
-    if (!this.checkLoadWithinCapacity(request.weight)) {
+    if (!this.checkLoadWithinCapacity(request.load_weight_kg)) {
       const toast = await this.toastCtrl.create({
         message: this.translate.instant('TRANSPORT_REQUESTS.LOAD_CAPACITY_EXCEEDED'),
         duration: 4000,
         position: 'middle',
         color: 'warning',
-        buttons: [{ text: this.translate.instant('TRANSPORT_REQUESTS.OK'), role: 'cancel' }]
+        buttons: [
+          { text: this.translate.instant('TRANSPORT_REQUESTS.OK'), role: 'cancel' }
+        ]
       });
       await toast.present();
       return;
     }
 
-    let orderDetails = `${this.translate.instant('TRANSPORT_REQUESTS.JOB_ID')}${request.job_id}\n\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.PICKUP')}: ${this.getPickupLocations(request)}\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.DELIVERY')}: ${this.getDropoffLocation(request)}\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.WEIGHT')}: ${request.weight}kg\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.DISTANCE')}: ${request.distance}km\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.BASE_PRICE')}: ₹${request.base_price}\n`;
-
-    if (request.orders && request.orders.length > 0) {
-      orderDetails += `\n${this.translate.instant('TRANSPORT_REQUESTS.ORDERS')}: ${request.orders.length}\n`;
-      const totalValue = this.getTotalOrderValue(request);
-      const itemCount = this.getTotalItemCount(request);
-      orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.TOTAL_ITEMS')}: ${itemCount}\n`;
-      orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.ORDER_VALUE')}: ₹${totalValue.toFixed(2)}`;
-    }
+    let orderDetails = `${this.translate.instant('TRANSPORT_REQUESTS.JOB_ID')}: ${request.job_id}\n\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.PICKUP')}: ${request.pickup_address}\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.DELIVERY')}: ${request.drop_address}\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.WEIGHT')}: ${request.load_weight_kg}kg\n`;
+    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.BASE_PRICE')}: ₹${request.offered_rate}\n`;
 
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('TRANSPORT_REQUESTS.ACCEPT_HEADER'),
@@ -303,22 +502,22 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
         {
           text: this.translate.instant('TRANSPORT_REQUESTS.ACCEPT'),
           handler: async () => {
-            const loadingToast = await this.toastCtrl.create({
-              message: this.translate.instant('TRANSPORT_REQUESTS.PROCESSING'),
-              duration: 2000,
-              position: 'middle'
-            });
-            await loadingToast.present();
+            this.isAcceptingOffer[requestKey] = true;
+            const operationId = `accept-${request.ride_id}-${request.attempt_no}-${Date.now()}`;
 
-            const rideId = request.ride_id ?? request.job_id;
-            const attemptNo = request.attempt_no ?? 1;
-            const sub = this.transportRequestService.acceptTransportRequest(rideId, attemptNo)
+            const sub = this.transportRequestService
+              .acceptJob(request.ride_id, request.attempt_no)
               .subscribe({
                 next: () => {
-                  this.acceptedRequests.add(request.job_id);
-                  this.currentLoad += request.weight;
-                  loadingToast.dismiss();
-                  this.showToast(this.translate.instant('TRANSPORT_REQUESTS.ACCEPTED_SUCCESS'), 'success');
+                  this.acceptedRequests.add(requestKey);
+                  this.currentLoad += request.load_weight_kg;
+                  this.isAcceptingOffer[requestKey] = false;
+                  this.failedOperations.delete(operationId);
+
+                  this.showToast(
+                    this.translate.instant('TRANSPORT_REQUESTS.ACCEPTED_SUCCESS'),
+                    'success'
+                  );
 
                   const remainingCapacity = this.maxLoad - this.currentLoad;
                   if (remainingCapacity > 0) {
@@ -326,21 +525,40 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
                   }
                 },
                 error: (error) => {
-                  loadingToast.dismiss();
-                  this.showToast(this.translate.instant('TRANSPORT_REQUESTS.ACCEPT_FAILED'), 'danger');
+                  this.isAcceptingOffer[requestKey] = false;
+                  const errorMsg = this.getErrorMessage(error, 'TRANSPORT_REQUESTS.ACCEPT_FAILED');
+                  this.failedOperations.set(operationId, {
+                    type: 'accept',
+                    error: errorMsg,
+                    timestamp: Date.now()
+                  });
+                  this.showToast(errorMsg, 'danger');
+                  this.showRetryOption(request, 'accept', operationId);
                 }
               });
 
             this.subscription.add(sub);
-          },
-        },
+          }
+        }
       ]
     });
     await alert.present();
   }
 
-  async rejectOrder(request: TransportRequest) {
-    if (this.acceptedRequests.has(request.job_id) || this.rejectedRequests.has(request.job_id)) {
+  async rejectOrder(request: DriverJobOffer) {
+    const requestKey = `${request.ride_id}-${request.attempt_no}`;
+    if (
+      this.acceptedRequests.has(requestKey) ||
+      this.rejectedRequests.has(requestKey)
+    ) {
+      return;
+    }
+
+    if (this.isUnderCooldown) {
+      this.showToast(
+        this.translate.instant('TRANSPORT_REQUESTS.CANNOT_REJECT_COOLDOWN'),
+        'warning'
+      );
       return;
     }
 
@@ -348,8 +566,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       header: this.translate.instant('TRANSPORT_REQUESTS.REJECT_HEADER'),
       message: this.translate.instant('TRANSPORT_REQUESTS.REJECT_CONFIRM', {
         jobId: request.job_id,
-        pickup: this.getPickupLocations(request),
-        delivery: this.getDropoffLocation(request)
+        pickup: request.pickup_address,
+        delivery: request.drop_address
       }),
       buttons: [
         { text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'), role: 'cancel' },
@@ -357,27 +575,39 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           text: this.translate.instant('TRANSPORT_REQUESTS.REJECT'),
           role: 'destructive',
           handler: async () => {
-            const rideId = request.ride_id ?? request.job_id;
-            const attemptNo = request.attempt_no ?? 1;
-            const sub = this.transportRequestService.rejectTransportRequest(rideId, attemptNo)
+            this.isRejectingOffer[requestKey] = true;
+            const operationId = `reject-${request.ride_id}-${request.attempt_no}-${Date.now()}`;
+
+            const sub = this.transportRequestService
+              .rejectJob(request.ride_id, request.attempt_no)
               .subscribe({
-                next: async () => {
-                  this.rejectedRequests.add(request.job_id);
-                  this.requestVisibilityMap.delete(request.job_id);
-                  this.saveRejectedRequest(request.job_id);
+                next: () => {
+                  this.rejectedRequests.add(requestKey);
+                  this.saveRejectedRequest(request.ride_id);
+                  this.isRejectingOffer[requestKey] = false;
+                  this.failedOperations.delete(operationId);
                   this.applyFilters();
-                  await this.showToast(
+
+                  this.showToast(
                     this.translate.instant('TRANSPORT_REQUESTS.REJECTED_SUCCESS'),
-                    'medium'
+                    'success'
                   );
                 },
-                error: async () => {
-                  await this.showToast(this.translate.instant('TRANSPORT_REQUESTS.REJECT_FAILED'), 'danger');
+                error: (error) => {
+                  this.isRejectingOffer[requestKey] = false;
+                  const errorMsg = this.getErrorMessage(error, 'TRANSPORT_REQUESTS.REJECT_FAILED');
+                  this.failedOperations.set(operationId, {
+                    type: 'reject',
+                    error: errorMsg,
+                    timestamp: Date.now()
+                  });
+                  this.showToast(errorMsg, 'danger');
+                  this.showRetryOption(request, 'reject', operationId);
                 }
               });
             this.subscription.add(sub);
-          },
-        },
+          }
+        }
       ]
     });
     await alert.present();
@@ -389,7 +619,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   async promptForMoreOrders(remainingCapacity: number) {
     const toast = await this.toastCtrl.create({
-      message: this.translate.instant('TRANSPORT_REQUESTS.REMAINING_CAPACITY', { capacity: remainingCapacity }),
+      message: this.translate.instant('TRANSPORT_REQUESTS.REMAINING_CAPACITY', {
+        capacity: remainingCapacity
+      }),
       duration: 5000,
       position: 'middle',
       color: 'primary',
@@ -410,18 +642,25 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   showAvailableOrders(remainingCapacity: number) {
-    const availableOrders = this.filteredRequests.filter(request =>
-      !this.acceptedRequests.has(request.job_id) &&
-      !this.rejectedRequests.has(request.job_id) &&
-      request.weight <= remainingCapacity
+    const availableOrders = this.filteredRequests.filter(
+      request =>
+        !this.acceptedRequests.has(
+          `${request.ride_id}-${request.attempt_no}`
+        ) &&
+        !this.rejectedRequests.has(
+          `${request.ride_id}-${request.attempt_no}`
+        ) &&
+        request.load_weight_kg <= remainingCapacity
     );
 
     if (availableOrders.length === 0) {
-      this.showToast(this.translate.instant('TRANSPORT_REQUESTS.NO_FITTING_ORDERS'), 'warning');
+      this.showToast(
+        this.translate.instant('TRANSPORT_REQUESTS.NO_FITTING_ORDERS'),
+        'warning'
+      );
       return;
     }
 
-    availableOrders.sort((a, b) => a.distance - b.distance);
     this.filteredRequests = availableOrders;
   }
 
@@ -434,7 +673,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
         sharedDeliveries: this.sharedDeliveries,
         singleDelivery: this.singleDelivery,
         perishableOnly: this.perishableOnly
-      },
+      }
     });
 
     await modal.present();
@@ -452,6 +691,33 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   applyFilters() {
     let filteredOrders = [...this.transportRequests];
+
+    // Filter out accepted and rejected requests
+    filteredOrders = filteredOrders.filter(request => {
+      const requestKey = `${request.ride_id}-${request.attempt_no}`;
+      return !this.acceptedRequests.has(requestKey) && !this.rejectedRequests.has(requestKey);
+    });
+
+    // Filter by priority deliveries (high priority tier)
+    if (this.priorityDeliveries) {
+      filteredOrders = filteredOrders.filter(request =>
+        request.capacity_warning === true // High priority items have capacity warnings
+      );
+    }
+
+    // Filter by weight constraints
+    if (this.singleDelivery) {
+      // Show only deliveries that fit within remaining capacity
+      filteredOrders = filteredOrders.filter(request =>
+        this.checkLoadWithinCapacity(request.load_weight_kg)
+      );
+    }
+
+    // Additional filtering options can be added here
+    // - delayedDeliveries: filter by delivery time priority
+    // - sharedDeliveries: filter by ride_id grouping
+    // - perishableOnly: filter by product type/category
+
     this.filteredRequests = filteredOrders;
 
     if (this.sortOption) {
@@ -462,7 +728,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   async openSortModal() {
     const modal = await this.modalController.create({
       component: SortModalComponent,
-      componentProps: { sortOption: this.sortOption },
+      componentProps: { sortOption: this.sortOption }
     });
 
     await modal.present();
@@ -476,33 +742,150 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   applySort() {
     switch (this.sortOption) {
-      case 'distance-asc':
-        this.filteredRequests.sort((a, b) => a.distance - b.distance);
-        break;
-      case 'distance-desc':
-        this.filteredRequests.sort((a, b) => b.distance - a.distance);
-        break;
       case 'price-desc':
-        this.filteredRequests.sort((a, b) => b.base_price - a.base_price);
+        this.filteredRequests.sort(
+          (a: DriverJobOffer, b: DriverJobOffer) =>
+            (b.offered_rate || 0) - (a.offered_rate || 0)
+        );
         break;
       case 'quantity-asc':
-        this.filteredRequests.sort((a, b) => a.weight - b.weight);
+        this.filteredRequests.sort(
+          (a: DriverJobOffer, b: DriverJobOffer) =>
+            (a.load_weight_kg || 0) - (b.load_weight_kg || 0)
+        );
         break;
       case 'quantity-desc':
-        this.filteredRequests.sort((a, b) => b.weight - a.weight);
+        this.filteredRequests.sort(
+          (a: DriverJobOffer, b: DriverJobOffer) =>
+            (b.load_weight_kg || 0) - (a.load_weight_kg || 0)
+        );
         break;
       case 'order-value-desc':
-        this.filteredRequests.sort((a, b) =>
-          this.getTotalOrderValue(b) - this.getTotalOrderValue(a)
+        this.filteredRequests.sort(
+          (a: DriverJobOffer, b: DriverJobOffer) =>
+            this.getTotalOrderValue(b) - this.getTotalOrderValue(a)
         );
         break;
     }
   }
 
+  private getErrorMessage(error: any, defaultKey: string): string {
+    if (!error) {
+      return this.translate.instant(defaultKey);
+    }
+
+    // Handle backend error codes
+    const errorCode = error?.error?.error_code || error?.status;
+    const errorCodeMap: { [key: string]: string } = {
+      'offer_already_taken': 'TRANSPORT_REQUESTS.ERROR_OFFER_TAKEN',
+      'offer_not_open': 'TRANSPORT_REQUESTS.ERROR_OFFER_EXPIRED',
+      'schedule_conflict': 'TRANSPORT_REQUESTS.ERROR_SCHEDULE_CONFLICT',
+      'driver_busy': 'TRANSPORT_REQUESTS.ERROR_DRIVER_BUSY',
+      'job_not_cancelable': 'TRANSPORT_REQUESTS.ERROR_NOT_CANCELABLE',
+      'driver_under_cooldown': 'TRANSPORT_REQUESTS.ERROR_UNDER_COOLDOWN',
+      'driver_under_dispute': 'TRANSPORT_REQUESTS.ERROR_UNDER_DISPUTE',
+      409: 'TRANSPORT_REQUESTS.ERROR_CONFLICT',
+      404: 'TRANSPORT_REQUESTS.ERROR_NOT_FOUND',
+      429: 'TRANSPORT_REQUESTS.ERROR_RATE_LIMITED'
+    };
+
+    const messageKey = errorCodeMap[errorCode] || defaultKey;
+    return this.translate.instant(messageKey);
+  }
+
+  private async showRetryOption(
+    request: DriverJobOffer,
+    operationType: 'accept' | 'reject',
+    operationId: string
+  ) {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('TRANSPORT_REQUESTS.OPERATION_FAILED'),
+      message: this.failedOperations.get(operationId)?.error || 'Unknown error',
+      buttons: [
+        {
+          text: this.translate.instant('TRANSPORT_REQUESTS.DISMISS'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('TRANSPORT_REQUESTS.RETRY'),
+          handler: () => {
+            if (operationType === 'accept') {
+              this.retryAcceptOrder(request);
+            } else {
+              this.retryRejectOrder(request);
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private retryAcceptOrder(request: DriverJobOffer) {
+    this.retryingOperationId = `retry-accept-${request.ride_id}-${request.attempt_no}`;
+    const requestKey = `${request.ride_id}-${request.attempt_no}`;
+    this.isAcceptingOffer[requestKey] = true;
+
+    const sub = this.transportRequestService
+      .acceptJob(request.ride_id, request.attempt_no)
+      .subscribe({
+        next: () => {
+          this.acceptedRequests.add(requestKey);
+          this.currentLoad += request.load_weight_kg;
+          this.isAcceptingOffer[requestKey] = false;
+          this.retryingOperationId = null;
+
+          this.showToast(
+            this.translate.instant('TRANSPORT_REQUESTS.ACCEPTED_SUCCESS'),
+            'success'
+          );
+        },
+        error: (error) => {
+          this.isAcceptingOffer[requestKey] = false;
+          this.retryingOperationId = null;
+          const errorMsg = this.getErrorMessage(error, 'TRANSPORT_REQUESTS.ACCEPT_FAILED');
+          this.showToast(errorMsg, 'danger');
+        }
+      });
+
+    this.subscription.add(sub);
+  }
+
+  private retryRejectOrder(request: DriverJobOffer) {
+    this.retryingOperationId = `retry-reject-${request.ride_id}-${request.attempt_no}`;
+    const requestKey = `${request.ride_id}-${request.attempt_no}`;
+    this.isRejectingOffer[requestKey] = true;
+
+    const sub = this.transportRequestService
+      .rejectJob(request.ride_id, request.attempt_no)
+      .subscribe({
+        next: () => {
+          this.rejectedRequests.add(requestKey);
+          this.saveRejectedRequest(request.ride_id);
+          this.isRejectingOffer[requestKey] = false;
+          this.retryingOperationId = null;
+          this.applyFilters();
+
+          this.showToast(
+            this.translate.instant('TRANSPORT_REQUESTS.REJECTED_SUCCESS'),
+            'success'
+          );
+        },
+        error: (error) => {
+          this.isRejectingOffer[requestKey] = false;
+          this.retryingOperationId = null;
+          const errorMsg = this.getErrorMessage(error, 'TRANSPORT_REQUESTS.REJECT_FAILED');
+          this.showToast(errorMsg, 'danger');
+        }
+      });
+
+    this.subscription.add(sub);
+  }
+
   async showToast(message: string, color: string = 'success') {
     const toast = await this.toastCtrl.create({
       message,
-      duration: 3000,
+      duration: color === 'danger' ? 4000 : 3000,
       position: 'bottom',
       color
     });
@@ -513,198 +896,85 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     return formatDate(dateString, 'dd MMM yyyy', 'en-US');
   }
 
-  getUrgencyColor(urgency: string): string {
+  getUrgencyColor(request: DriverJobOffer): string {
+    const urgency = this.getUrgency(request);
     switch (urgency.toLowerCase()) {
-      case 'high': return 'danger';
-      case 'standard': return 'warning';
-      case 'low': return 'success';
-      default: return 'medium';
+      case 'high':
+        return 'danger';
+      case 'standard':
+        return 'warning';
+      case 'low':
+        return 'success';
+      default:
+        return 'medium';
     }
   }
 
-  getUrgencyIcon(urgency: string): string {
+  getUrgencyIcon(request: DriverJobOffer): string {
+    const urgency = this.getUrgency(request);
     switch (urgency.toLowerCase()) {
-      case 'high': return 'flash';
-      case 'standard': return 'time';
-      case 'low': return 'checkmark-circle';
-      default: return 'help-circle';
+      case 'high':
+        return 'flash';
+      case 'standard':
+        return 'time';
+      case 'low':
+        return 'checkmark-circle';
+      default:
+        return 'help-circle';
     }
   }
 
-  isRequestAccepted(jobId: number): boolean {
-    return this.acceptedRequests.has(jobId);
+  getUrgency(request: DriverJobOffer): string {
+    if (request.capacity_warning) return 'high';
+    return 'standard';
   }
 
-  isRequestRejected(jobId: number): boolean {
-    return this.rejectedRequests.has(jobId);
+  isRequestAccepted(rideId: number, attemptNo: number): boolean {
+    return this.acceptedRequests.has(`${rideId}-${attemptNo}`);
   }
 
-  getTotalOrderValue(request: TransportRequest): number {
+  isRequestRejected(rideId: number, attemptNo: number): boolean {
+    return this.rejectedRequests.has(`${rideId}-${attemptNo}`);
+  }
+
+  getTotalOrderValue(request: DriverJobOffer): number {
     return this.transportRequestService.getTotalOrderValue(request);
   }
 
-  getTotalItemCount(request: TransportRequest): number {
+  getTotalItemCount(request: DriverJobOffer): number {
     return this.transportRequestService.getTotalItemCount(request);
   }
 
-  hasOrders(request: TransportRequest): boolean {
-    return request.orders != null && request.orders.length > 0;
+  hasOrders(request: DriverJobOffer): boolean {
+    return false; // DriverJobOffer doesn't include orders
   }
 
-  get pendingDeliveries(): TransportRequest[] {
+  get pendingDeliveries(): DriverJobOffer[] {
     return this.filteredRequests.filter(request => {
-      // Filter out accepted and rejected requests
-      if (this.acceptedRequests.has(request.job_id) || this.rejectedRequests.has(request.job_id)) {
-        return false;
-      }
-
-      // Apply visibility logic - only show if currently visible
-      const visibilityState = this.requestVisibilityMap.get(request.job_id);
-      return visibilityState?.isVisible ?? true;
+      const requestKey = `${request.ride_id}-${request.attempt_no}`;
+      return (
+        !this.acceptedRequests.has(requestKey) &&
+        !this.rejectedRequests.has(requestKey)
+      );
     });
   }
 
-  // Initialize visibility tracking for new requests
-  private initializeRequestVisibility() {
-    this.transportRequests.forEach(request => {
-      if (!this.requestVisibilityMap.has(request.job_id)) {
-        // New request - show it immediately
-        this.requestVisibilityMap.set(request.job_id, {
-          isVisible: true,
-          showCount: 1,
-          lastToggleTime: Date.now()
-        });
-      }
-    });
-
-    // Clean up visibility map for requests that no longer exist
-    const currentJobIds = new Set(this.transportRequests.map(r => r.job_id));
-    for (const jobId of this.requestVisibilityMap.keys()) {
-      if (!currentJobIds.has(jobId) && !this.acceptedRequests.has(jobId) && !this.rejectedRequests.has(jobId)) {
-        this.requestVisibilityMap.delete(jobId);
-      }
-    }
-  }
-
-  // Update request visibility based on transit/waiting time logic
-  private updateRequestVisibility() {
-    const now = Date.now();
-
-    this.requestVisibilityMap.forEach((state, jobId) => {
-      // Skip if max show count reached
-      if (state.showCount >= this.MAX_SHOW_COUNT) {
-        state.isVisible = false;
-        return;
-      }
-
-      const timeSinceLastToggle = now - state.lastToggleTime;
-
-      if (state.isVisible) {
-        // Currently visible - check if transit time (1 min) has passed
-        if (timeSinceLastToggle >= this.TRANSIT_TIME_MS) {
-          state.isVisible = false;
-          state.lastToggleTime = now;
-          console.log(`Job ${jobId} entering waiting period (shown ${state.showCount}/${this.MAX_SHOW_COUNT} times)`);
-        }
-      } else {
-        // Currently hidden - check if waiting time (3 min) has passed
-        if (timeSinceLastToggle >= this.WAITING_TIME_MS) {
-          state.isVisible = true;
-          state.showCount++;
-          state.lastToggleTime = now;
-          console.log(`Job ${jobId} becoming visible again (${state.showCount}/${this.MAX_SHOW_COUNT})`);
-        }
-      }
-    });
-
-    // Trigger change detection by updating filtered requests
-    this.applyFilters();
-  }
-
-  // Load rejected requests from localStorage
   private loadRejectedRequests() {
     const stored = localStorage.getItem('rejected_transport_requests');
     if (stored) {
       try {
-        const rejectedArray = JSON.parse(stored) as number[];
+        const rejectedArray = JSON.parse(stored) as string[];
         this.rejectedRequests = new Set(rejectedArray);
       } catch (error) {
-        // Silently handle JSON parse error - storage may be corrupted
+        // Silently handle JSON parse error
       }
     }
   }
 
-  // Save rejected request to localStorage
-  private saveRejectedRequest(jobId: number) {
+  private saveRejectedRequest(rideId: number) {
+    const requestKey = `${rideId}-0`;
+    this.rejectedRequests.add(requestKey);
     const rejectedArray = Array.from(this.rejectedRequests);
     localStorage.setItem('rejected_transport_requests', JSON.stringify(rejectedArray));
-  }
-
-  // Load city names and cache them
-  private loadCityNames() {
-    this.locationPreferenceService.getCities()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (cities) => {
-          cities.forEach(city => {
-            this.citiesCache.set(city.id, city.city_name);
-          });
-        },
-        error: (error) => {
-          // Silently handle city load error - not critical
-        }
-      });
-  }
-
-  // Get unique pickup locations from all order items
-  getPickupLocations(request: TransportRequest): string {
-    if (request.pickup_address?.trim()) {
-      return request.pickup_address;
-    }
-    if (!request.orders || request.orders.length === 0) {
-      return this.translate.instant('TRANSPORT_REQUESTS.NO_PICKUP_INFO');
-    }
-
-    const pickupLocations = new Set<string>();
-
-    request.orders.forEach(order => {
-      if (order.items && order.items.length > 0) {
-        order.items.forEach(item => {
-          if (item.branch && item.branch.branch_address) {
-            pickupLocations.add(item.branch.branch_address);
-          }
-        });
-      }
-    });
-
-    return Array.from(pickupLocations).join(', ') || this.translate.instant('TRANSPORT_REQUESTS.MULTIPLE_LOCATIONS');
-  }
-
-  // Get dropoff location from retailer branch or delivery address
-  getDropoffLocation(request: TransportRequest): string {
-    if (request.drop_address?.trim()) {
-      return request.drop_address;
-    }
-    if (!request.orders || request.orders.length === 0) {
-      return this.translate.instant('TRANSPORT_REQUESTS.NO_DELIVERY_INFO');
-    }
-
-    // Use first order's delivery address
-    const firstOrder = request.orders[0];
-
-    // First try retailer_branch if it exists
-    if (firstOrder.retailer_branch &&
-      Object.keys(firstOrder.retailer_branch).length > 0 &&
-      firstOrder.retailer_branch.branch_address) {
-      return firstOrder.retailer_branch.branch_address;
-    }
-
-    // Otherwise use delivery_address
-    return firstOrder.delivery_address || this.translate.instant('TRANSPORT_REQUESTS.ADDRESS_NOT_AVAILABLE');
-  }
-
-  getRequestLocationSummary(request: TransportRequest): string {
-    const parts = [request.city, request.area].filter((value) => !!value && value.trim().length > 0);
-    return parts.join(' / ') || this.translate.instant('TRANSPORT_REQUESTS.NOT_SPECIFIED');
   }
 }

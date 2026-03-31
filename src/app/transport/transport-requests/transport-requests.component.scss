@@ -41,6 +41,108 @@ $breakpoint-desktop: 1024px;
   --background: $color-bg-light;
 }
 
+// CONNECTION STATUS INDICATOR
+.connection-status-bar {
+  padding: $spacing-md $spacing-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(158, 158, 158, 0.05), rgba(158, 158, 158, 0.02));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all $transition-fast;
+
+  &.connected {
+    background: linear-gradient(135deg, rgba($color-success, 0.08), rgba($color-success, 0.03));
+    border-bottom-color: rgba($color-success, 0.2);
+  }
+
+  &.connecting {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(255, 193, 7, 0.03));
+    border-bottom-color: rgba(255, 193, 7, 0.2);
+    animation: pulse 1.5s infinite;
+  }
+
+  .connection-badge {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 16px;
+
+    ion-icon {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+// STATUS WARNINGS (Cooldown, Lock)
+.status-warning {
+  padding: $spacing-md $spacing-lg;
+
+  ion-card {
+    margin: 0;
+    border-radius: $border-radius-md;
+  }
+
+  ion-card-content {
+    padding: $spacing-md;
+  }
+
+  .warning-content {
+    display: flex;
+    gap: $spacing-md;
+    align-items: flex-start;
+  }
+
+  .warning-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .warning-text {
+    flex: 1;
+  }
+
+  .warning-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin: 0 0 4px 0;
+  }
+
+  .warning-desc {
+    font-size: 0.85rem;
+    margin: 0;
+    opacity: 0.9;
+  }
+}
+
+// LOADING SKELETON
+.loading-skeleton {
+  padding: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.skeleton-card {
+  background: $color-bg-card;
+  border-radius: $border-radius-md;
+  padding: $spacing-md;
+  box-shadow: $shadow-sm;
+}
+
 // DRIVER AVAILABILITY HEADER
 .availability-header {
   padding: $spacing-lg;
