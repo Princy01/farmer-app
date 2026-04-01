@@ -69,6 +69,20 @@
     </ion-card>
   </div>
 
+  <div class="card-section" *ngIf="isSimulatedMode">
+    <ion-card class="modern-card security-card">
+      <ion-card-content class="security-content">
+        <div class="security-info">
+          <ion-icon name="wallet-outline" class="security-icon"></ion-icon>
+          <div class="security-text">
+            <h3>{{ 'PAYMENT.SIMULATION_TITLE' | translate }}</h3>
+            <p>{{ 'PAYMENT.SIMULATION_DESC' | translate }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
   <!-- Payment Methods -->
   <div class="card-section">
     <ion-card class="modern-card payment-methods-card">
@@ -121,19 +135,15 @@
 <ion-footer class="payment-footer">
   <div class="footer-content">
     <div class="total-display">
-      <span class="total-label">
-        {{ selectedPaymentMethod === 'COD' ? ('PAYMENT.AMOUNT_ON_DELIVERY' | translate) : ('PAYMENT.TOTAL_TO_PAY' | translate) }}
-      </span>
+      <span class="total-label">{{ 'PAYMENT.TOTAL_TO_PAY' | translate }}</span>
       <span class="total-amount">₹{{ orderData?.grandTotal }}</span>
     </div>
     <ion-button
       class="pay-now-btn"
       expand="block"
       [disabled]="isProcessingPayment || !selectedPaymentMethod"
-      [class.cod-btn]="selectedPaymentMethod === 'COD'"
       (click)="processPayment()">
-      <ion-icon name="lock-closed-outline" slot="start" *ngIf="!isProcessingPayment && selectedPaymentMethod !== 'COD'"></ion-icon>
-      <ion-icon name="cash-outline" slot="start" *ngIf="!isProcessingPayment && selectedPaymentMethod === 'COD'"></ion-icon>
+      <ion-icon name="lock-closed-outline" slot="start" *ngIf="!isProcessingPayment"></ion-icon>
       <ion-spinner name="dots" *ngIf="isProcessingPayment"></ion-spinner>
       {{ getPayButtonText() }}
     </ion-button>

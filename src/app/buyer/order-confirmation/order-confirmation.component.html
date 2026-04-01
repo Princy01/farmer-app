@@ -46,6 +46,11 @@
           <span class="detail-label">{{ 'ORDER_CONFIRMATION.TOTAL_AMOUNT' | translate }}:</span>
           <span class="detail-value">{{ getOrderGrandTotal() | currency:'INR':'symbol':'1.2-2' }}</span>
         </div>
+
+        <div class="detail-row" *ngIf="usedSimulatedPayment()">
+          <span class="detail-label">{{ 'ORDER_CONFIRMATION.PAYMENT_MODE' | translate }}:</span>
+          <span class="detail-value">{{ 'ORDER_CONFIRMATION.PAYMENT_MODE_SIMULATED' | translate }}</span>
+        </div>
       </ion-card-content>
     </ion-card>
   </div>

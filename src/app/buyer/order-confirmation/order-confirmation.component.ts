@@ -58,6 +58,10 @@ interface OrderConfirmationNavigationState {
   orderData?: OrderConfirmationData;
   hasTransport?: boolean;
   transportData?: TransportInfo;
+  paymentMeta?: {
+    mode?: string;
+    method?: string;
+  };
 }
 
 @Component({
@@ -73,6 +77,7 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
   showAnimation: boolean = true;
   hasTransport: boolean = false;
   transportInfo: TransportInfo | null = null;
+  paymentMeta: { mode?: string; method?: string } | null = null;
   isLoading: boolean = false;
   loadErrorMessageKey: string | null = null;
 
@@ -116,6 +121,7 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
     this.orderData = state?.orderData ?? null;
     this.hasTransport = state?.hasTransport ?? false;
     this.transportInfo = state?.transportData ?? null;
+    this.paymentMeta = state?.paymentMeta ?? null;
 
     if (!this.orderData) {
       this.loadErrorMessageKey = 'ORDER_CONFIRMATION.NO_ORDER_DATA';
@@ -334,6 +340,10 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
 
   hasOrderItems(): boolean {
     return (this.orderData?.items?.length ?? 0) > 0;
+  }
+
+  usedSimulatedPayment(): boolean {
+    return this.paymentMeta?.mode === 'simulated';
   }
 
   /**

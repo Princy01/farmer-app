@@ -20,6 +20,19 @@ import { PaymentService } from './payment.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { OrderService, Item, CreateBatchOrderRequest, TransportRequestWithOrders } from '../order-confirmation/order.service';
+import { environment } from 'src/environments/environment';
+
+type PaymentMode = 'simulated' | 'gateway';
+
+interface PaymentNavigationState {
+  orderData: any;
+  hasTransport: boolean;
+  transportData: any;
+  paymentMeta: {
+    mode: PaymentMode;
+    method: string;
+  };
+}
 
 @Component({
   selector: 'app-payment',
@@ -35,6 +48,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
   loadingPaymentMethods: boolean = true;
   pollingInterval: any = null;
   pollingTimeout: any = null;
+  readonly paymentMode: PaymentMode = environment.paymentMode === 'gateway' ? 'gateway' : 'simulated';
 
   hasTransport: boolean = false;
   transportInfo: any = null;
@@ -66,13 +80,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
       name: 'PAYMENT.WALLET_NAME',
       description: 'PAYMENT.WALLET_DESC',
       icon: 'wallet-outline',
-      available: true
-    },
-    {
-      id: 'COD',
-      name: 'PAYMENT.COD_NAME',
-      description: 'PAYMENT.COD_DESC',
-      icon: 'cash-outline',
       available: true
     }
   ];
@@ -127,6 +134,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.clearPolling();
   }
 
+  get isSimulatedMode(): boolean {
+    return this.paymentMode === 'simulated';
+  }
+
   // Helper method to get transport delivery type display name
   getTransportTypeName(): string {
     if (!this.transportInfo) return '';
@@ -161,6 +172,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
   }
 
   getProcessingMessage(): string {
+    if (this.isSimulatedMode) {
+      return this.translate.instant('PAYMENT.PROCESSING_SIMULATED');
+    }
+
     switch (this.selectedPaymentMethod) {
       case 'UPI':
         return this.translate.instant('PAYMENT.PROCESSING_UPI');
@@ -170,8 +185,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
         return this.translate.instant('PAYMENT.PROCESSING_NETBANKING');
       case 'WALLET':
         return this.translate.instant('PAYMENT.PROCESSING_WALLET');
-      case 'COD':
-        return this.translate.instant('PAYMENT.PROCESSING_COD');
       default:
         return this.translate.instant('PAYMENT.PROCESSING_DEFAULT');
     }
@@ -180,6 +193,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
   getPayButtonText(): string {
     if (this.isProcessingPayment) {
       return this.translate.instant('PAYMENT.PROCESSING');
+    }
+
+    if (this.isSimulatedMode) {
+      return this.translate.instant('PAYMENT.COMPLETE_SIMULATED');
     }
 
     switch (this.selectedPaymentMethod) {
@@ -191,8 +208,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
         return this.translate.instant('PAYMENT.PAY_NETBANKING');
       case 'WALLET':
         return this.translate.instant('PAYMENT.PAY_WALLET');
-      case 'COD':
-        return this.translate.instant('PAYMENT.PLACE_ORDER_COD');
       default:
         return this.translate.instant('PAYMENT.SELECT_METHOD');
     }
@@ -302,9 +317,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ============================================================================
-  // CURRENT IMPLEMENTATION: Direct Order Placement (For Testing)
-  // ============================================================================
   async processPayment() {
     if (!this.selectedPaymentMethod) {
       const alert = await this.alertCtrl.create({
@@ -322,6 +334,15 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     this.isProcessingPayment = true;
 
+    if (this.isSimulatedMode) {
+      await this.processSimulatedPayment();
+      return;
+    }
+
+    await this.processGatewayPayment();
+  }
+
+  private async processSimulatedPayment(): Promise<void> {
     const loading = await this.loadingCtrl.create({
       message: this.getProcessingMessage(),
       spinner: 'dots'
@@ -329,17 +350,16 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await loading.present();
 
     try {
+      await this.simulatePaymentProcessing();
       const updatedOrderData = await this.handleOrderCreation(this.orderData);
       await loading.dismiss();
 
       await this.showToast(
-        this.translate.instant('PAYMENT.ORDER_PLACED_SUCCESS'),
+        this.translate.instant('PAYMENT.SIMULATED_SUCCESS'),
         'success'
       );
 
-      this.router.navigate(['/buyer/order-confirmation'], {
-        state: { orderData: updatedOrderData }
-      });
+      this.navigateToOrderConfirmation(updatedOrderData);
     } catch (error: any) {
       console.error('Payment processing error:', error);
       await loading.dismiss();
@@ -350,60 +370,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ============================================================================
-  // END: Current Implementation
-  // ============================================================================
-
-
-  // ============================================================================
-  // COMMENTED CODE: Payment Gateway Integration (To be used later)
-  // ============================================================================
-  // UNCOMMENT THIS CODE WHEN READY TO USE ACTUAL PAYMENT GATEWAY
-  /*
-  async processPayment() {
-    if (!this.selectedPaymentMethod) {
-      const alert = await this.alertCtrl.create({
-        header: this.translate.instant('PAYMENT.METHOD_REQUIRED'),
-        message: this.translate.instant('PAYMENT.SELECT_METHOD_MSG'),
-        buttons: [this.translate.instant('PAYMENT.OK')]
-      });
-      await alert.present();
-      return;
-    }
-
-    this.isProcessingPayment = true;
-
-    // COD: Direct order placement
-    if (this.selectedPaymentMethod === 'COD') {
-      const loading = await this.loadingCtrl.create({
-        message: this.getProcessingMessage(),
-        spinner: 'dots'
-      });
-      await loading.present();
-
-      try {
-        await this.simulatePaymentProcessing();
-        const updatedOrderData = await this.handleOrderCreation(this.orderData);
-        await loading.dismiss();
-
-        await this.showToast(
-          this.translate.instant('PAYMENT.ORDER_PLACED_SUCCESS'),
-          'success'
-        );
-
-        this.router.navigate(['/buyer/order-confirmation'], {
-          state: { orderData: updatedOrderData }
-        });
-      } catch (error) {
-        console.error('Payment processing error:', error);
-        await loading.dismiss();
-        this.isProcessingPayment = false;
-        await this.showPaymentError();
-      }
-      return;
-    }
-
-    // Online payment: Redirect to payment gateway
+  private async processGatewayPayment(): Promise<void> {
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('PAYMENT.REDIRECTING'),
       spinner: 'dots'
@@ -411,13 +378,12 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await loading.present();
 
     try {
-      const amount = this.orderData?.final_amount || this.orderData?.grandTotal;
+      const amount = this.orderData?.grandTotal ?? this.orderData?.grand_total ?? this.orderData?.final_amount ?? this.orderData?.finalAmount;
       const description = this.translate.instant('PAYMENT.ORDER_DESC', {
         count: this.orderData?.items?.length || 1
       });
-      const currency = 'inr';
+      const currency = 'INR';
 
-      // Initiate payment with gateway
       const response = await this.paymentService.initiatePayment(
         amount,
         currency,
@@ -430,10 +396,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
         const paymentUrl = response.data.payment_url;
         const paymentOrderId = response.data.order_id;
 
-        // Open payment gateway in new window
-        window.open(paymentUrl, '_blank');
+        const paymentWindow = window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+        if (!paymentWindow) {
+          throw new Error(this.translate.instant('PAYMENT.GATEWAY_WINDOW_BLOCKED'));
+        }
 
-        // Start polling for payment status
         await this.pollPaymentStatus(paymentOrderId);
       } else {
         throw new Error('Invalid payment response');
@@ -442,19 +409,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
       console.error('Payment initiation error:', error);
       await loading.dismiss();
       this.isProcessingPayment = false;
-      await this.showPaymentError();
+      await this.showPaymentError(error instanceof Error ? error.message : undefined);
     }
   }
-  */
-  // ============================================================================
-  // END: Payment Gateway Integration Code
-  // ============================================================================
 
-
-  // ============================================================================
-  // COMMENTED CODE: Payment Status Polling (For payment gateway)
-  // ============================================================================
-  /*
   private async pollPaymentStatus(paymentOrderId: string): Promise<void> {
     const pollingLoading = await this.loadingCtrl.create({
       message: this.translate.instant('PAYMENT.CHECKING_STATUS'),
@@ -473,8 +431,9 @@ export class PaymentComponent implements OnInit, OnDestroy {
           .checkPaymentStatus(paymentOrderId)
           .toPromise();
 
-        if (statusResponse?.status === 'success') {
-          // Payment successful - create order
+        const paymentStatus = statusResponse?.data?.status;
+
+        if (paymentStatus === 'success') {
           this.clearPolling();
           await pollingLoading.dismiss();
 
@@ -485,23 +444,18 @@ export class PaymentComponent implements OnInit, OnDestroy {
             'success'
           );
 
-          this.router.navigate(['/buyer/order-confirmation'], {
-            state: { orderData: updatedOrderData }
-          });
-        } else if (statusResponse?.status === 'failed') {
-          // Payment failed
+          this.navigateToOrderConfirmation(updatedOrderData);
+        } else if (paymentStatus === 'failed' || paymentStatus === 'cancelled') {
           this.clearPolling();
           await pollingLoading.dismiss();
           await this.showPaymentError(
             this.translate.instant('PAYMENT.PAYMENT_FAILED_MSG')
           );
         }
-        // If status is 'pending', continue polling
       } catch (error) {
         console.error('Error checking payment status:', error);
       }
 
-      // Timeout after max attempts
       if (attempts >= maxAttempts) {
         this.clearPolling();
         await pollingLoading.dismiss();
@@ -516,10 +470,22 @@ export class PaymentComponent implements OnInit, OnDestroy {
       this.clearPolling();
     }, maxAttempts * 3000);
   }
-  */
-  // ============================================================================
-  // END: Payment Status Polling Code
-  // ============================================================================
+
+  private navigateToOrderConfirmation(updatedOrderData: any): void {
+    const navigationState: PaymentNavigationState = {
+      orderData: updatedOrderData,
+      hasTransport: this.hasTransport,
+      transportData: this.transportInfo,
+      paymentMeta: {
+        mode: this.paymentMode,
+        method: this.selectedPaymentMethod
+      }
+    };
+
+    this.router.navigate(['/buyer/order-confirmation'], {
+      state: navigationState
+    });
+  }
 
   private clearPolling() {
     if (this.pollingInterval) {
@@ -546,7 +512,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve();
-      }, 2000);
+      }, 1500);
     });
   }
 
