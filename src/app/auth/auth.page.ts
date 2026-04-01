@@ -76,13 +76,13 @@ export class LoginPage implements OnDestroy {
 
     this.loginForm = this.fb.group({
       identifier: ['', [Validators.required, this.emailOrPhoneValidator]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
     this.registerForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       identifier: ['', [Validators.required, this.emailOrPhoneValidator]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
       state: [null, Validators.required],
       city: [null, Validators.required],
       location: [null, Validators.required],
