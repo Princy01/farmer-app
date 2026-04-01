@@ -217,6 +217,36 @@ export class CartService {
     );
   }
 
+  clearCartItems(doe?: string): Observable<any> {
+    const operationKey = this.createOperationKey('clear');
+
+    if (this.pendingOperations.has(operationKey)) {
+      return throwError(() => new Error('Clear operation already in progress'));
+    }
+
+    this.pendingOperations.add(operationKey);
+    const headers = this.getAuthHeaders();
+    const dateOfEntry = doe || new Date().toISOString().split('T')[0];
+
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/ClearCartItems?doe=${encodeURIComponent(dateOfEntry)}`,
+      {},
+      { headers }
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      this.getRetryStrategy(),
+      tap(() => {
+        this.cartItemsSubject.next([]);
+      }),
+      catchError(error => {
+        return throwError(() => error);
+      }),
+      finalize(() => {
+        this.pendingOperations.delete(operationKey);
+      })
+    );
+  }
+
   /**
    * Get current cart items from the BehaviorSubject
    */

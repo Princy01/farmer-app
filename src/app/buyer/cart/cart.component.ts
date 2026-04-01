@@ -74,7 +74,6 @@ export class CartComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   private quantityUpdateSubject = new Subject<QuantityUpdate>();
-  private deleteItemSubject = new Subject<number>();
 
   constructor(
     private router: Router,
@@ -114,14 +113,12 @@ export class CartComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadCartItems();
     this.setupQuantityDebounce();
-    this.setupDeleteDebounce();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
     this.quantityUpdateSubject.complete();
-    this.deleteItemSubject.complete();
     this.cartService.clearPendingOperations();
   }
 
@@ -134,13 +131,6 @@ export class CartComponent implements OnInit, OnDestroy {
       ),
       takeUntil(this.destroy$)
     ).subscribe(update => this.executeQuantityUpdate(update));
-  }
-
-  private setupDeleteDebounce(): void {
-    this.deleteItemSubject.pipe(
-      debounceTime(500),
-      takeUntil(this.destroy$)
-    ).subscribe(selectedId => this.executeRemoveItem(selectedId));
   }
 
   // ─── Load & group ──────────────────────────────────────────────────────────
@@ -293,7 +283,7 @@ export class CartComponent implements OnInit, OnDestroy {
     if (item.quantity - 1 <= 0) {
       // remove item
       item.quantity = 0;
-      this.deleteItemSubject.next(item.selected_id);
+      void this.executeRemoveItem(item.selected_id);
       return;
     }
 
@@ -337,7 +327,9 @@ export class CartComponent implements OnInit, OnDestroy {
         {
           text: this.translate.instant('CART.REMOVE'),
           role: 'destructive',
-          handler: () => this.deleteItemSubject.next(item.selected_id)
+          handler: () => {
+            void this.executeRemoveItem(item.selected_id);
+          }
         }
       ]
     });
@@ -375,10 +367,48 @@ export class CartComponent implements OnInit, OnDestroy {
           text: this.translate.instant('CART.REMOVE'),
           role: 'destructive',
           handler: async () => {
-            // fire delete for every item in the group
-            const ids = group.items.map(i => i.selected_id);
-            for (const id of ids) {
-              this.deleteItemSubject.next(id);
+            this.isLoading = true;
+            try {
+              for (const item of [...group.items]) {
+                await this.cartService.deleteCartItem(item.selected_id).toPromise();
+              }
+              await this.showToast(this.translate.instant('CART.ITEM_REMOVED'), 'success');
+              await this.loadCartItems();
+            } catch (error) {
+              const errorMessage = this.getErrorMessage(error, 'CART.FAILED_REMOVE_ITEM');
+              await this.showToast(errorMessage, 'danger');
+              await this.loadCartItems();
+            } finally {
+              this.isLoading = false;
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  async clearCartItems(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('CART.CLEAR_CART_HEADER'),
+      message: this.translate.instant('CART.CLEAR_CART_MESSAGE'),
+      buttons: [
+        { text: this.translate.instant('CART.CANCEL'), role: 'cancel' },
+        {
+          text: this.translate.instant('CART.REMOVE'),
+          role: 'destructive',
+          handler: async () => {
+            this.isLoading = true;
+            try {
+              await this.cartService.clearCartItems(this.selectedDate).toPromise();
+              await this.showToast(this.translate.instant('CART.CART_CLEARED'), 'success');
+              await this.loadCartItems();
+            } catch (error) {
+              const errorMessage = this.getErrorMessage(error, 'CART.FAILED_REMOVE_ITEM');
+              await this.showToast(errorMessage, 'danger');
+              await this.loadCartItems();
+            } finally {
+              this.isLoading = false;
             }
           }
         }

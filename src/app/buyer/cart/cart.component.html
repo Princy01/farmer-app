@@ -30,13 +30,19 @@
     <!-- Select All row - only show in multi-select mode -->
     @if (allowMultipleSelection) {
       <div class="select-all-row">
-        <ion-button fill="clear" class="select-all-btn" (click)="selectAllGroups()">
-          <ion-icon
-            slot="start"
-            [name]="getSelectAllIconName(wholesalerGroups)">
-          </ion-icon>
-          {{ 'CART.SELECT_ALL' | translate }}
-        </ion-button>
+        <div>
+          <ion-button fill="clear" class="select-all-btn" (click)="selectAllGroups()">
+            <ion-icon
+              slot="start"
+              [name]="getSelectAllIconName(wholesalerGroups)">
+            </ion-icon>
+            {{ 'CART.SELECT_ALL' | translate }}
+          </ion-button>
+          <ion-button fill="clear" class="remove-group-btn" (click)="clearCartItems()" [disabled]="isLoading">
+            <ion-icon slot="start" name="trash-outline"></ion-icon>
+            {{ 'CART.CLEAR_CART' | translate }}
+          </ion-button>
+        </div>
         <span class="select-all-summary">
           {{ selectedGroupCount }} / {{ wholesalerGroups.length }} {{ 'CART.STORES' | translate }}
         </span>
