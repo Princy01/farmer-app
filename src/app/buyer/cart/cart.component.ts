@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, LoadingController, ToastController, ModalController } from '@ionic/angular';
+import { IonicModule, AlertController, LoadingController, ToastController, ModalController, ViewWillEnter } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -56,7 +56,7 @@ interface QuantityUpdate {
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss']
 })
-export class CartComponent implements OnInit, OnDestroy {
+export class CartComponent implements OnInit, OnDestroy, ViewWillEnter {
   cartForm: FormGroup;
   cartProducts: CartItem[] = [];   // raw flat list from backend
   wholesalerGroups: WholesalerGroup[] = [];
@@ -113,6 +113,10 @@ export class CartComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadCartItems();
     this.setupQuantityDebounce();
+  }
+
+  ionViewWillEnter() {
+    this.loadCartItems();
   }
 
   ngOnDestroy() {
@@ -191,7 +195,7 @@ export class CartComponent implements OnInit, OnDestroy {
           wholesalerId: wId,
           branchId: bId,
           wholesalerName: item.wholesaler_name ?? `Wholesaler ${wId}`,
-          branchName: `Branch ${bId}`,
+          branchName: item.branch_name ?? `Branch ${bId}`,
           items: [],
           subtotal: 0,
           isSelected: prev?.isSelected ?? false,   // default not selected when single-select

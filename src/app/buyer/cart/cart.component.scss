@@ -203,10 +203,15 @@
 
 .remove-group-btn {
   --color: #ff6b6b;
-  --padding-start: 4px;
-  --padding-end: 4px;
-  height: 32px;
-  font-size: 1rem;
+  --padding-start: 1rem;
+  --padding-end: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  ion-icon {
+    margin-right: 6px;
+    font-size: 1.1rem;
+  }
 }
 
 /* Single item row */

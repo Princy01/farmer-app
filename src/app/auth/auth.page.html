@@ -87,8 +87,13 @@
             </ion-input>
           </ion-item>
           <div class="error-message" [id]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched ? 'name-error' : null"
-            *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.errors?.['required']">
-            {{ 'AUTH.FULL_NAME_REQUIRED' | translate }}
+            *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.errors">
+            <span *ngIf="registerForm.get('name')?.errors?.['required']">
+              {{ 'AUTH.FULL_NAME_REQUIRED' | translate }}
+            </span>
+            <span *ngIf="registerForm.get('name')?.errors?.['minlength']">
+              {{ 'AUTH.FULL_NAME_MIN_LENGTH' | translate }}
+            </span>
           </div>
         </div>
 
@@ -207,8 +212,13 @@
             </ion-input>
           </ion-item>
           <div class="error-message"
-            *ngIf="registerForm.get('pincode')?.touched && registerForm.get('pincode')?.errors?.['required']">
-            {{ 'AUTH.PINCODE_REQUIRED' | translate }}
+            *ngIf="registerForm.get('pincode')?.touched && registerForm.get('pincode')?.errors">
+            <span *ngIf="registerForm.get('pincode')?.errors?.['required']">
+              {{ 'AUTH.PINCODE_REQUIRED' | translate }}
+            </span>
+            <span *ngIf="registerForm.get('pincode')?.errors?.['pattern']">
+              {{ 'AUTH.PINCODE_INVALID' | translate }}
+            </span>
           </div>
         </div>
 

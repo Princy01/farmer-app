@@ -11,6 +11,7 @@ export interface CartItem {
   product_name: string;
   wholesaler_id: number;
   branch_id: number;
+  branch_name: string;
   image_path: string;
   wholesaler_name: string;
   unit_id: number;
@@ -35,7 +36,7 @@ export interface UpdateCartItemRequest {
 }
 
 export interface GetCartRequest {
-  doe: string; // Date of entry in format YYYY-MM-DD
+  DOE: string; // Date of entry in format YYYY-MM-DD
 }
 
 export interface DeleteCartItemRequest {
@@ -99,7 +100,7 @@ export class CartService {
     const dateOfEntry = doe || new Date().toISOString().split('T')[0];
 
     const payload: GetCartRequest = {
-      doe: dateOfEntry
+      DOE: dateOfEntry
     };
 
     return this.http.post<CartItem[]>(

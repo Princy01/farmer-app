@@ -34,10 +34,10 @@ export interface UserRegistration {
 }
 
 export interface AuthResponse {
-  message: string;
+  message?: string;
   role_id: number;
   access_token: string;
-  refresh_token: string;
+  refresh_token?: string;
 }
 
 export interface Location {
@@ -66,6 +66,7 @@ export interface RegistrationResponse {
   user_id?: number;
   email_verification_required?: boolean;
   verification_sent?: boolean;
+  verification_token?: string; // FOR TESTING ONLY - Token for email verification
 }
 
 export interface LoginResponse {
@@ -75,6 +76,17 @@ export interface LoginResponse {
   refresh_token?: string;
   error?: string;
   email_verification_required?: boolean;
+}
+
+export interface VerifyEmailResponse {
+  message: string;
+  verified: boolean;
+}
+
+export interface ResendVerificationResponse {
+  message: string;
+  verification_sent: boolean;
+  verification_token?: string; // FOR TESTING ONLY
 }
 
 @Injectable({
@@ -126,6 +138,9 @@ export class AuthService {
             if (userId) {
               localStorage.setItem(this.userIdKey, userId.toString());
             }
+          }
+          if (response.role_id) {
+            localStorage.setItem(this.roleKey, this.mapRoleIdToRole(response.role_id));
           }
           if (response.refresh_token) {
             localStorage.setItem(this.refreshTokenKey, response.refresh_token);
@@ -323,11 +338,11 @@ export class AuthService {
       );
   }
 
-  verifyEmail(token: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/verify-email`, { token });
+  verifyEmail(token: string): Observable<VerifyEmailResponse> {
+    return this.http.post<VerifyEmailResponse>(`${this.apiUrl}/auth/verify-email`, { token });
   }
 
-  resendVerification(email: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/resend-verification`, { email });
+  resendVerification(email: string): Observable<ResendVerificationResponse> {
+    return this.http.post<ResendVerificationResponse>(`${this.apiUrl}/auth/resend-verification`, { email });
   }
 }
