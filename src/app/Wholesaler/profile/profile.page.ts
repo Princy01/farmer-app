@@ -13,7 +13,8 @@ import { addIcons } from 'ionicons';
 import {
   personOutline, mailOutline, callOutline, locationOutline,
   businessOutline, arrowBackOutline, create, saveOutline,
-  closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline
+  closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline,
+  mapOutline, locateOutline, calendarOutline
 } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
@@ -40,6 +41,8 @@ export class ProfilePage implements OnInit, OnDestroy {
     address: null,
     location: null,
     location_id: null,
+    city_id: null,
+    city_name: null,
     state_id: null,
     state_name: null,
     pincode: null,
@@ -69,7 +72,8 @@ export class ProfilePage implements OnInit, OnDestroy {
     addIcons({
       personOutline, mailOutline, callOutline, locationOutline,
       businessOutline, arrowBackOutline, create, saveOutline,
-      closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline
+      closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline,
+      mapOutline, locateOutline, calendarOutline
     });
   }
 
@@ -102,6 +106,8 @@ export class ProfilePage implements OnInit, OnDestroy {
           address: backendProfile.address,
           location: backendProfile.location,
           location_id: backendProfile.location_id,
+          city_id: backendProfile.city_id,
+          city_name: backendProfile.city_name,
           state_id: backendProfile.state_id,
           state_name: backendProfile.state_name,
           pincode: backendProfile.pincode,
@@ -159,7 +165,7 @@ export class ProfilePage implements OnInit, OnDestroy {
       mobile: this.profile.mobile || '',
       address: this.profile.address || '',
       state_name: this.profile.state_name || '',
-      city_name: this.profile.location || '',
+      city_name: this.profile.city_name || '',
       location_name: this.profile.location || '',
       pincode: this.profile.pincode || ''
     };
@@ -364,6 +370,9 @@ export class ProfilePage implements OnInit, OnDestroy {
         this.profile.email !== this.originalProfile.email ||
         this.profile.mobile !== this.originalProfile.mobile ||
         this.profile.address !== this.originalProfile.address ||
+        this.profile.state_name !== this.originalProfile.state_name ||
+        this.profile.city_name !== this.originalProfile.city_name ||
+        this.profile.location !== this.originalProfile.location ||
         this.profile.pincode !== this.originalProfile.pincode;
 
       this.hasUnsavedChanges = fieldsChanged;

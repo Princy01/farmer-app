@@ -13,6 +13,8 @@ export interface WholesalerProfile {
   address: string | null;
   location: string | null;
   location_id: number | null;
+  city_id: number | null;
+  city_name: string | null;
   state_id: number | null;
   state_name: string | null;
   pincode: string | null;

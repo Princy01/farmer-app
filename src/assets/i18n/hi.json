@@ -2400,6 +2400,8 @@
     "ADDRESS": "पता",
     "ADDRESS_PLACEHOLDER": "पूरा पता दर्ज करें",
     "LOCATION": "स्थान",
+    "CITY": "शहर",
+    "CITY_PLACEHOLDER": "शहर दर्ज करें",
     "STATE": "राज्य",
     "PINCODE": "पिनकोड",
     "PINCODE_PLACEHOLDER": "पिनकोड दर्ज करें",
@@ -2553,6 +2555,7 @@
     "ABOUT": "व्यवसाय के बारे में",
     "STATS": "आंकड़े",
     "TOTAL_ORDERS": "कुल ऑर्डर",
+    "TOTAL_BRANCHES": "कुल शाखाएँ",
     "ACTIVE_ORDERS": "सक्रिय ऑर्डर",
     "TOTAL_SPENT": "कुल खर्च",
     "MEMBER_SINCE": "सदस्यता की तारीख",
@@ -2594,7 +2597,13 @@
     "AUTH_ERROR": "प्रमाणीकरण त्रुटि",
     "IMAGE_UPLOAD_ERROR": "छवि अपलोड करने में विफल। कृपया फिर से प्रयास करें।",
     "VALIDATION_ERROR": "सत्यापन त्रुटि",
-    "ERROR": "त्रुटि"
+    "ERROR": "त्रुटि",
+    "CITY_PLACEHOLDER": "शहर दर्ज करें",
+    "UPLOADING": "छवि अपलोड हो रही है...",
+    "IMAGE_UPDATED": "प्रोफ़ाइल छवि सफलतापूर्वक अपडेट की गई",
+    "CAMERA_FAILED": "कैमरा से छवि कैप्चर करने में विफल",
+    "GALLERY_FAILED": "गैलरी से छवि चुनने में विफल",
+    "UPLOAD_FAILED": "प्रोफ़ाइल छवि अपलोड करने में विफल"
   },
   "RETAILER_SETTINGS": {
     "TITLE": "सेटिंग्स",

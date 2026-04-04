@@ -15,8 +15,9 @@ import {
   personOutline, mailOutline, callOutline, locationOutline,
   businessOutline, arrowBackOutline, createOutline, saveOutline,
   closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline,
-  storefrontOutline, cardOutline
+  storefrontOutline, cardOutline, locateOutline, calendarOutline
 } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 import { AuthService } from 'src/app/auth/auth.service';
 import { RetailerProfile, RetailerProfileService, UpdateUserProfileRequest } from './profile.service';
@@ -34,19 +35,21 @@ export class ProfilePage implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   profile: RetailerProfile = {
-    retailer_id: 0,
+    id: 0,
     name: '',
     email: '',
-    mobile_num: '',
+    mobile: '',
     address: '',
-    pincode: '',
-    state_id: 0,
+    location_id: null,
+    location: '',
+    state_id: null,
     state_name: '',
-    location_id: 0,
-    location_name: '',
-    registration_date: '',
-    active_status: true,
-    total_orders: 0
+    city_id: null,
+    city_name: '',
+    pincode: '',
+    status: 'inactive',
+    member_since: '',
+    total_branches: 0
   };
 
   isEditing = false;
@@ -67,7 +70,7 @@ export class ProfilePage implements OnInit, OnDestroy {
       personOutline, mailOutline, callOutline, locationOutline,
       businessOutline, arrowBackOutline, createOutline, saveOutline,
       closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline,
-      storefrontOutline, cardOutline
+      storefrontOutline, cardOutline, locateOutline, calendarOutline
     });
   }
 
@@ -92,7 +95,18 @@ export class ProfilePage implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (profile: RetailerProfile) => {
-          this.profile = profile;
+          this.profile = {
+            ...profile,
+            email: profile.email ?? '',
+            mobile: profile.mobile ?? '',
+            address: profile.address ?? '',
+            location: profile.location ?? '',
+            state_name: profile.state_name ?? '',
+            city_name: profile.city_name ?? '',
+            pincode: profile.pincode ?? '',
+            status: profile.status ?? 'inactive',
+            member_since: profile.member_since ?? ''
+          };
           this.isLoading = false;
         },
         error: (error: HttpErrorResponse) => {
@@ -118,12 +132,13 @@ export class ProfilePage implements OnInit, OnDestroy {
 
     const profileData: UpdateUserProfileRequest = {
       name: this.profile.name,
-      email: this.profile.email,
-      mobile_num: this.profile.mobile_num,
-      address: this.profile.address,
-      state_name: this.profile.state_name,
-      location_name: this.profile.location_name,
-      pincode: this.profile.pincode
+      email: this.profile.email ?? '',
+      mobile: this.profile.mobile ?? '',
+      address: this.profile.address ?? '',
+      state_name: this.profile.state_name ?? '',
+      city_name: this.profile.city_name ?? '',
+      location_name: this.profile.location ?? '',
+      pincode: this.profile.pincode ?? ''
     };
 
     this.retailerProfileService.updateProfile(profileData)
@@ -148,7 +163,7 @@ export class ProfilePage implements OnInit, OnDestroy {
   }
 
   validateProfile(): boolean {
-    if (!this.profile.name || !this.profile.email || !this.profile.mobile_num) {
+    if (!this.profile.name || !this.profile.email || !this.profile.mobile) {
       const alert = this.alertCtrl.create({
         header: this.translate.instant('RETAILER_PROFILE.VALIDATION_ERROR'),
         message: this.translate.instant('RETAILER_PROFILE.REQUIRED_FIELDS'),
@@ -170,6 +185,10 @@ export class ProfilePage implements OnInit, OnDestroy {
     }
 
     return true;
+  }
+
+  isProfileActive(): boolean {
+    return this.profile.status?.toLowerCase?.() === 'active';
   }
 
   async changeProfileImage() {
@@ -198,26 +217,88 @@ export class ProfilePage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  captureImage() {
-    // Camera capture functionality would be implemented here
-    // For now, show a message that this feature will be available soon
-    this.toastCtrl.create({
-      message: 'Camera feature will be available soon',
-      duration: 2000,
-      color: 'info',
-      position: 'top'
-    }).then(toast => toast.present());
+  async captureImage() {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: true,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera
+      });
+      if (image.base64String) {
+        await this.uploadImage(image.base64String);
+      }
+    } catch (error: any) {
+      if (error?.message?.includes('User cancelled')) {
+        return;
+      }
+      this.showErrorAlert(
+        this.translate.instant('RETAILER_PROFILE.ERROR'),
+        this.translate.instant('RETAILER_PROFILE.CAMERA_FAILED')
+      );
+    }
   }
 
-  selectImage() {
-    // Image selection from gallery would be implemented here
-    // For now, show a message that this feature will be available soon
-    this.toastCtrl.create({
-      message: 'Gallery selection will be available soon',
-      duration: 2000,
-      color: 'info',
-      position: 'top'
-    }).then(toast => toast.present());
+  async selectImage() {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: true,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Photos
+      });
+      if (image.base64String) {
+        await this.uploadImage(image.base64String);
+      }
+    } catch (error: any) {
+      if (error?.message?.includes('User cancelled')) {
+        return;
+      }
+      this.showErrorAlert(
+        this.translate.instant('RETAILER_PROFILE.ERROR'),
+        this.translate.instant('RETAILER_PROFILE.GALLERY_FAILED')
+      );
+    }
+  }
+
+  async uploadImage(base64: string) {
+    const loading = await this.loadingCtrl.create({
+      message: this.translate.instant('RETAILER_PROFILE.UPLOADING')
+    });
+    await loading.present();
+    this.isLoading = true;
+
+    this.retailerProfileService.uploadProfileImage(base64)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async (response: any) => {
+          this.isLoading = false;
+          await loading.dismiss();
+          this.loadProfile();
+          const toast = await this.toastCtrl.create({
+            message: response.message || this.translate.instant('RETAILER_PROFILE.IMAGE_UPDATED'),
+            duration: 2000,
+            color: 'success',
+            position: 'top'
+          });
+          await toast.present();
+        },
+        error: async (error: any) => {
+          this.isLoading = false;
+          await loading.dismiss();
+          const errorMessage = error?.message || 'RETAILER_PROFILE.UPLOAD_FAILED';
+          this.showErrorAlert(
+            this.translate.instant('RETAILER_PROFILE.ERROR'),
+            this.translate.instant(errorMessage)
+          );
+        }
+      });
+  }
+
+  getImageSrc(image: string | null | undefined): string {
+    if (!image) return '';
+    if (image.startsWith('data:')) return image;
+    return `data:image/jpeg;base64,${image}`;
   }
 
   goBack() {

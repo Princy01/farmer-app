@@ -6,28 +6,31 @@ import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
 export interface RetailerProfile {
-  retailer_id: number;
+  id: number;
   name: string;
-  email: string;
-  mobile_num: string;
-  address: string;
-  pincode: string;
-  state_id: number;
-  state_name: string;
-  location_id: number;
-  location_name: string;
-  registration_date: string;
-  active_status: boolean;
-  total_orders: number;
-  profile_image?: string;
+  email: string | null;
+  mobile: string | null;
+  address: string | null;
+  location_id: number | null;
+  location: string | null;
+  state_id: number | null;
+  state_name: string | null;
+  city_id: number | null;
+  city_name: string | null;
+  pincode: string | null;
+  status: string;
+  member_since: string | null;
+  total_branches: number;
+  profile_image?: string | null;
 }
 
 export interface UpdateUserProfileRequest {
   name: string;
   email: string;
-  mobile_num: string;
+  mobile: string;
   address: string;
   state_name: string;
+  city_name: string;
   location_name: string;
   pincode: string;
 }

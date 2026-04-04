@@ -149,26 +149,55 @@
               </ion-textarea>
             </div>
 
-            <!-- Location -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="business-outline"></ion-icon>
-                <span>{{ 'PROFILE.LOCATION' | translate }}</span>
-              </div>
-              <div class="detail-value">
-                {{ profile.location }}
-              </div>
-            </div>
-
             <!-- State -->
             <div class="detail-item">
               <div class="detail-label">
                 <ion-icon name="map-outline"></ion-icon>
                 <span>{{ 'PROFILE.STATE' | translate }}</span>
               </div>
-              <div class="detail-value">
-                {{ profile.state_name }}
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.state_name }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.state_name"
+                (ngModelChange)="onProfileFieldChange()"
+                placeholder="{{ 'PROFILE.STATE' | translate }}"
+                class="edit-input"
+                aria-label="State name">
+              </ion-input>
+            </div>
+
+            <!-- City -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>{{ 'PROFILE.CITY' | translate }}</span>
               </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.city_name }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.city_name"
+                (ngModelChange)="onProfileFieldChange()"
+                placeholder="{{ 'PROFILE.CITY_PLACEHOLDER' | translate }}"
+                class="edit-input"
+                aria-label="City name">
+              </ion-input>
+            </div>
+
+            <!-- Location -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="business-outline"></ion-icon>
+                <span>{{ 'PROFILE.LOCATION' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.location }}</div>
+              <ion-input
+                *ngIf="isEditing"
+                [(ngModel)]="profile.location"
+                (ngModelChange)="onProfileFieldChange()"
+                placeholder="{{ 'PROFILE.LOCATION' | translate }}"
+                class="edit-input"
+                aria-label="Location name">
+              </ion-input>
             </div>
 
             <!-- Pincode -->
