@@ -36,6 +36,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private subscription = new Subscription();
   private expiryTimers = new Map<number, NodeJS.Timeout>();
+  private fallbackRefreshTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly FALLBACK_REFRESH_MS = 5000;
 
   // Driver configuration (will be loaded dynamically)
   transporterId: string = '';
@@ -124,6 +126,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
     this.subscription.unsubscribe();
     this.transportRealtimeService.disconnect();
+    this.stopFallbackPolling();
     this.clearExpiryTimers();
     this.failedOperations.clear();
   }
@@ -182,9 +185,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       .subscribe(preferences => {
         this.hasLocationPreferences = this.locationPreferenceService.hasPreferences();
         this.updateLocationSummary();
-        if (this.isDriverAvailable && this.hasLocationPreferences && this.wsConnected) {
-          this.loadTransportRequests();
-        }
+        this.syncRequestLoadingState();
       });
   }
 
@@ -219,14 +220,13 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           if (isConnected) {
             this.wsConnectionMessage = 'Connected';
             this.isReconnecting = false;
+            this.stopFallbackPolling();
 
-            // Load offers when connected
-            if (this.isDriverAvailable && this.hasLocationPreferences) {
-              this.loadTransportRequests();
-            }
+            this.syncRequestLoadingState();
           } else {
             this.wsConnectionMessage = 'Reconnecting...';
             this.isReconnecting = true;
+            this.startFallbackPolling();
           }
         })
     );
@@ -346,9 +346,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           this.driverStatus = response.status;
           this.isDriverAvailable = response.status === 'active';
           this.isLoadingStatus = false;
-          if (this.isDriverAvailable && this.hasLocationPreferences && this.wsConnected) {
-            this.loadTransportRequests();
-          }
+          this.syncRequestLoadingState();
         },
         error: (error) => {
           this.isLoadingStatus = false;
@@ -382,12 +380,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
           this.showToast(this.translate.instant(messageKey), 'success');
 
-          if (this.isDriverAvailable && this.hasLocationPreferences) {
-            this.loadTransportRequests();
-          } else if (!this.isDriverAvailable) {
-            this.transportRequests = [];
-            this.filteredRequests = [];
-          }
+          this.syncRequestLoadingState();
         },
         error: (error) => {
           this.isTogglingAvailability = false;
@@ -402,9 +395,52 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       });
   }
 
+  private canLoadRequests(): boolean {
+    return this.isDriverAvailable && this.hasLocationPreferences && !this.isAvailabilityLocked;
+  }
+
+  private syncRequestLoadingState() {
+    if (!this.canLoadRequests()) {
+      this.stopFallbackPolling();
+      if (!this.isDriverAvailable || this.isAvailabilityLocked || !this.hasLocationPreferences) {
+        this.transportRequests = [];
+        this.filteredRequests = [];
+      }
+      return;
+    }
+
+    this.loadTransportRequests();
+    if (this.wsConnected) {
+      this.stopFallbackPolling();
+    } else {
+      this.startFallbackPolling();
+    }
+  }
+
+  private startFallbackPolling() {
+    if (this.fallbackRefreshTimer || this.wsConnected) {
+      return;
+    }
+
+    this.fallbackRefreshTimer = setInterval(() => {
+      if (!this.canLoadRequests() || this.wsConnected) {
+        this.stopFallbackPolling();
+        return;
+      }
+      this.loadTransportRequests();
+    }, this.FALLBACK_REFRESH_MS);
+  }
+
+  private stopFallbackPolling() {
+    if (this.fallbackRefreshTimer) {
+      clearInterval(this.fallbackRefreshTimer);
+      this.fallbackRefreshTimer = null;
+    }
+  }
+
   private loadTransportRequests() {
     // Only load requests if driver is available
-    if (!this.isDriverAvailable) {
+    if (!this.canLoadRequests()) {
       this.transportRequests = [];
       this.filteredRequests = [];
       return;

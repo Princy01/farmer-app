@@ -128,6 +128,18 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
     return date.slice(0, 10) === today;
   }
 
+  canVerifyPickup() {
+    if (!this.selectedJob || !this.selectedOrder) {
+      return false;
+    }
+
+    const jobIsToday = this.isToday(this.selectedJob.delivery_date);
+    const pickupWindowOpen = ['accepted', 'partially_picked'].includes(this.selectedJob.job_status);
+    const orderAlreadyPickedOrDelivered = [5, 8].includes(this.selectedOrder.order_status_id);
+
+    return jobIsToday && pickupWindowOpen && !orderAlreadyPickedOrDelivered;
+  }
+
   verifyOtp(enteredOtp: string) {
     if (!enteredOtp?.trim()) {
       this.otpError = this.translate.instant('PICKUP_ORDERS.ENTER_OTP');

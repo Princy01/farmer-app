@@ -96,10 +96,7 @@
 
   <div
     class="otp-section"
-    *ngIf="
-      isToday(selectedOrder.date_of_order) &&
-      selectedOrder.order_status_text === 'Processing'
-    "
+    *ngIf="canVerifyPickup()"
   >
     <ion-text>
       <h3>{{ 'PICKUP_ORDERS.VERIFY_PICKUP' | translate }}</h3>
