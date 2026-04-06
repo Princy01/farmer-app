@@ -403,17 +403,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
    * Final price = Math.max(50, rate * distance)
    */
   calculateRidePrice(): void {
-    if (this.hasRideRequest && this.transportData?.delivery_type && this.transportData?.distance) {
-      const ratesPerKm: Record<string, number> = {
-        standard: 8,
-        express: 15,
-        priority: 25
-      };
-      const rate = ratesPerKm[this.transportData.delivery_type] || 0;
-      this.estimatedRidePrice = Math.max(50, Math.round(rate * this.transportData.distance));
-    } else {
-      this.estimatedRidePrice = 0;
-    }
+    this.estimatedRidePrice = this.hasRideRequest ? (this.transportData?.base_price || 0) : 0;
 
     this.calculateGroupPricing();
   }

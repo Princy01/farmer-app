@@ -22,14 +22,6 @@ import {
   navigateOutline
 } from 'ionicons/icons';
 
-// Constants for delivery rates
-const DELIVERY_RATES = {
-  STANDARD: 8,
-  EXPRESS: 15,
-  PRIORITY: 25,
-  MIN_CHARGE: 50
-} as const;
-
 const DISTANCE_RANGE = {
   MIN: 5,
   MAX: 100
@@ -85,6 +77,8 @@ export class RideComponent implements OnInit, OnDestroy {
   dropoffLocation: string = '';
   distance: number = 0; // Distance in km
   isLoadingDistance: boolean = false;
+  isLoadingQuote: boolean = false;
+  private quotedBasePrice: number = 0;
 
   isPremiumUser: boolean = false;
 
@@ -128,6 +122,10 @@ export class RideComponent implements OnInit, OnDestroy {
     if (!this.validateRequiredData()) {
       this.showErrorAndNavigateBack();
     }
+
+    if (this.existingTransportData?.base_price) {
+      this.quotedBasePrice = this.existingTransportData.base_price;
+    }
   }
 
   ngOnDestroy(): void {
@@ -149,11 +147,13 @@ export class RideComponent implements OnInit, OnDestroy {
         // Convert meters to km and round to 2 decimal places
         this.distance = Math.round((response.distance_meters / 1000) * 100) / 100;
         this.isLoadingDistance = false;
+        void this.refreshPriceQuote();
       },
       error: () => {
         // Fallback to dummy distance on error
         this.distance = this.calculateDummyDistance();
         this.isLoadingDistance = false;
+        void this.refreshPriceQuote();
       }
     });
   }
@@ -175,6 +175,7 @@ export class RideComponent implements OnInit, OnDestroy {
       this.existingTransportData = navData['transportData'] || null;
       if (this.existingTransportData?.delivery_type) {
         this.selectedTransportType = this.existingTransportData.delivery_type as TransportType;
+        this.quotedBasePrice = this.existingTransportData.base_price || 0;
       }
 
       // Extract coordinates from available data
@@ -279,7 +280,7 @@ export class RideComponent implements OnInit, OnDestroy {
 
         transportDataToPass = {
           delivery_type: this.selectedTransportType,
-          distance: this.distance * 1000, // Store in meters
+          distance: this.distance,
           distance_km: this.distance,
           load_type: 'general',
           status: 'pending',
@@ -319,12 +320,16 @@ export class RideComponent implements OnInit, OnDestroy {
     try {
       await loading.present();
 
+      await this.refreshPriceQuote();
       const basePrice = this.getBaseDeliveryCharge();
+      if (!basePrice) {
+        throw new Error('transport quote unavailable');
+      }
       const urgency = this.selectedTransportType === 'priority' ? 'high' : 'standard';
 
       const transportRequestData: TransportData = {
         delivery_type: this.selectedTransportType,
-        distance: this.distance * 1000, // Store in meters
+        distance: this.distance,
         distance_km: this.distance,
         load_type: 'general',
         status: 'pending',
@@ -360,6 +365,7 @@ export class RideComponent implements OnInit, OnDestroy {
       return;
     }
     this.selectedTransportType = type as TransportType;
+    await this.refreshPriceQuote();
   }
 
   private async showPremiumUpgradeModal(): Promise<void> {
@@ -441,43 +447,42 @@ export class RideComponent implements OnInit, OnDestroy {
     }
   }
 
+  private async refreshPriceQuote(): Promise<void> {
+    const branch = this.checkoutData.selectedBranch;
+    if (!this.selectedTransportType || this.distance <= 0 || !branch?.city_shortname) {
+      return;
+    }
+
+    this.isLoadingQuote = true;
+
+    try {
+      const quote = await this.buyerApiService.calculateTransportPricePreview(
+        this.distance,
+        this.totalWeight,
+        this.selectedTransportType,
+        branch.city_shortname,
+        branch.city_name || branch.city_shortname,
+        'general'
+      ).toPromise();
+
+      this.quotedBasePrice = quote?.price || 0;
+    } catch {
+      this.quotedBasePrice = 0;
+    } finally {
+      this.isLoadingQuote = false;
+    }
+  }
+
   getBaseDeliveryCharge(): number {
-    if (!this.selectedTransportType || this.distance === 0) {
+    if (!this.selectedTransportType) {
       return 0;
     }
 
-    // Delivery type multipliers (currently all 1, will be customizable later)
-    const multipliers: Record<TransportType, number> = {
-      standard: 1,
-      express: 1,
-      priority: 1
-    };
-
-    const ratesPerKm: Record<TransportType, number> = {
-      standard: DELIVERY_RATES.STANDARD,
-      express: DELIVERY_RATES.EXPRESS,
-      priority: DELIVERY_RATES.PRIORITY
-    };
-
-    const rate = ratesPerKm[this.selectedTransportType] || 0;
-    const multiplier = multipliers[this.selectedTransportType] || 1;
-    const calculatedPrice = rate * this.distance * multiplier;
-
-    return Math.max(DELIVERY_RATES.MIN_CHARGE, Math.round(calculatedPrice));
+    return this.quotedBasePrice;
   }
 
   getTotalDeliveryCost(): number {
     return this.getBaseDeliveryCharge();
-  }
-
-  getRatePerKm(): number {
-    const rates: Record<TransportType, number> = {
-      standard: DELIVERY_RATES.STANDARD,
-      express: DELIVERY_RATES.EXPRESS,
-      priority: DELIVERY_RATES.PRIORITY
-    };
-
-    return this.selectedTransportType ? rates[this.selectedTransportType] : 0;
   }
 
   getTransportTypeName(): string {

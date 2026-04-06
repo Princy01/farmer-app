@@ -275,7 +275,7 @@ export class BuyerApiService {
 
     return this.applyRetryLogic(
       this.http.post<{ distance_meters: number; duration_seconds: number }>(
-        `${this.apiUrl}/route-metrics`,
+        `${this.apiUrl}/transportation/requests/route-metrics`,
         payload,
         { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
       )
@@ -293,7 +293,33 @@ export class BuyerApiService {
 
     return this.applyRetryLogic(
       this.http.post<{ job_id: number; price: number }>(
-        `${this.apiUrl}/calculate-transport-job-price`,
+        `${this.apiUrl}/transportation/requests/calculate-transport-job-price`,
+        payload,
+        { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
+      )
+    );
+  }
+
+  calculateTransportPricePreview(
+    distance: number,
+    weight: number,
+    deliveryType: string,
+    cityCode: string,
+    cityName: string,
+    loadType: string = 'general'
+  ): Observable<{ price: number; vehicle_type: string }> {
+    const payload = {
+      distance,
+      weight,
+      delivery_type: deliveryType,
+      city_code: cityCode,
+      city_name: cityName,
+      load_type: loadType
+    };
+
+    return this.applyRetryLogic(
+      this.http.post<{ price: number; vehicle_type: string }>(
+        `${this.apiUrl}/transportation/requests/calculate-transport-price-preview`,
         payload,
         { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
       )
