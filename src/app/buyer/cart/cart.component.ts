@@ -146,21 +146,29 @@ export class CartComponent implements OnInit, OnDestroy, ViewWillEnter {
     });
     await loading.present();
 
-    this.cartService.getCartItems(this.selectedDate).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (items) => {
-        this.cartProducts = items;
-        this.buildGroups();
-      },
-      error: async (error) => {
-        const errorMessage = this.getErrorMessage(error, 'CART.FAILED_LOAD');
-        await this.showToast(errorMessage, 'danger');
-      },
-      complete: async () => {
-        this.isLoading = false;
-        await loading.dismiss();
-      }
+    return new Promise((resolve) => {
+      this.cartService.getCartItems(this.selectedDate).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
+        next: (items) => {
+          this.cartProducts = items;
+          this.buildGroups();
+        },
+        error: async (error) => {
+          const errorMessage = this.getErrorMessage(error, 'CART.FAILED_LOAD');
+          await this.showToast(errorMessage, 'danger');
+          this.cartProducts = [];
+          this.buildGroups();
+          this.isLoading = false;
+          await loading.dismiss();
+          resolve();
+        },
+        complete: async () => {
+          this.isLoading = false;
+          await loading.dismiss();
+          resolve();
+        }
+      });
     });
   }
 
@@ -405,6 +413,8 @@ export class CartComponent implements OnInit, OnDestroy, ViewWillEnter {
             this.isLoading = true;
             try {
               await this.cartService.clearCartItems(this.selectedDate).toPromise();
+              this.cartProducts = [];
+              this.buildGroups();
               await this.showToast(this.translate.instant('CART.CART_CLEARED'), 'success');
               await this.loadCartItems();
             } catch (error) {
