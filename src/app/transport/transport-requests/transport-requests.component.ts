@@ -35,8 +35,11 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   filteredRequests: DriverJobOffer[] = [];
   private destroy$ = new Subject<void>();
   private subscription = new Subscription();
-  private expiryTimers = new Map<number, NodeJS.Timeout>();
+  private expiryTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  private cooldownCheckTimer: ReturnType<typeof setTimeout> | null = null;
   private fallbackRefreshTimer: ReturnType<typeof setInterval> | null = null;
+  private loadRequestsSubscription: Subscription | null = null;
+  private latestLoadRequestId = 0;
   private readonly FALLBACK_REFRESH_MS = 5000;
 
   // Driver configuration (will be loaded dynamically)
@@ -90,7 +93,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   driverStatus: string = 'inactive';
   isLoadingRequests = false;
   wsConnected = false;
-  wsConnectionMessage: string = 'Connecting...';
+  wsConnectionMessage: string = '';
   isReconnecting = false;
 
   private modalController = inject(ModalController);
@@ -125,8 +128,14 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     this.subscription.unsubscribe();
+    this.loadRequestsSubscription?.unsubscribe();
+    this.loadRequestsSubscription = null;
     this.transportRealtimeService.disconnect();
     this.stopFallbackPolling();
+    if (this.cooldownCheckTimer) {
+      clearTimeout(this.cooldownCheckTimer);
+      this.cooldownCheckTimer = null;
+    }
     this.clearExpiryTimers();
     this.failedOperations.clear();
   }
@@ -134,16 +143,22 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   private startCooldownTimer() {
     if (!this.driverCooldownUntil) return;
 
+    if (this.cooldownCheckTimer) {
+      clearTimeout(this.cooldownCheckTimer);
+      this.cooldownCheckTimer = null;
+    }
+
     const checkCooldown = () => {
       if (this.driverCooldownUntil && new Date() >= this.driverCooldownUntil) {
         this.isUnderCooldown = false;
         this.driverCooldownUntil = null;
+        this.cooldownCheckTimer = null;
         this.showToast(
           this.translate.instant('TRANSPORT_REQUESTS.COOLDOWN_EXPIRED'),
           'success'
         );
       } else {
-        setTimeout(checkCooldown, 30000); // Check every 30 seconds
+        this.cooldownCheckTimer = setTimeout(checkCooldown, 30000); // Check every 30 seconds
       }
     };
     checkCooldown();
@@ -207,7 +222,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   private connectRealtime() {
     // Connect to WebSocket
     this.transportRealtimeService.connect();
-    this.wsConnectionMessage = 'Connecting...';
+    this.wsConnectionMessage = this.translate.instant('TRANSPORT_REQUESTS.WS_CONNECTING');
     this.isReconnecting = true;
 
     // Listen for connection status changes
@@ -218,13 +233,13 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           this.wsConnected = isConnected;
 
           if (isConnected) {
-            this.wsConnectionMessage = 'Connected';
+            this.wsConnectionMessage = this.translate.instant('TRANSPORT_REQUESTS.WS_CONNECTED');
             this.isReconnecting = false;
             this.stopFallbackPolling();
 
             this.syncRequestLoadingState();
           } else {
-            this.wsConnectionMessage = 'Reconnecting...';
+            this.wsConnectionMessage = this.translate.instant('TRANSPORT_REQUESTS.WS_RECONNECTING');
             this.isReconnecting = true;
             this.startFallbackPolling();
           }
@@ -236,7 +251,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       this.transportRealtimeService.offers$
         .pipe(takeUntil(this.destroy$))
         .subscribe(offers => {
-          this.transportRequests = offers;
+          this.transportRequests = this.deduplicateRequests(offers);
           this.applyFilters();
           this.setupExpiryTimers();
         })
@@ -267,8 +282,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.transportRealtimeService.error$
         .pipe(takeUntil(this.destroy$))
-        .subscribe(error => {
-          this.showToast(error, 'danger');
+        .subscribe(errorKey => {
+          this.showToast(this.translate.instant(errorKey), 'danger');
         })
     );
 
@@ -316,7 +331,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
           const timer = setTimeout(() => {
             this.removeExpiredOffer(request.ride_id, request.attempt_no);
           }, delay);
-          this.expiryTimers.set(request.ride_id, timer);
+          this.expiryTimers.set(this.getRequestKey(request.ride_id, request.attempt_no), timer);
         } else {
           // Already expired
           this.removeExpiredOffer(request.ride_id, request.attempt_no);
@@ -331,10 +346,35 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   private removeExpiredOffer(rideId: number, attemptNo: number) {
+    const requestKey = this.getRequestKey(rideId, attemptNo);
+    const existingTimer = this.expiryTimers.get(requestKey);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      this.expiryTimers.delete(requestKey);
+    }
+
     this.transportRequests = this.transportRequests.filter(
       r => !(r.ride_id === rideId && r.attempt_no === attemptNo)
     );
     this.applyFilters();
+  }
+
+  private getRequestKey(rideId: number, attemptNo: number): string {
+    return `${rideId}-${attemptNo}`;
+  }
+
+  private deduplicateRequests(requests: DriverJobOffer[] | null | undefined): DriverJobOffer[] {
+    if (!requests || requests.length === 0) {
+      return [];
+    }
+
+    const uniqueRequests = new Map<string, DriverJobOffer>();
+    for (const request of requests) {
+      const requestKey = `${request.ride_id}-${request.attempt_no}`;
+      uniqueRequests.set(requestKey, request);
+    }
+
+    return Array.from(uniqueRequests.values());
   }
 
   private loadDriverStatus() {
@@ -402,6 +442,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   private syncRequestLoadingState() {
     if (!this.canLoadRequests()) {
       this.stopFallbackPolling();
+      this.loadRequestsSubscription?.unsubscribe();
+      this.loadRequestsSubscription = null;
+      this.isLoadingRequests = false;
       if (!this.isDriverAvailable || this.isAvailabilityLocked || !this.hasLocationPreferences) {
         this.transportRequests = [];
         this.filteredRequests = [];
@@ -441,10 +484,18 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   private loadTransportRequests() {
     // Only load requests if driver is available
     if (!this.canLoadRequests()) {
+      this.loadRequestsSubscription?.unsubscribe();
+      this.loadRequestsSubscription = null;
+      this.isLoadingRequests = false;
       this.transportRequests = [];
       this.filteredRequests = [];
       return;
     }
+
+    const requestId = ++this.latestLoadRequestId;
+
+    this.loadRequestsSubscription?.unsubscribe();
+    this.loadRequestsSubscription = null;
 
     this.isLoadingRequests = true;
     const preferences = this.locationPreferenceService.getCurrentPreferences();
@@ -459,16 +510,24 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       branchIds = preferences.branches;
     }
 
-    this.transportRequestService.getTransportRequestDetailed(cityIds, branchIds)
+    this.loadRequestsSubscription = this.transportRequestService.getTransportRequestDetailed(cityIds, branchIds)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.transportRequests = response || [];
+          if (requestId !== this.latestLoadRequestId) {
+            return;
+          }
+          this.transportRequests = this.deduplicateRequests(response);
           this.applyFilters();
           this.isLoadingRequests = false;
+          this.loadRequestsSubscription = null;
         },
         error: (error) => {
+          if (requestId !== this.latestLoadRequestId) {
+            return;
+          }
           this.isLoadingRequests = false;
+          this.loadRequestsSubscription = null;
           this.showToast(
             this.translate.instant('TRANSPORT_REQUESTS.LOAD_FAILED'),
             'danger'
@@ -619,7 +678,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
               .subscribe({
                 next: () => {
                   this.rejectedRequests.add(requestKey);
-                  this.saveRejectedRequest(request.ride_id);
+                  this.saveRejectedRequest(request.ride_id, request.attempt_no);
                   this.isRejectingOffer[requestKey] = false;
                   this.failedOperations.delete(operationId);
                   this.applyFilters();
@@ -897,7 +956,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.rejectedRequests.add(requestKey);
-          this.saveRejectedRequest(request.ride_id);
+          this.saveRejectedRequest(request.ride_id, request.attempt_no);
           this.isRejectingOffer[requestKey] = false;
           this.retryingOperationId = null;
           this.applyFilters();
@@ -1007,8 +1066,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private saveRejectedRequest(rideId: number) {
-    const requestKey = `${rideId}-0`;
+  private saveRejectedRequest(rideId: number, attemptNo: number) {
+    const requestKey = this.getRequestKey(rideId, attemptNo);
     this.rejectedRequests.add(requestKey);
     const rejectedArray = Array.from(this.rejectedRequests);
     localStorage.setItem('rejected_transport_requests', JSON.stringify(rejectedArray));

@@ -70,13 +70,13 @@ export class TransportRealtimeService {
 
     const token = this.authService.getToken();
     if (!token) {
-      this.errorSubject.next('No authentication token available');
+      this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_NO_AUTH_TOKEN');
       return;
     }
 
     // Check if token is expired or about to expire
     if (this.isTokenExpired(token)) {
-      this.errorSubject.next('Authentication token has expired. Please log in again.');
+      this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_AUTH_TOKEN_EXPIRED_LOGIN');
       return;
     }
 
@@ -99,7 +99,7 @@ export class TransportRealtimeService {
       };
 
       this.ws.onerror = (error: Event) => {
-        this.errorSubject.next('WebSocket connection error');
+        this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_WS_CONNECTION');
       };
 
       this.ws.onclose = () => {
@@ -108,7 +108,7 @@ export class TransportRealtimeService {
         this.reconnect();
       };
     } catch (error) {
-      this.errorSubject.next('Failed to establish WebSocket connection');
+      this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_WS_ESTABLISH');
       this.reconnect();
     }
   }
@@ -131,7 +131,7 @@ export class TransportRealtimeService {
 
   private reconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      this.errorSubject.next('Failed to reconnect to WebSocket after multiple attempts');
+      this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_WS_RECONNECT_FAILED');
       return;
     }
 
@@ -310,8 +310,10 @@ export class TransportRealtimeService {
         return true; // Invalid token format
       }
 
-      // Decode payload (base64url)
-      const payload = JSON.parse(atob(parts[1]));
+      // Decode payload (base64url -> base64)
+      const base64Url = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const paddedBase64 = base64Url.padEnd(base64Url.length + ((4 - (base64Url.length % 4)) % 4), '=');
+      const payload = JSON.parse(atob(paddedBase64));
 
       // Check expiration (exp is in seconds, Date.now() is in ms)
       if (payload.exp) {
@@ -343,14 +345,14 @@ export class TransportRealtimeService {
     this.tokenRefreshCheckInterval = setInterval(() => {
       const token = this.authService.getToken();
       if (!token) {
-        this.errorSubject.next('Authentication token lost');
+        this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_AUTH_TOKEN_LOST');
         this.disconnect();
         return;
       }
 
       if (this.isTokenExpired(token)) {
         // Token is expired or about to expire, reconnect
-        this.errorSubject.next('Authentication token expired. Reconnecting...');
+        this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_AUTH_TOKEN_EXPIRED_RECONNECTING');
         this.disconnect();
 
         // Wait a moment then reconnect with new token
@@ -359,7 +361,7 @@ export class TransportRealtimeService {
         }, 1000);
       }
     }, this.TOKEN_CHECK_INTERVAL);
-    
+
   }
 
   isWebSocketConnected(): boolean {

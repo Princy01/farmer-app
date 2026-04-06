@@ -1910,6 +1910,7 @@
     "PROCESSING": "Processing request...",
     "ACCEPTED_SUCCESS": "Request accepted successfully!",
     "ACCEPT_FAILED": "Failed to accept request. Please try again.",
+    "NEW_OFFER_AVAILABLE": "A new transport request is available",
     "REJECT_HEADER": "Reject Request",
     "REJECT_CONFIRM": "Are you sure you want to reject Job #{jobId}?\n\nPickup: {pickup}\nDelivery: {delivery}",
     "REJECTED_SUCCESS": "Request rejected",
@@ -1961,7 +1962,17 @@
     "AVAILABILITY_LOCKED": "Your availability has been locked",
     "LOCKED_TITLE": "Account Locked",
     "LOCKED_MESSAGE": "Your account has been locked by an administrator. Please contact support for assistance",
-    "CANNOT_ACCEPT_LOCKED": "You cannot accept offers while your account is locked"
+    "CANNOT_ACCEPT_LOCKED": "You cannot accept offers while your account is locked",
+    "WS_CONNECTING": "Connecting...",
+    "WS_CONNECTED": "Connected",
+    "WS_RECONNECTING": "Reconnecting...",
+    "ERROR_NO_AUTH_TOKEN": "Session not found. Please log in again.",
+    "ERROR_AUTH_TOKEN_EXPIRED_LOGIN": "Your session has expired. Please log in again.",
+    "ERROR_WS_CONNECTION": "Connection issue detected. Trying to reconnect...",
+    "ERROR_WS_ESTABLISH": "Unable to start live updates. Trying again...",
+    "ERROR_WS_RECONNECT_FAILED": "Live connection could not be restored. Please check your internet and retry.",
+    "ERROR_AUTH_TOKEN_LOST": "Your session is no longer available. Please log in again.",
+    "ERROR_AUTH_TOKEN_EXPIRED_RECONNECTING": "Refreshing session for live updates..."
   },
   "PICKUP_ORDERS": {
     "JOBS": "Jobs",
