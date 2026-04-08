@@ -21,7 +21,8 @@
 
     <form [formGroup]="businessForm" (ngSubmit)="onSubmit()">
 
-      <!-- Camera Capture Section -->
+      <!--
+      Camera Capture Section
       <div class="camera-section">
         <ion-card>
           <ion-card-header>
@@ -71,6 +72,7 @@
           </ion-card-content>
         </ion-card>
       </div>
+      -->
 
       <!-- Basic Business Information Section -->
       <div class="form-section">
@@ -340,7 +342,7 @@
         type="submit"
         color="primary"
         class="submit-btn"
-        [disabled]="businessForm.invalid || !locationCaptured"
+        [disabled]="businessForm.invalid"
       >
         <ion-icon name="save" slot="start"></ion-icon>
         {{ (isEditMode ? 'ADD_BUSINESS_LOCATION.UPDATE_BUTTON' : 'ADD_BUSINESS_LOCATION.SAVE_BUTTON') | translate }}

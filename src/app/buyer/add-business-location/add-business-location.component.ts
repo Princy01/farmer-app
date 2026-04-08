@@ -5,14 +5,15 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ToastController, LoadingController, AlertController } from '@ionic/angular/standalone';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { save, arrowBack, camera, location, trash, informationCircle, business, cameraOutline } from 'ionicons/icons';
+// import { save, arrowBack, camera, location, trash, informationCircle, business, cameraOutline } from 'ionicons/icons';
+import { save, arrowBack, location, informationCircle, business } from 'ionicons/icons';
 import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch, BranchAddressResolutionResponse } from './add-business.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { BusinessBranchWithNames } from '../business-locations/business-locations.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Geolocation } from '@capacitor/geolocation';
-import * as exifr from 'exifr';
+// import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+// import { Geolocation } from '@capacitor/geolocation';
+// import * as exifr from 'exifr';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
@@ -37,10 +38,10 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
         cities: City[] = [];
         locations: Location[] = [];
         businessTypes: BusinessType[] = [];
-        capturedImage: string = '';
-        latitude: number = 0;
-        longitude: number = 0;
-        locationCaptured: boolean = false;
+        // capturedImage: string = '';
+        // latitude: number = 0;
+        // longitude: number = 0;
+        // locationCaptured: boolean = false;
         isResolvingAddress = false;
         showAddressResolutionChecking = false;
         addressResolution: BranchAddressResolutionResponse | null = null;
@@ -74,7 +75,8 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                 private authService: AuthService,
                 private translate: TranslateService
         ) {
-                addIcons({ save, arrowBack, camera, location, trash, informationCircle, business, cameraOutline });
+                // addIcons({ save, arrowBack, camera, location, trash, informationCircle, business, cameraOutline });
+                addIcons({ save, arrowBack, location, informationCircle, business });
 
                 this.businessForm = this.formBuilder.group({
                         shopName: ['', Validators.required],
@@ -350,15 +352,15 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                                         b_type_id: location?.type_id || null,
                                         establishedYear: location?.established_year || ''
                                 });
-                                // Load existing image and coordinates
-                                if (location?.image) {
-                                        this.capturedImage = location.image;
-                                }
-                                if (location?.latitude && location?.longitude) {
-                                        this.latitude = location.latitude;
-                                        this.longitude = location.longitude;
-                                        this.locationCaptured = true;
-                                }
+                                // // Load existing image and coordinates
+                                // if (location?.image) {
+                                //         this.capturedImage = location.image;
+                                // }
+                                // if (location?.latitude && location?.longitude) {
+                                //         this.latitude = location.latitude;
+                                //         this.longitude = location.longitude;
+                                //         this.locationCaptured = true;
+                                // }
                                 // Disable all fields except phone number, email, location, and address
                                 this.businessForm.get('shopName')?.disable();
                                 this.businessForm.get('state')?.disable();
@@ -378,286 +380,286 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                 }
         }
 
-        /**
-         * Capture shop location image with camera or file input (browser fallback)
-         */
-        async captureShopImage() {
-                // Detect if running in browser (not on device)
-                const isBrowser = !window || !(window as any).Capacitor?.isNativePlatform?.();
-                if (isBrowser) {
-                        this.captureImageFromFileInput();
-                        return;
-                }
-                try {
-                        const loading = await this.loadingController.create({
-                                message: this.translate.instant('ADD_BUSINESS_LOCATION.CAPTURING_IMAGE')
-                        });
-                        await loading.present();
+        // /**
+        //  * Capture shop location image with camera or file input (browser fallback)
+        //  */
+        // async captureShopImage() {
+        //         // Detect if running in browser (not on device)
+        //         const isBrowser = !window || !(window as any).Capacitor?.isNativePlatform?.();
+        //         if (isBrowser) {
+        //                 this.captureImageFromFileInput();
+        //                 return;
+        //         }
+        //         try {
+        //                 const loading = await this.loadingController.create({
+        //                         message: this.translate.instant('ADD_BUSINESS_LOCATION.CAPTURING_IMAGE')
+        //                 });
+        //                 await loading.present();
 
-                        // Request camera permissions
-                        const permissions = await Camera.checkPermissions();
-                        if (permissions.camera !== 'granted') {
-                                await Camera.requestPermissions();
-                                const newPermissions = await Camera.checkPermissions();
-                                if (newPermissions.camera !== 'granted') {
-                                        loading.dismiss();
-                                        await this.showToast(
-                                                this.translate.instant('ADD_BUSINESS_LOCATION.CAMERA_PERMISSION_DENIED'),
-                                                'danger'
-                                        );
-                                        return;
-                                }
-                        }
+        //                 // Request camera permissions
+        //                 const permissions = await Camera.checkPermissions();
+        //                 if (permissions.camera !== 'granted') {
+        //                         await Camera.requestPermissions();
+        //                         const newPermissions = await Camera.checkPermissions();
+        //                         if (newPermissions.camera !== 'granted') {
+        //                                 loading.dismiss();
+        //                                 await this.showToast(
+        //                                         this.translate.instant('ADD_BUSINESS_LOCATION.CAMERA_PERMISSION_DENIED'),
+        //                                         'danger'
+        //                                 );
+        //                                 return;
+        //                         }
+        //                 }
 
-                        // Take photo
-                        const image = await Camera.getPhoto({
-                                quality: 90,
-                                allowEditing: false,
-                                resultType: CameraResultType.Base64,
-                                source: CameraSource.Camera,
-                                saveToGallery: false
-                        });
+        //                 // Take photo
+        //                 const image = await Camera.getPhoto({
+        //                         quality: 90,
+        //                         allowEditing: false,
+        //                         resultType: CameraResultType.Base64,
+        //                         source: CameraSource.Camera,
+        //                         saveToGallery: false
+        //                 });
 
-                        if (!image.base64String) {
-                                loading.dismiss();
-                                await this.showToast(
-                                        this.translate.instant('ADD_BUSINESS_LOCATION.IMAGE_CAPTURE_FAILED'),
-                                        'danger'
-                                );
-                                return;
-                        }
+        //                 if (!image.base64String) {
+        //                         loading.dismiss();
+        //                         await this.showToast(
+        //                                 this.translate.instant('ADD_BUSINESS_LOCATION.IMAGE_CAPTURE_FAILED'),
+        //                                 'danger'
+        //                         );
+        //                         return;
+        //                 }
 
-                        // Store the image
-                        this.capturedImage = `data:image/${image.format};base64,${image.base64String}`;
+        //                 // Store the image
+        //                 this.capturedImage = `data:image/${image.format};base64,${image.base64String}`;
 
-                        // Try to extract GPS coordinates from EXIF data
-                        const extracted = await this.extractGPSFromImage(this.capturedImage);
+        //                 // Try to extract GPS coordinates from EXIF data
+        //                 const extracted = await this.extractGPSFromImage(this.capturedImage);
 
-                        if (extracted) {
-                                this.locationCaptured = true;
-                                loading.dismiss();
-                                await this.showToast(
-                                        this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_FROM_IMAGE'),
-                                        'success'
-                                );
-                                await this.confirmLocation();
-                        } else {
-                                // Fallback to device location
-                                await this.getDeviceLocation(loading);
-                        }
+        //                 if (extracted) {
+        //                         this.locationCaptured = true;
+        //                         loading.dismiss();
+        //                         await this.showToast(
+        //                                 this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_FROM_IMAGE'),
+        //                                 'success'
+        //                         );
+        //                         await this.confirmLocation();
+        //                 } else {
+        //                         // Fallback to device location
+        //                         await this.getDeviceLocation(loading);
+        //                 }
 
-                } catch (error) {
-                        console.error('Error capturing image:', error);
-                        await this.showToast(
-                                this.translate.instant('ADD_BUSINESS_LOCATION.IMAGE_CAPTURE_ERROR'),
-                                'danger'
-                        );
-                }
-        }
+        //         } catch (error) {
+        //                 console.error('Error capturing image:', error);
+        //                 await this.showToast(
+        //                         this.translate.instant('ADD_BUSINESS_LOCATION.IMAGE_CAPTURE_ERROR'),
+        //                         'danger'
+        //                 );
+        //         }
+        // }
 
-        /**
-         * Browser fallback: Use file input to select image and extract EXIF/location
-         */
-        captureImageFromFileInput() {
-                // Create file input dynamically
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.onchange = async (event: any) => {
-                        const file = event.target.files[0];
-                        if (!file) return;
-                        // Show loading
-                        const loading = await this.loadingController.create({
-                                message: this.translate.instant('ADD_BUSINESS_LOCATION.CAPTURING_IMAGE')
-                        });
-                        await loading.present();
-                        // Read file as base64
-                        const reader = new FileReader();
-                        reader.onload = async (e: any) => {
-                                this.capturedImage = e.target.result;
-                                // Try to extract GPS
-                                const extracted = await this.extractGPSFromImage(this.capturedImage);
-                                if (extracted) {
-                                        this.locationCaptured = true;
-                                        loading.dismiss();
-                                        await this.showToast(
-                                                this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_FROM_IMAGE'),
-                                                'success'
-                                        );
-                                        await this.confirmLocation();
-                                } else {
-                                        // Fallback to browser geolocation
-                                        await this.getBrowserGeolocation(loading);
-                                }
-                        };
-                        reader.readAsDataURL(file);
-                };
-                input.click();
-        }
+        // /**
+        //  * Browser fallback: Use file input to select image and extract EXIF/location
+        //  */
+        // captureImageFromFileInput() {
+        //         // Create file input dynamically
+        //         const input = document.createElement('input');
+        //         input.type = 'file';
+        //         input.accept = 'image/*';
+        //         input.onchange = async (event: any) => {
+        //                 const file = event.target.files[0];
+        //                 if (!file) return;
+        //                 // Show loading
+        //                 const loading = await this.loadingController.create({
+        //                         message: this.translate.instant('ADD_BUSINESS_LOCATION.CAPTURING_IMAGE')
+        //                 });
+        //                 await loading.present();
+        //                 // Read file as base64
+        //                 const reader = new FileReader();
+        //                 reader.onload = async (e: any) => {
+        //                         this.capturedImage = e.target.result;
+        //                         // Try to extract GPS
+        //                         const extracted = await this.extractGPSFromImage(this.capturedImage);
+        //                         if (extracted) {
+        //                                 this.locationCaptured = true;
+        //                                 loading.dismiss();
+        //                                 await this.showToast(
+        //                                         this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_FROM_IMAGE'),
+        //                                         'success'
+        //                                 );
+        //                                 await this.confirmLocation();
+        //                         } else {
+        //                                 // Fallback to browser geolocation
+        //                                 await this.getBrowserGeolocation(loading);
+        //                         }
+        //                 };
+        //                 reader.readAsDataURL(file);
+        //         };
+        //         input.click();
+        // }
 
-        /**
-         * Fallback: Get browser geolocation (for desktop dev)
-         */
-        async getBrowserGeolocation(loading: HTMLIonLoadingElement) {
-                if (!navigator.geolocation) {
-                        loading.dismiss();
-                        await this.showToast(
-                                this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_ERROR'),
-                                'danger'
-                        );
-                        return;
-                }
-                navigator.geolocation.getCurrentPosition(
-                        async (position) => {
-                                this.latitude = position.coords.latitude;
-                                this.longitude = position.coords.longitude;
-                                this.locationCaptured = true;
-                                loading.dismiss();
-                                await this.showToast(
-                                        this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_FROM_DEVICE'),
-                                        'success'
-                                );
-                                await this.confirmLocation();
-                        },
-                        async (error) => {
-                                loading.dismiss();
-                                await this.showToast(
-                                        this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_ERROR'),
-                                        'danger'
-                                );
-                        },
-                        { enableHighAccuracy: true, timeout: 15000 }
-                );
-        }
+        // /**
+        //  * Fallback: Get browser geolocation (for desktop dev)
+        //  */
+        // async getBrowserGeolocation(loading: HTMLIonLoadingElement) {
+        //         if (!navigator.geolocation) {
+        //                 loading.dismiss();
+        //                 await this.showToast(
+        //                         this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_ERROR'),
+        //                         'danger'
+        //                 );
+        //                 return;
+        //         }
+        //         navigator.geolocation.getCurrentPosition(
+        //                 async (position) => {
+        //                         this.latitude = position.coords.latitude;
+        //                         this.longitude = position.coords.longitude;
+        //                         this.locationCaptured = true;
+        //                         loading.dismiss();
+        //                         await this.showToast(
+        //                                 this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_FROM_DEVICE'),
+        //                                 'success'
+        //                         );
+        //                         await this.confirmLocation();
+        //                 },
+        //                 async (error) => {
+        //                         loading.dismiss();
+        //                         await this.showToast(
+        //                                 this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_ERROR'),
+        //                                 'danger'
+        //                         );
+        //                 },
+        //                 { enableHighAccuracy: true, timeout: 15000 }
+        //         );
+        // }
 
-        /**
-         * Extract GPS coordinates from image EXIF data
-         */
-        async extractGPSFromImage(base64Image: string): Promise<boolean> {
-                try {
-                        // Convert base64 to blob
-                        const response = await fetch(base64Image);
-                        const blob = await response.blob();
+        // /**
+        //  * Extract GPS coordinates from image EXIF data
+        //  */
+        // async extractGPSFromImage(base64Image: string): Promise<boolean> {
+        //         try {
+        //                 // Convert base64 to blob
+        //                 const response = await fetch(base64Image);
+        //                 const blob = await response.blob();
 
-                        // Extract EXIF data
-                        const exifData = await exifr.parse(blob, {
-                                gps: true,
-                                pick: ['latitude', 'longitude']
-                        });
+        //                 // Extract EXIF data
+        //                 const exifData = await exifr.parse(blob, {
+        //                         gps: true,
+        //                         pick: ['latitude', 'longitude']
+        //                 });
 
-                        if (exifData && exifData.latitude && exifData.longitude) {
-                                this.latitude = exifData.latitude;
-                                this.longitude = exifData.longitude;
-                                return true;
-                        }
+        //                 if (exifData && exifData.latitude && exifData.longitude) {
+        //                         this.latitude = exifData.latitude;
+        //                         this.longitude = exifData.longitude;
+        //                         return true;
+        //                 }
 
-                        return false;
-                } catch (error) {
-                        console.error('Error extracting EXIF data:', error);
-                        return false;
-                }
-        }
+        //                 return false;
+        //         } catch (error) {
+        //                 console.error('Error extracting EXIF data:', error);
+        //                 return false;
+        //         }
+        // }
 
-        /**
-         * Fallback: Get device location using Geolocation plugin
-         */
-        async getDeviceLocation(loading: HTMLIonLoadingElement) {
-                try {
-                        // Check geolocation permissions
-                        const permissions = await Geolocation.checkPermissions();
-                        if (permissions.location !== 'granted') {
-                                await Geolocation.requestPermissions();
-                                const newPermissions = await Geolocation.checkPermissions();
-                                if (newPermissions.location !== 'granted') {
-                                        loading.dismiss();
-                                        await this.showToast(
-                                                this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_PERMISSION_DENIED'),
-                                                'danger'
-                                        );
-                                        return;
-                                }
-                        }
+        // /**
+        //  * Fallback: Get device location using Geolocation plugin
+        //  */
+        // async getDeviceLocation(loading: HTMLIonLoadingElement) {
+        //         try {
+        //                 // Check geolocation permissions
+        //                 const permissions = await Geolocation.checkPermissions();
+        //                 if (permissions.location !== 'granted') {
+        //                         await Geolocation.requestPermissions();
+        //                         const newPermissions = await Geolocation.checkPermissions();
+        //                         if (newPermissions.location !== 'granted') {
+        //                                 loading.dismiss();
+        //                                 await this.showToast(
+        //                                         this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_PERMISSION_DENIED'),
+        //                                         'danger'
+        //                                 );
+        //                                 return;
+        //                         }
+        //                 }
 
-                        // Get current position
-                        const position = await Geolocation.getCurrentPosition({
-                                enableHighAccuracy: true,
-                                timeout: 15000
-                        });
+        //                 // Get current position
+        //                 const position = await Geolocation.getCurrentPosition({
+        //                         enableHighAccuracy: true,
+        //                         timeout: 15000
+        //                 });
 
-                        this.latitude = position.coords.latitude;
-                        this.longitude = position.coords.longitude;
-                        this.locationCaptured = true;
+        //                 this.latitude = position.coords.latitude;
+        //                 this.longitude = position.coords.longitude;
+        //                 this.locationCaptured = true;
 
-                        loading.dismiss();
+        //                 loading.dismiss();
 
-                        await this.showToast(
-                                this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_FROM_DEVICE'),
-                                'success'
-                        );
+        //                 await this.showToast(
+        //                         this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_FROM_DEVICE'),
+        //                         'success'
+        //                 );
 
-                        await this.confirmLocation();
+        //                 await this.confirmLocation();
 
-                } catch (error) {
-                        loading.dismiss();
-                        console.error('Error getting device location:', error);
-                        await this.showToast(
-                                this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_ERROR'),
-                                'danger'
-                        );
-                }
-        }
+        //         } catch (error) {
+        //                 loading.dismiss();
+        //                 console.error('Error getting device location:', error);
+        //                 await this.showToast(
+        //                         this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_ERROR'),
+        //                         'danger'
+        //                 );
+        //         }
+        // }
 
-        /**
-         * Show confirmation dialog for captured location
-         */
-        async confirmLocation() {
-                const alert = await this.alertController.create({
-                        header: this.translate.instant('ADD_BUSINESS_LOCATION.CONFIRM_LOCATION'),
-                        message: this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_DETAILS', {
-                                latitude: this.latitude.toFixed(6),
-                                longitude: this.longitude.toFixed(6)
-                        }),
-                        buttons: [
-                                {
-                                        text: this.translate.instant('ADD_BUSINESS_LOCATION.RETAKE'),
-                                        role: 'cancel',
-                                        handler: () => {
-                                                this.captureShopImage();
-                                        }
-                                },
-                                {
-                                        text: this.translate.instant('ADD_BUSINESS_LOCATION.CONFIRM'),
-                                        handler: () => {
-                                                this.showToast(
-                                                        this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_CONFIRMED'),
-                                                        'success'
-                                                );
-                                        }
-                                }
-                        ]
-                });
-                await alert.present();
-        }
+        // /**
+        //  * Show confirmation dialog for captured location
+        //  */
+        // async confirmLocation() {
+        //         const alert = await this.alertController.create({
+        //                 header: this.translate.instant('ADD_BUSINESS_LOCATION.CONFIRM_LOCATION'),
+        //                 message: this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_DETAILS', {
+        //                         latitude: this.latitude.toFixed(6),
+        //                         longitude: this.longitude.toFixed(6)
+        //                 }),
+        //                 buttons: [
+        //                         {
+        //                                 text: this.translate.instant('ADD_BUSINESS_LOCATION.RETAKE'),
+        //                                 role: 'cancel',
+        //                                 handler: () => {
+        //                                         this.captureShopImage();
+        //                                 }
+        //                         },
+        //                         {
+        //                                 text: this.translate.instant('ADD_BUSINESS_LOCATION.CONFIRM'),
+        //                                 handler: () => {
+        //                                         this.showToast(
+        //                                                 this.translate.instant('ADD_BUSINESS_LOCATION.LOCATION_CONFIRMED'),
+        //                                                 'success'
+        //                                         );
+        //                                 }
+        //                         }
+        //                 ]
+        //         });
+        //         await alert.present();
+        // }
 
-        /**
-         * Remove captured image and location
-         */
-        removeImage() {
-                this.capturedImage = '';
-                this.latitude = 0;
-                this.longitude = 0;
-                this.locationCaptured = false;
-        }
+        // /**
+        //  * Remove captured image and location
+        //  */
+        // removeImage() {
+        //         this.capturedImage = '';
+        //         this.latitude = 0;
+        //         this.longitude = 0;
+        //         this.locationCaptured = false;
+        // }
 
         async onSubmit() {
-                // Validate location and image are captured
-                if (!this.locationCaptured || !this.capturedImage) {
-                        await this.showToast(
-                                this.translate.instant('ADD_BUSINESS_LOCATION.CAPTURE_LOCATION_FIRST'),
-                                'warning'
-                        );
-                        return;
-                }
+                // // Validate location and image are captured
+                // if (!this.locationCaptured || !this.capturedImage) {
+                //         await this.showToast(
+                //                 this.translate.instant('ADD_BUSINESS_LOCATION.CAPTURE_LOCATION_FIRST'),
+                //                 'warning'
+                //         );
+                //         return;
+                // }
 
                 if (this.businessForm.valid) {
                         const loading = await this.loadingController.create({
@@ -670,6 +672,9 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                         try {
                                 // Map form values to backend field names that match BusinessBranch struct
                                 const formValue = this.businessForm.getRawValue();
+                                const fallbackImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2ZkAAAAASUVORK5CYII=';
+                                const fallbackLatitude = 28.6139;
+                                const fallbackLongitude = 77.2090;
                                 const formData: any = {
                                         shop_name: formValue.shopName,
                                         number: formValue.number,
@@ -684,9 +689,12 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                                         privilege_user: false,
                                         established_year: formValue.establishedYear || '',
                                         active_status: true,
-                                        latitude: this.latitude,
-                                        longitude: this.longitude,
-                                        image: this.capturedImage
+                                        // latitude: this.latitude,
+                                        // longitude: this.longitude,
+                                        // image: this.capturedImage
+                                        latitude: fallbackLatitude,
+                                        longitude: fallbackLongitude,
+                                        image: fallbackImage
                                 };
 
                                 const userId = this.authService.getUserId();
@@ -815,12 +823,12 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                         }
                 });
 
-                // Add location capture to progress
-                if (this.locationCaptured) {
-                        filledFields++;
-                }
+                // // Add location capture to progress
+                // if (this.locationCaptured) {
+                //         filledFields++;
+                // }
 
-                const totalItems = totalFields + 1; // +1 for location capture
+                const totalItems = totalFields;
                 return Math.round((filledFields / totalItems) * 100);
         }
 }

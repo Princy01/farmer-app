@@ -8,7 +8,7 @@ import { State, City, Location, BusinessType, BusinessCategory, BusinessRegistra
 import { AuthService } from 'src/app/auth/auth.service';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Geolocation } from '@capacitor/geolocation';
+// import { Geolocation } from '@capacitor/geolocation';
 
 @Component({
   selector: 'app-business-registration',
@@ -24,7 +24,7 @@ export class BusinessRegistrationComponent implements OnInit {
   cities: City[] = [];
   locations: Location[] = [];
   businessTypes: BusinessType[] = [];
-  isGettingLocation = false;
+  // isGettingLocation = false;
 
   constructor(
     private fb: FormBuilder,
@@ -52,8 +52,8 @@ export class BusinessRegistrationComponent implements OnInit {
       gst_number: ['', Validators.required],
       pan_number: ['', [Validators.required, Validators.pattern(/[A-Z]{5}[0-9]{4}[A-Z]{1}/)]],
       privileged_user: [false], // Default false
-      latitude: [null, Validators.required], // Required by backend
-      longitude: [null, Validators.required], // Required by backend
+      // latitude: [null, Validators.required], // Required by backend
+      // longitude: [null, Validators.required], // Required by backend
     });
 
     addIcons({ save });
@@ -171,50 +171,54 @@ export class BusinessRegistrationComponent implements OnInit {
     });
   }
 
-  // Get current location using Capacitor Geolocation
-  async getCurrentLocation() {
-    this.isGettingLocation = true;
-    try {
-      // Check permissions first
-      const permission = await Geolocation.checkPermissions();
+  // // Get current location using Capacitor Geolocation
+  // async getCurrentLocation() {
+  //   this.isGettingLocation = true;
+  //   try {
+  //     // Check permissions first
+  //     const permission = await Geolocation.checkPermissions();
 
-      if (permission.location !== 'granted') {
-        const requestPermission = await Geolocation.requestPermissions();
-        if (requestPermission.location !== 'granted') {
-          await this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOCATION_PERMISSION');
-          this.isGettingLocation = false;
-          return;
-        }
-      }
+  //     if (permission.location !== 'granted') {
+  //       const requestPermission = await Geolocation.requestPermissions();
+  //       if (requestPermission.location !== 'granted') {
+  //         await this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOCATION_PERMISSION');
+  //         this.isGettingLocation = false;
+  //         return;
+  //       }
+  //     }
 
-      // Get current position
-      const position = await Geolocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      });
+  //     // Get current position
+  //     const position = await Geolocation.getCurrentPosition({
+  //       enableHighAccuracy: true,
+  //       timeout: 10000,
+  //       maximumAge: 0
+  //     });
 
-      this.form.patchValue({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      });
+  //     this.form.patchValue({
+  //       latitude: position.coords.latitude,
+  //       longitude: position.coords.longitude
+  //     });
 
-      await this.showSuccessToast('BUSINESS_REGISTRATION.LOCATION_SUCCESS');
-    } catch (error) {
-      console.error('Error getting location:', error);
-      await this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOCATION');
-    } finally {
-      this.isGettingLocation = false;
-    }
-  }
+  //     await this.showSuccessToast('BUSINESS_REGISTRATION.LOCATION_SUCCESS');
+  //   } catch (error) {
+  //     console.error('Error getting location:', error);
+  //     await this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOCATION');
+  //   } finally {
+  //     this.isGettingLocation = false;
+  //   }
+  // }
 
   async onSubmit() {
     if (this.form.valid) {
+      const fallbackLatitude = 28.6139;
+      const fallbackLongitude = 77.2090;
       const payload = {
         ...this.form.value,
         city_id: this.form.value.city_id,
-        latitude: parseFloat(this.form.value.latitude),
-        longitude: parseFloat(this.form.value.longitude)
+        // latitude: parseFloat(this.form.value.latitude),
+        // longitude: parseFloat(this.form.value.longitude)
+        latitude: fallbackLatitude,
+        longitude: fallbackLongitude
       };
 
       this.businessRegistrationService.addNewBusiness(payload).subscribe({

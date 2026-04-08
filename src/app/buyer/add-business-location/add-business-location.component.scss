@@ -375,7 +375,6 @@ ion-item {
   margin-bottom: 1.25rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border-radius: 12px;
-  transition: all 0.3s ease;
 
   &:hover {
     --border-color: rgba(102, 126, 234, 0.3);
@@ -385,13 +384,11 @@ ion-item {
   &.item-has-focus {
     --border-color: #667eea;
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
-    transform: translateY(-1px);
   }
 
   &.ion-invalid {
     --border-color: var(--ion-color-danger);
     --highlight-color-focused: var(--ion-color-danger);
-    animation: shake 0.4s ease-in-out;
 
     &.item-has-focus {
       box-shadow: 0 4px 16px rgba(245, 101, 101, 0.15);
@@ -456,7 +453,6 @@ ion-select {
   border-radius: 8px;
   border-left: 3px solid var(--ion-color-danger);
   display: inline-block;
-  animation: shake 0.3s ease-in-out;
 }
 
 /* Submit Button */
@@ -528,18 +524,6 @@ ion-select {
   }
 }
 
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-4px);
-  }
-  75% {
-    transform: translateX(4px);
-  }
-}
-
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);
@@ -549,23 +533,6 @@ ion-select {
     transform: scale(1.05);
     opacity: 0.8;
   }
-}
-
-/* Staggered Animation for Form Items */
-ion-item {
-  animation: fadeInUp 0.4s ease-out;
-  animation-fill-mode: both;
-
-  &:nth-child(1) { animation-delay: 0.05s; }
-  &:nth-child(2) { animation-delay: 0.1s; }
-  &:nth-child(3) { animation-delay: 0.15s; }
-  &:nth-child(4) { animation-delay: 0.2s; }
-  &:nth-child(5) { animation-delay: 0.25s; }
-  &:nth-child(6) { animation-delay: 0.3s; }
-  &:nth-child(7) { animation-delay: 0.35s; }
-  &:nth-child(8) { animation-delay: 0.4s; }
-  &:nth-child(9) { animation-delay: 0.45s; }
-  &:nth-child(10) { animation-delay: 0.5s; }
 }
 
 /* Focus States for Accessibility */

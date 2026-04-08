@@ -13,7 +13,8 @@
   <div class="container">
     <form [formGroup]="businessForm" (ngSubmit)="onSubmit()">
 
-      <!-- Camera Capture Section -->
+      <!--
+      Camera Capture Section
       <div class="camera-section">
         <ion-card>
           <ion-card-header>
@@ -61,6 +62,7 @@
           </ion-card-content>
         </ion-card>
       </div>
+      -->
 
       <!-- Shop Name -->
       <ion-item
@@ -344,7 +346,7 @@
         type="submit"
         color="primary"
         class="submit-btn"
-        [disabled]="businessForm.invalid || !locationCaptured"
+        [disabled]="businessForm.invalid"
       >
         <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
         {{ isEditMode ? ('ADD_BUSINESS_FORM.UPDATE_LOCATION' | translate) : ('ADD_BUSINESS_FORM.SAVE_LOCATION' | translate) }}

@@ -3,7 +3,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { DeliveryService, Delivery } from './delivery-history.service';
+import { DeliveryService, Delivery, DeliveryOrder } from './delivery-history.service';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 
@@ -18,9 +18,8 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
   searchQuery: string = '';
   deliveries: Delivery[] = [];
   filteredDeliveries: Delivery[] = [];
-  expandedJobIds = new Set<string>();
+  expandedJobIds = new Set<number>();
   isLoading: boolean = false;
-  isResolvingDispute: string | null = null;
   error: string | null = null;
   private searchSubject$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -94,18 +93,18 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
 
     const lowerCaseQuery = query.toLowerCase();
     this.filteredDeliveries = this.deliveries.filter(delivery => {
+      const orders = delivery.orders ?? [];
       const searchableText = [
-        delivery.job_id,
-        delivery.order_id?.toString() ?? '',
+        delivery.job_id?.toString() ?? '',
         (delivery.order_ids ?? []).join(','),
-        delivery.pickup_address,
-        delivery.drop_address,
         delivery.delivery_date,
-        ...(delivery.orders ?? []).flatMap(order => [
+        ...orders.flatMap(order => [
           order.order_id?.toString() ?? '',
-          order.delivery_address,
+          this.getOrderDeliveryAddress(order),
           order.order_status,
           order.final_amount?.toString() ?? '',
+          order.pickup_branch?.branch_address ?? '',
+          order.dropoff_branch?.branch_address ?? '',
           ...(order.items ?? []).map(item => item.product_name),
         ]),
       ]
@@ -116,7 +115,25 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleDeliveryDetails(jobId: string) {
+  getOrderDeliveryAddress(order: DeliveryOrder): string {
+    return order.dropoff_branch?.branch_address?.trim() || order.delivery_address?.trim() || '';
+  }
+
+  private getFirstOrder(delivery: Delivery): DeliveryOrder | null {
+    const orders = delivery.orders ?? [];
+    return orders.length > 0 ? orders[0] : null;
+  }
+
+  getPickupAddress(delivery: Delivery): string {
+    return this.getFirstOrder(delivery)?.pickup_branch?.branch_address?.trim() || '';
+  }
+
+  getDropAddress(delivery: Delivery): string {
+    const firstOrder = this.getFirstOrder(delivery);
+    return firstOrder ? this.getOrderDeliveryAddress(firstOrder) : '';
+  }
+
+  toggleDeliveryDetails(jobId: number) {
     if (this.expandedJobIds.has(jobId)) {
       this.expandedJobIds.delete(jobId);
       return;
@@ -125,32 +142,7 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
     this.expandedJobIds.add(jobId);
   }
 
-  isDeliveryExpanded(jobId: string): boolean {
+  isDeliveryExpanded(jobId: number): boolean {
     return this.expandedJobIds.has(jobId);
-  }
-
-  resolveDispute(jobId: string) {
-    if (this.isResolvingDispute) {
-      return;
-    }
-
-    this.isResolvingDispute = jobId;
-    this.deliveryService
-      .resolveDispute(jobId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.error = null;
-          const updatedDelivery = this.deliveries.find(d => d.job_id === jobId);
-          if (updatedDelivery) {
-            updatedDelivery.hasDispute = false;
-          }
-          this.isResolvingDispute = null;
-        },
-        error: () => {
-          this.error = this.translate.instant('DELIVERY_HISTORY.LOAD_ERROR');
-          this.isResolvingDispute = null;
-        }
-      });
   }
 }
