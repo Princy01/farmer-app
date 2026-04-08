@@ -87,7 +87,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 			pan: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
 			privilegedUser: [false],
 			active_status: [true],
-			b_type_id: [3],
+			b_type_id: [null],
 			establishedYear: ['', [Validators.pattern(/^[0-9]{4}$/)]]
 		});
 	}
@@ -391,7 +391,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 						pan: location.pan_num || '',
 						privilegedUser: location.privilege_user || false,
 						active_status: location.active_status ? 1 : 0,
-						b_type_id: location.type_id || 3,
+						b_type_id: location.type_id || null,
 						establishedYear: location.established_year || ''
 					});
 
@@ -435,7 +435,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 							pan: data.pan_num || '',
 							privilegedUser: data.privilege_user || false,
 							active_status: data.active_status,
-							b_type_id: data.type_id || 3,
+							b_type_id: data.type_id || null,
 							establishedYear: data.established_year || ''
 						});
 
@@ -766,7 +766,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 				const formData: any = {
 					shop_name: formValue.shopName,
 					number: formValue.number,
-					type_id: 3,
+					type_id: formValue.b_type_id || null,
 					location: formValue.location,
 					state: formValue.state,
 					b_city_id: formValue.city,
