@@ -426,6 +426,9 @@
     "ADDRESS_RESOLUTION_RESOLVED": "Matched locality: {{location}}",
     "ADDRESS_RESOLUTION_SUGGESTED": "Suggested locality: {{location}}",
     "ADDRESS_RESOLUTION_UNRESOLVED": "We could not confidently match this address yet.",
+    "ADDRESS_RESOLUTION_HINT_RESOLVED": "This locality matches the address you entered.",
+    "ADDRESS_RESOLUTION_HINT_SUGGESTED": "You can use the suggested locality or keep your current selection.",
+    "ADDRESS_RESOLUTION_HINT_UNRESOLVED": "Add a clearer locality, sector, mandi, or landmark in the address, or choose the location manually from the list.",
     "ADDRESS_RESOLUTION_QUERY": "Normalized search: {{query}}",
     "ADDRESS_RESOLUTION_APPLY": "Use Suggested Location"
   },
@@ -1169,6 +1172,9 @@
     "ADDRESS_RESOLUTION_RESOLVED": "Matched locality: {{location}}",
     "ADDRESS_RESOLUTION_SUGGESTED": "Suggested locality: {{location}}",
     "ADDRESS_RESOLUTION_UNRESOLVED": "We could not confidently match this address yet.",
+    "ADDRESS_RESOLUTION_HINT_RESOLVED": "This locality matches the address you entered.",
+    "ADDRESS_RESOLUTION_HINT_SUGGESTED": "You can use the suggested locality or keep your current selection.",
+    "ADDRESS_RESOLUTION_HINT_UNRESOLVED": "Add a clearer locality, sector, mandi, or landmark in the address, or choose the location manually from the list.",
     "ADDRESS_RESOLUTION_QUERY": "Normalized search: {{query}}",
     "ADDRESS_RESOLUTION_APPLY": "Use Suggested Location"
   },

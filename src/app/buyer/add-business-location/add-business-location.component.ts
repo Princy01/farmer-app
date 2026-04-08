@@ -42,8 +42,10 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
         longitude: number = 0;
         locationCaptured: boolean = false;
         isResolvingAddress = false;
+        showAddressResolutionChecking = false;
         addressResolution: BranchAddressResolutionResponse | null = null;
         private destroy$ = new Subject<void>();
+        private addressResolutionLoadingTimer: ReturnType<typeof setTimeout> | null = null;
 
         fieldLabels: { [key: string]: string } = {
                 shopName: 'ADD_BUSINESS_LOCATION.SHOP_NAME',
@@ -155,6 +157,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
         }
 
         ngOnDestroy() {
+                this.clearAddressResolutionLoadingTimer();
                 this.destroy$.next();
                 this.destroy$.complete();
         }
@@ -221,13 +224,22 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                 const address = this.businessForm.get('address')?.value?.trim();
                 const selectedLocationId = this.businessForm.get('location')?.value;
 
-                if (!cityId || !address) {
+                if (!cityId || !address || address.length < 5) {
                         this.addressResolution = null;
                         this.isResolvingAddress = false;
+                        this.showAddressResolutionChecking = false;
+                        this.clearAddressResolutionLoadingTimer();
                         return;
                 }
 
                 this.isResolvingAddress = true;
+                this.showAddressResolutionChecking = false;
+                this.clearAddressResolutionLoadingTimer();
+                this.addressResolutionLoadingTimer = setTimeout(() => {
+                        if (this.isResolvingAddress) {
+                                this.showAddressResolutionChecking = true;
+                        }
+                }, 250);
                 this.addBusinessService.resolveBusinessBranchAddress({
                         city_id: cityId,
                         address,
@@ -236,13 +248,24 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                         next: (resolution) => {
                                 this.addressResolution = resolution;
                                 this.isResolvingAddress = false;
+                                this.showAddressResolutionChecking = false;
+                                this.clearAddressResolutionLoadingTimer();
                         },
                         error: (error) => {
                                 console.error('Address resolution error:', error);
                                 this.addressResolution = null;
                                 this.isResolvingAddress = false;
+                                this.showAddressResolutionChecking = false;
+                                this.clearAddressResolutionLoadingTimer();
                         }
                 });
+        }
+
+        private clearAddressResolutionLoadingTimer() {
+                if (this.addressResolutionLoadingTimer) {
+                        clearTimeout(this.addressResolutionLoadingTimer);
+                        this.addressResolutionLoadingTimer = null;
+                }
         }
 
         applySuggestedLocation() {
@@ -282,6 +305,23 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                                 });
                         case 'unresolved':
                                 return this.translate.instant('ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_UNRESOLVED');
+                        default:
+                                return '';
+                }
+        }
+
+        getAddressResolutionHint(): string {
+                if (!this.addressResolution) {
+                        return '';
+                }
+
+                switch (this.addressResolution.status) {
+                        case 'resolved':
+                                return this.translate.instant('ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_HINT_RESOLVED');
+                        case 'suggested':
+                                return this.translate.instant('ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_HINT_SUGGESTED');
+                        case 'unresolved':
+                                return this.translate.instant('ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_HINT_UNRESOLVED');
                         default:
                                 return '';
                 }

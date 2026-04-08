@@ -214,16 +214,20 @@
         {{ getErrorMessage("address") }}
       </div>
 
-      <ion-card *ngIf="isResolvingAddress || addressResolution" class="address-resolution-card">
+      <ion-card *ngIf="showAddressResolutionChecking || addressResolution" class="address-resolution-card">
         <ion-card-content>
-          <ion-chip *ngIf="isResolvingAddress" color="medium">
+          <ion-chip *ngIf="showAddressResolutionChecking" color="medium">
             <ion-label>{{ 'ADD_BUSINESS_FORM.ADDRESS_RESOLUTION_CHECKING' | translate }}</ion-label>
           </ion-chip>
 
-          <ng-container *ngIf="!isResolvingAddress && addressResolution">
+          <ng-container *ngIf="!showAddressResolutionChecking && addressResolution">
             <ion-chip [color]="getAddressResolutionTone()">
               <ion-label>{{ getAddressResolutionMessage() }}</ion-label>
             </ion-chip>
+
+            <p class="resolution-query" *ngIf="getAddressResolutionHint()">
+              {{ getAddressResolutionHint() }}
+            </p>
 
             <p class="resolution-query" *ngIf="addressResolution.normalized_query">
               {{ 'ADD_BUSINESS_FORM.ADDRESS_RESOLUTION_QUERY' | translate:{ query: addressResolution.normalized_query } }}

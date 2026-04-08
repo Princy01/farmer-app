@@ -426,6 +426,9 @@
     "ADDRESS_RESOLUTION_RESOLVED": "मिलान किया गया क्षेत्र: {{location}}",
     "ADDRESS_RESOLUTION_SUGGESTED": "सुझाया गया क्षेत्र: {{location}}",
     "ADDRESS_RESOLUTION_UNRESOLVED": "हम इस पते का सही क्षेत्र अभी तय नहीं कर पाए।",
+    "ADDRESS_RESOLUTION_HINT_RESOLVED": "यह क्षेत्र आपके दिए गए पते से मेल खाता है।",
+    "ADDRESS_RESOLUTION_HINT_SUGGESTED": "आप सुझाया गया क्षेत्र चुन सकते हैं या अपनी मौजूदा पसंद रख सकते हैं।",
+    "ADDRESS_RESOLUTION_HINT_UNRESOLVED": "पते में और स्पष्ट क्षेत्र, सेक्टर, मंडी, या लैंडमार्क जोड़ें, या सूची से स्थान खुद चुनें।",
     "ADDRESS_RESOLUTION_QUERY": "सामान्यीकृत खोज: {{query}}",
     "ADDRESS_RESOLUTION_APPLY": "सुझाया गया स्थान चुनें"
   },
@@ -1168,6 +1171,9 @@
     "ADDRESS_RESOLUTION_RESOLVED": "मिलान किया गया क्षेत्र: {{location}}",
     "ADDRESS_RESOLUTION_SUGGESTED": "सुझाया गया क्षेत्र: {{location}}",
     "ADDRESS_RESOLUTION_UNRESOLVED": "हम इस पते का सही क्षेत्र अभी तय नहीं कर पाए।",
+    "ADDRESS_RESOLUTION_HINT_RESOLVED": "यह क्षेत्र आपके दिए गए पते से मेल खाता है।",
+    "ADDRESS_RESOLUTION_HINT_SUGGESTED": "आप सुझाया गया क्षेत्र चुन सकते हैं या अपनी मौजूदा पसंद रख सकते हैं।",
+    "ADDRESS_RESOLUTION_HINT_UNRESOLVED": "पते में और स्पष्ट क्षेत्र, सेक्टर, मंडी, या लैंडमार्क जोड़ें, या सूची से स्थान खुद चुनें।",
     "ADDRESS_RESOLUTION_QUERY": "सामान्यीकृत खोज: {{query}}",
     "ADDRESS_RESOLUTION_APPLY": "सुझाया गया स्थान चुनें"
   },
