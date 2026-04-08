@@ -9,6 +9,7 @@ import { chevronBackOutline } from 'ionicons/icons';
 import { Subject, forkJoin } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { DemandTrendsService, DemandPatternRow, ProductDemandComparisonRow } from './demand-trends.service';
+import { WholesalerApiService } from '../services/wholesaler-api.service';
 
 interface ProductData {
   name: string;
@@ -48,6 +49,7 @@ export class DemandTrendsComponent implements OnInit, OnDestroy {
   constructor(
     private navController: NavController,
     private demandService: DemandTrendsService,
+    private wholesalerApiService: WholesalerApiService,
     private toastController: ToastController,
     private translate: TranslateService
   ) {
@@ -129,25 +131,27 @@ export class DemandTrendsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.hasError = false;
 
-    this.demandService.getDemandPatterns(this.selectedTimeRange)
+    this.wholesalerApiService.getWholesalerProducts()
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => this.isLoading = false)
       )
       .subscribe({
-        next: (data) => {
-          if (!data || data.length === 0) {
+        next: (products) => {
+          if (!products || products.length === 0) {
             this.showToast('DEMAND_TRENDS.NO_DATA_AVAILABLE', 'warning');
             this.products = [];
             this.filteredProducts = [];
+            this.selectedProducts = [];
             return;
           }
 
           const productMap = new Map<string, ProductData>();
-          data.forEach(row => {
-            if (row.product_name && !productMap.has(row.product_name)) {
-              productMap.set(row.product_name, {
-                name: row.product_name,
+          products.forEach(product => {
+            const productName = product?.product_name?.trim();
+            if (productName && !productMap.has(productName)) {
+              productMap.set(productName, {
+                name: productName,
                 isSelected: false,
                 data: []
               });
