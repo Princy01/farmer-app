@@ -58,6 +58,28 @@ export interface BusinessBranchWithNames extends BusinessBranch {
   location_name?: string;
 }
 
+export interface BranchAddressResolutionCandidate {
+  location_id: number;
+  location_name: string;
+  alias_text: string;
+  language_code: string;
+  script_code: string;
+  score: number;
+  contains_alias: boolean;
+  contains_latin: boolean;
+}
+
+export interface BranchAddressResolutionResponse {
+  status: 'pending' | 'resolved' | 'suggested' | 'unresolved' | 'manual_override';
+  confidence: number;
+  resolved_location_id?: number;
+  resolved_location_name?: string;
+  selected_location_id?: number;
+  selected_location_match?: boolean;
+  normalized_query: string;
+  candidates: BranchAddressResolutionCandidate[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AddBusinessService {
   private apiUrl = environment.apiUrl;
@@ -98,6 +120,19 @@ export class AddBusinessService {
   modifyBusinessBranch(data: any): Observable<any> {
     const headers = this.getAuthHeaders();
     return this.http.put(`${this.apiUrl}/branchDetailsUpdate`, data, { headers });
+  }
+
+  resolveBusinessBranchAddress(data: {
+    address: string;
+    city_id: number;
+    selected_location_id?: number | null;
+  }): Observable<BranchAddressResolutionResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.post<BranchAddressResolutionResponse>(
+      `${this.apiUrl}/business-branches/resolve-address`,
+      data,
+      { headers }
+    );
   }
 
   getBusinessBranchById(branchId: number): Observable<BusinessBranch> {

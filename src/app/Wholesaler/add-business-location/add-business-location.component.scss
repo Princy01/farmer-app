@@ -543,6 +543,22 @@ ion-loading {
   --backdrop-opacity: 0.6;
 }
 
+.address-resolution-card {
+  margin-top: 12px;
+  border-radius: 16px;
+
+  ion-card-content {
+    display: grid;
+    gap: 10px;
+  }
+
+  .resolution-query {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+  }
+}
+
 
 // Print Styles
 

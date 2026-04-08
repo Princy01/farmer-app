@@ -214,6 +214,33 @@
       <div class="error-message" *ngIf="getErrorMessage('address')">
         {{ getErrorMessage("address") }}
       </div>
+
+      <ion-card *ngIf="isResolvingAddress || addressResolution" class="address-resolution-card">
+        <ion-card-content>
+          <ion-chip *ngIf="isResolvingAddress" color="medium">
+            <ion-label>{{ 'ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_CHECKING' | translate }}</ion-label>
+          </ion-chip>
+
+          <ng-container *ngIf="!isResolvingAddress && addressResolution">
+            <ion-chip [color]="getAddressResolutionTone()">
+              <ion-label>{{ getAddressResolutionMessage() }}</ion-label>
+            </ion-chip>
+
+            <p class="resolution-query" *ngIf="addressResolution.normalized_query">
+              {{ 'ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_QUERY' | translate:{ query: addressResolution.normalized_query } }}
+            </p>
+
+            <ion-button
+              *ngIf="addressResolution.resolved_location_id && businessForm.get('location')?.value !== addressResolution.resolved_location_id"
+              size="small"
+              fill="outline"
+              (click)="applySuggestedLocation()"
+            >
+              {{ 'ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_APPLY' | translate }}
+            </ion-button>
+          </ng-container>
+        </ion-card-content>
+      </ion-card>
       </div>
 
       <!-- Business Identity Section -->

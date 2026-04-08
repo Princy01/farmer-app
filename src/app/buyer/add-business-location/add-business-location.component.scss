@@ -846,6 +846,27 @@ ion-item:focus-within {
   ion-select {
     color: #e8e8f0;
   }
+
+  .address-resolution-card {
+    background: #2d2d3a;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+  }
+}
+
+.address-resolution-card {
+  margin-top: 12px;
+  border-radius: 16px;
+
+  ion-card-content {
+    display: grid;
+    gap: 10px;
+  }
+
+  .resolution-query {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+  }
 }
 
 /* Print Styles */

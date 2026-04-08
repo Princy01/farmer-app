@@ -421,7 +421,13 @@
     "LOCATION_DETAILS": "Latitude: {{latitude}}, Longitude: {{longitude}}",
     "CONFIRM": "Confirm",
     "LOCATION_CONFIRMED": "Location confirmed successfully",
-    "CAPTURE_LOCATION_FIRST": "Please capture shop image with location first"
+    "CAPTURE_LOCATION_FIRST": "Please capture shop image with location first",
+    "ADDRESS_RESOLUTION_CHECKING": "Checking address locality...",
+    "ADDRESS_RESOLUTION_RESOLVED": "Matched locality: {{location}}",
+    "ADDRESS_RESOLUTION_SUGGESTED": "Suggested locality: {{location}}",
+    "ADDRESS_RESOLUTION_UNRESOLVED": "We could not confidently match this address yet.",
+    "ADDRESS_RESOLUTION_QUERY": "Normalized search: {{query}}",
+    "ADDRESS_RESOLUTION_APPLY": "Use Suggested Location"
   },
   "PRODUCTS_IN_BRANCH": {
     "TITLE": "Products in",
@@ -1158,7 +1164,13 @@
     "CREATE_MODE": "Create Mode",
     "PRIVILEGED_USER": "Privileged User",
     "ACTIVE_STATUS": "Active Status",
-    "BUSINESS_TYPE": "Business Type"
+    "BUSINESS_TYPE": "Business Type",
+    "ADDRESS_RESOLUTION_CHECKING": "Checking address locality...",
+    "ADDRESS_RESOLUTION_RESOLVED": "Matched locality: {{location}}",
+    "ADDRESS_RESOLUTION_SUGGESTED": "Suggested locality: {{location}}",
+    "ADDRESS_RESOLUTION_UNRESOLVED": "We could not confidently match this address yet.",
+    "ADDRESS_RESOLUTION_QUERY": "Normalized search: {{query}}",
+    "ADDRESS_RESOLUTION_APPLY": "Use Suggested Location"
   },
   "HTTP_ERROR": {
     "FORBIDDEN": "Permission denied. You don't have access to this resource.",

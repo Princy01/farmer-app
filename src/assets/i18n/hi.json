@@ -421,7 +421,13 @@
     "LOCATION_DETAILS": "अक्षांश: {{latitude}}, देशांतर: {{longitude}}",
     "CONFIRM": "पुष्टि करें",
     "LOCATION_CONFIRMED": "लोकेशन सफलतापूर्वक पुष्टि हो गई",
-    "CAPTURE_LOCATION_FIRST": "कृपया पहले दुकान की फोटो लेकर लोकेशन कैप्चर करें"
+    "CAPTURE_LOCATION_FIRST": "कृपया पहले दुकान की फोटो लेकर लोकेशन कैप्चर करें",
+    "ADDRESS_RESOLUTION_CHECKING": "पते के आधार पर क्षेत्र मिलाया जा रहा है...",
+    "ADDRESS_RESOLUTION_RESOLVED": "मिलान किया गया क्षेत्र: {{location}}",
+    "ADDRESS_RESOLUTION_SUGGESTED": "सुझाया गया क्षेत्र: {{location}}",
+    "ADDRESS_RESOLUTION_UNRESOLVED": "हम इस पते का सही क्षेत्र अभी तय नहीं कर पाए।",
+    "ADDRESS_RESOLUTION_QUERY": "सामान्यीकृत खोज: {{query}}",
+    "ADDRESS_RESOLUTION_APPLY": "सुझाया गया स्थान चुनें"
   },
   "PRODUCTS_IN_BRANCH": {
     "TITLE": "शाखा में उत्पाद:",
@@ -1157,7 +1163,13 @@
     "CREATE_MODE": "निर्माण मोड",
     "PRIVILEGED_USER": "विशेषाधिकार प्राप्त उपयोगकर्ता",
     "ACTIVE_STATUS": "सक्रिय स्थिति",
-    "BUSINESS_TYPE": "व्यवसाय प्रकार"
+    "BUSINESS_TYPE": "व्यवसाय प्रकार",
+    "ADDRESS_RESOLUTION_CHECKING": "पते के आधार पर क्षेत्र मिलाया जा रहा है...",
+    "ADDRESS_RESOLUTION_RESOLVED": "मिलान किया गया क्षेत्र: {{location}}",
+    "ADDRESS_RESOLUTION_SUGGESTED": "सुझाया गया क्षेत्र: {{location}}",
+    "ADDRESS_RESOLUTION_UNRESOLVED": "हम इस पते का सही क्षेत्र अभी तय नहीं कर पाए।",
+    "ADDRESS_RESOLUTION_QUERY": "सामान्यीकृत खोज: {{query}}",
+    "ADDRESS_RESOLUTION_APPLY": "सुझाया गया स्थान चुनें"
   },
   "HTTP_ERROR": {
     "FORBIDDEN": "अनुमति अस्वीकृत। आपको इस संसाधन तक पहुंचने की अनुमति नहीं है।",

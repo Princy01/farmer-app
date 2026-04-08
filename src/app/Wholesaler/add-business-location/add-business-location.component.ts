@@ -6,7 +6,7 @@ import { ToastController, LoadingController, AlertController } from '@ionic/angu
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { save, arrowBack, camera, location } from 'ionicons/icons';
-import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch } from './add-business.service';
+import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch, BranchAddressResolutionResponse } from './add-business.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { BusinessBranchWithNames } from '../business-locations/business-locations.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -14,7 +14,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
 import * as exifr from 'exifr';
 import { Subject, EMPTY } from 'rxjs';
-import { takeUntil, switchMap } from 'rxjs/operators';
+import { takeUntil, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
 	selector: 'app-add-business-location',
@@ -41,6 +41,8 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 	latitude: number = 0;
 	longitude: number = 0;
 	locationCaptured: boolean = false;
+	isResolvingAddress = false;
+	addressResolution: BranchAddressResolutionResponse | null = null;
 
 	fieldLabels: { [key: string]: string } = {
 		shopName: 'ADD_BUSINESS_FORM.SHOP_NAME',
@@ -121,6 +123,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 						this.businessForm.get('location')?.reset();
 						this.cities = [];
 						this.locations = [];
+						this.addressResolution = null;
 						return this.addBusinessService.getCitiesOfState(stateId);
 					}
 					return EMPTY;
@@ -145,6 +148,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 					if (cityId) {
 						this.businessForm.get('location')?.reset();
 						this.locations = [];
+						this.addressResolution = null;
 						return this.addBusinessService.getLocationsByCity(cityId);
 					}
 					return EMPTY;
@@ -154,6 +158,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 			.subscribe({
 				next: (data: Location[]) => {
 					this.locations = data;
+					this.requestAddressResolution();
 				},
 				error: () => {
 					this.showToast(
@@ -161,6 +166,24 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 						'danger'
 					);
 				}
+			});
+
+		this.businessForm.get('location')?.valueChanges
+			.pipe(takeUntil(this.destroy$))
+			.subscribe(() => {
+				if (this.addressResolution) {
+					this.requestAddressResolution();
+				}
+			});
+
+		this.businessForm.get('address')?.valueChanges
+			.pipe(
+				debounceTime(450),
+				distinctUntilChanged(),
+				takeUntil(this.destroy$)
+			)
+			.subscribe(() => {
+				this.requestAddressResolution();
 			});
 	}
 
@@ -248,6 +271,79 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 					);
 				}
 			});
+	}
+
+	requestAddressResolution() {
+		const cityId = this.businessForm.get('city')?.value;
+		const address = this.businessForm.get('address')?.value?.trim();
+		const selectedLocationId = this.businessForm.get('location')?.value;
+
+		if (!cityId || !address) {
+			this.addressResolution = null;
+			this.isResolvingAddress = false;
+			return;
+		}
+
+		this.isResolvingAddress = true;
+		this.addBusinessService.resolveBusinessBranchAddress({
+			city_id: cityId,
+			address,
+			selected_location_id: selectedLocationId || null
+		})
+			.pipe(takeUntil(this.destroy$))
+			.subscribe({
+				next: (resolution) => {
+					this.addressResolution = resolution;
+					this.isResolvingAddress = false;
+				},
+				error: (error) => {
+					console.error('Address resolution error:', error);
+					this.addressResolution = null;
+					this.isResolvingAddress = false;
+				}
+			});
+	}
+
+	applySuggestedLocation() {
+		const locationId = this.addressResolution?.resolved_location_id;
+		if (!locationId) {
+			return;
+		}
+		this.businessForm.get('location')?.setValue(locationId);
+	}
+
+	getAddressResolutionTone(): 'success' | 'warning' | 'medium' {
+		if (!this.addressResolution) {
+			return 'medium';
+		}
+		if (this.addressResolution.status === 'resolved') {
+			return 'success';
+		}
+		if (this.addressResolution.status === 'suggested') {
+			return 'warning';
+		}
+		return 'medium';
+	}
+
+	getAddressResolutionMessage(): string {
+		if (!this.addressResolution) {
+			return '';
+		}
+
+		switch (this.addressResolution.status) {
+			case 'resolved':
+				return this.translate.instant('ADD_BUSINESS_FORM.ADDRESS_RESOLUTION_RESOLVED', {
+					location: this.addressResolution.resolved_location_name || ''
+				});
+			case 'suggested':
+				return this.translate.instant('ADD_BUSINESS_FORM.ADDRESS_RESOLUTION_SUGGESTED', {
+					location: this.addressResolution.resolved_location_name || ''
+				});
+			case 'unresolved':
+				return this.translate.instant('ADD_BUSINESS_FORM.ADDRESS_RESOLUTION_UNRESOLVED');
+			default:
+				return '';
+		}
 	}
 
 	loadBusinessTypes() {

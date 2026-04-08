@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -6,13 +6,15 @@ import { ToastController, LoadingController, AlertController } from '@ionic/angu
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { save, arrowBack, camera, location, trash, informationCircle, business, cameraOutline } from 'ionicons/icons';
-import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch } from './add-business.service';
+import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch, BranchAddressResolutionResponse } from './add-business.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { BusinessBranchWithNames } from '../business-locations/business-locations.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
 import * as exifr from 'exifr';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
         selector: 'app-add-business-location',
@@ -26,7 +28,7 @@ import * as exifr from 'exifr';
                 TranslatePipe
         ]
 })
-export class AddBusinessLocationComponent implements OnInit {
+export class AddBusinessLocationComponent implements OnInit, OnDestroy {
         businessForm: FormGroup;
         isEditMode = false;
         locationId: number | null = null;
@@ -39,6 +41,9 @@ export class AddBusinessLocationComponent implements OnInit {
         latitude: number = 0;
         longitude: number = 0;
         locationCaptured: boolean = false;
+        isResolvingAddress = false;
+        addressResolution: BranchAddressResolutionResponse | null = null;
+        private destroy$ = new Subject<void>();
 
         fieldLabels: { [key: string]: string } = {
                 shopName: 'ADD_BUSINESS_LOCATION.SHOP_NAME',
@@ -116,6 +121,7 @@ export class AddBusinessLocationComponent implements OnInit {
                                 this.businessForm.get('location')?.reset();
                                 this.cities = [];
                                 this.locations = [];
+                                this.addressResolution = null;
                         }
                 });
 
@@ -124,8 +130,33 @@ export class AddBusinessLocationComponent implements OnInit {
                                 this.loadLocations(cityId);
                                 this.businessForm.get('location')?.reset();
                                 this.locations = [];
+                                this.addressResolution = null;
+                                this.requestAddressResolution();
                         }
                 });
+
+                this.businessForm.get('location')?.valueChanges
+                        ?.pipe(takeUntil(this.destroy$))
+                        .subscribe(() => {
+                                if (this.addressResolution) {
+                                        this.requestAddressResolution();
+                                }
+                        });
+
+                this.businessForm.get('address')?.valueChanges
+                        ?.pipe(
+                                debounceTime(450),
+                                distinctUntilChanged(),
+                                takeUntil(this.destroy$)
+                        )
+                        .subscribe(() => {
+                                this.requestAddressResolution();
+                        });
+        }
+
+        ngOnDestroy() {
+                this.destroy$.next();
+                this.destroy$.complete();
         }
 
         async showAuthError() {
@@ -183,6 +214,77 @@ export class AddBusinessLocationComponent implements OnInit {
                 this.addBusinessService.getLocationsByCity(cityId).subscribe(locations => {
                         this.locations = locations;
                 });
+        }
+
+        requestAddressResolution() {
+                const cityId = this.businessForm.get('city')?.value;
+                const address = this.businessForm.get('address')?.value?.trim();
+                const selectedLocationId = this.businessForm.get('location')?.value;
+
+                if (!cityId || !address) {
+                        this.addressResolution = null;
+                        this.isResolvingAddress = false;
+                        return;
+                }
+
+                this.isResolvingAddress = true;
+                this.addBusinessService.resolveBusinessBranchAddress({
+                        city_id: cityId,
+                        address,
+                        selected_location_id: selectedLocationId || null
+                }).subscribe({
+                        next: (resolution) => {
+                                this.addressResolution = resolution;
+                                this.isResolvingAddress = false;
+                        },
+                        error: (error) => {
+                                console.error('Address resolution error:', error);
+                                this.addressResolution = null;
+                                this.isResolvingAddress = false;
+                        }
+                });
+        }
+
+        applySuggestedLocation() {
+                const locationId = this.addressResolution?.resolved_location_id;
+                if (!locationId) {
+                        return;
+                }
+                this.businessForm.get('location')?.setValue(locationId);
+        }
+
+        getAddressResolutionTone(): 'success' | 'warning' | 'medium' {
+                if (!this.addressResolution) {
+                        return 'medium';
+                }
+                if (this.addressResolution.status === 'resolved') {
+                        return 'success';
+                }
+                if (this.addressResolution.status === 'suggested') {
+                        return 'warning';
+                }
+                return 'medium';
+        }
+
+        getAddressResolutionMessage(): string {
+                if (!this.addressResolution) {
+                        return '';
+                }
+
+                switch (this.addressResolution.status) {
+                        case 'resolved':
+                                return this.translate.instant('ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_RESOLVED', {
+                                        location: this.addressResolution.resolved_location_name || ''
+                                });
+                        case 'suggested':
+                                return this.translate.instant('ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_SUGGESTED', {
+                                        location: this.addressResolution.resolved_location_name || ''
+                                });
+                        case 'unresolved':
+                                return this.translate.instant('ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_UNRESOLVED');
+                        default:
+                                return '';
+                }
         }
 
         loadLocationData() {
