@@ -313,7 +313,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.businessBranches = branches?.filter(branch => branch.active_status) || [];
 
           if (this.businessBranches.length > 0 && !this.selectedBranch) {
-            this.selectedBranch = this.businessBranches[0];
+            this.selectedBranch =
+              this.businessBranches.find(branch => this.isBranchVerified(branch)) ||
+              this.businessBranches[0];
           }
         },
         error: async (error: any) => {
@@ -342,6 +344,14 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   selectBranch(branch: BusinessBranch): void {
     this.selectedBranch = branch;
     this.calculateRidePrice();
+  }
+
+  private isBranchVerified(branch: BusinessBranch | null | undefined): boolean {
+    return !!branch && branch.location_verification_status === 'verified';
+  }
+
+  private showBranchVerificationRequired(): void {
+    this.showErrorAlert(this.translate.instant('CHECKOUT.BRANCH_VERIFICATION_REQUIRED_MESSAGE'));
   }
 
   addNewAddress(): void {
@@ -417,6 +427,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
       return;
     }
+    if (!this.isBranchVerified(this.selectedBranch)) {
+      this.showBranchVerificationRequired();
+      return;
+    }
 
     const totalWeight = this.calculateTotalWeight();
 
@@ -457,6 +471,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
     if (!this.selectedBranch) {
       this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
+      return;
+    }
+    if (!this.isBranchVerified(this.selectedBranch)) {
+      this.showBranchVerificationRequired();
       return;
     }
 

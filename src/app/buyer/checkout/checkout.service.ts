@@ -31,6 +31,7 @@ export interface BusinessBranch {
   pincode: string;
   latitude?: number;
   longitude?: number;
+  location_verification_status?: string;
 }
 
 @Injectable({

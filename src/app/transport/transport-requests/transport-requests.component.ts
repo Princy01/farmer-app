@@ -91,6 +91,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   isDriverAvailable: boolean = false;
   isLoadingStatus: boolean = true;
   driverStatus: string = 'inactive';
+  driverOnboardingStatus: string = 'pending_documents';
+  driverVerificationNotes: string = '';
+  isDriverVerifiedForLiveJobs: boolean = false;
   isLoadingRequests = false;
   wsConnected = false;
   wsConnectionMessage: string = '';
@@ -121,6 +124,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     this.loadRejectedRequests();
     this.setupLocationPreferences();
     this.loadDriverStatus();
+    this.loadDriverOnboardingStatus();
     this.connectRealtime();
   }
 
@@ -398,6 +402,34 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       });
   }
 
+  private loadDriverOnboardingStatus() {
+    this.transportRequestService.getDriverOnboardingStatus()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.driverOnboardingStatus = response.onboarding_verification_status;
+          this.driverVerificationNotes = response.verification_notes || '';
+          this.isDriverVerifiedForLiveJobs = response.can_act_on_live_jobs;
+        },
+        error: () => {
+          this.driverOnboardingStatus = 'pending_documents';
+          this.driverVerificationNotes = this.translate.instant('TRANSPORT_REQUESTS.VERIFICATION_REQUIRED_MESSAGE');
+          this.isDriverVerifiedForLiveJobs = false;
+        }
+      });
+  }
+
+  private canActOnLiveRequests(): boolean {
+    return this.isDriverVerifiedForLiveJobs;
+  }
+
+  private showVerificationRequiredMessage(): void {
+    this.showToast(
+      this.translate.instant('TRANSPORT_REQUESTS.ERROR_VERIFICATION_REQUIRED'),
+      'warning'
+    );
+  }
+
   toggleDriverAvailability(
     event: { target: HTMLIonToggleElement; detail: { checked: boolean } }
   ) {
@@ -554,6 +586,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   async acceptOrder(request: DriverJobOffer) {
     const requestKey = `${request.ride_id}-${request.attempt_no}`;
+    if (!this.canActOnLiveRequests()) {
+      this.showVerificationRequiredMessage();
+      return;
+    }
     if (
       this.acceptedRequests.has(requestKey) ||
       this.rejectedRequests.has(requestKey) ||
@@ -642,6 +678,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   async rejectOrder(request: DriverJobOffer) {
     const requestKey = `${request.ride_id}-${request.attempt_no}`;
+    if (!this.canActOnLiveRequests()) {
+      this.showVerificationRequiredMessage();
+      return;
+    }
     if (
       this.acceptedRequests.has(requestKey) ||
       this.rejectedRequests.has(requestKey)
@@ -879,8 +919,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       'job_not_cancelable': 'TRANSPORT_REQUESTS.ERROR_NOT_CANCELABLE',
       'driver_under_cooldown': 'TRANSPORT_REQUESTS.ERROR_UNDER_COOLDOWN',
       'driver_under_dispute': 'TRANSPORT_REQUESTS.ERROR_UNDER_DISPUTE',
+      'driver_verification_required': 'TRANSPORT_REQUESTS.ERROR_VERIFICATION_REQUIRED',
       409: 'TRANSPORT_REQUESTS.ERROR_CONFLICT',
       404: 'TRANSPORT_REQUESTS.ERROR_NOT_FOUND',
+      403: 'TRANSPORT_REQUESTS.ERROR_VERIFICATION_REQUIRED',
       429: 'TRANSPORT_REQUESTS.ERROR_RATE_LIMITED'
     };
 

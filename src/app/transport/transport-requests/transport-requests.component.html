@@ -105,6 +105,23 @@
     </ion-card>
   </div>
 
+  <!-- Driver Verification Message -->
+  <div class="status-warning" *ngIf="hasLocationPreferences && isDriverAvailable && !isDriverVerifiedForLiveJobs">
+    <ion-card color="warning">
+      <ion-card-content>
+        <div class="warning-content">
+          <ion-icon name="flash-outline" class="warning-icon"></ion-icon>
+          <div class="warning-text">
+            <p class="warning-title">{{ 'TRANSPORT_REQUESTS.VERIFICATION_REQUIRED_TITLE' | translate }}</p>
+            <p class="warning-desc">
+              {{ driverVerificationNotes || ('TRANSPORT_REQUESTS.VERIFICATION_REQUIRED_MESSAGE' | translate) }}
+            </p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
   <!-- Transport Requests Section -->
   <div class="regular-section" *ngIf="hasLocationPreferences && isDriverAvailable">
     <div class="section-header">
@@ -234,12 +251,12 @@
         <!-- Card Footer -->
         <div class="card-footer">
           <div class="action-buttons" *ngIf="!isRequestAccepted(request.ride_id, request.attempt_no) && !isRequestRejected(request.ride_id, request.attempt_no)">
-            <ion-button class="accept-button" (click)="acceptOrder(request)" [disabled]="isLoadingRequests || isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)] || isUnderCooldown || isAvailabilityLocked">
+            <ion-button class="accept-button" (click)="acceptOrder(request)" [disabled]="isLoadingRequests || isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)] || isUnderCooldown || isAvailabilityLocked || !isDriverVerifiedForLiveJobs">
               <ion-spinner *ngIf="isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)]" name="crescent"></ion-spinner>
               <ion-icon *ngIf="!isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)]" name="checkmark-circle-outline" slot="start"></ion-icon>
               {{ 'TRANSPORT_REQUESTS.ACCEPT' | translate }}
             </ion-button>
-            <ion-button class="reject-button" (click)="rejectOrder(request)" [disabled]="isLoadingRequests || isRejectingOffer[(request.ride_id + '-' + request.attempt_no)] || isUnderCooldown">
+            <ion-button class="reject-button" (click)="rejectOrder(request)" [disabled]="isLoadingRequests || isRejectingOffer[(request.ride_id + '-' + request.attempt_no)] || isUnderCooldown || !isDriverVerifiedForLiveJobs">
               <ion-spinner *ngIf="isRejectingOffer[(request.ride_id + '-' + request.attempt_no)]" name="crescent"></ion-spinner>
               <ion-icon *ngIf="!isRejectingOffer[(request.ride_id + '-' + request.attempt_no)]" name="close-circle-outline" slot="start"></ion-icon>
               {{ 'TRANSPORT_REQUESTS.REJECT' | translate }}

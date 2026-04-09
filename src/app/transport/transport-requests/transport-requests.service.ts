@@ -88,6 +88,14 @@ export interface DriverStatusResponse {
   status: string; // 'active' | 'inactive'
 }
 
+export interface DriverOnboardingStatusResponse {
+  driver_id: number;
+  onboarding_verification_status: string;
+  registration_complete: boolean;
+  can_act_on_live_jobs: boolean;
+  verification_notes?: string;
+}
+
 export interface UpdateDriverStatusRequest {
   status: string; // 'active' | 'inactive'
 }
@@ -148,6 +156,11 @@ export class TransportRequestService {
   getDriverStatus(): Observable<DriverStatusResponse> {
     const headers = this.getAuthHeaders();
     return this.http.get<DriverStatusResponse>(`${this.apiUrl}/transportation/driver/status`, { headers });
+  }
+
+  getDriverOnboardingStatus(): Observable<DriverOnboardingStatusResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<DriverOnboardingStatusResponse>(`${this.apiUrl}/transportation/driver/onboarding-status`, { headers });
   }
 
   updateDriverStatus(status: string): Observable<{ message: string }> {

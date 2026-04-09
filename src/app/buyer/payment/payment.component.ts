@@ -213,8 +213,16 @@ export class PaymentComponent implements OnInit, OnDestroy {
     }
   }
 
+  private isSelectedBranchVerified(): boolean {
+    return this.orderData?.selectedBranch?.location_verification_status === 'verified';
+  }
+
   private async handleOrderCreation(orderData: any): Promise<any> {
     try {
+      if (!this.isSelectedBranchVerified()) {
+        throw new Error(this.translate.instant('CHECKOUT.BRANCH_VERIFICATION_REQUIRED_MESSAGE'));
+      }
+
       console.log('Creating batch order with data:', orderData);
 
       // Validate
