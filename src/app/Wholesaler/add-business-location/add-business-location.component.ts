@@ -994,6 +994,15 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 		return String(this.businessForm.get('address')?.value || '').trim();
 	}
 
+	private hasCompleteLocationContext(
+		stateId: number | null,
+		cityId: number | null,
+		locationId: number | null,
+		address: string
+	): boolean {
+		return stateId !== null && cityId !== null && locationId !== null && address.length > 0;
+	}
+
 	private currentFormMatchesCapturedLocation(): boolean {
 		return this.captureReferenceState === this.getNumericControlValue('state') &&
 			this.captureReferenceCity === this.getNumericControlValue('city') &&
@@ -1005,6 +1014,33 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 		if (this.isHydratingLocationContext || !this.locationCaptured || !this.capturedImage) {
 			return;
 		}
+
+		const currentState = this.getNumericControlValue('state');
+		const currentCity = this.getNumericControlValue('city');
+		const currentLocation = this.getNumericControlValue('location');
+		const currentAddress = this.getNormalizedAddressValue();
+
+		const hasCapturedReference = this.hasCompleteLocationContext(
+			this.captureReferenceState,
+			this.captureReferenceCity,
+			this.captureReferenceLocation,
+			this.captureReferenceAddress
+		);
+
+		const hasCurrentLocationContext = this.hasCompleteLocationContext(
+			currentState,
+			currentCity,
+			currentLocation,
+			currentAddress
+		);
+
+		if (!hasCapturedReference) {
+			if (hasCurrentLocationContext) {
+				this.updateCaptureReference();
+			}
+			return;
+		}
+
 		if (this.currentFormMatchesCapturedLocation()) {
 			return;
 		}

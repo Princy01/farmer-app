@@ -10,7 +10,7 @@ import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
-// import { Geolocation } from '@capacitor/geolocation';
+import { Geolocation } from '@capacitor/geolocation';
 
 @Component({
   selector: 'app-business-registration',
@@ -26,7 +26,7 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
   cities: City[] = [];
   locations: Location[] = [];
   businessTypes: BusinessType[] = [];
-  // isGettingLocation = false;
+  isGettingLocation = false;
   isSubmitting = false;
   isLoadingCities = false;
   isLoadingLocations = false;
@@ -60,8 +60,8 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
       user_id: [null, Validators.required],
       gst_number: ['', Validators.required],
       pan_number: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
-      // latitude: ['', Validators.required],
-      // longitude: ['', Validators.required],
+      latitude: [null, Validators.required],
+      longitude: [null, Validators.required],
       privileged_user: [false],
     });
 
@@ -238,13 +238,11 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
     });
     await loading.present();
 
-    const fallbackLatitude = 28.6139;
-    const fallbackLongitude = 77.2090;
     const payload = {
       ...this.form.value,
       city_id: this.form.value.city_id,
-      latitude: fallbackLatitude,
-      longitude: fallbackLongitude
+      latitude: parseFloat(this.form.value.latitude),
+      longitude: parseFloat(this.form.value.longitude)
     };
 
     this.businessRegistrationService.addNewBusiness(payload)
@@ -265,40 +263,41 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
       });
   }
 
-  // async getCurrentLocation() {
-  //   this.isGettingLocation = true;
-  //   try {
-  //     // Check permissions first
-  //     const permission = await Geolocation.checkPermissions();
+  async getCurrentLocation(): Promise<void> {
+    this.isGettingLocation = true;
+    try {
+      // Check permissions first
+      const permission = await Geolocation.checkPermissions();
 
-  //     if (permission.location !== 'granted') {
-  //       const requestPermission = await Geolocation.requestPermissions();
-  //       if (requestPermission.location !== 'granted') {
-  //         await this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.ERROR_LOCATION_PERMISSION');
-  //         this.isGettingLocation = false;
-  //         return;
-  //       }
-  //     }
+      if (permission.location !== 'granted') {
+        const requestPermission = await Geolocation.requestPermissions();
+        if (requestPermission.location !== 'granted') {
+          await this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.ERROR_LOCATION_PERMISSION');
+          return;
+        }
+      }
 
-  //     // Get current position
-  //     const position = await Geolocation.getCurrentPosition({
-  //       enableHighAccuracy: true,
-  //       timeout: 10000,
-  //       maximumAge: 0
-  //     });
+      // Get current position
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
 
-  //     this.form.patchValue({
-  //       latitude: position.coords.latitude,
-  //       longitude: position.coords.longitude
-  //     });
+      this.form.patchValue({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      });
 
-  //     await this.showSuccessToast('WHOLESALER_BUSINESS_REGISTRATION.LOCATION_SUCCESS');
-  //   } catch (error) {
-  //     await this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.ERROR_LOCATION');
-  //   } finally {
-  //     this.isGettingLocation = false;
-  //   }
-  // }
+      this.form.get('latitude')?.markAsTouched();
+      this.form.get('longitude')?.markAsTouched();
+      await this.showSuccessToast('WHOLESALER_BUSINESS_REGISTRATION.LOCATION_SUCCESS');
+    } catch {
+      await this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.ERROR_LOCATION');
+    } finally {
+      this.isGettingLocation = false;
+    }
+  }
 
   private async showErrorToast(messageKey: string): Promise<void> {
     const toast = await this.toastCtrl.create({

@@ -21,8 +21,8 @@
 
     <form [formGroup]="businessForm" (ngSubmit)="onSubmit()">
 
-      <!--
-      Camera Capture Section
+
+      <!-- Camera Capture Section -->
       <div class="camera-section">
         <ion-card>
           <ion-card-header>
@@ -53,10 +53,6 @@
                     {{ 'ADD_BUSINESS_LOCATION.LOCATION_CAPTURED' | translate }}
                   </ion-label>
                 </ion-chip>
-                <p class="coordinates">
-                  <strong>{{ 'ADD_BUSINESS_LOCATION.LATITUDE' | translate }}:</strong> {{ latitude.toFixed(6) }}<br>
-                  <strong>{{ 'ADD_BUSINESS_LOCATION.LONGITUDE' | translate }}:</strong> {{ longitude.toFixed(6) }}
-                </p>
               </div>
               <div class="action-buttons">
                 <ion-button size="small" (click)="captureShopImage()" color="primary">
@@ -72,7 +68,7 @@
           </ion-card-content>
         </ion-card>
       </div>
-      -->
+
 
       <!-- Basic Business Information Section -->
       <div class="form-section">

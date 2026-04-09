@@ -218,8 +218,7 @@
             </div>
           </div>
 
-          <!--
-            GPS Coordinates Section
+          <!-- GPS Coordinates Section -->
           <div class="form-section">
             <div class="section-title">
               <ion-icon name="navigate-circle-outline" class="section-icon"></ion-icon>
@@ -228,18 +227,17 @@
 
             <ion-button
               expand="block"
-              fill="outline"
+              type="button"
               (click)="getCurrentLocation()"
               [disabled]="isGettingLocation"
               class="location-btn"
             >
-              <ion-icon name="locate-outline" slot="start" *ngIf="!isGettingLocation"></ion-icon>
-              <ion-spinner *ngIf="isGettingLocation" slot="start"></ion-spinner>
-              {{ isGettingLocation ? ('WHOLESALER_BUSINESS_REGISTRATION.GETTING_LOCATION' | translate) : ('WHOLESALER_BUSINESS_REGISTRATION.GET_CURRENT_LOCATION' | translate) }}
+              <ion-spinner *ngIf="isGettingLocation" name="crescent" slot="start"></ion-spinner>
+              <ion-icon *ngIf="!isGettingLocation" name="locate-outline" slot="start"></ion-icon>
+              {{ (isGettingLocation ? 'WHOLESALER_BUSINESS_REGISTRATION.GETTING_LOCATION' : 'WHOLESALER_BUSINESS_REGISTRATION.GET_CURRENT_LOCATION') | translate }}
             </ion-button>
 
-            <div class="form-row form-row-double">
-              Latitude
+            <div class="form-row">
               <div>
                 <ion-item
                   [class.ion-invalid]="
@@ -251,7 +249,7 @@
                     formControlName="latitude"
                     [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.LATITUDE_PLACEHOLDER' | translate"
                     type="number"
-                    step="any"
+                    inputmode="decimal"
                   >
                   </ion-input>
                 </ion-item>
@@ -265,7 +263,6 @@
                 </div>
               </div>
 
-              Longitude
               <div>
                 <ion-item
                   [class.ion-invalid]="
@@ -277,7 +274,7 @@
                     formControlName="longitude"
                     [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.LONGITUDE_PLACEHOLDER' | translate"
                     type="number"
-                    step="any"
+                    inputmode="decimal"
                   >
                   </ion-input>
                 </ion-item>
@@ -292,7 +289,6 @@
               </div>
             </div>
           </div>
-          -->
 
           <!-- Contact Information Section -->
           <div class="form-section">

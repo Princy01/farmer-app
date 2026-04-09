@@ -279,8 +279,6 @@
               {{ 'BUSINESS_REGISTRATION.ERROR_ADDRESS' | translate }}
             </div>
 
-            <!--
-            GPS Coordinates Section
             <div class="gps-section">
               <div class="gps-header">
                 <ion-icon name="navigate-circle-outline" class="gps-icon"></ion-icon>
@@ -289,21 +287,22 @@
 
               <ion-button
                 expand="block"
-                fill="outline"
+                type="button"
+                class="location-btn"
                 (click)="getCurrentLocation()"
                 [disabled]="isGettingLocation"
-                class="location-btn"
               >
-                <ion-icon name="locate-outline" slot="start" *ngIf="!isGettingLocation"></ion-icon>
-                <ion-spinner *ngIf="isGettingLocation" slot="start"></ion-spinner>
-                {{ isGettingLocation ? ('BUSINESS_REGISTRATION.GETTING_LOCATION' | translate) : ('BUSINESS_REGISTRATION.GET_CURRENT_LOCATION' | translate) }}
+                <ion-spinner *ngIf="isGettingLocation" name="crescent" slot="start"></ion-spinner>
+                <ion-icon *ngIf="!isGettingLocation" name="locate-outline" slot="start"></ion-icon>
+                {{ (isGettingLocation ? 'BUSINESS_REGISTRATION.GETTING_LOCATION' : 'BUSINESS_REGISTRATION.GET_CURRENT_LOCATION') | translate }}
               </ion-button>
 
               <div class="form-row">
                 <div>
                   <ion-item
                     [class.ion-invalid]="
-                      form.get('latitude')?.invalid && form.get('latitude')?.touched
+                      form.get('latitude')?.invalid &&
+                      form.get('latitude')?.touched
                     "
                   >
                     <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.LATITUDE' | translate }} *</ion-label>
@@ -311,14 +310,15 @@
                       formControlName="latitude"
                       [placeholder]="'BUSINESS_REGISTRATION.LATITUDE_PLACEHOLDER' | translate"
                       type="number"
-                      step="any"
+                      inputmode="decimal"
                     >
                     </ion-input>
                   </ion-item>
                   <div
                     class="error-message"
                     *ngIf="
-                      form.get('latitude')?.invalid && form.get('latitude')?.touched
+                      form.get('latitude')?.invalid &&
+                      form.get('latitude')?.touched
                     "
                   >
                     {{ 'BUSINESS_REGISTRATION.ERROR_LATITUDE' | translate }}
@@ -328,7 +328,8 @@
                 <div>
                   <ion-item
                     [class.ion-invalid]="
-                      form.get('longitude')?.invalid && form.get('longitude')?.touched
+                      form.get('longitude')?.invalid &&
+                      form.get('longitude')?.touched
                     "
                   >
                     <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.LONGITUDE' | translate }} *</ion-label>
@@ -336,14 +337,15 @@
                       formControlName="longitude"
                       [placeholder]="'BUSINESS_REGISTRATION.LONGITUDE_PLACEHOLDER' | translate"
                       type="number"
-                      step="any"
+                      inputmode="decimal"
                     >
                     </ion-input>
                   </ion-item>
                   <div
                     class="error-message"
                     *ngIf="
-                      form.get('longitude')?.invalid && form.get('longitude')?.touched
+                      form.get('longitude')?.invalid &&
+                      form.get('longitude')?.touched
                     "
                   >
                     {{ 'BUSINESS_REGISTRATION.ERROR_LONGITUDE' | translate }}
@@ -351,7 +353,6 @@
                 </div>
               </div>
             </div>
-            -->
           </div>
 
           <!-- Contact Information Section -->
