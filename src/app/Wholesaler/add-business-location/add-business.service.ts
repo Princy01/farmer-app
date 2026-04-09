@@ -51,6 +51,12 @@ export interface BusinessBranch {
   latitude: number;
   longitude: number;
   image: string;
+  location_capture_source?: string | null;
+  location_verification_status?: string | null;
+  location_captured_at?: string | null;
+  location_verified_at?: string | null;
+  location_verified_by?: number | null;
+  location_verification_notes?: string | null;
 }
 
 export interface BranchAddressResolutionCandidate {

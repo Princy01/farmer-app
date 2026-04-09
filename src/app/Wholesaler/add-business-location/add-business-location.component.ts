@@ -5,15 +5,13 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ToastController, LoadingController, AlertController } from '@ionic/angular/standalone';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-// import { save, arrowBack, camera, location } from 'ionicons/icons';
-import { save, arrowBack } from 'ionicons/icons';
+import { save, arrowBack, camera, location } from 'ionicons/icons';
 import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch, BranchAddressResolutionResponse } from './add-business.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { BusinessBranchWithNames } from '../business-locations/business-locations.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-// import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-// import { Geolocation } from '@capacitor/geolocation';
-// import * as exifr from 'exifr';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Geolocation } from '@capacitor/geolocation';
 import { Subject, EMPTY } from 'rxjs';
 import { takeUntil, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -38,14 +36,20 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 	cities: City[] = [];
 	locations: Location[] = [];
 	businessTypes: BusinessType[] = [];
-	// capturedImage: string = '';
-	// latitude: number = 0;
-	// longitude: number = 0;
-	// locationCaptured: boolean = false;
+	capturedImage: string = '';
+	latitude: number = 0;
+	longitude: number = 0;
+	locationCaptureSource: string = '';
+	locationCaptured: boolean = false;
 	isResolvingAddress = false;
 	showAddressResolutionChecking = false;
 	addressResolution: BranchAddressResolutionResponse | null = null;
 	private addressResolutionLoadingTimer: ReturnType<typeof setTimeout> | null = null;
+	private isHydratingLocationContext = false;
+	private captureReferenceState: number | null = null;
+	private captureReferenceCity: number | null = null;
+	private captureReferenceLocation: number | null = null;
+	private captureReferenceAddress = '';
 
 	fieldLabels: { [key: string]: string } = {
 		shopName: 'ADD_BUSINESS_FORM.SHOP_NAME',
@@ -76,10 +80,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 		private authService: AuthService,
 		private translate: TranslateService
 	) {
-		// addIcons({ save, arrowBack, camera, location });
-		// addIcons({ save, arrowBack, camera });
-		// addIcons({ save, arrowBack, camera, location });
-		addIcons({ save, arrowBack });
+		addIcons({ save, arrowBack, camera, location });
 
 		this.businessForm = this.formBuilder.group({
 			shopName: ['', Validators.required],
@@ -139,6 +140,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 			.subscribe({
 				next: (data: City[]) => {
 					this.cities = data;
+					void this.invalidateCaptureIfLocationChanged();
 				},
 				error: () => {
 					this.showToast(
@@ -165,6 +167,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 				next: (data: Location[]) => {
 					this.locations = data;
 					this.requestAddressResolution();
+					void this.invalidateCaptureIfLocationChanged();
 				},
 				error: () => {
 					this.showToast(
@@ -180,6 +183,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 				if (this.addressResolution) {
 					this.requestAddressResolution();
 				}
+				void this.invalidateCaptureIfLocationChanged();
 			});
 
 		this.businessForm.get('address')?.valueChanges
@@ -190,6 +194,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 			)
 			.subscribe(() => {
 				this.requestAddressResolution();
+				void this.invalidateCaptureIfLocationChanged();
 			});
 	}
 
@@ -414,6 +419,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 				let location = navigation.extras.state['location'] as BusinessBranchWithNames | null;
 
 				if (location) {
+					this.isHydratingLocationContext = true;
 					// Load cities and locations based on state
 					if (location.state_id) {
 						this.loadCities(location.state_id);
@@ -439,17 +445,19 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 						establishedYear: location.established_year || ''
 					});
 
-					// // Load existing image and coordinates if available
-					// if (location.image) {
-					// 	this.capturedImage = location.image;
-					// }
-					// if (location.latitude && location.longitude) {
-					// 	this.latitude = location.latitude;
-					// 	this.longitude = location.longitude;
-					// 	this.locationCaptured = true;
-					// }
+					// Load existing image and coordinates if available
+					if (location.image) {
+						this.capturedImage = location.image;
+					}
+					if (location.latitude && location.longitude) {
+						this.latitude = location.latitude;
+						this.longitude = location.longitude;
+						this.locationCaptured = true;
+						this.updateCaptureReference();
+					}
 
 					this.setEditModeFieldStates();
+					this.isHydratingLocationContext = false;
 					return;
 				}
 			}
@@ -459,6 +467,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 				.pipe(takeUntil(this.destroy$))
 				.subscribe({
 					next: (data: BusinessBranch) => {
+						this.isHydratingLocationContext = true;
 						// Load cities and locations based on state
 						if (data.state) {
 							this.loadCities(data.state);
@@ -483,19 +492,22 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 							establishedYear: data.established_year || ''
 						});
 
-						// // Load existing image and coordinates
-						// if (data.image) {
-						// 	this.capturedImage = data.image;
-						// }
-						// if (data.latitude && data.longitude) {
-						// 	this.latitude = data.latitude;
-						// 	this.longitude = data.longitude;
-						// 	this.locationCaptured = true;
-						// }
+						// Load existing image and coordinates
+						if (data.image) {
+							this.capturedImage = data.image;
+						}
+						if (data.latitude && data.longitude) {
+							this.latitude = data.latitude;
+							this.longitude = data.longitude;
+							this.locationCaptured = true;
+							this.updateCaptureReference();
+						}
 
 						this.setEditModeFieldStates();
+						this.isHydratingLocationContext = false;
 					},
 					error: () => {
+						this.isHydratingLocationContext = false;
 						this.showToast(
 							this.translate.instant('ADD_BUSINESS_FORM.ERROR_LOADING_DATA'),
 							'danger'
@@ -529,276 +541,312 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	// /**
-	//  * Capture shop location image with camera or file input (browser fallback)
-	//  */
-	// async captureShopImage() {
-	// 	// Detect if running in browser (not on device)
-	// 	const isBrowser = !window || !(window as any).Capacitor?.isNativePlatform?.();
-	// 	if (isBrowser) {
-	// 		this.captureImageFromFileInput();
-	// 		return;
-	// 	}
-	// 	try {
-	// 		const loading = await this.loadingController.create({
-	// 			message: this.translate.instant('ADD_BUSINESS_FORM.CAPTURING_IMAGE')
-	// 		});
-	// 		await loading.present();
+	/**
+	 * Capture shop location image with camera or file input (browser fallback)
+	 */
+	async captureShopImage() {
+		// Detect if running in browser (not on device)
+		const isBrowser = !window || !(window as any).Capacitor?.isNativePlatform?.();
+		if (isBrowser) {
+			await this.captureImageFromBrowserCamera();
+			return;
+		}
+		try {
+			const loading = await this.loadingController.create({
+				message: this.translate.instant('ADD_BUSINESS_FORM.CAPTURING_IMAGE')
+			});
+			await loading.present();
 
-	// 		// Request camera permissions
-	// 		const permissions = await Camera.checkPermissions();
-	// 		if (permissions.camera !== 'granted') {
-	// 			const requestResult = await Camera.requestPermissions({ permissions: ['camera'] });
-	// 			if (requestResult.camera !== 'granted') {
-	// 				loading.dismiss();
-	// 				await this.showToast(
-	// 					this.translate.instant('ADD_BUSINESS_FORM.CAMERA_PERMISSION_DENIED'),
-	// 					'warning'
-	// 				);
-	// 				return;
-	// 			}
-	// 		}
+			// Request camera permissions
+			const permissions = await Camera.checkPermissions();
+			if (permissions.camera !== 'granted') {
+				const requestResult = await Camera.requestPermissions({ permissions: ['camera'] });
+				if (requestResult.camera !== 'granted') {
+					loading.dismiss();
+					await this.showToast(
+						this.translate.instant('ADD_BUSINESS_FORM.CAMERA_PERMISSION_DENIED'),
+						'warning'
+					);
+					return;
+				}
+			}
 
-	// 		// Take photo
-	// 		const image = await Camera.getPhoto({
-	// 			quality: 90,
-	// 			allowEditing: false,
-	// 			resultType: CameraResultType.Base64,
-	// 			source: CameraSource.Camera,
-	// 			saveToGallery: false
-	// 		});
+			// Take photo
+			const image = await Camera.getPhoto({
+				quality: 90,
+				allowEditing: false,
+				resultType: CameraResultType.Base64,
+				source: CameraSource.Camera,
+				saveToGallery: false
+			});
 
-	// 		if (!image.base64String) {
-	// 			loading.dismiss();
-	// 			await this.showToast(
-	// 				this.translate.instant('ADD_BUSINESS_FORM.IMAGE_CAPTURE_FAILED'),
-	// 				'danger'
-	// 			);
-	// 			return;
-	// 		}
+			if (!image.base64String) {
+				loading.dismiss();
+				await this.showToast(
+					this.translate.instant('ADD_BUSINESS_FORM.IMAGE_CAPTURE_FAILED'),
+					'danger'
+				);
+				return;
+			}
 
-	// 		// Store the image
-	// 		this.capturedImage = `data:image/${image.format};base64,${image.base64String}`;
+			// Store the image
+			this.capturedImage = `data:image/${image.format};base64,${image.base64String}`;
+			await this.getDeviceLocation(loading);
 
-	// 		// // Try to extract GPS coordinates from EXIF data
-	// 		// const extracted = await this.extractGPSFromImage(this.capturedImage);
+		} catch (error) {
+			await this.showToast(
+				this.translate.instant('ADD_BUSINESS_FORM.IMAGE_CAPTURE_ERROR'),
+				'danger'
+			);
+		}
+	}
 
-	// 		// if (extracted) {
-	// 		// 	loading.dismiss();
-	// 		// 	await this.confirmLocation();
-	// 		// } else {
-	// 		// 	// Fallback to device geolocation
-	// 		// 	await this.getDeviceLocation(loading);
-	// 		// }
+	/**
+	 * Use browser webcam capture for PWA/laptop flows.
+	 */
+	async captureImageFromBrowserCamera() {
+		try {
+			const imageData = await this.captureImageFromBrowserStream();
+			if (!imageData) {
+				return;
+			}
 
-	// 		await loading.dismiss();
+			const loading = await this.loadingController.create({
+				message: this.translate.instant('ADD_BUSINESS_FORM.CAPTURING_IMAGE')
+			});
+			await loading.present();
 
-	// 	} catch (error) {
-	// 		await this.showToast(
-	// 			this.translate.instant('ADD_BUSINESS_FORM.IMAGE_CAPTURE_ERROR'),
-	// 			'danger'
-	// 		);
-	// 	}
-	// }
+			this.capturedImage = imageData;
+			await this.getBrowserGeolocation(loading);
+		} catch (error) {
+			await this.showToast(
+				this.translate.instant('ADD_BUSINESS_FORM.IMAGE_CAPTURE_ERROR'),
+				'danger'
+			);
+		}
+	}
 
-	// /**
-	//  * Browser fallback: Use file input to select image and extract EXIF/location
-	//  */
-	// captureImageFromFileInput() {
-	// 	// Create file input dynamically
-	// 	const input = document.createElement('input');
-	// 	input.type = 'file';
-	// 	input.accept = 'image/*';
-	// 	input.onchange = async (event: any) => {
-	// 		const file = event.target.files[0];
-	// 		if (!file) return;
-	// 		// Show loading
-	// 		const loading = await this.loadingController.create({
-	// 			message: this.translate.instant('ADD_BUSINESS_FORM.CAPTURING_IMAGE')
-	// 		});
-	// 		await loading.present();
-	// 		// Read file as base64
-	// 		const reader = new FileReader();
-	// 		reader.onload = async (e: any) => {
-	// 			this.capturedImage = e.target.result;
-	// 			// // Try to extract GPS from EXIF
-	// 			// const extracted = await this.extractGPSFromImage(this.capturedImage);
-	// 			// if (extracted) {
-	// 			// 	loading.dismiss();
-	// 			// 	await this.confirmLocation();
-	// 			// } else {
-	// 			// 	// Fallback to browser geolocation
-	// 			// 	await this.getBrowserGeolocation(loading);
-	// 			// }
-	// 			await loading.dismiss();
-	// 		};
-	// 		reader.readAsDataURL(file);
-	// 	};
-	// 	input.click();
-	// }
+	/**
+	 * Use browser webcam to capture a fresh frame for onboarding verification.
+	 */
+	async captureImageFromBrowserStream(): Promise<string | null> {
+		if (!navigator.mediaDevices?.getUserMedia) {
+			await this.showToast(
+				this.translate.instant('ADD_BUSINESS_FORM.IMAGE_CAPTURE_ERROR'),
+				'danger'
+			);
+			return null;
+		}
 
-	// /**
-	//  * Fallback: Get browser geolocation (for desktop dev)
-	//  */
-	// async getBrowserGeolocation(loading: HTMLIonLoadingElement) {
-	// 	if (!navigator.geolocation) {
-	// 		loading.dismiss();
-	// 		await this.showToast(
-	// 			this.translate.instant('ADD_BUSINESS_FORM.LOCATION_ERROR'),
-	// 			'danger'
-	// 		);
-	// 		return;
-	// 	}
-	// 	navigator.geolocation.getCurrentPosition(
-	// 		async (position) => {
-	// 			this.latitude = position.coords.latitude;
-	// 			this.longitude = position.coords.longitude;
-	// 			this.locationCaptured = true;
-	// 			loading.dismiss();
-	// 			await this.showToast(
-	// 				this.translate.instant('ADD_BUSINESS_FORM.LOCATION_FROM_DEVICE'),
-	// 				'success'
-	// 			);
-	// 			await this.confirmLocation();
-	// 		},
-	// 		async (error) => {
-	// 			loading.dismiss();
-	// 			await this.showToast(
-	// 				this.translate.instant('ADD_BUSINESS_FORM.LOCATION_ERROR'),
-	// 				'danger'
-	// 			);
-	// 		},
-	// 		{ enableHighAccuracy: true, timeout: 15000 }
-	// 	);
-	// }
+		const stream = await navigator.mediaDevices.getUserMedia({
+			video: {
+				facingMode: 'environment'
+			},
+			audio: false
+		});
 
-	// /**
-	//  * Extract GPS coordinates from image EXIF data
-	//  */
-	// async extractGPSFromImage(base64Image: string): Promise<boolean> {
-	// 	try {
-	// 		// Convert base64 to blob
-	// 		const response = await fetch(base64Image);
-	// 		const blob = await response.blob();
+		return new Promise<string | null>((resolve) => {
+			const overlay = document.createElement('div');
+			overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;';
 
-	// 		// Extract EXIF data
-	// 		const exifData = await exifr.parse(blob, {
-	// 			gps: true,
-	// 			pick: ['latitude', 'longitude']
-	// 		});
+			const card = document.createElement('div');
+			card.style.cssText = 'background:#fff;border-radius:16px;padding:16px;max-width:720px;width:100%;display:flex;flex-direction:column;gap:12px;';
 
-	// 		if (exifData && exifData.latitude && exifData.longitude) {
-	// 			this.latitude = exifData.latitude;
-	// 			this.longitude = exifData.longitude;
-	// 			this.locationCaptured = true;
-	// 			return true;
-	// 		}
+			const video = document.createElement('video');
+			video.autoplay = true;
+			video.playsInline = true;
+			video.muted = true;
+			video.style.cssText = 'width:100%;border-radius:12px;background:#000;max-height:70vh;object-fit:cover;';
 
-	// 		return false;
-	// 	} catch (error) {
-	// 		return false;
-	// 	}
-	// }
+			const actions = document.createElement('div');
+			actions.style.cssText = 'display:flex;gap:12px;justify-content:flex-end;';
 
-	// /**
-	//  * Fallback: Get device location using Geolocation plugin
-	//  */
-	// async getDeviceLocation(loading: HTMLIonLoadingElement) {
-	// 	try {
-	// 		// Check geolocation permissions
-	// 		const permissions = await Geolocation.checkPermissions();
-	// 		if (permissions.location !== 'granted') {
-	// 			const requestResult = await Geolocation.requestPermissions();
-	// 			if (requestResult.location !== 'granted') {
-	// 				loading.dismiss();
-	// 				await this.showToast(
-	// 					this.translate.instant('ADD_BUSINESS_FORM.LOCATION_PERMISSION_DENIED'),
-	// 					'warning'
-	// 				);
-	// 				return;
-	// 			}
-	// 		}
+			const cancelButton = document.createElement('button');
+			cancelButton.type = 'button';
+			cancelButton.textContent = this.translate.instant('ADD_BUSINESS_FORM.CANCEL');
+			cancelButton.style.cssText = 'padding:10px 16px;border-radius:999px;border:1px solid #d1d5db;background:#fff;color:#111827;cursor:pointer;';
 
-	// 		// Get current position
-	// 		const position = await Geolocation.getCurrentPosition({
-	// 			enableHighAccuracy: true,
-	// 			timeout: 15000
-	// 		});
+			const captureButton = document.createElement('button');
+			captureButton.type = 'button';
+			captureButton.textContent = this.translate.instant('ADD_BUSINESS_FORM.CAPTURE_SHOP_IMAGE');
+			captureButton.style.cssText = 'padding:10px 16px;border-radius:999px;border:none;background:#1d4ed8;color:#fff;cursor:pointer;';
 
-	// 		this.latitude = position.coords.latitude;
-	// 		this.longitude = position.coords.longitude;
-	// 		this.locationCaptured = true;
+			actions.append(cancelButton, captureButton);
+			card.append(video, actions);
+			overlay.append(card);
+			document.body.appendChild(overlay);
 
-	// 		loading.dismiss();
+			const cleanup = () => {
+				stream.getTracks().forEach(track => track.stop());
+				overlay.remove();
+			};
 
-	// 		await this.showToast(
-	// 			this.translate.instant('ADD_BUSINESS_FORM.LOCATION_FROM_DEVICE'),
-	// 			'success'
-	// 		);
+			cancelButton.onclick = () => {
+				cleanup();
+				resolve(null);
+			};
 
-	// 		await this.confirmLocation();
+			captureButton.onclick = () => {
+				if (!video.videoWidth || !video.videoHeight) {
+					return;
+				}
+				const canvas = document.createElement('canvas');
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+				const context = canvas.getContext('2d');
+				if (!context) {
+					cleanup();
+					resolve(null);
+					return;
+				}
+				context.drawImage(video, 0, 0, canvas.width, canvas.height);
+				const imageData = canvas.toDataURL('image/jpeg', 0.92);
+				cleanup();
+				resolve(imageData);
+			};
 
-	// 	} catch (error) {
-	// 		loading.dismiss();
-	// 		await this.showToast(
-	// 			this.translate.instant('ADD_BUSINESS_FORM.LOCATION_ERROR'),
-	// 			'danger'
-	// 		);
-	// 	}
-	// }
+			video.srcObject = stream;
+			video.onloadedmetadata = () => {
+				void video.play();
+			};
+		});
+	}
 
-	// /**
-	//  * Show confirmation dialog for captured location
-	//  */
-	// async confirmLocation() {
-	// 	const alert = await this.alertController.create({
-	// 		header: this.translate.instant('ADD_BUSINESS_FORM.CONFIRM_LOCATION'),
-	// 		message: this.translate.instant('ADD_BUSINESS_FORM.LOCATION_DETAILS', {
-	// 			latitude: this.latitude.toFixed(6),
-	// 			longitude: this.longitude.toFixed(6)
-	// 		}),
-	// 		buttons: [
-	// 			{
-	// 				text: this.translate.instant('ADD_BUSINESS_FORM.RETAKE'),
-	// 				role: 'cancel',
-	// 				handler: () => {
-	// 					this.captureShopImage();
-	// 				}
-	// 			},
-	// 			{
-	// 				text: this.translate.instant('ADD_BUSINESS_FORM.CONFIRM'),
-	// 				handler: () => {
-	// 					this.showToast(
-	// 						this.translate.instant('ADD_BUSINESS_FORM.LOCATION_CONFIRMED'),
-	// 						'success'
-	// 					);
-	// 				}
-	// 			}
-	// 		]
-	// 	});
-	// 	await alert.present();
-	// }
+	/**
+	 * Get browser geolocation immediately after webcam capture.
+	 */
+	async getBrowserGeolocation(loading: HTMLIonLoadingElement) {
+		if (!navigator.geolocation) {
+			loading.dismiss();
+			await this.showToast(
+				this.translate.instant('ADD_BUSINESS_FORM.LOCATION_ERROR'),
+				'danger'
+			);
+			return;
+		}
+		navigator.geolocation.getCurrentPosition(
+			async (position) => {
+				this.latitude = position.coords.latitude;
+				this.longitude = position.coords.longitude;
+				this.setLocationCaptureMetadata('browser_camera_browser_gps');
+				loading.dismiss();
+				await this.showToast(
+					this.translate.instant('ADD_BUSINESS_FORM.LOCATION_FROM_DEVICE'),
+					'success'
+				);
+				await this.confirmLocation();
+			},
+			async () => {
+				loading.dismiss();
+				await this.showToast(
+					this.translate.instant('ADD_BUSINESS_FORM.LOCATION_ERROR'),
+					'danger'
+				);
+			},
+			{ enableHighAccuracy: true, timeout: 15000 }
+		);
+	}
 
-	// /**
-	//  * Remove captured image and location
-	//  */
-	// removeImage() {
-	// 	this.capturedImage = '';
-	// 	// this.latitude = 0;
-	// 	// this.longitude = 0;
-	// 	// this.locationCaptured = false;
-	// }
+	/**
+	 * Fallback: Get device location using Geolocation plugin
+	 */
+	async getDeviceLocation(loading: HTMLIonLoadingElement) {
+		try {
+			// Check geolocation permissions
+			const permissions = await Geolocation.checkPermissions();
+			if (permissions.location !== 'granted') {
+				const requestResult = await Geolocation.requestPermissions();
+				if (requestResult.location !== 'granted') {
+					loading.dismiss();
+					await this.showToast(
+						this.translate.instant('ADD_BUSINESS_FORM.LOCATION_PERMISSION_DENIED'),
+						'warning'
+					);
+					return;
+				}
+			}
+
+			// Get current position
+			const position = await Geolocation.getCurrentPosition({
+				enableHighAccuracy: true,
+				timeout: 15000
+			});
+
+			this.latitude = position.coords.latitude;
+			this.longitude = position.coords.longitude;
+			this.setLocationCaptureMetadata('native_camera_native_gps');
+
+			loading.dismiss();
+
+			await this.showToast(
+				this.translate.instant('ADD_BUSINESS_FORM.LOCATION_FROM_DEVICE'),
+				'success'
+			);
+
+			await this.confirmLocation();
+
+		} catch (error) {
+			loading.dismiss();
+			await this.showToast(
+				this.translate.instant('ADD_BUSINESS_FORM.LOCATION_ERROR'),
+				'danger'
+			);
+		}
+	}
+
+	/**
+	 * Show confirmation dialog for captured location
+	 */
+	async confirmLocation() {
+		const alert = await this.alertController.create({
+			header: this.translate.instant('ADD_BUSINESS_FORM.CONFIRM_LOCATION'),
+			message: this.translate.instant('ADD_BUSINESS_FORM.LOCATION_DETAILS', {
+				latitude: this.latitude.toFixed(6),
+				longitude: this.longitude.toFixed(6)
+			}),
+			buttons: [
+				{
+					text: this.translate.instant('ADD_BUSINESS_FORM.RETAKE'),
+					role: 'cancel',
+					handler: () => {
+						this.captureShopImage();
+					}
+				},
+				{
+					text: this.translate.instant('ADD_BUSINESS_FORM.CONFIRM'),
+					handler: () => {
+						this.showToast(
+							this.translate.instant('ADD_BUSINESS_FORM.LOCATION_CONFIRMED'),
+							'success'
+						);
+					}
+				}
+			]
+		});
+		await alert.present();
+	}
+
+	/**
+	 * Remove captured image and location
+	 */
+	removeImage() {
+		this.capturedImage = '';
+		this.latitude = 0;
+		this.longitude = 0;
+		this.locationCaptureSource = '';
+		this.locationCaptured = false;
+		this.clearCaptureReference();
+	}
 
 	async onSubmit() {
-		// // Validate location and image are captured
-		// if (!this.locationCaptured || !this.capturedImage) {
-		// if (!this.capturedImage) {
-		// 	await this.showToast(
-		// 		this.translate.instant('ADD_BUSINESS_FORM.CAPTURE_LOCATION_FIRST'),
-		// 		'warning'
-		// 	);
-		// 	return;
-		// }
+		// Validate location and image are captured
+		if (!this.locationCaptured || !this.capturedImage) {
+			await this.showToast(
+				this.translate.instant('ADD_BUSINESS_FORM.CAPTURE_LOCATION_FIRST'),
+				'warning'
+			);
+			return;
+		}
 
 		if (this.businessForm.valid) {
 			const loading = await this.loadingController.create({
@@ -811,9 +859,6 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 			try {
 				// Map form values to backend field names that match BusinessBranch struct
 				const formValue = this.businessForm.getRawValue();
-				const fallbackImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2ZkAAAAASUVORK5CYII=';
-				const fallbackLatitude = 28.6139;
-				const fallbackLongitude = 77.2090;
 				const formData: any = {
 					shop_name: formValue.shopName,
 					number: formValue.number,
@@ -828,12 +873,10 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 					privilege_user: false,
 					established_year: formValue.establishedYear || '',
 					active_status: true,
-					// latitude: this.latitude,
-					// longitude: this.longitude,
-					latitude: fallbackLatitude,
-					longitude: fallbackLongitude,
-					// image: this.capturedImage
-					image: fallbackImage
+					latitude: this.latitude,
+					longitude: this.longitude,
+					image: this.capturedImage,
+					location_capture_source: this.locationCaptureSource || null
 				};
 
 				const userId = this.authService.getUserId();
@@ -916,6 +959,61 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 		Object.keys(this.businessForm.controls).forEach(key => {
 			this.businessForm.get(key)?.markAsTouched();
 		});
+	}
+
+	private setLocationCaptureMetadata(source: string) {
+		this.locationCaptureSource = source;
+		this.locationCaptured = true;
+		this.updateCaptureReference();
+	}
+
+	private updateCaptureReference() {
+		this.captureReferenceState = this.getNumericControlValue('state');
+		this.captureReferenceCity = this.getNumericControlValue('city');
+		this.captureReferenceLocation = this.getNumericControlValue('location');
+		this.captureReferenceAddress = this.getNormalizedAddressValue();
+	}
+
+	private clearCaptureReference() {
+		this.captureReferenceState = null;
+		this.captureReferenceCity = null;
+		this.captureReferenceLocation = null;
+		this.captureReferenceAddress = '';
+	}
+
+	private getNumericControlValue(controlName: string): number | null {
+		const rawValue = this.businessForm.get(controlName)?.value;
+		if (rawValue === null || rawValue === undefined || rawValue === '') {
+			return null;
+		}
+		const numericValue = Number(rawValue);
+		return Number.isFinite(numericValue) ? numericValue : null;
+	}
+
+	private getNormalizedAddressValue(): string {
+		return String(this.businessForm.get('address')?.value || '').trim();
+	}
+
+	private currentFormMatchesCapturedLocation(): boolean {
+		return this.captureReferenceState === this.getNumericControlValue('state') &&
+			this.captureReferenceCity === this.getNumericControlValue('city') &&
+			this.captureReferenceLocation === this.getNumericControlValue('location') &&
+			this.captureReferenceAddress === this.getNormalizedAddressValue();
+	}
+
+	private async invalidateCaptureIfLocationChanged() {
+		if (this.isHydratingLocationContext || !this.locationCaptured || !this.capturedImage) {
+			return;
+		}
+		if (this.currentFormMatchesCapturedLocation()) {
+			return;
+		}
+
+		this.removeImage();
+		await this.showToast(
+			this.translate.instant('ADD_BUSINESS_FORM.CAPTURE_REQUIRED_AFTER_LOCATION_CHANGE'),
+			'warning'
+		);
 	}
 
 	getErrorMessage(fieldName: string): string {
