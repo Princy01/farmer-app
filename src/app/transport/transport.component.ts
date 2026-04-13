@@ -12,7 +12,7 @@ import { addIcons } from 'ionicons';
 import {
   speedometerOutline, pricetagOutline, carOutline, personOutline, navigateOutline,
   locationOutline, checkmarkCircleOutline, cashOutline, timeOutline, notificationsOutline,
-  documentTextOutline, checkmarkDoneOutline, personAddOutline, listOutline, personCircleOutline, settingsOutline } from 'ionicons/icons';
+  documentTextOutline, checkmarkDoneOutline, personAddOutline, listOutline, personCircleOutline, settingsOutline, alertCircleOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-transport',
@@ -47,12 +47,13 @@ export class TransportComponent implements OnDestroy {
     '/transport/customer-chat': 'TRANSPORT_MENU.CUSTOMER_CHAT',
     '/transport/earnings-dashboard': 'TRANSPORT_MENU.EARNINGS_REPORTS',
     '/transport/delivery-history': 'TRANSPORT_MENU.DELIVERY_HISTORY',
+    '/transport/dispute-management': 'TRANSPORT_MENU.DISPUTE_MANAGEMENT',
     '/transport/notifications': 'TRANSPORT_MENU.NOTIFICATIONS',
     '/transport/settings': 'TRANSPORT_MENU.SETTINGS'
   };
 
   constructor(private router: Router, private translate: TranslateService) {
-    addIcons({speedometerOutline,documentTextOutline,personAddOutline,listOutline,checkmarkCircleOutline,timeOutline,personCircleOutline,settingsOutline,pricetagOutline,carOutline,personOutline,locationOutline,cashOutline,notificationsOutline,navigateOutline,checkmarkDoneOutline});
+    addIcons({personCircleOutline,speedometerOutline,documentTextOutline,personAddOutline,listOutline,checkmarkCircleOutline,timeOutline,alertCircleOutline,settingsOutline,pricetagOutline,carOutline,personOutline,locationOutline,cashOutline,notificationsOutline,navigateOutline,checkmarkDoneOutline});
     this.router.events
       .pipe(takeUntil(this.destroy$))
       .subscribe((event) => {

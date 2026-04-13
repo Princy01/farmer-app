@@ -1,0 +1,484 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="goBack()">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      <span *ngIf="view === 'list'">{{ 'TRANSPORT_DISPUTE.MY_DISPUTES' | translate }}</span>
+      <span *ngIf="view === 'raise'">{{ 'TRANSPORT_DISPUTE.REPORT_ISSUE' | translate }}</span>
+      <span *ngIf="view === 'detail'">{{ 'TRANSPORT_DISPUTE.DISPUTE_DETAILS' | translate }}</span>
+    </ion-title>
+    <ion-buttons slot="end" *ngIf="view === 'list'">
+      <ion-button fill="clear" (click)="startRaise()">
+        <ion-icon name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="dispute-content">
+
+  <!-- ═══════════════════════════════════════════════
+       LIST VIEW
+  ════════════════════════════════════════════════ -->
+  <div *ngIf="view === 'list'" class="content-container">
+
+    <!-- Segment tabs -->
+    <ion-segment [(ngModel)]="activeTabIndex" class="dispute-segment">
+      <ion-segment-button [value]="0">
+        <ion-label>{{ 'TRANSPORT_DISPUTE.TAB_OPEN' | translate:{count: openDisputes.length} }}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button [value]="1">
+        <ion-label>{{ 'TRANSPORT_DISPUTE.TAB_RESOLVED' | translate:{count: resolvedDisputes.length} }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- Loading skeleton -->
+    <div *ngIf="isLoadingList" class="skeleton-list">
+      <ion-card *ngFor="let s of [1,2,3]" class="dispute-card skeleton-card">
+        <ion-skeleton-text animated style="height:16px;width:60%;margin-bottom:8px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="height:12px;width:40%"></ion-skeleton-text>
+      </ion-card>
+    </div>
+
+    <!-- Open disputes -->
+    <div *ngIf="!isLoadingList && activeTabIndex === 0">
+      <div *ngIf="openDisputes.length === 0" class="empty-state">
+        <ion-icon name="checkmark-circle-outline" class="empty-icon"></ion-icon>
+        <h3>{{ 'TRANSPORT_DISPUTE.NO_OPEN_DISPUTES_TITLE' | translate }}</h3>
+        <p>{{ 'TRANSPORT_DISPUTE.NO_OPEN_DISPUTES_DESC' | translate }}</p>
+        <ion-button fill="outline" (click)="startRaise()">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          {{ 'TRANSPORT_DISPUTE.REPORT_ISSUE' | translate }}
+        </ion-button>
+      </div>
+
+      <ion-card
+        *ngFor="let d of openDisputes"
+        class="dispute-card"
+        (click)="openDetail(d)"
+      >
+        <div class="dispute-card-inner">
+          <div class="dispute-card-left">
+            <div class="issue-icon-wrap">
+              <ion-icon [name]="getIconForCode(d.issue_type_code)"></ion-icon>
+            </div>
+          </div>
+          <div class="dispute-card-body">
+            <div class="dispute-card-top">
+              <span class="case-ref">{{ d.case_reference }}</span>
+              <ion-badge [color]="getPriorityColor(d.priority)" class="priority-badge">
+                {{ d.priority }}
+              </ion-badge>
+            </div>
+            <p class="dispute-title">{{ d.title || getLabelForCode(d.issue_type_code) }}</p>
+            <p class="dispute-meta">{{ d.reported_at | date:'mediumDate' }}</p>
+            <div class="dispute-card-bottom">
+              <ion-chip [color]="getStatusColor(d.status)" outline class="status-chip">
+                {{ getStatusLabel(d.status) }}
+              </ion-chip>
+              <span *ngIf="d.job_id" class="linked-ref">{{ 'TRANSPORT_DISPUTE.JOB_PREFIX' | translate:{id: d.job_id} }}</span>
+            </div>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="card-arrow"></ion-icon>
+        </div>
+      </ion-card>
+    </div>
+
+    <!-- Resolved disputes -->
+    <div *ngIf="!isLoadingList && activeTabIndex === 1">
+      <div *ngIf="resolvedDisputes.length === 0" class="empty-state">
+        <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
+        <h3>{{ 'TRANSPORT_DISPUTE.NO_RESOLVED_DISPUTES_TITLE' | translate }}</h3>
+        <p>{{ 'TRANSPORT_DISPUTE.NO_RESOLVED_DISPUTES_DESC' | translate }}</p>
+      </div>
+
+      <ion-card
+        *ngFor="let d of resolvedDisputes"
+        class="dispute-card resolved"
+        (click)="openDetail(d)"
+      >
+        <div class="dispute-card-inner">
+          <div class="dispute-card-left">
+            <div class="issue-icon-wrap resolved">
+              <ion-icon [name]="getIconForCode(d.issue_type_code)"></ion-icon>
+            </div>
+          </div>
+          <div class="dispute-card-body">
+            <div class="dispute-card-top">
+              <span class="case-ref">{{ d.case_reference }}</span>
+              <ion-chip [color]="getStatusColor(d.status)" class="status-chip-sm">
+                {{ getStatusLabel(d.status) }}
+              </ion-chip>
+            </div>
+            <p class="dispute-title">{{ d.title || getLabelForCode(d.issue_type_code) }}</p>
+            <p class="dispute-meta">{{ d.reported_at | date:'mediumDate' }}</p>
+            <div *ngIf="d.resolution" class="resolution-preview">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              <span>{{ d.resolution.outcome_code | titlecase }}</span>
+            </div>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="card-arrow"></ion-icon>
+        </div>
+      </ion-card>
+    </div>
+
+    <!-- FAB -->
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button (click)="startRaise()" color="primary">
+        <ion-icon name="add-circle-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════
+       RAISE DISPUTE FORM VIEW
+  ════════════════════════════════════════════════ -->
+  <div *ngIf="view === 'raise'" class="content-container raise-view">
+
+    <!-- Step: Issue type -->
+    <ion-card class="form-card">
+      <div class="card-header">
+        <ion-icon name="alert-circle-outline" class="header-icon"></ion-icon>
+        <div class="header-info">
+          <h3 class="card-title">{{ 'TRANSPORT_DISPUTE.WHAT_IS_THE_ISSUE' | translate }}</h3>
+          <p class="card-subtitle">{{ 'TRANSPORT_DISPUTE.ISSUE_TYPE_SUBTITLE' | translate }}</p>
+        </div>
+      </div>
+      <div class="issue-type-grid">
+        <div
+          *ngFor="let it of issueTypes"
+          class="issue-type-chip"
+          [class.selected]="form.issue_type_code === it.code"
+          (click)="selectIssueType(it.code)"
+        >
+          <ion-icon [name]="it.icon"></ion-icon>
+          <span>{{ it.label | translate }}</span>
+        </div>
+      </div>
+      <p *ngIf="formErrors['issue_type_code']" class="field-error">
+        {{ formErrors['issue_type_code'] }}
+      </p>
+    </ion-card>
+
+    <!-- Step: Description -->
+    <ion-card class="form-card">
+      <div class="card-header">
+        <ion-icon name="document-text-outline" class="header-icon"></ion-icon>
+        <div class="header-info">
+          <h3 class="card-title">{{ 'TRANSPORT_DISPUTE.DESCRIBE_THE_ISSUE' | translate }}</h3>
+        </div>
+      </div>
+
+      <div class="form-fields">
+        <!-- Title (optional) -->
+        <div class="field-group">
+          <label class="field-label">{{ 'TRANSPORT_DISPUTE.SHORT_TITLE' | translate }} <span class="optional">{{ 'TRANSPORT_DISPUTE.OPTIONAL' | translate }}</span></label>
+          <ion-input
+            [(ngModel)]="form.title"
+            [placeholder]="'TRANSPORT_DISPUTE.SHORT_TITLE_PLACEHOLDER' | translate"
+            fill="outline"
+            class="field-input"
+          ></ion-input>
+        </div>
+
+        <!-- Description (required) -->
+        <div class="field-group">
+          <label class="field-label">{{ 'TRANSPORT_DISPUTE.DETAILS' | translate }} <span class="required">*</span></label>
+          <ion-textarea
+            [(ngModel)]="form.description"
+            [placeholder]="'TRANSPORT_DISPUTE.DETAILS_PLACEHOLDER' | translate"
+            rows="4"
+            auto-grow="true"
+            maxlength="1000"
+            counter="true"
+            fill="outline"
+            class="field-textarea"
+          ></ion-textarea>
+          <p *ngIf="formErrors['description']" class="field-error">
+            {{ formErrors['description'] }}
+          </p>
+        </div>
+
+        <!-- Incident date/time -->
+        <div class="field-group">
+          <label class="field-label">{{ 'TRANSPORT_DISPUTE.WHEN_DID_IT_HAPPEN' | translate }} <span class="optional">{{ 'TRANSPORT_DISPUTE.OPTIONAL' | translate }}</span></label>
+          <ion-input
+            type="datetime-local"
+            [(ngModel)]="form.incident_at"
+            fill="outline"
+            class="field-input"
+          ></ion-input>
+        </div>
+
+        <!-- Priority -->
+        <div class="field-group">
+          <label class="field-label">{{ 'TRANSPORT_DISPUTE.PRIORITY' | translate }}</label>
+          <div class="priority-selector">
+            <div
+              *ngFor="let p of priorityOptions"
+              class="priority-chip"
+              [class.selected]="form.priority === p.value"
+              [attr.data-color]="p.color"
+              (click)="form.priority = p.value"
+            >
+              {{ p.label | translate }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Linked job/order (pre-filled or manual) -->
+        <div class="field-row">
+          <div class="field-group half">
+            <label class="field-label">{{ 'TRANSPORT_DISPUTE.JOB_ID' | translate }} <span class="optional">{{ 'TRANSPORT_DISPUTE.OPTIONAL' | translate }}</span></label>
+            <ion-input
+              type="number"
+              [(ngModel)]="form.job_id"
+              [placeholder]="'TRANSPORT_DISPUTE.JOB_ID_PLACEHOLDER' | translate"
+              fill="outline"
+              class="field-input"
+            ></ion-input>
+          </div>
+          <div class="field-group half">
+            <label class="field-label">{{ 'TRANSPORT_DISPUTE.ORDER_ID' | translate }} <span class="optional">{{ 'TRANSPORT_DISPUTE.OPTIONAL' | translate }}</span></label>
+            <ion-input
+              type="number"
+              [(ngModel)]="form.order_id"
+              [placeholder]="'TRANSPORT_DISPUTE.ORDER_ID_PLACEHOLDER' | translate"
+              fill="outline"
+              class="field-input"
+            ></ion-input>
+          </div>
+        </div>
+      </div>
+    </ion-card>
+
+    <!-- Step: Evidence upload -->
+    <ion-card class="form-card">
+      <div class="card-header">
+        <ion-icon name="attach-outline" class="header-icon"></ion-icon>
+        <div class="header-info">
+          <h3 class="card-title">{{ 'TRANSPORT_DISPUTE.ATTACH_EVIDENCE' | translate }}</h3>
+          <p class="card-subtitle">{{ 'TRANSPORT_DISPUTE.ATTACH_EVIDENCE_SUBTITLE' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="evidence-upload-area">
+        <div class="evidence-previews" *ngIf="pendingPreviews.length > 0">
+          <div
+            *ngFor="let preview of pendingPreviews; let i = index"
+            class="preview-item"
+          >
+            <img [src]="preview" [alt]="'TRANSPORT_DISPUTE.EVIDENCE_PREVIEW_ALT' | translate" />
+            <button class="remove-preview" (click)="removeFile(i)">
+              <ion-icon name="close-circle-outline"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <label class="upload-btn" *ngIf="pendingFiles.length < 5">
+          <input
+            type="file"
+            accept="image/*,video/*,application/pdf"
+            multiple
+            (change)="onFileSelected($event)"
+            style="display:none"
+          />
+          <ion-icon name="cloud-upload-outline"></ion-icon>
+          <span>{{ pendingFiles.length === 0 ? ('TRANSPORT_DISPUTE.TAP_TO_ADD_FILES' | translate) : ('TRANSPORT_DISPUTE.ADD_MORE' | translate) }}</span>
+        </label>
+      </div>
+    </ion-card>
+
+    <!-- Submit -->
+    <div class="submit-section">
+      <ion-button
+        expand="block"
+        class="submit-btn"
+        (click)="submitDispute()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon name="send-outline" slot="start"></ion-icon>
+        {{ isSubmitting ? ('TRANSPORT_DISPUTE.SUBMITTING' | translate) : ('TRANSPORT_DISPUTE.SUBMIT_DISPUTE' | translate) }}
+      </ion-button>
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="cancel-btn"
+        (click)="goBack()"
+        [disabled]="isSubmitting"
+      >
+        {{ 'TRANSPORT_DISPUTE.CANCEL' | translate }}
+      </ion-button>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════
+       DETAIL VIEW
+  ════════════════════════════════════════════════ -->
+  <div *ngIf="view === 'detail' && selectedDispute" class="content-container detail-view">
+
+    <!-- Case header card -->
+    <ion-card class="detail-header-card">
+      <div class="detail-header-top">
+        <div class="case-ref-large">{{ selectedDispute.case_reference }}</div>
+        <ion-badge [color]="getStatusColor(selectedDispute.status)" class="status-badge-large">
+          {{ getStatusLabel(selectedDispute.status) }}
+        </ion-badge>
+      </div>
+      <h2 class="detail-title">
+        {{ selectedDispute.title || (getLabelForCode(selectedDispute.issue_type_code) | translate) }}
+      </h2>
+      <div class="detail-chips">
+        <ion-chip [color]="getPriorityColor(selectedDispute.priority)" outline>
+          <ion-label>{{ getPriorityLabel(selectedDispute.priority) }} {{ 'TRANSPORT_DISPUTE.PRIORITY_SUFFIX' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip outline color="medium" *ngIf="selectedDispute.job_id">
+          <ion-icon name="car-outline"></ion-icon>
+          <ion-label>{{ 'TRANSPORT_DISPUTE.JOB_PREFIX' | translate:{id: selectedDispute.job_id} }}</ion-label>
+        </ion-chip>
+        <ion-chip outline color="medium" *ngIf="selectedDispute.order_id">
+          <ion-icon name="receipt-outline"></ion-icon>
+          <ion-label>{{ 'TRANSPORT_DISPUTE.ORDER_PREFIX' | translate:{id: selectedDispute.order_id} }}</ion-label>
+        </ion-chip>
+      </div>
+    </ion-card>
+
+    <!-- Description -->
+    <ion-card class="detail-section-card">
+      <div class="card-header">
+        <ion-icon name="document-text-outline" class="header-icon"></ion-icon>
+        <h3 class="card-title">{{ 'TRANSPORT_DISPUTE.ISSUE_DESCRIPTION' | translate }}</h3>
+      </div>
+      <p class="detail-description">{{ selectedDispute.description }}</p>
+      <div class="detail-meta-row" *ngIf="selectedDispute.incident_at">
+        <ion-icon name="time-outline"></ion-icon>
+        <span>{{ 'TRANSPORT_DISPUTE.INCIDENT_AT' | translate:{date: (selectedDispute.incident_at | date:'medium')} }}</span>
+      </div>
+      <div class="detail-meta-row">
+        <ion-icon name="time-outline"></ion-icon>
+        <span>{{ 'TRANSPORT_DISPUTE.REPORTED_AT' | translate:{date: (selectedDispute.reported_at | date:'medium')} }}</span>
+      </div>
+    </ion-card>
+
+    <!-- SLA / Timeline pills -->
+    <ion-card class="detail-section-card timeline-card">
+      <div class="card-header">
+        <ion-icon name="hourglass-outline" class="header-icon"></ion-icon>
+        <h3 class="card-title">{{ 'TRANSPORT_DISPUTE.TIMELINE' | translate }}</h3>
+      </div>
+      <div class="timeline">
+        <div class="timeline-step done">
+          <div class="timeline-dot"></div>
+          <div class="timeline-label">
+            <span class="tl-title">{{ 'TRANSPORT_DISPUTE.CASE_RAISED' | translate }}</span>
+            <span class="tl-time">{{ selectedDispute.reported_at | date:'shortTime' }}, {{ selectedDispute.reported_at | date:'mediumDate' }}</span>
+          </div>
+        </div>
+        <div class="timeline-step" [class.done]="selectedDispute.first_response_at">
+          <div class="timeline-dot"></div>
+          <div class="timeline-label">
+            <span class="tl-title">{{ 'TRANSPORT_DISPUTE.FIRST_RESPONSE' | translate }}</span>
+            <span class="tl-time" *ngIf="selectedDispute.first_response_at">
+              {{ selectedDispute.first_response_at | date:'short' }}
+            </span>
+            <span class="tl-time pending" *ngIf="!selectedDispute.first_response_at">{{ 'TRANSPORT_DISPUTE.PENDING' | translate }}</span>
+          </div>
+        </div>
+        <div class="timeline-step" [class.done]="selectedDispute.resolved_at">
+          <div class="timeline-dot"></div>
+          <div class="timeline-label">
+            <span class="tl-title">{{ 'TRANSPORT_DISPUTE.TIMELINE_RESOLVED' | translate }}</span>
+            <span class="tl-time" *ngIf="selectedDispute.resolved_at">
+              {{ selectedDispute.resolved_at | date:'short' }}
+            </span>
+            <span class="tl-time pending" *ngIf="!selectedDispute.resolved_at">{{ 'TRANSPORT_DISPUTE.PENDING' | translate }}</span>
+          </div>
+        </div>
+        <div class="timeline-step" [class.done]="selectedDispute.closed_at">
+          <div class="timeline-dot"></div>
+          <div class="timeline-label">
+            <span class="tl-title">{{ 'TRANSPORT_DISPUTE.TIMELINE_CLOSED' | translate }}</span>
+            <span class="tl-time" *ngIf="selectedDispute.closed_at">
+              {{ selectedDispute.closed_at | date:'short' }}
+            </span>
+            <span class="tl-time pending" *ngIf="!selectedDispute.closed_at">{{ 'TRANSPORT_DISPUTE.PENDING' | translate }}</span>
+          </div>
+        </div>
+      </div>
+    </ion-card>
+
+    <!-- Resolution outcome (if available) -->
+    <ion-card class="detail-section-card resolution-card" *ngIf="selectedDispute.resolution">
+      <div class="card-header">
+        <ion-icon name="checkmark-circle-outline" class="header-icon success"></ion-icon>
+        <h3 class="card-title">{{ 'TRANSPORT_DISPUTE.RESOLUTION' | translate }}</h3>
+      </div>
+      <div class="resolution-outcome">
+        <ion-badge color="success" class="outcome-badge">
+          {{ selectedDispute.resolution.outcome_code | titlecase }}
+        </ion-badge>
+      </div>
+      <p class="resolution-summary">{{ selectedDispute.resolution.decision_summary }}</p>
+
+      <div class="resolution-amounts" *ngIf="selectedDispute.resolution.refund_amount || selectedDispute.resolution.penalty_amount">
+        <div class="amount-row" *ngIf="selectedDispute.resolution.refund_amount">
+          <span class="amount-label">{{ 'TRANSPORT_DISPUTE.REFUND_APPROVED' | translate }}</span>
+          <span class="amount-value success">₹{{ selectedDispute.resolution.refund_amount | number:'1.2-2' }}</span>
+        </div>
+        <div class="amount-row" *ngIf="selectedDispute.resolution.penalty_amount">
+          <span class="amount-label">{{ 'TRANSPORT_DISPUTE.PENALTY_APPLIED' | translate }}</span>
+          <span class="amount-value danger">₹{{ selectedDispute.resolution.penalty_amount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="ops-action" *ngIf="selectedDispute.resolution.ops_action_required">
+        <ion-icon name="alert-circle-outline" color="warning"></ion-icon>
+        <span>{{ selectedDispute.resolution.ops_action_required }}</span>
+      </div>
+    </ion-card>
+
+    <!-- Evidence -->
+    <ion-card class="detail-section-card">
+      <div class="card-header">
+        <ion-icon name="attach-outline" class="header-icon"></ion-icon>
+        <h3 class="card-title">{{ 'TRANSPORT_DISPUTE.EVIDENCE' | translate:{count: disputeEvidence.length} }}</h3>
+      </div>
+      <div *ngIf="isLoadingDetail" class="evidence-loading">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+      <div *ngIf="!isLoadingDetail && disputeEvidence.length === 0" class="no-evidence">
+        <span>{{ 'TRANSPORT_DISPUTE.NO_EVIDENCE' | translate }}</span>
+      </div>
+      <div class="evidence-grid" *ngIf="!isLoadingDetail && disputeEvidence.length > 0">
+        <div *ngFor="let ev of disputeEvidence" class="evidence-thumb">
+          <img *ngIf="ev.mime_type?.startsWith('image')" [src]="ev.file_url" [alt]="ev.file_name" />
+          <div *ngIf="!ev.mime_type?.startsWith('image')" class="doc-thumb">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <span>{{ ev.file_name }}</span>
+          </div>
+          <p class="evidence-caption" *ngIf="ev.caption">{{ ev.caption }}</p>
+        </div>
+      </div>
+    </ion-card>
+
+    <!-- Next step (if ops left a note) -->
+    <ion-card class="detail-section-card next-step-card"
+      *ngIf="selectedDispute.next_step_type">
+      <div class="card-header">
+        <ion-icon name="hourglass-outline" class="header-icon warning"></ion-icon>
+        <h3 class="card-title">{{ 'TRANSPORT_DISPUTE.NEXT_STEP' | translate }}</h3>
+      </div>
+      <p class="next-step-text">{{ selectedDispute.next_step_type }}</p>
+      <p class="next-step-due" *ngIf="selectedDispute.next_step_due_at">
+        {{ 'TRANSPORT_DISPUTE.DUE_BY' | translate:{date: (selectedDispute.next_step_due_at | date:'short')} }}
+      </p>
+    </ion-card>
+
+  </div>
+
+</ion-content>
