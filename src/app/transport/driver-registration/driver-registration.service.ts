@@ -16,6 +16,8 @@ export interface DriverInfoRequest {
   address_street: string;
   address_town: string;
   address_state: string;
+  address_city_id?: number | null;
+  address_state_id?: number | null;
   address_pin_code: string;
   address_landmark: string;
   contact_num: string;
@@ -57,6 +59,7 @@ export interface DriverVehicle {
   veh_number: string;
   reg_date: string;
   state: string;
+  state_id?: number | null;
   type_id: number;
   veh_make: string;
   veh_model: string;

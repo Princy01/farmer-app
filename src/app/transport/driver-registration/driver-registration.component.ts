@@ -58,6 +58,9 @@ export class DriverRegistrationComponent implements OnInit {
   today = new Date().toISOString();
   states: State[] = [];
   cities: City[] = [];
+  filteredCities: City[] = [];
+  citySearchTerm = '';
+  showCitySuggestions = false;
   selectedStateId: number | null = null;
 
   // Form groups
@@ -181,8 +184,8 @@ export class DriverRegistrationComponent implements OnInit {
 
     console.log('Driver registration initialized for driver_id (user_id):', this.driverId);
 
-    // Load states for dropdown
-    this.loadStates();
+    // Load states for dropdown before prefill logic resolves IDs
+    await this.loadStates();
 
     // Check registration status
     await this.checkDriverRegistrationStatus();
@@ -292,6 +295,13 @@ export class DriverRegistrationComponent implements OnInit {
   }
 
   private prefillDriverInfo(data: DriverInfoResponse) {
+    const resolvedStateId =
+      data.address_state_id ??
+      this.states.find(
+        s => s.state_shortname.toLowerCase() === (data.address_state || '').toLowerCase()
+      )?.id ??
+      null;
+
     this.driverInfoForm.patchValue({
       first_name: data.first_name || '',
       last_name: data.last_name || '',
@@ -302,8 +312,8 @@ export class DriverRegistrationComponent implements OnInit {
       licence_type: data.licence_type || '',
       address_door_no: data.address_door_no || '',
       address_street: data.address_street || '',
-      address_town: data.address_town || '',
-      address_state: data.address_state || '',
+      address_city_id: data.address_city_id || null,
+      address_state_id: resolvedStateId,
       address_pin_code: data.address_pin_code || '',
       address_landmark: data.address_landmark || '',
       contact_num: data.contact_num || '',
@@ -320,24 +330,41 @@ export class DriverRegistrationComponent implements OnInit {
     });
 
     // Load cities if state is set
-    if (data.address_state) {
-      const state = this.states.find(s => s.state_shortname === data.address_state);
-      if (state) {
-        this.selectedStateId = state.id;
-        this.driverService.getCitiesOfState(state.id).subscribe({
-          next: (cities) => {
-            this.cities = cities;
+    if (resolvedStateId) {
+      this.selectedStateId = resolvedStateId;
+      this.driverService.getCitiesOfState(resolvedStateId).subscribe({
+        next: (cities) => {
+          this.cities = cities;
+          this.filteredCities = [...cities];
+          const resolvedCityId =
+            data.address_city_id ??
+            cities.find(
+              city => city.city_name.toLowerCase() === (data.address_town || '').toLowerCase()
+            )?.id ??
+            null;
+
+          if (resolvedCityId) {
+            this.driverInfoForm.patchValue({ address_city_id: resolvedCityId });
+            const selectedCity = cities.find((city) => city.id === resolvedCityId);
+            this.citySearchTerm = selectedCity?.city_name ?? '';
           }
-        });
-      }
+        }
+      });
     }
   }
 
   private prefillVehicleInfo(data: DriverVehicleResponse) {
+    const resolvedVehicleStateId =
+      data.state_id ??
+      this.states.find(
+        state => state.state_shortname.toLowerCase() === (data.state || '').toLowerCase()
+      )?.id ??
+      null;
+
     this.vehicleForm.patchValue({
       veh_number: data.veh_number || '',
       reg_date: data.reg_date || '',
-      state: data.state || '',
+      state_id: resolvedVehicleStateId,
       type_id: data.type_id || null,
       veh_make: data.veh_make || '',
       veh_model: data.veh_model || '',
@@ -346,7 +373,6 @@ export class DriverRegistrationComponent implements OnInit {
       rc_document: data.rc_document || '',
       kms_travelled: data.kms_travelled || 0
     });
-    console.log(this.vehicleForm.value)
   }
 
   // Update prefillDocuments to set preview URLs
@@ -443,8 +469,8 @@ export class DriverRegistrationComponent implements OnInit {
       licence_type: ['', [Validators.required]],
       address_door_no: [''],
       address_street: ['', [Validators.required]],
-      address_town: ['', [Validators.required]],
-      address_state: ['', [Validators.required]],
+      address_city_id: [null, [Validators.required]],
+      address_state_id: [null, [Validators.required]],
       address_pin_code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
       address_landmark: [''],
       contact_num: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
@@ -474,7 +500,7 @@ export class DriverRegistrationComponent implements OnInit {
     this.vehicleForm = this.fb.group({
       veh_number: ['', [Validators.required, Validators.minLength(5)]],
       reg_date: ['', [Validators.required]],
-      state: ['', [Validators.required]],
+      state_id: [null, [Validators.required]],
       type_id: [null, [Validators.required]],
       veh_make: [''],
       veh_model: [''],
@@ -591,6 +617,15 @@ export class DriverRegistrationComponent implements OnInit {
     }
 
     const formValue = this.driverInfoForm.value;
+    const selectedState = this.states.find((state) => state.id === Number(formValue.address_state_id));
+    const selectedCity = this.cities.find((city) => city.id === Number(formValue.address_city_id));
+
+    if (!selectedState || !selectedCity) {
+      await loading.dismiss();
+      await this.showToast('DRIVER_REGISTRATION.FILL_REQUIRED_FIELDS', 'warning');
+      return;
+    }
+
     const driverInfo: DriverInfoRequest = {
       first_name: formValue.first_name.trim(),
       last_name: formValue.last_name.trim(),
@@ -601,8 +636,10 @@ export class DriverRegistrationComponent implements OnInit {
       licence_type: formValue.licence_type,
       address_door_no: formValue.address_door_no?.trim() || '',
       address_street: formValue.address_street.trim(),
-      address_town: formValue.address_town,
-      address_state: formValue.address_state,
+      address_town: selectedCity.city_name,
+      address_state: selectedState.state_shortname,
+      address_city_id: selectedCity.id,
+      address_state_id: selectedState.id,
       address_pin_code: formValue.address_pin_code,
       address_landmark: formValue.address_landmark?.trim() || '',
       contact_num: formValue.contact_num,
@@ -693,10 +730,19 @@ export class DriverRegistrationComponent implements OnInit {
     }
 
     const formValue = this.vehicleForm.value;
+    const selectedVehicleState = this.states.find((state) => state.id === Number(formValue.state_id));
+
+    if (!selectedVehicleState) {
+      await loading.dismiss();
+      await this.showToast('DRIVER_REGISTRATION.FILL_REQUIRED_FIELDS', 'warning');
+      return;
+    }
+
     const vehicle: DriverVehicle = {
       veh_number: formValue.veh_number.toUpperCase().trim(),
       reg_date: this.formatDate(formValue.reg_date),
-      state: formValue.state,
+      state: selectedVehicleState.state_shortname,
+      state_id: selectedVehicleState.id,
       type_id: Number(formValue.type_id),
       veh_make: formValue.veh_make?.trim() || '',
       veh_model: formValue.veh_model?.trim() || '',
@@ -998,45 +1044,111 @@ export class DriverRegistrationComponent implements OnInit {
     });
   }
 
-  loadStates() {
-    this.driverService.getStates().subscribe({
-      next: (states) => {
-        this.states = states;
-      },
-      error: (error) => {
-        console.error('Error loading states:', error);
-        this.states = [];
-        this.showToast('DRIVER_REGISTRATION.STATES_LOAD_FAILED', 'warning');
-      }
+  loadStates(): Promise<void> {
+    return new Promise((resolve) => {
+      this.driverService.getStates().subscribe({
+        next: (states) => {
+          this.states = states;
+          resolve();
+        },
+        error: () => {
+          this.states = [];
+          this.showToast('DRIVER_REGISTRATION.STATES_LOAD_FAILED', 'warning');
+          resolve();
+        }
+      });
     });
   }
 
   onStateChange(event: any, formGroup: FormGroup | null, stateField: string, cityField: string) {
     if (!formGroup) return;
 
-    const stateShortName = event.detail.value;
-    const selectedState = this.states.find(s => s.state_shortname === stateShortName);
+    const selectedStateId = Number(event.detail.value);
 
-    if (selectedState) {
-      this.selectedStateId = selectedState.id;
-      this.driverService.getCitiesOfState(selectedState.id).subscribe({
+    if (selectedStateId) {
+      this.selectedStateId = selectedStateId;
+      this.driverService.getCitiesOfState(selectedStateId).subscribe({
         next: (cities) => {
           this.cities = cities;
+          this.filteredCities = [...cities];
           if (cities.length === 0) {
             this.showToast('DRIVER_REGISTRATION.NO_CITIES_FOUND', 'warning');
           }
         },
-        error: (error) => {
-          console.error('Error loading cities:', error);
+        error: () => {
           this.cities = [];
+          this.filteredCities = [];
           this.showToast('DRIVER_REGISTRATION.CITIES_LOAD_FAILED', 'warning');
         }
       });
-      formGroup.patchValue({ [cityField]: '' }); // Reset city/town field
+      formGroup.patchValue({ [cityField]: null });
+      this.citySearchTerm = '';
+      this.showCitySuggestions = false;
     } else {
       this.cities = [];
-      formGroup.patchValue({ [cityField]: '' });
+      this.filteredCities = [];
+      formGroup.patchValue({ [cityField]: null });
+      this.citySearchTerm = '';
+      this.showCitySuggestions = false;
     }
+  }
+
+  onAddressCitySearchChange(event: Event | CustomEvent): void {
+    const rawValue = (event as CustomEvent)?.detail?.value ?? (event.target as HTMLInputElement)?.value ?? '';
+    this.citySearchTerm = String(rawValue);
+
+    const selectedCityId = this.driverInfoForm.get('address_city_id')?.value;
+    if (selectedCityId) {
+      const selectedCity = this.cities.find((city) => city.id === Number(selectedCityId));
+      if (selectedCity && selectedCity.city_name.toLowerCase() !== this.citySearchTerm.trim().toLowerCase()) {
+        this.driverInfoForm.get('address_city_id')?.setValue(null, { emitEvent: false });
+      }
+    }
+
+    this.filterCities();
+    this.showCitySuggestions = !!this.driverInfoForm.get('address_state_id')?.value;
+  }
+
+  onAddressCityInputFocus(): void {
+    if (!this.driverInfoForm.get('address_state_id')?.value) {
+      return;
+    }
+    this.filteredCities = [...this.cities];
+    this.showCitySuggestions = true;
+  }
+
+  onAddressCityInputBlur(): void {
+    this.driverInfoForm.get('address_city_id')?.markAsTouched();
+    setTimeout(() => {
+      this.showCitySuggestions = false;
+    }, 150);
+  }
+
+  selectAddressCity(city: City, event?: Event): void {
+    event?.preventDefault();
+    this.driverInfoForm.get('address_city_id')?.setValue(city.id, { emitEvent: false });
+    this.citySearchTerm = city.city_name;
+    this.showCitySuggestions = false;
+  }
+
+  clearSelectedAddressCity(): void {
+    this.driverInfoForm.get('address_city_id')?.setValue(null, { emitEvent: false });
+    this.citySearchTerm = '';
+    this.filteredCities = [...this.cities];
+    this.showCitySuggestions = false;
+  }
+
+  private filterCities(): void {
+    const searchTerm = this.citySearchTerm.trim().toLowerCase();
+    if (!searchTerm) {
+      this.filteredCities = [...this.cities];
+      return;
+    }
+
+    this.filteredCities = this.cities.filter((city) =>
+      city.city_name.toLowerCase().includes(searchTerm) ||
+      city.city_shortname.toLowerCase().includes(searchTerm)
+    );
   }
 
   // Helper methods for UI

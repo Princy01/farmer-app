@@ -202,22 +202,46 @@
 
               <!-- City ID -->
               <div>
-                <ion-item
-                  [class.ion-invalid]="
-                    form.get('city_id')?.invalid && form.get('city_id')?.touched
-                  "
-                >
-                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.CITY' | translate }} *</ion-label>
-                  <ion-select
-                    formControlName="city_id"
-                    [placeholder]="'BUSINESS_REGISTRATION.CITY_PLACEHOLDER' | translate"
-                    [disabled]="!form.get('state_id')?.value"
+                <div class="typeahead-container">
+                  <ion-item
+                    [class.ion-invalid]="
+                      form.get('city_id')?.invalid && form.get('city_id')?.touched
+                    "
                   >
-                    <ion-select-option *ngFor="let city of cities" [value]="city.id">
-                      {{ city.city_name }} ({{ city.city_shortname }})
-                    </ion-select-option>
-                  </ion-select>
-                </ion-item>
+                    <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.CITY' | translate }} *</ion-label>
+                    <ion-input
+                      [placeholder]="'BUSINESS_REGISTRATION.CITY_PLACEHOLDER' | translate"
+                      [value]="citySearchTerm"
+                      (ionInput)="onCitySearchChange($event)"
+                      (focus)="onCityInputFocus()"
+                      (blur)="onCityInputBlur()"
+                      [disabled]="!form.get('state_id')?.value">
+                    </ion-input>
+                  </ion-item>
+                  <ion-button
+                    *ngIf="form.get('city_id')?.value"
+                    fill="clear"
+                    size="small"
+                    class="clear-selection-btn"
+                    (click)="clearSelectedCity()">
+                    {{ 'BUSINESS_REGISTRATION.CLEAR_SELECTION' | translate }}
+                  </ion-button>
+                  <div class="typeahead-results" *ngIf="showCitySuggestions && form.get('state_id')?.value">
+                    <button
+                      type="button"
+                      class="typeahead-option"
+                      *ngFor="let city of filteredCities"
+                      (mousedown)="selectCity(city, $event)">
+                      {{ city.city_name }}
+                    </button>
+                    <div class="typeahead-empty" *ngIf="filteredCities.length === 0">
+                      {{ 'BUSINESS_REGISTRATION.NO_CITIES_FOUND' | translate }}
+                    </div>
+                  </div>
+                  <div class="typeahead-helper" *ngIf="!form.get('state_id')?.value">
+                    {{ 'BUSINESS_REGISTRATION.SELECT_STATE_FIRST' | translate }}
+                  </div>
+                </div>
                 <div
                   class="error-message"
                   *ngIf="form.get('city_id')?.invalid && form.get('city_id')?.touched"
@@ -228,25 +252,46 @@
 
               <!-- Location ID -->
               <div>
-                <ion-item
-                  [class.ion-invalid]="
-                    form.get('location_id')?.invalid && form.get('location_id')?.touched
-                  "
-                >
-                  <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.LOCATION' | translate }} *</ion-label>
-                  <ion-select
-                    formControlName="location_id"
-                    [placeholder]="'BUSINESS_REGISTRATION.LOCATION_PLACEHOLDER' | translate"
-                    [disabled]="!form.get('city_id')?.value"
+                <div class="typeahead-container">
+                  <ion-item
+                    [class.ion-invalid]="
+                      form.get('location_id')?.invalid && form.get('location_id')?.touched
+                    "
                   >
-                    <ion-select-option
-                      *ngFor="let location of locations"
-                      [value]="location.id"
-                    >
+                    <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.LOCATION' | translate }} *</ion-label>
+                    <ion-input
+                      [placeholder]="'BUSINESS_REGISTRATION.LOCATION_PLACEHOLDER' | translate"
+                      [value]="locationSearchTerm"
+                      (ionInput)="onLocationSearchChange($event)"
+                      (focus)="onLocationInputFocus()"
+                      (blur)="onLocationInputBlur()"
+                      [disabled]="!form.get('city_id')?.value">
+                    </ion-input>
+                  </ion-item>
+                  <ion-button
+                    *ngIf="form.get('location_id')?.value"
+                    fill="clear"
+                    size="small"
+                    class="clear-selection-btn"
+                    (click)="clearSelectedLocation()">
+                    {{ 'BUSINESS_REGISTRATION.CLEAR_SELECTION' | translate }}
+                  </ion-button>
+                  <div class="typeahead-results" *ngIf="showLocationSuggestions && form.get('city_id')?.value">
+                    <button
+                      type="button"
+                      class="typeahead-option"
+                      *ngFor="let location of filteredLocations"
+                      (mousedown)="selectLocation(location, $event)">
                       {{ location.location_name }}
-                    </ion-select-option>
-                  </ion-select>
-                </ion-item>
+                    </button>
+                    <div class="typeahead-empty" *ngIf="filteredLocations.length === 0">
+                      {{ 'BUSINESS_REGISTRATION.NO_LOCATIONS_FOUND' | translate }}
+                    </div>
+                  </div>
+                  <div class="typeahead-helper" *ngIf="!form.get('city_id')?.value">
+                    {{ 'BUSINESS_REGISTRATION.SELECT_CITY_FIRST' | translate }}
+                  </div>
+                </div>
                 <div
                   class="error-message"
                   *ngIf="

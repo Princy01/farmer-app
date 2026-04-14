@@ -29,8 +29,11 @@ export interface UpdateUserProfileRequest {
   email: string;
   mobile: string;
   address: string;
+  state_id?: number | null;
   state_name: string;
+  city_id?: number | null;
   city_name: string;
+  location_id?: number | null;
   location_name: string;
   pincode: string;
 }

@@ -19,7 +19,7 @@ import {
 } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
-import { AuthService } from 'src/app/auth/auth.service';
+import { AuthService, State, City, Location } from 'src/app/auth/auth.service';
 import { RetailerProfile, RetailerProfileService, UpdateUserProfileRequest } from './profile.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
@@ -55,6 +55,17 @@ export class ProfilePage implements OnInit, OnDestroy {
   isEditing = false;
   isLoading = false;
   profileImage: string | null = null;
+  states: State[] = [];
+  cities: City[] = [];
+  locations: Location[] = [];
+  filteredCities: City[] = [];
+  filteredLocations: Location[] = [];
+  citySearchTerm = '';
+  locationSearchTerm = '';
+  showCitySuggestions = false;
+  showLocationSuggestions = false;
+  private profileLoaded = false;
+  private statesLoaded = false;
 
   constructor(
     private navCtrl: NavController,
@@ -75,6 +86,7 @@ export class ProfilePage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.loadStates();
     this.loadProfile();
   }
 
@@ -107,6 +119,10 @@ export class ProfilePage implements OnInit, OnDestroy {
             status: profile.status ?? 'inactive',
             member_since: profile.member_since ?? ''
           };
+          this.citySearchTerm = this.profile.city_name ?? '';
+          this.locationSearchTerm = this.profile.location ?? '';
+          this.profileLoaded = true;
+          this.initializeLocationMasterSelection();
           this.isLoading = false;
         },
         error: (error: HttpErrorResponse) => {
@@ -118,12 +134,23 @@ export class ProfilePage implements OnInit, OnDestroy {
 
   toggleEdit() {
     this.isEditing = !this.isEditing;
+    if (this.isEditing) {
+      this.citySearchTerm = this.profile.city_name ?? '';
+      this.locationSearchTerm = this.profile.location ?? '';
+      this.filteredCities = [...this.cities];
+      this.filteredLocations = [...this.locations];
+    } else {
+      this.showCitySuggestions = false;
+      this.showLocationSuggestions = false;
+    }
   }
 
   async saveProfile() {
     if (!this.validateProfile()) {
       return;
     }
+
+    this.syncLocationNamesFromSelection();
 
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('RETAILER_PROFILE.SAVING')
@@ -135,8 +162,11 @@ export class ProfilePage implements OnInit, OnDestroy {
       email: this.profile.email ?? '',
       mobile: this.profile.mobile ?? '',
       address: this.profile.address ?? '',
+      state_id: this.profile.state_id ?? null,
       state_name: this.profile.state_name ?? '',
+      city_id: this.profile.city_id ?? null,
       city_name: this.profile.city_name ?? '',
+      location_id: this.profile.location_id ?? null,
       location_name: this.profile.location ?? '',
       pincode: this.profile.pincode ?? ''
     };
@@ -184,7 +214,123 @@ export class ProfilePage implements OnInit, OnDestroy {
       return false;
     }
 
+    if (this.citySearchTerm.trim() && !this.profile.city_id) {
+      const alert = this.alertCtrl.create({
+        header: this.translate.instant('RETAILER_PROFILE.VALIDATION_ERROR'),
+        message: this.translate.instant('RETAILER_PROFILE.SELECT_CITY_FROM_LIST'),
+        buttons: [this.translate.instant('RETAILER_PROFILE.OK')]
+      });
+      alert.then(a => a.present());
+      return false;
+    }
+
+    if (this.locationSearchTerm.trim() && !this.profile.location_id) {
+      const alert = this.alertCtrl.create({
+        header: this.translate.instant('RETAILER_PROFILE.VALIDATION_ERROR'),
+        message: this.translate.instant('RETAILER_PROFILE.SELECT_LOCATION_FROM_LIST'),
+        buttons: [this.translate.instant('RETAILER_PROFILE.OK')]
+      });
+      alert.then(a => a.present());
+      return false;
+    }
+
     return true;
+  }
+
+  onStateSelected(stateId: number | string | null): void {
+    const normalizedStateId = Number(stateId);
+    if (!normalizedStateId) {
+      this.profile.state_id = null;
+      this.profile.state_name = '';
+      this.clearCityAndLocationSelection();
+      this.cities = [];
+      this.locations = [];
+      this.filteredCities = [];
+      this.filteredLocations = [];
+      return;
+    }
+
+    const selectedState = this.states.find((state) => state.id === normalizedStateId);
+    this.profile.state_id = normalizedStateId;
+    this.profile.state_name = selectedState?.state_name ?? '';
+    this.clearCityAndLocationSelection();
+    this.loadCities(normalizedStateId);
+  }
+
+  onCitySearchChange(searchTerm: string | null): void {
+    this.citySearchTerm = searchTerm ?? '';
+    this.filterCities();
+    this.showCitySuggestions = !!this.profile.state_id;
+  }
+
+  onLocationSearchChange(searchTerm: string | null): void {
+    this.locationSearchTerm = searchTerm ?? '';
+    this.filterLocations();
+    this.showLocationSuggestions = !!this.profile.city_id;
+  }
+
+  onCityInputFocus(): void {
+    if (!this.profile.state_id) {
+      return;
+    }
+    this.filteredCities = [...this.cities];
+    this.showCitySuggestions = true;
+  }
+
+  onLocationInputFocus(): void {
+    if (!this.profile.city_id) {
+      return;
+    }
+    this.filteredLocations = [...this.locations];
+    this.showLocationSuggestions = true;
+  }
+
+  onCityInputBlur(): void {
+    setTimeout(() => {
+      this.showCitySuggestions = false;
+    }, 150);
+  }
+
+  onLocationInputBlur(): void {
+    setTimeout(() => {
+      this.showLocationSuggestions = false;
+    }, 150);
+  }
+
+  selectCity(city: City, event?: Event): void {
+    event?.preventDefault();
+    this.profile.city_id = city.id;
+    this.profile.city_name = city.city_name;
+    this.citySearchTerm = city.city_name;
+    this.profile.location_id = null;
+    this.profile.location = '';
+    this.locationSearchTerm = '';
+    this.showCitySuggestions = false;
+    this.locations = [];
+    this.filteredLocations = [];
+    this.loadLocations(city.id);
+  }
+
+  selectLocation(location: Location, event?: Event): void {
+    event?.preventDefault();
+    this.profile.location_id = location.id;
+    this.profile.location = location.location_name ?? '';
+    this.locationSearchTerm = this.profile.location;
+    this.showLocationSuggestions = false;
+  }
+
+  clearSelectedCity(): void {
+    this.clearCityAndLocationSelection();
+    this.locations = [];
+    this.filteredLocations = [];
+  }
+
+  clearSelectedLocation(): void {
+    this.profile.location_id = null;
+    this.profile.location = '';
+    this.locationSearchTerm = '';
+    this.filteredLocations = [...this.locations];
+    this.showLocationSuggestions = false;
   }
 
   isProfileActive(): boolean {
@@ -303,6 +449,157 @@ export class ProfilePage implements OnInit, OnDestroy {
 
   goBack() {
     this.navCtrl.back();
+  }
+
+  private loadStates(): void {
+    this.authService.getStates()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (states) => {
+          this.states = states ?? [];
+          this.statesLoaded = true;
+          this.initializeLocationMasterSelection();
+        },
+        error: () => {
+          this.states = [];
+          this.statesLoaded = true;
+        }
+      });
+  }
+
+  private initializeLocationMasterSelection(): void {
+    if (!this.profileLoaded || !this.statesLoaded) {
+      return;
+    }
+
+    if (!this.profile.state_id && this.profile.state_name) {
+      const matchedState = this.states.find(
+        (state) => state.state_name.toLowerCase() === this.profile.state_name!.toLowerCase()
+      );
+      if (matchedState) {
+        this.profile.state_id = matchedState.id;
+        this.profile.state_name = matchedState.state_name;
+      }
+    }
+
+    if (this.profile.state_id) {
+      this.loadCities(this.profile.state_id, true);
+    }
+  }
+
+  private loadCities(stateId: number, preserveSelection = false): void {
+    this.authService.getCitiesOfState(stateId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cities) => {
+          this.cities = cities ?? [];
+          this.filteredCities = [...this.cities];
+
+          if (preserveSelection && !this.profile.city_id && this.profile.city_name) {
+            const matchedCity = this.cities.find(
+              (city) => city.city_name.toLowerCase() === this.profile.city_name!.toLowerCase()
+            );
+            if (matchedCity) {
+              this.profile.city_id = matchedCity.id;
+              this.profile.city_name = matchedCity.city_name;
+            }
+          }
+
+          if (this.profile.city_id) {
+            this.citySearchTerm = this.profile.city_name ?? '';
+            this.loadLocations(this.profile.city_id, preserveSelection);
+          } else {
+            this.locations = [];
+            this.filteredLocations = [];
+          }
+        },
+        error: () => {
+          this.cities = [];
+          this.filteredCities = [];
+          this.locations = [];
+          this.filteredLocations = [];
+        }
+      });
+  }
+
+  private loadLocations(cityId: number, preserveSelection = false): void {
+    this.authService.getLocationsByCity(cityId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (locations) => {
+          this.locations = locations ?? [];
+          this.filteredLocations = [...this.locations];
+
+          if (preserveSelection && !this.profile.location_id && this.profile.location) {
+            const matchedLocation = this.locations.find(
+              (location) => (location.location_name ?? '').toLowerCase() === this.profile.location!.toLowerCase()
+            );
+            if (matchedLocation) {
+              this.profile.location_id = matchedLocation.id;
+              this.profile.location = matchedLocation.location_name ?? '';
+            }
+          }
+
+          this.locationSearchTerm = this.profile.location ?? '';
+        },
+        error: () => {
+          this.locations = [];
+          this.filteredLocations = [];
+        }
+      });
+  }
+
+  private filterCities(): void {
+    const searchTerm = this.citySearchTerm.trim().toLowerCase();
+    if (!searchTerm) {
+      this.filteredCities = [...this.cities];
+      return;
+    }
+
+    this.filteredCities = this.cities.filter((city) =>
+      city.city_name.toLowerCase().includes(searchTerm) ||
+      city.city_shortname.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  private filterLocations(): void {
+    const searchTerm = this.locationSearchTerm.trim().toLowerCase();
+    if (!searchTerm) {
+      this.filteredLocations = [...this.locations];
+      return;
+    }
+
+    this.filteredLocations = this.locations.filter((location) =>
+      (location.location_name ?? '').toLowerCase().includes(searchTerm)
+    );
+  }
+
+  private clearCityAndLocationSelection(): void {
+    this.profile.city_id = null;
+    this.profile.city_name = '';
+    this.citySearchTerm = '';
+    this.profile.location_id = null;
+    this.profile.location = '';
+    this.locationSearchTerm = '';
+    this.showCitySuggestions = false;
+    this.showLocationSuggestions = false;
+  }
+
+  private syncLocationNamesFromSelection(): void {
+    const selectedState = this.states.find((state) => state.id === this.profile.state_id);
+    if (selectedState) {
+      this.profile.state_name = selectedState.state_name;
+    }
+
+    const selectedCity = this.cities.find((city) => city.id === this.profile.city_id);
+    if (selectedCity) {
+      this.profile.city_name = selectedCity.city_name;
+    }
+
+    const selectedLocation = this.locations.find((location) => location.id === this.profile.location_id);
+    if (selectedLocation) {
+      this.profile.location = selectedLocation.location_name ?? '';
+    }
   }
 
   private async showAuthError() {

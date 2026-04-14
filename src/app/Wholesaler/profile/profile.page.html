@@ -131,6 +131,115 @@
               </ion-input>
             </div>
 
+            <!-- State -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="map-outline"></ion-icon>
+                <span>{{ 'PROFILE.STATE' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.state_name }}</div>
+              <ion-select
+                *ngIf="isEditing"
+                [ngModel]="profile.state_id"
+                (ngModelChange)="onStateSelected($event)"
+                [placeholder]="'PROFILE.STATE_PLACEHOLDER' | translate"
+                interface="action-sheet"
+                class="edit-input state-select"
+                aria-label="State name">
+                <ion-select-option *ngFor="let state of states" [value]="state.id">
+                  {{ state.state_name }}
+                </ion-select-option>
+              </ion-select>
+            </div>
+
+            <!-- City -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>{{ 'PROFILE.CITY' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.city_name }}</div>
+              <div *ngIf="isEditing" class="typeahead-container">
+                <ion-input
+                  [ngModel]="citySearchTerm"
+                  (ngModelChange)="onCitySearchChange($event)"
+                  (focus)="onCityInputFocus()"
+                  (blur)="onCityInputBlur()"
+                  [placeholder]="'PROFILE.CITY_PLACEHOLDER' | translate"
+                  class="edit-input"
+                  [disabled]="!profile.state_id"
+                  aria-label="City name">
+                </ion-input>
+                <ion-button
+                  *ngIf="profile.city_id"
+                  fill="clear"
+                  size="small"
+                  class="clear-selection-btn"
+                  (click)="clearSelectedCity()">
+                  {{ 'PROFILE.CLEAR_SELECTION' | translate }}
+                </ion-button>
+                <div class="typeahead-results" *ngIf="showCitySuggestions && profile.state_id">
+                  <button
+                    type="button"
+                    class="typeahead-option"
+                    *ngFor="let city of filteredCities"
+                    (mousedown)="selectCity(city, $event)">
+                    {{ city.city_name }}
+                  </button>
+                  <div class="typeahead-empty" *ngIf="filteredCities.length === 0">
+                    {{ 'PROFILE.NO_CITIES_FOUND' | translate }}
+                  </div>
+                </div>
+                <div class="typeahead-helper" *ngIf="!profile.state_id">
+                  {{ 'PROFILE.SELECT_STATE_FIRST' | translate }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Location -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <ion-icon name="business-outline"></ion-icon>
+                <span>{{ 'PROFILE.LOCATION' | translate }}</span>
+              </div>
+              <div class="detail-value" *ngIf="!isEditing">{{ profile.location }}</div>
+              <div *ngIf="isEditing" class="typeahead-container">
+                <ion-input
+                  [ngModel]="locationSearchTerm"
+                  (ngModelChange)="onLocationSearchChange($event)"
+                  (focus)="onLocationInputFocus()"
+                  (blur)="onLocationInputBlur()"
+                  [placeholder]="'PROFILE.LOCATION_PLACEHOLDER' | translate"
+                  class="edit-input"
+                  [disabled]="!profile.city_id"
+                  aria-label="Location name">
+                </ion-input>
+                <ion-button
+                  *ngIf="profile.location_id"
+                  fill="clear"
+                  size="small"
+                  class="clear-selection-btn"
+                  (click)="clearSelectedLocation()">
+                  {{ 'PROFILE.CLEAR_SELECTION' | translate }}
+                </ion-button>
+                <div class="typeahead-results" *ngIf="showLocationSuggestions && profile.city_id">
+                  <button
+                    type="button"
+                    class="typeahead-option"
+                    *ngFor="let location of filteredLocations"
+                    (mousedown)="selectLocation(location, $event)">
+                    {{ location.location_name }}
+                  </button>
+                  <div class="typeahead-empty" *ngIf="filteredLocations.length === 0">
+                    {{ 'PROFILE.NO_LOCATIONS_FOUND' | translate }}
+                  </div>
+                </div>
+                <div class="typeahead-helper" *ngIf="!profile.city_id">
+                  {{ 'PROFILE.SELECT_CITY_FIRST' | translate }}
+                </div>
+              </div>
+            </div>
+
             <!-- Address -->
             <div class="detail-item">
               <div class="detail-label">
@@ -147,57 +256,6 @@
                 class="edit-input"
                 aria-label="Address">
               </ion-textarea>
-            </div>
-
-            <!-- State -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="map-outline"></ion-icon>
-                <span>{{ 'PROFILE.STATE' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.state_name }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.state_name"
-                (ngModelChange)="onProfileFieldChange()"
-                placeholder="{{ 'PROFILE.STATE' | translate }}"
-                class="edit-input"
-                aria-label="State name">
-              </ion-input>
-            </div>
-
-            <!-- City -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="location-outline"></ion-icon>
-                <span>{{ 'PROFILE.CITY' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.city_name }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.city_name"
-                (ngModelChange)="onProfileFieldChange()"
-                placeholder="{{ 'PROFILE.CITY_PLACEHOLDER' | translate }}"
-                class="edit-input"
-                aria-label="City name">
-              </ion-input>
-            </div>
-
-            <!-- Location -->
-            <div class="detail-item">
-              <div class="detail-label">
-                <ion-icon name="business-outline"></ion-icon>
-                <span>{{ 'PROFILE.LOCATION' | translate }}</span>
-              </div>
-              <div class="detail-value" *ngIf="!isEditing">{{ profile.location }}</div>
-              <ion-input
-                *ngIf="isEditing"
-                [(ngModel)]="profile.location"
-                (ngModelChange)="onProfileFieldChange()"
-                placeholder="{{ 'PROFILE.LOCATION' | translate }}"
-                class="edit-input"
-                aria-label="Location name">
-              </ion-input>
             </div>
 
             <!-- Pincode -->

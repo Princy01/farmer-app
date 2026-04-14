@@ -148,47 +148,92 @@
       </div>
 
       <!-- City -->
-      <ion-item
-        [class.ion-invalid]="
-          businessForm.get('city')?.invalid && businessForm.get('city')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.CITY' | translate }} *</ion-label>
-        <ion-select
-          formControlName="city"
-          [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_CITY' | translate"
-          [disabled]="isEditMode"
+      <div class="typeahead-container">
+        <ion-item
+          [class.ion-invalid]="
+            businessForm.get('city')?.invalid && businessForm.get('city')?.touched
+          "
         >
-          <ion-select-option *ngFor="let city of cities" [value]="city.id">
+          <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.CITY' | translate }} *</ion-label>
+          <ion-input
+            [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_CITY' | translate"
+            [value]="citySearchTerm"
+            (ionInput)="onCitySearchChange($event)"
+            (focus)="onCityInputFocus()"
+            (blur)="onCityInputBlur()"
+            [disabled]="isEditMode || !businessForm.get('state')?.value">
+          </ion-input>
+        </ion-item>
+        <ion-button
+          *ngIf="businessForm.get('city')?.value && !isEditMode"
+          fill="clear"
+          size="small"
+          class="clear-selection-btn"
+          (click)="clearSelectedCity()">
+          {{ 'ADD_BUSINESS_LOCATION.CLEAR_SELECTION' | translate }}
+        </ion-button>
+        <div class="typeahead-results" *ngIf="showCitySuggestions && businessForm.get('state')?.value && !isEditMode">
+          <button
+            type="button"
+            class="typeahead-option"
+            *ngFor="let city of filteredCities"
+            (mousedown)="selectCity(city, $event)">
             {{ city.city_name }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
+          </button>
+          <div class="typeahead-empty" *ngIf="filteredCities.length === 0">
+            {{ 'ADD_BUSINESS_LOCATION.NO_CITIES_FOUND' | translate }}
+          </div>
+        </div>
+        <div class="typeahead-helper" *ngIf="!businessForm.get('state')?.value">
+          {{ 'ADD_BUSINESS_LOCATION.SELECT_STATE_FIRST' | translate }}
+        </div>
+      </div>
       <div class="error-message" *ngIf="getErrorMessage('city')">
         {{ getErrorMessage("city") }}
       </div>
 
       <!-- Location (editable in edit mode) -->
-      <ion-item
-        [class.ion-invalid]="
-          businessForm.get('location')?.invalid &&
-          businessForm.get('location')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.LOCATION' | translate }} *</ion-label>
-        <ion-select
-          formControlName="location"
-          [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_LOCATION' | translate"
-          [disabled]="false"
+      <div class="typeahead-container">
+        <ion-item
+          [class.ion-invalid]="
+            businessForm.get('location')?.invalid &&
+            businessForm.get('location')?.touched
+          "
         >
-          <ion-select-option
-            *ngFor="let location of locations"
-            [value]="location.id"
-          >
+          <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.LOCATION' | translate }} *</ion-label>
+          <ion-input
+            [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_LOCATION' | translate"
+            [value]="locationSearchTerm"
+            (ionInput)="onLocationSearchChange($event)"
+            (focus)="onLocationInputFocus()"
+            (blur)="onLocationInputBlur()"
+            [disabled]="!businessForm.get('city')?.value">
+          </ion-input>
+        </ion-item>
+        <ion-button
+          *ngIf="businessForm.get('location')?.value"
+          fill="clear"
+          size="small"
+          class="clear-selection-btn"
+          (click)="clearSelectedLocation()">
+          {{ 'ADD_BUSINESS_LOCATION.CLEAR_SELECTION' | translate }}
+        </ion-button>
+        <div class="typeahead-results" *ngIf="showLocationSuggestions && businessForm.get('city')?.value">
+          <button
+            type="button"
+            class="typeahead-option"
+            *ngFor="let location of filteredLocations"
+            (mousedown)="selectLocation(location, $event)">
             {{ location.location_name }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
+          </button>
+          <div class="typeahead-empty" *ngIf="filteredLocations.length === 0">
+            {{ 'ADD_BUSINESS_LOCATION.NO_LOCATIONS_FOUND' | translate }}
+          </div>
+        </div>
+        <div class="typeahead-helper" *ngIf="!businessForm.get('city')?.value">
+          {{ 'ADD_BUSINESS_LOCATION.SELECT_CITY_FIRST' | translate }}
+        </div>
+      </div>
       <div class="error-message" *ngIf="getErrorMessage('location')">
         {{ getErrorMessage("location") }}
       </div>

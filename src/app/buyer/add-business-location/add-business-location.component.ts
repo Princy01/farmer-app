@@ -35,6 +35,12 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
         states: State[] = [];
         cities: City[] = [];
         locations: Location[] = [];
+        filteredCities: City[] = [];
+        filteredLocations: Location[] = [];
+        citySearchTerm = '';
+        locationSearchTerm = '';
+        showCitySuggestions = false;
+        showLocationSuggestions = false;
         businessTypes: BusinessType[] = [];
         capturedImage: string = '';
         latitude: number = 0;
@@ -122,25 +128,35 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                 this.loadStates();
 
                 this.businessForm.get('state')?.valueChanges.subscribe((stateId) => {
+                        this.businessForm.patchValue({ city: null, location: null }, { emitEvent: false });
+                        this.cities = [];
+                        this.locations = [];
+                        this.filteredCities = [];
+                        this.filteredLocations = [];
+                        this.citySearchTerm = '';
+                        this.locationSearchTerm = '';
+                        this.showCitySuggestions = false;
+                        this.showLocationSuggestions = false;
+
                         if (stateId) {
                                 this.loadCities(stateId);
-                                this.businessForm.get('city')?.reset();
-                                this.businessForm.get('location')?.reset();
-                                this.cities = [];
-                                this.locations = [];
-                                this.addressResolution = null;
                         }
+                        this.addressResolution = null;
                         void this.invalidateCaptureIfLocationChanged();
                 });
 
                 this.businessForm.get('city')?.valueChanges.subscribe((cityId) => {
+                        this.businessForm.get('location')?.setValue(null, { emitEvent: false });
+                        this.locations = [];
+                        this.filteredLocations = [];
+                        this.locationSearchTerm = '';
+                        this.showLocationSuggestions = false;
+
                         if (cityId) {
                                 this.loadLocations(cityId);
-                                this.businessForm.get('location')?.reset();
-                                this.locations = [];
-                                this.addressResolution = null;
-                                this.requestAddressResolution();
                         }
+                        this.addressResolution = null;
+                        this.requestAddressResolution();
                         void this.invalidateCaptureIfLocationChanged();
                 });
 
@@ -219,13 +235,126 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
         loadCities(stateId: number) {
                 this.addBusinessService.getCitiesOfState(stateId).subscribe(cities => {
                         this.cities = cities;
+                        this.filteredCities = [...cities];
+                        this.syncCitySearchFromSelection();
                 });
         }
 
         loadLocations(cityId: number) {
                 this.addBusinessService.getLocationsByCity(cityId).subscribe(locations => {
                         this.locations = locations;
+                        this.filteredLocations = [...locations];
+                        this.syncLocationSearchFromSelection();
                 });
+        }
+
+        onCitySearchChange(event: Event | CustomEvent): void {
+                const rawValue = (event as CustomEvent)?.detail?.value ?? (event.target as HTMLInputElement)?.value ?? '';
+                this.citySearchTerm = String(rawValue);
+
+                const selectedCityId = this.businessForm.get('city')?.value;
+                if (selectedCityId) {
+                        const selectedCity = this.cities.find((city) => city.id === Number(selectedCityId));
+                        if (selectedCity && selectedCity.city_name.toLowerCase() !== this.citySearchTerm.trim().toLowerCase()) {
+                                this.businessForm.patchValue({ city: null, location: null }, { emitEvent: false });
+                                this.locations = [];
+                                this.filteredLocations = [];
+                                this.locationSearchTerm = '';
+                                this.showLocationSuggestions = false;
+                                this.addressResolution = null;
+                        }
+                }
+
+                this.filterCities();
+                this.showCitySuggestions = !!this.businessForm.get('state')?.value && !this.isEditMode;
+        }
+
+        onLocationSearchChange(event: Event | CustomEvent): void {
+                const rawValue = (event as CustomEvent)?.detail?.value ?? (event.target as HTMLInputElement)?.value ?? '';
+                this.locationSearchTerm = String(rawValue);
+
+                const selectedLocationId = this.businessForm.get('location')?.value;
+                if (selectedLocationId) {
+                        const selectedLocation = this.locations.find((location) => location.id === Number(selectedLocationId));
+                        if (selectedLocation && (selectedLocation.location_name ?? '').toLowerCase() !== this.locationSearchTerm.trim().toLowerCase()) {
+                                this.businessForm.get('location')?.setValue(null, { emitEvent: false });
+                                this.addressResolution = null;
+                        }
+                }
+
+                this.filterLocations();
+                this.showLocationSuggestions = !!this.businessForm.get('city')?.value;
+        }
+
+        onCityInputFocus(): void {
+                if (!this.businessForm.get('state')?.value || this.isEditMode) {
+                        return;
+                }
+                this.filteredCities = [...this.cities];
+                this.showCitySuggestions = true;
+        }
+
+        onCityInputBlur(): void {
+                this.businessForm.get('city')?.markAsTouched();
+                setTimeout(() => {
+                        this.showCitySuggestions = false;
+                }, 150);
+        }
+
+        onLocationInputFocus(): void {
+                if (!this.businessForm.get('city')?.value) {
+                        return;
+                }
+                this.filteredLocations = [...this.locations];
+                this.showLocationSuggestions = true;
+        }
+
+        onLocationInputBlur(): void {
+                this.businessForm.get('location')?.markAsTouched();
+                setTimeout(() => {
+                        this.showLocationSuggestions = false;
+                }, 150);
+        }
+
+        selectCity(city: City, event?: Event): void {
+                event?.preventDefault();
+                this.businessForm.patchValue({ city: city.id, location: null }, { emitEvent: false });
+                this.citySearchTerm = city.city_name;
+                this.locationSearchTerm = '';
+                this.showCitySuggestions = false;
+                this.locations = [];
+                this.filteredLocations = [];
+                this.addressResolution = null;
+                this.loadLocations(city.id);
+                this.requestAddressResolution();
+        }
+
+        selectLocation(location: Location, event?: Event): void {
+                event?.preventDefault();
+                this.businessForm.get('location')?.setValue(location.id, { emitEvent: false });
+                this.locationSearchTerm = location.location_name ?? '';
+                this.showLocationSuggestions = false;
+                this.requestAddressResolution();
+        }
+
+        clearSelectedCity(): void {
+                this.businessForm.patchValue({ city: null, location: null }, { emitEvent: false });
+                this.citySearchTerm = '';
+                this.locationSearchTerm = '';
+                this.locations = [];
+                this.filteredLocations = [];
+                this.filteredCities = [...this.cities];
+                this.showCitySuggestions = false;
+                this.showLocationSuggestions = false;
+                this.addressResolution = null;
+        }
+
+        clearSelectedLocation(): void {
+                this.businessForm.get('location')?.setValue(null, { emitEvent: false });
+                this.locationSearchTerm = '';
+                this.filteredLocations = [...this.locations];
+                this.showLocationSuggestions = false;
+                this.addressResolution = null;
         }
 
         requestAddressResolution() {
@@ -702,6 +831,24 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
                         return;
                 }
 
+                if (this.citySearchTerm.trim() && !this.businessForm.get('city')?.value) {
+                        this.businessForm.get('city')?.markAsTouched();
+                        await this.showToast(
+                                this.translate.instant('ADD_BUSINESS_LOCATION.SELECT_CITY_FROM_LIST'),
+                                'warning'
+                        );
+                        return;
+                }
+
+                if (this.locationSearchTerm.trim() && !this.businessForm.get('location')?.value) {
+                        this.businessForm.get('location')?.markAsTouched();
+                        await this.showToast(
+                                this.translate.instant('ADD_BUSINESS_LOCATION.SELECT_LOCATION_FROM_LIST'),
+                                'warning'
+                        );
+                        return;
+                }
+
                 if (this.businessForm.valid) {
                         const loading = await this.loadingController.create({
                                 message: this.isEditMode ?
@@ -938,6 +1085,51 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 
         goBack() {
                 this.router.navigate(['/buyer/business-locations']);
+        }
+
+        private filterCities(): void {
+                const searchTerm = this.citySearchTerm.trim().toLowerCase();
+                if (!searchTerm) {
+                        this.filteredCities = [...this.cities];
+                        return;
+                }
+
+                this.filteredCities = this.cities.filter((city) =>
+                        city.city_name.toLowerCase().includes(searchTerm) ||
+                        city.city_shortname.toLowerCase().includes(searchTerm)
+                );
+        }
+
+        private filterLocations(): void {
+                const searchTerm = this.locationSearchTerm.trim().toLowerCase();
+                if (!searchTerm) {
+                        this.filteredLocations = [...this.locations];
+                        return;
+                }
+
+                this.filteredLocations = this.locations.filter((location) =>
+                        (location.location_name ?? '').toLowerCase().includes(searchTerm)
+                );
+        }
+
+        private syncCitySearchFromSelection(): void {
+                const selectedCityId = this.businessForm.get('city')?.value;
+                if (!selectedCityId) {
+                        return;
+                }
+
+                const selectedCity = this.cities.find((city) => city.id === Number(selectedCityId));
+                this.citySearchTerm = selectedCity?.city_name ?? '';
+        }
+
+        private syncLocationSearchFromSelection(): void {
+                const selectedLocationId = this.businessForm.get('location')?.value;
+                if (!selectedLocationId) {
+                        return;
+                }
+
+                const selectedLocation = this.locations.find((location) => location.id === Number(selectedLocationId));
+                this.locationSearchTerm = selectedLocation?.location_name ?? '';
         }
 
         getFormProgress(): number {

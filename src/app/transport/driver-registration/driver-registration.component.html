@@ -264,9 +264,11 @@
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
                     <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.PAN_NUMBER' | translate }} *</ion-label>
-                    <ion-item [class.error-item]="hasError(driverInfoForm, 'pan')" lines="none" class="custom-item">
-                      <ion-input formControlName="pan" [placeholder]="'DRIVER_REGISTRATION.PAN_PLACEHOLDER' | translate" type="text" maxlength="10"
-                        style="text-transform: uppercase">
+                    <ion-item [class.error-item]="
+                        hasError(driverInfoForm, 'pan')
+                      " lines="none" class="custom-item">
+                      <ion-input formControlName="pan" [placeholder]="'DRIVER_REGISTRATION.PAN_PLACEHOLDER' | translate" type="text"
+                        maxlength="10">
                       </ion-input>
                     </ion-item>
                     <div *ngIf="hasError(driverInfoForm, 'pan')" class="error-text">
@@ -276,12 +278,12 @@
                   </div>
                 </ion-col>
               </ion-row>
+
             </ion-grid>
 
-            <!-- Address Information -->
             <div class="section-divider">
               <ion-icon name="location" class="section-icon"></ion-icon>
-              <span class="section-title">{{ 'DRIVER_REGISTRATION.ADDRESS_INFO' | translate }}</span>
+              <span class="section-title">{{ 'DRIVER_REGISTRATION.ADDRESS' | translate }}</span>
             </div>
 
             <ion-grid class="form-grid">
@@ -318,25 +320,25 @@
                   <div class="form-field">
                     <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.STATE' | translate }} *</ion-label>
                     <ion-item [class.error-item]="
-                        hasError(driverInfoForm, 'address_state')
+                        hasError(driverInfoForm, 'address_state_id')
                       " lines="none" class="custom-item">
-                      <ion-select formControlName="address_state" [placeholder]="'DRIVER_REGISTRATION.STATE_PLACEHOLDER' | translate" interface="action-sheet"
+                      <ion-select formControlName="address_state_id" [placeholder]="'DRIVER_REGISTRATION.STATE_PLACEHOLDER' | translate" interface="action-sheet"
                         (ionChange)="
                           onStateChange(
                             $event,
                             driverInfoForm,
-                            'address_state',
-                            'address_town'
+                            'address_state_id',
+                            'address_city_id'
                           )
                         ">
-                        <ion-select-option *ngFor="let state of states" [value]="state.state_shortname">
-                          {{ state.state_name }} ({{ state.state_shortname }})
+                        <ion-select-option *ngFor="let state of states" [value]="state.id">
+                          {{ state.state_name }}
                         </ion-select-option>
                       </ion-select>
                     </ion-item>
-                    <div *ngIf="hasError(driverInfoForm, 'address_state')" class="error-text">
+                    <div *ngIf="hasError(driverInfoForm, 'address_state_id')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
-                      {{ getErrorMessage(driverInfoForm, "address_state") }}
+                      {{ getErrorMessage(driverInfoForm, "address_state_id") }}
                     </div>
                   </div>
                 </ion-col>
@@ -344,19 +346,46 @@
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
                     <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.TOWN_CITY' | translate }} *</ion-label>
-                    <ion-item [class.error-item]="
-                        hasError(driverInfoForm, 'address_town')
-                      " lines="none" class="custom-item">
-                      <ion-select formControlName="address_town" [placeholder]="'DRIVER_REGISTRATION.TOWN_CITY_PLACEHOLDER' | translate" interface="action-sheet"
-                        [disabled]="!cities.length">
-                        <ion-select-option *ngFor="let city of cities" [value]="city.city_name">
-                          {{ city.city_name }} ({{ city.city_shortname }})
-                        </ion-select-option>
-                      </ion-select>
-                    </ion-item>
-                    <div *ngIf="hasError(driverInfoForm, 'address_town')" class="error-text">
+                    <div class="typeahead-container">
+                      <ion-item [class.error-item]="
+                          hasError(driverInfoForm, 'address_city_id')
+                        " lines="none" class="custom-item">
+                        <ion-input
+                          [placeholder]="'DRIVER_REGISTRATION.TOWN_CITY_PLACEHOLDER' | translate"
+                          [value]="citySearchTerm"
+                          (ionInput)="onAddressCitySearchChange($event)"
+                          (focus)="onAddressCityInputFocus()"
+                          (blur)="onAddressCityInputBlur()"
+                          [disabled]="!cities.length">
+                        </ion-input>
+                      </ion-item>
+                      <ion-button
+                        *ngIf="driverInfoForm.get('address_city_id')?.value"
+                        fill="clear"
+                        size="small"
+                        class="clear-selection-btn"
+                        (click)="clearSelectedAddressCity()">
+                        {{ 'DRIVER_REGISTRATION.CLEAR_SELECTION' | translate }}
+                      </ion-button>
+                      <div class="typeahead-results" *ngIf="showCitySuggestions && driverInfoForm.get('address_state_id')?.value">
+                        <button
+                          type="button"
+                          class="typeahead-option"
+                          *ngFor="let city of filteredCities"
+                          (mousedown)="selectAddressCity(city, $event)">
+                          {{ city.city_name }}
+                        </button>
+                        <div class="typeahead-empty" *ngIf="filteredCities.length === 0">
+                          {{ 'DRIVER_REGISTRATION.NO_CITIES_FOUND' | translate }}
+                        </div>
+                      </div>
+                      <div class="typeahead-helper" *ngIf="!driverInfoForm.get('address_state_id')?.value">
+                        {{ 'DRIVER_REGISTRATION.SELECT_STATE_FIRST' | translate }}
+                      </div>
+                    </div>
+                    <div *ngIf="hasError(driverInfoForm, 'address_city_id')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
-                      {{ getErrorMessage(driverInfoForm, "address_town") }}
+                      {{ getErrorMessage(driverInfoForm, "address_city_id") }}
                     </div>
                   </div>
                 </ion-col>
@@ -629,16 +658,16 @@
                 <ion-col size="12" size-md="6">
                   <div class="form-field">
                     <ion-label class="field-label">{{ 'DRIVER_REGISTRATION.STATE' | translate }} *</ion-label>
-                    <ion-item [class.error-item]="hasError(vehicleForm, 'state')" lines="none" class="custom-item">
-                      <ion-select formControlName="state" [placeholder]="'DRIVER_REGISTRATION.STATE_PLACEHOLDER' | translate" interface="action-sheet">
-                        <ion-select-option *ngFor="let state of states" [value]="state.state_shortname">
-                          {{ state.state_name }} ({{ state.state_shortname }})
+                    <ion-item [class.error-item]="hasError(vehicleForm, 'state_id')" lines="none" class="custom-item">
+                      <ion-select formControlName="state_id" [placeholder]="'DRIVER_REGISTRATION.STATE_PLACEHOLDER' | translate" interface="action-sheet">
+                        <ion-select-option *ngFor="let state of states" [value]="state.id">
+                          {{ state.state_name }}
                         </ion-select-option>
                       </ion-select>
                     </ion-item>
-                    <div *ngIf="hasError(vehicleForm, 'state')" class="error-text">
+                    <div *ngIf="hasError(vehicleForm, 'state_id')" class="error-text">
                       <ion-icon name="information-circle" class="error-icon"></ion-icon>
-                      {{ getErrorMessage(vehicleForm, "state") }}
+                      {{ getErrorMessage(vehicleForm, "state_id") }}
                     </div>
                   </div>
                 </ion-col>

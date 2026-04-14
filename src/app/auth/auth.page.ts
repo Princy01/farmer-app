@@ -42,6 +42,12 @@ export class LoginPage implements OnDestroy {
   states: State[] = [];
   cities: City[] = [];
   locations: Location[] = [];
+  filteredCities: City[] = [];
+  filteredLocations: Location[] = [];
+  citySearchTerm = '';
+  locationSearchTerm = '';
+  showCitySuggestions = false;
+  showLocationSuggestions = false;
   isLoadingStates = false;
   isLoadingCities = false;
   isLoadingLocations = false;
@@ -127,12 +133,18 @@ export class LoginPage implements OnDestroy {
     this.registerForm.get('state')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((stateId) => {
+        this.registerForm.patchValue({ city: null, location: null }, { emitEvent: false });
+        this.cities = [];
+        this.locations = [];
+        this.filteredCities = [];
+        this.filteredLocations = [];
+        this.citySearchTerm = '';
+        this.locationSearchTerm = '';
+        this.showCitySuggestions = false;
+        this.showLocationSuggestions = false;
+
         if (stateId) {
           this.loadCities(stateId);
-          this.registerForm.get('city')?.reset();
-          this.registerForm.get('location')?.reset();
-          this.cities = [];
-          this.locations = [];
         }
       });
 
@@ -140,12 +152,117 @@ export class LoginPage implements OnDestroy {
     this.registerForm.get('city')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((cityId) => {
+        this.registerForm.get('location')?.reset(null, { emitEvent: false });
+        this.locations = [];
+        this.filteredLocations = [];
+        this.locationSearchTerm = '';
+        this.showLocationSuggestions = false;
+
         if (cityId) {
           this.loadLocations(cityId);
-          this.registerForm.get('location')?.reset();
-          this.locations = [];
         }
       });
+  }
+
+  onCitySearchChange(event: Event | CustomEvent): void {
+    const rawValue = (event as CustomEvent)?.detail?.value ?? (event.target as HTMLInputElement)?.value ?? '';
+    this.citySearchTerm = String(rawValue);
+
+    const selectedCityId = this.registerForm.get('city')?.value;
+    if (selectedCityId) {
+      const selectedCity = this.cities.find((city) => city.id === Number(selectedCityId));
+      if (selectedCity && selectedCity.city_name.toLowerCase() !== this.citySearchTerm.trim().toLowerCase()) {
+        this.registerForm.patchValue({ city: null, location: null }, { emitEvent: false });
+        this.locations = [];
+        this.filteredLocations = [];
+        this.locationSearchTerm = '';
+      }
+    }
+
+    this.filterCities();
+    this.showCitySuggestions = !!this.registerForm.get('state')?.value;
+  }
+
+  onLocationSearchChange(event: Event | CustomEvent): void {
+    const rawValue = (event as CustomEvent)?.detail?.value ?? (event.target as HTMLInputElement)?.value ?? '';
+    this.locationSearchTerm = String(rawValue);
+
+    const selectedLocationId = this.registerForm.get('location')?.value;
+    if (selectedLocationId) {
+      const selectedLocation = this.locations.find((location) => location.id === Number(selectedLocationId));
+      if (selectedLocation && (selectedLocation.location_name ?? '').toLowerCase() !== this.locationSearchTerm.trim().toLowerCase()) {
+        this.registerForm.get('location')?.setValue(null, { emitEvent: false });
+      }
+    }
+
+    this.filterLocations();
+    this.showLocationSuggestions = !!this.registerForm.get('city')?.value;
+  }
+
+  onCityInputFocus(): void {
+    if (!this.registerForm.get('state')?.value) {
+      return;
+    }
+    this.filteredCities = [...this.cities];
+    this.showCitySuggestions = true;
+  }
+
+  onCityInputBlur(): void {
+    this.registerForm.get('city')?.markAsTouched();
+    setTimeout(() => {
+      this.showCitySuggestions = false;
+    }, 150);
+  }
+
+  onLocationInputFocus(): void {
+    if (!this.registerForm.get('city')?.value) {
+      return;
+    }
+    this.filteredLocations = [...this.locations];
+    this.showLocationSuggestions = true;
+  }
+
+  onLocationInputBlur(): void {
+    this.registerForm.get('location')?.markAsTouched();
+    setTimeout(() => {
+      this.showLocationSuggestions = false;
+    }, 150);
+  }
+
+  selectCity(city: City, event?: Event): void {
+    event?.preventDefault();
+    this.registerForm.patchValue({ city: city.id, location: null }, { emitEvent: false });
+    this.citySearchTerm = city.city_name;
+    this.locationSearchTerm = '';
+    this.showCitySuggestions = false;
+    this.locations = [];
+    this.filteredLocations = [];
+    this.loadLocations(city.id);
+  }
+
+  selectLocation(location: Location, event?: Event): void {
+    event?.preventDefault();
+    this.registerForm.get('location')?.setValue(location.id, { emitEvent: false });
+    this.locationSearchTerm = location.location_name ?? '';
+    this.showLocationSuggestions = false;
+  }
+
+  clearSelectedCity(): void {
+    this.registerForm.patchValue({ city: null, location: null }, { emitEvent: false });
+    this.citySearchTerm = '';
+    this.locationSearchTerm = '';
+    this.locations = [];
+    this.filteredLocations = [];
+    this.filteredCities = [...this.cities];
+    this.showCitySuggestions = false;
+    this.showLocationSuggestions = false;
+  }
+
+  clearSelectedLocation(): void {
+    this.registerForm.get('location')?.setValue(null, { emitEvent: false });
+    this.locationSearchTerm = '';
+    this.filteredLocations = [...this.locations];
+    this.showLocationSuggestions = false;
   }
 
   toggleLoginPasswordVisibility() {
@@ -265,6 +382,18 @@ export class LoginPage implements OnDestroy {
       return;
     }
 
+    if (this.citySearchTerm.trim() && !this.registerForm.get('city')?.value) {
+      this.registerForm.get('city')?.markAsTouched();
+      this.presentToast(this.translate.instant('AUTH.SELECT_CITY_FROM_LIST'), 'warning');
+      return;
+    }
+
+    if (this.locationSearchTerm.trim() && !this.registerForm.get('location')?.value) {
+      this.registerForm.get('location')?.markAsTouched();
+      this.presentToast(this.translate.instant('AUTH.SELECT_LOCATION_FROM_LIST'), 'warning');
+      return;
+    }
+
     this.isLoading = true;
     const formData = { ...this.registerForm.value };
 
@@ -307,6 +436,12 @@ export class LoginPage implements OnDestroy {
             });
             this.cities = [];
             this.locations = [];
+            this.filteredCities = [];
+            this.filteredLocations = [];
+            this.citySearchTerm = '';
+            this.locationSearchTerm = '';
+            this.showCitySuggestions = false;
+            this.showLocationSuggestions = false;
             this.authMode = 'login';
           }
         },
@@ -356,6 +491,8 @@ export class LoginPage implements OnDestroy {
       .subscribe({
         next: (cities) => {
           this.cities = cities;
+          this.filteredCities = [...cities];
+          this.syncCitySearchFromSelection();
           this.isLoadingCities = false;
         },
         error: (error) => {
@@ -372,6 +509,8 @@ export class LoginPage implements OnDestroy {
       .subscribe({
         next: (locations) => {
           this.locations = locations;
+          this.filteredLocations = [...locations];
+          this.syncLocationSearchFromSelection();
           this.isLoadingLocations = false;
         },
         error: (error) => {
@@ -419,6 +558,51 @@ export class LoginPage implements OnDestroy {
     this.authMode = 'login';
     this.pendingVerificationEmail = '';
     this.loginForm.reset();
+  }
+
+  private filterCities(): void {
+    const searchTerm = this.citySearchTerm.trim().toLowerCase();
+    if (!searchTerm) {
+      this.filteredCities = [...this.cities];
+      return;
+    }
+
+    this.filteredCities = this.cities.filter((city) =>
+      city.city_name.toLowerCase().includes(searchTerm) ||
+      city.city_shortname.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  private filterLocations(): void {
+    const searchTerm = this.locationSearchTerm.trim().toLowerCase();
+    if (!searchTerm) {
+      this.filteredLocations = [...this.locations];
+      return;
+    }
+
+    this.filteredLocations = this.locations.filter((location) =>
+      (location.location_name ?? '').toLowerCase().includes(searchTerm)
+    );
+  }
+
+  private syncCitySearchFromSelection(): void {
+    const selectedCityId = this.registerForm.get('city')?.value;
+    if (!selectedCityId) {
+      return;
+    }
+
+    const selectedCity = this.cities.find((city) => city.id === Number(selectedCityId));
+    this.citySearchTerm = selectedCity?.city_name ?? '';
+  }
+
+  private syncLocationSearchFromSelection(): void {
+    const selectedLocationId = this.registerForm.get('location')?.value;
+    if (!selectedLocationId) {
+      return;
+    }
+
+    const selectedLocation = this.locations.find((location) => location.id === Number(selectedLocationId));
+    this.locationSearchTerm = selectedLocation?.location_name ?? '';
   }
 
   ngOnDestroy() {

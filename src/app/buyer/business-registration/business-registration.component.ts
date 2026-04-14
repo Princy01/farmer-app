@@ -23,6 +23,12 @@ export class BusinessRegistrationComponent implements OnInit {
   states: State[] = [];
   cities: City[] = [];
   locations: Location[] = [];
+  filteredCities: City[] = [];
+  filteredLocations: Location[] = [];
+  citySearchTerm = '';
+  locationSearchTerm = '';
+  showCitySuggestions = false;
+  showLocationSuggestions = false;
   businessTypes: BusinessType[] = [];
   isGettingLocation = false;
 
@@ -99,26 +105,133 @@ export class BusinessRegistrationComponent implements OnInit {
 
   private setupFormListeners() {
     this.form.get('state_id')?.valueChanges.subscribe((stateId) => {
+      this.form.patchValue({ city_id: null, location_id: null }, { emitEvent: false });
+      this.cities = [];
+      this.locations = [];
+      this.filteredCities = [];
+      this.filteredLocations = [];
+      this.citySearchTerm = '';
+      this.locationSearchTerm = '';
+      this.showCitySuggestions = false;
+      this.showLocationSuggestions = false;
+
       if (stateId) {
         this.fetchCities(stateId);
-        this.form.patchValue({ city_id: null, location_id: null });
-        this.locations = [];
-      } else {
-        this.cities = [];
-        this.locations = [];
-        this.form.patchValue({ city_id: null, location_id: null });
       }
     });
 
     this.form.get('city_id')?.valueChanges.subscribe((cityId) => {
+      this.form.get('location_id')?.setValue(null, { emitEvent: false });
+      this.locations = [];
+      this.filteredLocations = [];
+      this.locationSearchTerm = '';
+      this.showLocationSuggestions = false;
+
       if (cityId) {
         this.fetchLocations(cityId);
-        this.form.get('location_id')?.setValue(null);
-      } else {
-        this.locations = [];
-        this.form.get('location_id')?.setValue(null);
       }
     });
+  }
+
+  onCitySearchChange(event: Event | CustomEvent): void {
+    const rawValue = (event as CustomEvent)?.detail?.value ?? (event.target as HTMLInputElement)?.value ?? '';
+    this.citySearchTerm = String(rawValue);
+
+    const selectedCityId = this.form.get('city_id')?.value;
+    if (selectedCityId) {
+      const selectedCity = this.cities.find((city) => city.id === Number(selectedCityId));
+      if (selectedCity && selectedCity.city_name.toLowerCase() !== this.citySearchTerm.trim().toLowerCase()) {
+        this.form.patchValue({ city_id: null, location_id: null }, { emitEvent: false });
+        this.locations = [];
+        this.filteredLocations = [];
+        this.locationSearchTerm = '';
+      }
+    }
+
+    this.filterCities();
+    this.showCitySuggestions = !!this.form.get('state_id')?.value;
+  }
+
+  onLocationSearchChange(event: Event | CustomEvent): void {
+    const rawValue = (event as CustomEvent)?.detail?.value ?? (event.target as HTMLInputElement)?.value ?? '';
+    this.locationSearchTerm = String(rawValue);
+
+    const selectedLocationId = this.form.get('location_id')?.value;
+    if (selectedLocationId) {
+      const selectedLocation = this.locations.find((location) => location.id === Number(selectedLocationId));
+      if (selectedLocation && (selectedLocation.location_name ?? '').toLowerCase() !== this.locationSearchTerm.trim().toLowerCase()) {
+        this.form.get('location_id')?.setValue(null, { emitEvent: false });
+      }
+    }
+
+    this.filterLocations();
+    this.showLocationSuggestions = !!this.form.get('city_id')?.value;
+  }
+
+  onCityInputFocus(): void {
+    if (!this.form.get('state_id')?.value) {
+      return;
+    }
+    this.filteredCities = [...this.cities];
+    this.showCitySuggestions = true;
+  }
+
+  onCityInputBlur(): void {
+    this.form.get('city_id')?.markAsTouched();
+    setTimeout(() => {
+      this.showCitySuggestions = false;
+    }, 150);
+  }
+
+  onLocationInputFocus(): void {
+    if (!this.form.get('city_id')?.value) {
+      return;
+    }
+    this.filteredLocations = [...this.locations];
+    this.showLocationSuggestions = true;
+  }
+
+  onLocationInputBlur(): void {
+    this.form.get('location_id')?.markAsTouched();
+    setTimeout(() => {
+      this.showLocationSuggestions = false;
+    }, 150);
+  }
+
+  selectCity(city: City, event?: Event): void {
+    event?.preventDefault();
+    this.form.patchValue({ city_id: city.id, location_id: null }, { emitEvent: false });
+    this.citySearchTerm = city.city_name;
+    this.locationSearchTerm = '';
+    this.showCitySuggestions = false;
+    this.locations = [];
+    this.filteredLocations = [];
+    this.fetchLocations(city.id);
+  }
+
+  selectLocation(location: Location, event?: Event): void {
+    event?.preventDefault();
+    this.form.get('location_id')?.setValue(location.id, { emitEvent: false });
+    this.locationSearchTerm = location.location_name ?? '';
+    this.showLocationSuggestions = false;
+  }
+
+  clearSelectedCity(): void {
+    this.form.patchValue({ city_id: null, location_id: null }, { emitEvent: false });
+    this.citySearchTerm = '';
+    this.locationSearchTerm = '';
+    this.locations = [];
+    this.filteredLocations = [];
+    this.filteredCities = [...this.cities];
+    this.showCitySuggestions = false;
+    this.showLocationSuggestions = false;
+  }
+
+  clearSelectedLocation(): void {
+    this.form.get('location_id')?.setValue(null, { emitEvent: false });
+    this.locationSearchTerm = '';
+    this.filteredLocations = [...this.locations];
+    this.showLocationSuggestions = false;
   }
 
   fetchBusinessCategories() {
@@ -153,7 +266,10 @@ export class BusinessRegistrationComponent implements OnInit {
 
   fetchCities(stateId: number) {
     this.businessRegistrationService.getCitiesOfState(stateId).subscribe({
-      next: (data) => (this.cities = data),
+      next: (data) => {
+        this.cities = data;
+        this.filteredCities = [...data];
+      },
       error: (err) => {
         console.error('Error loading cities:', err);
         this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOAD_CITIES');
@@ -163,7 +279,10 @@ export class BusinessRegistrationComponent implements OnInit {
 
   fetchLocations(cityId: number) {
     this.businessRegistrationService.getLocationsByCity(cityId).subscribe({
-      next: (data) => (this.locations = data),
+      next: (data) => {
+        this.locations = data;
+        this.filteredLocations = [...data];
+      },
       error: (err) => {
         console.error('Error loading locations:', err);
         this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOAD_LOCATIONS');
@@ -210,6 +329,18 @@ export class BusinessRegistrationComponent implements OnInit {
 
   async onSubmit() {
     if (this.form.valid) {
+      if (this.citySearchTerm.trim() && !this.form.get('city_id')?.value) {
+        this.form.get('city_id')?.markAsTouched();
+        await this.showErrorToast('BUSINESS_REGISTRATION.SELECT_CITY_FROM_LIST');
+        return;
+      }
+
+      if (this.locationSearchTerm.trim() && !this.form.get('location_id')?.value) {
+        this.form.get('location_id')?.markAsTouched();
+        await this.showErrorToast('BUSINESS_REGISTRATION.SELECT_LOCATION_FROM_LIST');
+        return;
+      }
+
       const payload = {
         ...this.form.value,
         city_id: this.form.value.city_id,
@@ -251,5 +382,30 @@ export class BusinessRegistrationComponent implements OnInit {
       color: 'success',
     });
     await toast.present();
+  }
+
+  private filterCities(): void {
+    const searchTerm = this.citySearchTerm.trim().toLowerCase();
+    if (!searchTerm) {
+      this.filteredCities = [...this.cities];
+      return;
+    }
+
+    this.filteredCities = this.cities.filter((city) =>
+      city.city_name.toLowerCase().includes(searchTerm) ||
+      city.city_shortname.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  private filterLocations(): void {
+    const searchTerm = this.locationSearchTerm.trim().toLowerCase();
+    if (!searchTerm) {
+      this.filteredLocations = [...this.locations];
+      return;
+    }
+
+    this.filteredLocations = this.locations.filter((location) =>
+      (location.location_name ?? '').toLowerCase().includes(searchTerm)
+    );
   }
 }

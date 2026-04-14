@@ -155,16 +155,44 @@
 
         <!-- City field (second in cascade) -->
         <div class="input-group">
-          <ion-item class="custom-input" lines="none">
-            <ion-icon name="business-outline" slot="start" class="input-icon"></ion-icon>
-            <ion-select [placeholder]="'AUTH.SELECT_CITY' | translate" formControlName="city" class="role-select"
-              [disabled]="!registerForm.get('state')?.value">
-              <ion-select-option *ngFor="let city of cities" [value]="city.id">
+          <div class="typeahead-container">
+            <ion-item class="custom-input" lines="none">
+              <ion-icon name="business-outline" slot="start" class="input-icon"></ion-icon>
+              <ion-input
+                [placeholder]="'AUTH.SELECT_CITY' | translate"
+                [value]="citySearchTerm"
+                (ionInput)="onCitySearchChange($event)"
+                (focus)="onCityInputFocus()"
+                (blur)="onCityInputBlur()"
+                class="input-field"
+                [disabled]="!registerForm.get('state')?.value || isLoadingCities">
+              </ion-input>
+              <ion-spinner *ngIf="isLoadingCities" name="dots" slot="end"></ion-spinner>
+            </ion-item>
+            <ion-button
+              *ngIf="registerForm.get('city')?.value"
+              fill="clear"
+              size="small"
+              class="clear-selection-btn"
+              (click)="clearSelectedCity()">
+              {{ 'AUTH.CLEAR_SELECTION' | translate }}
+            </ion-button>
+            <div class="typeahead-results" *ngIf="showCitySuggestions && registerForm.get('state')?.value">
+              <button
+                type="button"
+                class="typeahead-option"
+                *ngFor="let city of filteredCities"
+                (mousedown)="selectCity(city, $event)">
                 {{ city.city_name }}
-              </ion-select-option>
-            </ion-select>
-            <ion-spinner *ngIf="isLoadingCities" name="dots" slot="end"></ion-spinner>
-          </ion-item>
+              </button>
+              <div class="typeahead-empty" *ngIf="filteredCities.length === 0">
+                {{ 'AUTH.NO_CITIES_FOUND' | translate }}
+              </div>
+            </div>
+            <div class="typeahead-helper" *ngIf="!registerForm.get('state')?.value">
+              {{ 'AUTH.SELECT_STATE_FIRST' | translate }}
+            </div>
+          </div>
           <div class="error-message"
             *ngIf="registerForm.get('city')?.touched && registerForm.get('city')?.errors?.['required']">
             {{ 'AUTH.CITY_REQUIRED' | translate }}
@@ -173,16 +201,44 @@
 
         <!-- Location field (third in cascade) -->
         <div class="input-group">
-          <ion-item class="custom-input" lines="none">
-            <ion-icon name="location-outline" slot="start" class="input-icon"></ion-icon>
-            <ion-select [placeholder]="'AUTH.SELECT_LOCATION' | translate" formControlName="location"
-              class="role-select" [disabled]="!registerForm.get('city')?.value">
-              <ion-select-option *ngFor="let location of locations" [value]="location.id">
+          <div class="typeahead-container">
+            <ion-item class="custom-input" lines="none">
+              <ion-icon name="location-outline" slot="start" class="input-icon"></ion-icon>
+              <ion-input
+                [placeholder]="'AUTH.SELECT_LOCATION' | translate"
+                [value]="locationSearchTerm"
+                (ionInput)="onLocationSearchChange($event)"
+                (focus)="onLocationInputFocus()"
+                (blur)="onLocationInputBlur()"
+                class="input-field"
+                [disabled]="!registerForm.get('city')?.value || isLoadingLocations">
+              </ion-input>
+              <ion-spinner *ngIf="isLoadingLocations" name="dots" slot="end"></ion-spinner>
+            </ion-item>
+            <ion-button
+              *ngIf="registerForm.get('location')?.value"
+              fill="clear"
+              size="small"
+              class="clear-selection-btn"
+              (click)="clearSelectedLocation()">
+              {{ 'AUTH.CLEAR_SELECTION' | translate }}
+            </ion-button>
+            <div class="typeahead-results" *ngIf="showLocationSuggestions && registerForm.get('city')?.value">
+              <button
+                type="button"
+                class="typeahead-option"
+                *ngFor="let location of filteredLocations"
+                (mousedown)="selectLocation(location, $event)">
                 {{ location.location_name }}
-              </ion-select-option>
-            </ion-select>
-            <ion-spinner *ngIf="isLoadingLocations" name="dots" slot="end"></ion-spinner>
-          </ion-item>
+              </button>
+              <div class="typeahead-empty" *ngIf="filteredLocations.length === 0">
+                {{ 'AUTH.NO_LOCATIONS_FOUND' | translate }}
+              </div>
+            </div>
+            <div class="typeahead-helper" *ngIf="!registerForm.get('city')?.value">
+              {{ 'AUTH.SELECT_CITY_FIRST' | translate }}
+            </div>
+          </div>
           <div class="error-message"
             *ngIf="registerForm.get('location')?.touched && registerForm.get('location')?.errors?.['required']">
             {{ 'AUTH.LOCATION_REQUIRED' | translate }}
