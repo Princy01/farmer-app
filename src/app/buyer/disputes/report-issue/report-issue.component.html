@@ -1,0 +1,178 @@
+<ion-header [translucent]="true" mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" fill="clear">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'BUYER_DISPUTES.REPORT_ISSUE_TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="goToMyIssues()">
+        {{ 'BUYER_DISPUTES.MY_ISSUES_TITLE' | translate }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div *ngIf="loading" class="state-container">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>{{ 'BUYER_DISPUTES.LOADING' | translate }}</p>
+  </div>
+
+  <div *ngIf="!loading && error" class="state-container">
+    <ion-icon name="alert-circle-outline" color="danger" class="state-icon"></ion-icon>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" (click)="loadScreenData()">
+      {{ 'BUYER_DISPUTES.RETRY' | translate }}
+    </ion-button>
+  </div>
+
+  <form *ngIf="!loading && !error && order" (ngSubmit)="submit()" novalidate>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ 'BUYER_DISPUTES.ORDER_SUMMARY' | translate }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="summary-row">
+          <span>{{ 'BUYER_DISPUTES.ORDER_NUMBER' | translate }}</span>
+          <strong>#{{ order.order_id }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>{{ 'BUYER_DISPUTES.ORDER_DATE' | translate }}</span>
+          <strong>{{ order.date_of_order | date: 'dd MMM yyyy, HH:mm' }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>{{ 'BUYER_DISPUTES.ORDER_TOTAL' | translate }}</span>
+          <strong>₹{{ order.final_amount | number: '1.2-2' }}</strong>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ 'BUYER_DISPUTES.ISSUE_DETAILS' | translate }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">{{ 'BUYER_DISPUTES.ISSUE_TYPE' | translate }}</ion-label>
+          <ion-select
+            [placeholder]="'BUYER_DISPUTES.SELECT_ISSUE_TYPE' | translate"
+            [(ngModel)]="selectedIssueTypeId"
+            name="issueType"
+            interface="action-sheet">
+            <ion-select-option
+              *ngFor="let issueType of issueTypes; trackBy: trackByIssueType"
+              [value]="issueType.id">
+              {{ getIssueTypeLabel(issueType) }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-note color="danger" *ngIf="issueTypeError" class="field-error">
+          {{ issueTypeError }}
+        </ion-note>
+
+        <ion-item>
+          <ion-label position="stacked">{{ 'BUYER_DISPUTES.DESCRIPTION' | translate }}</ion-label>
+          <ion-textarea
+            [(ngModel)]="description"
+            name="description"
+            [placeholder]="'BUYER_DISPUTES.DESCRIPTION_PLACEHOLDER' | translate"
+            maxlength="1000"
+            autoGrow="true">
+          </ion-textarea>
+        </ion-item>
+        <ion-note color="medium" class="helper-text">
+          {{ description.length }}/1000
+        </ion-note>
+        <ion-note color="danger" *ngIf="descriptionError" class="field-error">
+          {{ descriptionError }}
+        </ion-note>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ 'BUYER_DISPUTES.EVIDENCE_TITLE' | translate }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="helper-copy">{{ 'BUYER_DISPUTES.EVIDENCE_RULES' | translate }}</p>
+
+        <ion-item>
+          <ion-label position="stacked">{{ 'BUYER_DISPUTES.CAPTION' | translate }}</ion-label>
+          <ion-input
+            [(ngModel)]="evidenceCaption"
+            name="evidenceCaption"
+            [placeholder]="'BUYER_DISPUTES.CAPTION_PLACEHOLDER' | translate"
+            maxlength="120">
+          </ion-input>
+        </ion-item>
+
+        <ion-button
+          expand="block"
+          type="button"
+          [disabled]="submitting || isStartingCamera || pendingEvidence.length >= 3"
+          (click)="startEvidenceCapture()">
+          <ion-icon name="camera-outline" slot="start"></ion-icon>
+          {{ 'BUYER_DISPUTES.OPEN_CAMERA' | translate }}
+        </ion-button>
+
+        <div *ngIf="isWebCameraOpen" class="camera-panel">
+          <video #webCameraVideo autoplay playsinline muted class="camera-video"></video>
+          <div class="camera-actions">
+            <ion-button type="button" (click)="captureFromWebCamera()">
+              {{ 'BUYER_DISPUTES.CAPTURE_PHOTO' | translate }}
+            </ion-button>
+            <ion-button type="button" fill="outline" (click)="cancelWebCameraCapture()">
+              {{ 'BUYER_DISPUTES.CANCEL_CAMERA' | translate }}
+            </ion-button>
+          </div>
+        </div>
+
+        <ion-note color="danger" *ngIf="evidenceError" class="field-error">
+          {{ evidenceError }}
+        </ion-note>
+
+        <ion-item lines="none" class="evidence-count" *ngIf="pendingEvidence.length > 0">
+          <ion-icon name="image-outline" slot="start" color="medium"></ion-icon>
+          <ion-label>
+            {{ 'BUYER_DISPUTES.EVIDENCE_COUNT' | translate: { count: pendingEvidence.length } }}
+          </ion-label>
+        </ion-item>
+
+        <div class="empty-evidence" *ngIf="pendingEvidence.length === 0">
+          <p>{{ 'BUYER_DISPUTES.NO_EVIDENCE' | translate }}</p>
+        </div>
+
+        <div class="pending-evidence-grid" *ngIf="pendingEvidence.length > 0">
+          <ion-card class="pending-evidence-card" *ngFor="let evidence of pendingEvidence; let i = index; trackBy: trackByPendingEvidence">
+            <img [src]="evidence.previewUrl" [alt]="evidence.caption || ('BUYER_DISPUTES.EVIDENCE_IMAGE' | translate)" />
+            <ion-card-content>
+              <h4>{{ evidence.caption || ('BUYER_DISPUTES.NO_CAPTION' | translate) }}</h4>
+              <p>{{ evidence.capturedAt | date: 'dd MMM yyyy, HH:mm' }}</p>
+              <ion-button type="button" fill="clear" color="danger" size="small" (click)="removePendingEvidence(i)">
+                <ion-icon slot="start" name="trash-outline"></ion-icon>
+                {{ 'BUYER_DISPUTES.REMOVE_EVIDENCE' | translate }}
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-item lines="none" class="help-note" color="light">
+      <ion-icon name="help-circle-outline" slot="start" color="primary"></ion-icon>
+      <ion-label>
+        {{ 'BUYER_DISPUTES.CALLBACK_HELP_NOTE' | translate }}
+      </ion-label>
+    </ion-item>
+
+    <ion-button
+      expand="block"
+      type="submit"
+      [disabled]="submitting">
+      <ion-spinner name="crescent" slot="start" *ngIf="submitting"></ion-spinner>
+      {{ 'BUYER_DISPUTES.SUBMIT_ISSUE' | translate }}
+    </ion-button>
+  </form>
+</ion-content>

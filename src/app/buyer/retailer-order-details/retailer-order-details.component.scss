@@ -463,6 +463,24 @@ ion-card {
   }
 }
 
+.support-card {
+  ion-card-content {
+    padding: var(--spacing-lg);
+  }
+
+  .support-copy {
+    margin: 0 0 var(--spacing-md);
+    color: var(--ion-color-medium-shade);
+    line-height: 1.5;
+  }
+
+  .support-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}
+
 
 // Responsive Design
 

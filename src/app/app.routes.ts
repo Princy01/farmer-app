@@ -170,6 +170,22 @@ const appRoutes: Routes = [
         loadComponent: () => import('./buyer/retailer-order-details/retailer-order-details.component').then((m) => m.RetailerOrderDetailsComponent),
       },
       {
+        path: 'report-issue/:orderId',
+        loadComponent: () => import('./buyer/disputes/report-issue/report-issue.component').then((m) => m.ReportIssueComponent),
+      },
+      {
+        path: 'issue-submitted/:id',
+        loadComponent: () => import('./buyer/disputes/issue-submitted/issue-submitted.component').then((m) => m.IssueSubmittedComponent),
+      },
+      {
+        path: 'my-issues',
+        loadComponent: () => import('./buyer/disputes/my-issues/my-issues.component').then((m) => m.MyIssuesComponent),
+      },
+      {
+        path: 'issue-detail/:id',
+        loadComponent: () => import('./buyer/disputes/issue-detail/issue-detail.component').then((m) => m.IssueDetailComponent),
+      },
+      {
         path: 'RetailerTrends',
         loadComponent: () => import('./buyer/retailer-trends/retailer-trends.component').then((m) => m.RetailerTrendsComponent),
       },

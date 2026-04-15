@@ -157,5 +157,24 @@
       </ion-card-content>
     </ion-card>
 
+    <ion-card class="support-card">
+      <ion-card-header>
+        <ion-card-title>{{ 'RETAILER_ORDER_DETAILS.ISSUE_HELP_TITLE' | translate }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="support-copy">{{ 'RETAILER_ORDER_DETAILS.ISSUE_HELP_NOTE' | translate }}</p>
+        <div class="support-actions">
+          <ion-button expand="block" (click)="reportIssue()">
+            <ion-icon slot="start" name="flag-outline"></ion-icon>
+            {{ 'RETAILER_ORDER_DETAILS.REPORT_ISSUE' | translate }}
+          </ion-button>
+          <ion-button expand="block" fill="outline" (click)="openMyIssues()">
+            <ion-icon slot="start" name="list-outline"></ion-icon>
+            {{ 'RETAILER_ORDER_DETAILS.MY_ISSUES' | translate }}
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
   </div>
 </ion-content>

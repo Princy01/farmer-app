@@ -18,6 +18,8 @@ import {
   locationOutline,
   arrowBackOutline,
   alertCircleOutline,
+  flagOutline,
+  listOutline,
 } from 'ionicons/icons';
 import { RetailerOrderService, RetailerOrderDetails, OrderItem } from './retailer-order-details.service';
 
@@ -57,6 +59,8 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       locationOutline,
       arrowBackOutline,
       alertCircleOutline,
+      flagOutline,
+      listOutline,
     });
   }
 
@@ -115,6 +119,31 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
    */
   goBack(): void {
     this.router.navigate(['/buyer/retailer-order-history']);
+  }
+
+  /**
+   * Navigates to the buyer Report Issue screen for this order.
+   */
+  reportIssue(): void {
+    if (!this.order?.order_id) {
+      return;
+    }
+
+    this.router.navigate(['/buyer/report-issue', this.order.order_id]);
+  }
+
+  /**
+   * Navigates to buyer My Issues screen and applies this order as filter.
+   */
+  openMyIssues(): void {
+    if (this.order?.order_id) {
+      this.router.navigate(['/buyer/my-issues'], {
+        queryParams: { orderId: this.order.order_id },
+      });
+      return;
+    }
+
+    this.router.navigate(['/buyer/my-issues']);
   }
 
   /**
