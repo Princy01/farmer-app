@@ -356,10 +356,6 @@ const appRoutes: Routes = [
         loadComponent: () => import('./transport/settings/settings.page').then((m) => m.SettingsPage),
       },
       {
-        path: 'dispute-management',
-        loadComponent: () => import('./transport/dispute-management/dispute-management.component').then((m) => m.DisputeManagementComponent),
-      },
-      {
         path: 'notifications',
         loadComponent: () => import('./transport/notifications/notifications.component').then((m) => m.NotificationsComponent),
       },
