@@ -25,7 +25,7 @@ import {
   DisputeDetail,
   DisputeEvidence,
   IssueType,
-} from '../buyer-disputes.service';
+} from '../wholesaler-disputes.service';
 
 interface DisputeEvidenceView extends DisputeEvidence {
   imageUrl?: string;
@@ -181,7 +181,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/buyer/my-issues']);
+    this.router.navigate(['/wholesaler/my-issues']);
   }
 
   goToOrder(): void {
@@ -189,7 +189,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.router.navigate(['/buyer/retailer-order-details', this.dispute.order_id]);
+    this.router.navigate(['/wholesaler/order-details', this.dispute.order_id]);
   }
 
   async startEvidenceCapture(): Promise<void> {

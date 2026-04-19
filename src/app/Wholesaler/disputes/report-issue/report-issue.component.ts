@@ -17,7 +17,7 @@ import {
 } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
-import { RetailerOrderDetails, RetailerOrderService } from '../../retailer-order-details/retailer-order-details.service';
+import { OrderFullDetails, WholesalerApiService } from '../../services/wholesaler-api.service';
 import {
   AddEvidencePayload,
   BuyerDisputesApiError,
@@ -26,7 +26,7 @@ import {
   CreateDisputeResponse,
   DuplicateDisputeCase,
   IssueType,
-} from '../buyer-disputes.service';
+} from '../wholesaler-disputes.service';
 
 interface PendingEvidenceItem {
   id: number;
@@ -48,7 +48,7 @@ interface PendingEvidenceItem {
 export class ReportIssueComponent implements OnInit, OnDestroy {
   @ViewChild('webCameraVideo') webCameraVideo?: ElementRef<HTMLVideoElement>;
 
-  order: RetailerOrderDetails | null = null;
+  order: OrderFullDetails | null = null;
   issueTypes: IssueType[] = [];
 
   loading = true;
@@ -77,7 +77,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private orderService: RetailerOrderService,
+    private wholesalerService: WholesalerApiService,
     private disputesService: BuyerDisputesService,
     private translate: TranslateService
   ) {
@@ -118,7 +118,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
     this.duplicateExistingCase = null;
 
     forkJoin({
-      order: this.orderService.getOrderDetails(this.orderId),
+      order: this.wholesalerService.getOrderFullDetails(this.orderId),
       issueTypesResponse: this.disputesService.getIssueTypes(),
     })
       .pipe(takeUntil(this.destroy$))
@@ -166,7 +166,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
             this.clearPendingEvidence();
 
             this.submitting = false;
-            this.router.navigate(['/buyer/issue-submitted', response.case_id], {
+            this.router.navigate(['/wholesaler/issue-submitted', response.case_id], {
               queryParams: {
                 caseReference: response.case_reference,
                 status: response.status,
@@ -176,7 +176,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
           } catch {
             this.clearPendingEvidence();
             this.submitting = false;
-            this.router.navigate(['/buyer/issue-detail', response.case_id], {
+            this.router.navigate(['/wholesaler/issue-detail', response.case_id], {
               queryParams: {
                 evidenceUploadNotice: '1',
               },
@@ -233,7 +233,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.router.navigate(['/buyer/issue-detail', this.duplicateExistingCase.case_id]);
+    this.router.navigate(['/wholesaler/issue-detail', this.duplicateExistingCase.case_id]);
   }
 
   async startEvidenceCapture(): Promise<void> {
@@ -315,15 +315,15 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     if (this.orderId) {
-      this.router.navigate(['/buyer/retailer-order-details', this.orderId]);
+      this.router.navigate(['/wholesaler/order-details', this.orderId]);
       return;
     }
 
-    this.router.navigate(['/buyer/retailer-order-history']);
+    this.router.navigate(['/wholesaler/orders']);
   }
 
   goToMyIssues(): void {
-    this.router.navigate(['/buyer/my-issues']);
+    this.router.navigate(['/wholesaler/my-issues']);
   }
 
   trackByIssueType(_index: number, item: IssueType): number {

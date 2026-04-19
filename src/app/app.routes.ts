@@ -41,6 +41,22 @@ const appRoutes: Routes = [
     loadComponent: () => import('./Wholesaler/order-details/order-details.component').then(m => m.OrderDetailsComponent)
   },
   {
+    path: 'wholesaler/report-issue/:orderId',
+    loadComponent: () => import('./Wholesaler/disputes/report-issue/report-issue.component').then((m) => m.ReportIssueComponent),
+  },
+  {
+    path: 'wholesaler/issue-submitted/:id',
+    loadComponent: () => import('./Wholesaler/disputes/issue-submitted/issue-submitted.component').then((m) => m.IssueSubmittedComponent),
+  },
+  {
+    path: 'wholesaler/my-issues',
+    loadComponent: () => import('./Wholesaler/disputes/my-issues/my-issues.component').then((m) => m.MyIssuesComponent),
+  },
+  {
+    path: 'wholesaler/issue-detail/:id',
+    loadComponent: () => import('./Wholesaler/disputes/issue-detail/issue-detail.component').then((m) => m.IssueDetailComponent),
+  },
+  {
     path: 'wholesaler/past-orders',
     loadComponent: () => import('./Wholesaler/past-orders/past-orders.component').then((m) => m.PastOrdersComponent),
   },
@@ -354,10 +370,6 @@ const appRoutes: Routes = [
       {
         path: 'settings',
         loadComponent: () => import('./transport/settings/settings.page').then((m) => m.SettingsPage),
-      },
-      {
-        path: 'dispute-management',
-        loadComponent: () => import('./transport/dispute-management/dispute-management.component').then((m) => m.DisputeManagementComponent),
       },
       {
         path: 'notifications',

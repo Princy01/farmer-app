@@ -240,4 +240,23 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   goBack() {
     this.router.navigate(['/wholesaler/orders']);
   }
+
+  reportIssue(): void {
+    if (!this.orderDetails?.order_id) {
+      return;
+    }
+
+    this.router.navigate(['/wholesaler/report-issue', this.orderDetails.order_id]);
+  }
+
+  openMyIssues(): void {
+    if (this.orderDetails?.order_id) {
+      this.router.navigate(['/wholesaler/my-issues'], {
+        queryParams: { orderId: this.orderDetails.order_id },
+      });
+      return;
+    }
+
+    this.router.navigate(['/wholesaler/my-issues']);
+  }
 }

@@ -352,7 +352,11 @@
     "STATUS_CANCELLED": "Cancelled",
     "STATUS_RETURNED": "Returned",
     "STATUS_RETURN_REQUESTED": "Return Requested",
-    "STATUS_UNKNOWN": "Unknown"
+    "STATUS_UNKNOWN": "Unknown",
+    "ISSUE_HELP_TITLE": "Need help with this order?",
+    "ISSUE_HELP_NOTE": "Report an issue for this order or review your submitted issues.",
+    "REPORT_ISSUE": "Report Issue",
+    "MY_ISSUES": "My Issues"
   },
   "ADD_BUSINESS_FORM": {
     "PAGE_TITLE": "Add Business Location",
@@ -1826,6 +1830,8 @@
     "ISSUE_DETAILS": "Issue Details",
     "ISSUE_TYPE": "Issue Type",
     "SELECT_ISSUE_TYPE": "Select issue type",
+    "OTHER_TITLE_LABEL": "Issue title / short summary",
+    "OTHER_TITLE_PLACEHOLDER": "Add a short title",
     "DESCRIPTION": "Description",
     "DESCRIPTION_PLACEHOLDER": "Describe what happened",
     "CALLBACK_HELP_NOTE": "Need a callback? Our team may contact you if more information is required.",
@@ -1848,6 +1854,7 @@
     "CAPTURE_PHOTO": "Capture Photo",
     "CANCEL_CAMERA": "Cancel",
     "REMOVE_EVIDENCE": "Remove",
+    "REPLACE_EVIDENCE": "Replace evidence",
     "EVIDENCE_COUNT": "{{count}} / 3 evidence uploaded",
     "REFRESH": "Refresh",
     "NO_EVIDENCE": "No evidence uploaded yet.",
@@ -1882,6 +1889,8 @@
     "ERROR_INVALID_ORDER_ID": "Invalid order ID.",
     "ERROR_INVALID_DISPUTE_ID": "Invalid issue ID.",
     "ERROR_ISSUE_TYPE_REQUIRED": "Please select an issue type.",
+    "ERROR_OTHER_TITLE_REQUIRED": "Please enter a short title for Other issue type.",
+    "ERROR_OTHER_TITLE_MAX": "Title cannot be more than {{max}} characters.",
     "ERROR_DESCRIPTION_REQUIRED": "Please enter a description.",
     "ERROR_DESCRIPTION_MAX": "Description cannot be more than {{max}} characters.",
     "ERROR_EVIDENCE_LIMIT": "Maximum 3 images allowed per issue.",
@@ -1891,6 +1900,9 @@
     "ERROR_CAMERA_PERMISSION": "Camera access denied. Please allow camera permission and try again.",
     "ERROR_CAMERA_CAPTURE_FAILED": "Could not capture image from camera. Please try again.",
     "ERROR_EVIDENCE_UPLOAD_CONTINUE": "Issue created. Some evidence could not be uploaded. Please add evidence again on this screen.",
+    "ERROR_DUPLICATE_OPEN_DISPUTE": "You already have an open issue for this.",
+    "VIEW_EXISTING_ISSUE": "View Issue",
+    "ERROR_MANUAL_CASE_REQUIRED": "App disputes can only be raised within 5 minutes of delivery. Please contact support for manual case creation.",
     "ERROR_VALIDATION": "Please check your input and try again.",
     "ERROR_GENERIC": "Unable to process your request right now. Please try again."
   },

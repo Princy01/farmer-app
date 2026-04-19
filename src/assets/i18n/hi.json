@@ -352,7 +352,11 @@
     "STATUS_CANCELLED": "रद्द किया गया",
     "STATUS_RETURNED": "वापस किया गया",
     "STATUS_RETURN_REQUESTED": "वापसी का अनुरोध",
-    "STATUS_UNKNOWN": "अज्ञात"
+    "STATUS_UNKNOWN": "अज्ञात",
+    "ISSUE_HELP_TITLE": "क्या इस ऑर्डर में मदद चाहिए?",
+    "ISSUE_HELP_NOTE": "इस ऑर्डर के लिए समस्या रिपोर्ट करें या अपने दर्ज किए गए मुद्दे देखें।",
+    "REPORT_ISSUE": "समस्या रिपोर्ट करें",
+    "MY_ISSUES": "मेरे मुद्दे"
   },
   "ADD_BUSINESS_FORM": {
     "PAGE_TITLE": "व्यवसाय स्थान जोड़ें",
@@ -1825,6 +1829,8 @@
     "ISSUE_DETAILS": "मुद्दे का विवरण",
     "ISSUE_TYPE": "मुद्दे का प्रकार",
     "SELECT_ISSUE_TYPE": "मुद्दे का प्रकार चुनें",
+    "OTHER_TITLE_LABEL": "समस्या का शीर्षक / छोटा सारांश",
+    "OTHER_TITLE_PLACEHOLDER": "छोटा शीर्षक लिखें",
     "DESCRIPTION": "विवरण",
     "DESCRIPTION_PLACEHOLDER": "बताएं क्या हुआ",
     "CALLBACK_HELP_NOTE": "कॉल बैक चाहिए? अगर अधिक जानकारी चाहिए होगी तो हमारी टीम आपसे संपर्क कर सकती है।",
@@ -1847,6 +1853,7 @@
     "CAPTURE_PHOTO": "फोटो कैप्चर करें",
     "CANCEL_CAMERA": "रद्द करें",
     "REMOVE_EVIDENCE": "हटाएं",
+    "REPLACE_EVIDENCE": "सबूत बदलें",
     "EVIDENCE_COUNT": "{{count}} / 3 सबूत अपलोड",
     "REFRESH": "रिफ्रेश",
     "NO_EVIDENCE": "अभी तक कोई सबूत अपलोड नहीं किया गया है।",
@@ -1881,6 +1888,8 @@
     "ERROR_INVALID_ORDER_ID": "अमान्य ऑर्डर आईडी।",
     "ERROR_INVALID_DISPUTE_ID": "अमान्य मुद्दा आईडी।",
     "ERROR_ISSUE_TYPE_REQUIRED": "कृपया मुद्दे का प्रकार चुनें।",
+    "ERROR_OTHER_TITLE_REQUIRED": "Other मुद्दे के लिए छोटा शीर्षक दर्ज करें।",
+    "ERROR_OTHER_TITLE_MAX": "शीर्षक {{max}} अक्षरों से अधिक नहीं हो सकता।",
     "ERROR_DESCRIPTION_REQUIRED": "कृपया विवरण दर्ज करें।",
     "ERROR_DESCRIPTION_MAX": "विवरण {{max}} अक्षरों से अधिक नहीं हो सकता।",
     "ERROR_EVIDENCE_LIMIT": "प्रति मुद्दा अधिकतम 3 इमेज की अनुमति है।",
@@ -1890,6 +1899,9 @@
     "ERROR_CAMERA_PERMISSION": "कैमरा अनुमति अस्वीकार की गई। कृपया अनुमति दें और फिर से कोशिश करें।",
     "ERROR_CAMERA_CAPTURE_FAILED": "कैमरे से इमेज कैप्चर नहीं हो सकी। कृपया फिर से कोशिश करें।",
     "ERROR_EVIDENCE_UPLOAD_CONTINUE": "मुद्दा बन गया है, लेकिन कुछ सबूत अपलोड नहीं हो सके। कृपया इसी स्क्रीन से फिर से सबूत जोड़ें।",
+    "ERROR_DUPLICATE_OPEN_DISPUTE": "इसके लिए आपका एक खुला मुद्दा पहले से मौजूद है।",
+    "VIEW_EXISTING_ISSUE": "मुद्दा देखें",
+    "ERROR_MANUAL_CASE_REQUIRED": "ऐप से विवाद डिलीवरी के 5 मिनट के भीतर ही दर्ज किया जा सकता है। कृपया मैनुअल केस बनाने के लिए सपोर्ट से संपर्क करें।",
     "ERROR_VALIDATION": "कृपया अपनी जानकारी जांचें और फिर से प्रयास करें।",
     "ERROR_GENERIC": "अभी आपका अनुरोध पूरा नहीं हो सका। कृपया फिर से कोशिश करें।"
   },

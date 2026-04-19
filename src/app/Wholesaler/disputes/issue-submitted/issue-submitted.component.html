@@ -1,0 +1,52 @@
+<ion-header [translucent]="true" mode="ios">
+  <ion-toolbar>
+    <ion-title>{{ 'BUYER_DISPUTES.ISSUE_SUBMITTED_TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div *ngIf="loading" class="state-container">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>{{ 'BUYER_DISPUTES.LOADING' | translate }}</p>
+  </div>
+
+  <div *ngIf="!loading && error" class="state-container">
+    <ion-icon name="alert-circle-outline" color="danger" class="state-icon"></ion-icon>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" (click)="loadSubmittedIssue()">
+      {{ 'BUYER_DISPUTES.RETRY' | translate }}
+    </ion-button>
+  </div>
+
+  <div *ngIf="!loading && !error" class="success-content">
+    <ion-icon name="checkmark-circle-outline" color="success" class="success-icon"></ion-icon>
+
+    <h2>{{ 'BUYER_DISPUTES.ISSUE_SUBMITTED_HEADING' | translate }}</h2>
+    <p>{{ 'BUYER_DISPUTES.ISSUE_SUBMITTED_MESSAGE' | translate }}</p>
+
+    <ion-card>
+      <ion-card-content>
+        <div class="info-row">
+          <span>{{ 'BUYER_DISPUTES.CASE_REFERENCE' | translate }}</span>
+          <strong>{{ caseReference }}</strong>
+        </div>
+        <div class="info-row">
+          <span>{{ 'BUYER_DISPUTES.CURRENT_STATUS' | translate }}</span>
+          <strong>{{ getStatusLabel(status) }}</strong>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-button expand="block" (click)="goToIssueDetail()">
+      {{ 'BUYER_DISPUTES.VIEW_ISSUE_DETAILS' | translate }}
+    </ion-button>
+
+    <ion-button expand="block" fill="outline" (click)="goToMyIssues()">
+      {{ 'BUYER_DISPUTES.MY_ISSUES_TITLE' | translate }}
+    </ion-button>
+
+    <ion-button expand="block" fill="clear" (click)="goBackToOrder()">
+      {{ 'BUYER_DISPUTES.BACK_TO_ORDER' | translate }}
+    </ion-button>
+  </div>
+</ion-content>
