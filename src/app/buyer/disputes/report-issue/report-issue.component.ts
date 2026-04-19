@@ -125,7 +125,9 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
       .subscribe({
         next: ({ order, issueTypesResponse }) => {
           this.order = order;
-          this.issueTypes = (issueTypesResponse.items || []).filter((item) => item.is_active);
+          this.issueTypes = this.sortIssueTypesWithOtherLast(
+            (issueTypesResponse.items || []).filter((item) => item.is_active)
+          );
           this.loading = false;
         },
         error: (err: Error | BuyerDisputesApiError) => {
@@ -149,7 +151,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
     const payload: CreateDisputePayload = {
       issue_type_id: this.selectedIssueTypeId as number,
       title,
-      description: this.description.trim(),
+      description: this.isOtherIssueTypeSelected() ? this.otherIssueTitle.trim() : this.description.trim(),
       source_channel: 'app',
       order_id: this.order.order_id,
     };
@@ -207,6 +209,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
   onIssueTypeChange(): void {
     this.issueTypeError = null;
     this.otherIssueTitleError = null;
+    this.descriptionError = null;
 
     if (!this.isOtherIssueTypeSelected()) {
       this.otherIssueTitle = '';
@@ -337,30 +340,33 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
 
   private validateForm(): boolean {
     let isValid = true;
+    const isOtherIssue = this.isOtherIssueTypeSelected();
 
     if (!this.selectedIssueTypeId) {
       this.issueTypeError = this.translate.instant('BUYER_DISPUTES.ERROR_ISSUE_TYPE_REQUIRED');
       isValid = false;
     }
 
-    if (this.isOtherIssueTypeSelected() && !this.otherIssueTitle.trim()) {
+    if (isOtherIssue && !this.otherIssueTitle.trim()) {
       this.otherIssueTitleError = this.translate.instant('BUYER_DISPUTES.ERROR_OTHER_TITLE_REQUIRED');
       isValid = false;
     }
 
-    if (this.otherIssueTitle.trim().length > 120) {
+    if (isOtherIssue && this.otherIssueTitle.trim().length > 120) {
       this.otherIssueTitleError = this.translate.instant('BUYER_DISPUTES.ERROR_OTHER_TITLE_MAX', { max: 120 });
       isValid = false;
     }
 
-    if (!this.description.trim()) {
-      this.descriptionError = this.translate.instant('BUYER_DISPUTES.ERROR_DESCRIPTION_REQUIRED');
-      isValid = false;
-    }
+    if (!isOtherIssue) {
+      if (!this.description.trim()) {
+        this.descriptionError = this.translate.instant('BUYER_DISPUTES.ERROR_DESCRIPTION_REQUIRED');
+        isValid = false;
+      }
 
-    if (this.description.trim().length > 1000) {
-      this.descriptionError = this.translate.instant('BUYER_DISPUTES.ERROR_DESCRIPTION_MAX', { max: 1000 });
-      isValid = false;
+      if (this.description.trim().length > 1000) {
+        this.descriptionError = this.translate.instant('BUYER_DISPUTES.ERROR_DESCRIPTION_MAX', { max: 1000 });
+        isValid = false;
+      }
     }
 
     return isValid;
@@ -586,6 +592,28 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
 
   private normalizeIssueTypeToken(value?: string): string {
     return (value || '').trim().toLowerCase();
+  }
+
+  private isOtherIssueType(issueType: IssueType): boolean {
+    return (
+      this.normalizeIssueTypeToken(issueType.code) === 'other' ||
+      this.normalizeIssueTypeToken(issueType.name) === 'other'
+    );
+  }
+
+  private sortIssueTypesWithOtherLast(issueTypes: IssueType[]): IssueType[] {
+    const nonOtherIssueTypes: IssueType[] = [];
+    const otherIssueTypes: IssueType[] = [];
+
+    for (const issueType of issueTypes || []) {
+      if (this.isOtherIssueType(issueType)) {
+        otherIssueTypes.push(issueType);
+      } else {
+        nonOtherIssueTypes.push(issueType);
+      }
+    }
+
+    return [...nonOtherIssueTypes, ...otherIssueTypes];
   }
 
   private getIssueTypeTranslationKey(issueTypeCode: string): string {

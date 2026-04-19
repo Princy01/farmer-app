@@ -8,6 +8,12 @@
       [placeholder]="'DELIVERY_HISTORY.SEARCH_PLACEHOLDER' | translate">
     </ion-searchbar>
 
+    <div class="history-actions">
+      <ion-button fill="outline" size="small" (click)="goToMyIssues()">
+        {{ 'BUYER_DISPUTES.MY_ISSUES_TITLE' | translate }}
+      </ion-button>
+    </div>
+
     <div class="loading-state ion-text-center" *ngIf="isLoading">
       <ion-spinner name="crescent"></ion-spinner>
       <p>{{ 'DELIVERY_HISTORY.LOADING' | translate }}</p>
@@ -71,6 +77,14 @@
                   <strong>{{ 'DELIVERY_HISTORY.ORDER_STATUS' | translate }}:</strong>
                   {{ order.order_status || ('DELIVERY_HISTORY.NOT_AVAILABLE' | translate) }}
                 </p>
+
+                <ion-button
+                  size="small"
+                  fill="outline"
+                  class="report-issue-btn"
+                  (click)="goToReportIssue(order, delivery)">
+                  {{ 'BUYER_DISPUTES.REPORT_ISSUE_TITLE' | translate }}
+                </ion-button>
 
                 <div *ngIf="(order.items?.length || 0) > 0">
                   <p class="items-title"><strong>{{ 'DELIVERY_HISTORY.ITEMS' | translate }}:</strong></p>

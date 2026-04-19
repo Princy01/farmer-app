@@ -392,10 +392,21 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     window.open('tel:+911800123456');
   }
 
-  reportDeliveryIssue() {
-    this.showIssueModal = true;
-    this.selectedIssueType = null;
-    this.issueDescription = '';
+  async reportDeliveryIssue() {
+    const firstOrder = this.orders.length > 0 ? this.orders[0] : null;
+
+    if (!firstOrder?.order_id) {
+      await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_REPORT_ISSUE'), 'danger');
+      return;
+    }
+
+    this.router.navigate(['/transport/report-issue', firstOrder.order_id], {
+      queryParams: {
+        jobId: this.jobId || undefined,
+        deliveryDate: firstOrder.date_of_order,
+        finalAmount: firstOrder.final_amount,
+      },
+    });
   }
 
   selectIssueType(issue: DeliveryIssueType) {

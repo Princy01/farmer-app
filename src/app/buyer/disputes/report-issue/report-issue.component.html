@@ -92,7 +92,7 @@
           {{ otherIssueTitleError }}
         </ion-note>
 
-        <ion-item>
+        <ion-item *ngIf="!isOtherIssueTypeSelected()">
           <ion-label position="stacked">{{ 'BUYER_DISPUTES.DESCRIPTION' | translate }}</ion-label>
           <ion-textarea
             [(ngModel)]="description"
@@ -102,10 +102,10 @@
             autoGrow="true">
           </ion-textarea>
         </ion-item>
-        <ion-note color="medium" class="helper-text">
+        <ion-note color="medium" class="helper-text" *ngIf="!isOtherIssueTypeSelected()">
           {{ description.length }}/1000
         </ion-note>
-        <ion-note color="danger" *ngIf="descriptionError" class="field-error">
+        <ion-note color="danger" *ngIf="!isOtherIssueTypeSelected() && descriptionError" class="field-error">
           {{ descriptionError }}
         </ion-note>
       </ion-card-content>

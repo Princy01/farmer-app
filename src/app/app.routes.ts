@@ -352,6 +352,10 @@ const appRoutes: Routes = [
       //       loadComponent: () => import('./transport/delivery-confirmation/delivery-confirmation.component').then((m) => m.DeliveryConfirmationComponent),
       //     },
       {
+        path: 'delivery-confirmation/:jobId',
+        loadComponent: () => import('./transport/delivery-confirmation/delivery-confirmation.component').then((m) => m.DeliveryConfirmationComponent),
+      },
+      {
         path: 'delivery-confirmation',
         loadComponent: () => import('./transport/delivery-confirmation/delivery-confirmation.component').then((m) => m.DeliveryConfirmationComponent),
       },
@@ -362,6 +366,27 @@ const appRoutes: Routes = [
       {
         path: 'delivery-history',
         loadComponent: () => import('./transport/delivery-history/delivery-history.component').then((m) => m.DeliveryHistoryComponent),
+      },
+      {
+        path: 'report-issue/:orderId',
+        loadComponent: () => import('./transport/disputes/report-issue/report-issue.component').then((m) => m.ReportIssueComponent),
+      },
+      {
+        path: 'issue-submitted/:id',
+        loadComponent: () => import('./transport/disputes/issue-submitted/issue-submitted.component').then((m) => m.IssueSubmittedComponent),
+      },
+      {
+        path: 'my-issues',
+        loadComponent: () => import('./transport/disputes/my-issues/my-issues.component').then((m) => m.MyIssuesComponent),
+      },
+      {
+        path: 'issue-detail/:id',
+        loadComponent: () => import('./transport/disputes/issue-detail/issue-detail.component').then((m) => m.IssueDetailComponent),
+      },
+      {
+        path: 'dispute-management',
+        redirectTo: 'my-issues',
+        pathMatch: 'full',
       },
       {
         path: 'profile',

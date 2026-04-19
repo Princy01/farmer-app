@@ -1,0 +1,57 @@
+<ion-header [translucent]="true" mode="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" fill="clear">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'BUYER_DISPUTES.MY_ISSUES_TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div *ngIf="loading" class="state-container">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>{{ 'BUYER_DISPUTES.LOADING' | translate }}</p>
+  </div>
+
+  <div *ngIf="!loading && error" class="state-container">
+    <ion-icon name="alert-circle-outline" color="danger" class="state-icon"></ion-icon>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" (click)="loadDisputes()">
+      {{ 'BUYER_DISPUTES.RETRY' | translate }}
+    </ion-button>
+  </div>
+
+  <div *ngIf="!loading && !error && disputes.length === 0" class="state-container">
+    <ion-icon name="clipboard-outline" color="medium" class="state-icon"></ion-icon>
+    <h3>{{ 'BUYER_DISPUTES.NO_ISSUES_TITLE' | translate }}</h3>
+    <p>{{ 'BUYER_DISPUTES.NO_ISSUES_MESSAGE' | translate }}</p>
+  </div>
+
+  <ion-list *ngIf="!loading && !error && disputes.length > 0" lines="none">
+    <ion-item
+      class="issue-item"
+      button
+      detail="true"
+      *ngFor="let dispute of disputes; trackBy: trackByDispute"
+      (click)="openIssue(dispute)">
+      <ion-label>
+        <h2>{{ dispute.case_reference }}</h2>
+        <h3>{{ getIssueTypeLabel(dispute) }}</h3>
+        <p>{{ dispute.created_at | date: 'dd MMM yyyy, HH:mm' }}</p>
+        <ion-chip [color]="getStatusColor(dispute.status)">
+          <ion-label>{{ getStatusLabel(dispute.status) }}</ion-label>
+        </ion-chip>
+      </ion-label>
+      <ion-button
+        *ngIf="dispute.order_id"
+        fill="outline"
+        size="small"
+        slot="end"
+        (click)="$event.stopPropagation(); goToOrder(dispute)">
+        {{ 'BUYER_DISPUTES.VIEW_ORDER' | translate }}
+      </ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>

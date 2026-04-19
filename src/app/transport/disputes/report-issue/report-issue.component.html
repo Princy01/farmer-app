@@ -43,11 +43,13 @@
         </div>
         <div class="summary-row">
           <span>{{ 'BUYER_DISPUTES.ORDER_DATE' | translate }}</span>
-          <strong>{{ order.date_of_order | date: 'dd MMM yyyy, HH:mm' }}</strong>
+          <strong *ngIf="order.date_of_order">{{ order.date_of_order | date: 'dd MMM yyyy, HH:mm' }}</strong>
+          <strong *ngIf="!order.date_of_order">-</strong>
         </div>
         <div class="summary-row">
           <span>{{ 'BUYER_DISPUTES.ORDER_TOTAL' | translate }}</span>
-          <strong>₹{{ order.final_amount | number: '1.2-2' }}</strong>
+          <strong *ngIf="order.final_amount !== undefined">₹{{ order.final_amount | number: '1.2-2' }}</strong>
+          <strong *ngIf="order.final_amount === undefined">-</strong>
         </div>
       </ion-card-content>
     </ion-card>

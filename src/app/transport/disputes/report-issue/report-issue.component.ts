@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Subject, firstValueFrom, forkJoin } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, firstValueFrom, forkJoin, of } from 'rxjs';
+import { catchError, takeUntil } from 'rxjs/operators';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
@@ -17,16 +17,16 @@ import {
 } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
-import { OrderFullDetails, WholesalerApiService } from '../../services/wholesaler-api.service';
+import { Delivery, DeliveryService } from '../../delivery-history/delivery-history.service';
 import {
   AddEvidencePayload,
-  BuyerDisputesApiError,
-  BuyerDisputesService,
   CreateDisputePayload,
   CreateDisputeResponse,
   DuplicateDisputeCase,
   IssueType,
-} from '../wholesaler-disputes.service';
+  TransportDisputesApiError,
+  TransportDisputesService,
+} from '../transport-disputes.service';
 
 interface PendingEvidenceItem {
   id: number;
@@ -38,8 +38,15 @@ interface PendingEvidenceItem {
   capturedLongitude?: number;
 }
 
+interface TransportOrderSummary {
+  order_id: number;
+  date_of_order?: string;
+  final_amount?: number;
+  job_id?: number;
+}
+
 @Component({
-  selector: 'app-report-issue',
+  selector: 'app-transport-report-issue',
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, TranslatePipe],
   templateUrl: './report-issue.component.html',
@@ -48,7 +55,7 @@ interface PendingEvidenceItem {
 export class ReportIssueComponent implements OnInit, OnDestroy {
   @ViewChild('webCameraVideo') webCameraVideo?: ElementRef<HTMLVideoElement>;
 
-  order: OrderFullDetails | null = null;
+  order: TransportOrderSummary | null = null;
   issueTypes: IssueType[] = [];
 
   loading = true;
@@ -71,14 +78,15 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
   descriptionError: string | null = null;
 
   private orderId: number | null = null;
+  private jobIdQuery: number | null = null;
   private webCameraStream: MediaStream | null = null;
   private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private wholesalerService: WholesalerApiService,
-    private disputesService: BuyerDisputesService,
+    private deliveryHistoryService: DeliveryService,
+    private disputesService: TransportDisputesService,
     private translate: TranslateService
   ) {
     addIcons({
@@ -104,6 +112,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
 
   loadScreenData(): void {
     const routeOrderId = this.route.snapshot.paramMap.get('orderId');
+    const routeJobId = this.route.snapshot.queryParamMap.get('jobId');
 
     if (!routeOrderId || Number.isNaN(+routeOrderId) || +routeOrderId <= 0) {
       this.error = this.translate.instant('BUYER_DISPUTES.ERROR_INVALID_ORDER_ID');
@@ -112,25 +121,28 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
     }
 
     this.orderId = +routeOrderId;
+    this.jobIdQuery = routeJobId && !Number.isNaN(+routeJobId) && +routeJobId > 0 ? +routeJobId : null;
     this.loading = true;
     this.error = null;
     this.blockRetry = false;
     this.duplicateExistingCase = null;
 
     forkJoin({
-      order: this.wholesalerService.getOrderFullDetails(this.orderId),
       issueTypesResponse: this.disputesService.getIssueTypes(),
+      deliveryHistoryResponse: this.deliveryHistoryService
+        .getDeliveryHistory()
+        .pipe(catchError(() => of({ deliveries: [] as Delivery[] }))),
     })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: ({ order, issueTypesResponse }) => {
-          this.order = order;
+        next: ({ issueTypesResponse, deliveryHistoryResponse }) => {
           this.issueTypes = this.sortIssueTypesWithOtherLast(
             (issueTypesResponse.items || []).filter((item) => item.is_active)
           );
+          this.order = this.resolveOrderSummary(deliveryHistoryResponse.deliveries || []);
           this.loading = false;
         },
-        error: (err: Error | BuyerDisputesApiError) => {
+        error: (err: Error | TransportDisputesApiError) => {
           this.error = this.resolveErrorMessage(err);
           this.loading = false;
         },
@@ -168,24 +180,25 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
             this.clearPendingEvidence();
 
             this.submitting = false;
-            this.router.navigate(['/wholesaler/issue-submitted', response.case_id], {
+            this.router.navigate(['/transport/issue-submitted', response.case_id], {
               queryParams: {
                 caseReference: response.case_reference,
                 status: response.status,
                 orderId: this.order?.order_id,
+                jobId: this.order?.job_id,
               },
             });
           } catch {
             this.clearPendingEvidence();
             this.submitting = false;
-            this.router.navigate(['/wholesaler/issue-detail', response.case_id], {
+            this.router.navigate(['/transport/issue-detail', response.case_id], {
               queryParams: {
                 evidenceUploadNotice: '1',
               },
             });
           }
         },
-        error: (err: BuyerDisputesApiError) => {
+        error: (err: TransportDisputesApiError) => {
           this.submitting = false;
 
           if (this.isDuplicateDisputeError(err)) {
@@ -236,7 +249,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.router.navigate(['/wholesaler/issue-detail', this.duplicateExistingCase.case_id]);
+    this.router.navigate(['/transport/issue-detail', this.duplicateExistingCase.case_id]);
   }
 
   async startEvidenceCapture(): Promise<void> {
@@ -317,16 +330,16 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    if (this.orderId) {
-      this.router.navigate(['/wholesaler/order-details', this.orderId]);
+    if (this.jobIdQuery) {
+      this.router.navigate(['/transport/delivery-confirmation', this.jobIdQuery]);
       return;
     }
 
-    this.router.navigate(['/wholesaler/orders']);
+    this.router.navigate(['/transport/delivery-history']);
   }
 
   goToMyIssues(): void {
-    this.router.navigate(['/wholesaler/my-issues']);
+    this.router.navigate(['/transport/my-issues']);
   }
 
   trackByIssueType(_index: number, item: IssueType): number {
@@ -559,8 +572,38 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
     });
   }
 
-  private resolveErrorMessage(error: Error | BuyerDisputesApiError, preferApiMessage: boolean = false): string {
-    const typedError = error as BuyerDisputesApiError;
+  private resolveOrderSummary(deliveries: Delivery[]): TransportOrderSummary {
+    const queryDate = this.route.snapshot.queryParamMap.get('deliveryDate') || undefined;
+    const queryAmountRaw = this.route.snapshot.queryParamMap.get('finalAmount');
+    const queryAmount =
+      queryAmountRaw && !Number.isNaN(Number(queryAmountRaw)) ? Number(queryAmountRaw) : undefined;
+
+    for (const delivery of deliveries || []) {
+      if (this.jobIdQuery && delivery.job_id !== this.jobIdQuery) {
+        continue;
+      }
+
+      const matchedOrder = (delivery.orders || []).find((order) => order.order_id === this.orderId);
+      if (matchedOrder) {
+        return {
+          order_id: matchedOrder.order_id,
+          date_of_order: delivery.delivery_date,
+          final_amount: matchedOrder.final_amount,
+          job_id: delivery.job_id,
+        };
+      }
+    }
+
+    return {
+      order_id: this.orderId as number,
+      date_of_order: queryDate,
+      final_amount: queryAmount,
+      job_id: this.jobIdQuery || undefined,
+    };
+  }
+
+  private resolveErrorMessage(error: Error | TransportDisputesApiError, preferApiMessage: boolean = false): string {
+    const typedError = error as TransportDisputesApiError;
 
     if (preferApiMessage && typedError.apiMessage) {
       return typedError.apiMessage;
@@ -578,11 +621,11 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
     return this.translate.instant('BUYER_DISPUTES.ERROR_GENERIC');
   }
 
-  private isDuplicateDisputeError(error: BuyerDisputesApiError): boolean {
+  private isDuplicateDisputeError(error: TransportDisputesApiError): boolean {
     return error.statusCode === 409 && error.errorCode === 'duplicate_dispute';
   }
 
-  private isManualCaseWindowError(error: BuyerDisputesApiError): boolean {
+  private isManualCaseWindowError(error: TransportDisputesApiError): boolean {
     const message = (error.apiMessage || '').toLowerCase();
     return (
       message.includes('within 5 minutes of delivery') &&

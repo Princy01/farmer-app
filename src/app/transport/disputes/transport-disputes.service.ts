@@ -147,7 +147,7 @@ export interface DuplicateDisputeCase {
   status: string;
 }
 
-export interface BuyerDisputesApiError extends Error {
+export interface TransportDisputesApiError extends Error {
   translationKey: string;
   apiMessage?: string;
   statusCode?: number;
@@ -158,7 +158,7 @@ export interface BuyerDisputesApiError extends Error {
 @Injectable({
   providedIn: 'root',
 })
-export class BuyerDisputesService {
+export class TransportDisputesService {
   private readonly apiUrl = environment.apiUrl;
   private readonly HTTP_TIMEOUT_MS = 30000;
 
@@ -282,7 +282,7 @@ export class BuyerDisputesService {
   }
 
   private handleError(error: HttpErrorResponse | TimeoutError): Observable<never> {
-    const apiError = new Error('BUYER_DISPUTES.ERROR_GENERIC') as BuyerDisputesApiError;
+    const apiError = new Error('BUYER_DISPUTES.ERROR_GENERIC') as TransportDisputesApiError;
     apiError.translationKey = 'BUYER_DISPUTES.ERROR_GENERIC';
 
     if (error instanceof TimeoutError) {

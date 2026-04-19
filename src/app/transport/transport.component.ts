@@ -47,6 +47,11 @@ export class TransportComponent implements OnDestroy {
     '/transport/customer-chat': 'TRANSPORT_MENU.CUSTOMER_CHAT',
     '/transport/earnings-dashboard': 'TRANSPORT_MENU.EARNINGS_REPORTS',
     '/transport/delivery-history': 'TRANSPORT_MENU.DELIVERY_HISTORY',
+    '/transport/dispute-management': 'TRANSPORT_MENU.DISPUTE_MANAGEMENT',
+    '/transport/my-issues': 'TRANSPORT_MENU.DISPUTE_MANAGEMENT',
+    '/transport/report-issue': 'TRANSPORT_MENU.DISPUTE_MANAGEMENT',
+    '/transport/issue-detail': 'TRANSPORT_MENU.DISPUTE_MANAGEMENT',
+    '/transport/issue-submitted': 'TRANSPORT_MENU.DISPUTE_MANAGEMENT',
     '/transport/notifications': 'TRANSPORT_MENU.NOTIFICATIONS',
     '/transport/settings': 'TRANSPORT_MENU.SETTINGS'
   };

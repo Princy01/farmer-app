@@ -253,8 +253,11 @@ export class BuyerDisputesService {
   }
 
   getEvidenceFile(disputeId: number, evidenceId: number): Observable<Blob> {
+    const params = new HttpParams().set('_ts', Date.now().toString());
+
     return this.readonlyRequest(
       this.http.get(`${this.apiUrl}/disputes/${disputeId}/evidence/${evidenceId}/file`, {
+        params,
         responseType: 'blob',
       })
     );

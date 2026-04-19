@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DeliveryService, Delivery, DeliveryOrder } from './delivery-history.service';
 import { Subject } from 'rxjs';
@@ -26,6 +27,7 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
 
   constructor(
     private deliveryService: DeliveryService,
+    private router: Router,
     private translate: TranslateService
   ) {}
 
@@ -144,5 +146,23 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
 
   isDeliveryExpanded(jobId: number): boolean {
     return this.expandedJobIds.has(jobId);
+  }
+
+  goToMyIssues(): void {
+    this.router.navigate(['/transport/my-issues']);
+  }
+
+  goToReportIssue(order: DeliveryOrder, delivery: Delivery): void {
+    if (!order?.order_id) {
+      return;
+    }
+
+    this.router.navigate(['/transport/report-issue', order.order_id], {
+      queryParams: {
+        jobId: delivery.job_id,
+        deliveryDate: delivery.delivery_date,
+        finalAmount: order.final_amount,
+      },
+    });
   }
 }
