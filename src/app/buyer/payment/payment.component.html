@@ -21,24 +21,24 @@
         </div>
       </div>
       <ion-card-content class="card-content">
-        <div class="summary-item" *ngFor="let item of orderData?.items">
+        <div class="summary-item" *ngFor="let item of summaryItems">
           <div class="item-info">
             <span class="item-name">{{ item.product_name }}</span>
             <span class="item-quantity">{{ item.quantity }} {{ item.unit_name }}</span>
           </div>
-          <span class="item-price">₹{{ item.latest_wholesaler_price * item.quantity }}</span>
+          <span class="item-price">₹{{ (item.latest_wholesaler_price || item.price || 0) * item.quantity }}</span>
         </div>
 
         <div class="summary-divider"></div>
 
         <div class="summary-row">
           <span class="summary-label">{{ 'PAYMENT.ITEMS_TOTAL' | translate }}</span>
-          <span class="summary-amount">₹{{ orderData?.totalPrice }}</span>
+          <span class="summary-amount">₹{{ getItemsTotal() }}</span>
         </div>
 
-        <div class="summary-row" *ngIf="orderData?.transportCost > 0">
+        <div class="summary-row" *ngIf="getTransportCost() > 0">
           <span class="summary-label">{{ 'PAYMENT.TRANSPORT_COST' | translate }}</span>
-          <span class="summary-amount">₹{{ orderData?.transportCost }}</span>
+          <span class="summary-amount">₹{{ getTransportCost() }}</span>
         </div>
 
         <!-- Total Design -->

@@ -174,10 +174,6 @@ const appRoutes: Routes = [
         loadComponent: () => import('./buyer/checkout/checkout.component').then((m) => m.CheckoutComponent),
       },
       {
-        path: 'ride',
-        loadComponent: () => import('./buyer/ride/ride.component').then((m) => m.RideComponent),
-      },
-      {
         path: 'retailer-order-history',
         loadComponent: () => import('./buyer/retailer-order-history/retailer-order-history.component').then((m) => m.RetailerOrderHistoryComponent),
       },

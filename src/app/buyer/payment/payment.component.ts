@@ -171,6 +171,28 @@ export class PaymentComponent implements OnInit, OnDestroy {
     return method ? this.translate.instant(method.name) : this.selectedPaymentMethod;
   }
 
+  get summaryItems(): any[] {
+    return (this.orderData?.wholesalerGroups || []).flatMap((group: any) => group.items || []);
+  }
+
+  getItemsTotal(): number {
+    if (typeof this.orderData?.totalPrice === 'number' && this.orderData.totalPrice > 0) {
+      return this.orderData.totalPrice;
+    }
+
+    return (this.orderData?.wholesalerGroups || []).reduce(
+      (sum: number, group: any) => sum + (group.subtotal || 0),
+      0
+    );
+  }
+
+  getTransportCost(): number {
+    return this.orderData?.transporterCost
+      || this.orderData?.transportCost
+      || this.transportInfo?.base_price
+      || 0;
+  }
+
   getProcessingMessage(): string {
     if (this.isSimulatedMode) {
       return this.translate.instant('PAYMENT.PROCESSING_SIMULATED');
@@ -256,7 +278,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
         delivery_address: orderData.deliveryAddress,
         retailer_branch_id: orderData.retailerBranchId,
         order_groups: orderGroups,
-        delivery_amount: orderData.transporterCost ?? 0,
+        delivery_amount: this.getTransportCost(),
       };
 
       console.log('Batch order request:', batchRequest);
@@ -539,14 +561,21 @@ export class PaymentComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const wholesalerGroups = this.orderData?.wholesalerGroups || [];
+    const cartItems = wholesalerGroups.flatMap((group: any) => group.items || []);
+    const totalPrice = wholesalerGroups.reduce(
+      (sum: number, group: any) => sum + (group.subtotal || 0),
+      0
+    );
+
     this.router.navigate(['/buyer/checkout'], {
       state: {
-        cartItems: this.orderData?.items || [],
-        totalPrice: this.orderData?.total_order_amount || 0,
-        discount: this.orderData?.discount_amount || 0,
+        cartItems,
+        wholesalerGroups,
+        totalPrice,
+        discount: this.orderData?.discount || this.orderData?.discount_amount || 0,
         retailer: this.orderData?.retailer,
-        retailerBranchId: this.orderData?.retailerBranchId,
-        wholeseller: { id: this.orderData?.wholeseller_id },
+        wholeseller: this.orderData?.wholeseller || null,
         selectedBranch: this.orderData?.selectedBranch,
         transportData: this.transportInfo,
         hasRideRequest: this.hasTransport

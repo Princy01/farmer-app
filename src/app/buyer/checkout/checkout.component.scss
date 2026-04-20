@@ -1,734 +1,693 @@
 .checkout-toolbar {
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --color: white;
+  --color: #fff;
+  --border-color: transparent;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
 
-  .back-btn {
-    --color: white;
-  }
+.back-btn {
+  --color: #fff;
+  --background: transparent;
+  --background-activated: rgba(255, 255, 255, 0.12);
+  --border-radius: 12px;
+}
 
-  .page-title {
-    font-weight: 600;
-    font-size: 1.2rem;
-  }
+.page-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .checkout-content {
   --background: #f8f9fa;
-
-  .card-section {
-    padding: 0 1rem 1rem 1rem;
-
-    &:first-child {
-      padding-top: 1rem;
-    }
-  }
 }
 
-
-// CORE CARD COMPONENT STYLES
- 
-// Modern card design with gradient headers
-// Used consistently across all sections
-
-.modern-card {
-  border-radius: 16px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-  margin: 0;
-  overflow: visible;
-
-  .card-header {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    padding: 1.25rem 1.5rem;
-    border-radius: 16px 16px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .header-content {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-
-      .header-icon {
-        font-size: 1.5rem;
-        color: var(--ion-color-primary);
-      }
-
-      .card-title {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--ion-color-dark);
-      }
-    }
-
-    .add-address-btn-header {
-      --border-color: var(--ion-color-primary);
-      --color: var(--ion-color-primary);
-      font-size: 0.8rem;
-      height: 2rem;
-    }
-
-    .items-count-badge {
-      background: var(--ion-color-primary);
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-  }
-
-  .card-content {
-    padding: 1.5rem;
-    overflow: visible;
-  }
+.checkout-bg-glow {
+  display: none;
 }
 
-
-// ORDER DETAILS & LABELS
-
-// Displays buyer and seller information
-.detail-item {
+.content-wrapper {
+  padding: 0.9rem 1rem 7rem;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  margin: 0;
+}
+
+.card-head {
+  padding: 0.85rem 1rem 0.7rem;
+  display: flex;
   align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--ion-color-light);
+  justify-content: space-between;
+  gap: 0.6rem;
+  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
 
-  &:last-child {
-    border-bottom: none;
+.card-head-left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 17px;
+    color: #667eea;
   }
 
-  .detail-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
-    color: var(--ion-color-medium);
-
-    .detail-icon {
-      font-size: 1.1rem;
-
-      &.buyer-icon {
-        color: var(--ion-color-tertiary);
-      }
-
-      &.seller-icon {
-        color: var(--ion-color-secondary);
-      }
-    }
-  }
-
-  .detail-value {
-    font-weight: 600;
-    color: var(--ion-color-dark);
-    text-align: right;
-    flex: 1;
-    margin-left: 1rem;
+  &.icon-blue,
+  &.icon-green,
+  &.icon-amber,
+  &.icon-sky {
+    background: rgba(102, 126, 234, 0.13);
   }
 }
 
+.card-title {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-// DELIVERY ADDRESS SELECTION
+.card-body {
+  padding: 0.8rem 1rem 0.95rem;
+}
 
-// Interactive address cards with visual feedback
-// Supports multiple addresses with selection state
-// Mobile-responsive layout
-.loading-container {
+.chip-add {
+  --border-color: #667eea;
+  --color: #667eea;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  height: 29px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.selected-tag {
+  display: inline-block;
+  font-size: 10px;
+  background: rgba(102, 126, 234, 0.18);
+  color: #667eea;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.parties-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.party-box {
+  background: #f8f9ff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid #eef1ff;
+}
+
+.party-label {
+  font-size: 10px;
+  color: #7f8a97;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  ion-icon {
+    font-size: 11px;
+    color: #667eea;
+  }
+}
+
+.party-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2d3d;
+}
+
+.party-sub {
+  font-size: 11px;
+  color: #777;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #7f8a97;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.empty-addr {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 0;
-
-  .loading-text {
-    margin-top: 1rem;
-    color: var(--ion-color-medium);
-    font-size: 0.9rem;
-  }
-}
-
-.no-addresses {
-  text-align: center;
-  padding: 2rem 0;
+  gap: 8px;
+  padding: 16px 0;
+  color: #9aa4b1;
 
   .empty-icon {
-    font-size: 3rem;
-    color: var(--ion-color-medium);
-    margin-bottom: 1rem;
+    font-size: 32px;
   }
 
-  .empty-text {
-    color: var(--ion-color-medium);
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
-  }
-
-  .add-address-btn {
-    --border-color: var(--ion-color-primary);
-    --color: var(--ion-color-primary);
-    font-weight: 500;
+  p {
+    margin: 0;
+    font-size: 13px;
   }
 }
 
-.addresses-grid {
+.addr-scroll {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-.address-card {
-  position: relative;
-  border: 2px solid var(--ion-color-light);
+.addr-card {
+  min-width: 180px;
+  max-width: 210px;
+  border: 2px solid #e8e8e8;
   border-radius: 12px;
-  padding: 1rem;
-  background: white;
+  padding: 10px 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  overflow: hidden;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+  position: relative;
+  background: #fafafa;
+  text-align: left;
 
   &:hover {
-    border-color: var(--ion-color-primary-tint);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-    transform: translateY(-1px);
-  }
-
-  &:focus-within {
-    outline: 2px solid var(--ion-color-primary);
-    outline-offset: 2px;
+    border-color: rgba(102, 126, 234, 0.3);
   }
 
   &.selected {
-    border-color: var(--ion-color-primary);
-    background: lightblue;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
-
-    .shop-name {
-      color: var(--ion-color-primary);
-    }
+    border-color: #667eea;
+    background: #f0f3ff;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   }
 
-  .address-card-header {
+  &.add-card {
+    border-style: dashed;
+    border-color: #c9c9c9;
+    background: transparent;
+    min-width: 90px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    margin-bottom: 0.75rem;
-
-    .shop-name {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--ion-color-dark);
-    }
-
-    .selected-icon {
-      color: var(--ion-color-primary);
-      font-size: 1.5rem;
-    }
-  }
-
-  .address-details {
-    .address-line {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-
-      .detail-icon {
-        color: var(--ion-color-medium);
-        font-size: 1.1rem;
-        margin-top: 0.1rem;
-        flex-shrink: 0;
-      }
-
-      .address-info {
-        flex: 1;
-
-        .address-text {
-          margin: 0 0 0.25rem 0;
-          font-size: 0.9rem;
-          color: var(--ion-color-dark);
-          line-height: 1.4;
-        }
-
-        .location-text {
-          margin: 0 0 0.25rem 0;
-          font-size: 0.85rem;
-          color: var(--ion-color-medium);
-          font-weight: 500;
-        }
-
-        .area-text {
-          margin: 0;
-          font-size: 0.8rem;
-          color: var(--ion-color-medium);
-        }
-      }
-    }
-
-    .contact-details {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-
-      .contact-item {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-
-        .contact-icon {
-          color: var(--ion-color-medium);
-          font-size: 0.9rem;
-        }
-
-        .contact-text {
-          font-size: 0.8rem;
-          color: var(--ion-color-medium);
-        }
-      }
-    }
-  }
-
-  .selection-overlay {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: var(--ion-color-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 0 12px 0 12px;
-
-    .selection-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      color: white;
-      font-size: 0.75rem;
-      font-weight: 600;
-
-      .check-icon {
-        font-size: 0.9rem;
-      }
-    }
+    justify-content: center;
+    gap: 4px;
   }
 }
 
+.addr-card-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 4px;
+  padding-right: 20px;
+}
 
-// CART ITEMS DISPLAY
+.addr-card-line {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.45;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 
-// Itemized list showing products, quantities, prices
+  &.muted {
+    color: #8b96a3;
+  }
+
+  ion-icon {
+    font-size: 12px;
+    color: #667eea;
+  }
+}
+
+.addr-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  background: #667eea;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 11px;
+    color: #fff;
+    --ionicon-stroke-width: 60px;
+  }
+}
+
+.add-addr-icon {
+  font-size: 22px;
+  color: #98a3af;
+}
+
+.add-addr-label {
+  font-size: 11px;
+  color: #8d97a3;
+  font-weight: 600;
+}
+
 .items-list {
-  .item-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--ion-color-light);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-    &:last-child {
-      border-bottom: none;
-    }
+.item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8f9ff;
+  border: 1px solid #eef1ff;
+  border-radius: 10px;
+  padding: 9px 11px;
+  gap: 10px;
+}
 
-    .item-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex: 1;
+.item-info {
+  min-width: 0;
+}
 
-      .product-image {
-        width: 50px;
-        height: 50px;
-        border-radius: 8px;
-        overflow: hidden;
-        background: var(--ion-color-light);
+.item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-        .product-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-      }
+.item-spec {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
 
-      .product-details {
-        flex: 1;
+.item-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #667eea;
+  flex-shrink: 0;
+}
 
-        .product-name {
-          font-size: 1rem;
-          font-weight: 600;
-          color: var(--ion-color-dark);
-          margin: 0 0 0.25rem 0;
-        }
+.items-badge {
+  background: #e8f0fe;
+  color: #667eea;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
 
-        .product-specs {
-          color: var(--ion-color-medium);
-          font-size: 0.85rem;
-          margin: 0;
-        }
-      }
-    }
+.transport-toggle {
+  --track-background: #ddd;
+  --track-background-checked: #667eea;
+}
 
-    .item-price {
-      .price-amount {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--ion-color-primary);
-      }
-    }
+.transport-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transport-off-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8f9ff;
+  border: 1px solid #e9ecff;
+  border-radius: 10px;
+  padding: 10px 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 13px;
+    color: #1a1a2e;
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #777;
+    line-height: 1.45;
   }
 }
 
+.transport-off-icon {
+  font-size: 20px;
+  color: #667eea;
+  flex-shrink: 0;
+}
 
-// TRANSPORT OPTIONS & DELIVERY
+.transport-activate-btn {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background-activated: linear-gradient(135deg, #5a6fdc, #6a4aad);
+  --border-radius: 12px;
+  --box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+  font-weight: 600;
+}
 
-// Transport arrangement UI with cost calculation
-// States: No transport selected, transport configured, driver assigned
-.transport-card {
-  .transport-content {
-    .transport-offer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
+.transport-hint {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
 
-      .offer-content {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex: 1;
+.transport-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
 
-        .offer-icon {
-          font-size: 2rem;
-          color: var(--ion-color-tertiary);
-        }
+.t-card {
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 10px 7px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: #fafafa;
+  position: relative;
+  overflow: hidden;
 
-        .offer-text {
-          h3 {
-            margin: 0 0 0.25rem 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--ion-color-dark);
-          }
-
-          p {
-            margin: 0;
-            color: var(--ion-color-medium);
-            font-size: 0.9rem;
-          }
-        }
-      }
-
-      .arrange-btn {
-        --background: var(--ion-color-tertiary);
-        --color: white;
-        font-weight: 500;
-      }
-    }
+  &:hover {
+    border-color: rgba(102, 126, 234, 0.35);
   }
 
-  .transport-details {
-    .delivery-summary {
-      background: var(--ion-color-light);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
+  &.selected {
+    border-color: #667eea;
+    background: #f0f3ff;
+  }
 
-      .summary-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.75rem;
-
-        &:last-child {
-          margin-bottom: 0;
-        }
-
-        .summary-label {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          color: var(--ion-color-medium);
-          font-weight: 500;
-
-          .summary-icon {
-            font-size: 1rem;
-          }
-        }
-
-        .summary-value {
-          font-weight: 600;
-          color: var(--ion-color-dark);
-
-          &.price-highlight {
-            color: var(--ion-color-success);
-            font-size: 1.1rem;
-          }
-        }
-      }
-    }
-
-    .driver-search {
-      text-align: center;
-      padding: 2rem 0;
-
-      .search-animation {
-        .search-spinner {
-          --color: var(--ion-color-primary);
-        }
-
-        .search-text {
-          margin-top: 1rem;
-
-          h4 {
-            margin: 0 0 0.5rem 0;
-            color: var(--ion-color-dark);
-            font-weight: 600;
-          }
-
-          p {
-            margin: 0;
-            color: var(--ion-color-medium);
-            font-size: 0.9rem;
-          }
-        }
-      }
-    }
-
-    .driver-assigned {
-      .driver-card {
-        background: var(--ion-color-success-tint);
-        border-radius: 12px;
-        padding: 1.25rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .driver-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-
-          .driver-avatar {
-            width: 50px;
-            height: 50px;
-            background: var(--ion-color-success);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            ion-icon {
-              color: white;
-              font-size: 1.5rem;
-            }
-          }
-
-          .driver-details {
-            h4 {
-              margin: 0 0 0.25rem 0;
-              color: var(--ion-color-success);
-              font-weight: 600;
-            }
-
-            p {
-              margin: 0;
-              color: var(--ion-color-dark);
-              font-weight: 500;
-            }
-          }
-        }
-
-        .status-badge {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: var(--ion-color-success);
-          color: white;
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          font-weight: 600;
-
-          ion-icon {
-            font-size: 1rem;
-          }
-        }
-      }
-    }
-
-    .transport-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-
-      .search-driver-btn {
-        --background: var(--ion-color-primary);
-        --color: white;
-        font-weight: 500;
-      }
-
-      .change-transport-btn {
-        --border-color: var(--ion-color-medium);
-        --color: var(--ion-color-medium);
-        font-weight: 500;
-      }
-    }
+  &.locked {
+    opacity: 0.6;
   }
 }
 
+.t-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+  color: #555;
+}
 
-// ORDER SUMMARY & PRICING
+.t-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
 
-// Displays itemized breakdown and grand total
-// Supports discounts and transport costs
-.summary-card {
-  .summary-list {
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 0;
+.t-time {
+  font-size: 10px;
+  color: #888;
+  margin-top: 2px;
+}
 
-      &.total-row {
-        padding-top: 1rem;
-        border-top: 2px solid var(--ion-color-primary);
+.t-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  margin-top: 5px;
 
-        .summary-label.total {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--ion-color-dark);
-        }
+  &.badge-std {
+    background: #e8f5e9;
+    color: #388e3c;
+  }
 
-        .summary-amount.total {
-          font-size: 1.3rem;
-          font-weight: 700;
-          color: var(--ion-color-primary);
-        }
-      }
+  &.badge-exp {
+    background: #fff3e0;
+    color: #f57c00;
+  }
 
-      .summary-label {
-        color: var(--ion-color-medium);
-        font-weight: 500;
-      }
-
-      .summary-amount {
-        font-weight: 600;
-        color: var(--ion-color-dark);
-      }
-    }
-
-    .summary-divider {
-      height: 1px;
-      background: var(--ion-color-light);
-      margin: 0.5rem 0;
-    }
+  &.badge-pri {
+    background: #f3e5f5;
+    color: #7b1fa2;
   }
 }
 
+.premium-lock {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  color: #7b1fa2;
+  background: #f3e5f5;
+  border-radius: 999px;
+  padding: 2px 6px;
+}
 
-// STICKY FOOTER & CALL-TO-ACTION
+.dist-row,
+.cost-row,
+.delivery-summary-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 10px;
+  padding: 9px 12px;
+}
 
-// Fixed footer with total and payment button
-// Remains visible during scroll for easy access
+.dist-row {
+  background: #f8f9ff;
+}
+
+.cost-row {
+  background: #fff8e1;
+}
+
+.dist-label,
+.cost-label {
+  font-size: 12px;
+  color: #777;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  ion-icon {
+    font-size: 14px;
+    color: #667eea;
+  }
+}
+
+.dist-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.cost-val {
+  font-size: 15px;
+  font-weight: 800;
+  color: #f57c00;
+}
+
+.inline-spinner {
+  width: 16px;
+  height: 16px;
+}
+
+.delivery-summary-inline {
+  background: #f0f3ff;
+  font-size: 12px;
+  color: #555;
+
+  strong {
+    font-size: 13px;
+    color: #1a1a2e;
+  }
+}
+
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #f0f3ff;
+  border-radius: 10px;
+  padding: 10px 12px;
+
+  ion-icon {
+    font-size: 16px;
+    color: #667eea;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  strong {
+    display: block;
+    font-size: 12px;
+    color: #333;
+  }
+
+  p {
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.5;
+  }
+}
+
+.summary-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sum-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.sum-label {
+  font-size: 13px;
+  color: #666;
+
+  &.discount {
+    color: #e53935;
+  }
+}
+
+.sum-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+
+  &.discount {
+    color: #e53935;
+  }
+}
+
+.sum-divider {
+  height: 1px;
+  background: #f0f0f0;
+}
+
+.sum-total-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1a1a2e;
+}
+
+.sum-total-val {
+  font-size: 17px;
+  font-weight: 800;
+  color: #667eea;
+}
+
 .checkout-footer {
-  .footer-content {
-    padding: 1rem 1.5rem;
-    background: white;
-    border-top: 1px solid var(--ion-color-light);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
+  --background: #fff;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+}
 
-    .total-summary {
-      .total-label {
-        display: block;
-        font-size: 0.85rem;
-        color: var(--ion-color-medium);
-        margin-bottom: 0.25rem;
-      }
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
 
-      .total-amount {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--ion-color-primary);
-      }
-    }
+.footer-total {
+  display: flex;
+  flex-direction: column;
+}
 
-    .confirm-order-btn {
-      --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --color: white;
-      font-weight: 600;
-      flex-shrink: 0;
-      height: 3rem;
+.footer-total-label {
+  font-size: 11px;
+  color: #888;
+  font-weight: 500;
+}
 
-      &[disabled] {
-        --background: var(--ion-color-medium);
-        --color: var(--ion-color-light);
-      }
-    }
-  }
+.footer-total-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1a1a2e;
+}
+
+.pay-btn {
+  flex: 1;
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background-activated: linear-gradient(135deg, #5a6fdc, #6a4aad);
+  --border-radius: 14px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  --box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+  font-size: 15px;
+  font-weight: 700;
+  height: 50px;
 }
 
 .bottom-spacing {
-  height: 1rem;
+  height: 10px;
 }
 
-
-// ANIMATIONS & INTERACTIONS
-
-@keyframes selectAddress {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.address-card.selected {
-  animation: selectAddress 0.3s ease;
-}
-
-
-// RESPONSIVE DESIGN
-
-// Mobile-first approach with tablet/desktop breakpoints
-// Optimized for: mobile < 576px, tablet 576px-768px, desktop > 768px
-@media (max-width: 768px) {
-  .address-card {
-    .address-details .contact-details {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .address-card-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-
-      .selected-icon {
-        align-self: flex-end;
-      }
-    }
+@media (max-width: 820px) {
+  .parties-row {
+    grid-template-columns: 1fr;
   }
 
-  .card-header {
+  .transport-options {
+    grid-template-columns: 1fr;
+  }
+
+  .premium-lock {
+    font-size: 9px;
+  }
+
+  .footer-content {
     flex-direction: column;
-    gap: 1rem;
     align-items: stretch;
-
-    .add-address-btn-header {
-      align-self: flex-end;
-    }
   }
 
-  .checkout-footer .footer-content {
-    flex-direction: column;
-    gap: 1rem;
-
-    .confirm-order-btn {
-      width: 100%;
-    }
+  .pay-btn {
+    width: 100%;
   }
 }

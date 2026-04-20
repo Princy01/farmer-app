@@ -1,350 +1,299 @@
-<!-- Checkout Header -->
 <ion-header mode="ios">
   <ion-toolbar class="checkout-toolbar">
     <ion-buttons slot="start">
-      <ion-button
-        (click)="goBack()"
-        class="back-btn"
-        [attr.aria-label]="'Back to cart'"
-      >
+      <ion-button (click)="goBack()" class="back-btn">
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title class="page-title">{{
-      "CHECKOUT.PAGE_TITLE" | translate
-    }}</ion-title>
+    <ion-title class="page-title">{{ "CHECKOUT.PAGE_TITLE" | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="checkout-content">
-  <!-- Order Details Section: Displays buyer and seller information -->
-  <div class="card-section" role="region" aria-label="Order Details">
-    <ion-card class="modern-card">
-      <div class="card-header">
-        <div class="header-content">
-          <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">{{ "CHECKOUT.ORDER_DETAILS" | translate }}</h2>
+  <div class="checkout-bg-glow"></div>
+
+  <div class="content-wrapper">
+    <div class="card" role="region" aria-label="Order Details">
+      <div class="card-head">
+        <div class="card-head-left">
+          <div class="card-icon icon-blue">
+            <ion-icon name="receipt-outline"></ion-icon>
+          </div>
+          <span class="card-title">{{ "CHECKOUT.ORDER_DETAILS" | translate }}</span>
         </div>
       </div>
-      <ion-card-content class="card-content">
-        <div class="detail-item">
-          <div class="detail-label">
-            <ion-icon
-              name="person-outline"
-              class="detail-icon buyer-icon"
-            ></ion-icon>
-            <span>{{ "CHECKOUT.BUYER" | translate }}</span>
+      <div class="card-body">
+        <div class="parties-row">
+          <div class="party-box">
+            <div class="party-label">
+              <ion-icon name="person-outline"></ion-icon>
+              {{ "CHECKOUT.BUYER" | translate }}
+            </div>
+            <div class="party-name">{{ retailerInfo?.name || ("CHECKOUT.UNKNOWN" | translate) }}</div>
+            <div class="party-sub">{{ retailerInfo?.location || ("CHECKOUT.UNKNOWN_LOCATION" | translate) }}</div>
           </div>
-          <div class="detail-value">{{ getRetailerInfo() }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">
-            <ion-icon
-              name="storefront-outline"
-              class="detail-icon seller-icon"
-            ></ion-icon>
-            <span>{{ "CHECKOUT.SELLER" | translate }}</span>
-          </div>
-          <div class="detail-value">{{ getWholesellerInfo() }}</div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
 
-  <!-- Delivery Address Section: Lists available delivery branches -->
-  <div class="card-section" role="region" aria-label="Delivery Address">
-    <ion-card class="modern-card">
-      <div class="card-header">
-        <div class="header-content">
-          <ion-icon name="location-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">
-            {{ "CHECKOUT.DELIVERY_ADDRESS" | translate }}
-          </h2>
+          <div class="party-box">
+            <div class="party-label">
+              <ion-icon name="storefront-outline"></ion-icon>
+              {{ "CHECKOUT.SELLER" | translate }}
+            </div>
+            <div class="party-name">{{ getWholesellerInfo() }}</div>
+            <div class="party-sub" *ngIf="wholesalerGroups.length === 1">{{ wholesalerGroups[0].branchName }}</div>
+          </div>
         </div>
-        <ion-button
-          fill="outline"
-          size="small"
-          class="add-address-btn-header"
-          (click)="addNewAddress()"
-        >
+      </div>
+    </div>
+
+    <div class="card" role="region" aria-label="Delivery Address">
+      <div class="card-head">
+        <div class="card-head-left">
+          <div class="card-icon icon-green">
+            <ion-icon name="location-outline"></ion-icon>
+          </div>
+          <span class="card-title">{{ "CHECKOUT.DELIVERY_ADDRESS" | translate }}</span>
+        </div>
+        <ion-button fill="outline" size="small" class="chip-add" (click)="addNewAddress()">
           <ion-icon name="add-outline" slot="start"></ion-icon>
           {{ "CHECKOUT.ADD_NEW" | translate }}
         </ion-button>
       </div>
-      <ion-card-content class="card-content">
-        <!-- Loading state -->
-        <div class="loading-container" *ngIf="isLoadingBranches">
+
+      <div class="card-body">
+        <div class="loading-row" *ngIf="isLoadingBranches">
           <ion-spinner name="dots"></ion-spinner>
-          <p class="loading-text">
-            {{ "CHECKOUT.LOADING_ADDRESSES" | translate }}
-          </p>
+          <span>{{ "CHECKOUT.LOADING_ADDRESSES" | translate }}</span>
         </div>
 
-        <!-- No branches available -->
-        <div
-          class="no-addresses"
-          *ngIf="!isLoadingBranches && businessBranches.length === 0"
-        >
+        <div class="empty-addr" *ngIf="!isLoadingBranches && businessBranches.length === 0">
           <ion-icon name="location-outline" class="empty-icon"></ion-icon>
-          <p class="empty-text">{{ "CHECKOUT.NO_ADDRESSES" | translate }}</p>
-          <ion-button
-            fill="outline"
-            class="add-address-btn"
-            (click)="addNewAddress()"
-          >
+          <p>{{ "CHECKOUT.NO_ADDRESSES" | translate }}</p>
+          <ion-button fill="outline" size="small" (click)="addNewAddress()">
             <ion-icon name="add-outline" slot="start"></ion-icon>
             {{ "CHECKOUT.ADD_NEW_ADDRESS" | translate }}
           </ion-button>
         </div>
 
-        <!-- Address cards for all branches -->
-        <div
-          class="addresses-grid"
-          *ngIf="!isLoadingBranches && businessBranches.length > 0"
-        >
+        <div class="addr-scroll" *ngIf="!isLoadingBranches && businessBranches.length > 0">
           <div
-            class="address-card"
+            class="addr-card"
             *ngFor="let branch of businessBranches; trackBy: trackByBranchId"
             [class.selected]="branch.branch_id === selectedBranch?.branch_id"
             (click)="selectBranch(branch)"
           >
-            <div class="address-card-header">
-              <h3 class="shop-name">{{ branch.shop_name }}</h3>
-              <ion-icon
-                name="checkmark-circle"
-                class="selected-icon"
-                *ngIf="branch.branch_id === selectedBranch?.branch_id"
-              >
-              </ion-icon>
+            <div class="addr-card-name">{{ branch.shop_name }}</div>
+            <div class="addr-card-line">{{ branch.address }}</div>
+            <div class="addr-card-line">{{ branch.city_name }}, {{ branch.state_name }}</div>
+            <div class="addr-card-line muted" *ngIf="branch.number">
+              <ion-icon name="call-outline"></ion-icon>
+              {{ branch.number }}
+            </div>
+            <div class="addr-card-line muted" *ngIf="branch.email">
+              <ion-icon name="mail-outline"></ion-icon>
+              {{ branch.email }}
             </div>
 
-            <div class="address-details">
-              <div class="address-line">
-                <ion-icon
-                  name="location-outline"
-                  class="detail-icon"
-                ></ion-icon>
-                <div class="address-info">
-                  <p class="address-text">{{ branch.address }}</p>
-                  <p class="location-text">
-                    {{ branch.city_name }}, {{ branch.state_name }}
-                  </p>
-                  <p class="area-text">{{ branch.location_name }}</p>
-                </div>
-              </div>
-
-              <div class="contact-details">
-                <div class="contact-item" *ngIf="branch.number">
-                  <ion-icon name="call-outline" class="contact-icon"></ion-icon>
-                  <span class="contact-text">{{ branch.number }}</span>
-                </div>
-                <div class="contact-item" *ngIf="branch.email">
-                  <ion-icon name="mail-outline" class="contact-icon"></ion-icon>
-                  <span class="contact-text">{{ branch.email }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="selection-overlay"
-              *ngIf="branch.branch_id === selectedBranch?.branch_id"
-            >
-              <div class="selection-badge">
-                <ion-icon name="checkmark" class="check-icon"></ion-icon>
-                <span>{{ "CHECKOUT.SELECTED" | translate }}</span>
-              </div>
+            <div class="addr-check" *ngIf="branch.branch_id === selectedBranch?.branch_id">
+              <ion-icon name="checkmark"></ion-icon>
             </div>
           </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
 
-  <!-- Cart Items List: Shows all items in the current order -->
-  <div class="card-section" role="region" aria-label="Order Items">
-    <ion-card class="modern-card">
-      <div class="card-header">
-        <div class="header-content">
-          <ion-icon name="bag-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">{{ "CHECKOUT.ORDER_ITEMS" | translate }}</h2>
-        </div>
-        <div class="items-count-badge">
-          {{ cartItems.length }} {{ "CHECKOUT.ITEMS" | translate }}
+          <button type="button" class="addr-card add-card" (click)="addNewAddress()">
+            <ion-icon name="add-outline" class="add-addr-icon"></ion-icon>
+            <span class="add-addr-label">{{ "CHECKOUT.ADD_NEW" | translate }}</span>
+          </button>
         </div>
       </div>
-      <ion-card-content class="card-content">
+    </div>
+
+    <div class="card" role="region" aria-label="Order Items">
+      <div class="card-head">
+        <div class="card-head-left">
+          <div class="card-icon icon-amber">
+            <ion-icon name="bag-outline"></ion-icon>
+          </div>
+          <span class="card-title">{{ "CHECKOUT.ORDER_ITEMS" | translate }}</span>
+        </div>
+        <span class="items-badge">{{ cartItems.length }} {{ "CHECKOUT.ITEMS" | translate }}</span>
+      </div>
+
+      <div class="card-body">
         <div class="items-list">
-          <div class="item-card" *ngFor="let item of cartItems">
+          <div class="item-row" *ngFor="let item of cartItems">
             <div class="item-info">
-              <div class="product-details">
-                <h3 class="product-name">{{ item.product_name }}</h3>
-                <p class="product-specs">
-                  ₹{{ item.latest_wholesaler_price }} × {{ item.quantity }}
-                  {{ item.unit_name }}
-                </p>
-              </div>
+              <div class="item-name">{{ item.product_name }}</div>
+              <div class="item-spec">₹{{ item.latest_wholesaler_price }} × {{ item.quantity }} {{ item.unit_name }}</div>
             </div>
-            <div class="item-price">
-              <span class="price-amount"
-                >₹{{ item.latest_wholesaler_price * item.quantity }}</span
-              >
-            </div>
+            <div class="item-price">₹{{ item.latest_wholesaler_price * item.quantity }}</div>
           </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- Transport Options: Allows adding or modifying delivery transport -->
-  <div class="card-section" role="region" aria-label="Transport Options">
-    <ion-card class="modern-card transport-card">
-      <div class="card-header">
-        <div class="header-content">
-          <ion-icon name="car-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">
-            {{ "CHECKOUT.TRANSPORT_OPTIONS" | translate }}
-          </h2>
         </div>
       </div>
-      <ion-card-content class="card-content">
-        <!-- No Transport Selected -->
-        <div class="transport-content" *ngIf="!hasRideRequest">
-          <div class="transport-offer">
-            <div class="offer-content">
-              <ion-icon name="rocket-outline" class="offer-icon"></ion-icon>
-              <div class="offer-text">
-                <h3>{{ "CHECKOUT.NEED_FAST_DELIVERY" | translate }}</h3>
-                <p>{{ "CHECKOUT.ARRANGE_TRANSPORT_MSG" | translate }}</p>
-              </div>
-            </div>
-            <ion-button
-              class="arrange-btn"
-              (click)="arrangeRide()"
-              [disabled]="isLoading || !selectedBranch"
-              aria-label="Arrange Transport"
-            >
-              <ion-icon name="add-outline" slot="start"></ion-icon>
-              {{ "CHECKOUT.ARRANGE_TRANSPORT" | translate }}
-            </ion-button>
+    </div>
+
+    <div class="card" role="region" aria-label="Transport Options">
+      <div class="card-head">
+        <div class="card-head-left">
+          <div class="card-icon icon-sky">
+            <ion-icon name="car-outline"></ion-icon>
           </div>
+          <span class="card-title">{{ "CHECKOUT.TRANSPORT_OPTIONS" | translate }}</span>
+          <span class="selected-tag" *ngIf="hasRideRequest">{{ "CHECKOUT.SELECTED" | translate }}</span>
         </div>
 
-        <!-- Transport Selected -->
-        <div class="transport-details" *ngIf="hasRideRequest">
-          <div class="delivery-summary">
-            <div class="summary-item">
-              <div class="summary-label">
-                <ion-icon name="flash-outline" class="summary-icon"></ion-icon>
-                {{ "CHECKOUT.DELIVERY_TYPE" | translate }}
-              </div>
-              <div class="summary-value">{{ (selectedDeliveryType | titlecase) || 'Standard' }}</div>
-            </div>
-            <!-- Removed urgency summary item -->
-            <div class="summary-item">
-              <div class="summary-label">
-                <ion-icon name="cash-outline" class="summary-icon"></ion-icon>
-                {{ "CHECKOUT.ESTIMATED_COST" | translate }}
-              </div>
-              <div class="summary-value price-highlight">
-                ₹{{ estimatedRidePrice }}
-              </div>
-            </div>
-          </div>
+        <ion-toggle
+          [(ngModel)]="hasRideRequest"
+          (ionChange)="onTransportToggle()"
+          mode="ios"
+          class="transport-toggle"
+        ></ion-toggle>
+      </div>
 
-          <!-- Info Message about Driver Assignment -->
-          <div class="transport-info-box">
-            <ion-icon
-              name="information-circle-outline"
-              class="info-icon"
-            ></ion-icon>
-            <div class="info-text">
-              <h4>{{ "CHECKOUT.DRIVER_INFO_TITLE" | translate }}</h4>
-              <p>{{ "CHECKOUT.DRIVER_INFO_MSG" | translate }}</p>
-            </div>
+      <div class="card-body transport-body" *ngIf="!hasRideRequest">
+        <div class="transport-off-state">
+          <ion-icon name="rocket-outline" class="transport-off-icon"></ion-icon>
+          <div>
+            <h3>{{ "CHECKOUT.NEED_FAST_DELIVERY" | translate }}</h3>
+            <p>{{ "CHECKOUT.ARRANGE_TRANSPORT_MSG" | translate }}</p>
           </div>
-
-          <!-- Change Transport Button -->
-          <div class="transport-actions">
-            <ion-button
-              expand="block"
-              fill="outline"
-              class="change-transport-btn"
-              (click)="arrangeRide()"
-            >
-              <ion-icon name="settings-outline" slot="start"></ion-icon>
-              {{ "CHECKOUT.CHANGE_TRANSPORT" | translate }}
-            </ion-button>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- Order Summary: Displays pricing breakdown and total -->
-  <div class="card-section" role="region" aria-label="Order Summary">
-    <ion-card class="modern-card summary-card">
-      <div class="card-header">
-        <div class="header-content">
-          <ion-icon name="calculator-outline" class="header-icon"></ion-icon>
-          <h2 class="card-title">{{ "CHECKOUT.ORDER_SUMMARY" | translate }}</h2>
         </div>
       </div>
-      <ion-card-content class="card-content">
-        <div class="summary-list">
-          <div class="summary-row">
-            <span class="summary-label">{{
-              "CHECKOUT.ITEMS_TOTAL" | translate
-            }}</span>
-            <span class="summary-amount">₹{{ totalPrice }}</span>
-          </div>
-          <div class="summary-row" *ngIf="discount > 0">
-            <span class="summary-label discount">{{
-              "CHECKOUT.DISCOUNT" | translate
-            }}</span>
-            <span class="summary-amount discount">-₹{{ discount }}</span>
-          </div>
-          <div class="summary-row" *ngIf="hasRideRequest">
-            <span class="summary-label">{{
-              "CHECKOUT.TRANSPORT_COST" | translate
-            }}</span>
-            <span class="summary-amount">₹{{ estimatedRidePrice }}</span>
-          </div>
-          <div class="summary-divider"></div>
-          <div class="summary-row total-row">
-            <span class="summary-label total">{{
-              "CHECKOUT.GRAND_TOTAL" | translate
-            }}</span>
-            <span class="summary-amount total">₹{{ grandTotal }}</span>
+
+      <div class="card-body transport-body" *ngIf="hasRideRequest">
+        <p class="transport-hint">{{ "CHECKOUT.ARRANGE_TRANSPORT_MSG" | translate }}</p>
+
+        <div class="transport-options">
+          <button
+            type="button"
+            class="t-card"
+            [class.selected]="selectedDeliveryType === 'standard'"
+            (click)="selectTransportType('standard')"
+          >
+            <ion-icon name="bicycle-outline" class="t-icon"></ion-icon>
+            <div class="t-name">{{ "RIDE.STANDARD_DELIVERY" | translate }}</div>
+            <div class="t-time">{{ "RIDE.STANDARD_TIME" | translate }}</div>
+            <span class="t-badge badge-std">{{ "RIDE.ECONOMICAL" | translate }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="t-card"
+            [class.selected]="selectedDeliveryType === 'express'"
+            (click)="selectTransportType('express')"
+          >
+            <ion-icon name="car-outline" class="t-icon"></ion-icon>
+            <div class="t-name">{{ "RIDE.EXPRESS_DELIVERY" | translate }}</div>
+            <div class="t-time">{{ "RIDE.EXPRESS_TIME" | translate }}</div>
+            <span class="t-badge badge-exp">{{ "RIDE.FAST" | translate }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="t-card"
+            [class.selected]="selectedDeliveryType === 'priority'"
+            [class.locked]="!isPremiumUser"
+            (click)="selectTransportType('priority')"
+          >
+            <div class="premium-lock" *ngIf="!isPremiumUser">{{ "RIDE.FOR_PREMIUM_USERS" | translate }}</div>
+            <ion-icon name="rocket-outline" class="t-icon"></ion-icon>
+            <div class="t-name">{{ "RIDE.PRIORITY_DELIVERY" | translate }}</div>
+            <div class="t-time">{{ "RIDE.PRIORITY_TIME" | translate }}</div>
+            <span class="t-badge badge-pri">{{ "RIDE.PREMIUM" | translate }}</span>
+          </button>
+        </div>
+
+        <div class="dist-row">
+          <span class="dist-label">
+            <ion-icon name="navigate-outline"></ion-icon>
+            {{ "RIDE.ESTIMATED_DISTANCE" | translate }}
+          </span>
+          <span class="dist-val">
+            <ion-spinner name="dots" *ngIf="isLoadingDistance" class="inline-spinner"></ion-spinner>
+            <span *ngIf="!isLoadingDistance">{{ distance }} km</span>
+          </span>
+        </div>
+
+        <div class="cost-row" *ngIf="selectedDeliveryType">
+          <span class="cost-label">
+            <ion-icon name="cash-outline"></ion-icon>
+            {{ "CHECKOUT.ESTIMATED_COST" | translate }}
+          </span>
+          <span class="cost-val">
+            <ion-spinner name="dots" *ngIf="isLoadingQuote" class="inline-spinner"></ion-spinner>
+            <span *ngIf="!isLoadingQuote">₹{{ estimatedRidePrice }}</span>
+          </span>
+        </div>
+
+        <div class="delivery-summary-inline" *ngIf="selectedDeliveryType">
+          <span>{{ "CHECKOUT.DELIVERY_TYPE" | translate }}</span>
+          <strong>{{ getSelectedDeliveryTypeKey() | translate }}</strong>
+        </div>
+
+        <div class="info-box">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <div>
+            <strong>{{ "CHECKOUT.DRIVER_INFO_TITLE" | translate }}</strong>
+            <p>{{ "CHECKOUT.DRIVER_INFO_MSG" | translate }}</p>
           </div>
         </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
+      </div>
+    </div>
 
-  <!-- Bottom Spacing -->
-  <div class="bottom-spacing"></div>
+    <div class="card summary-card" role="region" aria-label="Order Summary">
+      <div class="card-head">
+        <div class="card-head-left">
+          <div class="card-icon icon-blue">
+            <ion-icon name="calculator-outline"></ion-icon>
+          </div>
+          <span class="card-title">{{ "CHECKOUT.ORDER_SUMMARY" | translate }}</span>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="summary-rows">
+          <div class="sum-row">
+            <span class="sum-label">{{ "CHECKOUT.ITEMS_TOTAL" | translate }}</span>
+            <span class="sum-val">₹{{ totalPrice }}</span>
+          </div>
+
+          <div class="sum-row" *ngIf="discount > 0">
+            <span class="sum-label discount">{{ "CHECKOUT.DISCOUNT" | translate }}</span>
+            <span class="sum-val discount">-₹{{ discount }}</span>
+          </div>
+
+          <div class="sum-row" *ngIf="hasRideRequest && estimatedRidePrice > 0">
+            <span class="sum-label">{{ "CHECKOUT.TRANSPORT_COST" | translate }}</span>
+            <span class="sum-val">₹{{ estimatedRidePrice }}</span>
+          </div>
+
+          <div class="sum-divider"></div>
+
+          <div class="sum-row total-row">
+            <span class="sum-total-label">{{ "CHECKOUT.GRAND_TOTAL" | translate }}</span>
+            <span class="sum-total-val">₹{{ grandTotal }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-spacing"></div>
+  </div>
 </ion-content>
 
-<!-- Floating Confirm Button -->
 <ion-footer class="checkout-footer">
   <div class="footer-content">
-    <div class="total-summary">
-      <span class="total-label">{{ "CHECKOUT.TOTAL_AMOUNT" | translate }}</span>
-      <span class="total-amount">₹{{ grandTotal }}</span>
+    <div class="footer-total">
+      <span class="footer-total-label">{{ "CHECKOUT.TOTAL_AMOUNT" | translate }}</span>
+      <span class="footer-total-val">₹{{ grandTotal }}</span>
     </div>
+
     <ion-button
-      class="confirm-order-btn"
+      class="pay-btn"
       (click)="proceedToPayment()"
       [disabled]="isLoading || !selectedBranch"
       [attr.aria-busy]="isLoading"
-      aria-label="Proceed to payment"
     >
       <ion-icon name="arrow-forward-outline" slot="start"></ion-icon>
-      {{
-        isLoading
-          ? ("CHECKOUT.PROCESSING" | translate)
-          : ("CHECKOUT.PROCEED_TO_PAYMENT" | translate)
-      }}
+      {{ isLoading ? ("CHECKOUT.PROCESSING" | translate) : ("CHECKOUT.PROCEED_TO_PAYMENT" | translate) }}
     </ion-button>
   </div>
 </ion-footer>
