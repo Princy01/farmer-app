@@ -173,6 +173,53 @@
   }
 }
 
+.peer-rating-card {
+  margin-top: 1rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 14px;
+  padding: 0.9rem;
+
+  .peer-rating-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #334155;
+    margin-bottom: 0.6rem;
+
+    ion-icon {
+      color: #f59e0b;
+      font-size: 1.1rem;
+    }
+  }
+
+  .peer-rating-loading,
+  .peer-rating-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #475569;
+  }
+
+  .peer-rating-body {
+    .peer-score {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.2rem;
+    }
+
+    .peer-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-size: 0.82rem;
+      color: #475569;
+    }
+  }
+}
+
 // Details Card
 .details-card {
   border-radius: 16px;

@@ -356,7 +356,24 @@
     "ISSUE_HELP_TITLE": "क्या इस ऑर्डर में मदद चाहिए?",
     "ISSUE_HELP_NOTE": "इस ऑर्डर के लिए समस्या रिपोर्ट करें या अपने दर्ज किए गए मुद्दे देखें।",
     "REPORT_ISSUE": "समस्या रिपोर्ट करें",
-    "MY_ISSUES": "मेरे मुद्दे"
+    "MY_ISSUES": "मेरे मुद्दे",
+    "RATING_TITLE": "पूर्ण हुए ऑर्डर को रेट करें",
+    "RATING_NOTE": "पूर्ण हुए ऑर्डर प्रतिभागियों के लिए पीयर रेटिंग दर्ज करें।",
+    "RATING_LOADING": "रेटिंग विकल्प लोड हो रहे हैं...",
+    "RATING_NONE_ELIGIBLE": "इस ऑर्डर के लिए अभी कोई पीयर रेटिंग उपलब्ध नहीं है।",
+    "RATING_SELECT_PEER": "प्रतिभागी जोड़ी चुनें",
+    "RATING_STARS": "स्टार",
+    "RATING_COMMENT": "टिप्पणी (वैकल्पिक)",
+    "RATING_COMMENT_PLACEHOLDER": "छोटी प्रतिक्रिया लिखें (अधिकतम 500 अक्षर)",
+    "RATING_SUBMIT": "रेटिंग सबमिट करें",
+    "RATING_SUBMITTING": "सबमिट हो रहा है...",
+    "RATING_REQUIRED": "सबमिट करने से पहले स्टार रेटिंग चुनें।",
+    "RATING_SUBMIT_SUCCESS": "रेटिंग सफलतापूर्वक सबमिट हो गई।",
+    "RATING_SUBMIT_ERROR": "अभी रेटिंग सबमिट नहीं हो सकी।",
+    "RATING_DUPLICATE": "यह रेटिंग पहले से मौजूद है।",
+    "RATING_FORBIDDEN": "आपको यह रेटिंग सबमिट करने की अनुमति नहीं है।",
+    "RATING_BAD_REQUEST": "कृपया रेटिंग विवरण जांचें और फिर से प्रयास करें।",
+    "RATING_EXISTING": "पहले से दर्ज रेटिंग"
   },
   "ADD_BUSINESS_FORM": {
     "PAGE_TITLE": "व्यवसाय स्थान जोड़ें",
@@ -1811,7 +1828,24 @@
     "ISSUE_HELP_TITLE": "क्या इस ऑर्डर में मदद चाहिए?",
     "ISSUE_HELP_NOTE": "इस ऑर्डर के लिए समस्या रिपोर्ट करें या अपने दर्ज किए गए मुद्दे देखें।",
     "REPORT_ISSUE": "समस्या रिपोर्ट करें",
-    "MY_ISSUES": "मेरे मुद्दे"
+    "MY_ISSUES": "मेरे मुद्दे",
+    "RATING_TITLE": "अपना डिलीवरी अनुभव रेट करें",
+    "RATING_NOTE": "इस पूर्ण ऑर्डर के लिए एक त्वरित पीयर रेटिंग दें।",
+    "RATING_LOADING": "रेटिंग विकल्प लोड हो रहे हैं...",
+    "RATING_NONE_ELIGIBLE": "इस ऑर्डर के लिए अभी कोई पीयर रेटिंग उपलब्ध नहीं है।",
+    "RATING_SELECT_PEER": "आप किसे रेट करना चाहते हैं?",
+    "RATING_STARS": "आपकी रेटिंग",
+    "RATING_COMMENT": "टिप्पणी (वैकल्पिक)",
+    "RATING_COMMENT_PLACEHOLDER": "छोटी प्रतिक्रिया लिखें (अधिकतम 500 अक्षर)",
+    "RATING_SUBMIT": "रेटिंग सबमिट करें",
+    "RATING_SUBMITTING": "सबमिट हो रहा है...",
+    "RATING_REQUIRED": "सबमिट करने से पहले स्टार रेटिंग चुनें।",
+    "RATING_SUBMIT_SUCCESS": "धन्यवाद, आपकी रेटिंग सबमिट हो गई।",
+    "RATING_SUBMIT_ERROR": "अभी आपकी रेटिंग सबमिट नहीं हो सकी।",
+    "RATING_DUPLICATE": "आप यह रेटिंग पहले ही सबमिट कर चुके हैं।",
+    "RATING_FORBIDDEN": "आपको यह रेटिंग सबमिट करने की अनुमति नहीं है।",
+    "RATING_BAD_REQUEST": "कृपया रेटिंग विवरण जांचें और फिर से प्रयास करें।",
+    "RATING_EXISTING": "पहले से दर्ज रेटिंग"
   },
   "BUYER_DISPUTES": {
     "REPORT_ISSUE_TITLE": "समस्या रिपोर्ट करें",
@@ -2304,7 +2338,13 @@
     "ACTIVE": "सक्रिय",
     "INACTIVE": "निष्क्रिय",
     "TOTAL_DELIVERIES": "कुल डिलीवरीज",
-    "MEMBER_SINCE": "सदस्य बना हुआ है"
+    "MEMBER_SINCE": "सदस्य बना हुआ है",
+    "RETRY": "फिर से कोशिश करें",
+    "PEER_RATING_TITLE": "पीयर रेटिंग सारांश",
+    "PEER_RATING_LOADING": "आपकी पीयर रेटिंग लोड हो रही है...",
+    "PEER_RATING_COUNT": "कुल रेटिंग: {{count}}",
+    "PEER_RATING_RECEIVED": "हाल की प्राप्त: {{count}}",
+    "PEER_RATING_GIVEN": "हाल की दी गई: {{count}}"
   },
   "DRIVER_REGISTRATION": {
     "CHECKING_STATUS": "पंजीकरण स्थिति जांची जा रही है...",
@@ -2553,7 +2593,22 @@
     "CUSTOMER_REFUSES_DELIVERY": "ग्राहक डिलीवरी से इनकार करता है",
     "VEHICLE_BREAKDOWN": "वाहन खराबी",
     "GOODS_DAMAGED_TRANSIT": "परिवहन में सामान क्षतिग्रस्त",
-    "OTHER_ISSUE": "अन्य मुद्दा"
+    "OTHER_ISSUE": "अन्य मुद्दा",
+    "RATING_TITLE": "काउंटरपार्टी को रेट करें",
+    "RATING_LOADING": "रेटिंग विकल्प लोड हो रहे हैं...",
+    "RATING_NONE_ELIGIBLE": "इस ऑर्डर के लिए कोई रेटिंग उपलब्ध नहीं है।",
+    "RATING_SELECT_PEER": "प्रतिभागी जोड़ी चुनें",
+    "RATING_STARS": "स्टार",
+    "RATING_COMMENT": "टिप्पणी (वैकल्पिक)",
+    "RATING_COMMENT_PLACEHOLDER": "छोटी प्रतिक्रिया लिखें (अधिकतम 500 अक्षर)",
+    "RATING_SUBMIT": "रेटिंग सबमिट करें",
+    "RATING_SUBMITTING": "सबमिट हो रहा है...",
+    "RATING_REQUIRED": "सबमिट करने से पहले स्टार रेटिंग चुनें।",
+    "RATING_SUBMIT_SUCCESS": "रेटिंग सफलतापूर्वक सबमिट हो गई।",
+    "RATING_SUBMIT_ERROR": "अभी रेटिंग सबमिट नहीं हो सकी।",
+    "RATING_DUPLICATE": "यह रेटिंग पहले से मौजूद है।",
+    "RATING_FORBIDDEN": "आपको यह रेटिंग सबमिट करने की अनुमति नहीं है।",
+    "RATING_BAD_REQUEST": "कृपया रेटिंग विवरण जांचें और फिर से प्रयास करें।"
   },
   "PROFILE": {
     "TITLE": "प्रोफ़ाइल",
@@ -2618,7 +2673,13 @@
     "UNSAVED_CHANGES": "आपके पास अनसेव किए गए परिवर्तन हैं। क्या आप उन्हें त्यागना चाहते हैं?",
     "DISCARD": "त्यागें",
     "KEEP_EDITING": "संपादन जारी रखें",
-    "OK": "ठीक है"
+    "OK": "ठीक है",
+    "RETRY": "फिर से कोशिश करें",
+    "PEER_RATING_TITLE": "पीयर रेटिंग सारांश",
+    "PEER_RATING_LOADING": "आपकी पीयर रेटिंग लोड हो रही है...",
+    "PEER_RATING_COUNT": "कुल रेटिंग: {{count}}",
+    "PEER_RATING_RECEIVED": "हाल की प्राप्त: {{count}}",
+    "PEER_RATING_GIVEN": "हाल की दी गई: {{count}}"
   },
   "SETTINGS": {
     "TITLE": "सेटिंग्स",
@@ -2790,7 +2851,13 @@
     "IMAGE_UPDATED": "प्रोफ़ाइल छवि सफलतापूर्वक अपडेट की गई",
     "CAMERA_FAILED": "कैमरा से छवि कैप्चर करने में विफल",
     "GALLERY_FAILED": "गैलरी से छवि चुनने में विफल",
-    "UPLOAD_FAILED": "प्रोफ़ाइल छवि अपलोड करने में विफल"
+    "UPLOAD_FAILED": "प्रोफ़ाइल छवि अपलोड करने में विफल",
+    "RETRY": "फिर से कोशिश करें",
+    "PEER_RATING_TITLE": "पीयर रेटिंग सारांश",
+    "PEER_RATING_LOADING": "आपकी पीयर रेटिंग लोड हो रही है...",
+    "PEER_RATING_COUNT": "कुल रेटिंग: {{count}}",
+    "PEER_RATING_RECEIVED": "हाल की प्राप्त: {{count}}",
+    "PEER_RATING_GIVEN": "हाल की दी गई: {{count}}"
   },
   "RETAILER_SETTINGS": {
     "TITLE": "सेटिंग्स",

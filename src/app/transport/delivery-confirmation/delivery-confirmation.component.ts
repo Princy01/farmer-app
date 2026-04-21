@@ -4,6 +4,7 @@ import { IonicModule, IonContent, LoadingController, ToastController, AlertContr
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
+import { firstValueFrom } from 'rxjs';
 import {
   chevronBack,
   checkmarkDoneCircle,
@@ -32,16 +33,34 @@ import {
   closeCircleOutline,
   carOutline,
   warningOutline,
-  chevronBackOutline
+  chevronBackOutline,
+  star,
+  starOutline
 } from 'ionicons/icons';
 import { AuthService } from 'src/app/auth/auth.service';
 import { DeliveryService, DeliveryDetails, DeliveryItem, ActiveJob, JobOrder } from './delivery-confirmation.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import {
+  PeerRatingContextResponse,
+  PeerRatingPairOption,
+  TransportRatingsService,
+} from '../ratings/transport-ratings.service';
 
 interface DeliveryIssueType {
   id: string;
   label: string;
   icon: string;
+}
+
+interface OrderRatingState {
+  loading: boolean;
+  error: string | null;
+  context: PeerRatingContextResponse | null;
+  selectedPairKey: string | null;
+  stars: number;
+  comment: string;
+  submitting: boolean;
+  feedback: { type: 'success' | 'danger'; message: string } | null;
 }
 
 @Component({
@@ -90,6 +109,8 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   // Timers
   timerInterval: any;
   resendTimerInterval: any;
+  orderRatings: Record<number, OrderRatingState> = {};
+  readonly starValues = [1, 2, 3, 4, 5];
 
   deliveryIssueTypes: DeliveryIssueType[] = [
     { id: 'customer_absent', label: 'DELIVERY_CONFIRMATION.CUSTOMER_NOT_AVAILABLE', icon: 'person-outline' },
@@ -105,6 +126,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private authService: AuthService,
     private deliveryService: DeliveryService,
+    private transportRatingsService: TransportRatingsService,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
@@ -138,7 +160,9 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
       'close-circle-outline': closeCircleOutline,
       'car-outline': carOutline,
       'warning-outline': warningOutline,
-      'chevron-back-outline': chevronBackOutline
+      'chevron-back-outline': chevronBackOutline,
+      'star': star,
+      'star-outline': starOutline
     });
   }
 
@@ -260,6 +284,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
       this.deliveryCompletedTime = new Date();
       this.clearTimers();
       this.showSuccessModal = true;
+      await this.loadRatingsForDeliveredOrders();
       await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.DELIVERY_CONFIRMED_SUCCESS'), 'success');
     } catch (error) {
       await this.showToast(this.translate.instant('DELIVERY_CONFIRMATION.FAILED_CONFIRM_DELIVERY'), 'danger');
@@ -476,9 +501,156 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   // Public helper: Parse products JSON to DeliveryItem[]
   parseProducts(products: any): any[] {
-  if (typeof products === 'string') {
-    return JSON.parse(products);
+    if (typeof products === 'string') {
+      return JSON.parse(products);
+    }
+    return products || [];
   }
-  return products || [];
-}
+
+  getOrderRatingState(orderId: number): OrderRatingState {
+    if (!this.orderRatings[orderId]) {
+      this.orderRatings[orderId] = {
+        loading: false,
+        error: null,
+        context: null,
+        selectedPairKey: null,
+        stars: 0,
+        comment: '',
+        submitting: false,
+        feedback: null,
+      };
+    }
+
+    return this.orderRatings[orderId];
+  }
+
+  setOrderPair(orderId: number, pairKey: string): void {
+    const state = this.getOrderRatingState(orderId);
+    state.selectedPairKey = pairKey;
+  }
+
+  setOrderComment(orderId: number, comment: string): void {
+    const state = this.getOrderRatingState(orderId);
+    state.comment = comment;
+  }
+
+  setOrderStars(orderId: number, starsValue: number): void {
+    const state = this.getOrderRatingState(orderId);
+    state.stars = starsValue;
+  }
+
+  getOrderSelectedPair(orderId: number): PeerRatingPairOption | null {
+    const state = this.getOrderRatingState(orderId);
+    const pairs = state.context?.eligible_pairs ?? [];
+    if (!state.selectedPairKey || pairs.length === 0) {
+      return null;
+    }
+
+    return pairs.find((pair) => pair.pair_key === state.selectedPairKey) ?? null;
+  }
+
+  canSubmitOrderRating(orderId: number): boolean {
+    const state = this.getOrderRatingState(orderId);
+    return !!this.getOrderSelectedPair(orderId) && state.stars >= 1 && state.stars <= 5 && !state.submitting;
+  }
+
+  async submitOrderRating(orderId: number): Promise<void> {
+    const state = this.getOrderRatingState(orderId);
+    const selectedPair = this.getOrderSelectedPair(orderId);
+
+    if (!selectedPair || state.stars < 1 || state.stars > 5) {
+      state.feedback = {
+        type: 'danger',
+        message: this.translate.instant('DELIVERY_CONFIRMATION.RATING_REQUIRED'),
+      };
+      return;
+    }
+
+    state.submitting = true;
+    state.feedback = null;
+
+    try {
+      const response = await firstValueFrom(
+        this.transportRatingsService.submitPeerRating({
+          order_id: orderId,
+          job_id: this.jobId ?? selectedPair.job_id,
+          rater_entity_type: selectedPair.rater_entity_type,
+          rater_entity_id: selectedPair.rater_entity_id,
+          ratee_entity_type: selectedPair.ratee_entity_type,
+          ratee_entity_id: selectedPair.ratee_entity_id,
+          stars: state.stars,
+          comment: state.comment.trim().slice(0, 500),
+        })
+      );
+
+      state.stars = 0;
+      state.comment = '';
+      state.feedback = {
+        type: 'success',
+        message: response.message || this.translate.instant('DELIVERY_CONFIRMATION.RATING_SUBMIT_SUCCESS'),
+      };
+      await this.loadOrderRatingContext(orderId);
+    } catch (err: any) {
+      state.feedback = {
+        type: 'danger',
+        message: this.getRatingErrorMessage(err?.message),
+      };
+    } finally {
+      state.submitting = false;
+    }
+  }
+
+  private async loadRatingsForDeliveredOrders(): Promise<void> {
+    if (!this.orders.length) {
+      return;
+    }
+
+    for (const order of this.orders) {
+      await this.loadOrderRatingContext(order.order_id);
+    }
+  }
+
+  private async loadOrderRatingContext(orderId: number): Promise<void> {
+    const state = this.getOrderRatingState(orderId);
+    state.loading = true;
+    state.error = null;
+
+    try {
+      const context = await firstValueFrom(
+        this.transportRatingsService.getRatingContext(orderId, this.jobId ?? undefined)
+      );
+
+      state.context = context;
+      if (context.eligible_pairs?.length) {
+        const hasSelection = context.eligible_pairs.some((pair) => pair.pair_key === state.selectedPairKey);
+        if (!hasSelection) {
+          state.selectedPairKey = context.eligible_pairs[0].pair_key;
+        }
+      } else {
+        state.selectedPairKey = null;
+      }
+    } catch (err: any) {
+      state.error = this.getRatingErrorMessage(err?.message);
+    } finally {
+      state.loading = false;
+    }
+  }
+
+  private getRatingErrorMessage(message?: string): string {
+    if (!message) {
+      return this.translate.instant('DELIVERY_CONFIRMATION.RATING_SUBMIT_ERROR');
+    }
+
+    const normalized = message.toLowerCase();
+    if (normalized.includes('already exists')) {
+      return this.translate.instant('DELIVERY_CONFIRMATION.RATING_DUPLICATE');
+    }
+    if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
+      return this.translate.instant('DELIVERY_CONFIRMATION.RATING_FORBIDDEN');
+    }
+    if (normalized.includes('must be') || normalized.includes('required') || normalized.includes('invalid')) {
+      return this.translate.instant('DELIVERY_CONFIRMATION.RATING_BAD_REQUEST');
+    }
+    return message;
+  }
 }

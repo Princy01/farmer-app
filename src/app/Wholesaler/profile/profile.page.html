@@ -80,6 +80,34 @@
             </div>
           </div>
         </div>
+
+        <div class="peer-rating-card">
+          <div class="peer-rating-head">
+            <ion-icon name="star-outline"></ion-icon>
+            <strong>{{ 'PROFILE.PEER_RATING_TITLE' | translate }}</strong>
+          </div>
+
+          <div *ngIf="peerRatingLoading" class="peer-rating-loading">
+            <ion-spinner name="dots"></ion-spinner>
+            <span>{{ 'PROFILE.PEER_RATING_LOADING' | translate }}</span>
+          </div>
+
+          <div *ngIf="peerRatingError && !peerRatingLoading" class="peer-rating-error">
+            <span>{{ peerRatingError }}</span>
+            <ion-button size="small" fill="outline" (click)="loadPeerRatingSummary()">
+              {{ 'PROFILE.RETRY' | translate }}
+            </ion-button>
+          </div>
+
+          <div *ngIf="!peerRatingLoading && !peerRatingError && myPeerRating" class="peer-rating-body">
+            <div class="peer-score">{{ myPeerRating.received_rating.displayed_average_rating | number: '1.1-1' }} / 5</div>
+            <div class="peer-meta">
+              <span>{{ 'PROFILE.PEER_RATING_COUNT' | translate:{ count: myPeerRating.received_rating.rating_count } }}</span>
+              <span>{{ 'PROFILE.PEER_RATING_RECEIVED' | translate:{ count: myPeerRating.recent_received.length } }}</span>
+              <span>{{ 'PROFILE.PEER_RATING_GIVEN' | translate:{ count: myPeerRating.recent_given.length } }}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Profile Details -->

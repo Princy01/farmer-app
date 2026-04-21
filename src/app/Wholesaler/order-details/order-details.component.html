@@ -1,23 +1,36 @@
 <ion-header>
   <ion-toolbar class="order-details-toolbar">
     <ion-buttons slot="start">
-      <ion-back-button color="light" defaultHref="/wholesaler/orders"></ion-back-button>
+      <ion-back-button
+        color="light"
+        defaultHref="/wholesaler/orders"
+      ></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ 'ORDER_DETAILS.Order' | translate }} #{{orderId}}</ion-title>
+    <ion-title
+      >{{ "ORDER_DETAILS.Order" | translate }} #{{ orderId }}</ion-title
+    >
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-progress-bar *ngIf="loading" type="indeterminate"></ion-progress-bar>
 
-  <div *ngIf="!loading && !error && orderDetails" class="order-details-container">
+  <div
+    *ngIf="!loading && !error && orderDetails"
+    class="order-details-container"
+  >
     <!-- Order Status -->
     <ion-card>
       <ion-card-header>
-        <ion-card-subtitle>{{ 'ORDER_DETAILS.Status' | translate }}</ion-card-subtitle>
+        <ion-card-subtitle>{{
+          "ORDER_DETAILS.Status" | translate
+        }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
-        <div class="status-chip" [ngClass]="getStatusClass(orderDetails.order_status)">
+        <div
+          class="status-chip"
+          [ngClass]="getStatusClass(orderDetails.order_status)"
+        >
           {{ getStatusLabel(orderDetails.order_status) | translate }}
         </div>
       </ion-card-content>
@@ -26,17 +39,26 @@
     <!-- Retailer Info -->
     <ion-card>
       <ion-card-header>
-        <ion-card-subtitle>{{ 'ORDER_DETAILS.Retailer Information' | translate }}</ion-card-subtitle>
+        <ion-card-subtitle>{{
+          "ORDER_DETAILS.Retailer Information" | translate
+        }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <ion-item lines="none">
           <ion-label>
-            <h2>{{orderDetails.retailer_name}}</h2>
-            <p>{{ 'ORDER_DETAILS.Retailer ID' | translate }}: {{orderDetails.retailer_id}}</p>
-            <p *ngIf="orderDetails.retailer_mobile">{{ 'ORDER_DETAILS.Mobile' | translate }}:
-              {{orderDetails.retailer_mobile}}</p>
-            <p *ngIf="orderDetails.retailer_address">{{ 'ORDER_DETAILS.Address' | translate }}:
-              {{orderDetails.retailer_address}}</p>
+            <h2>{{ orderDetails.retailer_name }}</h2>
+            <p>
+              {{ "ORDER_DETAILS.Retailer ID" | translate }}:
+              {{ orderDetails.retailer_id }}
+            </p>
+            <p *ngIf="orderDetails.retailer_mobile">
+              {{ "ORDER_DETAILS.Mobile" | translate }}:
+              {{ orderDetails.retailer_mobile }}
+            </p>
+            <p *ngIf="orderDetails.retailer_address">
+              {{ "ORDER_DETAILS.Address" | translate }}:
+              {{ orderDetails.retailer_address }}
+            </p>
           </ion-label>
         </ion-item>
       </ion-card-content>
@@ -45,19 +67,39 @@
     <!-- Order Items -->
     <ion-card>
       <ion-card-header>
-        <ion-card-subtitle>{{ 'ORDER_DETAILS.Order Items' | translate }}</ion-card-subtitle>
+        <ion-card-subtitle>{{
+          "ORDER_DETAILS.Order Items" | translate
+        }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <ion-list>
           <ion-item *ngFor="let item of orderDetails.products" lines="full">
             <ion-label>
-              <h2>{{item.product_name}}</h2>
-              <p>{{ 'ORDER_DETAILS.Category' | translate }}: {{item.category_name}}</p>
-              <p>{{ 'ORDER_DETAILS.Quantity' | translate }}: {{item.quantity}} {{item.unit_name}}</p>
-              <p>{{ 'ORDER_DETAILS.Price' | translate }}: ₹{{item.max_item_price}}/{{item.unit_name}}</p>
-              <p *ngIf="item.branch_name">{{ 'ORDER_DETAILS.Branch' | translate }}: {{item.branch_name}}</p>
-              <p *ngIf="item.branch_address">{{ 'ORDER_DETAILS.Branch Address' | translate }}: {{item.branch_address}}</p>
-              <p *ngIf="item.branch_number">{{ 'ORDER_DETAILS.Branch Contact' | translate }}: {{item.branch_number}}</p>
+              <h2>{{ item.product_name }}</h2>
+              <p>
+                {{ "ORDER_DETAILS.Category" | translate }}:
+                {{ item.category_name }}
+              </p>
+              <p>
+                {{ "ORDER_DETAILS.Quantity" | translate }}: {{ item.quantity }}
+                {{ item.unit_name }}
+              </p>
+              <p>
+                {{ "ORDER_DETAILS.Price" | translate }}: ₹{{
+                  item.max_item_price
+                }}/{{ item.unit_name }}
+              </p>
+              <p *ngIf="item.branch_name">
+                {{ "ORDER_DETAILS.Branch" | translate }}: {{ item.branch_name }}
+              </p>
+              <p *ngIf="item.branch_address">
+                {{ "ORDER_DETAILS.Branch Address" | translate }}:
+                {{ item.branch_address }}
+              </p>
+              <p *ngIf="item.branch_number">
+                {{ "ORDER_DETAILS.Branch Contact" | translate }}:
+                {{ item.branch_number }}
+              </p>
             </ion-label>
           </ion-item>
         </ion-list>
@@ -67,52 +109,190 @@
     <!-- Order Summary -->
     <ion-card>
       <ion-card-header>
-        <ion-card-subtitle>{{ 'ORDER_DETAILS.Order Summary' | translate }}</ion-card-subtitle>
+        <ion-card-subtitle>{{
+          "ORDER_DETAILS.Order Summary" | translate
+        }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <div class="summary-item">
-          <span>{{ 'ORDER_DETAILS.Order Date' | translate }}</span>
-          <span>{{orderDetails.date_of_order | date:'medium'}}</span>
+          <span>{{ "ORDER_DETAILS.Order Date" | translate }}</span>
+          <span>{{ orderDetails.date_of_order | date: "medium" }}</span>
         </div>
         <div class="summary-item" *ngIf="orderDetails.actual_delivery_date">
-          <span>{{ 'ORDER_DETAILS.Delivery Date' | translate }}</span>
-          <span>{{orderDetails.actual_delivery_date | date:'medium'}}</span>
+          <span>{{ "ORDER_DETAILS.Delivery Date" | translate }}</span>
+          <span>{{ orderDetails.actual_delivery_date | date: "medium" }}</span>
         </div>
         <div class="summary-item">
-          <span>{{ 'ORDER_DETAILS.Total Amount' | translate }}</span>
-          <span>₹{{orderDetails.total_order_amount | number:'1.2-2'}}</span>
+          <span>{{ "ORDER_DETAILS.Total Amount" | translate }}</span>
+          <span>₹{{ orderDetails.total_order_amount | number: "1.2-2" }}</span>
         </div>
         <div class="summary-item">
-          <span>{{ 'ORDER_DETAILS.Discount' | translate }}</span>
-          <span>₹{{orderDetails.discount_amount | number:'1.2-2'}}</span>
+          <span>{{ "ORDER_DETAILS.Discount" | translate }}</span>
+          <span>₹{{ orderDetails.discount_amount | number: "1.2-2" }}</span>
         </div>
         <div class="summary-item">
-          <span>{{ 'ORDER_DETAILS.Tax Amount' | translate }}</span>
-          <span>₹{{orderDetails.tax_amount | number:'1.2-2'}}</span>
+          <span>{{ "ORDER_DETAILS.Tax Amount" | translate }}</span>
+          <span>₹{{ orderDetails.tax_amount | number: "1.2-2" }}</span>
         </div>
         <div class="summary-item">
-          <span>{{ 'ORDER_DETAILS.Delivery Charges' | translate }}</span>
-          <span>₹{{(orderDetails.final_amount - orderDetails.total_order_amount) | number:'1.2-2'}}</span>
+          <span>{{ "ORDER_DETAILS.Delivery Charges" | translate }}</span>
+          <span
+            >₹{{
+              orderDetails.final_amount - orderDetails.total_order_amount
+                | number: "1.2-2"
+            }}</span
+          >
         </div>
         <div class="summary-item final-amount">
-          <span>{{ 'ORDER_DETAILS.Final Amount' | translate }}</span>
-          <span>₹{{orderDetails.final_amount | number:'1.2-2'}}</span>
+          <span>{{ "ORDER_DETAILS.Final Amount" | translate }}</span>
+          <span>₹{{ orderDetails.final_amount | number: "1.2-2" }}</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="rating-card">
+      <ion-card-header>
+        <ion-card-subtitle>{{
+          "ORDER_DETAILS.RATING_TITLE" | translate
+        }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="support-copy">
+          {{ "ORDER_DETAILS.RATING_NOTE" | translate }}
+        </p>
+
+        <div class="rating-loading" *ngIf="ratingsLoading">
+          <ion-spinner name="dots"></ion-spinner>
+          <span>{{ "ORDER_DETAILS.RATING_LOADING" | translate }}</span>
+        </div>
+
+        <div class="rating-error" *ngIf="ratingsError && !ratingsLoading">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <span>{{ ratingsError }}</span>
+          <ion-button size="small" fill="outline" (click)="loadRatingContext()">
+            {{ "ORDER_DETAILS.RETRY" | translate }}
+          </ion-button>
+        </div>
+
+        <div *ngIf="!ratingsLoading && !ratingsError">
+          <div
+            class="rating-empty"
+            *ngIf="!ratingContext?.eligible_pairs?.length"
+          >
+            {{
+              ratingContext?.eligibility_message ||
+                ("ORDER_DETAILS.RATING_NONE_ELIGIBLE" | translate)
+            }}
+          </div>
+
+          <div
+            *ngIf="ratingContext?.eligible_pairs?.length"
+            class="rating-form"
+          >
+            <ion-item lines="none">
+              <ion-label position="stacked">{{
+                "ORDER_DETAILS.RATING_SELECT_PEER" | translate
+              }}</ion-label>
+              <ion-select [(ngModel)]="selectedPairKey" interface="popover">
+                <ion-select-option
+                  *ngFor="let pair of ratingContext?.eligible_pairs"
+                  [value]="pair.pair_key"
+                >
+                  {{ pair.ratee_display_name }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <div class="star-row">
+              <span>{{ "ORDER_DETAILS.RATING_STARS" | translate }}</span>
+              <div class="star-buttons">
+                <ion-button
+                  *ngFor="let starValue of starValues"
+                  fill="clear"
+                  class="star-btn"
+                  (click)="setStars(starValue)"
+                >
+                  <ion-icon
+                    [name]="
+                      starValue <= selectedStars ? 'star' : 'star-outline'
+                    "
+                  ></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+
+            <ion-item lines="none">
+              <ion-label position="stacked">{{
+                "ORDER_DETAILS.RATING_COMMENT" | translate
+              }}</ion-label>
+              <ion-textarea
+                [(ngModel)]="ratingComment"
+                rows="3"
+                maxlength="500"
+                counter="true"
+                [placeholder]="
+                  'ORDER_DETAILS.RATING_COMMENT_PLACEHOLDER' | translate
+                "
+              ></ion-textarea>
+            </ion-item>
+
+            <ion-button
+              expand="block"
+              (click)="submitRating()"
+              [disabled]="!canSubmitRating()"
+            >
+              {{
+                ratingSubmitting
+                  ? ("ORDER_DETAILS.RATING_SUBMITTING" | translate)
+                  : ("ORDER_DETAILS.RATING_SUBMIT" | translate)
+              }}
+            </ion-button>
+          </div>
+
+          <ion-note
+            *ngIf="ratingFeedback"
+            [color]="ratingFeedback.type"
+            class="rating-feedback"
+          >
+            {{ ratingFeedback.message }}
+          </ion-note>
+
+          <div *ngIf="existingRatings.length" class="existing-ratings">
+            <h4>{{ "ORDER_DETAILS.RATING_EXISTING" | translate }}</h4>
+            <div
+              class="existing-rating-item"
+              *ngFor="let rating of existingRatings"
+            >
+              <div class="existing-rating-head">
+                <strong>{{ rating.ratee_display_name }}</strong>
+                <span>{{
+                  rating.captured_at | date: "dd MMM yyyy, HH:mm"
+                }}</span>
+              </div>
+              <div class="existing-rating-stars">{{ rating.stars }} / 5</div>
+              <p *ngIf="rating.comment">{{ rating.comment }}</p>
+            </div>
+          </div>
         </div>
       </ion-card-content>
     </ion-card>
 
     <ion-card class="support-card">
       <ion-card-header>
-        <ion-card-subtitle>{{ 'ORDER_DETAILS.ISSUE_HELP_TITLE' | translate }}</ion-card-subtitle>
+        <ion-card-subtitle>{{
+          "ORDER_DETAILS.ISSUE_HELP_TITLE" | translate
+        }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
-        <p class="support-copy">{{ 'ORDER_DETAILS.ISSUE_HELP_NOTE' | translate }}</p>
+        <p class="support-copy">
+          {{ "ORDER_DETAILS.ISSUE_HELP_NOTE" | translate }}
+        </p>
         <div class="support-actions">
           <ion-button expand="block" (click)="reportIssue()">
-            {{ 'ORDER_DETAILS.REPORT_ISSUE' | translate }}
+            {{ "ORDER_DETAILS.REPORT_ISSUE" | translate }}
           </ion-button>
           <ion-button expand="block" fill="outline" (click)="openMyIssues()">
-            {{ 'ORDER_DETAILS.MY_ISSUES' | translate }}
+            {{ "ORDER_DETAILS.MY_ISSUES" | translate }}
           </ion-button>
         </div>
       </ion-card-content>
@@ -123,10 +303,10 @@
   <ion-card *ngIf="error && !loading">
     <ion-card-content>
       <div class="error-message">
-        {{ 'ORDER_DETAILS.LOAD_ERROR' | translate }}
+        {{ "ORDER_DETAILS.LOAD_ERROR" | translate }}
       </div>
       <ion-button expand="block" (click)="loadOrderDetails()">
-        {{ 'ORDER_DETAILS.RETRY' | translate }}
+        {{ "ORDER_DETAILS.RETRY" | translate }}
       </ion-button>
     </ion-card-content>
   </ion-card>

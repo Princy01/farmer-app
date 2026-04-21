@@ -133,6 +133,52 @@ ion-content {
       }
     }
   }
+
+  .peer-rating-card {
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 540px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 14px;
+    padding: 0.85rem;
+
+    .peer-rating-head {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.45rem;
+      color: #1e293b;
+
+      ion-icon {
+        color: #fbbf24;
+      }
+    }
+
+    .peer-rating-loading,
+    .peer-rating-error {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #334155;
+    }
+
+    .peer-score {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.2rem;
+    }
+
+    .peer-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      font-size: 0.8rem;
+      color: #334155;
+    }
+  }
 }
 
 // Responsive Design

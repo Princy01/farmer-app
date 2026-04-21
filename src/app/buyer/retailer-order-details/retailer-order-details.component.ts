@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
@@ -20,8 +21,17 @@ import {
   alertCircleOutline,
   flagOutline,
   listOutline,
+  star,
+  starOutline,
+  refreshOutline,
 } from 'ionicons/icons';
 import { RetailerOrderService, RetailerOrderDetails, OrderItem } from './retailer-order-details.service';
+import {
+  BuyerRatingsService,
+  PeerRatingContextResponse,
+  PeerRatingPairOption,
+  PeerRatingRecentItem,
+} from '../ratings/buyer-ratings.service';
 
 /**
  * Component for displaying retailer order details.
@@ -30,7 +40,7 @@ import { RetailerOrderService, RetailerOrderDetails, OrderItem } from './retaile
 @Component({
   selector: 'app-retailer-order-details',
   standalone: true,
-  imports: [IonicModule, CommonModule, TranslatePipe],
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe],
   templateUrl: './retailer-order-details.component.html',
   styleUrls: ['./retailer-order-details.component.scss'],
 })
@@ -39,12 +49,23 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   loading = true;
   error: string | null = null;
 
+  ratingContext: PeerRatingContextResponse | null = null;
+  ratingsLoading = false;
+  ratingsError: string | null = null;
+  selectedPairKey: string | null = null;
+  selectedStars = 0;
+  ratingComment = '';
+  ratingSubmitting = false;
+  ratingFeedback: { type: 'success' | 'danger'; message: string } | null = null;
+  readonly starValues = [1, 2, 3, 4, 5];
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private orderService: RetailerOrderService,
+    private ratingsService: BuyerRatingsService,
     private translate: TranslateService
   ) {
     addIcons({
@@ -61,6 +82,9 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       alertCircleOutline,
       flagOutline,
       listOutline,
+      star,
+      starOutline,
+      refreshOutline,
     });
   }
 
@@ -97,6 +121,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
           this.order = data;
           this.loading = false;
           this.error = null;
+          this.loadRatingContext();
         },
         error: (err: Error) => {
           // Error message is a translation key from service
@@ -105,6 +130,130 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
       });
+  }
+
+  loadRatingContext(): void {
+    if (!this.order?.order_id) {
+      this.ratingContext = null;
+      return;
+    }
+
+    this.ratingsLoading = true;
+    this.ratingsError = null;
+    this.ratingFeedback = null;
+
+    this.ratingsService
+      .getRatingContext(this.order.order_id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (context) => {
+          this.ratingContext = context;
+          this.ratingsLoading = false;
+
+          if (context.eligible_pairs?.length > 0) {
+            const hasSelectedPair = context.eligible_pairs.some(
+              (pair) => pair.pair_key === this.selectedPairKey
+            );
+            if (!hasSelectedPair) {
+              this.selectedPairKey = context.eligible_pairs[0].pair_key;
+            }
+          } else {
+            this.selectedPairKey = null;
+          }
+        },
+        error: (err: Error) => {
+          this.ratingsLoading = false;
+          this.ratingsError = this.getRatingErrorMessage(err.message);
+        },
+      });
+  }
+
+  get selectedPair(): PeerRatingPairOption | null {
+    if (!this.ratingContext?.eligible_pairs?.length || !this.selectedPairKey) {
+      return null;
+    }
+    return this.ratingContext.eligible_pairs.find((pair) => pair.pair_key === this.selectedPairKey) ?? null;
+  }
+
+  get existingRatings(): PeerRatingRecentItem[] {
+    return this.ratingContext?.existing_ratings ?? [];
+  }
+
+  setStars(value: number): void {
+    this.selectedStars = value;
+  }
+
+  canSubmitRating(): boolean {
+    return !!this.selectedPair && this.selectedStars >= 1 && this.selectedStars <= 5 && !this.ratingSubmitting;
+  }
+
+  submitRating(): void {
+    const selectedPair = this.selectedPair;
+    if (!this.order?.order_id || !selectedPair) {
+      return;
+    }
+
+    if (this.selectedStars < 1 || this.selectedStars > 5) {
+      this.ratingFeedback = {
+        type: 'danger',
+        message: this.translate.instant('RETAILER_ORDER_DETAILS.RATING_REQUIRED'),
+      };
+      return;
+    }
+
+    this.ratingSubmitting = true;
+    this.ratingFeedback = null;
+
+    this.ratingsService
+      .submitPeerRating({
+        order_id: this.order.order_id,
+        job_id: selectedPair.job_id,
+        rater_entity_type: selectedPair.rater_entity_type,
+        rater_entity_id: selectedPair.rater_entity_id,
+        ratee_entity_type: selectedPair.ratee_entity_type,
+        ratee_entity_id: selectedPair.ratee_entity_id,
+        stars: this.selectedStars,
+        comment: this.ratingComment.trim().slice(0, 500),
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.ratingSubmitting = false;
+          this.selectedStars = 0;
+          this.ratingComment = '';
+          this.ratingFeedback = {
+            type: 'success',
+            message:
+              response.message || this.translate.instant('RETAILER_ORDER_DETAILS.RATING_SUBMIT_SUCCESS'),
+          };
+          this.loadRatingContext();
+        },
+        error: (err: Error) => {
+          this.ratingSubmitting = false;
+          this.ratingFeedback = {
+            type: 'danger',
+            message: this.getRatingErrorMessage(err.message),
+          };
+        },
+      });
+  }
+
+  private getRatingErrorMessage(message: string): string {
+    if (!message) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_SUBMIT_ERROR');
+    }
+
+    const normalized = message.toLowerCase();
+    if (normalized.includes('already exists')) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_DUPLICATE');
+    }
+    if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_FORBIDDEN');
+    }
+    if (normalized.includes('must be') || normalized.includes('required') || normalized.includes('invalid')) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_BAD_REQUEST');
+    }
+    return message;
   }
 
   /**

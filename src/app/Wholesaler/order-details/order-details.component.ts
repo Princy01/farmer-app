@@ -1,19 +1,28 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { alertCircleOutline, star, starOutline } from 'ionicons/icons';
 import { WholesalerApiService, OrderFullDetails } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import {
+  WholesalerRatingsService,
+  PeerRatingContextResponse,
+  PeerRatingPairOption,
+  PeerRatingRecentItem,
+} from '../ratings/wholesaler-ratings.service';
 
 @Component({
   selector: 'app-order-details',
   templateUrl: './order-details.component.html',
   styleUrls: ['./order-details.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, TranslatePipe]
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
 })
 export class OrderDetailsComponent implements OnInit, OnDestroy {
   orderId!: number;
@@ -22,14 +31,31 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   error = false;
   private subscription: Subscription = new Subscription();
 
+  ratingContext: PeerRatingContextResponse | null = null;
+  ratingsLoading = false;
+  ratingsError: string | null = null;
+  selectedPairKey: string | null = null;
+  selectedStars = 0;
+  ratingComment = '';
+  ratingSubmitting = false;
+  ratingFeedback: { type: 'success' | 'danger'; message: string } | null = null;
+  readonly starValues = [1, 2, 3, 4, 5];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private wholesalerService: WholesalerApiService,
+    private wholesalerRatingsService: WholesalerRatingsService,
     private alertCtrl: AlertController,
     private authService: AuthService,
     private translate: TranslateService
-  ) { }
+  ) {
+    addIcons({
+      alertCircleOutline,
+      star,
+      starOutline,
+    });
+  }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -179,6 +205,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
         if (data) {
           this.orderDetails = data;
           this.error = false;
+          this.loadRatingContext();
         }
       });
 
@@ -258,5 +285,127 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
     }
 
     this.router.navigate(['/wholesaler/my-issues']);
+  }
+
+  loadRatingContext(): void {
+    if (!this.orderDetails?.order_id) {
+      this.ratingContext = null;
+      return;
+    }
+
+    this.ratingsLoading = true;
+    this.ratingsError = null;
+
+    const ratingsSub = this.wholesalerRatingsService
+      .getRatingContext(this.orderDetails.order_id)
+      .subscribe({
+        next: (context) => {
+          this.ratingContext = context;
+          this.ratingsLoading = false;
+
+          if (context.eligible_pairs?.length > 0) {
+            const hasSelection = context.eligible_pairs.some((pair) => pair.pair_key === this.selectedPairKey);
+            if (!hasSelection) {
+              this.selectedPairKey = context.eligible_pairs[0].pair_key;
+            }
+          } else {
+            this.selectedPairKey = null;
+          }
+        },
+        error: (err: Error) => {
+          this.ratingsLoading = false;
+          this.ratingsError = this.getRatingErrorMessage(err.message);
+        },
+      });
+
+    this.subscription.add(ratingsSub);
+  }
+
+  get selectedPair(): PeerRatingPairOption | null {
+    if (!this.ratingContext?.eligible_pairs?.length || !this.selectedPairKey) {
+      return null;
+    }
+    return this.ratingContext.eligible_pairs.find((pair) => pair.pair_key === this.selectedPairKey) ?? null;
+  }
+
+  get existingRatings(): PeerRatingRecentItem[] {
+    return this.ratingContext?.existing_ratings ?? [];
+  }
+
+  setStars(value: number): void {
+    this.selectedStars = value;
+  }
+
+  canSubmitRating(): boolean {
+    return !!this.selectedPair && this.selectedStars >= 1 && this.selectedStars <= 5 && !this.ratingSubmitting;
+  }
+
+  submitRating(): void {
+    const selectedPair = this.selectedPair;
+    if (!this.orderDetails?.order_id || !selectedPair) {
+      return;
+    }
+
+    if (this.selectedStars < 1 || this.selectedStars > 5) {
+      this.ratingFeedback = {
+        type: 'danger',
+        message: this.translate.instant('ORDER_DETAILS.RATING_REQUIRED'),
+      };
+      return;
+    }
+
+    this.ratingSubmitting = true;
+    this.ratingFeedback = null;
+
+    const ratingsSub = this.wholesalerRatingsService
+      .submitPeerRating({
+        order_id: this.orderDetails.order_id,
+        job_id: selectedPair.job_id,
+        rater_entity_type: selectedPair.rater_entity_type,
+        rater_entity_id: selectedPair.rater_entity_id,
+        ratee_entity_type: selectedPair.ratee_entity_type,
+        ratee_entity_id: selectedPair.ratee_entity_id,
+        stars: this.selectedStars,
+        comment: this.ratingComment.trim().slice(0, 500),
+      })
+      .subscribe({
+        next: (response) => {
+          this.ratingSubmitting = false;
+          this.selectedStars = 0;
+          this.ratingComment = '';
+          this.ratingFeedback = {
+            type: 'success',
+            message: response.message || this.translate.instant('ORDER_DETAILS.RATING_SUBMIT_SUCCESS'),
+          };
+          this.loadRatingContext();
+        },
+        error: (err: Error) => {
+          this.ratingSubmitting = false;
+          this.ratingFeedback = {
+            type: 'danger',
+            message: this.getRatingErrorMessage(err.message),
+          };
+        },
+      });
+
+    this.subscription.add(ratingsSub);
+  }
+
+  private getRatingErrorMessage(message: string): string {
+    if (!message) {
+      return this.translate.instant('ORDER_DETAILS.RATING_SUBMIT_ERROR');
+    }
+
+    const normalized = message.toLowerCase();
+    if (normalized.includes('already exists')) {
+      return this.translate.instant('ORDER_DETAILS.RATING_DUPLICATE');
+    }
+    if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
+      return this.translate.instant('ORDER_DETAILS.RATING_FORBIDDEN');
+    }
+    if (normalized.includes('must be') || normalized.includes('required') || normalized.includes('invalid')) {
+      return this.translate.instant('ORDER_DETAILS.RATING_BAD_REQUEST');
+    }
+    return message;
   }
 }

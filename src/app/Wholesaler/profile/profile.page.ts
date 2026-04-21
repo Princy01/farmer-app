@@ -14,7 +14,7 @@ import {
   personOutline, mailOutline, callOutline, locationOutline,
   businessOutline, arrowBackOutline, create, saveOutline,
   closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline,
-  mapOutline, locateOutline, calendarOutline
+  mapOutline, locateOutline, calendarOutline, starOutline
 } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
@@ -22,6 +22,7 @@ import { WholesalerProfileService, WholesalerProfile, UpdateUserProfileRequest }
 import { AuthService, State, City, Location } from 'src/app/auth/auth.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
+import { MyPeerRatingResponse, WholesalerRatingsService } from '../ratings/wholesaler-ratings.service';
 
 @Component({
   selector: 'app-profile',
@@ -69,6 +70,9 @@ export class ProfilePage implements OnInit, OnDestroy {
   showLocationSuggestions = false;
   private profileLoaded = false;
   private statesLoaded = false;
+  peerRatingLoading = false;
+  peerRatingError: string | null = null;
+  myPeerRating: MyPeerRatingResponse | null = null;
 
   constructor(
     private navCtrl: NavController,
@@ -78,13 +82,15 @@ export class ProfilePage implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private wholesalerRatingsService: WholesalerRatingsService
   ) {
     addIcons({
       personOutline, mailOutline, callOutline, locationOutline,
       businessOutline, arrowBackOutline, create, saveOutline,
       closeOutline, cameraOutline, imageOutline, checkmarkCircleOutline,
-      mapOutline, locateOutline, calendarOutline
+      mapOutline, locateOutline, calendarOutline,
+      starOutline
     });
   }
 
@@ -132,6 +138,7 @@ export class ProfilePage implements OnInit, OnDestroy {
         this.locationSearchTerm = this.profile.location ?? '';
         this.profileLoaded = true;
         this.initializeLocationMasterSelection();
+        this.loadPeerRatingSummary();
         this.isLoading = false;
       },
       error: (error: any) => {
@@ -725,5 +732,24 @@ export class ProfilePage implements OnInit, OnDestroy {
     if (selectedLocation) {
       this.profile.location = selectedLocation.location_name ?? null;
     }
+  }
+
+  loadPeerRatingSummary(): void {
+    this.peerRatingLoading = true;
+    this.peerRatingError = null;
+
+    this.wholesalerRatingsService
+      .getMyPeerRating()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (summary) => {
+          this.myPeerRating = summary;
+          this.peerRatingLoading = false;
+        },
+        error: (err: Error) => {
+          this.peerRatingLoading = false;
+          this.peerRatingError = err.message;
+        },
+      });
   }
 }

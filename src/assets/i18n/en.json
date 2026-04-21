@@ -356,7 +356,24 @@
     "ISSUE_HELP_TITLE": "Need help with this order?",
     "ISSUE_HELP_NOTE": "Report an issue for this order or review your submitted issues.",
     "REPORT_ISSUE": "Report Issue",
-    "MY_ISSUES": "My Issues"
+    "MY_ISSUES": "My Issues",
+    "RATING_TITLE": "Rate This Completed Order",
+    "RATING_NOTE": "Capture peer ratings for your completed order participants.",
+    "RATING_LOADING": "Loading rating options...",
+    "RATING_NONE_ELIGIBLE": "No peer rating action is available for this order right now.",
+    "RATING_SELECT_PEER": "Select participant pair",
+    "RATING_STARS": "Stars",
+    "RATING_COMMENT": "Comment (optional)",
+    "RATING_COMMENT_PLACEHOLDER": "Add short feedback (max 500 characters)",
+    "RATING_SUBMIT": "Submit Rating",
+    "RATING_SUBMITTING": "Submitting...",
+    "RATING_REQUIRED": "Please choose a star rating before submitting.",
+    "RATING_SUBMIT_SUCCESS": "Rating submitted successfully.",
+    "RATING_SUBMIT_ERROR": "Unable to submit rating right now.",
+    "RATING_DUPLICATE": "This rating already exists.",
+    "RATING_FORBIDDEN": "You are not allowed to submit this rating.",
+    "RATING_BAD_REQUEST": "Please review the rating details and try again.",
+    "RATING_EXISTING": "Already Captured Ratings"
   },
   "ADD_BUSINESS_FORM": {
     "PAGE_TITLE": "Add Business Location",
@@ -1812,7 +1829,24 @@
     "ISSUE_HELP_TITLE": "Need help with this order?",
     "ISSUE_HELP_NOTE": "Report an issue for this order or review your submitted issues.",
     "REPORT_ISSUE": "Report Issue",
-    "MY_ISSUES": "My Issues"
+    "MY_ISSUES": "My Issues",
+    "RATING_TITLE": "Rate Your Delivery Experience",
+    "RATING_NOTE": "Share a quick peer rating for this completed order.",
+    "RATING_LOADING": "Loading rating options...",
+    "RATING_NONE_ELIGIBLE": "No peer rating action is available for this order right now.",
+    "RATING_SELECT_PEER": "Who would you like to rate?",
+    "RATING_STARS": "Your rating",
+    "RATING_COMMENT": "Comment (optional)",
+    "RATING_COMMENT_PLACEHOLDER": "Add short feedback (max 500 characters)",
+    "RATING_SUBMIT": "Submit Rating",
+    "RATING_SUBMITTING": "Submitting...",
+    "RATING_REQUIRED": "Please choose a star rating before submitting.",
+    "RATING_SUBMIT_SUCCESS": "Thanks, your rating was submitted.",
+    "RATING_SUBMIT_ERROR": "Unable to submit your rating right now.",
+    "RATING_DUPLICATE": "You have already submitted this rating.",
+    "RATING_FORBIDDEN": "You are not allowed to submit this rating.",
+    "RATING_BAD_REQUEST": "Please review your rating details and try again.",
+    "RATING_EXISTING": "Already Captured Ratings"
   },
   "BUYER_DISPUTES": {
     "REPORT_ISSUE_TITLE": "Report Issue",
@@ -2305,7 +2339,13 @@
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
     "TOTAL_DELIVERIES": "Total Deliveries",
-    "MEMBER_SINCE": "Member Since"
+    "MEMBER_SINCE": "Member Since",
+    "RETRY": "Retry",
+    "PEER_RATING_TITLE": "Peer Rating Summary",
+    "PEER_RATING_LOADING": "Loading your peer rating...",
+    "PEER_RATING_COUNT": "Total ratings: {{count}}",
+    "PEER_RATING_RECEIVED": "Recent received: {{count}}",
+    "PEER_RATING_GIVEN": "Recent given: {{count}}"
   },
   "DRIVER_REGISTRATION": {
     "CHECKING_STATUS": "Checking registration status...",
@@ -2554,7 +2594,22 @@
     "CUSTOMER_REFUSES_DELIVERY": "Customer Refuses Delivery",
     "VEHICLE_BREAKDOWN": "Vehicle Breakdown",
     "GOODS_DAMAGED_TRANSIT": "Goods Damaged in Transit",
-    "OTHER_ISSUE": "Other Issue"
+    "OTHER_ISSUE": "Other Issue",
+    "RATING_TITLE": "Rate Counterparties",
+    "RATING_LOADING": "Loading rating options...",
+    "RATING_NONE_ELIGIBLE": "No rating action is available for this order.",
+    "RATING_SELECT_PEER": "Select participant pair",
+    "RATING_STARS": "Stars",
+    "RATING_COMMENT": "Comment (optional)",
+    "RATING_COMMENT_PLACEHOLDER": "Add short feedback (max 500 characters)",
+    "RATING_SUBMIT": "Submit Rating",
+    "RATING_SUBMITTING": "Submitting...",
+    "RATING_REQUIRED": "Please choose a star rating before submitting.",
+    "RATING_SUBMIT_SUCCESS": "Rating submitted successfully.",
+    "RATING_SUBMIT_ERROR": "Unable to submit rating right now.",
+    "RATING_DUPLICATE": "This rating already exists.",
+    "RATING_FORBIDDEN": "You are not allowed to submit this rating.",
+    "RATING_BAD_REQUEST": "Please review the rating details and try again."
   },
   "PROFILE": {
     "TITLE": "Profile",
@@ -2619,7 +2674,13 @@
     "UNSAVED_CHANGES": "You have unsaved changes. Do you want to discard them?",
     "DISCARD": "Discard",
     "KEEP_EDITING": "Keep Editing",
-    "OK": "OK"
+    "OK": "OK",
+    "RETRY": "Retry",
+    "PEER_RATING_TITLE": "Peer Rating Summary",
+    "PEER_RATING_LOADING": "Loading your peer rating...",
+    "PEER_RATING_COUNT": "Total ratings: {{count}}",
+    "PEER_RATING_RECEIVED": "Recent received: {{count}}",
+    "PEER_RATING_GIVEN": "Recent given: {{count}}"
   },
   "SETTINGS": {
     "TITLE": "Settings",
@@ -2791,7 +2852,13 @@
     "IMAGE_UPDATED": "Profile image updated successfully",
     "CAMERA_FAILED": "Failed to capture image from camera",
     "GALLERY_FAILED": "Failed to select image from gallery",
-    "UPLOAD_FAILED": "Failed to upload profile image"
+    "UPLOAD_FAILED": "Failed to upload profile image",
+    "RETRY": "Retry",
+    "PEER_RATING_TITLE": "Peer Rating Summary",
+    "PEER_RATING_LOADING": "Loading your peer rating...",
+    "PEER_RATING_COUNT": "Total ratings: {{count}}",
+    "PEER_RATING_RECEIVED": "Recent received: {{count}}",
+    "PEER_RATING_GIVEN": "Recent given: {{count}}"
   },
   "RETAILER_SETTINGS": {
     "TITLE": "Settings",

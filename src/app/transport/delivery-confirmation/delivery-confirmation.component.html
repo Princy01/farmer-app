@@ -296,6 +296,85 @@
             <strong>{{ 'DELIVERY_CONFIRMATION.TIME' | translate }}:</strong> {{ deliveryCompletedTime | date : "short" }}
           </p>
         </div>
+
+        <div class="post-delivery-ratings" *ngIf="orders.length">
+          <h3>{{ 'DELIVERY_CONFIRMATION.RATING_TITLE' | translate }}</h3>
+
+          <div class="order-rating-card" *ngFor="let order of orders">
+            <h4>{{ 'DELIVERY_CONFIRMATION.ORDER_LABEL' | translate }} #{{ order.order_id }}</h4>
+
+            <div *ngIf="getOrderRatingState(order.order_id).loading" class="rating-loading">
+              <ion-spinner name="dots"></ion-spinner>
+              <span>{{ 'DELIVERY_CONFIRMATION.RATING_LOADING' | translate }}</span>
+            </div>
+
+            <div *ngIf="getOrderRatingState(order.order_id).error" class="rating-error">
+              <span>{{ getOrderRatingState(order.order_id).error }}</span>
+            </div>
+
+            <div *ngIf="!getOrderRatingState(order.order_id).loading && !getOrderRatingState(order.order_id).error">
+              <div
+                class="rating-empty"
+                *ngIf="!getOrderRatingState(order.order_id).context?.eligible_pairs?.length"
+              >
+                {{ getOrderRatingState(order.order_id).context?.eligibility_message || ('DELIVERY_CONFIRMATION.RATING_NONE_ELIGIBLE' | translate) }}
+              </div>
+
+              <div *ngIf="getOrderRatingState(order.order_id).context?.eligible_pairs?.length" class="rating-form">
+                <ion-item lines="none">
+                  <ion-label position="stacked">{{ 'DELIVERY_CONFIRMATION.RATING_SELECT_PEER' | translate }}</ion-label>
+                  <ion-select
+                    [ngModel]="getOrderRatingState(order.order_id).selectedPairKey"
+                    (ngModelChange)="setOrderPair(order.order_id, $event)"
+                    interface="popover"
+                  >
+                    <ion-select-option
+                      *ngFor="let pair of getOrderRatingState(order.order_id).context?.eligible_pairs"
+                      [value]="pair.pair_key"
+                    >
+                      {{ pair.label }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+
+                <div class="star-row">
+                  <span>{{ 'DELIVERY_CONFIRMATION.RATING_STARS' | translate }}</span>
+                  <div class="star-buttons">
+                    <ion-button
+                      *ngFor="let starValue of starValues"
+                      fill="clear"
+                      class="star-btn"
+                      (click)="setOrderStars(order.order_id, starValue)"
+                    >
+                      <ion-icon [name]="starValue <= getOrderRatingState(order.order_id).stars ? 'star' : 'star-outline'"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
+
+                <ion-item lines="none">
+                  <ion-label position="stacked">{{ 'DELIVERY_CONFIRMATION.RATING_COMMENT' | translate }}</ion-label>
+                  <ion-textarea
+                    [ngModel]="getOrderRatingState(order.order_id).comment"
+                    (ngModelChange)="setOrderComment(order.order_id, $event)"
+                    rows="2"
+                    maxlength="500"
+                    counter="true"
+                    [placeholder]="'DELIVERY_CONFIRMATION.RATING_COMMENT_PLACEHOLDER' | translate"
+                  ></ion-textarea>
+                </ion-item>
+
+                <ion-button expand="block" size="small" (click)="submitOrderRating(order.order_id)" [disabled]="!canSubmitOrderRating(order.order_id)">
+                  {{ getOrderRatingState(order.order_id).submitting ? ('DELIVERY_CONFIRMATION.RATING_SUBMITTING' | translate) : ('DELIVERY_CONFIRMATION.RATING_SUBMIT' | translate) }}
+                </ion-button>
+              </div>
+
+              <ion-note *ngIf="getOrderRatingState(order.order_id).feedback" [color]="getOrderRatingState(order.order_id).feedback?.type" class="rating-feedback">
+                {{ getOrderRatingState(order.order_id).feedback?.message }}
+              </ion-note>
+            </div>
+          </div>
+        </div>
+
         <div class="success-actions">
           <ion-button
             expand="block"

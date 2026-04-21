@@ -27,10 +27,12 @@ import {
   calendarOutline,
   closeCircleOutline,
   close,
-  cameraOutline
+  cameraOutline,
+  starOutline
 } from 'ionicons/icons';
 import { DriverProfileService, UpdateDriverProfileRequest } from './profile.service';
 import { EmailVerificationModalComponent } from './email-verification-modal.component';
+import { MyPeerRatingResponse, TransportRatingsService } from '../ratings/transport-ratings.service';
 
 @Component({
   selector: 'app-profile',
@@ -51,6 +53,9 @@ export class ProfilePage implements OnInit, OnDestroy {
   today = new Date().toISOString().split('T')[0];
   isUploadingImage = false;
   isSubmitting = false;
+  peerRatingLoading = false;
+  peerRatingError: string | null = null;
+  myPeerRating: MyPeerRatingResponse | null = null;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -60,7 +65,8 @@ export class ProfilePage implements OnInit, OnDestroy {
     private toastCtrl: ToastController,
     private modalCtrl: ModalController,
     private translate: TranslateService,
-    private driverProfileService: DriverProfileService
+    private driverProfileService: DriverProfileService,
+    private transportRatingsService: TransportRatingsService
   ) {
     addIcons({
       'chevron-back': chevronBack,
@@ -77,7 +83,8 @@ export class ProfilePage implements OnInit, OnDestroy {
       'close-circle-outline': closeCircleOutline,
       'calendar-outline': calendarOutline,
       'close': close,
-      'camera-outline': cameraOutline
+      'camera-outline': cameraOutline,
+      'star-outline': starOutline
     });
   }
 
@@ -169,6 +176,7 @@ export class ProfilePage implements OnInit, OnDestroy {
             licence_issued_date: data.licence_issued_date ? data.licence_issued_date.split('T')[0] : '',
             licence_expiry_date: data.licence_expiry_date ? data.licence_expiry_date.split('T')[0] : '',
           });
+          this.loadPeerRatingSummary();
           loading.dismiss();
         },
         error: (err) => {
@@ -396,5 +404,24 @@ export class ProfilePage implements OnInit, OnDestroy {
       '4': 'DRIVER_REGISTRATION.OTHER',
     };
     return types[String(typeId)] || String(typeId);
+  }
+
+  loadPeerRatingSummary(): void {
+    this.peerRatingLoading = true;
+    this.peerRatingError = null;
+
+    this.transportRatingsService
+      .getMyPeerRating()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (summary) => {
+          this.myPeerRating = summary;
+          this.peerRatingLoading = false;
+        },
+        error: (err: Error) => {
+          this.peerRatingLoading = false;
+          this.peerRatingError = err.message;
+        },
+      });
   }
 }
