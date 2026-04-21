@@ -373,7 +373,8 @@
     "RATING_DUPLICATE": "This rating already exists.",
     "RATING_FORBIDDEN": "You are not allowed to submit this rating.",
     "RATING_BAD_REQUEST": "Please review the rating details and try again.",
-    "RATING_EXISTING": "Already Captured Ratings"
+    "RATING_EXISTING": "Already Captured Ratings",
+    "RATING_NOT_DELIVERED": "Order must be delivered before a rating can be submitted"
   },
   "ADD_BUSINESS_FORM": {
     "PAGE_TITLE": "Add Business Location",
@@ -1846,7 +1847,8 @@
     "RATING_DUPLICATE": "You have already submitted this rating.",
     "RATING_FORBIDDEN": "You are not allowed to submit this rating.",
     "RATING_BAD_REQUEST": "Please review your rating details and try again.",
-    "RATING_EXISTING": "Already Captured Ratings"
+    "RATING_EXISTING": "Already Captured Ratings",
+    "RATING_NOT_DELIVERED": "Order must be delivered before a rating can be submitted"
   },
   "BUYER_DISPUTES": {
     "REPORT_ISSUE_TITLE": "Report Issue",
@@ -2609,7 +2611,8 @@
     "RATING_SUBMIT_ERROR": "Unable to submit rating right now.",
     "RATING_DUPLICATE": "This rating already exists.",
     "RATING_FORBIDDEN": "You are not allowed to submit this rating.",
-    "RATING_BAD_REQUEST": "Please review the rating details and try again."
+    "RATING_BAD_REQUEST": "Please review the rating details and try again.",
+    "RATING_NOT_DELIVERED": "Order must be delivered before a rating can be submitted"
   },
   "PROFILE": {
     "TITLE": "Profile",

@@ -250,10 +250,12 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
     return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_FORBIDDEN');
   }
+  if (normalized.includes('must be delivered')) {
+    return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_NOT_DELIVERED');
+  }
   if (normalized.includes('required') || normalized.includes('invalid')) {
     return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_BAD_REQUEST');
   }
-
   return message;
 }
   /**

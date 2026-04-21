@@ -404,13 +404,12 @@ private getRatingErrorMessage(message: string): string {
   if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
     return this.translate.instant('ORDER_DETAILS.RATING_FORBIDDEN');
   }
-  // Only map to RATING_BAD_REQUEST for truly generic validation errors,
-  // not business-rule messages like "order must be delivered..."
+  if (normalized.includes('must be delivered')) {
+    return this.translate.instant('ORDER_DETAILS.RATING_NOT_DELIVERED');
+  }
   if (normalized.includes('required') || normalized.includes('invalid')) {
     return this.translate.instant('ORDER_DETAILS.RATING_BAD_REQUEST');
   }
-
-  // Fall through: return the raw server message so the user sees exactly what went wrong
   return message;
 }
 }
