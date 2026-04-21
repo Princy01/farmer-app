@@ -6,7 +6,9 @@
         <div class="header-left">
           <ion-icon name="list-outline" class="header-icon"></ion-icon>
           <div class="header-info">
-            <h3 class="card-title">{{ 'DELIVERY_CONFIRMATION.ACTIVE_DELIVERY_JOBS' | translate }}</h3>
+            <h3 class="card-title">
+              {{ "DELIVERY_CONFIRMATION.ACTIVE_DELIVERY_JOBS" | translate }}
+            </h3>
           </div>
         </div>
       </div>
@@ -17,12 +19,23 @@
           (click)="selectJob(job)"
         >
           <div class="job-details">
-            <h4 class="job-id">{{ 'DELIVERY_CONFIRMATION.JOB_LABEL' | translate }} #{{ job.job_id }}</h4>
+            <h4 class="job-id">
+              {{ "DELIVERY_CONFIRMATION.JOB_LABEL" | translate }} #{{
+                job.job_id
+              }}
+            </h4>
             <div class="job-info">
-              <span class="pickup">{{ 'DELIVERY_CONFIRMATION.PICKUP' | translate }}: {{ job.pickup_location }}</span>
-              <span class="dropoff">{{ 'DELIVERY_CONFIRMATION.DROPOFF' | translate }}: {{ job.dropoff_location }}</span>
+              <span class="pickup"
+                >{{ "DELIVERY_CONFIRMATION.PICKUP" | translate }}:
+                {{ job.pickup_location }}</span
+              >
+              <span class="dropoff"
+                >{{ "DELIVERY_CONFIRMATION.DROPOFF" | translate }}:
+                {{ job.dropoff_location }}</span
+              >
               <span class="date"
-                >{{ 'DELIVERY_CONFIRMATION.DATE' | translate }}: {{ job.delivery_date | date : "short" }}</span
+                >{{ "DELIVERY_CONFIRMATION.DATE" | translate }}:
+                {{ job.delivery_date | date: "short" }}</span
               >
             </div>
           </div>
@@ -30,7 +43,7 @@
         </div>
         <div *ngIf="activeJobs.length === 0" class="no-jobs">
           <ion-icon name="information-circle"></ion-icon>
-          <span>{{ 'DELIVERY_CONFIRMATION.NO_ACTIVE_JOBS' | translate }}</span>
+          <span>{{ "DELIVERY_CONFIRMATION.NO_ACTIVE_JOBS" | translate }}</span>
         </div>
       </div>
     </ion-card>
@@ -49,8 +62,14 @@
           <div class="header-left">
             <ion-icon name="receipt-outline" class="header-icon"></ion-icon>
             <div class="header-info">
-              <h2 class="order-id">{{ 'DELIVERY_CONFIRMATION.ORDER_LABEL' | translate }} #{{ order.order_id }}</h2>
-              <span class="order-type">{{ 'DELIVERY_CONFIRMATION.DELIVERY_TO_RETAILER' | translate }}</span>
+              <h2 class="order-id">
+                {{ "DELIVERY_CONFIRMATION.ORDER_LABEL" | translate }} #{{
+                  order.order_id
+                }}
+              </h2>
+              <span class="order-type">{{
+                "DELIVERY_CONFIRMATION.DELIVERY_TO_RETAILER" | translate
+              }}</span>
             </div>
           </div>
         </div>
@@ -62,7 +81,9 @@
               class="info-icon retailer-icon"
             ></ion-icon>
             <div class="info-details">
-              <span class="info-label">{{ 'DELIVERY_CONFIRMATION.DELIVER_TO' | translate }}</span>
+              <span class="info-label">{{
+                "DELIVERY_CONFIRMATION.DELIVER_TO" | translate
+              }}</span>
               <span class="info-value">{{
                 order.retailer_owner || "N/A"
               }}</span>
@@ -75,7 +96,9 @@
               class="info-icon location-icon"
             ></ion-icon>
             <div class="info-details">
-              <span class="info-label">{{ 'DELIVERY_CONFIRMATION.DELIVERY_ADDRESS' | translate }}</span>
+              <span class="info-label">{{
+                "DELIVERY_CONFIRMATION.DELIVERY_ADDRESS" | translate
+              }}</span>
               <span class="info-value">{{ order.delivery_address }}</span>
             </div>
           </div>
@@ -83,7 +106,9 @@
           <div class="info-row">
             <ion-icon name="call" class="info-icon contact-icon"></ion-icon>
             <div class="info-details">
-              <span class="info-label">{{ 'DELIVERY_CONFIRMATION.CONTACT' | translate }}</span>
+              <span class="info-label">{{
+                "DELIVERY_CONFIRMATION.CONTACT" | translate
+              }}</span>
               <span class="info-value">{{
                 order.retailer_contact || "N/A"
               }}</span>
@@ -98,7 +123,9 @@
           <div class="header-left">
             <ion-icon name="list-outline" class="header-icon"></ion-icon>
             <div class="header-info">
-              <h3 class="card-title">{{ 'DELIVERY_CONFIRMATION.ITEMS_TO_DELIVER' | translate }}</h3>
+              <h3 class="card-title">
+                {{ "DELIVERY_CONFIRMATION.ITEMS_TO_DELIVER" | translate }}
+              </h3>
             </div>
           </div>
         </div>
@@ -112,10 +139,18 @@
               <h4 class="item-name">{{ item.name }}</h4>
               <div class="item-quantities">
                 <span class="quantity-info">
-                  <strong>{{ 'DELIVERY_CONFIRMATION.ORDERED' | translate }}:</strong> {{ item.quantity }} {{ item.unit }}
+                  <strong
+                    >{{ "DELIVERY_CONFIRMATION.ORDERED" | translate }}:</strong
+                  >
+                  {{ item.quantity }} {{ item.unit }}
                 </span>
                 <span class="weight-info">
-                  <strong>{{ 'DELIVERY_CONFIRMATION.ACTUAL_WEIGHT' | translate }}:</strong> {{ item.weight }}
+                  <strong
+                    >{{
+                      "DELIVERY_CONFIRMATION.ACTUAL_WEIGHT" | translate
+                    }}:</strong
+                  >
+                  {{ item.weight }}
                 </span>
               </div>
             </div>
@@ -136,7 +171,11 @@
             [disabled]="isGeneratingOTP"
           >
             <ion-icon name="key" slot="start"></ion-icon>
-            {{ isGeneratingOTP ? ('DELIVERY_CONFIRMATION.GENERATING' | translate) : ('DELIVERY_CONFIRMATION.GENERATE_OTP' | translate) }}
+            {{
+              isGeneratingOTP
+                ? ("DELIVERY_CONFIRMATION.GENERATING" | translate)
+                : ("DELIVERY_CONFIRMATION.GENERATE_OTP" | translate)
+            }}
           </ion-button>
         </div>
 
@@ -144,7 +183,10 @@
         <div *ngIf="otpGenerated && !deliveryConfirmed" class="otp-input-step">
           <div class="otp-timer" *ngIf="otpTimer > 0">
             <ion-icon name="time"></ion-icon>
-            <span>{{ 'DELIVERY_CONFIRMATION.OTP_EXPIRES_IN' | translate }} {{ formatTime(otpTimer) }}</span>
+            <span
+              >{{ "DELIVERY_CONFIRMATION.OTP_EXPIRES_IN" | translate }}
+              {{ formatTime(otpTimer) }}</span
+            >
           </div>
 
           <div class="otp-input-container">
@@ -179,7 +221,10 @@
               >
                 <ion-icon name="checkmark-done" slot="start"></ion-icon>
                 {{
-                  isVerifyingOTP ? ('DELIVERY_CONFIRMATION.VERIFYING' | translate) : ('DELIVERY_CONFIRMATION.VERIFY_CONFIRM_DELIVERY' | translate)
+                  isVerifyingOTP
+                    ? ("DELIVERY_CONFIRMATION.VERIFYING" | translate)
+                    : ("DELIVERY_CONFIRMATION.VERIFY_CONFIRM_DELIVERY"
+                      | translate)
                 }}
               </ion-button>
               <ion-button
@@ -210,8 +255,14 @@
               name="checkmark-circle"
               class="success-icon-large"
             ></ion-icon>
-            <h3>{{ 'DELIVERY_CONFIRMATION.DELIVERY_CONFIRMED' | translate }}</h3>
-            <p>{{ 'DELIVERY_CONFIRMATION.ORDER_SUCCESSFULLY_DELIVERED' | translate }}</p>
+            <h3>
+              {{ "DELIVERY_CONFIRMATION.DELIVERY_CONFIRMED" | translate }}
+            </h3>
+            <p>
+              {{
+                "DELIVERY_CONFIRMATION.ORDER_SUCCESSFULLY_DELIVERED" | translate
+              }}
+            </p>
           </div>
         </div>
       </div>
@@ -226,17 +277,19 @@
         (click)="contactCustomer()"
       >
         <ion-icon name="call" slot="start"></ion-icon>
-        {{ 'DELIVERY_CONFIRMATION.CONTACT_CUSTOMER' | translate }}
+        {{ "DELIVERY_CONFIRMATION.CONTACT_CUSTOMER" | translate }}
       </ion-button>
     </div>
 
     <!-- Emergency Actions-->
     <div class="emergency-section" *ngIf="!deliveryConfirmed">
-      <h4 class="emergency-title">{{ 'DELIVERY_CONFIRMATION.NEED_HELP' | translate }}</h4>
+      <h4 class="emergency-title">
+        {{ "DELIVERY_CONFIRMATION.NEED_HELP" | translate }}
+      </h4>
       <div class="emergency-buttons">
         <ion-button fill="clear" class="support-btn" (click)="callSupport()">
           <ion-icon name="headset" slot="start"></ion-icon>
-          {{ 'DELIVERY_CONFIRMATION.CALL_SUPPORT' | translate }}
+          {{ "DELIVERY_CONFIRMATION.CALL_SUPPORT" | translate }}
         </ion-button>
         <ion-button
           fill="clear"
@@ -244,7 +297,7 @@
           (click)="reportDeliveryIssue()"
         >
           <ion-icon name="warning" slot="start"></ion-icon>
-          {{ 'DELIVERY_CONFIRMATION.REPORT_ISSUE' | translate }}
+          {{ "DELIVERY_CONFIRMATION.REPORT_ISSUE" | translate }}
         </ion-button>
       </div>
     </div>
@@ -258,7 +311,7 @@
         *ngIf="hasMoreDeliveries()"
       >
         <ion-icon name="arrow-forward" slot="end"></ion-icon>
-        {{ 'DELIVERY_CONFIRMATION.NEXT_DELIVERY' | translate }}
+        {{ "DELIVERY_CONFIRMATION.NEXT_DELIVERY" | translate }}
       </ion-button>
       <ion-button
         expand="block"
@@ -266,7 +319,7 @@
         (click)="goToDashboard()"
       >
         <ion-icon name="home" slot="start"></ion-icon>
-        {{ 'DELIVERY_CONFIRMATION.BACK_TO_DASHBOARD' | translate }}
+        {{ "DELIVERY_CONFIRMATION.BACK_TO_DASHBOARD" | translate }}
       </ion-button>
     </div>
   </div>
@@ -287,58 +340,105 @@
             class="success-icon-large"
           ></ion-icon>
         </div>
-        <h2 class="success-title">{{ 'DELIVERY_CONFIRMATION.DELIVERY_COMPLETED' | translate }}</h2>
+        <h2 class="success-title">
+          {{ "DELIVERY_CONFIRMATION.DELIVERY_COMPLETED" | translate }}
+        </h2>
         <p class="success-message">
-          {{ 'DELIVERY_CONFIRMATION.JOB_DELIVERED_CONFIRMED' | translate }} #{{ jobId }} {{ 'DELIVERY_CONFIRMATION.HAS_BEEN_SUCCESSFULLY_DELIVERED' | translate }}
+          {{ "DELIVERY_CONFIRMATION.JOB_DELIVERED_CONFIRMED" | translate }} #{{
+            jobId
+          }}
+          {{
+            "DELIVERY_CONFIRMATION.HAS_BEEN_SUCCESSFULLY_DELIVERED" | translate
+          }}
         </p>
         <div class="delivery-summary">
           <p>
-            <strong>{{ 'DELIVERY_CONFIRMATION.TIME' | translate }}:</strong> {{ deliveryCompletedTime | date : "short" }}
+            <strong>{{ "DELIVERY_CONFIRMATION.TIME" | translate }}:</strong>
+            {{ deliveryCompletedTime | date: "short" }}
           </p>
         </div>
 
         <div class="post-delivery-ratings" *ngIf="orders.length">
-          <h3>{{ 'DELIVERY_CONFIRMATION.RATING_TITLE' | translate }}</h3>
+          <h3>{{ "DELIVERY_CONFIRMATION.RATING_TITLE" | translate }}</h3>
 
           <div class="order-rating-card" *ngFor="let order of orders">
-            <h4>{{ 'DELIVERY_CONFIRMATION.ORDER_LABEL' | translate }} #{{ order.order_id }}</h4>
+            <h4>
+              {{ "DELIVERY_CONFIRMATION.ORDER_LABEL" | translate }} #{{
+                order.order_id
+              }}
+            </h4>
 
-            <div *ngIf="getOrderRatingState(order.order_id).loading" class="rating-loading">
+            <div
+              *ngIf="getOrderRatingState(order.order_id).loading"
+              class="rating-loading"
+            >
               <ion-spinner name="dots"></ion-spinner>
-              <span>{{ 'DELIVERY_CONFIRMATION.RATING_LOADING' | translate }}</span>
+              <span>{{
+                "DELIVERY_CONFIRMATION.RATING_LOADING" | translate
+              }}</span>
             </div>
 
-            <div *ngIf="getOrderRatingState(order.order_id).error" class="rating-error">
+            <div
+              *ngIf="getOrderRatingState(order.order_id).error"
+              class="rating-error"
+            >
               <span>{{ getOrderRatingState(order.order_id).error }}</span>
             </div>
 
-            <div *ngIf="!getOrderRatingState(order.order_id).loading && !getOrderRatingState(order.order_id).error">
+            <div
+              *ngIf="
+                !getOrderRatingState(order.order_id).loading &&
+                !getOrderRatingState(order.order_id).error
+              "
+            >
               <div
                 class="rating-empty"
-                *ngIf="!getOrderRatingState(order.order_id).context?.eligible_pairs?.length"
+                *ngIf="
+                  !getOrderRatingState(order.order_id).context?.eligible_pairs
+                    ?.length
+                "
               >
-                {{ getOrderRatingState(order.order_id).context?.eligibility_message || ('DELIVERY_CONFIRMATION.RATING_NONE_ELIGIBLE' | translate) }}
+                {{
+                  getOrderRatingState(order.order_id).context
+                    ?.eligibility_message ||
+                    ("DELIVERY_CONFIRMATION.RATING_NONE_ELIGIBLE" | translate)
+                }}
               </div>
 
-              <div *ngIf="getOrderRatingState(order.order_id).context?.eligible_pairs?.length" class="rating-form">
+              <div
+                *ngIf="
+                  getOrderRatingState(order.order_id).context?.eligible_pairs
+                    ?.length
+                "
+                class="rating-form"
+              >
                 <ion-item lines="none">
-                  <ion-label position="stacked">{{ 'DELIVERY_CONFIRMATION.RATING_SELECT_PEER' | translate }}</ion-label>
+                  <ion-label position="stacked">{{
+                    "DELIVERY_CONFIRMATION.RATING_SELECT_PEER" | translate
+                  }}</ion-label>
                   <ion-select
-                    [ngModel]="getOrderRatingState(order.order_id).selectedPairKey"
+                    [ngModel]="
+                      getOrderRatingState(order.order_id).selectedPairKey
+                    "
                     (ngModelChange)="setOrderPair(order.order_id, $event)"
                     interface="popover"
                   >
                     <ion-select-option
-                      *ngFor="let pair of getOrderRatingState(order.order_id).context?.eligible_pairs"
+                      *ngFor="
+                        let pair of getOrderRatingState(order.order_id).context
+                          ?.eligible_pairs
+                      "
                       [value]="pair.pair_key"
                     >
-                      {{ pair.label }}
+                      {{ pair.ratee_display_name }}
                     </ion-select-option>
                   </ion-select>
                 </ion-item>
 
                 <div class="star-row">
-                  <span>{{ 'DELIVERY_CONFIRMATION.RATING_STARS' | translate }}</span>
+                  <span>{{
+                    "DELIVERY_CONFIRMATION.RATING_STARS" | translate
+                  }}</span>
                   <div class="star-buttons">
                     <ion-button
                       *ngFor="let starValue of starValues"
@@ -346,29 +446,53 @@
                       class="star-btn"
                       (click)="setOrderStars(order.order_id, starValue)"
                     >
-                      <ion-icon [name]="starValue <= getOrderRatingState(order.order_id).stars ? 'star' : 'star-outline'"></ion-icon>
+                      <ion-icon
+                        [name]="
+                          starValue <= getOrderRatingState(order.order_id).stars
+                            ? 'star'
+                            : 'star-outline'
+                        "
+                      ></ion-icon>
                     </ion-button>
                   </div>
                 </div>
 
                 <ion-item lines="none">
-                  <ion-label position="stacked">{{ 'DELIVERY_CONFIRMATION.RATING_COMMENT' | translate }}</ion-label>
+                  <ion-label position="stacked">{{
+                    "DELIVERY_CONFIRMATION.RATING_COMMENT" | translate
+                  }}</ion-label>
                   <ion-textarea
                     [ngModel]="getOrderRatingState(order.order_id).comment"
                     (ngModelChange)="setOrderComment(order.order_id, $event)"
                     rows="2"
                     maxlength="500"
                     counter="true"
-                    [placeholder]="'DELIVERY_CONFIRMATION.RATING_COMMENT_PLACEHOLDER' | translate"
+                    [placeholder]="
+                      'DELIVERY_CONFIRMATION.RATING_COMMENT_PLACEHOLDER'
+                        | translate
+                    "
                   ></ion-textarea>
                 </ion-item>
 
-                <ion-button expand="block" size="small" (click)="submitOrderRating(order.order_id)" [disabled]="!canSubmitOrderRating(order.order_id)">
-                  {{ getOrderRatingState(order.order_id).submitting ? ('DELIVERY_CONFIRMATION.RATING_SUBMITTING' | translate) : ('DELIVERY_CONFIRMATION.RATING_SUBMIT' | translate) }}
+                <ion-button
+                  expand="block"
+                  size="small"
+                  (click)="submitOrderRating(order.order_id)"
+                  [disabled]="!canSubmitOrderRating(order.order_id)"
+                >
+                  {{
+                    getOrderRatingState(order.order_id).submitting
+                      ? ("DELIVERY_CONFIRMATION.RATING_SUBMITTING" | translate)
+                      : ("DELIVERY_CONFIRMATION.RATING_SUBMIT" | translate)
+                  }}
                 </ion-button>
               </div>
 
-              <ion-note *ngIf="getOrderRatingState(order.order_id).feedback" [color]="getOrderRatingState(order.order_id).feedback?.type" class="rating-feedback">
+              <ion-note
+                *ngIf="getOrderRatingState(order.order_id).feedback"
+                [color]="getOrderRatingState(order.order_id).feedback?.type"
+                class="rating-feedback"
+              >
                 {{ getOrderRatingState(order.order_id).feedback?.message }}
               </ion-note>
             </div>
@@ -383,7 +507,7 @@
             *ngIf="hasMoreDeliveries()"
           >
             <ion-icon name="arrow-forward" slot="end"></ion-icon>
-            {{ 'DELIVERY_CONFIRMATION.NEXT_DELIVERY' | translate }}
+            {{ "DELIVERY_CONFIRMATION.NEXT_DELIVERY" | translate }}
           </ion-button>
           <ion-button
             expand="block"
@@ -392,7 +516,7 @@
             (click)="goToDashboard()"
           >
             <ion-icon name="home" slot="start"></ion-icon>
-            {{ 'DELIVERY_CONFIRMATION.DASHBOARD' | translate }}
+            {{ "DELIVERY_CONFIRMATION.DASHBOARD" | translate }}
           </ion-button>
         </div>
       </div>
@@ -410,7 +534,9 @@
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ 'DELIVERY_CONFIRMATION.REPORT_DELIVERY_ISSUE' | translate }}</ion-title>
+        <ion-title>{{
+          "DELIVERY_CONFIRMATION.REPORT_DELIVERY_ISSUE" | translate
+        }}</ion-title>
         <ion-buttons slot="end">
           <ion-button fill="clear" (click)="showIssueModal = false">
             <ion-icon name="close"></ion-icon>
@@ -422,7 +548,7 @@
     <ion-content>
       <div class="modal-body">
         <p class="modal-description">
-          {{ 'DELIVERY_CONFIRMATION.REPORT_ISSUES_DESCRIPTION' | translate }}
+          {{ "DELIVERY_CONFIRMATION.REPORT_ISSUES_DESCRIPTION" | translate }}
         </p>
 
         <div class="issue-types">
@@ -448,7 +574,9 @@
           <ion-item lines="none" class="description-item">
             <ion-textarea
               [(ngModel)]="issueDescription"
-              placeholder="{{ 'DELIVERY_CONFIRMATION.DESCRIBE_ISSUE_PLACEHOLDER' | translate }}"
+              placeholder="{{
+                'DELIVERY_CONFIRMATION.DESCRIBE_ISSUE_PLACEHOLDER' | translate
+              }}"
               rows="4"
               auto-grow="true"
               maxlength="500"
@@ -467,7 +595,7 @@
             fill="clear"
             (click)="showIssueModal = false"
           >
-            {{ 'DELIVERY_CONFIRMATION.CANCEL' | translate }}
+            {{ "DELIVERY_CONFIRMATION.CANCEL" | translate }}
           </ion-button>
           <ion-button
             expand="block"
@@ -476,7 +604,7 @@
             [disabled]="!selectedIssueType || !issueDescription.trim()"
           >
             <ion-icon name="send" slot="start"></ion-icon>
-            {{ 'DELIVERY_CONFIRMATION.SUBMIT_ISSUE' | translate }}
+            {{ "DELIVERY_CONFIRMATION.SUBMIT_ISSUE" | translate }}
           </ion-button>
         </div>
       </ion-toolbar>

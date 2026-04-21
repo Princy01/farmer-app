@@ -391,21 +391,26 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
     this.subscription.add(ratingsSub);
   }
 
-  private getRatingErrorMessage(message: string): string {
-    if (!message) {
-      return this.translate.instant('ORDER_DETAILS.RATING_SUBMIT_ERROR');
-    }
 
-    const normalized = message.toLowerCase();
-    if (normalized.includes('already exists')) {
-      return this.translate.instant('ORDER_DETAILS.RATING_DUPLICATE');
-    }
-    if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
-      return this.translate.instant('ORDER_DETAILS.RATING_FORBIDDEN');
-    }
-    if (normalized.includes('must be') || normalized.includes('required') || normalized.includes('invalid')) {
-      return this.translate.instant('ORDER_DETAILS.RATING_BAD_REQUEST');
-    }
-    return message;
+private getRatingErrorMessage(message: string): string {
+  if (!message) {
+    return this.translate.instant('ORDER_DETAILS.RATING_SUBMIT_ERROR');
   }
+
+  const normalized = message.toLowerCase();
+  if (normalized.includes('already exists')) {
+    return this.translate.instant('ORDER_DETAILS.RATING_DUPLICATE');
+  }
+  if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
+    return this.translate.instant('ORDER_DETAILS.RATING_FORBIDDEN');
+  }
+  // Only map to RATING_BAD_REQUEST for truly generic validation errors,
+  // not business-rule messages like "order must be delivered..."
+  if (normalized.includes('required') || normalized.includes('invalid')) {
+    return this.translate.instant('ORDER_DETAILS.RATING_BAD_REQUEST');
+  }
+
+  // Fall through: return the raw server message so the user sees exactly what went wrong
+  return message;
+}
 }

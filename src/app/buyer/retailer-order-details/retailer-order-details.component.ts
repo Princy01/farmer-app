@@ -239,23 +239,23 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   private getRatingErrorMessage(message: string): string {
-    if (!message) {
-      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_SUBMIT_ERROR');
-    }
-
-    const normalized = message.toLowerCase();
-    if (normalized.includes('already exists')) {
-      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_DUPLICATE');
-    }
-    if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
-      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_FORBIDDEN');
-    }
-    if (normalized.includes('must be') || normalized.includes('required') || normalized.includes('invalid')) {
-      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_BAD_REQUEST');
-    }
-    return message;
+  if (!message) {
+    return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_SUBMIT_ERROR');
   }
 
+  const normalized = message.toLowerCase();
+  if (normalized.includes('already exists')) {
+    return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_DUPLICATE');
+  }
+  if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
+    return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_FORBIDDEN');
+  }
+  if (normalized.includes('required') || normalized.includes('invalid')) {
+    return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_BAD_REQUEST');
+  }
+
+  return message;
+}
   /**
    * Retries loading order details after an error.
    */
