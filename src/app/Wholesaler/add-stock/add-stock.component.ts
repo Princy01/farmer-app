@@ -171,7 +171,7 @@ export class AddStockComponent implements OnInit, OnDestroy {
    * @param field - Field name to increment
    */
   increment(field: string): void {
-    this.stockData[field] = (this.stockData[field] || 0) + 1;
+    this.setNumericField(field, this.getNumericFieldValue(field) + 1);
   }
 
   /**
@@ -179,9 +179,7 @@ export class AddStockComponent implements OnInit, OnDestroy {
    * @param field - Field name to decrement
    */
   decrement(field: string): void {
-    if ((this.stockData[field] || 0) > 0) {
-      this.stockData[field]--;
-    }
+    this.setNumericField(field, this.getNumericFieldValue(field) - 1);
   }
 
   /**
@@ -189,7 +187,7 @@ export class AddStockComponent implements OnInit, OnDestroy {
    * @param field - Field name to add to
    */
   addFifty(field: string): void {
-    this.stockData[field] = (this.stockData[field] || 0) + 50;
+    this.setNumericField(field, this.getNumericFieldValue(field) + 50);
   }
 
   /**
@@ -197,7 +195,26 @@ export class AddStockComponent implements OnInit, OnDestroy {
    * @param field - Field name to subtract from
    */
   subtractFifty(field: string): void {
-    this.stockData[field] = Math.max(0, (this.stockData[field] || 0) - 50);
+    this.setNumericField(field, this.getNumericFieldValue(field) - 50);
+  }
+
+  /**
+   * Set numeric field value from direct input while enforcing non-negative values
+   * @param field - Field name to update
+   * @param value - Incoming value from input or button operations
+   */
+  setNumericField(field: string, value: number | string | null | undefined): void {
+    const parsedValue = Number(value);
+    this.stockData[field] = Number.isFinite(parsedValue) ? Math.max(0, parsedValue) : 0;
+  }
+
+  /**
+   * Safely read a numeric field value
+   * @param field - Field name to read
+   */
+  private getNumericFieldValue(field: string): number {
+    const parsedValue = Number(this.stockData[field]);
+    return Number.isFinite(parsedValue) ? parsedValue : 0;
   }
 
   /**

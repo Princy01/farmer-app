@@ -163,9 +163,46 @@
       font-weight: 500;
     }
 
+    &.editable {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      min-height: 2.5rem;
+
+      &:focus-within {
+        box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.15);
+      }
+
+      .stepper-input {
+        --background: transparent;
+        --padding-start: 0;
+        --padding-end: 0;
+        --padding-top: 0;
+        --padding-bottom: 0;
+        --highlight-height: 0;
+        display: flex;
+        align-items: center;
+        width: 5rem;
+        min-height: 2rem;
+      }
+
+      .stepper-input::part(native) {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #333;
+      }
+    }
+
     &.price {
       flex-direction: row;
       gap: 0.25rem;
+      justify-content: center;
 
       .currency {
         font-size: 1rem;
@@ -173,7 +210,12 @@
         color: var(--ion-color-primary);
       }
 
-      .stepper-value {
+      .stepper-input {
+        width: 5rem;
+      }
+
+      .stepper-input::part(native) {
+        text-align: center;
         font-size: 1.4rem;
       }
     }
@@ -264,7 +306,11 @@
         font-size: 1rem;
       }
 
-      &.price .stepper-value {
+      &.editable .stepper-input::part(native) {
+        font-size: 1rem;
+      }
+
+      &.price .stepper-input::part(native) {
         font-size: 1.2rem;
       }
     }

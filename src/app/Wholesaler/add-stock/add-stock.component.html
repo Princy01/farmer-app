@@ -180,13 +180,17 @@
               >
                 <ion-icon name="remove-circle" slot="icon-only"></ion-icon>
               </ion-button>
-              <div class="stepper-value-box">
-                <span class="stepper-value">{{
-                  stockData.stockReceived || 0
-                }}</span>
-                <span class="stepper-unit">{{
-                  "ADD_STOCK.UNIT_KG" | translate
-                }}</span>
+              <div class="stepper-value-box editable">
+                <ion-input
+                  class="stepper-input"
+                  type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  autocomplete="off"
+                  placeholder="0"
+                  [ngModel]="stockData.stockReceived"
+                  (ngModelChange)="setNumericField('stockReceived', $event)"
+                ></ion-input>
               </div>
               <ion-button
                 fill="clear"
@@ -226,13 +230,17 @@
               >
                 <ion-icon name="remove-circle" slot="icon-only"></ion-icon>
               </ion-button>
-              <div class="stepper-value-box">
-                <span class="stepper-value">{{
-                  stockData.stockCarriedForward || 0
-                }}</span>
-                <span class="stepper-unit">{{
-                  "ADD_STOCK.UNIT_KG" | translate
-                }}</span>
+              <div class="stepper-value-box editable">
+                <ion-input
+                  class="stepper-input"
+                  type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  autocomplete="off"
+                  placeholder="0"
+                  [ngModel]="stockData.stockCarriedForward"
+                  (ngModelChange)="setNumericField('stockCarriedForward', $event)"
+                ></ion-input>
               </div>
               <ion-button
                 fill="clear"
@@ -285,11 +293,17 @@
               >
                 <ion-icon name="remove-circle" slot="icon-only"></ion-icon>
               </ion-button>
-              <div class="stepper-value-box price">
+              <div class="stepper-value-box price editable">
                 <span class="currency">₹</span>
-                <span class="stepper-value">{{
-                  stockData.pricePerUnit || 0
-                }}</span>
+                <ion-input
+                  class="stepper-input"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="0"
+                  [ngModel]="stockData.pricePerUnit"
+                  (ngModelChange)="setNumericField('pricePerUnit', $event)"
+                ></ion-input>
               </div>
               <ion-button
                 fill="clear"
