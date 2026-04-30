@@ -25,12 +25,13 @@ import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { RetailerOrderHistoryService, RetailerOrderHistory } from './retailer-order-history.service';
-
 interface DisplayOrder {
   orderId: string;
   rawOrderId: number;
   placedAt: string;
-  status: string;
+  statusId: number | null;
+  statusName: string;
+  statusLabel: string;
   deliveryAddress: string;
   totalAmount: number;
   finalAmount: number;
@@ -61,7 +62,6 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     private orderService: RetailerOrderHistoryService
   ) {
     addIcons({
-      alertCircleOutline,
       locationOutline,
       basketOutline,
       storefrontOutline,
@@ -147,39 +147,6 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       });
   }
 
-  private mapToDisplayOrder(o: RetailerOrderHistory, isCurrent: boolean): DisplayOrder {
-    const status = this.getStatusFromCode(o.order_status);
-    return {
-      orderId: `ORD-${o.order_id.toString().padStart(6, '0')}`,
-      rawOrderId: o.order_id,
-      placedAt: o.date_of_order,
-      status,
-      deliveryAddress: o.delivery_address || '',
-      totalAmount: o.total_order_amount || 0,
-      finalAmount: o.final_amount || 0,
-      actualDeliveryDate: o.actual_delivery_date || undefined,
-      isCurrent,
-    };
-  }
-  private getStatusFromCode(code: number | null): string {
-    if (code === null) return 'Unknown';
-
-    const statusMap: { [key: number]: string } = {
-      1: 'Processing',
-      2: 'Confirmed',
-      3: 'Payment',
-      4: 'Rejected',
-      5: 'Successful',
-      6: 'Cancellation',
-      7: 'Returned',
-      8: 'Picked Up',
-      9: 'Return',
-      10: 'Rejected',
-    };
-
-    return statusMap[code] || 'Unknown';
-  }
-
   onSegmentChange(event: any): void {
     if (event?.detail?.value) {
       this.filterOrders(event.detail.value);
@@ -189,61 +156,79 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   filterOrders(filter: string): void {
     this.selectedFilter = filter;
 
+    const isSuccessful = (statusName: string): boolean => {
+      const value = statusName.toLowerCase();
+      return value.includes('successful') || value.includes('delivered') || value.includes('complete');
+    };
+
+    const isCancelled = (statusName: string): boolean => {
+      const value = statusName.toLowerCase();
+      return value.includes('cancel') || value.includes('reject') || value.includes('fail');
+    };
+
+    const isReturned = (statusName: string): boolean => {
+      const value = statusName.toLowerCase();
+      return value.includes('return') || value.includes('refund');
+    };
+
     if (filter === 'all') {
       this.filteredOrders = [...this.orders];
     } else if (filter === 'active') {
-      // Active orders: Processing, Confirmed, Payment, Picked Up
-      this.filteredOrders = this.orders.filter((o) =>
-        ['Processing', 'Confirmed', 'Payment', 'Picked Up'].includes(o.status)
-      );
+      // Source of truth for active is backend grouping (current_orders).
+      this.filteredOrders = this.orders.filter((o) => o.isCurrent);
     } else if (filter === 'successful') {
-      this.filteredOrders = this.orders.filter((o) => o.status === 'Successful');
+      this.filteredOrders = this.orders.filter((o) => isSuccessful(o.statusName));
     } else if (filter === 'cancelled') {
-      // Cancelled/Rejected orders
-      this.filteredOrders = this.orders.filter((o) =>
-        ['Rejected', 'Cancellation'].includes(o.status)
-      );
+      this.filteredOrders = this.orders.filter((o) => isCancelled(o.statusName));
     } else if (filter === 'returned') {
-      this.filteredOrders = this.orders.filter((o) =>
-        ['Returned', 'Return'].includes(o.status)
-      );
+      this.filteredOrders = this.orders.filter((o) => isReturned(o.statusName));
     } else {
       this.filteredOrders = this.orders.filter(
-        (o) => o.status.toLowerCase() === filter.toLowerCase()
+        (o) => o.statusName.toLowerCase() === filter.toLowerCase()
       );
     }
   }
 
-  getStatusColor(status: string): string {
-    const colors: { [key: string]: string } = {
-      'Processing': 'warning',
-      'Confirmed': 'primary',
-      'Payment': 'secondary',
-      'Rejected': 'danger',
-      'Successful': 'success',
-      'Cancellation': 'danger',
-      'Returned': 'medium',
-      'Picked Up': 'tertiary',
-      'Return': 'medium',
-      'Unknown': 'medium',
+  getStatusColor(statusId: number | null): string {
+    if (statusId === null) {
+      return 'medium';
+    }
+
+    const colors: { [key: number]: string } = {
+      1: 'warning',
+      2: 'primary',
+      3: 'secondary',
+      4: 'danger',
+      5: 'success',
+      6: 'success',
+      7: 'medium',
+      8: 'tertiary',
+      9: 'medium',
+      10: 'danger',
     };
-    return colors[status] || 'medium';
+
+    return colors[statusId] || 'medium';
   }
 
-  getStatusIcon(status: string): string {
-    const icons: { [key: string]: string } = {
-      'Processing': 'time-outline',
-      'Confirmed': 'checkmark-circle-outline',
-      'Payment': 'card-outline',
-      'Rejected': 'close-circle-outline',
-      'Successful': 'checkmark-done-circle',
-      'Cancellation': 'close-circle-outline',
-      'Returned': 'arrow-undo-outline',
-      'Picked Up': 'cube-outline',
-      'Return': 'arrow-undo-outline',
-      'Unknown': 'help-outline',
+  getStatusIcon(statusId: number | null): string {
+    if (statusId === null) {
+      return 'help-outline';
+    }
+
+    const icons: { [key: number]: string } = {
+      1: 'time-outline',
+      2: 'checkmark-circle-outline',
+      3: 'card-outline',
+      4: 'close-circle-outline',
+      5: 'checkmark-done-circle',
+      6: 'checkmark-done-circle',
+      7: 'arrow-undo-outline',
+      8: 'cube-outline',
+      9: 'arrow-undo-outline',
+      10: 'close-circle-outline',
     };
-    return icons[status] || 'help-outline';
+
+    return icons[statusId] || 'help-outline';
   }
 
   onOrderClick(order: DisplayOrder): void {
@@ -256,26 +241,25 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     this.router.navigate(['/buyer/retailer-order-details', order.rawOrderId]);
   }
 
-  getOrderProgress(status: string): number {
-    const progress: { [key: string]: number } = {
-      'Processing': 0.2,
-      'Confirmed': 0.4,
-      'Payment': 0.6,
-      'Picked Up': 0.8,
-      'Successful': 1.0,
-      'Rejected': 0,
-      'Cancellation': 0,
-      'Returned': 0.5,
-      'Return': 0.5,
-      'Unknown': 0,
-    };
-    return progress[status] || 0;
-  }
+  getOrderProgress(statusId: number | null): number {
+    if (statusId === null) {
+      return 0;
+    }
 
-  getTranslatedStatus(status: string): string {
-    const key = `RETAILER_ORDER_HISTORY.STATUS_${status.toUpperCase().replace(/\s+/g, '_')}`;
-    const translation = this.translate.instant(key);
-    return translation !== key ? translation : status;
+    const progress: { [key: number]: number } = {
+      1: 0.2,
+      2: 0.4,
+      3: 0.6,
+      4: 0,
+      5: 0.8,
+      6: 1,
+      7: 0.5,
+      8: 0.8,
+      9: 0.5,
+      10: 0,
+    };
+
+    return progress[statusId] || 0;
   }
 
   getTranslatedFilterLabel(filter: string): string {
@@ -291,5 +275,29 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     return this.translate.instant('RETAILER_ORDER_HISTORY.NO_ORDERS_DESC_FILTER', {
       filter: this.getTranslatedFilterLabel(filter),
     });
+  }
+
+  private mapToDisplayOrder(o: RetailerOrderHistory, isCurrent: boolean): DisplayOrder {
+    const statusName = o.order_status_name || 'Unknown';
+    const statusLabel = statusName;
+
+    return {
+      orderId: `ORD-${o.order_id.toString().padStart(6, '0')}`,
+      rawOrderId: o.order_id,
+      placedAt: o.date_of_order,
+      statusId: o.order_status,
+      statusName,
+      statusLabel,
+      deliveryAddress: o.delivery_address || '',
+      totalAmount: o.total_order_amount || 0,
+      finalAmount: o.final_amount || 0,
+      actualDeliveryDate: o.actual_delivery_date || undefined,
+      isCurrent,
+    };
+  }
+
+  isSuccessfulStatus(statusName: string): boolean {
+    const value = statusName.toLowerCase();
+    return value.includes('successful') || value.includes('delivered') || value.includes('complete');
   }
 }

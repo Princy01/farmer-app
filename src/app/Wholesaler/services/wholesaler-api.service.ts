@@ -282,7 +282,7 @@ export interface BranchStock {
 }
 
   // Weekly sales trend data
- 
+
 export interface WeeklyTrend {
   week: number;
   sales: number;

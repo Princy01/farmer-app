@@ -297,21 +297,17 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/buyer/my-issues']);
   }
 
-  /**
-   * Returns the display label for an order status.
-   * @param status Order status code
-   * @returns Status label for translation lookup
-   */
-  getStatusLabel(status: number): string {
-    const labels: { [key: number]: string } = {
-      1: 'PLACED',
-      2: 'CONFIRMED',
-      3: 'PACKED',
-      4: 'SHIPPED',
-      5: 'IN_TRANSIT',
-      6: 'DELIVERED',
-    };
-    return labels[status] || 'UNKNOWN';
+  getStatusName(status: number): string {
+    return this.order?.order_status_name || this.translate.instant('RETAILER_ORDER_DETAILS.STATUS_UNKNOWN');
+  }
+
+  getStatusDisplay(status: number): string {
+    return this.order?.order_status_name || this.translate.instant('RETAILER_ORDER_DETAILS.STATUS_UNKNOWN');
+  }
+
+  isSuccessfulStatus(statusName: string): boolean {
+    const value = statusName.toLowerCase();
+    return value.includes('successful') || value.includes('delivered') || value.includes('complete');
   }
 
   /**
@@ -348,17 +344,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     return icons[status] || 'help-outline';
   }
 
-  /**
-   * Returns the translated status label for an order.
-   * @param status Order status code
-   * @returns Translated status string
-   */
-  getTranslatedStatus(status: number): string {
-    const label = this.getStatusLabel(status);
-    const key = `RETAILER_ORDER_DETAILS.STATUS_${label}`;
-    const translation = this.translate.instant(key);
-    return translation !== key ? translation : label;
-  }
 
   /**
    * Calculates the subtotal for the order (before discount and tax).

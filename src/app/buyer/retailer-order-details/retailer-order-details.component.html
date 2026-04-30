@@ -51,11 +51,11 @@
           </ion-label>
           <ion-chip [color]="getStatusColor(order.order_status)">
             <ion-icon [name]="getStatusIcon(order.order_status)"></ion-icon>
-            <ion-label>{{ getTranslatedStatus(order.order_status) }}</ion-label>
+            <ion-label>{{ getStatusDisplay(order.order_status) }}</ion-label>
           </ion-chip>
         </div>
 
-        <div class="info-row" *ngIf="order.actual_delivery_date">
+        <div class="info-row" *ngIf="order.actual_delivery_date && isSuccessfulStatus(order.order_status_name)">
           <ion-icon name="checkmark-done-circle" color="success"></ion-icon>
           <div>
             <strong>{{ 'RETAILER_ORDER_DETAILS.DELIVERED_AT' | translate }}:</strong>

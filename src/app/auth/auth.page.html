@@ -12,7 +12,7 @@
     </div>
 
     <!-- Segmented Control -->
-    <div class="segment-container">
+    <div class="segment-container" *ngIf="authMode !== 'verify-email' && authMode !== 'forgot-password'">
       <ion-segment [(ngModel)]="authMode" value="login" class="custom-segment" [attr.aria-label]="'AUTH.SELECT_AUTH_MODE' | translate">
         <ion-segment-button value="login" class="segment-button" [attr.aria-pressed]="authMode === 'login'">
           <ion-label>{{ 'AUTH.SIGN_IN' | translate }}</ion-label>
@@ -65,7 +65,13 @@
         </div>
 
         <div class="forgot-password-container">
-          <a class="forgot-password-link">{{ 'AUTH.FORGOT_PASSWORD' | translate }}</a>
+          <button
+            type="button"
+            class="forgot-password-link"
+            (click)="openForgotPasswordModal()"
+            [attr.aria-label]="'AUTH.FORGOT_PASSWORD' | translate">
+            {{ 'AUTH.FORGOT_PASSWORD' | translate }}
+          </button>
         </div>
 
         <ion-button type="submit" expand="block" class="login-button" [disabled]="loginForm.invalid || isLoading" [attr.aria-busy]="isLoading">
@@ -332,6 +338,208 @@
       </div>
     </div>
 
+    <div class="form-container forgot-password-flow" *ngIf="authMode === 'forgot-password'">
+      <div class="forgot-password-sheet">
+        <div class="forgot-password-header">
+          <div>
+            <p class="forgot-password-eyebrow">{{ 'AUTH.FORGOT_PASSWORD_LABEL' | translate }}</p>
+            <h2 class="forgot-password-title">{{ 'AUTH.FORGOT_PASSWORD' | translate }}</h2>
+          </div>
+
+          <ion-button
+            type="button"
+            fill="clear"
+            class="forgot-action-link"
+            (click)="closeForgotPasswordModal()"
+            [disabled]="isForgotLoading || isResendResetCodeLoading">
+            <ion-icon name="arrow-back-outline" slot="start" aria-hidden="true"></ion-icon>
+            {{ 'AUTH.BACK_TO_LOGIN' | translate }}
+          </ion-button>
+        </div>
+
+        <form *ngIf="forgotPasswordMode === 'request'" class="forgot-password-panel" [formGroup]="forgotPasswordForm" (ngSubmit)="submitForgotPasswordRequest()">
+          <p class="forgot-password-description">{{ 'AUTH.FORGOT_PASSWORD_HELPER' | translate }}</p>
+
+          <div class="input-group">
+            <ion-item
+              class="custom-input"
+              lines="none"
+              [class.ion-invalid]="forgotPasswordForm.get('identifier')?.invalid && forgotPasswordForm.get('identifier')?.touched"
+              [class.ion-touched]="forgotPasswordForm.get('identifier')?.touched">
+              <ion-icon name="mail-outline" slot="start" class="input-icon" aria-hidden="true"></ion-icon>
+              <ion-input
+                [placeholder]="'AUTH.FORGOT_PASSWORD_EMAIL_PLACEHOLDER' | translate"
+                formControlName="email"
+                class="input-field"
+                [attr.aria-required]="true"
+                [attr.aria-invalid]="forgotPasswordForm.get('email')?.invalid && forgotPasswordForm.get('email')?.touched">
+              </ion-input>
+            </ion-item>
+
+            <div class="forgot-password-error" *ngIf="forgotPasswordForm.get('email')?.touched && forgotPasswordForm.get('email')?.errors">
+              <span *ngIf="forgotPasswordForm.get('email')?.errors?.['required']">{{ 'AUTH.FORGOT_PASSWORD_EMAIL_REQUIRED' | translate }}</span>
+              <span *ngIf="forgotPasswordForm.get('email')?.errors?.['email']">{{ 'AUTH.FORGOT_PASSWORD_EMAIL_INVALID' | translate }}</span>
+            </div>
+          </div>
+
+          <div class="forgot-password-inline-error" *ngIf="forgotPasswordErrorKey">
+            <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+            <span>{{ forgotPasswordErrorKey | translate }}</span>
+          </div>
+
+          <ion-button expand="block" class="forgot-primary-button" type="submit" [disabled]="isForgotLoading">
+            <ion-spinner *ngIf="isForgotLoading" name="circles" slot="start" aria-hidden="true"></ion-spinner>
+            <ion-icon *ngIf="!isForgotLoading" name="key-outline" slot="start" aria-hidden="true"></ion-icon>
+            {{ isForgotLoading ? ('AUTH.SENDING' | translate) : ('AUTH.FORGOT_PASSWORD_SEND_CODE' | translate) }}
+          </ion-button>
+        </form>
+
+        <form *ngIf="forgotPasswordMode === 'reset'" class="forgot-password-panel" [formGroup]="forgotPasswordForm" (ngSubmit)="submitForgotPasswordReset()">
+          <p class="forgot-password-description">{{ 'AUTH.FORGOT_PASSWORD_CODE_SENT_TO' | translate }} <strong>{{ forgotPasswordMaskedDestination }}</strong></p>
+
+          <div class="forgot-password-status-row">
+            <span>{{ 'AUTH.FORGOT_PASSWORD_CODE_EXPIRES_IN' | translate }}</span>
+            <strong [class.expired]="forgotPasswordExpirySeconds <= 0">{{ getForgotPasswordCountdownLabel() }}</strong>
+          </div>
+
+          <div class="forgot-password-demo-code" *ngIf="demoResetCode">
+            <p>{{ 'AUTH.FORGOT_PASSWORD_DEMO_CODE_LABEL' | translate }}</p>
+            <strong>{{ demoResetCode }}</strong>
+          </div>
+
+          <div class="input-group">
+            <ion-item
+              class="custom-input"
+              lines="none"
+              [class.ion-invalid]="forgotPasswordForm.get('code')?.invalid && forgotPasswordForm.get('code')?.touched"
+              [class.ion-touched]="forgotPasswordForm.get('code')?.touched">
+              <ion-icon name="key-outline" slot="start" class="input-icon" aria-hidden="true"></ion-icon>
+              <ion-input
+                [placeholder]="'AUTH.FORGOT_PASSWORD_CODE_PLACEHOLDER' | translate"
+                formControlName="code"
+                class="input-field"
+                inputmode="numeric"
+                maxlength="6">
+              </ion-input>
+            </ion-item>
+            <div class="forgot-password-error" *ngIf="forgotPasswordForm.get('code')?.touched && forgotPasswordForm.get('code')?.errors">
+              <span *ngIf="forgotPasswordForm.get('code')?.errors?.['required']">{{ 'AUTH.FORGOT_PASSWORD_CODE_REQUIRED' | translate }}</span>
+              <span *ngIf="forgotPasswordForm.get('code')?.errors?.['pattern']">{{ 'AUTH.FORGOT_PASSWORD_INVALID_CODE' | translate }}</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <ion-item
+              class="custom-input"
+              lines="none"
+              [class.ion-invalid]="forgotPasswordForm.get('newPassword')?.invalid && forgotPasswordForm.get('newPassword')?.touched"
+              [class.ion-touched]="forgotPasswordForm.get('newPassword')?.touched">
+              <ion-icon name="lock-closed-outline" slot="start" class="input-icon" aria-hidden="true"></ion-icon>
+              <ion-input
+                [type]="showForgotNewPassword ? 'text' : 'password'"
+                [placeholder]="'AUTH.FORGOT_PASSWORD_NEW_PASSWORD' | translate"
+                formControlName="newPassword"
+                class="input-field">
+              </ion-input>
+              <ion-icon
+                [name]="showForgotNewPassword ? 'eye-off-outline' : 'eye-outline'"
+                slot="end"
+                class="password-toggle"
+                (click)="toggleForgotNewPasswordVisibility()"
+                [attr.aria-label]="(showForgotNewPassword ? 'AUTH.HIDE_PASSWORD' : 'AUTH.SHOW_PASSWORD') | translate"
+                role="button"
+                tabindex="0"
+                (keydown.enter)="toggleForgotNewPasswordVisibility()"
+                (keydown.space)="toggleForgotNewPasswordVisibility()">
+              </ion-icon>
+            </ion-item>
+            <div class="forgot-password-error" *ngIf="forgotPasswordForm.get('newPassword')?.touched && forgotPasswordForm.get('newPassword')?.errors">
+              <span *ngIf="forgotPasswordForm.get('newPassword')?.errors?.['required']">{{ 'AUTH.PASSWORD_REQUIRED' | translate }}</span>
+              <span *ngIf="forgotPasswordForm.get('newPassword')?.errors?.['minlength']">{{ 'AUTH.FORGOT_PASSWORD_WEAK_PASSWORD' | translate }}</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <ion-item
+              class="custom-input"
+              lines="none"
+              [class.ion-invalid]="(forgotPasswordForm.get('confirmPassword')?.touched && forgotPasswordForm.errors?.['passwordMismatch']) || (forgotPasswordForm.get('confirmPassword')?.invalid && forgotPasswordForm.get('confirmPassword')?.touched)"
+              [class.ion-touched]="forgotPasswordForm.get('confirmPassword')?.touched">
+              <ion-icon name="lock-closed-outline" slot="start" class="input-icon" aria-hidden="true"></ion-icon>
+              <ion-input
+                [type]="showForgotConfirmPassword ? 'text' : 'password'"
+                [placeholder]="'AUTH.FORGOT_PASSWORD_CONFIRM_PASSWORD' | translate"
+                formControlName="confirmPassword"
+                class="input-field">
+              </ion-input>
+              <ion-icon
+                [name]="showForgotConfirmPassword ? 'eye-off-outline' : 'eye-outline'"
+                slot="end"
+                class="password-toggle"
+                (click)="toggleForgotConfirmPasswordVisibility()"
+                [attr.aria-label]="(showForgotConfirmPassword ? 'AUTH.HIDE_PASSWORD' : 'AUTH.SHOW_PASSWORD') | translate"
+                role="button"
+                tabindex="0"
+                (keydown.enter)="toggleForgotConfirmPasswordVisibility()"
+                (keydown.space)="toggleForgotConfirmPasswordVisibility()">
+              </ion-icon>
+            </ion-item>
+            <div class="forgot-password-error" *ngIf="forgotPasswordForm.get('confirmPassword')?.touched && forgotPasswordForm.get('confirmPassword')?.errors?.['required']">
+              {{ 'AUTH.FORGOT_PASSWORD_CONFIRM_REQUIRED' | translate }}
+            </div>
+            <div class="forgot-password-error" *ngIf="forgotPasswordForm.get('confirmPassword')?.touched && forgotPasswordForm.errors?.['passwordMismatch']">
+              {{ 'AUTH.FORGOT_PASSWORD_PASSWORDS_DO_NOT_MATCH' | translate }}
+            </div>
+          </div>
+
+          <div class="forgot-password-inline-error" *ngIf="forgotPasswordErrorKey">
+            <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+            <span>{{ forgotPasswordErrorKey | translate }}</span>
+          </div>
+
+          <ion-button
+            expand="block"
+            class="forgot-primary-button"
+            type="submit"
+            [disabled]="isForgotLoading || forgotPasswordExpirySeconds <= 0">
+            <ion-spinner *ngIf="isForgotLoading" name="circles" slot="start" aria-hidden="true"></ion-spinner>
+            <ion-icon *ngIf="!isForgotLoading" name="lock-open-outline" slot="start" aria-hidden="true"></ion-icon>
+            {{ isForgotLoading ? ('AUTH.UPDATING_PASSWORD' | translate) : ('AUTH.FORGOT_PASSWORD_RESET_BUTTON' | translate) }}
+          </ion-button>
+
+          <div class="forgot-password-actions-row">
+            <ion-button
+              type="button"
+              fill="clear"
+              class="forgot-action-link"
+              (click)="resendForgotPasswordCode()"
+              [disabled]="forgotPasswordResendCooldown > 0 || isResendResetCodeLoading">
+              <ion-spinner *ngIf="isResendResetCodeLoading" name="dots" slot="start" aria-hidden="true"></ion-spinner>
+              <ion-icon *ngIf="!isResendResetCodeLoading" name="refresh-outline" slot="start" aria-hidden="true"></ion-icon>
+              {{ forgotPasswordResendCooldown > 0 ?
+              ('AUTH.RESEND_IN' | translate: {seconds: forgotPasswordResendCooldown}) :
+              ('AUTH.FORGOT_PASSWORD_RESEND_CODE' | translate) }}
+            </ion-button>
+
+            <ion-button type="button" fill="clear" class="forgot-action-link" (click)="backToForgotRequest()" [disabled]="isForgotLoading || isResendResetCodeLoading">
+              <ion-icon name="arrow-back-outline" slot="start" aria-hidden="true"></ion-icon>
+              {{ 'AUTH.BACK' | translate }}
+            </ion-button>
+          </div>
+        </form>
+
+        <div *ngIf="forgotPasswordMode === 'success'" class="forgot-password-panel forgot-password-success">
+          <ion-icon name="checkmark-circle-outline" class="forgot-password-success-icon" aria-hidden="true"></ion-icon>
+          <h3>{{ 'AUTH.FORGOT_PASSWORD_SUCCESS_TITLE' | translate }}</h3>
+          <p>{{ 'AUTH.FORGOT_PASSWORD_SUCCESS_MESSAGE' | translate }}</p>
+
+          <ion-button expand="block" class="forgot-primary-button" (click)="forgotPasswordContinueToLogin()">
+            {{ 'AUTH.GO_TO_LOGIN' | translate }}
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
     <!-- Features Section -->
     <div class="features-section">
       <div class="feature-item">
@@ -348,4 +556,5 @@
       </div>
     </div>
   </div>
+
 </ion-content>

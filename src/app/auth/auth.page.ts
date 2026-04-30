@@ -9,9 +9,19 @@ import {
   mailOutline, lockClosedOutline, personOutline,
   businessOutline, storefrontOutline, storefront,
   carOutline, shieldCheckmarkOutline, logInOutline,
-  personAddOutline, locationOutline, mapOutline
+  personAddOutline, locationOutline, mapOutline,
+  refreshOutline, arrowBackOutline,
+  checkmarkCircleOutline, keyOutline,
+  lockOpenOutline, alertCircleOutline
 } from 'ionicons/icons';
-import { AuthService, UserRegistration, LoginCredentials, Location, State, City } from './auth.service';
+import {
+  AuthService,
+  UserRegistration,
+  LoginCredentials,
+  Location,
+  State,
+  City
+} from './auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { TranslateApiService } from '@/services/translate-api.service';
 import { Subject } from 'rxjs';
@@ -35,10 +45,22 @@ enum UserRole {
 export class LoginPage implements OnDestroy {
   loginForm: FormGroup;
   registerForm: FormGroup;
-  authMode: 'login' | 'register' | 'verify-email' = 'login';
+  forgotPasswordForm: FormGroup;
+  authMode: 'login' | 'register' | 'verify-email' | 'forgot-password' = 'login';
+  forgotPasswordMode: 'request' | 'reset' | 'success' = 'request';
   showLoginPassword = false;
   showRegisterPassword = false;
+  showForgotNewPassword = false;
+  showForgotConfirmPassword = false;
   isLoading = false;
+  isForgotLoading = false;
+  isResendResetCodeLoading = false;
+  forgotPasswordEmail = '';
+  forgotPasswordMaskedDestination = '';
+  forgotPasswordExpirySeconds = 0;
+  forgotPasswordResendCooldown = 0;
+  forgotPasswordErrorKey = '';
+  demoResetCode: string | null = null;
   states: State[] = [];
   cities: City[] = [];
   locations: Location[] = [];
@@ -56,6 +78,8 @@ export class LoginPage implements OnDestroy {
   isResending: boolean = false;
   resendCooldown: number = 0;
   private cooldownTimer: any;
+  private forgotPasswordExpiryTimer: any;
+  private forgotPasswordResendTimer: any;
   private destroy$ = new Subject<void>();
 
   userRoles = [
@@ -77,7 +101,10 @@ export class LoginPage implements OnDestroy {
       mailOutline, lockClosedOutline, personOutline,
       businessOutline, storefrontOutline, storefront,
       carOutline, shieldCheckmarkOutline, logInOutline,
-      personAddOutline, locationOutline, mapOutline
+      personAddOutline, locationOutline, mapOutline,
+      refreshOutline, arrowBackOutline,
+      checkmarkCircleOutline, keyOutline,
+      lockOpenOutline, alertCircleOutline
     });
 
     this.loginForm = this.fb.group({
@@ -97,6 +124,13 @@ export class LoginPage implements OnDestroy {
       role_id: ['', Validators.required],
       active_status: [1]
     });
+
+    this.forgotPasswordForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
 
     this.loadStates();
     this.setupFormValueChanges();
@@ -273,6 +307,25 @@ export class LoginPage implements OnDestroy {
     this.showRegisterPassword = !this.showRegisterPassword;
   }
 
+  toggleForgotNewPasswordVisibility() {
+    this.showForgotNewPassword = !this.showForgotNewPassword;
+  }
+
+  toggleForgotConfirmPasswordVisibility() {
+    this.showForgotConfirmPassword = !this.showForgotConfirmPassword;
+  }
+
+  passwordMatchValidator(control: AbstractControl) {
+    const newPassword = control.get('newPassword')?.value;
+    const confirmPassword = control.get('confirmPassword')?.value;
+
+    if (!newPassword || !confirmPassword) {
+      return null;
+    }
+
+    return newPassword === confirmPassword ? null : { passwordMismatch: true };
+  }
+
   emailOrPhoneValidator(control: AbstractControl) {
     const value = control.value;
     if (!value) return { required: true };
@@ -288,6 +341,11 @@ export class LoginPage implements OnDestroy {
     }
 
     return { invalidFormat: true };
+  }
+
+  private isValidEmail(value: string): boolean {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return emailPattern.test(value.trim());
   }
 
   async presentToast(message: string, color: string = 'primary') {
@@ -373,6 +431,240 @@ export class LoginPage implements OnDestroy {
           this.presentToast(errorMessage, 'danger');
         }
       });
+  }
+
+  openForgotPasswordModal() {
+    this.authMode = 'forgot-password';
+    this.forgotPasswordMode = 'request';
+    this.forgotPasswordErrorKey = '';
+    this.demoResetCode = null;
+    this.stopForgotPasswordTimers();
+
+    const existingIdentifier = this.loginForm.get('identifier')?.value;
+    const normalized = String(existingIdentifier ?? '').trim().toLowerCase();
+    if (normalized && this.isValidEmail(normalized)) {
+      this.forgotPasswordForm.patchValue({ email: normalized }, { emitEvent: false });
+    } else {
+      this.forgotPasswordForm.patchValue({ email: '' }, { emitEvent: false });
+    }
+  }
+
+  closeForgotPasswordModal() {
+    this.authMode = 'login';
+    this.resetForgotPasswordFlow();
+  }
+
+  backToForgotRequest() {
+    this.forgotPasswordMode = 'request';
+    this.forgotPasswordErrorKey = '';
+    this.forgotPasswordForm.patchValue({ code: '', newPassword: '', confirmPassword: '' }, { emitEvent: false });
+  }
+
+  submitForgotPasswordRequest() {
+    const emailControl = this.forgotPasswordForm.get('email');
+
+    if (!emailControl || emailControl.invalid) {
+      emailControl?.markAsTouched();
+      return;
+    }
+
+    this.isForgotLoading = true;
+    this.forgotPasswordErrorKey = '';
+    const email = String(emailControl.value).trim().toLowerCase();
+
+    this.authService.requestPasswordReset(email)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.isForgotLoading = false;
+          this.forgotPasswordEmail = email;
+          this.forgotPasswordMaskedDestination = this.maskEmail(email);
+          this.forgotPasswordMode = 'reset';
+          this.forgotPasswordForm.patchValue({ code: '', newPassword: '', confirmPassword: '' }, { emitEvent: false });
+          this.forgotPasswordForm.get('code')?.markAsUntouched();
+          this.forgotPasswordForm.get('newPassword')?.markAsUntouched();
+          this.forgotPasswordForm.get('confirmPassword')?.markAsUntouched();
+          this.demoResetCode = response.demo_code ?? null;
+          this.startForgotPasswordExpiryCountdown(response.expires_in ?? 600);
+          this.startForgotPasswordResendCooldown(30);
+
+          this.presentToast(this.translate.instant('AUTH.FORGOT_PASSWORD_CODE_SENT'), 'success');
+        },
+        error: () => {
+          this.isForgotLoading = false;
+          this.forgotPasswordErrorKey = 'AUTH.FORGOT_PASSWORD_REQUEST_FAILED';
+          this.presentToast(this.translate.instant(this.forgotPasswordErrorKey), 'danger');
+        }
+      });
+  }
+
+  submitForgotPasswordReset() {
+    const codeControl = this.forgotPasswordForm.get('code');
+    const newPasswordControl = this.forgotPasswordForm.get('newPassword');
+    const confirmPasswordControl = this.forgotPasswordForm.get('confirmPassword');
+
+    codeControl?.markAsTouched();
+    newPasswordControl?.markAsTouched();
+    confirmPasswordControl?.markAsTouched();
+
+    if (this.forgotPasswordForm.invalid || this.forgotPasswordExpirySeconds <= 0) {
+      if (this.forgotPasswordExpirySeconds <= 0) {
+        this.forgotPasswordErrorKey = 'AUTH.FORGOT_PASSWORD_CODE_EXPIRED';
+      }
+      return;
+    }
+
+    this.isForgotLoading = true;
+    this.forgotPasswordErrorKey = '';
+
+    this.authService.resetPasswordWithCode({
+      email: this.forgotPasswordEmail,
+      code: String(codeControl?.value).trim(),
+      newPassword: String(newPasswordControl?.value)
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isForgotLoading = false;
+          this.forgotPasswordMode = 'success';
+          this.stopForgotPasswordTimers();
+          this.demoResetCode = null;
+          this.presentToast(this.translate.instant('AUTH.FORGOT_PASSWORD_RESET_SUCCESS'), 'success');
+        },
+        error: (error) => {
+          this.isForgotLoading = false;
+
+          const errorCode = error?.error?.error;
+          if (errorCode === 'reset_code_invalid') {
+            this.forgotPasswordErrorKey = 'AUTH.FORGOT_PASSWORD_INVALID_CODE';
+          } else if (errorCode === 'reset_code_expired') {
+            this.forgotPasswordErrorKey = 'AUTH.FORGOT_PASSWORD_CODE_EXPIRED';
+          } else if (errorCode === 'weak_password') {
+            this.forgotPasswordErrorKey = 'AUTH.FORGOT_PASSWORD_WEAK_PASSWORD';
+          } else {
+            this.forgotPasswordErrorKey = 'AUTH.FORGOT_PASSWORD_RESET_FAILED';
+          }
+
+          this.presentToast(this.translate.instant(this.forgotPasswordErrorKey), 'danger');
+        }
+      });
+  }
+
+  resendForgotPasswordCode() {
+    if (this.forgotPasswordResendCooldown > 0 || this.isResendResetCodeLoading) {
+      return;
+    }
+
+    this.isResendResetCodeLoading = true;
+    this.forgotPasswordErrorKey = '';
+
+    this.authService.requestPasswordReset(this.forgotPasswordEmail)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.isResendResetCodeLoading = false;
+          this.demoResetCode = response.demo_code ?? null;
+          this.startForgotPasswordExpiryCountdown(response.expires_in ?? 600);
+          this.startForgotPasswordResendCooldown(30);
+          this.presentToast(this.translate.instant('AUTH.FORGOT_PASSWORD_CODE_RESENT'), 'success');
+        },
+        error: () => {
+          this.isResendResetCodeLoading = false;
+          this.forgotPasswordErrorKey = 'AUTH.FORGOT_PASSWORD_REQUEST_FAILED';
+          this.presentToast(this.translate.instant(this.forgotPasswordErrorKey), 'danger');
+        }
+      });
+  }
+
+  forgotPasswordContinueToLogin() {
+    this.closeForgotPasswordModal();
+    this.authMode = 'login';
+  }
+
+  getForgotPasswordCountdownLabel(): string {
+    const totalSeconds = Math.max(this.forgotPasswordExpirySeconds, 0);
+    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  }
+
+  private maskEmail(email: string): string {
+    const [username, domain] = email.trim().split('@');
+    if (!username || !domain) {
+      return email;
+    }
+
+    const safeUsername = username.length > 2
+      ? `${username[0]}${'*'.repeat(Math.max(username.length - 2, 1))}${username[username.length - 1]}`
+      : `${username[0] ?? ''}*`;
+
+    return `${safeUsername}@${domain}`;
+  }
+
+  private startForgotPasswordExpiryCountdown(seconds: number) {
+    if (this.forgotPasswordExpiryTimer) {
+      clearInterval(this.forgotPasswordExpiryTimer);
+    }
+
+    this.forgotPasswordExpirySeconds = Math.max(seconds, 0);
+    this.forgotPasswordExpiryTimer = setInterval(() => {
+      this.forgotPasswordExpirySeconds--;
+
+      if (this.forgotPasswordExpirySeconds <= 0) {
+        this.forgotPasswordExpirySeconds = 0;
+        clearInterval(this.forgotPasswordExpiryTimer);
+      }
+    }, 1000);
+  }
+
+  private startForgotPasswordResendCooldown(seconds: number) {
+    if (this.forgotPasswordResendTimer) {
+      clearInterval(this.forgotPasswordResendTimer);
+    }
+
+    this.forgotPasswordResendCooldown = Math.max(seconds, 0);
+    this.forgotPasswordResendTimer = setInterval(() => {
+      this.forgotPasswordResendCooldown--;
+
+      if (this.forgotPasswordResendCooldown <= 0) {
+        this.forgotPasswordResendCooldown = 0;
+        clearInterval(this.forgotPasswordResendTimer);
+      }
+    }, 1000);
+  }
+
+  private stopForgotPasswordTimers() {
+    if (this.forgotPasswordExpiryTimer) {
+      clearInterval(this.forgotPasswordExpiryTimer);
+      this.forgotPasswordExpiryTimer = null;
+    }
+
+    if (this.forgotPasswordResendTimer) {
+      clearInterval(this.forgotPasswordResendTimer);
+      this.forgotPasswordResendTimer = null;
+    }
+  }
+
+  private resetForgotPasswordFlow() {
+    this.stopForgotPasswordTimers();
+    this.isForgotLoading = false;
+    this.isResendResetCodeLoading = false;
+    this.forgotPasswordMode = 'request';
+    this.forgotPasswordEmail = '';
+    this.forgotPasswordMaskedDestination = '';
+    this.forgotPasswordExpirySeconds = 0;
+    this.forgotPasswordResendCooldown = 0;
+    this.forgotPasswordErrorKey = '';
+    this.demoResetCode = null;
+    this.showForgotNewPassword = false;
+    this.showForgotConfirmPassword = false;
+
+    this.forgotPasswordForm.patchValue({
+      email: '',
+      code: '',
+      newPassword: '',
+      confirmPassword: ''
+    }, { emitEvent: false });
   }
 
 
@@ -609,6 +901,7 @@ export class LoginPage implements OnDestroy {
     if (this.cooldownTimer) {
       clearInterval(this.cooldownTimer);
     }
+    this.stopForgotPasswordTimers();
     this.destroy$.next();
     this.destroy$.complete();
   }

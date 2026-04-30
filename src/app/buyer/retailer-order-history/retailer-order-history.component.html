@@ -59,9 +59,9 @@
             <div class="order-id">#{{ order.orderId }}</div>
             <div class="order-date">{{ order.placedAt | date: 'MMM dd, yyyy' }}</div>
           </div>
-          <ion-badge [color]="getStatusColor(order.status)" class="status-badge">
-            <ion-icon [name]="getStatusIcon(order.status)"></ion-icon>
-            {{ getTranslatedStatus(order.status) }}
+          <ion-badge [color]="getStatusColor(order.statusId)" class="status-badge">
+            <ion-icon [name]="getStatusIcon(order.statusId)"></ion-icon>
+            {{ order.statusLabel }}
           </ion-badge>
         </div>
 
@@ -86,8 +86,8 @@
             <div class="amount">₹{{ order.finalAmount | number:'1.2-2' }}</div>
           </div>
 
-          <!-- Actual Delivery Date (if delivered) -->
-          <div class="delivery-info" *ngIf="order.actualDeliveryDate">
+          <!-- Actual Delivery Date (only if successfully delivered) -->
+          <div class="delivery-info" *ngIf="order.actualDeliveryDate && isSuccessfulStatus(order.statusName)">
             <ion-icon name="checkmark-circle" color="success"></ion-icon>
             <span>{{ 'RETAILER_ORDER_HISTORY.DELIVERED_ON' | translate: { date: (order.actualDeliveryDate | date: 'MMM
               dd, yyyy') } }}</span>

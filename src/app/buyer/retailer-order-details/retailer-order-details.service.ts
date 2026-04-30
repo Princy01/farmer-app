@@ -21,6 +21,7 @@ export interface RetailerOrderDetails {
   order_id: number;
   date_of_order: string;
   order_status: number;
+  order_status_name: string;
   actual_delivery_date?: string | null;
   retailer_id: number;
   wholeseller_ids: number[];

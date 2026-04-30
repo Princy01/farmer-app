@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, tap, catchError, throwError, retry, timer, of } from 'rxjs';
+import { Observable, tap, catchError, throwError, retry, timer, of, delay } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface LoginCredentials {
@@ -89,6 +89,22 @@ export interface ResendVerificationResponse {
   verification_token?: string; // FOR TESTING ONLY
 }
 
+export interface RequestPasswordResetResponse {
+  message: string;
+  expires_in: number;
+  demo_code?: string;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -107,6 +123,9 @@ export class AuthService {
   private locationsCache: Map<number, Location[]> = new Map();
   private locationsCacheTime: Map<number, number> = new Map();
   private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in ms
+  private readonly PASSWORD_RESET_CODE_TTL_MS = 10 * 60 * 1000;
+  private readonly PASSWORD_RESET_MIN_PASSWORD_LENGTH = 8;
+  private passwordResetStore = new Map<string, { code: string; expiresAt: number }>();
 
   constructor(private http: HttpClient) { }
 
@@ -344,5 +363,65 @@ export class AuthService {
 
   resendVerification(email: string): Observable<ResendVerificationResponse> {
     return this.http.post<ResendVerificationResponse>(`${this.apiUrl}/auth/resend-verification`, { email });
+  }
+
+  requestPasswordReset(email: string): Observable<RequestPasswordResetResponse> {
+    const normalizedEmail = this.normalizeEmail(email);
+    const resetCode = this.generateResetCode();
+
+    this.passwordResetStore.set(normalizedEmail, {
+      code: resetCode,
+      expiresAt: Date.now() + this.PASSWORD_RESET_CODE_TTL_MS
+    });
+
+    return of({
+      // Keep this message non-enumerative even in mock mode.
+      message: 'If an account exists for this email, a reset code has been sent.',
+      expires_in: Math.floor(this.PASSWORD_RESET_CODE_TTL_MS / 1000),
+      demo_code: resetCode
+    }).pipe(delay(800));
+  }
+
+  resetPasswordWithCode(payload: ResetPasswordPayload): Observable<ResetPasswordResponse> {
+    const normalizedEmail = this.normalizeEmail(payload.email);
+    const code = payload.code?.trim();
+    const newPassword = payload.newPassword ?? '';
+    const resetEntry = this.passwordResetStore.get(normalizedEmail);
+
+    if (!resetEntry || resetEntry.code !== code) {
+      return throwError(() => new HttpErrorResponse({
+        status: 400,
+        error: { error: 'reset_code_invalid' }
+      }));
+    }
+
+    if (Date.now() > resetEntry.expiresAt) {
+      this.passwordResetStore.delete(normalizedEmail);
+      return throwError(() => new HttpErrorResponse({
+        status: 400,
+        error: { error: 'reset_code_expired' }
+      }));
+    }
+
+    if (newPassword.length < this.PASSWORD_RESET_MIN_PASSWORD_LENGTH) {
+      return throwError(() => new HttpErrorResponse({
+        status: 400,
+        error: { error: 'weak_password' }
+      }));
+    }
+
+    this.passwordResetStore.delete(normalizedEmail);
+
+    return of({
+      message: 'Password reset successful.'
+    }).pipe(delay(800));
+  }
+
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+  }
+
+  private generateResetCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 }

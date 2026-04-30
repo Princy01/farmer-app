@@ -9,6 +9,7 @@ export interface RetailerOrderHistory {
   order_id: number;
   date_of_order: string;
   order_status: number | null;
+  order_status_name: string | null;
   delivery_address: string;
   total_order_amount: number;
   discount_amount: number;
