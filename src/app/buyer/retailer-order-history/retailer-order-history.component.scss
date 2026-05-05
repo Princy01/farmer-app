@@ -18,6 +18,107 @@ $success-color: #00b894;
   padding: 16px 16px 8px 16px;
   background: $card-bg;
 
+  .pending-payments-section {
+    margin-bottom: 20px;
+
+    .section-header {
+      margin-bottom: 12px;
+
+      h3 {
+        margin: 0 0 4px 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: $text-primary;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.92rem;
+        color: $text-secondary;
+      }
+    }
+  }
+
+  .pending-payments-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .pending-payment-card {
+    background: linear-gradient(180deg, #fffaf3 0%, #ffffff 100%);
+    border: 1px solid #f7d8a8;
+    border-radius: $border-radius;
+    padding: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .order-id {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: $text-primary;
+      margin-bottom: 4px;
+    }
+
+    .order-date {
+      font-size: 0.88rem;
+      color: $text-secondary;
+    }
+
+    .countdown-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff3df;
+      color: #8a5a00;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+
+      &.failed {
+        background: #fff1f0;
+        color: #b42318;
+      }
+    }
+
+    .address-section {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+      color: $text-secondary;
+      line-height: 1.5;
+    }
+
+    .footer-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed #e9d8c2;
+    }
+
+    .pending-payment-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+  }
+
   ion-segment {
     background: #f8f9fa;
     border-radius: 12px;
@@ -41,106 +142,6 @@ $success-color: #00b894;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
     }
-  }
-}
-
-// Checkout sessions section
-.checkout-sessions {
-  padding: 8px 16px 16px 16px;
-
-  .checkout-header {
-    margin-bottom: 12px;
-
-    h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: $text-primary;
-      margin: 0 0 4px 0;
-    }
-
-    p {
-      margin: 0;
-      font-size: 0.9rem;
-      color: $text-secondary;
-    }
-  }
-
-  .checkout-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .checkout-card {
-    background: $card-bg;
-    border-radius: $border-radius;
-    padding: 14px 16px;
-    box-shadow: $card-shadow;
-    border: 1px solid #f0f0f0;
-
-    .checkout-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-
-      .checkout-id {
-        font-weight: 600;
-        color: $text-primary;
-      }
-
-      .checkout-date {
-        font-size: 0.85rem;
-        color: $text-secondary;
-      }
-    }
-
-    .checkout-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px dashed #eee;
-
-      .amount-info {
-        .label {
-          font-size: 0.85rem;
-          color: $text-secondary;
-        }
-
-        .amount {
-          font-size: 1.2rem;
-          font-weight: 700;
-          color: $text-primary;
-        }
-      }
-
-      .timeout-info {
-        font-size: 0.85rem;
-        color: $text-secondary;
-        text-align: right;
-      }
-    }
-
-    .error-text {
-      margin-top: 8px;
-      font-size: 0.85rem;
-      color: #d63031;
-    }
-
-    .checkout-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      justify-content: flex-end;
-    }
-  }
-}
-
-.checkout-sessions.failed {
-  .checkout-header h3 {
-    color: #b23b3b;
   }
 }
 

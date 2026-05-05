@@ -35,6 +35,7 @@ export interface CreateBatchOrderRequest {
   order_groups: OrderGroup[];
   delivery_amount: number;
   retailer_branch_id: number;
+  checkout_session_id?: number;
 }
 
 export interface CreateBatchOrderResponse {
