@@ -43,6 +43,11 @@
   margin: 0;
 }
 
+.summary-card {
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.12);
+}
+
 .card-head {
   padding: 0.85rem 1rem 0.7rem;
   display: flex;
@@ -93,6 +98,10 @@
 
 .card-body {
   padding: 0.8rem 1rem 0.95rem;
+}
+
+.summary-card .card-body {
+  padding: 1rem 1.1rem 1.2rem;
 }
 
 .chip-add {
@@ -575,7 +584,7 @@
 .summary-rows {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
 }
 
 .sum-row {
@@ -583,11 +592,13 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  padding: 0;
 }
 
 .sum-label {
   font-size: 13px;
   color: #666;
+  flex: 1;
 
   &.discount {
     color: #e53935;
@@ -598,6 +609,7 @@
   font-size: 13px;
   font-weight: 600;
   color: #1a1a2e;
+  white-space: nowrap;
 
   &.discount {
     color: #e53935;
@@ -606,24 +618,75 @@
 
 .sum-divider {
   height: 1px;
-  background: #f0f0f0;
+  background: linear-gradient(to right, #f0f0f0 0%, #f0f0f0 100%);
+  margin: 6px 0;
 }
 
-.sum-total-label {
-  font-size: 15px;
-  font-weight: 800;
-  color: #1a1a2e;
+.subtotal-row {
+  padding: 8px 0;
+  margin: 4px 0 2px 0;
+  background: linear-gradient(135deg, #fafbff 0%, #f5f7ff 100%);
+  border-radius: 6px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-left: 3px solid #667eea;
+
+  .sum-label {
+    color: #333;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .sum-val {
+    color: #1a1a2e;
+    font-weight: 700;
+    font-size: 14px;
+  }
 }
 
-.sum-total-val {
-  font-size: 17px;
-  font-weight: 800;
-  color: #667eea;
+.tax-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .tax-rate {
+    font-size: 12px;
+    color: #999;
+    font-weight: 400;
+  }
+}
+
+.tax-val {
+  color: #f57c00;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.total-row {
+  padding: 12px 8px;
+  margin: 4px 0 0 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+
+  .sum-total-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .sum-total-val {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .checkout-footer {
   --background: #fff;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid #f0f0f0;
 }
 
 .footer-content {

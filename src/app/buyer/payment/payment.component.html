@@ -141,7 +141,7 @@
     <ion-button
       class="pay-now-btn"
       expand="block"
-      [disabled]="isProcessingPayment || !selectedPaymentMethod"
+      [disabled]="isProcessingPayment || !selectedPaymentMethod || isLoadingSession"
       (click)="processPayment()">
       <ion-icon name="lock-closed-outline" slot="start" *ngIf="!isProcessingPayment"></ion-icon>
       <ion-spinner name="dots" *ngIf="isProcessingPayment"></ion-spinner>

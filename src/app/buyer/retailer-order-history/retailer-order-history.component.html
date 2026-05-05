@@ -39,6 +39,12 @@
       <ion-segment-button value="successful">
         <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_SUCCESSFUL' | translate }}</ion-label>
       </ion-segment-button>
+      <ion-segment-button value="pending">
+        <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_PENDING' | translate }}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="failed">
+        <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_FAILED' | translate }}</ion-label>
+      </ion-segment-button>
       <ion-segment-button value="cancelled">
         <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_CANCELLED' | translate }}</ion-label>
       </ion-segment-button>
@@ -48,8 +54,116 @@
     </ion-segment>
   </div>
 
+  <!-- Pending Payments -->
+  <div class="checkout-sessions" *ngIf="!isLoading && !hasError && showPendingPayments()">
+    <div class="checkout-header">
+      <h3>{{ 'RETAILER_ORDER_HISTORY.PENDING_PAYMENTS_TITLE' | translate }}</h3>
+      <p>{{ 'RETAILER_ORDER_HISTORY.PENDING_PAYMENTS_DESC' | translate }}</p>
+    </div>
+
+    <div class="checkout-grid">
+      <div class="checkout-card" *ngFor="let session of pendingCheckoutSessions">
+        <div class="checkout-card-header">
+          <div>
+            <div class="checkout-id">CS-{{ session.checkoutSessionId }}</div>
+            <div class="checkout-date">{{ session.createdAt | date: 'MMM dd, yyyy' }}</div>
+          </div>
+          <ion-badge [color]="session.statusColor" class="status-badge">
+            <ion-icon name="card-outline"></ion-icon>
+            {{ session.statusLabel }}
+          </ion-badge>
+        </div>
+
+        <div class="address-section">
+          <ion-icon name="location-outline" color="medium"></ion-icon>
+          <span class="address-text">{{ session.deliveryAddress }}</span>
+        </div>
+
+        <div class="checkout-meta">
+          <div class="amount-info">
+            <div class="label">{{ 'RETAILER_ORDER_HISTORY.TOTAL_AMOUNT' | translate }}</div>
+            <div class="amount">₹{{ session.grossAmount | number:'1.2-2' }}</div>
+          </div>
+          <div class="timeout-info" *ngIf="session.secondsUntilTimeout !== null && session.secondsUntilTimeout !== undefined">
+            {{ getCheckoutSessionTimeoutText(session.secondsUntilTimeout) }}
+          </div>
+        </div>
+
+        <div class="error-text" *ngIf="session.lastPaymentError">
+          {{ session.lastPaymentError }}
+        </div>
+
+        <div class="checkout-actions">
+          <ion-button
+            size="small"
+            fill="outline"
+            *ngIf="session.canResumePayment"
+            (click)="openCheckoutSessionPayment(session)">
+            {{ 'RETAILER_ORDER_HISTORY.RESUME_PAYMENT' | translate }}
+          </ion-button>
+          <ion-button
+            size="small"
+            fill="outline"
+            color="danger"
+            *ngIf="session.canRetryPayment"
+            (click)="openCheckoutSessionPayment(session)">
+            {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Failed Payments -->
+  <div class="checkout-sessions failed" *ngIf="!isLoading && !hasError && showFailedPayments()">
+    <div class="checkout-grid">
+      <div class="checkout-card" *ngFor="let session of failedCheckoutSessions">
+        <div class="checkout-card-header">
+          <div>
+            <div class="checkout-id">CS-{{ session.checkoutSessionId }}</div>
+            <div class="checkout-date">{{ session.createdAt | date: 'MMM dd, yyyy' }}</div>
+          </div>
+          <ion-badge [color]="session.statusColor" class="status-badge">
+            <ion-icon name="card-outline"></ion-icon>
+            {{ session.statusLabel }}
+          </ion-badge>
+        </div>
+
+        <div class="address-section">
+          <ion-icon name="location-outline" color="medium"></ion-icon>
+          <span class="address-text">{{ session.deliveryAddress }}</span>
+        </div>
+
+        <div class="checkout-meta">
+          <div class="amount-info">
+            <div class="label">{{ 'RETAILER_ORDER_HISTORY.TOTAL_AMOUNT' | translate }}</div>
+            <div class="amount">₹{{ session.grossAmount | number:'1.2-2' }}</div>
+          </div>
+          <div class="timeout-info" *ngIf="session.secondsUntilTimeout !== null && session.secondsUntilTimeout !== undefined">
+            {{ getCheckoutSessionTimeoutText(session.secondsUntilTimeout) }}
+          </div>
+        </div>
+
+        <div class="error-text" *ngIf="session.lastPaymentError">
+          {{ session.lastPaymentError }}
+        </div>
+
+        <div class="checkout-actions">
+          <ion-button
+            size="small"
+            fill="outline"
+            color="danger"
+            *ngIf="session.canRetryPayment"
+            (click)="openCheckoutSessionPayment(session)">
+            {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Orders List -->
-  <div class="orders-container" *ngIf="!isLoading && !hasError">
+  <div class="orders-container" *ngIf="!isLoading && !hasError && showOrdersList()">
     <div class="orders-grid" *ngIf="filteredOrders.length > 0">
       <div *ngFor="let order of filteredOrders" class="modern-order-card" (click)="onOrderClick(order)">
 

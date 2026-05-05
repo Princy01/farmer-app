@@ -44,6 +44,106 @@ $success-color: #00b894;
   }
 }
 
+// Checkout sessions section
+.checkout-sessions {
+  padding: 8px 16px 16px 16px;
+
+  .checkout-header {
+    margin-bottom: 12px;
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: $text-primary;
+      margin: 0 0 4px 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: $text-secondary;
+    }
+  }
+
+  .checkout-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .checkout-card {
+    background: $card-bg;
+    border-radius: $border-radius;
+    padding: 14px 16px;
+    box-shadow: $card-shadow;
+    border: 1px solid #f0f0f0;
+
+    .checkout-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+
+      .checkout-id {
+        font-weight: 600;
+        color: $text-primary;
+      }
+
+      .checkout-date {
+        font-size: 0.85rem;
+        color: $text-secondary;
+      }
+    }
+
+    .checkout-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed #eee;
+
+      .amount-info {
+        .label {
+          font-size: 0.85rem;
+          color: $text-secondary;
+        }
+
+        .amount {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: $text-primary;
+        }
+      }
+
+      .timeout-info {
+        font-size: 0.85rem;
+        color: $text-secondary;
+        text-align: right;
+      }
+    }
+
+    .error-text {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #d63031;
+    }
+
+    .checkout-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      justify-content: flex-end;
+    }
+  }
+}
+
+.checkout-sessions.failed {
+  .checkout-header h3 {
+    color: #b23b3b;
+  }
+}
+
 // Orders grid
 .orders-grid {
   display: flex;

@@ -21,6 +21,29 @@ export interface RetailerOrderHistory {
 export interface RetailerOrderHistoryResponse {
   current_orders: RetailerOrderHistory[];
   order_history: RetailerOrderHistory[];
+  checkout_sessions?: RetailerCheckoutSessionSummary[];
+}
+
+export interface RetailerCheckoutSessionSummary {
+  checkout_session_id: number;
+  status: string;
+  goods_amount: number;
+  delivery_amount: number;
+  gross_amount: number;
+  delivery_address: string;
+  current_payment_intent_id?: number | null;
+  payment_started_at?: string | null;
+  payment_failed_at?: string | null;
+  expired_at?: string | null;
+  payment_timeout_at?: string | null;
+  seconds_until_timeout?: number | null;
+  last_payment_error_code?: string | null;
+  last_payment_error?: string | null;
+  can_resume_payment: boolean;
+  can_retry_payment: boolean;
+  can_cancel_checkout: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 @Injectable({

@@ -1,7 +1,16 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
+
+export interface InitiatePaymentRequest {
+  amount: number;
+  currency: string;
+  description: string;
+  checkout_session_id?: number;
+  provider_code?: string;
+  payment_method?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -11,13 +20,8 @@ export class PaymentService {
 
   constructor(private http: HttpClient) {}
 
-  initiatePayment(amount: number, currency: string, description: string): Observable<any> {
-    const body = {
-      amount,
-      currency,
-      description
-    };
-    return this.http.post<any>(`${this.apiUrl}/payments/initiate`, body);
+  initiatePayment(request: InitiatePaymentRequest): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/payments/initiate`, request);
   }
 
    checkPaymentStatus(orderId: string): Observable<any> {

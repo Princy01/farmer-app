@@ -29,6 +29,7 @@ import { Subject, firstValueFrom } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 
 import { CheckoutService, BusinessBranch } from './checkout.service';
+import { CheckoutSessionService, CreateCheckoutSessionRequest } from '../services/checkout-session.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { BuyerApiService } from '../services/buyer-api.service';
 
@@ -103,6 +104,16 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   totalPrice = 0;
   discount = 0;
+
+  // Charges and Taxes
+  handlingCharges = 50; // Fixed handling charge in rupees
+  platformFeeRate = 0.02; // Platform fee - 2% of subtotal
+  platformFee = 0; // Calculated platform fee
+  gstRate = 0.05; // 5% GST rate for taxable items
+  taxableAmount = 0; // Subtotal excluding fresh items
+  taxAmount = 0; // Calculated GST on taxable items and charges
+  transportTax = 0; // GST on transport charges (if applicable)
+
   grandTotal = 0;
 
   businessBranches: BusinessBranch[] = [];
@@ -130,7 +141,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     private checkoutService: CheckoutService,
     private authService: AuthService,
     private translate: TranslateService,
-    private buyerApiService: BuyerApiService
+    private buyerApiService: BuyerApiService,
+    private checkoutSessionService: CheckoutSessionService
   ) {
     addIcons({
       chevronBack,
@@ -348,7 +360,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     return 'RIDE.STANDARD_DELIVERY';
   }
 
-  proceedToPayment(): void {
+  async proceedToPayment(): Promise<void> {
     if (this.paymentInProgress) {
       return;
     }
@@ -385,6 +397,46 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       : null;
 
     try {
+      const orderGroups = this.wholesalerGroups.map(group => ({
+        wholeseller_id: group.wholesalerId,
+        branch_id: group.branchId,
+        items: (group.items || []).map(item => ({
+          selected_id: item.selected_id,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          quantity: item.quantity,
+          unit_id: item.unit_id,
+          unit_name: item.unit_name,
+          price: item.price_while_added ?? item.latest_wholesaler_price ?? 0,
+          discount_amount: 0,
+          tax_amount: 0,
+          wholeseller_id: group.wholesalerId,
+          branch_id: group.branchId,
+        })),
+        total_order_amount: group.subtotal,
+        discount_amount: group.allocatedDiscount ?? 0,
+        tax_amount: group.allocatedTax ?? 0,
+        final_amount: group.finalAmount,
+      }));
+
+      const checkoutRequest: CreateCheckoutSessionRequest = {
+        date_of_order: new Date().toISOString().split('T')[0],
+        delivery_address: this.selectedBranch.address || '',
+        retailer_branch_id: this.selectedBranch.branch_id,
+        order_groups: orderGroups,
+        delivery_amount: this.getTransportCostForCheckout(),
+      };
+
+      const checkoutResponse = await firstValueFrom(
+        this.checkoutSessionService.createCheckoutSession(checkoutRequest)
+          .pipe(takeUntil(this.destroy$))
+      );
+
+      const checkoutSessionId = checkoutResponse?.data?.checkout_session_id;
+      if (!checkoutSessionId) {
+        throw new Error(this.translate.instant('CHECKOUT.CHECKOUT_SESSION_ERROR'));
+      }
+
       this.router.navigate(['/buyer/payment'], {
         state: {
           orderData: {
@@ -398,14 +450,22 @@ export class CheckoutComponent implements OnInit, OnDestroy {
             transportData: finalTransportData,
             transporterCost: this.hasRideRequest ? this.estimatedRidePrice : 0,
             retailer: this.retailerInfo,
-            retailerBranchId: this.selectedBranch.branch_id
+            retailerBranchId: this.selectedBranch.branch_id,
+            checkoutSessionId: checkoutSessionId
           }
         }
       });
+    } catch (error: any) {
+      const errorMessage = error?.message || this.translate.instant('CHECKOUT.CHECKOUT_SESSION_ERROR');
+      void this.showErrorAlert(errorMessage);
     } finally {
       this.paymentInProgress = false;
       this.isLoading = false;
     }
+  }
+
+  private getTransportCostForCheckout(): number {
+    return this.hasRideRequest ? this.estimatedRidePrice : 0;
   }
 
   goBack(): void {
@@ -508,7 +568,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   private calculateGroupPricing(): void {
     if (this.wholesalerGroups.length === 0) {
-      this.grandTotal = this.totalPrice - this.discount +
+      this.calculateTaxes();
+      this.grandTotal = this.totalPrice - this.discount + this.handlingCharges +
+        this.platformFee + this.taxAmount + this.transportTax +
         (this.hasRideRequest ? this.estimatedRidePrice : 0);
       return;
     }
@@ -522,8 +584,28 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       group.finalAmount = group.subtotal - group.allocatedDiscount + group.allocatedTax;
     }
 
+    this.calculateTaxes();
     const ordersTotal = this.wholesalerGroups.reduce((sum, group) => sum + group.finalAmount, 0);
-    this.grandTotal = ordersTotal + (this.hasRideRequest ? this.estimatedRidePrice : 0);
+    this.grandTotal = ordersTotal - this.discount + this.handlingCharges +
+      this.platformFee + this.taxAmount + this.transportTax +
+      (this.hasRideRequest ? this.estimatedRidePrice : 0);
+  }
+
+  private calculateTaxes(): void {
+    // Calculate taxable amount (items - discount)
+    const subtotalAfterDiscount = this.totalPrice - this.discount;
+    this.taxableAmount = subtotalAfterDiscount;
+
+    // Calculate platform fee as 2% of subtotal (after discount)
+    this.platformFee = Math.round(subtotalAfterDiscount * this.platformFeeRate * 100) / 100;
+
+    const taxableBase = this.taxableAmount + this.handlingCharges + this.platformFee;
+    this.taxAmount = Math.round(taxableBase * this.gstRate * 100) / 100;
+
+    // Calculate GST on transport charges if transport is selected
+    this.transportTax = this.hasRideRequest && this.estimatedRidePrice > 0
+      ? Math.round(this.estimatedRidePrice * this.gstRate * 100) / 100
+      : 0;
   }
 
   private async showPremiumUpgradeAlert(): Promise<void> {

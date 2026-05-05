@@ -250,26 +250,67 @@
 
       <div class="card-body">
         <div class="summary-rows">
+          <!-- Items Total -->
           <div class="sum-row">
             <span class="sum-label">{{ "CHECKOUT.ITEMS_TOTAL" | translate }}</span>
-            <span class="sum-val">₹{{ totalPrice }}</span>
+            <span class="sum-val">₹{{ totalPrice | number:'1.2-2' }}</span>
           </div>
 
+          <!-- Discount -->
           <div class="sum-row" *ngIf="discount > 0">
             <span class="sum-label discount">{{ "CHECKOUT.DISCOUNT" | translate }}</span>
-            <span class="sum-val discount">-₹{{ discount }}</span>
+            <span class="sum-val discount">-₹{{ discount | number:'1.2-2' }}</span>
           </div>
 
+          <!-- Handling Charges -->
+          <div class="sum-row" *ngIf="handlingCharges > 0">
+            <span class="sum-label">{{ "CHECKOUT.HANDLING_CHARGES" | translate }}</span>
+            <span class="sum-val">₹{{ handlingCharges | number:'1.2-2' }}</span>
+          </div>
+
+          <!-- Platform Fee -->
+          <div class="sum-row" *ngIf="platformFee > 0">
+            <span class="sum-label">{{ "CHECKOUT.PLATFORM_FEE" | translate }}</span>
+            <span class="sum-val">₹{{ platformFee | number:'1.2-2' }}</span>
+          </div>
+
+          <!-- Subtotal Before Tax -->
+          <div class="sum-row subtotal-row" *ngIf="(discount > 0) || (handlingCharges > 0) || (platformFee > 0)">
+            <span class="sum-label">{{ "CHECKOUT.SUBTOTAL" | translate }}</span>
+            <span class="sum-val">₹{{ (totalPrice - discount + handlingCharges + platformFee) | number:'1.2-2' }}</span>
+          </div>
+
+          <!-- GST/Tax -->
+          <div class="sum-row" *ngIf="taxAmount > 0">
+            <span class="sum-label tax-label">
+              {{ "CHECKOUT.GST_TAX" | translate }}
+              <span class="tax-rate">({{ (gstRate * 100) | number:'1.0-0' }}%)</span>
+            </span>
+            <span class="sum-val tax-val">+₹{{ taxAmount | number:'1.2-2' }}</span>
+          </div>
+
+          <!-- Transport Cost -->
           <div class="sum-row" *ngIf="hasRideRequest && estimatedRidePrice > 0">
             <span class="sum-label">{{ "CHECKOUT.TRANSPORT_COST" | translate }}</span>
-            <span class="sum-val">₹{{ estimatedRidePrice }}</span>
+            <span class="sum-val">₹{{ estimatedRidePrice | number:'1.2-2' }}</span>
           </div>
 
+          <!-- Transport GST -->
+          <div class="sum-row" *ngIf="hasRideRequest && transportTax > 0">
+            <span class="sum-label tax-label">
+              {{ "CHECKOUT.TRANSPORT_GST" | translate }}
+              <span class="tax-rate">({{ (gstRate * 100) | number:'1.0-0' }}%)</span>
+            </span>
+            <span class="sum-val tax-val">+₹{{ transportTax | number:'1.2-2' }}</span>
+          </div>
+
+          <!-- Divider -->
           <div class="sum-divider"></div>
 
+          <!-- Grand Total -->
           <div class="sum-row total-row">
             <span class="sum-total-label">{{ "CHECKOUT.GRAND_TOTAL" | translate }}</span>
-            <span class="sum-total-val">₹{{ grandTotal }}</span>
+            <span class="sum-total-val">₹{{ grandTotal | number:'1.2-2' }}</span>
           </div>
         </div>
       </div>
