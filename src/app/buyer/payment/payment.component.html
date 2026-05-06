@@ -26,19 +26,19 @@
             <span class="item-name">{{ item.product_name }}</span>
             <span class="item-quantity">{{ item.quantity }} {{ item.unit_name }}</span>
           </div>
-          <span class="item-price">₹{{ item.latest_wholesaler_price * item.quantity }}</span>
+          <span class="item-price">₹{{ item.latest_wholesaler_price * item.quantity | number:'1.2-2' }}</span>
         </div>
 
         <div class="summary-divider"></div>
 
         <div class="summary-row">
           <span class="summary-label">{{ 'PAYMENT.ITEMS_TOTAL' | translate }}</span>
-          <span class="summary-amount">₹{{ orderData?.totalPrice }}</span>
+          <span class="summary-amount">₹{{ orderData?.totalPrice | number:'1.2-2' }}</span>
         </div>
 
         <div class="summary-row" *ngIf="orderData?.transportCost > 0">
           <span class="summary-label">{{ 'PAYMENT.TRANSPORT_COST' | translate }}</span>
-          <span class="summary-amount">₹{{ orderData?.transportCost }}</span>
+          <span class="summary-amount">₹{{ orderData?.transportCost | number:'1.2-2' }}</span>
         </div>
 
         <!-- Total Design -->
@@ -46,7 +46,7 @@
           <div class="total-container">
             <div class="total-info">
               <span class="total-label">{{ 'PAYMENT.TOTAL_AMOUNT' | translate }}</span>
-              <span class="total-amount">₹{{ orderData?.grandTotal }}</span>
+              <span class="total-amount">₹{{ orderData?.grandTotal | number:'1.2-2' }}</span>
             </div>
           </div>
         </div>
@@ -150,7 +150,7 @@
   <div class="footer-content">
     <div class="total-display">
       <span class="total-label">{{ 'PAYMENT.TOTAL_TO_PAY' | translate }}</span>
-      <span class="total-amount">₹{{ orderData?.grandTotal }}</span>
+      <span class="total-amount">₹{{ orderData?.grandTotal | number:'1.2-2' }}</span>
     </div>
     <ion-button
       class="pay-now-btn"

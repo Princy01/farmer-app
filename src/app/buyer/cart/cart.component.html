@@ -82,22 +82,19 @@
 
             <!-- Subtotal -->
             <div class="group-subtotal">
-              <span class="subtotal-amount">₹{{ group.subtotal }}</span>
+              <span class="subtotal-amount">₹{{ group.subtotal | number:'1.2-2' }}</span>
             </div>
 
-            <!-- Delete group button -->
             <ion-button fill="clear" class="remove-group-btn" (click)="$event.stopPropagation(); removeGroup(group)">
               <ion-icon name="trash-outline"></ion-icon>
             </ion-button>
 
-            <!-- Expand / collapse chevron -->
             <ion-icon
               [name]="group.isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"
               class="expand-icon">
             </ion-icon>
           </div>
 
-          <!-- ─── Expanded item list ──────────────────────────────────────── -->
           @if (group.isExpanded) {
             <div class="group-items">
 
@@ -113,8 +110,8 @@
                     </div>
                     <div class="item-details">
                       <h4 class="item-name">{{ item.product_name }}</h4>
-                      <span class="item-unit-price">₹{{ item.price }} / {{ item.unit_name }}</span>
-                      <span class="item-line-total">₹{{ item.price * item.quantity }}</span>
+                      <span class="item-unit-price">₹{{ item.price | number:'1.2-2' }} / {{ item.unit_name }}</span>
+                      <span class="item-line-total">₹{{ item.price * item.quantity | number:'1.2-2' }}</span>
                     </div>
                   </div>
 
@@ -186,7 +183,7 @@
         @if (discount > 0) {
           <div class="discount-applied">
             <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-            <span class="discount-text">{{ 'CART.DISCOUNT_APPLIED' | translate }}: -₹{{ discount }}</span>
+            <span class="discount-text">{{ 'CART.DISCOUNT_APPLIED' | translate }}: -₹{{ discount | number:'1.2-2' }}</span>
           </div>
         }
       </ion-card>
@@ -200,18 +197,18 @@
       <div class="summary-details">
         <div class="summary-row">
           <span class="summary-label">{{ 'CART.SUBTOTAL' | translate }}</span>
-          <span class="summary-value">₹{{ selectedSubtotal }}</span>
+          <span class="summary-value">₹{{ selectedSubtotal | number:'1.2-2' }}</span>
         </div>
         @if (discount > 0) {
           <div class="summary-row">
             <span class="summary-label discount-label">{{ 'CART.DISCOUNT' | translate }}</span>
-            <span class="summary-value discount-value">-₹{{ discount }}</span>
+            <span class="summary-value discount-value">-₹{{ discount | number:'1.2-2' }}</span>
           </div>
         }
         <div class="summary-divider"></div>
         <div class="summary-row total-row">
           <span class="summary-label total-label">{{ 'CART.TOTAL' | translate }}</span>
-          <span class="summary-value total-value">₹{{ selectedSubtotal - discount }}</span>
+          <span class="summary-value total-value">₹{{ (selectedSubtotal - discount) | number:'1.2-2' }}</span>
         </div>
       </div>
     </ion-card>
@@ -240,7 +237,7 @@
     <div class="checkout-container">
       <div class="checkout-info">
         <span class="total-label">{{ 'CART.TOTAL_AMOUNT' | translate }}</span>
-        <span class="total-amount">₹{{ selectedSubtotal - discount }}</span>
+        <span class="total-amount">₹{{ (selectedSubtotal - discount) | number:'1.2-2' }}</span>
         <span class="items-info">
           {{ selectedItemCount }} {{ 'CART.ITEMS' | translate }}@if (allowMultipleSelection) { · {{ selectedGroupCount }} {{ 'CART.STORES' | translate }} }
         </span>

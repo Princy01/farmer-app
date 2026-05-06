@@ -22,7 +22,7 @@ import {
   arrowUndoOutline,
 } from 'ionicons/icons';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
+import { Subject, Subscription, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import {
   RetailerOrderHistoryService,
@@ -34,7 +34,9 @@ interface DisplayOrder {
   orderId: string;
   rawOrderId: number;
   placedAt: string;
-  status: string;
+  statusId: number | null;
+  statusName: string;
+  statusLabel: string;
   deliveryAddress: string;
   totalAmount: number;
   finalAmount: number;
@@ -42,23 +44,20 @@ interface DisplayOrder {
   isCurrent: boolean;
 }
 
-interface DisplayPaymentSession {
-  checkoutSessionId: string;
-  rawCheckoutSessionId: number;
+interface DisplayCheckoutSession {
+  checkoutSessionId: number;
   status: string;
+  statusLabel: string;
+  statusColor: string;
   deliveryAddress: string;
-  totalAmount: number;
-  placedAt: string;
-  paymentTimeoutAt?: string;
-  secondsUntilTimeout?: number;
-  countdownLabel?: string;
-  lastPaymentError?: string;
+  grossAmount: number;
+  createdAt: string;
+  secondsUntilTimeout?: number | null;
+  lastPaymentError?: string | null;
+  retryAvailableAt?: string | null;
+  retryBlockReason?: string | null;
   canResumePayment: boolean;
   canRetryPayment: boolean;
-  retryAttemptsUsed: number;
-  maxRetryAttempts: number;
-  retryAvailableAt?: string;
-  retryBlockReason?: string;
 }
 
 @Component({
@@ -71,14 +70,16 @@ interface DisplayPaymentSession {
 export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   orders: DisplayOrder[] = [];
   filteredOrders: DisplayOrder[] = [];
-  pendingPayments: DisplayPaymentSession[] = [];
+  checkoutSessions: DisplayCheckoutSession[] = [];
+  pendingCheckoutSessions: DisplayCheckoutSession[] = [];
+  failedCheckoutSessions: DisplayCheckoutSession[] = [];
   selectedFilter: string = 'all';
   isLoading = true;
   hasError = false;
   errorMessage: string = '';
 
   private destroy$ = new Subject<void>();
-  private countdownTimer: ReturnType<typeof setInterval> | null = null;
+  private checkoutCountdownSub: Subscription | null = null;
 
   constructor(
     private router: Router,
@@ -110,15 +111,16 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.stopCountdownTimer();
     this.destroy$.next();
     this.destroy$.complete();
+    this.stopCheckoutCountdown();
   }
 
   loadOrders(): void {
     this.isLoading = true;
     this.hasError = false;
     this.errorMessage = '';
+    this.stopCheckoutCountdown();
 
     this.orderService
       .getOrderHistory()
@@ -154,11 +156,14 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
               return b.rawOrderId - a.rawOrderId;
             });
             this.orders = allOrders;
-            this.pendingPayments = (response.checkout_sessions ?? []).map((session) =>
-              this.mapToDisplayPaymentSession(session)
-            );
             this.filterOrders(this.selectedFilter);
-            this.startCountdownTimer();
+
+            const checkoutSessions = (response.checkout_sessions || [])
+              .map(session => this.mapToDisplayCheckoutSession(session))
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            this.checkoutSessions = checkoutSessions;
+            this.updateCheckoutSessionBuckets();
+            this.startCheckoutCountdown();
             this.isLoading = false;
           } catch (error) {
             // Error in data processing - show generic message
@@ -176,138 +181,23 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       });
   }
 
-  private mapToDisplayOrder(o: RetailerOrderHistory, isCurrent: boolean): DisplayOrder {
-    const status = this.getStatusLabel(o.order_status_name, o.order_status);
+  private mapToDisplayCheckoutSession(session: RetailerCheckoutSessionSummary): DisplayCheckoutSession {
+    const statusLabel = this.getCheckoutSessionStatusLabel(session.status);
     return {
-      orderId: `ORD-${o.order_id.toString().padStart(6, '0')}`,
-      rawOrderId: o.order_id,
-      placedAt: o.date_of_order,
-      status,
-      deliveryAddress: o.delivery_address || '',
-      totalAmount: o.total_order_amount || 0,
-      finalAmount: o.final_amount || 0,
-      actualDeliveryDate: o.actual_delivery_date || undefined,
-      isCurrent,
-    };
-  }
-
-  private mapToDisplayPaymentSession(session: RetailerCheckoutSessionSummary): DisplayPaymentSession {
-    const secondsUntilTimeout = session.seconds_until_timeout ?? undefined;
-    return {
-      checkoutSessionId: `PAY-${session.checkout_session_id.toString().padStart(6, '0')}`,
-      rawCheckoutSessionId: session.checkout_session_id,
-      status: this.getCheckoutSessionStatusLabel(session.status, secondsUntilTimeout),
+      checkoutSessionId: session.checkout_session_id,
+      status: session.status,
+      statusLabel,
+      statusColor: this.getCheckoutSessionStatusColor(session.status),
       deliveryAddress: session.delivery_address || '',
-      totalAmount: session.gross_amount || 0,
-      placedAt: session.created_at,
-      paymentTimeoutAt: session.payment_timeout_at || undefined,
-      secondsUntilTimeout,
-      countdownLabel: this.formatCountdown(secondsUntilTimeout),
-      lastPaymentError: session.last_payment_error || undefined,
+      grossAmount: session.gross_amount || 0,
+      createdAt: session.created_at,
+      secondsUntilTimeout: session.seconds_until_timeout ?? null,
+      lastPaymentError: session.last_payment_error ?? null,
+      retryAvailableAt: session.retry_available_at ?? null,
+      retryBlockReason: session.retry_block_reason ?? null,
       canResumePayment: session.can_resume_payment,
       canRetryPayment: session.can_retry_payment,
-      retryAttemptsUsed: session.retry_attempts_used ?? 0,
-      maxRetryAttempts: session.max_retry_attempts ?? 0,
-      retryAvailableAt: session.retry_available_at || undefined,
-      retryBlockReason: session.retry_block_reason || undefined,
     };
-  }
-
-  private startCountdownTimer(): void {
-    this.stopCountdownTimer();
-    if (!this.pendingPayments.some((payment) => !!payment.paymentTimeoutAt)) {
-      return;
-    }
-
-    this.countdownTimer = setInterval(() => {
-      this.pendingPayments = this.pendingPayments.map((payment) => {
-        if (!payment.paymentTimeoutAt) {
-          return payment;
-        }
-
-        const remainingSeconds = this.getRemainingSeconds(payment.paymentTimeoutAt);
-        const becameFailed = remainingSeconds === 0 && payment.canResumePayment;
-        return {
-          ...payment,
-          secondsUntilTimeout: remainingSeconds,
-          countdownLabel: this.formatCountdown(remainingSeconds),
-          canResumePayment: becameFailed ? false : payment.canResumePayment,
-          canRetryPayment: becameFailed ? true : payment.canRetryPayment,
-          status:
-            becameFailed
-              ? this.getCheckoutSessionStatusLabel('payment_failed', 0)
-              : this.getCheckoutSessionStatusLabel(
-                  payment.canRetryPayment ? 'payment_failed' : 'payment_pending',
-                  remainingSeconds
-                ),
-        };
-      });
-    }, 1000);
-  }
-
-  private stopCountdownTimer(): void {
-    if (this.countdownTimer) {
-      clearInterval(this.countdownTimer);
-      this.countdownTimer = null;
-    }
-  }
-
-  private getRemainingSeconds(timeoutAt: string): number {
-    const diffMs = new Date(timeoutAt).getTime() - Date.now();
-    return Math.max(0, Math.floor(diffMs / 1000));
-  }
-
-  private formatCountdown(seconds?: number): string {
-    if (seconds === undefined || seconds === null) {
-      return '';
-    }
-    const minutes = Math.floor(seconds / 60);
-    const remainder = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainder.toString().padStart(2, '0')}`;
-  }
-
-  private getStatusLabel(statusName?: string | null, code?: number | null): string {
-    if (statusName && statusName.trim().length > 0) {
-      return statusName.trim();
-    }
-    return this.getStatusFromCode(code);
-  }
-
-  private getStatusFromCode(code: number | null | undefined): string {
-    if (code === null || code === undefined) return 'Unknown';
-
-    const statusMap: { [key: number]: string } = {
-      1: 'Order Created',
-      2: 'Order Confirmed',
-      3: 'Payment Pending',
-      4: 'Payment Confirmed',
-      5: 'Payment Failed',
-      6: 'Delivery In Progress',
-      7: 'Delivered',
-      8: 'Cancelled By Buyer',
-      9: 'Cancelled By Seller',
-      10: 'Cancelled By Admin',
-      11: 'Returned',
-      12: 'Disputed',
-    };
-
-    return statusMap[code] || 'Unknown';
-  }
-
-  private getCheckoutSessionStatusLabel(status: string, secondsUntilTimeout?: number): string {
-    if ((status === 'created' || status === 'payment_pending') && (secondsUntilTimeout ?? 0) > 0) {
-      return 'Payment Pending';
-    }
-    if (status === 'payment_failed' || status === 'payment_expired') {
-      return 'Payment Failed';
-    }
-    if (status === 'materialized') {
-      return 'Payment Confirmed';
-    }
-    if (status === 'cancelled') {
-      return 'Cancelled';
-    }
-    return 'Payment Pending';
   }
 
   onSegmentChange(event: any): void {
@@ -319,132 +209,39 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   filterOrders(filter: string): void {
     this.selectedFilter = filter;
 
-    if (filter === 'all') {
+    const isSuccessful = (statusName: string): boolean => {
+      const value = statusName.toLowerCase();
+      return value.includes('successful') || value.includes('delivered') || value.includes('complete');
+    };
+
+    const isCancelled = (statusName: string): boolean => {
+      const value = statusName.toLowerCase();
+      return value.includes('cancel') || value.includes('reject') || value.includes('fail');
+    };
+
+    const isReturned = (statusName: string): boolean => {
+      const value = statusName.toLowerCase();
+      return value.includes('return') || value.includes('refund');
+    };
+
+    if (filter === 'pending' || filter === 'failed') {
+      this.filteredOrders = [];
+    } else if (filter === 'all') {
       this.filteredOrders = [...this.orders];
     } else if (filter === 'active') {
-      this.filteredOrders = this.orders.filter((o) =>
-        ['Order Created', 'Order Confirmed', 'Delivery In Progress'].includes(o.status)
-      );
+      // Source of truth for active is backend grouping (current_orders).
+      this.filteredOrders = this.orders.filter((o) => o.isCurrent);
     } else if (filter === 'successful') {
-      this.filteredOrders = this.orders.filter((o) => o.status === 'Delivered');
+      this.filteredOrders = this.orders.filter((o) => isSuccessful(o.statusName));
     } else if (filter === 'cancelled') {
-      this.filteredOrders = this.orders.filter((o) =>
-        ['Cancelled By Buyer', 'Cancelled By Seller', 'Cancelled By Admin'].includes(o.status)
-      );
+      this.filteredOrders = this.orders.filter((o) => isCancelled(o.statusName));
     } else if (filter === 'returned') {
-      this.filteredOrders = this.orders.filter((o) =>
-        ['Returned'].includes(o.status)
-      );
+      this.filteredOrders = this.orders.filter((o) => isReturned(o.statusName));
     } else {
       this.filteredOrders = this.orders.filter(
-        (o) => o.status.toLowerCase() === filter.toLowerCase()
+        (o) => o.statusName.toLowerCase() === filter.toLowerCase()
       );
     }
-  }
-
-  onResumePayment(payment: DisplayPaymentSession): void {
-    if (!payment.canResumePayment) {
-      return;
-    }
-
-    this.router.navigate(['/buyer/payment'], {
-      state: {
-        checkoutSessionId: payment.rawCheckoutSessionId,
-      },
-    });
-  }
-
-  onRetryPayment(payment: DisplayPaymentSession): void {
-    if (!payment.canRetryPayment) {
-      return;
-    }
-
-    this.router.navigate(['/buyer/payment'], {
-      state: {
-        checkoutSessionId: payment.rawCheckoutSessionId,
-      },
-    });
-  }
-
-  getRetryInfo(payment: DisplayPaymentSession): string {
-    if (payment.maxRetryAttempts > 0) {
-      return `Attempts used: ${payment.retryAttemptsUsed}/${payment.maxRetryAttempts}`;
-    }
-    return '';
-  }
-
-  getStatusColor(status: string): string {
-    const colors: { [key: string]: string } = {
-      'Order Created': 'warning',
-      'Order Confirmed': 'primary',
-      'Payment Pending': 'secondary',
-      'Payment Confirmed': 'success',
-      'Payment Failed': 'danger',
-      'Delivery In Progress': 'tertiary',
-      'Delivered': 'success',
-      'Cancelled By Buyer': 'danger',
-      'Cancelled By Seller': 'danger',
-      'Cancelled By Admin': 'danger',
-      'Returned': 'medium',
-      'Disputed': 'warning',
-      'Cancelled': 'danger',
-      'Unknown': 'medium',
-    };
-    return colors[status] || 'medium';
-  }
-
-  getStatusIcon(status: string): string {
-    const icons: { [key: string]: string } = {
-      'Order Created': 'time-outline',
-      'Order Confirmed': 'checkmark-circle-outline',
-      'Payment Pending': 'card-outline',
-      'Payment Confirmed': 'checkmark-done-circle',
-      'Payment Failed': 'close-circle-outline',
-      'Delivery In Progress': 'cube-outline',
-      'Delivered': 'checkmark-circle',
-      'Cancelled By Buyer': 'close-circle-outline',
-      'Cancelled By Seller': 'close-circle-outline',
-      'Cancelled By Admin': 'close-circle-outline',
-      'Returned': 'arrow-undo-outline',
-      'Disputed': 'alert-circle-outline',
-      'Cancelled': 'close-circle-outline',
-      'Unknown': 'help-outline',
-    };
-    return icons[status] || 'help-outline';
-  }
-
-  onOrderClick(order: DisplayOrder): void {
-    if (order?.rawOrderId) {
-      this.navigateToOrderDetails(order);
-    }
-  }
-
-  navigateToOrderDetails(order: DisplayOrder): void {
-    this.router.navigate(['/buyer/retailer-order-details', order.rawOrderId]);
-  }
-
-  getOrderProgress(status: string): number {
-    const progress: { [key: string]: number } = {
-      'Order Created': 0.2,
-      'Order Confirmed': 0.5,
-      'Delivery In Progress': 0.8,
-      'Delivered': 1.0,
-      'Payment Pending': 0.1,
-      'Payment Failed': 0,
-      'Cancelled By Buyer': 0,
-      'Cancelled By Seller': 0,
-      'Cancelled By Admin': 0,
-      'Returned': 0.5,
-      'Disputed': 0.5,
-      'Unknown': 0,
-    };
-    return progress[status] || 0;
-  }
-
-  getTranslatedStatus(status: string): string {
-    const key = `RETAILER_ORDER_HISTORY.STATUS_${status.toUpperCase().replace(/\s+/g, '_')}`;
-    const translation = this.translate.instant(key);
-    return translation !== key ? translation : status;
   }
 
   getTranslatedFilterLabel(filter: string): string {
@@ -462,29 +259,112 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     });
   }
 
+  private mapToDisplayOrder(o: RetailerOrderHistory, isCurrent: boolean): DisplayOrder {
+    const statusName = o.order_status_name || 'Unknown';
+    const statusLabel = statusName;
 
-
-  private mapToDisplayCheckoutSession(session: RetailerCheckoutSessionSummary): DisplayCheckoutSession {
-    const statusLabel = this.getCheckoutSessionStatusLabel(session.status);
     return {
-      checkoutSessionId: session.checkout_session_id,
-      status: session.status,
+      orderId: `ORD-${o.order_id.toString().padStart(6, '0')}`,
+      rawOrderId: o.order_id,
+      placedAt: o.date_of_order,
+      statusId: o.order_status,
+      statusName,
       statusLabel,
-      statusColor: this.getCheckoutSessionStatusColor(session.status),
-      deliveryAddress: session.delivery_address || '',
-      grossAmount: session.gross_amount || 0,
-      createdAt: session.created_at,
-      secondsUntilTimeout: session.seconds_until_timeout ?? null,
-      lastPaymentError: session.last_payment_error ?? null,
-      paymentFailedAt: session.payment_failed_at ?? null,
-      retryAvailableAt: session.retry_available_at ?? null,
-      retryBlockReason: session.retry_block_reason ?? null,
-      canResumePayment: session.can_resume_payment && !session.payment_failed_at,
-      canRetryPayment: session.can_retry_payment,
+      deliveryAddress: o.delivery_address || '',
+      totalAmount: o.total_order_amount || 0,
+      finalAmount: o.final_amount || 0,
+      actualDeliveryDate: o.actual_delivery_date || undefined,
+      isCurrent,
     };
   }
 
- 
+  getStatusColor(statusId: number | null): string {
+    if (statusId === null) {
+      return 'medium';
+    }
+
+    const colors: { [key: number]: string } = {
+      1: 'warning',
+      2: 'primary',
+      3: 'secondary',
+      4: 'danger',
+      5: 'success',
+      6: 'success',
+      7: 'medium',
+      8: 'tertiary',
+      9: 'medium',
+      10: 'danger',
+    };
+
+    return colors[statusId] || 'medium';
+  }
+
+  getStatusIcon(statusId: number | null): string {
+    if (statusId === null) {
+      return 'help-outline';
+    }
+
+    const icons: { [key: number]: string } = {
+      1: 'time-outline',
+      2: 'checkmark-circle-outline',
+      3: 'card-outline',
+      4: 'close-circle-outline',
+      5: 'checkmark-done-circle',
+      6: 'checkmark-done-circle',
+      7: 'arrow-undo-outline',
+      8: 'cube-outline',
+      9: 'arrow-undo-outline',
+      10: 'close-circle-outline',
+    };
+
+    return icons[statusId] || 'help-outline';
+  }
+
+  onOrderClick(order: DisplayOrder): void {
+    if (order?.rawOrderId) {
+      this.navigateToOrderDetails(order);
+    }
+  }
+
+  navigateToOrderDetails(order: DisplayOrder): void {
+    this.router.navigate(['/buyer/retailer-order-details', order.rawOrderId]);
+  }
+
+  getOrderProgress(statusId: number | null): number {
+    if (statusId === null) {
+      return 0;
+    }
+
+    const progress: { [key: number]: number } = {
+      1: 0.2,
+      2: 0.4,
+      3: 0.6,
+      4: 0,
+      5: 0.8,
+      6: 1,
+      7: 0.5,
+      8: 0.8,
+      9: 0.5,
+      10: 0,
+    };
+
+    return progress[statusId] || 0;
+  }
+
+  getCheckoutSessionStatusLabel(status: string): string {
+    const normalized = (status || '').toLowerCase();
+    const map: { [key: string]: string } = {
+      created: this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_CREATED'),
+      payment_pending: this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_PENDING'),
+      payment_failed: this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_FAILED'),
+      payment_expired: this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_EXPIRED'),
+      cancelled: this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_CANCELLED'),
+      payment_captured: this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_SUCCESS'),
+      materialized: this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_SUCCESS'),
+    };
+
+    return map[normalized] || this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_PENDING');
+  }
 
   getCheckoutSessionStatusColor(status: string): string {
     const normalized = (status || '').toLowerCase();
@@ -547,10 +427,10 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
 
   private updateCheckoutSessionBuckets(): void {
     this.pendingCheckoutSessions = this.checkoutSessions.filter(session =>
-      this.isPendingCheckoutSession(session.status) && !session.paymentFailedAt
+      this.isPendingCheckoutSession(session.status)
     );
     this.failedCheckoutSessions = this.checkoutSessions.filter(session =>
-      this.isFailedCheckoutSession(session.status) || !!session.paymentFailedAt
+      this.isFailedCheckoutSession(session.status)
     );
   }
 
@@ -598,5 +478,4 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     const value = statusName.toLowerCase();
     return value.includes('successful') || value.includes('delivered') || value.includes('complete');
   }
-}
 }

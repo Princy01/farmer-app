@@ -25,7 +25,7 @@
         }}</span>
       </div>
       <div class="stat-item">
-        <span class="stat-number">₹{{ getTotalValue() }}</span>
+        <span class="stat-number">₹{{ getTotalValue() | number:'1.2-2' }}</span>
         <span class="stat-label">Total Value</span>
       </div>
     </div>
@@ -80,7 +80,7 @@
               <h3 class="product-name">{{ item.name }}</h3>
               <p class="product-hindi">{{ item.hindiName }}</p>
               <div class="price-container">
-                <span class="current-price">₹{{ item.price }}</span>
+                <span class="current-price">₹{{ item.price | number:'1.2-2' }}</span>
                 <span class="price-unit">/kg</span>
               </div>
             </div>
@@ -153,7 +153,7 @@
             >{{ cartItems.length }}
             {{ cartItems.length === 1 ? "item" : "items" }}</span
           >
-          <span class="cart-total">₹{{ getCartTotal() }}</span>
+          <span class="cart-total">₹{{ getCartTotal() | number:'1.2-2' }}</span>
         </div>
       </div>
       <ion-button class="go-to-cart-btn" (click)="goToCart()">

@@ -243,57 +243,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async handleOrderCreation(orderData: any): Promise<any> {
-    try {
-      if (!this.isSelectedBranchVerified() && !this.checkoutSessionId) {
-        throw new Error(this.translate.instant('CHECKOUT.BRANCH_VERIFICATION_REQUIRED_MESSAGE'));
-      }
-
-      console.log('Creating batch order with data:', orderData);
-
-      // Validate
-      if (!orderData?.wholesalerGroups || orderData.wholesalerGroups.length === 0) {
-        throw new Error(this.translate.instant('PAYMENT.ERROR_NO_ITEMS'));
-      }
-
-      const batchRequest = this.buildCheckoutSessionRequest(orderData);
-
-      console.log('Batch order request:', batchRequest);
-
-      // Call batch endpoint
-      const response = await this.orderService.createOrder(batchRequest).toPromise();
-
-      if (!response || !response.order_ids || response.order_ids.length === 0) {
-        throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
-      }
-
-      console.log('Batch order response:', response);
-
-      const orderIds = response.order_ids;
-
-      // Update orderData with response
-      const updatedOrderData = {
-        ...orderData,
-        checkoutSessionId: this.checkoutSessionId,
-        orderIds: orderIds,
-        orderId: orderIds[0],
-        ordersTotal: response.orders_total,
-        deliveryCost: response.delivery_cost,
-        grandTotal: response.grand_total,
-      };
-
-      // If transport is selected, create transport job
-      if (this.hasTransport && this.transportInfo) {
-        await this.createTransportJob(orderIds, this.transportInfo);
-      }
-
-      return updatedOrderData;
-
-    } catch (error: any) {
-      console.error('Order creation error:', error);
-      throw error;
-    }
-  }
 
   private async createTransportJob(orderIds: number[], transportData: any): Promise<void> {
     try {
@@ -356,33 +305,12 @@ export class PaymentComponent implements OnInit, OnDestroy {
   }
 
   private async processSimulatedPayment(): Promise<void> {
-    const loading = await this.loadingCtrl.create({
-      message: this.getProcessingMessage(),
-      spinner: 'dots'
-    });
-    await loading.present();
+    await this.showToast(
+      this.translate.instant('PAYMENT.SIMULATED_GATEWAY_NOTICE'),
+      'warning'
+    );
 
-    try {
-      await this.ensureCheckoutSession();
-      await this.simulatePaymentProcessing();
-      const updatedOrderData = await this.handleOrderCreation(this.orderData);
-      this.orderData = updatedOrderData;
-      await loading.dismiss();
-
-      await this.showToast(
-        this.translate.instant('PAYMENT.SIMULATED_SUCCESS'),
-        'success'
-      );
-
-      this.navigateToOrderConfirmation(updatedOrderData);
-    } catch (error: any) {
-      console.error('Payment processing error:', error);
-      await loading.dismiss();
-      this.isProcessingPayment = false;
-
-      const errorMessage = error?.message || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG');
-      await this.showPaymentError(errorMessage);
-    }
+    await this.processGatewayPayment();
   }
 
   private async processGatewayPayment(): Promise<void> {
@@ -447,7 +375,9 @@ export class PaymentComponent implements OnInit, OnDestroy {
           .checkPaymentStatus(paymentOrderId)
           .toPromise();
 
-        const paymentStatus = statusResponse?.data?.status;
+        const rawStatus = statusResponse?.data?.status ?? '';
+        const paymentStatus = rawStatus.toLowerCase();
+        const failureReason = statusResponse?.data?.failure_reason || undefined;
 
         if (paymentStatus === 'success') {
           const orderIds = statusResponse?.data?.order_ids ?? [];
@@ -481,11 +411,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
           );
 
           this.navigateToOrderConfirmation(updatedOrderData);
-        } else if (paymentStatus === 'failed' || paymentStatus === 'cancelled') {
+        } else if (paymentStatus === 'failed' || paymentStatus === 'failure' || paymentStatus === 'cancelled') {
           this.clearPolling();
           await pollingLoading.dismiss();
           await this.showPaymentError(
-            this.translate.instant('PAYMENT.PAYMENT_FAILED_MSG')
+            failureReason || this.translate.instant('PAYMENT.PAYMENT_FAILED_MSG')
           );
         }
       } catch (error) {
@@ -678,13 +608,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await toast.present();
   }
 
-  private simulatePaymentProcessing(): Promise<void> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 1500);
-    });
-  }
 
   private async showPaymentError(message?: string) {
     const alert = await this.alertCtrl.create({

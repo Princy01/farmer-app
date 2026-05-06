@@ -125,14 +125,11 @@
   --border-radius: 12px;
   --padding-start: 1rem;
   --padding-end: 1rem;
-  --inner-padding-start: 0.25rem;
-  --inner-padding-end: 0.25rem;
   --min-height: 50px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 
   &.ion-focused {
     --background: #fff;
@@ -157,6 +154,11 @@
   }
 }
 
+.input-icon {
+  color: #667eea;
+  margin-right: 0.75rem;
+  font-size: 1.2rem;
+}
 
 .input-field {
   --color: #333;
@@ -282,291 +284,171 @@
   }
 }
 
-/* =============================================
-   Forgot Password Flow
-   Consistent with the auth page's purple gradient
-   theme — white card on blurred glass backdrop
-   ============================================= */
-
+/* Forgot Password Flow */
 .forgot-password-flow {
-  animation: fadeInUp 0.5s ease-out;
+  background: linear-gradient(150deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.55) 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 14px 28px rgba(2, 6, 23, 0.24);
 }
 
-// ── Header row (title + back link) ────────────
+.forgot-password-sheet {
+  padding: 1.25rem 1.1rem 1.4rem;
+  color: #e2e8f0;
+}
+
 .forgot-password-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .forgot-password-eyebrow {
-  margin: 0 0 0.2rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+  margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  color: rgba(148, 163, 184, 0.95);
 }
 
 .forgot-password-title {
-  margin: 0;
-  font-size: 1.9rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  margin: 0.2rem 0 0;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: #f8fafc;
 }
 
-// ── White card panel that contains the form ───
 .forgot-password-panel {
-  background: #fff;
-  border-radius: 20px;
-  padding: 1.5rem 1.25rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(102, 126, 234, 0.12);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.72) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .forgot-password-description {
-  margin: 0 0 1.25rem;
-  color: #555;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  margin: 0 0 0.9rem;
+  color: rgba(226, 232, 240, 0.94);
+  font-size: 0.92rem;
 }
 
-// ── Expiry countdown chip ──────────────────────
 .forgot-password-status-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 0 1.1rem;
-  padding: 0.6rem 0.85rem;
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.75rem;
   border-radius: 10px;
-  background: #f5f6ff;
-  border: 1px solid rgba(102, 126, 234, 0.15);
-  font-size: 0.82rem;
-  color: #666;
+  background: rgba(15, 23, 42, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  font-size: 0.83rem;
 
   strong {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: #667eea;
+    font-size: 0.95rem;
+    color: #f8fafc;
   }
 
   .expired {
-    color: #ff6b6b;
-    font-weight: 600;
+    color: #fda4af;
   }
 }
 
-// ── Demo / debug OTP display ───────────────────
 .forgot-password-demo-code {
-  margin-bottom: 1rem;
-  padding: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
+  padding: 0.65rem 0.8rem;
   border-radius: 12px;
-  border: 1.5px dashed rgba(102, 126, 234, 0.35);
-  background: #f5f6ff;
+  border: 1px dashed rgba(125, 211, 252, 0.5);
+  background: rgba(2, 132, 199, 0.16);
 
   p {
     margin: 0;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: #888;
+    letter-spacing: 0.06em;
+    color: rgba(186, 230, 253, 0.95);
   }
 
   strong {
     display: inline-block;
-    margin-top: 0.3rem;
-    font-size: 1.15rem;
-    letter-spacing: 0.3em;
-    color: #667eea;
-    font-weight: 700;
+    margin-top: 0.35rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.2em;
+    color: #e0f2fe;
   }
 }
 
-// ── Inline / field-level error messages ───────
 .forgot-password-error {
-  margin-top: 0.4rem;
-  margin-left: 0.25rem;
-  color: #e53e3e;
-  font-size: 0.8rem;
-  font-weight: 500;
-  animation: slideInLeft 0.3s ease-out;
+  margin-top: 0.42rem;
+  margin-left: 0.9rem;
+  color: #fecaca;
+  font-size: 0.79rem;
 }
 
 .forgot-password-inline-error {
   display: flex;
   align-items: flex-start;
-  gap: 0.4rem;
-  margin: 0 0 0.85rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: 10px;
-  background: #fff5f5;
-  border: 1px solid rgba(229, 62, 62, 0.2);
-  color: #c53030;
-  font-size: 0.82rem;
-  font-weight: 500;
-  animation: slideInLeft 0.3s ease-out;
+  gap: 0.35rem;
+  margin: 0.2rem 0 0.7rem;
+  color: #fecaca;
+  font-size: 0.8rem;
 
   ion-icon {
     font-size: 1rem;
-    margin-top: 0.05rem;
-    flex-shrink: 0;
-    color: #e53e3e;
+    margin-top: 0.03rem;
   }
 }
 
-// ── Primary CTA — mirrors .login-button style ──
 .forgot-primary-button {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --background-hover: linear-gradient(135deg, #7b8ff5 0%, #8a5cb5 100%);
-  --color: #fff;
+  --background: #22d3ee;
+  --background-hover: #67e8f9;
+  --color: #082f49;
   --border-radius: 12px;
-  --box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-  height: 50px;
-  margin-top: 0.5rem;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-  }
-
-  &:focus {
-    outline: 2px solid #667eea;
-    outline-offset: 2px;
-  }
-
-  &:disabled {
-    opacity: 0.65;
-    transform: none;
-    cursor: not-allowed;
-  }
-
-  ion-spinner {
-    --color: #fff;
-    margin-right: 0.5rem;
-  }
+  --box-shadow: 0 10px 20px rgba(34, 211, 238, 0.28);
+  margin-top: 0.2rem;
+  font-weight: 700;
 }
 
-// ── Actions row (resend only) ─────────────────
 .forgot-password-actions-row {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  justify-content: space-between;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
   flex-wrap: wrap;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .forgot-action-link {
+  --color: #bae6fd;
   --padding-start: 0;
   --padding-end: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.86rem;
   margin: 0;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 0.75;
-  }
-
-  &:focus {
-    outline-offset: 4px;
-    border-radius: 6px;
-  }
 }
 
-// On the purple gradient (header): white so it's always legible
-.forgot-password-header .forgot-action-link {
-  --color: rgba(255, 255, 255, 0.9);
-
-  &:hover {
-    --color: #fff;
-  }
-
-  &:focus {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-  }
-}
-
-// Inside the white card (actions row): purple
-.forgot-password-actions-row .forgot-action-link {
-  --color: #667eea;
-
-  &:focus {
-    outline: 2px solid #667eea;
-  }
-}
-// ── Success state ──────────────────────────────
 .forgot-password-success {
   text-align: center;
-  padding: 2rem 0.5rem 1.5rem;
-  animation: fadeInUp 0.5s ease-out;
+  padding-top: 1.4rem;
+  padding-bottom: 1.2rem;
 
   h3 {
-    margin: 0.85rem 0 0.5rem;
-    color: #1a1a2e;
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: -0.3px;
+    margin: 0.65rem 0 0.4rem;
+    color: #f8fafc;
+    font-size: 1.32rem;
   }
 
   p {
-    margin: 0 0 1.5rem;
-    color: #555;
+    margin: 0 0 1.2rem;
+    color: rgba(226, 232, 240, 0.92);
     font-size: 0.92rem;
-    line-height: 1.6;
   }
 }
 
 .forgot-password-success-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%);
-  border: 2px solid rgba(102, 126, 234, 0.25);
-
-  ion-icon, &::before {
-    font-size: 2.5rem;
-    color: #667eea;
-  }
-}
-
-// When the icon is directly on the element (ion-icon.forgot-password-success-icon)
-ion-icon.forgot-password-success-icon {
-  display: block;
-  width: auto;
-  height: auto;
-  font-size: 3.5rem;
-  color: #667eea;
-  filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.35));
-  animation: pulse 2.5s ease-in-out infinite;
-  background: none;
-  border: none;
-}
-
-// ── Responsive tweaks ──────────────────────────
-@media (max-width: 480px) {
-  .forgot-password-panel {
-    padding: 1.25rem 1rem;
-  }
-
-  .forgot-password-title {
-    font-size: 1.6rem;
-  }
-
-  .forgot-primary-button {
-    height: 46px;
-  }
+  font-size: 3.2rem;
+  color: #5eead4;
+  filter: drop-shadow(0 12px 18px rgba(20, 184, 166, 0.3));
 }
 
 /* Buttons */
@@ -708,8 +590,6 @@ ion-icon.forgot-password-success-icon {
     --min-height: 42px;
     --padding-start: 0.75rem;
     --padding-end: 0.75rem;
-    --inner-padding-start: 0.25rem;
-    --inner-padding-end: 0.25rem;
   }
 
   .features-section {
@@ -724,12 +604,16 @@ ion-icon.forgot-password-success-icon {
     justify-content: center;
   }
 
+  .forgot-password-sheet {
+    padding: 1rem 0.8rem 1.15rem;
+  }
+
   .forgot-password-title {
-    font-size: 1.4rem;
+    font-size: 1.25rem;
   }
 
   .forgot-password-panel {
-    padding: 1.1rem 0.9rem;
+    padding: 0.9rem;
   }
 }
 
@@ -812,13 +696,17 @@ ion-spinner {
 .custom-input.ion-invalid.ion-touched {
   border-color: rgba(255, 107, 107, 0.6);
 
-
+  .input-icon {
+    color: #ff6b6b;
+  }
 }
 
 .custom-input.ion-valid.ion-touched {
   border-color: rgba(76, 175, 80, 0.6);
 
-
+  .input-icon {
+    color: #4caf50;
+  }
 }
 
 /* Select Interface Styling */
@@ -960,6 +848,330 @@ ion-spinner {
 
 @keyframes pulse {
 
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+/* =============================================
+   Forgot Password Flow
+   ============================================= */
+
+.forgot-password-flow {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* ── Header row (title + back link) ──────────── */
+.forgot-password-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.forgot-password-eyebrow {
+  margin: 0 0 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.forgot-password-title {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* ── White card panel that contains the form ─── */
+.forgot-password-panel {
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.5rem 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(102, 126, 234, 0.12);
+}
+
+.forgot-password-description {
+  margin: 0 0 1.25rem;
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ── Expiry countdown chip ────────────────────── */
+.forgot-password-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 1.1rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 10px;
+  background: #f5f6ff;
+  border: 1px solid rgba(102, 126, 234, 0.15);
+  font-size: 0.82rem;
+  color: #666;
+
+  strong {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+
+  .expired {
+    color: #ff6b6b;
+    font-weight: 600;
+  }
+}
+
+/* ── Demo / debug OTP display ─────────────────── */
+.forgot-password-demo-code {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1.5px dashed rgba(102, 126, 234, 0.35);
+  background: #f5f6ff;
+
+  p {
+    margin: 0;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #888;
+  }
+
+  strong {
+    display: inline-block;
+    margin-top: 0.3rem;
+    font-size: 1.15rem;
+    letter-spacing: 0.3em;
+    color: #667eea;
+    font-weight: 700;
+  }
+}
+
+/* ── Inline / field-level error messages ──────── */
+.forgot-password-error {
+  margin-top: 0.4rem;
+  margin-left: 0.25rem;
+  color: #e53e3e;
+  font-size: 0.8rem;
+  font-weight: 500;
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.forgot-password-inline-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0 0 0.85rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: #fff5f5;
+  border: 1px solid rgba(229, 62, 62, 0.2);
+  color: #c53030;
+  font-size: 0.82rem;
+  font-weight: 500;
+  animation: slideInLeft 0.3s ease-out;
+
+  ion-icon {
+    font-size: 1rem;
+    margin-top: 0.05rem;
+    flex-shrink: 0;
+    color: #e53e3e;
+  }
+}
+
+/* ── Primary CTA — mirrors .login-button style ── */
+.forgot-primary-button {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background-hover: linear-gradient(135deg, #7b8ff5 0%, #8a5cb5 100%);
+  --color: #fff;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  height: 50px;
+  margin-top: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  }
+
+  &:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    transform: none;
+    cursor: not-allowed;
+  }
+
+  ion-spinner {
+    --color: #fff;
+    margin-right: 0.5rem;
+  }
+}
+
+/* ── Actions row (resend only) ──────────────────*/
+.forgot-password-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.forgot-action-link {
+  --padding-start: 0;
+  --padding-end: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.75;
+  }
+
+  &:focus {
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+}
+
+/* On the purple gradient header: white so it's always legible */
+.forgot-password-header .forgot-action-link {
+  --color: rgba(255, 255, 255, 0.9);
+
+  &:hover {
+    --color: #fff;
+  }
+
+  &:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* Inside the white card (actions row): purple */
+.forgot-password-actions-row .forgot-action-link {
+  --color: #667eea;
+
+  &:focus {
+    outline: 2px solid #667eea;
+  }
+}
+
+/* ── Success state ────────────────────────────── */
+.forgot-password-success {
+  text-align: center;
+  padding: 2rem 0.5rem 1.5rem;
+  animation: fadeInUp 0.5s ease-out;
+
+  h3 {
+    margin: 0.85rem 0 0.5rem;
+    color: #1a1a2e;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  p {
+    margin: 0 0 1.5rem;
+    color: #555;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+}
+
+.forgot-password-success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.25);
+
+  ion-icon,
+  &::before {
+    font-size: 2.5rem;
+    color: #667eea;
+  }
+}
+
+/* When the icon is directly on the element (ion-icon.forgot-password-success-icon) */
+ion-icon.forgot-password-success-icon {
+  display: block;
+  width: auto;
+  height: auto;
+  font-size: 3.5rem;
+  color: #667eea;
+  filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.35));
+  animation: pulse 2.5s ease-in-out infinite;
+  background: none;
+  border: none;
+}
+
+/* ── Responsive tweaks ────────────────────────── */
+@media (max-width: 480px) {
+  .forgot-password-panel {
+    padding: 1.25rem 1rem;
+  }
+
+  .forgot-password-title {
+    font-size: 1.6rem;
+  }
+
+  .forgot-primary-button {
+    height: 46px;
+  }
+}
+
+/* ── Animations (shared) ──────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
   0%,
   100% {
     transform: scale(1);

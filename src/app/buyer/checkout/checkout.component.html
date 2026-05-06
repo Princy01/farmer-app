@@ -122,9 +122,9 @@
           <div class="item-row" *ngFor="let item of cartItems">
             <div class="item-info">
               <div class="item-name">{{ item.product_name }}</div>
-              <div class="item-spec">₹{{ item.latest_wholesaler_price }} × {{ item.quantity }} {{ item.unit_name }}</div>
+              <div class="item-spec">₹{{ item.latest_wholesaler_price | number:'1.2-2' }} × {{ item.quantity }} {{ item.unit_name }}</div>
             </div>
-            <div class="item-price">₹{{ item.latest_wholesaler_price * item.quantity }}</div>
+            <div class="item-price">₹{{ item.latest_wholesaler_price * item.quantity | number:'1.2-2' }}</div>
           </div>
         </div>
       </div>
@@ -219,7 +219,7 @@
           </span>
           <span class="cost-val">
             <ion-spinner name="dots" *ngIf="isLoadingQuote" class="inline-spinner"></ion-spinner>
-            <span *ngIf="!isLoadingQuote">₹{{ estimatedRidePrice }}</span>
+            <span *ngIf="!isLoadingQuote">₹{{ estimatedRidePrice | number:'1.2-2' }}</span>
           </span>
         </div>
 
@@ -324,7 +324,7 @@
   <div class="footer-content">
     <div class="footer-total">
       <span class="footer-total-label">{{ "CHECKOUT.TOTAL_AMOUNT" | translate }}</span>
-      <span class="footer-total-val">₹{{ grandTotal }}</span>
+      <span class="footer-total-val">₹{{ grandTotal | number:'1.2-2' }}</span>
     </div>
 
     <ion-button
