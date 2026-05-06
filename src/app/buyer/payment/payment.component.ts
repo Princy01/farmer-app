@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   chevronBack,
@@ -12,30 +12,27 @@ import {
   receiptOutline,
   cardOutline,
   checkmarkCircle,
+  timeOutline,
   walletOutline,
   cashOutline,
   businessOutline
 } from 'ionicons/icons';
-import { PaymentService } from './payment.service';
+import { CheckoutSessionDetailResponse, PaymentService } from './payment.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { OrderService, TransportRequestWithOrders } from '../order-confirmation/order.service';
+import { OrderService, Item, CreateBatchOrderRequest, TransportRequestWithOrders } from '../order-confirmation/order.service';
 import { environment } from 'src/environments/environment';
-import { CheckoutSessionService, RetailerCheckoutSessionDetail, RetailerCheckoutSessionDetailResponse } from '../services/checkout-session.service';
 
 type PaymentMode = 'simulated' | 'gateway';
 
 interface PaymentNavigationState {
   orderData?: any;
   checkoutSessionId?: number;
-  fromOrderHistory?: boolean;
   hasTransport?: boolean;
   transportData?: any;
-  paymentMeta?: {
-    mode?: PaymentMode;
-    method?: string;
+  paymentMeta: {
+    mode: PaymentMode;
+    method: string;
   };
 }
 
@@ -47,21 +44,22 @@ interface PaymentNavigationState {
   styleUrls: ['./payment.component.scss'],
 })
 export class PaymentComponent implements OnInit, OnDestroy {
-  orderData: any = null;
+  orderData: any;
   checkoutSessionId: number | null = null;
   selectedPaymentMethod: string = '';
   isProcessingPayment: boolean = false;
   loadingPaymentMethods: boolean = true;
-  isLoadingSession: boolean = false;
+  paymentContextError: string | null = null;
+  checkoutPaymentStatus: string | null = null;
+  checkoutCanResumePayment: boolean = false;
+  checkoutCanRetryPayment: boolean = true;
+  checkoutRetryBlockReason: string | null = null;
   pollingInterval: any = null;
   pollingTimeout: any = null;
   readonly paymentMode: PaymentMode = environment.paymentMode === 'gateway' ? 'gateway' : 'simulated';
 
-  private readonly destroy$ = new Subject<void>();
-
   hasTransport: boolean = false;
   transportInfo: any = null;
-  fromOrderHistory: boolean = false;
 
   paymentMethods = [
     {
@@ -96,13 +94,13 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private paymentService: PaymentService,
     private translate: TranslateService,
     private orderService: OrderService,
-    private checkoutSessionService: CheckoutSessionService,
   ) {
     addIcons({
       chevronBack,
@@ -112,106 +110,38 @@ export class PaymentComponent implements OnInit, OnDestroy {
       receiptOutline,
       cardOutline,
       checkmarkCircle,
+      timeOutline,
       walletOutline,
       cashOutline,
       businessOutline
     });
 
     const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras?.state as PaymentNavigationState | undefined;
-    this.orderData = state?.orderData ?? null;
-    this.checkoutSessionId = state?.checkoutSessionId ?? this.orderData?.checkoutSessionId ?? null;
-    this.fromOrderHistory = state?.fromOrderHistory ?? false;
+    const navigationState = navigation?.extras?.state as Partial<PaymentNavigationState> | undefined;
+    this.orderData = navigationState?.orderData;
+    this.checkoutSessionId = navigationState?.checkoutSessionId ?? this.orderData?.checkoutSessionId ?? null;
 
     if (!this.orderData && !this.checkoutSessionId) {
-      console.error('No order data or checkout session found in navigation state');
+      console.error('No order data found in navigation state');
       this.router.navigate(['/buyer/cart']);
       return;
     }
-
     // Extract transport information
-    this.hasTransport = this.orderData?.hasTransport || false;
-    this.transportInfo = this.orderData?.transportData || null;
+    this.hasTransport = this.orderData?.hasTransport || navigationState?.hasTransport || false;
+    this.transportInfo = this.orderData?.transportData || navigationState?.transportData;
 
     console.log('Payment page initialized with order data:', this.orderData);
+    console.log('Checkout session ID:', this.checkoutSessionId);
     console.log('Has transport:', this.hasTransport);
     console.log('Transport info:', this.transportInfo);
   }
 
-  ngOnInit() {
-    setTimeout(() => {
-      this.loadingPaymentMethods = false;
-    }, 1000);
-
-    if (this.checkoutSessionId && (!this.orderData || !this.orderData?.checkoutSessionId)) {
-      this.loadCheckoutSessionDetail(this.checkoutSessionId);
-    }
+  async ngOnInit() {
+    await this.initializePaymentContext();
   }
 
   ngOnDestroy() {
     this.clearPolling();
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private loadCheckoutSessionDetail(checkoutSessionId: number): void {
-    this.isLoadingSession = true;
-
-    this.checkoutSessionService.getCheckoutSessionDetail(checkoutSessionId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: RetailerCheckoutSessionDetailResponse) => {
-          const detail = response?.data as RetailerCheckoutSessionDetail | undefined;
-          if (!detail) {
-            throw new Error(this.translate.instant('PAYMENT.CHECKOUT_SESSION_LOAD_ERROR'));
-          }
-
-          const wholesalerGroups = (detail.order_groups || []).map(group => ({
-            wholesalerId: group.wholeseller_id,
-            branchId: group.branch_id ?? 0,
-            wholesalerName: '',
-            branchName: '',
-            itemCount: group.items?.length ?? 0,
-            subtotal: group.total_order_amount,
-            items: (group.items || []).map(item => ({
-              selected_id: item.selected_id ?? undefined,
-              product_id: item.product_id,
-              product_name: item.product_name,
-              quantity: item.quantity,
-              unit_id: item.unit_id,
-              unit_name: item.unit_name,
-              price_while_added: item.price,
-              latest_wholesaler_price: item.price,
-              is_active: true,
-              wholesaler_id: item.wholeseller_id,
-              branch_id: item.branch_id ?? undefined,
-            })),
-            allocatedDiscount: group.discount_amount,
-            allocatedTax: group.tax_amount,
-            finalAmount: group.final_amount,
-          }));
-
-          this.orderData = {
-            ...this.orderData,
-            checkoutSessionId: detail.checkout_session_id,
-            wholesalerGroups,
-            deliveryAddress: detail.delivery_address,
-            totalPrice: detail.goods_amount,
-            transporterCost: detail.delivery_amount,
-            grandTotal: detail.gross_amount,
-            hasTransport: detail.delivery_amount > 0,
-          };
-
-          this.checkoutSessionId = detail.checkout_session_id;
-          this.hasTransport = this.orderData.hasTransport || false;
-          this.isLoadingSession = false;
-        },
-        error: (err) => {
-          const message = err?.message || this.translate.instant('PAYMENT.CHECKOUT_SESSION_LOAD_ERROR');
-          this.isLoadingSession = false;
-          void this.showPaymentError(message);
-        }
-      });
   }
 
   get isSimulatedMode(): boolean {
@@ -249,28 +179,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
   getPaymentMethodName(): string {
     const method = this.paymentMethods.find(m => m.id === this.selectedPaymentMethod);
     return method ? this.translate.instant(method.name) : this.selectedPaymentMethod;
-  }
-
-  get summaryItems(): any[] {
-    return (this.orderData?.wholesalerGroups || []).flatMap((group: any) => group.items || []);
-  }
-
-  getItemsTotal(): number {
-    if (typeof this.orderData?.totalPrice === 'number' && this.orderData.totalPrice > 0) {
-      return this.orderData.totalPrice;
-    }
-
-    return (this.orderData?.wholesalerGroups || []).reduce(
-      (sum: number, group: any) => sum + (group.subtotal || 0),
-      0
-    );
-  }
-
-  getTransportCost(): number {
-    return this.orderData?.transporterCost
-      || this.orderData?.transportCost
-      || this.transportInfo?.base_price
-      || 0;
   }
 
   getProcessingMessage(): string {
@@ -315,6 +223,78 @@ export class PaymentComponent implements OnInit, OnDestroy {
     }
   }
 
+  private isSelectedBranchVerified(): boolean {
+    return this.orderData?.selectedBranch?.location_verification_status === 'verified';
+  }
+
+  private async initializePaymentContext(): Promise<void> {
+    try {
+      if (!this.orderData && this.checkoutSessionId) {
+        await this.loadCheckoutSessionDetail(this.checkoutSessionId);
+      } else if (this.orderData && !this.checkoutSessionId) {
+        await this.ensureCheckoutSession();
+      }
+    } catch (error: any) {
+      console.error('Failed to initialize payment context:', error);
+      this.paymentContextError = error?.message || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG');
+      await this.showPaymentError(this.paymentContextError ?? undefined);
+    } finally {
+      this.loadingPaymentMethods = false;
+    }
+  }
+
+  private async handleOrderCreation(orderData: any): Promise<any> {
+    try {
+      if (!this.isSelectedBranchVerified() && !this.checkoutSessionId) {
+        throw new Error(this.translate.instant('CHECKOUT.BRANCH_VERIFICATION_REQUIRED_MESSAGE'));
+      }
+
+      console.log('Creating batch order with data:', orderData);
+
+      // Validate
+      if (!orderData?.wholesalerGroups || orderData.wholesalerGroups.length === 0) {
+        throw new Error(this.translate.instant('PAYMENT.ERROR_NO_ITEMS'));
+      }
+
+      const batchRequest = this.buildCheckoutSessionRequest(orderData);
+
+      console.log('Batch order request:', batchRequest);
+
+      // Call batch endpoint
+      const response = await this.orderService.createOrder(batchRequest).toPromise();
+
+      if (!response || !response.order_ids || response.order_ids.length === 0) {
+        throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
+      }
+
+      console.log('Batch order response:', response);
+
+      const orderIds = response.order_ids;
+
+      // Update orderData with response
+      const updatedOrderData = {
+        ...orderData,
+        checkoutSessionId: this.checkoutSessionId,
+        orderIds: orderIds,
+        orderId: orderIds[0],
+        ordersTotal: response.orders_total,
+        deliveryCost: response.delivery_cost,
+        grandTotal: response.grand_total,
+      };
+
+      // If transport is selected, create transport job
+      if (this.hasTransport && this.transportInfo) {
+        await this.createTransportJob(orderIds, this.transportInfo);
+      }
+
+      return updatedOrderData;
+
+    } catch (error: any) {
+      console.error('Order creation error:', error);
+      throw error;
+    }
+  }
+
   private async createTransportJob(orderIds: number[], transportData: any): Promise<void> {
     try {
       const transportRequest: TransportRequestWithOrders = {
@@ -356,6 +336,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (!this.canProcessCheckoutPayment()) {
+      await this.showPaymentError(this.checkoutRetryBlockReason || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG'));
+      return;
+    }
+
     if (this.isProcessingPayment) {
       return;
     }
@@ -370,39 +355,34 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await this.processGatewayPayment();
   }
 
-  private async initiateCheckoutSessionPayment(): Promise<any> {
-    if (!this.checkoutSessionId) {
-      throw new Error(this.translate.instant('PAYMENT.CHECKOUT_SESSION_MISSING'));
-    }
-
-    const amountFromOrder = this.orderData?.grandTotal
-      ?? this.orderData?.grand_total
-      ?? this.orderData?.final_amount
-      ?? this.orderData?.finalAmount
-      ?? 0;
-    const amount = amountFromOrder > 0 ? amountFromOrder : this.getItemsTotal() + this.getTransportCost();
-    const description = this.translate.instant('PAYMENT.ORDER_DESC', {
-      count: this.summaryItems?.length || 1
-    });
-    const currency = 'INR';
-
-    return this.paymentService.initiatePayment({
-      amount,
-      currency,
-      description,
-      checkout_session_id: this.checkoutSessionId,
-      provider_code: 'gateway',
-      payment_method: this.selectedPaymentMethod
-    }).toPromise();
-  }
-
   private async processSimulatedPayment(): Promise<void> {
-    await this.showToast(
-      this.translate.instant('PAYMENT.SIMULATED_GATEWAY_NOTICE'),
-      'warning'
-    );
+    const loading = await this.loadingCtrl.create({
+      message: this.getProcessingMessage(),
+      spinner: 'dots'
+    });
+    await loading.present();
 
-    await this.processGatewayPayment();
+    try {
+      await this.ensureCheckoutSession();
+      await this.simulatePaymentProcessing();
+      const updatedOrderData = await this.handleOrderCreation(this.orderData);
+      this.orderData = updatedOrderData;
+      await loading.dismiss();
+
+      await this.showToast(
+        this.translate.instant('PAYMENT.SIMULATED_SUCCESS'),
+        'success'
+      );
+
+      this.navigateToOrderConfirmation(updatedOrderData);
+    } catch (error: any) {
+      console.error('Payment processing error:', error);
+      await loading.dismiss();
+      this.isProcessingPayment = false;
+
+      const errorMessage = error?.message || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG');
+      await this.showPaymentError(errorMessage);
+    }
   }
 
   private async processGatewayPayment(): Promise<void> {
@@ -413,7 +393,15 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await loading.present();
 
     try {
-      const response = await this.initiateCheckoutSessionPayment();
+      await this.ensureCheckoutSession();
+      if (!this.checkoutSessionId) {
+        throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
+      }
+
+      const response = await this.paymentService.initiatePayment(
+        this.checkoutSessionId,
+        this.selectedPaymentMethod
+      ).toPromise();
 
       await loading.dismiss();
 
@@ -421,7 +409,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
         const paymentUrl = response.data.payment_url;
         const paymentOrderId = response.data.order_id;
 
-        const paymentWindow = window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+        // We need the returned window handle here to distinguish a real popup block
+        // from a successful gateway launch. Using noopener/noreferrer can return null
+        // even when the popup opens, which breaks the gateway flow.
+        const paymentWindow = window.open(paymentUrl, '_blank');
         if (!paymentWindow) {
           throw new Error(this.translate.instant('PAYMENT.GATEWAY_WINDOW_BLOCKED'));
         }
@@ -459,35 +450,37 @@ export class PaymentComponent implements OnInit, OnDestroy {
         const paymentStatus = statusResponse?.data?.status;
 
         if (paymentStatus === 'success') {
-          const orderIds = statusResponse?.data?.order_ids || [];
-          const checkoutStatus = statusResponse?.data?.checkout_status || '';
-
-          if (orderIds.length > 0) {
-            this.clearPolling();
-            await pollingLoading.dismiss();
-
-            if (this.hasTransport && this.transportInfo) {
-              await this.createTransportJob(orderIds, this.transportInfo);
-            }
-
-            const updatedOrderData = {
-              ...this.orderData,
-              orderIds: orderIds,
-              orderId: orderIds[0],
-              grandTotal: this.orderData?.grandTotal ?? statusResponse?.data?.amount
-            };
-
-            await this.showToast(
-              this.translate.instant('PAYMENT.PAYMENT_SUCCESS'),
-              'success'
-            );
-
-            this.navigateToOrderConfirmation(updatedOrderData);
-          } else if (checkoutStatus === 'materialized') {
-            this.clearPolling();
-            await pollingLoading.dismiss();
-            await this.showPaymentError(this.translate.instant('PAYMENT.MATERIALIZATION_MISSING'));
+          const orderIds = statusResponse?.data?.order_ids ?? [];
+          if (!orderIds.length) {
+            return;
           }
+
+          this.clearPolling();
+          await pollingLoading.dismiss();
+
+          const updatedOrderData = {
+            ...this.orderData,
+            checkoutSessionId: this.checkoutSessionId,
+            orderIds,
+            orderId: orderIds[0],
+            ordersTotal: this.orderData?.wholesalerGroups?.reduce((sum: number, group: any) => sum + (group?.finalAmount ?? 0), 0)
+              ?? this.orderData?.grandTotal
+              ?? 0,
+            deliveryCost: this.orderData?.transporterCost ?? 0,
+            grandTotal: this.orderData?.grandTotal ?? 0,
+          };
+          this.orderData = updatedOrderData;
+
+          if (this.hasTransport && this.transportInfo) {
+            await this.createTransportJob(orderIds, this.transportInfo);
+          }
+
+          await this.showToast(
+            this.translate.instant('PAYMENT.PAYMENT_SUCCESS'),
+            'success'
+          );
+
+          this.navigateToOrderConfirmation(updatedOrderData);
         } else if (paymentStatus === 'failed' || paymentStatus === 'cancelled') {
           this.clearPolling();
           await pollingLoading.dismiss();
@@ -512,6 +505,140 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.pollingTimeout = setTimeout(() => {
       this.clearPolling();
     }, maxAttempts * 3000);
+  }
+
+  private buildCheckoutSessionRequest(orderData: any): CreateBatchOrderRequest {
+    const orderGroups = orderData.wholesalerGroups.map((group: any) => ({
+      wholeseller_id: group.wholesalerId,
+      branch_id: group.branchId,
+      items: group.items.map((item: any) => ({
+        selected_id: item.selected_id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_id: item.unit_id,
+        price: item.price ?? item.latest_wholesaler_price ?? 0,
+        discount_amount: item.discount_amount ?? 0,
+        tax_amount: item.tax_amount ?? 0,
+        wholeseller_id: group.wholesalerId,
+        branch_id: group.branchId,
+        product_name: item.product_name || item.name || '',
+        unit_name: item.unit_name || '',
+      })),
+      total_order_amount: group.subtotal,
+      discount_amount: group.allocatedDiscount ?? 0,
+      tax_amount: group.allocatedTax ?? 0,
+      final_amount: group.finalAmount,
+    }));
+
+    return {
+      date_of_order: new Date().toISOString().split('T')[0],
+      order_status: 1,
+      delivery_address: orderData.deliveryAddress,
+      retailer_branch_id: orderData.retailerBranchId,
+      order_groups: orderGroups,
+      delivery_amount: orderData.transporterCost ?? 0,
+      checkout_session_id: orderData.checkoutSessionId ?? this.checkoutSessionId ?? undefined,
+    };
+  }
+
+  private async ensureCheckoutSession(): Promise<void> {
+    if (this.checkoutSessionId) {
+      return;
+    }
+    if (!this.orderData) {
+      throw new Error(this.translate.instant('PAYMENT.ERROR_NO_ITEMS'));
+    }
+
+    const response = await this.paymentService
+      .createCheckoutSession(this.buildCheckoutSessionRequest(this.orderData))
+      .toPromise();
+
+    const checkoutSessionId = response?.data?.checkout_session_id;
+    if (!checkoutSessionId) {
+      throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
+    }
+
+    this.checkoutSessionId = checkoutSessionId;
+    this.orderData = {
+      ...this.orderData,
+      checkoutSessionId,
+    };
+  }
+
+  private async loadCheckoutSessionDetail(checkoutSessionId: number): Promise<void> {
+    const response = await this.paymentService.getCheckoutSession(checkoutSessionId).toPromise();
+    const detail = response?.data;
+    if (!detail) {
+      throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
+    }
+
+    this.checkoutSessionId = detail.checkout_session_id;
+    this.checkoutPaymentStatus = detail.status;
+    this.checkoutCanResumePayment = detail.can_resume_payment;
+    this.checkoutCanRetryPayment = detail.can_retry_payment;
+    this.checkoutRetryBlockReason = detail.retry_block_reason || null;
+    this.orderData = this.mapCheckoutSessionDetailToOrderData(detail);
+    this.hasTransport = (detail.delivery_amount ?? 0) > 0;
+    this.transportInfo = this.hasTransport
+      ? {
+          base_price: detail.delivery_amount,
+          delivery_type: 'standard',
+          urgency: 'standard',
+          distance: 0,
+          load_type: 'general',
+        }
+      : null;
+  }
+
+  private mapCheckoutSessionDetailToOrderData(detail: CheckoutSessionDetailResponse['data']): any {
+    const wholesalerGroups = detail.order_groups.map((group) => ({
+      wholesalerId: group.wholeseller_id,
+      branchId: group.branch_id ?? 0,
+      wholesalerName: '',
+      branchName: '',
+      itemCount: group.items.length,
+      subtotal: group.total_order_amount,
+      allocatedDiscount: group.discount_amount,
+      allocatedTax: group.tax_amount,
+      finalAmount: group.final_amount,
+      items: group.items.map((item) => ({
+        selected_id: item.selected_id,
+        product_id: item.product_id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        unit_id: item.unit_id,
+        unit_name: item.unit_name,
+        price: item.price,
+        latest_wholesaler_price: item.price,
+        tax_amount: item.tax_amount,
+        discount_amount: item.discount_amount,
+        wholeseller_id: item.wholeseller_id,
+        branch_id: item.branch_id,
+      })),
+    }));
+    const items = wholesalerGroups.reduce((allItems: any[], group: any) => {
+      return allItems.concat(group.items);
+    }, []);
+
+    return {
+      checkoutSessionId: detail.checkout_session_id,
+      checkoutStatus: detail.status,
+      items,
+      wholesalerGroups,
+      selectedBranch: {
+        branch_id: detail.retailer_branch_id,
+        address: detail.delivery_address,
+        location_verification_status: 'verified',
+      },
+      deliveryAddress: detail.delivery_address,
+      totalPrice: detail.goods_amount,
+      discount: wholesalerGroups.reduce((sum: number, group: any) => sum + (group.allocatedDiscount || 0), 0),
+      grandTotal: detail.gross_amount,
+      hasTransport: detail.delivery_amount > 0,
+      transportData: detail.delivery_amount > 0 ? { base_price: detail.delivery_amount } : null,
+      transporterCost: detail.delivery_amount,
+      retailerBranchId: detail.retailer_branch_id,
+    };
   }
 
   private navigateToOrderConfirmation(updatedOrderData: any): void {
@@ -551,6 +678,14 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await toast.present();
   }
 
+  private simulatePaymentProcessing(): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1500);
+    });
+  }
+
   private async showPaymentError(message?: string) {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('PAYMENT.PAYMENT_FAILED'),
@@ -566,30 +701,43 @@ export class PaymentComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.fromOrderHistory) {
+    if (this.checkoutSessionId) {
       this.router.navigate(['/buyer/retailer-order-history']);
       return;
     }
 
-    const wholesalerGroups = this.orderData?.wholesalerGroups || [];
-    const cartItems = wholesalerGroups.flatMap((group: any) => group.items || []);
-    const totalPrice = wholesalerGroups.reduce(
-      (sum: number, group: any) => sum + (group.subtotal || 0),
-      0
-    );
-
     this.router.navigate(['/buyer/checkout'], {
       state: {
-        cartItems,
-        wholesalerGroups,
-        totalPrice,
-        discount: this.orderData?.discount || this.orderData?.discount_amount || 0,
+        cartItems: this.orderData?.items || [],
+        totalPrice: this.orderData?.total_order_amount || 0,
+        discount: this.orderData?.discount_amount || 0,
         retailer: this.orderData?.retailer,
-        wholeseller: this.orderData?.wholeseller || null,
+        retailerBranchId: this.orderData?.retailerBranchId,
+        wholeseller: { id: this.orderData?.wholeseller_id },
         selectedBranch: this.orderData?.selectedBranch,
         transportData: this.transportInfo,
         hasRideRequest: this.hasTransport
       }
     });
+  }
+
+  canProcessCheckoutPayment(): boolean {
+    if (!this.checkoutSessionId || !this.checkoutPaymentStatus) {
+      return true;
+    }
+
+    if (this.checkoutPaymentStatus === 'cancelled' || this.checkoutPaymentStatus === 'materialized' || this.checkoutPaymentStatus === 'payment_captured') {
+      return false;
+    }
+
+    if (this.checkoutPaymentStatus === 'payment_failed' || this.checkoutPaymentStatus === 'payment_expired') {
+      return this.checkoutCanRetryPayment;
+    }
+
+    if (this.checkoutPaymentStatus === 'created' || this.checkoutPaymentStatus === 'payment_pending') {
+      return true;
+    }
+
+    return true;
   }
 }

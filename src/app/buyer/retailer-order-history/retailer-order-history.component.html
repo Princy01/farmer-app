@@ -29,6 +29,79 @@
 
   <!-- Filter Tabs -->
   <div class="filter-tabs" *ngIf="!isLoading && !hasError">
+    <div class="pending-payments-section" *ngIf="pendingPayments.length > 0">
+      <div class="section-header">
+        <h3>{{ 'RETAILER_ORDER_HISTORY.PENDING_PAYMENTS_TITLE' | translate }}</h3>
+        <p>{{ 'RETAILER_ORDER_HISTORY.PENDING_PAYMENTS_SUBTITLE' | translate }}</p>
+      </div>
+
+      <div class="pending-payments-grid">
+        <div *ngFor="let payment of pendingPayments" class="pending-payment-card">
+          <div class="order-header">
+            <div class="order-info">
+              <div class="order-id">#{{ payment.checkoutSessionId }}</div>
+              <div class="order-date">{{ payment.placedAt | date: 'MMM dd, yyyy, hh:mm a' }}</div>
+            </div>
+            <ion-badge [color]="getStatusColor(payment.status)" class="status-badge">
+              <ion-icon [name]="getStatusIcon(payment.status)"></ion-icon>
+              {{ getTranslatedStatus(payment.status) }}
+            </ion-badge>
+          </div>
+
+          <div class="countdown-strip" *ngIf="payment.secondsUntilTimeout !== undefined && payment.status === 'Payment Pending'">
+            <ion-icon name="time-outline" color="warning"></ion-icon>
+            <span>{{ 'RETAILER_ORDER_HISTORY.TIME_LEFT' | translate }}: {{ payment.countdownLabel }}</span>
+          </div>
+
+          <div class="countdown-strip failed" *ngIf="payment.status === 'Payment Failed' && payment.lastPaymentError">
+            <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+            <span>{{ payment.lastPaymentError }}</span>
+          </div>
+
+          <div class="countdown-strip" *ngIf="payment.retryBlockReason">
+            <ion-icon name="time-outline" color="medium"></ion-icon>
+            <span>{{ payment.retryBlockReason }}</span>
+          </div>
+
+          <div class="countdown-strip" *ngIf="payment.maxRetryAttempts > 0">
+            <ion-icon name="card-outline" color="medium"></ion-icon>
+            <span>{{ getRetryInfo(payment) }}</span>
+          </div>
+
+          <div class="address-section">
+            <ion-icon name="location-outline" color="medium"></ion-icon>
+            <span class="address-text">{{ payment.deliveryAddress }}</span>
+          </div>
+
+          <div class="footer-section">
+            <div class="amount-info">
+              <div class="label">{{ 'RETAILER_ORDER_HISTORY.PAYMENT_TOTAL' | translate }}</div>
+              <div class="amount">₹{{ payment.totalAmount | number:'1.2-2' }}</div>
+            </div>
+          </div>
+
+          <div class="pending-payment-actions" *ngIf="payment.canResumePayment || payment.canRetryPayment || payment.retryBlockReason">
+            <ion-button
+              *ngIf="payment.canResumePayment"
+              size="small"
+              fill="outline"
+              (click)="onResumePayment(payment); $event.stopPropagation()">
+              {{ 'RETAILER_ORDER_HISTORY.RESUME_PAYMENT' | translate }}
+            </ion-button>
+            <ion-button
+              *ngIf="payment.canRetryPayment || payment.retryBlockReason"
+              size="small"
+              fill="solid"
+              color="primary"
+              [disabled]="!payment.canRetryPayment"
+              (click)="onRetryPayment(payment); $event.stopPropagation()">
+              {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <ion-segment [value]="selectedFilter" (ionChange)="onSegmentChange($event)">
       <ion-segment-button value="all">
         <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_ALL' | translate }}</ion-label>
@@ -39,12 +112,6 @@
       <ion-segment-button value="successful">
         <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_SUCCESSFUL' | translate }}</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="pending">
-        <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_PENDING' | translate }}</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="failed">
-        <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_FAILED' | translate }}</ion-label>
-      </ion-segment-button>
       <ion-segment-button value="cancelled">
         <ion-label>{{ 'RETAILER_ORDER_HISTORY.FILTER_CANCELLED' | translate }}</ion-label>
       </ion-segment-button>
@@ -54,6 +121,7 @@
     </ion-segment>
   </div>
 
+<<<<<<< HEAD
   <!-- Pending Payments Empty State -->
   <div *ngIf="!isLoading && !hasError && selectedFilter === 'pending' && pendingCheckoutSessions.length === 0" class="empty-state">
     <div class="empty-illustration">
@@ -188,8 +256,10 @@
     </div>
   </div>
 
+=======
+>>>>>>> 93b5d78c2fd028d534ce7a1b12e3fc8c27549147
   <!-- Orders List -->
-  <div class="orders-container" *ngIf="!isLoading && !hasError && showOrdersList()">
+  <div class="orders-container" *ngIf="!isLoading && !hasError">
     <div class="orders-grid" *ngIf="filteredOrders.length > 0">
       <div *ngFor="let order of filteredOrders" class="modern-order-card" (click)="onOrderClick(order)">
 
@@ -199,9 +269,9 @@
             <div class="order-id">#{{ order.orderId }}</div>
             <div class="order-date">{{ order.placedAt | date: 'MMM dd, yyyy' }}</div>
           </div>
-          <ion-badge [color]="getStatusColor(order.statusId)" class="status-badge">
-            <ion-icon [name]="getStatusIcon(order.statusId)"></ion-icon>
-            {{ order.statusLabel }}
+          <ion-badge [color]="getStatusColor(order.status)" class="status-badge">
+            <ion-icon [name]="getStatusIcon(order.status)"></ion-icon>
+            {{ getTranslatedStatus(order.status) }}
           </ion-badge>
         </div>
 
@@ -226,8 +296,8 @@
             <div class="amount">₹{{ order.finalAmount | number:'1.2-2' }}</div>
           </div>
 
-          <!-- Actual Delivery Date (only if successfully delivered) -->
-          <div class="delivery-info" *ngIf="order.actualDeliveryDate && isSuccessfulStatus(order.statusName)">
+          <!-- Actual Delivery Date (if delivered) -->
+          <div class="delivery-info" *ngIf="order.actualDeliveryDate">
             <ion-icon name="checkmark-circle" color="success"></ion-icon>
             <span>{{ 'RETAILER_ORDER_HISTORY.DELIVERED_ON' | translate: { date: (order.actualDeliveryDate | date: 'MMM
               dd, yyyy') } }}</span>

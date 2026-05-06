@@ -9,7 +9,7 @@ export interface RetailerOrderHistory {
   order_id: number;
   date_of_order: string;
   order_status: number | null;
-  order_status_name: string | null;
+  order_status_name?: string | null;
   delivery_address: string;
   total_order_amount: number;
   discount_amount: number;
@@ -21,7 +21,7 @@ export interface RetailerOrderHistory {
 export interface RetailerOrderHistoryResponse {
   current_orders: RetailerOrderHistory[];
   order_history: RetailerOrderHistory[];
-  checkout_sessions?: RetailerCheckoutSessionSummary[];
+  checkout_sessions: RetailerCheckoutSessionSummary[];
 }
 
 export interface RetailerCheckoutSessionSummary {
@@ -48,6 +48,14 @@ export interface RetailerCheckoutSessionSummary {
   can_cancel_checkout: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface RetailerCheckoutSessionsResponse {
+  status: string;
+  message: string;
+  data: {
+    checkout_sessions: RetailerCheckoutSessionSummary[];
+  };
 }
 
 @Injectable({
