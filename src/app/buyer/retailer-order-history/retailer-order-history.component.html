@@ -54,6 +54,15 @@
     </ion-segment>
   </div>
 
+  <!-- Pending Payments Empty State -->
+  <div *ngIf="!isLoading && !hasError && selectedFilter === 'pending' && pendingCheckoutSessions.length === 0" class="empty-state">
+    <div class="empty-illustration">
+      <ion-icon name="card-outline" class="empty-icon"></ion-icon>
+    </div>
+    <h3>{{ 'RETAILER_ORDER_HISTORY.NO_ORDERS_TITLE' | translate }}</h3>
+    <p>{{ getNoOrdersMessage('pending') }}</p>
+  </div>
+
   <!-- Pending Payments -->
   <div class="checkout-sessions" *ngIf="!isLoading && !hasError && showPendingPayments()">
     <div class="checkout-header">
@@ -92,6 +101,9 @@
         <div class="error-text" *ngIf="session.lastPaymentError">
           {{ session.lastPaymentError }}
         </div>
+        <div class="error-text" *ngIf="session.retryBlockReason">
+          {{ session.retryBlockReason }}
+        </div>
 
         <div class="checkout-actions">
           <ion-button
@@ -105,13 +117,23 @@
             size="small"
             fill="outline"
             color="danger"
-            *ngIf="session.canRetryPayment"
+            *ngIf="session.canRetryPayment || session.retryBlockReason"
+            [disabled]="!session.canRetryPayment"
             (click)="openCheckoutSessionPayment(session)">
             {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
           </ion-button>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Failed Payments Empty State -->
+  <div *ngIf="!isLoading && !hasError && selectedFilter === 'failed' && failedCheckoutSessions.length === 0" class="empty-state">
+    <div class="empty-illustration">
+      <ion-icon name="close-circle-outline" class="empty-icon"></ion-icon>
+    </div>
+    <h3>{{ 'RETAILER_ORDER_HISTORY.NO_ORDERS_TITLE' | translate }}</h3>
+    <p>{{ getNoOrdersMessage('failed') }}</p>
   </div>
 
   <!-- Failed Payments -->
@@ -147,13 +169,17 @@
         <div class="error-text" *ngIf="session.lastPaymentError">
           {{ session.lastPaymentError }}
         </div>
+        <div class="error-text" *ngIf="session.retryBlockReason">
+          {{ session.retryBlockReason }}
+        </div>
 
         <div class="checkout-actions">
           <ion-button
             size="small"
             fill="outline"
             color="danger"
-            *ngIf="session.canRetryPayment"
+            *ngIf="session.canRetryPayment || session.retryBlockReason"
+            [disabled]="!session.canRetryPayment"
             (click)="openCheckoutSessionPayment(session)">
             {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
           </ion-button>

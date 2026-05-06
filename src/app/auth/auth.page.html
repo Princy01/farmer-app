@@ -352,7 +352,6 @@
             class="forgot-action-link"
             (click)="closeForgotPasswordModal()"
             [disabled]="isForgotLoading || isResendResetCodeLoading">
-            <ion-icon name="arrow-back-outline" slot="start" aria-hidden="true"></ion-icon>
             {{ 'AUTH.BACK_TO_LOGIN' | translate }}
           </ion-button>
         </div>
@@ -364,8 +363,8 @@
             <ion-item
               class="custom-input"
               lines="none"
-              [class.ion-invalid]="forgotPasswordForm.get('identifier')?.invalid && forgotPasswordForm.get('identifier')?.touched"
-              [class.ion-touched]="forgotPasswordForm.get('identifier')?.touched">
+              [class.ion-invalid]="forgotPasswordForm.get('email')?.invalid && forgotPasswordForm.get('email')?.touched"
+              [class.ion-touched]="forgotPasswordForm.get('email')?.touched">
               <ion-icon name="mail-outline" slot="start" class="input-icon" aria-hidden="true"></ion-icon>
               <ion-input
                 [placeholder]="'AUTH.FORGOT_PASSWORD_EMAIL_PLACEHOLDER' | translate"
@@ -400,11 +399,6 @@
           <div class="forgot-password-status-row">
             <span>{{ 'AUTH.FORGOT_PASSWORD_CODE_EXPIRES_IN' | translate }}</span>
             <strong [class.expired]="forgotPasswordExpirySeconds <= 0">{{ getForgotPasswordCountdownLabel() }}</strong>
-          </div>
-
-          <div class="forgot-password-demo-code" *ngIf="demoResetCode">
-            <p>{{ 'AUTH.FORGOT_PASSWORD_DEMO_CODE_LABEL' | translate }}</p>
-            <strong>{{ demoResetCode }}</strong>
           </div>
 
           <div class="input-group">
@@ -515,15 +509,9 @@
               (click)="resendForgotPasswordCode()"
               [disabled]="forgotPasswordResendCooldown > 0 || isResendResetCodeLoading">
               <ion-spinner *ngIf="isResendResetCodeLoading" name="dots" slot="start" aria-hidden="true"></ion-spinner>
-              <ion-icon *ngIf="!isResendResetCodeLoading" name="refresh-outline" slot="start" aria-hidden="true"></ion-icon>
               {{ forgotPasswordResendCooldown > 0 ?
               ('AUTH.RESEND_IN' | translate: {seconds: forgotPasswordResendCooldown}) :
               ('AUTH.FORGOT_PASSWORD_RESEND_CODE' | translate) }}
-            </ion-button>
-
-            <ion-button type="button" fill="clear" class="forgot-action-link" (click)="backToForgotRequest()" [disabled]="isForgotLoading || isResendResetCodeLoading">
-              <ion-icon name="arrow-back-outline" slot="start" aria-hidden="true"></ion-icon>
-              {{ 'AUTH.BACK' | translate }}
             </ion-button>
           </div>
         </form>

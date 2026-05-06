@@ -55,6 +55,7 @@ yarn-error.log
 # Copilot Configuration
 .copilot-instructions.md
 
+BACKEND
 
 # Miscellaneous
 /.angular

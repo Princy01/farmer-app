@@ -49,6 +49,9 @@ interface DisplayCheckoutSession {
   createdAt: string;
   secondsUntilTimeout?: number | null;
   lastPaymentError?: string | null;
+  paymentFailedAt?: string | null;
+  retryAvailableAt?: string | null;
+  retryBlockReason?: string | null;
   canResumePayment: boolean;
   canRetryPayment: boolean;
 }
@@ -338,7 +341,10 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       createdAt: session.created_at,
       secondsUntilTimeout: session.seconds_until_timeout ?? null,
       lastPaymentError: session.last_payment_error ?? null,
-      canResumePayment: session.can_resume_payment,
+      paymentFailedAt: session.payment_failed_at ?? null,
+      retryAvailableAt: session.retry_available_at ?? null,
+      retryBlockReason: session.retry_block_reason ?? null,
+      canResumePayment: session.can_resume_payment && !session.payment_failed_at,
       canRetryPayment: session.can_retry_payment,
     };
   }
@@ -418,8 +424,12 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   }
 
   private updateCheckoutSessionBuckets(): void {
-    this.pendingCheckoutSessions = this.checkoutSessions.filter(session => this.isPendingCheckoutSession(session.status));
-    this.failedCheckoutSessions = this.checkoutSessions.filter(session => this.isFailedCheckoutSession(session.status));
+    this.pendingCheckoutSessions = this.checkoutSessions.filter(session =>
+      this.isPendingCheckoutSession(session.status) && !session.paymentFailedAt
+    );
+    this.failedCheckoutSessions = this.checkoutSessions.filter(session =>
+      this.isFailedCheckoutSession(session.status) || !!session.paymentFailedAt
+    );
   }
 
   private startCheckoutCountdown(): void {

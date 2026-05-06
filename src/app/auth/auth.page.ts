@@ -60,7 +60,6 @@ export class LoginPage implements OnDestroy {
   forgotPasswordExpirySeconds = 0;
   forgotPasswordResendCooldown = 0;
   forgotPasswordErrorKey = '';
-  demoResetCode: string | null = null;
   states: State[] = [];
   cities: City[] = [];
   locations: Location[] = [];
@@ -437,7 +436,6 @@ export class LoginPage implements OnDestroy {
     this.authMode = 'forgot-password';
     this.forgotPasswordMode = 'request';
     this.forgotPasswordErrorKey = '';
-    this.demoResetCode = null;
     this.stopForgotPasswordTimers();
 
     const existingIdentifier = this.loginForm.get('identifier')?.value;
@@ -484,9 +482,8 @@ export class LoginPage implements OnDestroy {
           this.forgotPasswordForm.get('code')?.markAsUntouched();
           this.forgotPasswordForm.get('newPassword')?.markAsUntouched();
           this.forgotPasswordForm.get('confirmPassword')?.markAsUntouched();
-          this.demoResetCode = response.demo_code ?? null;
-          this.startForgotPasswordExpiryCountdown(response.expires_in ?? 600);
-          this.startForgotPasswordResendCooldown(30);
+          this.startForgotPasswordExpiryCountdown(response.expires_in_seconds ?? 600);
+          this.startForgotPasswordResendCooldown(response.resend_after_seconds ?? 60);
 
           this.presentToast(this.translate.instant('AUTH.FORGOT_PASSWORD_CODE_SENT'), 'success');
         },
@@ -528,7 +525,6 @@ export class LoginPage implements OnDestroy {
           this.isForgotLoading = false;
           this.forgotPasswordMode = 'success';
           this.stopForgotPasswordTimers();
-          this.demoResetCode = null;
           this.presentToast(this.translate.instant('AUTH.FORGOT_PASSWORD_RESET_SUCCESS'), 'success');
         },
         error: (error) => {
@@ -558,14 +554,13 @@ export class LoginPage implements OnDestroy {
     this.isResendResetCodeLoading = true;
     this.forgotPasswordErrorKey = '';
 
-    this.authService.requestPasswordReset(this.forgotPasswordEmail)
+    this.authService.resendPasswordReset(this.forgotPasswordEmail)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           this.isResendResetCodeLoading = false;
-          this.demoResetCode = response.demo_code ?? null;
-          this.startForgotPasswordExpiryCountdown(response.expires_in ?? 600);
-          this.startForgotPasswordResendCooldown(30);
+          this.startForgotPasswordExpiryCountdown(response.expires_in_seconds ?? 600);
+          this.startForgotPasswordResendCooldown(response.resend_after_seconds ?? 60);
           this.presentToast(this.translate.instant('AUTH.FORGOT_PASSWORD_CODE_RESENT'), 'success');
         },
         error: () => {
@@ -655,7 +650,6 @@ export class LoginPage implements OnDestroy {
     this.forgotPasswordExpirySeconds = 0;
     this.forgotPasswordResendCooldown = 0;
     this.forgotPasswordErrorKey = '';
-    this.demoResetCode = null;
     this.showForgotNewPassword = false;
     this.showForgotConfirmPassword = false;
 

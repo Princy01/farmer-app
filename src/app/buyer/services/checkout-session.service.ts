@@ -67,6 +67,10 @@ export interface RetailerCheckoutSessionSummary {
   last_payment_error?: string | null;
   can_resume_payment: boolean;
   can_retry_payment: boolean;
+  retry_attempts_used?: number | null;
+  max_retry_attempts?: number | null;
+  retry_available_at?: string | null;
+  retry_block_reason?: string | null;
   can_cancel_checkout: boolean;
   created_at: string;
   updated_at: string;
@@ -113,6 +117,10 @@ export interface RetailerCheckoutSessionDetail {
   last_payment_error?: string | null;
   can_resume_payment: boolean;
   can_retry_payment: boolean;
+  retry_attempts_used?: number | null;
+  max_retry_attempts?: number | null;
+  retry_available_at?: string | null;
+  retry_block_reason?: string | null;
   can_cancel_checkout: boolean;
   order_groups: RetailerCheckoutSessionDetailGroup[];
   created_at: string;
