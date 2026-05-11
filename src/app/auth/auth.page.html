@@ -2,6 +2,14 @@
   <div class="background-overlay"></div>
 
   <div class="login-container">
+    <!-- Language Selector Button -->
+    <div class="language-selector-container">
+      <button class="language-btn" (click)="selectLanguage()" [attr.aria-label]="'AUTH.SELECT_LANGUAGE' | translate">
+        <ion-icon name="language-outline"></ion-icon>
+        <span class="language-text">{{ currentLanguageName }}</span>
+      </button>
+    </div>
+
     <!-- Header Section -->
     <div class="header-section">
       <div class="logo-container">

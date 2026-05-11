@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
@@ -12,7 +12,7 @@ import {
   personAddOutline, locationOutline, mapOutline,
   refreshOutline, arrowBackOutline,
   checkmarkCircleOutline, keyOutline,
-  lockOpenOutline, alertCircleOutline
+  lockOpenOutline, alertCircleOutline, languageOutline
 } from 'ionicons/icons';
 import {
   AuthService,
@@ -81,6 +81,14 @@ export class LoginPage implements OnDestroy {
   private forgotPasswordResendTimer: any;
   private destroy$ = new Subject<void>();
 
+  // Language selection properties
+  languages = [
+    { id: 1, code: 'en', name: 'English' },
+    { id: 2, code: 'hi', name: 'हिन्दी' }
+  ];
+  selectedLanguage: string = 'en';
+  currentLanguageName: string = 'English';
+
   userRoles = [
     { id: UserRole.Wholesaler, name: 'AUTH.ROLE_WHOLESALER' },
     { id: UserRole.Retailer, name: 'AUTH.ROLE_RETAILER' },
@@ -92,6 +100,7 @@ export class LoginPage implements OnDestroy {
     private router: Router,
     private authService: AuthService,
     private toastController: ToastController,
+    private alertCtrl: AlertController,
     private translate: TranslateService,
     private translateApiService: TranslateApiService
   ) {
@@ -103,7 +112,7 @@ export class LoginPage implements OnDestroy {
       personAddOutline, locationOutline, mapOutline,
       refreshOutline, arrowBackOutline,
       checkmarkCircleOutline, keyOutline,
-      lockOpenOutline, alertCircleOutline
+      lockOpenOutline, alertCircleOutline, languageOutline
     });
 
     this.loginForm = this.fb.group({
@@ -133,6 +142,7 @@ export class LoginPage implements OnDestroy {
 
     this.loadStates();
     this.setupFormValueChanges();
+    this.initUserLanguage();
   }
 
   private initUserLanguage() {
@@ -145,7 +155,9 @@ export class LoginPage implements OnDestroy {
     }
 
     const savedLang = localStorage.getItem('preferred_language') || 'en';
-
+    this.selectedLanguage = savedLang;
+    const currentLang = this.languages.find(l => l.code === savedLang);
+    this.currentLanguageName = currentLang ? currentLang.name : 'English';
 
     this.translate.use(savedLang);
 
@@ -153,6 +165,9 @@ export class LoginPage implements OnDestroy {
       next: (pref) => {
         const code = pref?.code?.toLowerCase() || savedLang;
         this.translate.use(code);
+        this.selectedLanguage = code;
+        const lang = this.languages.find(l => l.code === code);
+        this.currentLanguageName = lang ? lang.name : 'English';
         localStorage.setItem('preferred_language', code);
       },
       error: () => {
@@ -388,6 +403,19 @@ export class LoginPage implements OnDestroy {
 
           this.presentToast(this.translate.instant('AUTH.LOGIN_SUCCESS'), 'success');
           this.initUserLanguage();
+
+          // Save language preference to database after login
+          const savedLang = localStorage.getItem('preferred_language') || 'en';
+          const langObj = this.languages.find(l => l.code === savedLang);
+          if (langObj) {
+            this.translateApiService.setLanguagePreference(langObj.id)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                error: () => {
+                  // Silently fail - language preference already set locally
+                }
+              });
+          }
 
           const userRole = this.authService.getUserRole();
           setTimeout(() => {
@@ -889,6 +917,61 @@ export class LoginPage implements OnDestroy {
 
     const selectedLocation = this.locations.find((location) => location.id === Number(selectedLocationId));
     this.locationSearchTerm = selectedLocation?.location_name ?? '';
+  }
+
+  // Language selection methods
+  async selectLanguage() {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('AUTH.SELECT_LANGUAGE'),
+      inputs: this.languages.map(lang => ({
+        type: 'radio' as const,
+        label: lang.name,
+        value: lang.code,
+        checked: lang.code === this.selectedLanguage
+      })),
+      buttons: [
+        {
+          text: this.translate.instant('AUTH.CANCEL'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('AUTH.OK'),
+          handler: (selectedCode: string) => {
+            if (selectedCode) {
+              this.changeLanguage(selectedCode);
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  changeLanguage(langCode: string) {
+    const lang = this.languages.find(l => l.code === langCode);
+    if (!lang) return;
+
+    const normalizedLangCode = langCode.toLowerCase();
+    this.selectedLanguage = normalizedLangCode;
+    this.currentLanguageName = lang.name;
+    this.translate.use(normalizedLangCode);
+    localStorage.setItem('preferred_language', normalizedLangCode);
+
+    // Save to backend/database for persistence across sessions
+    if (this.authService.getToken()) {
+      // Only save to backend if user is already authenticated
+      this.translateApiService.setLanguagePreference(lang.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            // Language preference saved successfully to database
+          },
+          error: () => {
+            // Silently fail - language preference already set locally
+          }
+        });
+    }
   }
 
   ngOnDestroy() {
