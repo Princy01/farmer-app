@@ -25,9 +25,26 @@ export const authInterceptor: HttpInterceptorFn = (
     req.url.includes('/auth/refresh-token') ||
     req.url.includes('/auth/');
 
-  const shouldSkipTranslation = isAuthEndpoint    // || !!authService.getToken();
+  const isMasterDataEndpoint =
+    req.url.includes('/getStates') ||
+    req.url.includes('/getAllCities') ||
+    req.url.includes('/getAllCitiesOfState') ||
+    req.url.includes('/getLocations') ||
+    req.url.includes('/getLocationsByCity') ||
+    req.url.includes('/getAllLanguages') ||
+    req.url.includes('/setUserLanguagePreference') ||
+    req.url.includes('/getUserLanguagePreference');
+
+  const shouldSkipTranslation = isAuthEndpoint || isMasterDataEndpoint;
 
   let modifiedReq = req;
+  const preferredLanguage = getPreferredLanguage();
+
+  modifiedReq = modifiedReq.clone({
+    setHeaders: {
+      'X-App-Language': preferredLanguage,
+    },
+  });
 
   const token = authService.getToken();
   if (token && !isAuthEndpoint) {
@@ -82,6 +99,18 @@ export const authInterceptor: HttpInterceptorFn = (
     })
   );
 };
+
+function getPreferredLanguage(): string {
+  const rawLang = (
+    localStorage.getItem('preferred_language') ||
+    localStorage.getItem('appLang') ||
+    'en'
+  ).toLowerCase();
+  const baseLang = rawLang.split('-')[0];
+  const supportedLangs = ['en', 'hi', 'te', 'ta', 'kn', 'ml', 'or', 'mr', 'gu', 'bn', 'pa', 'ur'];
+
+  return supportedLangs.includes(baseLang) ? baseLang : 'en';
+}
 
 // Helper: Add token
 function addTokenToRequest(request: HttpRequest<unknown>, token: string): HttpRequest<unknown> {

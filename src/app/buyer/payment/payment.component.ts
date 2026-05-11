@@ -229,9 +229,9 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   private async initializePaymentContext(): Promise<void> {
     try {
-      if (!this.orderData && this.checkoutSessionId) {
+      if (this.checkoutSessionId) {
         await this.loadCheckoutSessionDetail(this.checkoutSessionId);
-      } else if (this.orderData && !this.checkoutSessionId) {
+      } else if (this.orderData) {
         await this.ensureCheckoutSession();
       }
     } catch (error: any) {
@@ -492,10 +492,17 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.orderData = {
       ...this.orderData,
       checkoutSessionId,
+      totalPrice: response?.data?.goods_amount ?? this.orderData?.totalPrice ?? 0,
+      transporterCost: response?.data?.delivery_amount ?? this.orderData?.transporterCost ?? 0,
+      platformFeeAmount: response?.data?.platform_fee_amount ?? this.orderData?.platformFeeAmount ?? 0,
+      handlingChargeAmount: response?.data?.handling_charge_amount ?? this.orderData?.handlingChargeAmount ?? 0,
+      payableAmount: response?.data?.payable_amount ?? this.orderData?.payableAmount ?? this.orderData?.grandTotal ?? 0,
+      grandTotal: response?.data?.payable_amount ?? this.orderData?.grandTotal ?? 0,
     };
   }
 
   private async loadCheckoutSessionDetail(checkoutSessionId: number): Promise<void> {
+    const existingTransportInfo = this.transportInfo;
     const response = await this.paymentService.getCheckoutSession(checkoutSessionId).toPromise();
     const detail = response?.data;
     if (!detail) {
@@ -512,10 +519,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.transportInfo = this.hasTransport
       ? {
           base_price: detail.delivery_amount,
-          delivery_type: 'standard',
-          urgency: 'standard',
-          distance: 0,
-          load_type: 'general',
+          delivery_type: existingTransportInfo?.delivery_type || 'standard',
+          urgency: existingTransportInfo?.urgency || 'standard',
+          distance: existingTransportInfo?.distance || 0,
+          distance_km: existingTransportInfo?.distance_km || existingTransportInfo?.distance || 0,
+          load_type: existingTransportInfo?.load_type || 'general',
         }
       : null;
   }
@@ -563,7 +571,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
       deliveryAddress: detail.delivery_address,
       totalPrice: detail.goods_amount,
       discount: wholesalerGroups.reduce((sum: number, group: any) => sum + (group.allocatedDiscount || 0), 0),
-      grandTotal: detail.gross_amount,
+      platformFeeAmount: detail.platform_fee_amount,
+      handlingChargeAmount: detail.handling_charge_amount,
+      payableAmount: detail.payable_amount,
+      grandTotal: detail.payable_amount,
       hasTransport: detail.delivery_amount > 0,
       transportData: detail.delivery_amount > 0 ? { base_price: detail.delivery_amount } : null,
       transporterCost: detail.delivery_amount,
