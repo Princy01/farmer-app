@@ -43,22 +43,30 @@ export interface AuthResponse {
 export interface Location {
   id: number;
   location_name: string | null;
+  location_name_en?: string | null;
   city_id: number;
   city_name: string | null;
+  city_name_en?: string | null;
   state_id: number;
   state_name: string | null;
+  state_name_en?: string | null;
+  language_code?: string;
 }
 
 export interface State {
   id: number;
   state_name: string;
   state_shortname: string;
+  state_name_en?: string;
+  language_code?: string;
 }
 
 export interface City {
   id: number;
   city_shortname: string;
   city_name: string;
+  city_name_en?: string;
+  language_code?: string;
 }
 
 export interface RegistrationResponse {
@@ -116,12 +124,12 @@ export class AuthService {
   private userIdKey = 'user_id';
 
   // Caching for reference data (24-hour TTL)
-  private statesCache: State[] | null = null;
-  private statesCacheTime: number = 0;
-  private citiesCache: Map<number, City[]> = new Map();
-  private citiesCacheTime: Map<number, number> = new Map();
-  private locationsCache: Map<number, Location[]> = new Map();
-  private locationsCacheTime: Map<number, number> = new Map();
+  private statesCache: Map<string, State[]> = new Map();
+  private statesCacheTime: Map<string, number> = new Map();
+  private citiesCache: Map<string, City[]> = new Map();
+  private citiesCacheTime: Map<string, number> = new Map();
+  private locationsCache: Map<string, Location[]> = new Map();
+  private locationsCacheTime: Map<string, number> = new Map();
   private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in ms
 
   constructor(private http: HttpClient) { }
@@ -208,7 +216,9 @@ export class AuthService {
       1: 'admin',
       2: 'wholesaler',
       3: 'retailer',
-      4: 'driver'
+      4: 'driver',
+      6: 'ops_l1',
+      8: 'finance',
     };
     return roleMap[roleId] || 'unknown';
   }
@@ -224,9 +234,7 @@ export class AuthService {
     localStorage.removeItem('wholesalerId');
 
     // Clear caches on logout
-    this.statesCache = null;
-    this.citiesCache.clear();
-    this.locationsCache.clear();
+    this.clearReferenceDataCache();
   }
 
   // Updated authentication check methods
@@ -259,7 +267,9 @@ export class AuthService {
       'admin': 1,
       'wholesaler': 2,
       'retailer': 3,
-      'driver': 4
+      'driver': 4,
+      'ops_l1': 6,
+      'finance': 8,
     };
     return role ? roleMap[role] || null : null;
   }
@@ -285,11 +295,24 @@ export class AuthService {
     return userRole ? roles.includes(userRole) : false;
   }
 
+  clearReferenceDataCache(): void {
+    this.statesCache.clear();
+    this.statesCacheTime.clear();
+    this.citiesCache.clear();
+    this.citiesCacheTime.clear();
+    this.locationsCache.clear();
+    this.locationsCacheTime.clear();
+  }
+
   getStates(): Observable<State[]> {
     // Return cached data if still valid
     const now = Date.now();
-    if (this.statesCache && (now - this.statesCacheTime) < this.CACHE_DURATION) {
-      return of(this.statesCache);
+    const lang = this.getPreferredLanguage();
+    const cached = this.statesCache.get(lang);
+    const cacheTime = this.statesCacheTime.get(lang) || 0;
+
+    if (cached && (now - cacheTime) < this.CACHE_DURATION) {
+      return of(cached);
     }
 
     return this.http.get<State[]>(`${this.apiUrl}/getStates`)
@@ -297,8 +320,8 @@ export class AuthService {
         retry({ count: 3, delay: (error, count) => timer(Math.pow(2, count) * 1000) }),
         tap(states => {
           // Update cache
-          this.statesCache = states;
-          this.statesCacheTime = now;
+          this.statesCache.set(lang, states);
+          this.statesCacheTime.set(lang, now);
         }),
         catchError(error => {
           return throwError(() => error);
@@ -309,8 +332,10 @@ export class AuthService {
   getCitiesOfState(stateId: number): Observable<City[]> {
     // Return cached data if still valid
     const now = Date.now();
-    const cached = this.citiesCache.get(stateId);
-    const cacheTime = this.citiesCacheTime.get(stateId) || 0;
+    const lang = this.getPreferredLanguage();
+    const cacheKey = `${lang}:${stateId}`;
+    const cached = this.citiesCache.get(cacheKey);
+    const cacheTime = this.citiesCacheTime.get(cacheKey) || 0;
 
     if (cached && (now - cacheTime) < this.CACHE_DURATION) {
       return of(cached);
@@ -321,8 +346,8 @@ export class AuthService {
         retry({ count: 3, delay: (error, count) => timer(Math.pow(2, count) * 1000) }),
         tap(cities => {
           // Update cache
-          this.citiesCache.set(stateId, cities);
-          this.citiesCacheTime.set(stateId, now);
+          this.citiesCache.set(cacheKey, cities);
+          this.citiesCacheTime.set(cacheKey, now);
         }),
         catchError(error => {
           return throwError(() => error);
@@ -333,8 +358,10 @@ export class AuthService {
   getLocationsByCity(cityId: number): Observable<Location[]> {
     // Return cached data if still valid
     const now = Date.now();
-    const cached = this.locationsCache.get(cityId);
-    const cacheTime = this.locationsCacheTime.get(cityId) || 0;
+    const lang = this.getPreferredLanguage();
+    const cacheKey = `${lang}:${cityId}`;
+    const cached = this.locationsCache.get(cacheKey);
+    const cacheTime = this.locationsCacheTime.get(cacheKey) || 0;
 
     if (cached && (now - cacheTime) < this.CACHE_DURATION) {
       return of(cached);
@@ -345,8 +372,8 @@ export class AuthService {
         retry({ count: 3, delay: (error, count) => timer(Math.pow(2, count) * 1000) }),
         tap(locations => {
           // Update cache
-          this.locationsCache.set(cityId, locations);
-          this.locationsCacheTime.set(cityId, now);
+          this.locationsCache.set(cacheKey, locations);
+          this.locationsCacheTime.set(cacheKey, now);
         }),
         catchError(error => {
           return throwError(() => error);
@@ -395,5 +422,17 @@ export class AuthService {
 
   private normalizeEmail(email: string): string {
     return email.trim().toLowerCase();
+  }
+
+  private getPreferredLanguage(): string {
+    const rawLang = (
+      localStorage.getItem('preferred_language') ||
+      localStorage.getItem('appLang') ||
+      'en'
+    ).toLowerCase();
+    const baseLang = rawLang.split('-')[0];
+    const supportedLangs = ['en', 'hi', 'te', 'ta', 'kn', 'ml', 'or', 'mr', 'gu', 'bn', 'pa', 'ur'];
+
+    return supportedLangs.includes(baseLang) ? baseLang : 'en';
   }
 }

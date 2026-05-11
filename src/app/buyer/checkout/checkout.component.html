@@ -274,34 +274,10 @@
             <span class="sum-val">₹{{ platformFee | number:'1.2-2' }}</span>
           </div>
 
-          <!-- Subtotal Before Tax -->
-          <div class="sum-row subtotal-row" *ngIf="(discount > 0) || (handlingCharges > 0) || (platformFee > 0)">
-            <span class="sum-label">{{ "CHECKOUT.SUBTOTAL" | translate }}</span>
-            <span class="sum-val">₹{{ (totalPrice - discount + handlingCharges + platformFee) | number:'1.2-2' }}</span>
-          </div>
-
-          <!-- GST/Tax -->
-          <div class="sum-row" *ngIf="taxAmount > 0">
-            <span class="sum-label tax-label">
-              {{ "CHECKOUT.GST_TAX" | translate }}
-              <span class="tax-rate">({{ (gstRate * 100) | number:'1.0-0' }}%)</span>
-            </span>
-            <span class="sum-val tax-val">+₹{{ taxAmount | number:'1.2-2' }}</span>
-          </div>
-
           <!-- Transport Cost -->
           <div class="sum-row" *ngIf="hasRideRequest && estimatedRidePrice > 0">
             <span class="sum-label">{{ "CHECKOUT.TRANSPORT_COST" | translate }}</span>
             <span class="sum-val">₹{{ estimatedRidePrice | number:'1.2-2' }}</span>
-          </div>
-
-          <!-- Transport GST -->
-          <div class="sum-row" *ngIf="hasRideRequest && transportTax > 0">
-            <span class="sum-label tax-label">
-              {{ "CHECKOUT.TRANSPORT_GST" | translate }}
-              <span class="tax-rate">({{ (gstRate * 100) | number:'1.0-0' }}%)</span>
-            </span>
-            <span class="sum-val tax-val">+₹{{ transportTax | number:'1.2-2' }}</span>
           </div>
 
           <!-- Divider -->

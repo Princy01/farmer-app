@@ -283,6 +283,144 @@ const appRoutes: Routes = [
     ]
   },
   {
+    path: 'admin',
+    loadComponent: () => import('./console/console-shell.component').then((m) => m.ConsoleShellComponent),
+    data: { consoleRole: 'admin' },
+    children: [
+      {
+        path: '',
+        redirectTo: 'control-tower',
+        pathMatch: 'full',
+      },
+      {
+        path: 'control-tower',
+        loadComponent: () => import('./console/console-summary-page.component').then((m) => m.ConsoleSummaryPageComponent),
+        data: {
+          summaryKind: 'admin',
+          consoleLabel: 'Admin Console',
+          title: 'Control Tower',
+          description: 'This will become the admin landing page with control-tower summary cards, refresh metadata, and drilldowns into watch lists.',
+        },
+      },
+      {
+        path: 'master-data',
+        loadComponent: () => import('./console/console-master-data-page.component').then((m) => m.ConsoleMasterDataPageComponent),
+        data: {
+          consoleLabel: 'Admin Console',
+          title: 'Master Data',
+          description: 'Foundational admin entry page for states, cities, and locations, with room to grow into mandi, product, and payment master setup.',
+        },
+      },
+      {
+        path: 'console-access',
+        loadComponent: () => import('./console/console-access-page.component').then((m) => m.ConsoleAccessPageComponent),
+        data: {
+          consoleLabel: 'Admin Console',
+          title: 'Console Access',
+          description: 'Grant and revoke ops and finance console access without leaving the admin workspace.',
+        },
+      },
+      {
+        path: 'onboarding-watch',
+        loadComponent: () => import('./console/console-placeholder.component').then((m) => m.ConsolePlaceholderComponent),
+        data: {
+          consoleLabel: 'Admin Console',
+          title: 'Onboarding Watch',
+          description: 'This page will host buyer KYC, wholesaler license, branch verification, and driver onboarding watchlists.',
+        },
+      },
+      {
+        path: 'transport-watch',
+        loadComponent: () => import('./console/console-placeholder.component').then((m) => m.ConsolePlaceholderComponent),
+        data: {
+          consoleLabel: 'Admin Console',
+          title: 'Transport Watch',
+          description: 'This page will show ride-not-assigned, ride-not-taken, pickup delayed, and delivery overdue operational views.',
+        },
+      },
+      {
+        path: 'payment-watch',
+        loadComponent: () => import('./console/console-placeholder.component').then((m) => m.ConsolePlaceholderComponent),
+        data: {
+          consoleLabel: 'Admin Console',
+          title: 'Payment Watch',
+          description: 'This page will show payment failures, finance exceptions, and payment-linked dispute monitoring.',
+        },
+      },
+    ],
+  },
+  {
+    path: 'ops',
+    loadComponent: () => import('./console/console-shell.component').then((m) => m.ConsoleShellComponent),
+    data: { consoleRole: 'ops' },
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./console/console-summary-page.component').then((m) => m.ConsoleSummaryPageComponent),
+        data: {
+          summaryKind: 'ops',
+          consoleLabel: 'Ops Console',
+          title: 'Ops Dashboard',
+          description: 'This will become the ops landing page for case handling, onboarding review, and transport exception workflows.',
+        },
+      },
+      {
+        path: 'onboarding-watch',
+        loadComponent: () => import('./console/console-placeholder.component').then((m) => m.ConsolePlaceholderComponent),
+        data: {
+          consoleLabel: 'Ops Console',
+          title: 'Onboarding Watch',
+          description: 'This page will give ops a focused onboarding queue for KYC, branch verification, and document review.',
+        },
+      },
+      {
+        path: 'transport-watch',
+        loadComponent: () => import('./console/console-placeholder.component').then((m) => m.ConsolePlaceholderComponent),
+        data: {
+          consoleLabel: 'Ops Console',
+          title: 'Transport Watch',
+          description: 'This page will give ops the daily transport watchlists and time-sensitive operational queue.',
+        },
+      },
+    ],
+  },
+  {
+    path: 'finance',
+    loadComponent: () => import('./console/console-shell.component').then((m) => m.ConsoleShellComponent),
+    data: { consoleRole: 'finance' },
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./console/console-summary-page.component').then((m) => m.ConsoleSummaryPageComponent),
+        data: {
+          summaryKind: 'finance',
+          consoleLabel: 'Finance Console',
+          title: 'Finance Dashboard',
+          description: 'This will become the finance landing page for payment failures, pending execution, and finance-owned dispute work.',
+        },
+      },
+      {
+        path: 'payment-watch',
+        loadComponent: () => import('./console/console-placeholder.component').then((m) => m.ConsolePlaceholderComponent),
+        data: {
+          consoleLabel: 'Finance Console',
+          title: 'Payment Watch',
+          description: 'This page will show payment failures, exception lists, and finance-side follow-up work.',
+        },
+      },
+    ],
+  },
+  {
     path: 'transport',
     loadComponent: () => import('./transport/transport.component').then((m) => m.TransportComponent),
     children: [
@@ -421,10 +559,25 @@ const publicTopLevelPaths = new Set(['', 'login', 'verify-email']);
 const wholesalerRoleGuard = requireRolesGuard(['wholesaler']);
 const buyerRoleGuard = requireRolesGuard(['retailer']);
 const transportRoleGuard = requireRolesGuard(['driver']);
+const adminRoleGuard = requireRolesGuard(['admin']);
+const opsRoleGuard = requireRolesGuard(['ops_l1']);
+const financeRoleGuard = requireRolesGuard(['finance']);
 
 const getRoleGuardByPrefix = (path?: string): CanActivateFn | null => {
   if (!path) {
     return null;
+  }
+
+  if (path === 'admin' || path.startsWith('admin/')) {
+    return adminRoleGuard;
+  }
+
+  if (path === 'ops' || path.startsWith('ops/')) {
+    return opsRoleGuard;
+  }
+
+  if (path === 'finance' || path.startsWith('finance/')) {
+    return financeRoleGuard;
   }
 
   if (path === 'buyer' || path.startsWith('buyer/')) {

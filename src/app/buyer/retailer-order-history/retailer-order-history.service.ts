@@ -30,6 +30,9 @@ export interface RetailerCheckoutSessionSummary {
   goods_amount: number;
   delivery_amount: number;
   gross_amount: number;
+  platform_fee_amount: number;
+  handling_charge_amount: number;
+  payable_amount: number;
   delivery_address: string;
   current_payment_intent_id?: number | null;
   payment_started_at?: string | null;

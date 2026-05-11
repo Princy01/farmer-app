@@ -105,14 +105,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   totalPrice = 0;
   discount = 0;
 
-  // Charges and Taxes
-  handlingCharges = 50; // Fixed handling charge in rupees
-  platformFeeRate = 0.02; // Platform fee - 2% of subtotal
-  platformFee = 0; // Calculated platform fee
-  gstRate = 0.05; // 5% GST rate for taxable items
-  taxableAmount = 0; // Subtotal excluding fresh items
-  taxAmount = 0; // Calculated GST on taxable items and charges
-  transportTax = 0; // GST on transport charges (if applicable)
+  // Checkout preview mirrors the current backend policy:
+  // retailer pays only their own commission share; wholeseller and transporter
+  // deductions stay backend-side and do not change retailer payable.
+  handlingCharges = 0;
+  platformFee = 0;
 
   grandTotal = 0;
 
@@ -444,11 +441,15 @@ export class CheckoutComponent implements OnInit, OnDestroy {
             selectedBranch: this.selectedBranch,
             deliveryAddress: this.selectedBranch.address || '',
             deliveryPincode: this.selectedBranch.pincode || '',
+            totalPrice: checkoutResponse?.data?.goods_amount ?? this.totalPrice,
             discount: this.discount,
-            grandTotal: this.grandTotal,
+            platformFeeAmount: checkoutResponse?.data?.platform_fee_amount ?? this.platformFee,
+            handlingChargeAmount: checkoutResponse?.data?.handling_charge_amount ?? this.handlingCharges,
+            payableAmount: checkoutResponse?.data?.payable_amount ?? this.grandTotal,
+            grandTotal: checkoutResponse?.data?.payable_amount ?? this.grandTotal,
             hasTransport: this.hasRideRequest,
             transportData: finalTransportData,
-            transporterCost: this.hasRideRequest ? this.estimatedRidePrice : 0,
+            transporterCost: checkoutResponse?.data?.delivery_amount ?? (this.hasRideRequest ? this.estimatedRidePrice : 0),
             retailer: this.retailerInfo,
             retailerBranchId: this.selectedBranch.branch_id,
             checkoutSessionId: checkoutSessionId
@@ -568,9 +569,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   private calculateGroupPricing(): void {
     if (this.wholesalerGroups.length === 0) {
-      this.calculateTaxes();
-      this.grandTotal = this.totalPrice - this.discount + this.handlingCharges +
-        this.platformFee + this.taxAmount + this.transportTax +
+      const goodsAmount = Math.max(this.totalPrice - this.discount, 0);
+      this.applyPaymentQuote(goodsAmount);
+      this.grandTotal = goodsAmount + this.platformFee +
         (this.hasRideRequest ? this.estimatedRidePrice : 0);
       return;
     }
@@ -584,28 +585,33 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       group.finalAmount = group.subtotal - group.allocatedDiscount + group.allocatedTax;
     }
 
-    this.calculateTaxes();
     const ordersTotal = this.wholesalerGroups.reduce((sum, group) => sum + group.finalAmount, 0);
-    this.grandTotal = ordersTotal - this.discount + this.handlingCharges +
-      this.platformFee + this.taxAmount + this.transportTax +
+    this.applyPaymentQuote(ordersTotal);
+    this.grandTotal = ordersTotal + this.platformFee +
       (this.hasRideRequest ? this.estimatedRidePrice : 0);
   }
 
-  private calculateTaxes(): void {
-    // Calculate taxable amount (items - discount)
-    const subtotalAfterDiscount = this.totalPrice - this.discount;
-    this.taxableAmount = subtotalAfterDiscount;
+  private applyPaymentQuote(goodsAmount: number): void {
+    const normalizedGoodsAmount = Math.max(goodsAmount, 0);
+    this.handlingCharges = 0;
+    this.platformFee = this.calculateRetailerPlatformFeeShare(normalizedGoodsAmount);
+  }
 
-    // Calculate platform fee as 2% of subtotal (after discount)
-    this.platformFee = Math.round(subtotalAfterDiscount * this.platformFeeRate * 100) / 100;
+  private calculateRetailerPlatformFeeShare(goodsAmount: number): number {
+    if (goodsAmount <= 0) {
+      return 0;
+    }
 
-    const taxableBase = this.taxableAmount + this.handlingCharges + this.platformFee;
-    this.taxAmount = Math.round(taxableBase * this.gstRate * 100) / 100;
+    let commissionRate = 0.0125;
+    if (goodsAmount <= 5000) {
+      commissionRate = 0.02;
+    } else if (goodsAmount <= 10000) {
+      commissionRate = 0.0175;
+    } else if (goodsAmount <= 25000) {
+      commissionRate = 0.015;
+    }
 
-    // Calculate GST on transport charges if transport is selected
-    this.transportTax = this.hasRideRequest && this.estimatedRidePrice > 0
-      ? Math.round(this.estimatedRidePrice * this.gstRate * 100) / 100
-      : 0;
+    return Math.round(goodsAmount * commissionRate * 0.5 * 100) / 100;
   }
 
   private async showPremiumUpgradeAlert(): Promise<void> {

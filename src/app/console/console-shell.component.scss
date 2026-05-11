@@ -1,0 +1,22 @@
+.console-toolbar {
+  --background: linear-gradient(135deg, #15304d 0%, #1f4f73 100%);
+  --color: #f5f7fb;
+}
+
+.console-main-toolbar {
+  box-shadow: 0 10px 24px rgba(17, 39, 64, 0.14);
+}
+
+.console-menu-content {
+  --background: #eef3f8;
+}
+
+ion-item.selected {
+  --background: rgba(31, 79, 115, 0.12);
+  --color: #15304d;
+  font-weight: 600;
+}
+
+.console-shell-content {
+  --background: #f5f7fb;
+}

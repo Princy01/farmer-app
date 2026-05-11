@@ -1,0 +1,106 @@
+<ion-content class="access-content">
+  <div class="access-wrap">
+    <ion-card class="hero-card">
+      <ion-card-header>
+        <ion-card-subtitle>Admin Console</ion-card-subtitle>
+        <ion-card-title>Console Access</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Use this page to grant or revoke console access for admin, ops, and finance users without leaving the dashboard flow.</p>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="state-row" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Loading console access…</span>
+    </div>
+
+    <div class="state-row error" *ngIf="!isLoading && errorMessage">
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <div class="layout-grid" *ngIf="!isLoading && !errorMessage">
+      <ion-card class="panel-card">
+        <ion-card-header>
+          <ion-card-subtitle>Grant Access</ion-card-subtitle>
+          <ion-card-title>Assign a module</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <form [formGroup]="grantForm" class="panel-form">
+            <ion-item>
+              <ion-label position="stacked">User</ion-label>
+              <ion-select interface="popover" formControlName="user_id">
+                <ion-select-option *ngFor="let user of filteredUsers" [value]="user.user_id">
+                  {{ getUserLabel(user) }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Module</ion-label>
+              <ion-select interface="popover" formControlName="module_code">
+                <ion-select-option *ngFor="let option of moduleOptions" [value]="option.value">
+                  {{ option.label }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Reason</ion-label>
+              <ion-textarea autoGrow="true" formControlName="reason"></ion-textarea>
+            </ion-item>
+
+            <ion-button expand="block" (click)="grantAccess()" [disabled]="grantForm.invalid || isSaving">
+              Grant Access
+            </ion-button>
+          </form>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="panel-card">
+        <ion-card-header>
+          <ion-card-subtitle>Eligible Users</ion-card-subtitle>
+          <ion-card-title>Who can be assigned</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list lines="none" class="user-list">
+            <ion-item *ngFor="let user of filteredUsers">
+              <ion-label>
+                <h3>{{ user.name }}</h3>
+                <p>{{ user.email || user.mobile_num || 'No contact info' }}</p>
+                <p>{{ roleLabel(user.base_role_code) }}</p>
+              </ion-label>
+              <div class="module-chip-row">
+                <ion-badge *ngFor="let module of user.active_modules">{{ roleLabel(module) }}</ion-badge>
+              </div>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <div class="module-grid" *ngIf="!isLoading && !errorMessage">
+      <ion-card class="module-card" *ngFor="let group of groupedAccess">
+        <ion-card-header>
+          <ion-card-subtitle>Active Access</ion-card-subtitle>
+          <ion-card-title>{{ group.label }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="empty-copy" *ngIf="group.items.length === 0">No active {{ group.label.toLowerCase() }} access right now.</div>
+
+          <div class="access-item" *ngFor="let item of group.items">
+            <div class="access-copy">
+              <h3>{{ item.name }}</h3>
+              <p>{{ item.email || item.mobile_num || 'No contact info' }}</p>
+              <p>Granted {{ item.granted_at | date: 'medium' }}</p>
+              <p *ngIf="item.reason">{{ item.reason }}</p>
+            </div>
+            <ion-button fill="outline" color="danger" size="small" (click)="revokeAccess(item)" [disabled]="isSaving">
+              Revoke
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>
