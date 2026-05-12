@@ -1,8 +1,10 @@
-<ion-list>
-  <ion-radio-group (ionChange)="switchLanguage($event.detail.value)">
-    <ion-item *ngFor="let lang of languages">
+<div class="language-switcher" role="group" aria-label="Language">
+  <ion-segment
+    mode="ios"
+    [value]="currentLang"
+    (ionChange)="switchLanguage($event.detail.value)">
+    <ion-segment-button *ngFor="let lang of languages" [value]="lang.code">
       <ion-label>{{ lang.label }}</ion-label>
-      <ion-radio slot="start" [value]="lang.code"></ion-radio>
-    </ion-item>
-  </ion-radio-group>
-</ion-list>
+    </ion-segment-button>
+  </ion-segment>
+</div>

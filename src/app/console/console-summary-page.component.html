@@ -1,0 +1,63 @@
+<ion-content class="summary-content">
+  <div class="summary-wrap">
+    <ion-card class="summary-hero">
+      <ion-card-header>
+        <ion-card-subtitle>{{ consoleLabel }}</ion-card-subtitle>
+        <ion-card-title>{{ title }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="summary-description">{{ description }}</p>
+
+        <div class="meta-grid">
+          <div class="meta-pill">
+            <ion-icon name="refresh-outline"></ion-icon>
+            <span>Last refreshed {{ lastRefreshedLabel }}</span>
+          </div>
+          <div class="meta-pill">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>Server time {{ serverTimeLabel }}</span>
+          </div>
+          <div class="meta-pill">
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+            <span>Refresh in {{ nextRefreshSeconds }}s</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="summary-state" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading summary…</p>
+    </div>
+
+    <div class="summary-state error" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <section class="summary-section" *ngFor="let section of sections; trackBy: trackSection">
+      <div class="section-heading">
+        <h2>{{ section.title }}</h2>
+        <p>{{ section.subtitle }}</p>
+      </div>
+
+      <div class="cards-grid">
+        <a
+          class="summary-card-link"
+          *ngFor="let card of section.cards; trackBy: trackCard"
+          [routerLink]="card.route || null"
+          [class.clickable]="!!card.route"
+        >
+          <ion-card class="summary-card" [ngClass]="getToneClass(card)">
+            <ion-card-content>
+              <div class="card-topline">{{ card.label }}</div>
+              <div class="card-value">{{ card.value }}</div>
+              <div class="card-helper" *ngIf="card.helper">{{ card.helper }}</div>
+              <ion-badge *ngIf="card.route" class="card-cta">Open</ion-badge>
+            </ion-card-content>
+          </ion-card>
+        </a>
+      </div>
+    </section>
+  </div>
+</ion-content>

@@ -36,6 +36,16 @@
           <span class="summary-amount">₹{{ orderData?.totalPrice | number:'1.2-2' }}</span>
         </div>
 
+        <div class="summary-row" *ngIf="orderData?.handlingChargeAmount > 0">
+          <span class="summary-label">{{ 'CHECKOUT.HANDLING_CHARGES' | translate }}</span>
+          <span class="summary-amount">₹{{ orderData?.handlingChargeAmount }}</span>
+        </div>
+
+        <div class="summary-row" *ngIf="orderData?.platformFeeAmount > 0">
+          <span class="summary-label">{{ 'CHECKOUT.PLATFORM_FEE' | translate }}</span>
+          <span class="summary-amount">₹{{ orderData?.platformFeeAmount }}</span>
+        </div>
+
         <div class="summary-row" *ngIf="orderData?.transportCost > 0">
           <span class="summary-label">{{ 'PAYMENT.TRANSPORT_COST' | translate }}</span>
           <span class="summary-amount">₹{{ orderData?.transportCost | number:'1.2-2' }}</span>

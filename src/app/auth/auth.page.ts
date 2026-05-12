@@ -140,21 +140,32 @@ export class LoginPage implements OnDestroy {
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
 
+    this.initUserLanguage();
     this.loadStates();
     this.setupFormValueChanges();
-    this.initUserLanguage();
+    this.translate.onLangChange
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.reloadReferenceDataForLanguage());
   }
 
   private initUserLanguage() {
     const legacy = localStorage.getItem('wholesaler_language')
       || localStorage.getItem('retailer_language');
     if (legacy) {
-      localStorage.setItem('preferred_language', legacy);
+      const normalizedLegacy = this.normalizeLanguageCode(legacy);
+      localStorage.setItem('preferred_language', normalizedLegacy);
+      localStorage.setItem('appLang', normalizedLegacy);
       localStorage.removeItem('wholesaler_language');
       localStorage.removeItem('retailer_language');
     }
 
-    const savedLang = localStorage.getItem('preferred_language') || 'en';
+    const savedLang = this.normalizeLanguageCode(
+      localStorage.getItem('preferred_language') ||
+      localStorage.getItem('appLang') ||
+      'en'
+    );
+    localStorage.setItem('preferred_language', savedLang);
+    localStorage.setItem('appLang', savedLang);
     this.selectedLanguage = savedLang;
     const currentLang = this.languages.find(l => l.code === savedLang);
     this.currentLanguageName = currentLang ? currentLang.name : 'English';
@@ -163,12 +174,13 @@ export class LoginPage implements OnDestroy {
 
     this.translateApiService.getUserPreference().subscribe({
       next: (pref) => {
-        const code = pref?.code?.toLowerCase() || savedLang;
+        const code = this.normalizeLanguageCode(pref?.code || savedLang);
         this.translate.use(code);
         this.selectedLanguage = code;
         const lang = this.languages.find(l => l.code === code);
         this.currentLanguageName = lang ? lang.name : 'English';
         localStorage.setItem('preferred_language', code);
+        localStorage.setItem('appLang', code);
       },
       error: () => {
         // Already applied saved/default above, nothing to do
@@ -219,7 +231,7 @@ export class LoginPage implements OnDestroy {
     const selectedCityId = this.registerForm.get('city')?.value;
     if (selectedCityId) {
       const selectedCity = this.cities.find((city) => city.id === Number(selectedCityId));
-      if (selectedCity && selectedCity.city_name.toLowerCase() !== this.citySearchTerm.trim().toLowerCase()) {
+      if (selectedCity && !this.matchesCityInput(selectedCity, this.citySearchTerm)) {
         this.registerForm.patchValue({ city: null, location: null }, { emitEvent: false });
         this.locations = [];
         this.filteredLocations = [];
@@ -238,7 +250,7 @@ export class LoginPage implements OnDestroy {
     const selectedLocationId = this.registerForm.get('location')?.value;
     if (selectedLocationId) {
       const selectedLocation = this.locations.find((location) => location.id === Number(selectedLocationId));
-      if (selectedLocation && (selectedLocation.location_name ?? '').toLowerCase() !== this.locationSearchTerm.trim().toLowerCase()) {
+      if (selectedLocation && !this.matchesLocationInput(selectedLocation, this.locationSearchTerm)) {
         this.registerForm.get('location')?.setValue(null, { emitEvent: false });
       }
     }
@@ -280,7 +292,7 @@ export class LoginPage implements OnDestroy {
   selectCity(city: City, event?: Event): void {
     event?.preventDefault();
     this.registerForm.patchValue({ city: city.id, location: null }, { emitEvent: false });
-    this.citySearchTerm = city.city_name;
+    this.citySearchTerm = this.getCityDisplayName(city);
     this.locationSearchTerm = '';
     this.showCitySuggestions = false;
     this.locations = [];
@@ -291,7 +303,7 @@ export class LoginPage implements OnDestroy {
   selectLocation(location: Location, event?: Event): void {
     event?.preventDefault();
     this.registerForm.get('location')?.setValue(location.id, { emitEvent: false });
-    this.locationSearchTerm = location.location_name ?? '';
+    this.locationSearchTerm = this.getLocationDisplayName(location);
     this.showLocationSuggestions = false;
   }
 
@@ -421,7 +433,13 @@ export class LoginPage implements OnDestroy {
           setTimeout(() => {
             switch (userRole) {
               case 'admin':
-                this.router.navigate(['/admin/driver']);
+                this.router.navigate(['/admin/control-tower']);
+                break;
+              case 'ops_l1':
+                this.router.navigate(['/ops/dashboard']);
+                break;
+              case 'finance':
+                this.router.navigate(['/finance/dashboard']);
                 break;
               case 'wholesaler':
                 this.router.navigate(['/wholesaler/business-registration']);
@@ -882,8 +900,7 @@ export class LoginPage implements OnDestroy {
     }
 
     this.filteredCities = this.cities.filter((city) =>
-      city.city_name.toLowerCase().includes(searchTerm) ||
-      city.city_shortname.toLowerCase().includes(searchTerm)
+      this.getCitySearchText(city).includes(searchTerm)
     );
   }
 
@@ -895,7 +912,7 @@ export class LoginPage implements OnDestroy {
     }
 
     this.filteredLocations = this.locations.filter((location) =>
-      (location.location_name ?? '').toLowerCase().includes(searchTerm)
+      this.getLocationSearchText(location).includes(searchTerm)
     );
   }
 
@@ -906,7 +923,7 @@ export class LoginPage implements OnDestroy {
     }
 
     const selectedCity = this.cities.find((city) => city.id === Number(selectedCityId));
-    this.citySearchTerm = selectedCity?.city_name ?? '';
+    this.citySearchTerm = selectedCity ? this.getCityDisplayName(selectedCity) : '';
   }
 
   private syncLocationSearchFromSelection(): void {
@@ -916,7 +933,67 @@ export class LoginPage implements OnDestroy {
     }
 
     const selectedLocation = this.locations.find((location) => location.id === Number(selectedLocationId));
-    this.locationSearchTerm = selectedLocation?.location_name ?? '';
+    this.locationSearchTerm = selectedLocation ? this.getLocationDisplayName(selectedLocation) : '';
+  }
+
+  private reloadReferenceDataForLanguage(): void {
+    this.authService.clearReferenceDataCache();
+    this.loadStates();
+
+    const stateId = Number(this.registerForm.get('state')?.value);
+    if (stateId) {
+      this.loadCities(stateId);
+    }
+
+    const cityId = Number(this.registerForm.get('city')?.value);
+    if (cityId) {
+      this.loadLocations(cityId);
+    }
+  }
+
+  getStateDisplayName(state: State): string {
+    return state.state_name || state.state_name_en || '';
+  }
+
+  getCityDisplayName(city: City): string {
+    return city.city_name || city.city_name_en || '';
+  }
+
+  getLocationDisplayName(location: Location): string {
+    return location.location_name || location.location_name_en || '';
+  }
+
+  private getCitySearchText(city: City): string {
+    return [
+      city.city_name,
+      city.city_name_en,
+      city.city_shortname,
+    ].filter(Boolean).join(' ').toLowerCase();
+  }
+
+  private getLocationSearchText(location: Location): string {
+    return [
+      location.location_name,
+      location.location_name_en,
+      location.city_name,
+      location.city_name_en,
+    ].filter(Boolean).join(' ').toLowerCase();
+  }
+
+  private matchesCityInput(city: City, input: string): boolean {
+    const normalizedInput = input.trim().toLowerCase();
+    return [
+      city.city_name,
+      city.city_name_en,
+    ].filter(Boolean).some((value) => value!.toLowerCase() === normalizedInput);
+  }
+
+  private matchesLocationInput(location: Location, input: string): boolean {
+    const normalizedInput = input.trim().toLowerCase();
+    return [
+      location.location_name,
+      location.location_name_en,
+    ].filter(Boolean).some((value) => value!.toLowerCase() === normalizedInput);
   }
 
   // Language selection methods
@@ -952,11 +1029,13 @@ export class LoginPage implements OnDestroy {
     const lang = this.languages.find(l => l.code === langCode);
     if (!lang) return;
 
-    const normalizedLangCode = langCode.toLowerCase();
+    const normalizedLangCode = this.normalizeLanguageCode(langCode);
     this.selectedLanguage = normalizedLangCode;
     this.currentLanguageName = lang.name;
-    this.translate.use(normalizedLangCode);
     localStorage.setItem('preferred_language', normalizedLangCode);
+    localStorage.setItem('appLang', normalizedLangCode);
+    this.authService.clearReferenceDataCache();
+    this.translate.use(normalizedLangCode);
 
     // Save to backend/database for persistence across sessions
     if (this.authService.getToken()) {
@@ -972,6 +1051,11 @@ export class LoginPage implements OnDestroy {
           }
         });
     }
+  }
+
+  private normalizeLanguageCode(langCode: string): string {
+    const baseLang = String(langCode || 'en').toLowerCase().split('-')[0];
+    return this.languages.some((lang) => lang.code === baseLang) ? baseLang : 'en';
   }
 
   ngOnDestroy() {

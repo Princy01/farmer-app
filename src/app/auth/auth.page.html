@@ -156,7 +156,7 @@
             <ion-icon name="map-outline" slot="start" class="input-icon"></ion-icon>
             <ion-select [placeholder]="'AUTH.SELECT_STATE' | translate" formControlName="state" class="role-select">
               <ion-select-option *ngFor="let state of states" [value]="state.id">
-                {{ state.state_name }}
+                {{ getStateDisplayName(state) }}
               </ion-select-option>
             </ion-select>
             <ion-spinner *ngIf="isLoadingStates" name="dots" slot="end"></ion-spinner>
@@ -197,7 +197,7 @@
                 class="typeahead-option"
                 *ngFor="let city of filteredCities"
                 (mousedown)="selectCity(city, $event)">
-                {{ city.city_name }}
+                {{ getCityDisplayName(city) }}
               </button>
               <div class="typeahead-empty" *ngIf="filteredCities.length === 0">
                 {{ 'AUTH.NO_CITIES_FOUND' | translate }}
@@ -243,7 +243,7 @@
                 class="typeahead-option"
                 *ngFor="let location of filteredLocations"
                 (mousedown)="selectLocation(location, $event)">
-                {{ location.location_name }}
+                {{ getLocationDisplayName(location) }}
               </button>
               <div class="typeahead-empty" *ngIf="filteredLocations.length === 0">
                 {{ 'AUTH.NO_LOCATIONS_FOUND' | translate }}
