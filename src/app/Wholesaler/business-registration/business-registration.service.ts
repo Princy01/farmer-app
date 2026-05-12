@@ -37,23 +37,21 @@ export interface Location {
 }
 
 export interface BusinessRegistrationPayload {
-  bid: number | null;
+  bid?: number | null;
   b_registration_num: string;
   b_owner_name: string;
   b_category_id: number;
   b_type_id: number;
   is_active: boolean;
-  state_id: number;
-  city_id: number;
-  location_id: number;
-  address: string;
   mobile_number: string;
   email: string;
   established_year: string;
   user_id: number;
   gst_number: string;
   pan_number: string;
-  privileged_user: boolean;
+  aadhaar_number?: string;
+  government_license_number?: string;
+  privileged_user?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

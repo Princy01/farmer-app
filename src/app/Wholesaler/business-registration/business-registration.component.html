@@ -125,213 +125,6 @@
             </div>
           </div>
 
-          <!-- Location Information Section -->
-          <div class="form-section">
-            <div class="section-title">
-              <ion-icon name="location-outline" class="section-icon"></ion-icon>
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.SECTION_LOCATION_INFO' | translate }}
-            </div>
-
-            <div class="form-row form-row-triple">
-              <!-- State ID -->
-              <div>
-                <ion-item
-                  [class.ion-invalid]="form.get('state_id')?.invalid && form.get('state_id')?.touched"
-                >
-                  <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.STATE' | translate }} *</ion-label>
-                  <ion-select formControlName="state_id" [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.STATE_PLACEHOLDER' | translate">
-                    <ion-select-option *ngFor="let state of states" [value]="state.id">
-                      {{ state.state_name }} ({{ state.state_shortname }})
-                    </ion-select-option>
-                  </ion-select>
-                </ion-item>
-                <div class="error-message" *ngIf="form.get('state_id')?.invalid && form.get('state_id')?.touched">
-                  {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_STATE' | translate }}
-                </div>
-              </div>
-
-              <!-- City -->
-              <div>
-                <div class="typeahead-container">
-                  <ion-item
-                    [class.ion-invalid]="form.get('city_id')?.invalid && form.get('city_id')?.touched"
-                    [disabled]="!form.get('state_id')?.value || isLoadingCities"
-                  >
-                    <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.CITY' | translate }} *</ion-label>
-                    <ion-input
-                      [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.CITY_PLACEHOLDER' | translate"
-                      [value]="citySearchTerm"
-                      (ionInput)="onCitySearchChange($event)"
-                      (focus)="onCityInputFocus()"
-                      (blur)="onCityInputBlur()"
-                      [disabled]="!form.get('state_id')?.value || isLoadingCities">
-                    </ion-input>
-                  </ion-item>
-                  <ion-button
-                    *ngIf="form.get('city_id')?.value"
-                    fill="clear"
-                    size="small"
-                    class="clear-selection-btn"
-                    (click)="clearSelectedCity()">
-                    {{ 'WHOLESALER_BUSINESS_REGISTRATION.CLEAR_SELECTION' | translate }}
-                  </ion-button>
-                  <div class="typeahead-results" *ngIf="showCitySuggestions && form.get('state_id')?.value">
-                    <button
-                      type="button"
-                      class="typeahead-option"
-                      *ngFor="let city of filteredCities"
-                      (mousedown)="selectCity(city, $event)">
-                      {{ city.city_name }}
-                    </button>
-                    <div class="typeahead-empty" *ngIf="filteredCities.length === 0">
-                      {{ 'WHOLESALER_BUSINESS_REGISTRATION.NO_CITIES_FOUND' | translate }}
-                    </div>
-                  </div>
-                  <div class="typeahead-helper" *ngIf="!form.get('state_id')?.value">
-                    {{ 'WHOLESALER_BUSINESS_REGISTRATION.SELECT_STATE_FIRST' | translate }}
-                  </div>
-                </div>
-                <div class="error-message" *ngIf="form.get('city_id')?.invalid && form.get('city_id')?.touched">
-                  {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_CITY' | translate }}
-                </div>
-              </div>
-
-              <!-- Location -->
-              <div>
-                <div class="typeahead-container">
-                  <ion-item
-                    [class.ion-invalid]="form.get('location_id')?.invalid && form.get('location_id')?.touched"
-                    [disabled]="!form.get('city_id')?.value || isLoadingLocations"
-                  >
-                    <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.LOCATION' | translate }} *</ion-label>
-                    <ion-input
-                      [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.LOCATION_PLACEHOLDER' | translate"
-                      [value]="locationSearchTerm"
-                      (ionInput)="onLocationSearchChange($event)"
-                      (focus)="onLocationInputFocus()"
-                      (blur)="onLocationInputBlur()"
-                      [disabled]="!form.get('city_id')?.value || isLoadingLocations">
-                    </ion-input>
-                  </ion-item>
-                  <ion-button
-                    *ngIf="form.get('location_id')?.value"
-                    fill="clear"
-                    size="small"
-                    class="clear-selection-btn"
-                    (click)="clearSelectedLocation()">
-                    {{ 'WHOLESALER_BUSINESS_REGISTRATION.CLEAR_SELECTION' | translate }}
-                  </ion-button>
-                  <div class="typeahead-results" *ngIf="showLocationSuggestions && form.get('city_id')?.value">
-                    <button
-                      type="button"
-                      class="typeahead-option"
-                      *ngFor="let location of filteredLocations"
-                      (mousedown)="selectLocation(location, $event)">
-                      {{ location.location_name }}
-                    </button>
-                    <div class="typeahead-empty" *ngIf="filteredLocations.length === 0">
-                      {{ 'WHOLESALER_BUSINESS_REGISTRATION.NO_LOCATIONS_FOUND' | translate }}
-                    </div>
-                  </div>
-                  <div class="typeahead-helper" *ngIf="!form.get('city_id')?.value">
-                    {{ 'WHOLESALER_BUSINESS_REGISTRATION.SELECT_CITY_FIRST' | translate }}
-                  </div>
-                </div>
-                <div class="error-message" *ngIf="form.get('location_id')?.invalid && form.get('location_id')?.touched">
-                  {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_LOCATION' | translate }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Address -->
-            <ion-item
-              [class.ion-invalid]="form.get('address')?.invalid && form.get('address')?.touched"
-            >
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.ADDRESS' | translate }} *</ion-label>
-              <ion-textarea
-                formControlName="address"
-                [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.ADDRESS_PLACEHOLDER' | translate"
-                rows="3"
-              >
-              </ion-textarea>
-            </ion-item>
-            <div class="error-message" *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_ADDRESS' | translate }}
-            </div>
-          </div>
-
-          <!-- GPS Coordinates Section -->
-          <div class="form-section">
-            <div class="section-title">
-              <ion-icon name="navigate-circle-outline" class="section-icon"></ion-icon>
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.GPS_COORDINATES' | translate }}
-            </div>
-
-            <ion-button
-              expand="block"
-              type="button"
-              (click)="getCurrentLocation()"
-              [disabled]="isGettingLocation"
-              class="location-btn"
-            >
-              <ion-spinner *ngIf="isGettingLocation" name="crescent" slot="start"></ion-spinner>
-              <ion-icon *ngIf="!isGettingLocation" name="locate-outline" slot="start"></ion-icon>
-              {{ (isGettingLocation ? 'WHOLESALER_BUSINESS_REGISTRATION.GETTING_LOCATION' : 'WHOLESALER_BUSINESS_REGISTRATION.GET_CURRENT_LOCATION') | translate }}
-            </ion-button>
-
-            <div class="form-row">
-              <div>
-                <ion-item
-                  [class.ion-invalid]="
-                    form.get('latitude')?.invalid && form.get('latitude')?.touched
-                  "
-                >
-                  <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.LATITUDE' | translate }} *</ion-label>
-                  <ion-input
-                    formControlName="latitude"
-                    [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.LATITUDE_PLACEHOLDER' | translate"
-                    type="number"
-                    inputmode="decimal"
-                  >
-                  </ion-input>
-                </ion-item>
-                <div
-                  class="error-message"
-                  *ngIf="
-                    form.get('latitude')?.invalid && form.get('latitude')?.touched
-                  "
-                >
-                  {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_LATITUDE' | translate }}
-                </div>
-              </div>
-
-              <div>
-                <ion-item
-                  [class.ion-invalid]="
-                    form.get('longitude')?.invalid && form.get('longitude')?.touched
-                  "
-                >
-                  <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.LONGITUDE' | translate }} *</ion-label>
-                  <ion-input
-                    formControlName="longitude"
-                    [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.LONGITUDE_PLACEHOLDER' | translate"
-                    type="number"
-                    inputmode="decimal"
-                  >
-                  </ion-input>
-                </ion-item>
-                <div
-                  class="error-message"
-                  *ngIf="
-                    form.get('longitude')?.invalid && form.get('longitude')?.touched
-                  "
-                >
-                  {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_LONGITUDE' | translate }}
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Contact Information Section -->
           <div class="form-section">
             <div class="section-title">
@@ -434,6 +227,44 @@
                   <span *ngIf="form.get('pan_number')?.errors?.['pattern']">
                     {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_PAN_PATTERN' | translate }}
                   </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <!-- Aadhaar Number -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="form.get('aadhaar_number')?.invalid && form.get('aadhaar_number')?.touched"
+                >
+                  <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.AADHAAR_NUMBER' | translate }}</ion-label>
+                  <ion-input
+                    formControlName="aadhaar_number"
+                    [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.AADHAAR_PLACEHOLDER' | translate"
+                    type="text"
+                  >
+                  </ion-input>
+                </ion-item>
+                <div class="error-message" *ngIf="form.get('aadhaar_number')?.invalid && form.get('aadhaar_number')?.touched">
+                  {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_AADHAAR_NUMBER' | translate }}
+                </div>
+              </div>
+
+              <!-- Government License Number -->
+              <div>
+                <ion-item
+                  [class.ion-invalid]="form.get('government_license_number')?.invalid && form.get('government_license_number')?.touched"
+                >
+                  <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.GOVERNMENT_LICENSE_NUMBER' | translate }}</ion-label>
+                  <ion-input
+                    formControlName="government_license_number"
+                    [placeholder]="'WHOLESALER_BUSINESS_REGISTRATION.GOVERNMENT_LICENSE_PLACEHOLDER' | translate"
+                    type="text"
+                  >
+                  </ion-input>
+                </ion-item>
+                <div class="error-message" *ngIf="form.get('government_license_number')?.invalid && form.get('government_license_number')?.touched">
+                  {{ 'WHOLESALER_BUSINESS_REGISTRATION.ERROR_GOVERNMENT_LICENSE_NUMBER' | translate }}
                 </div>
               </div>
             </div>
