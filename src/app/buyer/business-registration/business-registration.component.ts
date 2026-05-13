@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { save } from 'ionicons/icons';
-import { BusinessType, BusinessCategory, BusinessRegistrationService } from './business-registration.service';
+import { save, informationCircleOutline, documentTextOutline } from 'ionicons/icons';
+import { BusinessRegistrationService } from './business-registration.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -18,8 +18,6 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 })
 export class BusinessRegistrationComponent implements OnInit {
   form: FormGroup;
-  businessCategories: BusinessCategory[] = [];
-  businessTypes: BusinessType[] = [];
   isSubmitting = false;
 
   constructor(
@@ -33,22 +31,15 @@ export class BusinessRegistrationComponent implements OnInit {
     this.form = this.fb.group({
       bid: [null],
       b_registration_num: ['', Validators.required],
-      b_owner_name: ['', Validators.required],
-      b_category_id: [null, Validators.required],
-      b_type_id: [null, Validators.required],
-      is_active: [true], // Default true
-      mobile_number: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      email: ['', [Validators.required, Validators.email]],
-      established_year: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
+      is_active: [true],
       user_id: [null, Validators.required],
-      gst_number: ['', Validators.required],
       pan_number: ['', [Validators.required, Validators.pattern(/[A-Z]{5}[0-9]{4}[A-Z]{1}/)]],
       aadhaar_number: [''],
       government_license_number: [''],
-      privileged_user: [false], // Default false
+      privileged_user: [false],
     });
 
-    addIcons({ save });
+    addIcons({ save, informationCircleOutline, documentTextOutline });
   }
 
   ngOnInit() {
@@ -73,8 +64,6 @@ export class BusinessRegistrationComponent implements OnInit {
   }
 
   private initializeRegistrationForm() {
-    this.fetchBusinessCategories();
-    this.fetchBusinessTypes();
     this.setUserId();
   }
 
@@ -87,26 +76,6 @@ export class BusinessRegistrationComponent implements OnInit {
     }
   }
 
-  private fetchBusinessCategories() {
-    this.businessRegistrationService.getBusinessCategories().subscribe({
-      next: (data) => (this.businessCategories = data),
-      error: (err) => {
-        console.error('Error loading business categories:', err);
-        this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOAD_CATEGORIES');
-      },
-    });
-  }
-
-  private fetchBusinessTypes() {
-    this.businessRegistrationService.getBusinessTypes().subscribe({
-      next: (data) => (this.businessTypes = data),
-      error: (err) => {
-        console.error('Error loading business types:', err);
-        this.showErrorToast('BUSINESS_REGISTRATION.ERROR_LOAD_TYPES');
-      },
-    });
-  }
-
   async onSubmit() {
     if (!this.form.valid) {
       this.form.markAllAsTouched();
@@ -115,7 +84,7 @@ export class BusinessRegistrationComponent implements OnInit {
     }
 
     if (this.isSubmitting) {
-      return; // Prevent double submission
+      return;
     }
 
     this.isSubmitting = true;

@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, ToastController, LoadingController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { save } from 'ionicons/icons';
-import { BusinessType, BusinessCategory, BusinessRegistrationService } from './business-registration.service';
+import { save, informationCircleOutline, documentTextOutline } from 'ionicons/icons';
+import { BusinessRegistrationService } from './business-registration.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import { Router } from '@angular/router';
@@ -20,8 +20,6 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class BusinessRegistrationComponent implements OnInit, OnDestroy {
   form: FormGroup;
-  businessCategories: BusinessCategory[] = [];
-  businessTypes: BusinessType[] = [];
   isSubmitting = false;
 
   private destroy$ = new Subject<void>();
@@ -39,20 +37,15 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       bid: [null],
       b_registration_num: ['', Validators.required],
-      b_owner_name: ['', Validators.required],
-      b_category_id: [null, Validators.required],
-      b_type_id: [null, Validators.required],
       is_active: [true],
-      mobile_number: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      email: ['', [Validators.required, Validators.email]],
-      established_year: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
       user_id: [null, Validators.required],
-      gst_number: ['', Validators.required],
       pan_number: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
+      aadhaar_number: [''],
+      government_license_number: [''],
       privileged_user: [false],
     });
 
-    addIcons({ save });
+    addIcons({ save, informationCircleOutline, documentTextOutline });
   }
 
   ngOnInit(): void {
@@ -92,8 +85,6 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
 
   private initializeRegistrationForm(): void {
     this.setUserId();
-    this.fetchBusinessCategories();
-    this.fetchBusinessTypes();
   }
 
   private setUserId(): void {
@@ -103,32 +94,6 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
     } else {
       this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.USER_ID_NOT_FOUND');
     }
-  }
-
-  private fetchBusinessCategories(): void {
-    this.businessRegistrationService.getBusinessCategories()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          this.businessCategories = data;
-        },
-        error: (err) => {
-          this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.LOAD_CATEGORIES_ERROR');
-        },
-      });
-  }
-
-  private fetchBusinessTypes(): void {
-    this.businessRegistrationService.getBusinessTypes()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          this.businessTypes = data;
-        },
-        error: (err) => {
-          this.showErrorToast('WHOLESALER_BUSINESS_REGISTRATION.LOAD_TYPES_ERROR');
-        },
-      });
   }
 
   private async showErrorToast(messageKey: string): Promise<void> {
@@ -169,7 +134,7 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
     }
 
     if (this.isSubmitting) {
-      return; // Prevent double submission
+      return;
     }
 
     this.isSubmitting = true;

@@ -337,25 +337,6 @@
         {{ getErrorMessage("gstNumber") }}
       </div>
 
-      <!-- PAN -->
-      <ion-item
-        [class.ion-invalid]="
-          businessForm.get('pan')?.invalid && businessForm.get('pan')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.PAN_NUMBER' | translate }} *</ion-label>
-        <ion-input
-          formControlName="pan"
-          [placeholder]="'ADD_BUSINESS_LOCATION.PAN_PLACEHOLDER' | translate"
-          type="text"
-          [disabled]="isEditMode"
-        >
-        </ion-input>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('pan')">
-        {{ getErrorMessage("pan") }}
-      </div>
-
       <!-- Established Year -->
       <ion-item
         [class.ion-invalid]="

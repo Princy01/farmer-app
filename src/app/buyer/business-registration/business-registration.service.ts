@@ -4,17 +4,6 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 
-export interface BusinessCategory {
-        b_category_id: number;
-        b_category_name: string;
-}
-
-export interface BusinessType {
-        b_typeid: number;
-        b_typename: string;
-        remarks: string;
-}
-
 export interface State {
         id: number;
         state_name: string;
@@ -39,15 +28,8 @@ export interface Location {
 export interface BusinessRegistrationPayload {
   bid?: number | null;
   b_registration_num: string;
-  b_owner_name: string;
-  b_category_id: number;
-  b_type_id: number;
   is_active: boolean;
-  mobile_number: string;
-  email: string;
-  established_year: string;
   user_id: number;
-  gst_number: string;
   pan_number: string;
   aadhaar_number?: string;
   government_license_number?: string;
@@ -68,10 +50,6 @@ export class BusinessRegistrationService {
                 });
         }
 
-        getBusinessCategories(): Observable<BusinessCategory[]> {
-                return this.http.get<BusinessCategory[]>(`${this.apiUrl}/getBusinessCategory`);
-        }
-
         getStates(): Observable<State[]> {
                 return this.http.get<State[]>(`${this.apiUrl}/getStates`);
         }
@@ -82,10 +60,6 @@ export class BusinessRegistrationService {
 
         getLocationsByCity(cityId: number): Observable<Location[]> {
                 return this.http.get<Location[]>(`${this.apiUrl}/getLocationsByCity/${cityId}`);
-        }
-
-        getBusinessTypes(): Observable<BusinessType[]> {
-                return this.http.get<BusinessType[]>(`${this.apiUrl}/getBusinessTypes`);
         }
 
         addNewBusiness(business: any): Observable<any> {
