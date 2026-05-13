@@ -1,0 +1,185 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'PAYMENT_DETAILS.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="payment-details-container">
+    <ion-card class="status-card" *ngIf="isLoading">
+      <ion-card-content class="loading-content">
+        <ion-spinner name="dots"></ion-spinner>
+        <p>{{ 'PAYMENT_DETAILS.LOADING' | translate }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="status-card" *ngIf="!isLoading && loadError">
+      <ion-card-content>
+        <div class="status-row">
+          <ion-icon name="warning-outline" class="status-icon"></ion-icon>
+          <div>
+            <h2>{{ 'PAYMENT_DETAILS.LOAD_ERROR' | translate }}</h2>
+          </div>
+        </div>
+        <ion-button expand="block" (click)="loadDetails()">
+          {{ 'PAYMENT_DETAILS.RETRY' | translate }}
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ng-container *ngIf="!isLoading && !loadError">
+      <ion-card class="status-card">
+        <ion-card-content>
+          <div class="status-row">
+            <ion-icon [name]="getStatusIcon(details?.verification_status)" class="status-icon"></ion-icon>
+            <div>
+              <h2>{{ getStatusLabel(details?.verification_status) }}</h2>
+              <p>{{ getStatusMessage(details?.verification_status) }}</p>
+            </div>
+          </div>
+          <ion-button expand="block" *ngIf="details?.can_continue" (click)="continue()">
+            {{ 'PAYMENT_DETAILS.CONTINUE' | translate }}
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="details-card" *ngIf="getExistingDetails() as existing">
+        <ion-card-header>
+          <ion-card-title>{{ 'PAYMENT_DETAILS.CURRENT_DETAILS' | translate }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="detail-row">
+            <span>{{ 'PAYMENT_DETAILS.DESTINATION_TYPE' | translate }}</span>
+            <strong>
+              {{ existing.destination_type === 'upi'
+                ? ('PAYMENT_DETAILS.UPI_OPTION' | translate)
+                : ('PAYMENT_DETAILS.BANK_OPTION' | translate) }}
+            </strong>
+          </div>
+          <div class="detail-row" *ngIf="existing.display_label">
+            <span>{{ 'PAYMENT_DETAILS.DISPLAY_LABEL' | translate }}</span>
+            <strong>{{ existing.display_label }}</strong>
+          </div>
+          <div class="detail-row" *ngIf="existing.account_holder_name">
+            <span>{{ 'PAYMENT_DETAILS.ACCOUNT_HOLDER_LABEL' | translate }}</span>
+            <strong>{{ existing.account_holder_name }}</strong>
+          </div>
+          <div class="detail-row" *ngIf="existing.destination_type === 'upi' && existing.upi_id">
+            <span>{{ 'PAYMENT_DETAILS.UPI_ID_LABEL' | translate }}</span>
+            <strong>{{ existing.upi_id }}</strong>
+          </div>
+          <div class="detail-row" *ngIf="existing.destination_type === 'bank_account' && existing.bank_name">
+            <span>{{ 'PAYMENT_DETAILS.BANK_NAME_LABEL' | translate }}</span>
+            <strong>{{ existing.bank_name }}</strong>
+          </div>
+          <div class="detail-row" *ngIf="existing.destination_type === 'bank_account' && existing.account_number">
+            <span>{{ 'PAYMENT_DETAILS.ACCOUNT_NUMBER_LABEL' | translate }}</span>
+            <strong>{{ maskAccountNumber(existing.account_number) }}</strong>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="form-card">
+        <ion-card-header>
+          <ion-card-title>{{ 'PAYMENT_DETAILS.SUBTITLE' | translate }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-segment [(ngModel)]="destinationType" class="destination-segment">
+            <ion-segment-button value="upi">
+              <ion-icon name="phone-portrait-outline"></ion-icon>
+              <ion-label>{{ 'PAYMENT_DETAILS.UPI_OPTION' | translate }}</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="bank_account">
+              <ion-icon name="business-outline"></ion-icon>
+              <ion-label>{{ 'PAYMENT_DETAILS.BANK_OPTION' | translate }}</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+
+          <ion-item lines="full">
+            <ion-label position="stacked">{{ 'PAYMENT_DETAILS.DISPLAY_LABEL' | translate }}</ion-label>
+            <ion-input
+              [(ngModel)]="displayLabel"
+              [placeholder]="'PAYMENT_DETAILS.DISPLAY_LABEL_PLACEHOLDER' | translate">
+            </ion-input>
+          </ion-item>
+
+          <ion-item lines="full">
+            <ion-label position="stacked">{{ 'PAYMENT_DETAILS.ACCOUNT_HOLDER_LABEL' | translate }}</ion-label>
+            <ion-input
+              [(ngModel)]="accountHolderName"
+              [placeholder]="'PAYMENT_DETAILS.ACCOUNT_HOLDER_PLACEHOLDER' | translate">
+            </ion-input>
+          </ion-item>
+
+          <ng-container *ngIf="destinationType === 'upi'">
+            <ion-item lines="full">
+              <ion-label position="stacked">{{ 'PAYMENT_DETAILS.UPI_ID_LABEL' | translate }}</ion-label>
+              <ion-input
+                [(ngModel)]="upiId"
+                [placeholder]="'PAYMENT_DETAILS.UPI_ID_PLACEHOLDER' | translate">
+              </ion-input>
+            </ion-item>
+          </ng-container>
+
+          <ng-container *ngIf="destinationType === 'bank_account'">
+            <ion-item lines="full">
+              <ion-label position="stacked">{{ 'PAYMENT_DETAILS.BANK_NAME_LABEL' | translate }}</ion-label>
+              <ion-input
+                [(ngModel)]="bankName"
+                [placeholder]="'PAYMENT_DETAILS.BANK_NAME_PLACEHOLDER' | translate">
+              </ion-input>
+            </ion-item>
+
+            <ion-item lines="full">
+              <ion-label position="stacked">{{ 'PAYMENT_DETAILS.BRANCH_NAME_LABEL' | translate }}</ion-label>
+              <ion-input
+                [(ngModel)]="branchName"
+                [placeholder]="'PAYMENT_DETAILS.BRANCH_NAME_PLACEHOLDER' | translate">
+              </ion-input>
+            </ion-item>
+
+            <ion-item lines="full">
+              <ion-label position="stacked">{{ 'PAYMENT_DETAILS.IFSC_LABEL' | translate }}</ion-label>
+              <ion-input
+                [(ngModel)]="ifscCode"
+                [placeholder]="'PAYMENT_DETAILS.IFSC_PLACEHOLDER' | translate">
+              </ion-input>
+            </ion-item>
+
+            <ion-item lines="full">
+              <ion-label position="stacked">{{ 'PAYMENT_DETAILS.ACCOUNT_NUMBER_LABEL' | translate }}</ion-label>
+              <ion-input
+                [(ngModel)]="accountNumber"
+                [placeholder]="'PAYMENT_DETAILS.ACCOUNT_NUMBER_PLACEHOLDER' | translate">
+              </ion-input>
+            </ion-item>
+          </ng-container>
+
+          <ion-item lines="full">
+            <ion-label position="stacked">{{ 'PAYMENT_DETAILS.NOTES_LABEL' | translate }}</ion-label>
+            <ion-textarea
+              [(ngModel)]="notes"
+              auto-grow="true"
+              [placeholder]="'PAYMENT_DETAILS.NOTES_PLACEHOLDER' | translate">
+            </ion-textarea>
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            class="submit-button"
+            [disabled]="isSubmitting"
+            (click)="submit()">
+            <ion-spinner *ngIf="isSubmitting" name="dots"></ion-spinner>
+            <span *ngIf="!isSubmitting">{{ 'PAYMENT_DETAILS.SAVE_BUTTON' | translate }}</span>
+            <span *ngIf="isSubmitting">{{ 'PAYMENT_DETAILS.SAVING' | translate }}</span>
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+  </div>
+</ion-content>

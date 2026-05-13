@@ -17,6 +17,10 @@ const appRoutes: Routes = [
     component: VerifyEmailPage
   },
   {
+    path: 'payment-details',
+    loadComponent: () => import('./payment-details/payment-details.page').then((m) => m.PaymentDetailsPage),
+  },
+  {
     path: 'wholesaler/home',
     loadComponent: () => import('./Wholesaler/home/home.page').then((m) => m.HomePage),
   },

@@ -7,6 +7,7 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
+import { Router } from '@angular/router';
 import { catchError, switchMap, throwError, timeout } from 'rxjs';
 import { SKIP_TRANSLATION } from './translation.context';
 
@@ -18,6 +19,7 @@ export const authInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
 
   const isAuthEndpoint =
     req.url.includes('/auth/login') ||
@@ -66,6 +68,19 @@ export const authInterceptor: HttpInterceptorFn = (
     timeout(HTTP_TIMEOUT_MS),
     catchError((error) => {
       if (error instanceof HttpErrorResponse) {
+        const errorBody = error.error as any;
+        if (error.status === 403 && errorBody?.error_code === 'payment_details_required') {
+          const redirectTo = errorBody?.redirect_to || '/payment-details';
+          if (!router.url.startsWith(redirectTo)) {
+            router.navigate([redirectTo], {
+              queryParams: { returnUrl: router.url }
+            });
+          }
+          return throwError(() => ({
+            ...error,
+            userMessage: errorBody?.message || 'PAYMENT_DETAILS.MISSING_MESSAGE'
+          }));
+        }
         switch (error.status) {
           case 401:
             return handleUnauthorizedError(modifiedReq, next, authService);
