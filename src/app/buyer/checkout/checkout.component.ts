@@ -195,7 +195,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         : navigationGroups.flatMap((group: any) => group.items || []);
 
       this.cartItems = sourceItems.map((item: any) => {
-        const price = item.price_while_added ?? item.price ?? 0;
+        const price = this.firstPositivePrice(
+          item.price_while_added,
+          item.latest_wholesaler_price,
+          item.price
+        );
         return {
           selected_id: item.selected_id,
           product_id: item.product_id,
@@ -404,7 +408,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           quantity: item.quantity,
           unit_id: item.unit_id,
           unit_name: item.unit_name,
-          price: item.price_while_added ?? item.latest_wholesaler_price ?? 0,
+          price: this.firstPositivePrice(item.price_while_added, item.latest_wholesaler_price),
           discount_amount: 0,
           tax_amount: 0,
           wholeseller_id: group.wholesalerId,
@@ -612,6 +616,16 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     }
 
     return Math.round(goodsAmount * commissionRate * 0.5 * 100) / 100;
+  }
+
+  private firstPositivePrice(...values: unknown[]): number {
+    for (const value of values) {
+      const numericValue = Number(value);
+      if (Number.isFinite(numericValue) && numericValue > 0) {
+        return numericValue;
+      }
+    }
+    return 0;
   }
 
   private async showPremiumUpgradeAlert(): Promise<void> {
