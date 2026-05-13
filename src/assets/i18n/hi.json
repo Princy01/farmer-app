@@ -1768,6 +1768,7 @@
     "ORDER_PLACED_SUCCESS": "ऑर्डर सफलतापूर्वक रखा गया!",
     "PAYMENT_SUCCESS": "भुगतान सफल!",
     "PAYMENT_FAILED_MSG": "भुगतान विफल। कृपया पुनः प्रयास करें।",
+    "ERROR_INVALID_AMOUNT": "अमान्य भुगतान राशि। कृपया पुनः प्रयास करें।",
     "GATEWAY_WINDOW_BLOCKED": "भुगतान विंडो आपके ब्राउज़र ने ब्लॉक कर दी। कृपया पॉप-अप अनुमति दें और फिर से कोशिश करें।"
   },
   "RETAILER_ORDER_DETAILS": {

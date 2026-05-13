@@ -29,6 +29,7 @@ export interface UserRegistration {
   pincode: string;
   location: number;
   state: number;
+  city: number;
   role_id: number;
   active_status: number;
 }

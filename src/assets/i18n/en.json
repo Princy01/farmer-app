@@ -1753,6 +1753,7 @@
     "ORDER_PLACED_SUCCESS": "Order placed successfully!",
     "PAYMENT_SUCCESS": "Payment successful!",
     "PAYMENT_FAILED_MSG": "Payment failed. Please try again.",
+    "ERROR_INVALID_AMOUNT": "Invalid payment amount. Please try again.",
     "GATEWAY_WINDOW_BLOCKED": "The payment window was blocked by your browser. Please allow pop-ups and try again."
   },
   "RETAILER_ORDER_DETAILS": {

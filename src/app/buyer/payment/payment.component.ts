@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 import { addIcons } from 'ionicons';
 import {
   chevronBack,
@@ -95,6 +96,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
+    private location: Location,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
@@ -126,6 +128,12 @@ export class PaymentComponent implements OnInit, OnDestroy {
       this.router.navigate(['/buyer/cart']);
       return;
     }
+
+    // Always ensure items are properly populated from wholesalerGroups
+    if (this.orderData && this.orderData.wholesalerGroups) {
+      this.ensureItemsPopulated();
+    }
+
     // Extract transport information
     this.hasTransport = this.orderData?.hasTransport || navigationState?.hasTransport || false;
     this.transportInfo = this.orderData?.transportData || navigationState?.transportData;
@@ -227,6 +235,29 @@ export class PaymentComponent implements OnInit, OnDestroy {
     return this.orderData?.selectedBranch?.location_verification_status === 'verified';
   }
 
+  private ensureItemsPopulated(): void {
+    if (!this.orderData || !this.orderData.wholesalerGroups) {
+      return;
+    }
+
+    // Extract items from wholesalerGroups and ensure each item has valid price data
+    const items = this.orderData.wholesalerGroups.reduce((allItems: any[], group: any) => {
+      return allItems.concat(
+        (group.items || []).map((item: any) => ({
+          ...item,
+          // Ensure latest_wholesaler_price is set from available sources
+          latest_wholesaler_price: item.latest_wholesaler_price ?? item.price ?? 0,
+          price: item.price ?? item.latest_wholesaler_price ?? 0
+        }))
+      );
+    }, []);
+
+    // Only update if items have valid prices or if no items exist
+    if (items.length > 0 && (items.some((i: any) => i.latest_wholesaler_price > 0) || !this.orderData.items || this.orderData.items.length === 0)) {
+      this.orderData.items = items;
+    }
+  }
+
   private async initializePaymentContext(): Promise<void> {
     try {
       if (this.checkoutSessionId) {
@@ -242,7 +273,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
       this.loadingPaymentMethods = false;
     }
   }
-
 
   private async createTransportJob(orderIds: number[], transportData: any): Promise<void> {
     try {
@@ -326,9 +356,35 @@ export class PaymentComponent implements OnInit, OnDestroy {
         throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
       }
 
+      // FIX: Use ?? (nullish coalescing) instead of || (logical OR) so that a legitimate
+      // numeric 0 does not incorrectly fall through to the next fallback. Also add
+      // transporterCost as a last-resort fallback before defaulting to 0.
+      const payableAmount = Number(
+        this.orderData?.payableAmount
+          ?? this.orderData?.grandTotal
+          ?? this.orderData?.totalPrice
+          ?? 0
+      );
+
+      console.log('Payment initiation - payableAmount:', payableAmount, 'orderData:', {
+        payableAmount: this.orderData?.payableAmount,
+        grandTotal: this.orderData?.grandTotal,
+        totalPrice: this.orderData?.totalPrice,
+      });
+
+      // Guard: ensure we have a valid positive amount before calling the gateway.
+      // Previously, when payableAmount resolved to 0 (e.g. because orderData fields were
+      // null/undefined after loadCheckoutSessionDetail), the service omitted the `amount`
+      // field from the request body entirely, causing the gateway to respond with:
+      // "invalid callback amount "": amount is required"
+      if (!payableAmount || payableAmount <= 0) {
+        throw new Error(this.translate.instant('PAYMENT.ERROR_INVALID_AMOUNT'));
+      }
+
       const response = await this.paymentService.initiatePayment(
         this.checkoutSessionId,
-        this.selectedPaymentMethod
+        this.selectedPaymentMethod,
+        payableAmount
       ).toPromise();
 
       await loading.dismiss();
@@ -496,9 +552,18 @@ export class PaymentComponent implements OnInit, OnDestroy {
       transporterCost: response?.data?.delivery_amount ?? this.orderData?.transporterCost ?? 0,
       platformFeeAmount: response?.data?.platform_fee_amount ?? this.orderData?.platformFeeAmount ?? 0,
       handlingChargeAmount: response?.data?.handling_charge_amount ?? this.orderData?.handlingChargeAmount ?? 0,
+      // FIX: Use ?? instead of || so a valid 0 amount is not silently skipped
       payableAmount: response?.data?.payable_amount ?? this.orderData?.payableAmount ?? this.orderData?.grandTotal ?? 0,
       grandTotal: response?.data?.payable_amount ?? this.orderData?.grandTotal ?? 0,
+      // Preserve the items array if it exists
+      items: this.orderData?.items || [],
     };
+
+    console.log('Checkout session created:', {
+      checkoutSessionId,
+      payableAmount: this.orderData.payableAmount,
+      responseData: response?.data
+    });
   }
 
   private async loadCheckoutSessionDetail(checkoutSessionId: number): Promise<void> {
@@ -515,6 +580,17 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.checkoutCanRetryPayment = detail.can_retry_payment;
     this.checkoutRetryBlockReason = detail.retry_block_reason || null;
     this.orderData = this.mapCheckoutSessionDetailToOrderData(detail);
+
+    console.log('Checkout session loaded:', {
+      checkoutSessionId: detail.checkout_session_id,
+      payableAmount: detail.payable_amount,
+      status: detail.status,
+      orderData: this.orderData
+    });
+
+    // Ensure items have correct prices from wholesalerGroups
+    this.ensureItemsPopulated();
+
     this.hasTransport = (detail.delivery_amount ?? 0) > 0;
     this.transportInfo = this.hasTransport
       ? {
@@ -573,8 +649,12 @@ export class PaymentComponent implements OnInit, OnDestroy {
       discount: wholesalerGroups.reduce((sum: number, group: any) => sum + (group.allocatedDiscount || 0), 0),
       platformFeeAmount: detail.platform_fee_amount,
       handlingChargeAmount: detail.handling_charge_amount,
-      payableAmount: detail.payable_amount,
-      grandTotal: detail.payable_amount,
+      // FIX: Explicitly coerce to Number so downstream arithmetic never sees null/undefined.
+      // This is the root source of the "invalid callback amount" error — if the API returns
+      // payable_amount as null or undefined, all downstream reads of orderData.payableAmount
+      // produce NaN or undefined, which causes initiatePayment to omit the amount field entirely.
+      payableAmount: Number(detail.payable_amount ?? 0),
+      grandTotal: Number(detail.payable_amount ?? 0),
       hasTransport: detail.delivery_amount > 0,
       transportData: detail.delivery_amount > 0 ? { base_price: detail.delivery_amount } : null,
       transporterCost: detail.delivery_amount,
@@ -619,7 +699,6 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await toast.present();
   }
 
-
   private async showPaymentError(message?: string) {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('PAYMENT.PAYMENT_FAILED'),
@@ -635,24 +714,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.checkoutSessionId) {
-      this.router.navigate(['/buyer/retailer-order-history']);
-      return;
-    }
-
-    this.router.navigate(['/buyer/checkout'], {
-      state: {
-        cartItems: this.orderData?.items || [],
-        totalPrice: this.orderData?.total_order_amount || 0,
-        discount: this.orderData?.discount_amount || 0,
-        retailer: this.orderData?.retailer,
-        retailerBranchId: this.orderData?.retailerBranchId,
-        wholeseller: { id: this.orderData?.wholeseller_id },
-        selectedBranch: this.orderData?.selectedBranch,
-        transportData: this.transportInfo,
-        hasRideRequest: this.hasTransport
-      }
-    });
+    this.location.back();
   }
 
   canProcessCheckoutPayment(): boolean {

@@ -737,6 +737,7 @@ export class LoginPage implements OnDestroy {
       pincode: formData.pincode,
       location: formData.location,
       state: formData.state,
+      city: formData.city,
       role_id: formData.role_id,
       active_status: formData.active_status
     };

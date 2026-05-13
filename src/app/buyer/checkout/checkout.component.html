@@ -23,17 +23,11 @@
         </div>
       </div>
       <div class="card-body">
-        <div class="parties-row">
-          <div class="party-box">
-            <div class="party-label">
-              <ion-icon name="person-outline"></ion-icon>
-              {{ "CHECKOUT.BUYER" | translate }}
-            </div>
-            <div class="party-name">{{ retailerInfo?.name || ("CHECKOUT.UNKNOWN" | translate) }}</div>
-            <div class="party-sub">{{ retailerInfo?.location || ("CHECKOUT.UNKNOWN_LOCATION" | translate) }}</div>
+        <div class="seller-row">
+          <div class="seller-icon-wrap">
+            <ion-icon name="storefront-outline"></ion-icon>
           </div>
-
-          <div class="party-box">
+          <div class="seller-details">
             <div class="party-label">
               <ion-icon name="storefront-outline"></ion-icon>
               {{ "CHECKOUT.SELLER" | translate }}

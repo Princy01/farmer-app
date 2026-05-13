@@ -114,12 +114,17 @@ export class PaymentService {
     return this.http.get<CheckoutSessionDetailResponse>(`${this.apiUrl}/retailer/checkout-sessions/${checkoutSessionId}`);
   }
 
-  initiatePayment(checkoutSessionId: number, paymentMethod: string): Observable<any> {
-    const body = {
+  initiatePayment(checkoutSessionId: number, paymentMethod: string, amount?: number): Observable<any> {
+    const body: any = {
       checkout_session_id: checkoutSessionId,
       payment_method: paymentMethod,
       provider_code: 'gateway'
     };
+
+    if (amount !== undefined && amount > 0) {
+      body.amount = amount;
+    }
+
     return this.http.post<any>(`${this.apiUrl}/payments/initiate`, body);
   }
 
