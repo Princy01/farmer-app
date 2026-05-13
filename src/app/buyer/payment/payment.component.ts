@@ -26,6 +26,8 @@ import { environment } from 'src/environments/environment';
 
 type PaymentMode = 'simulated' | 'gateway';
 
+const DEFAULT_TRANSPORT_REQUEST_LEAD_MINUTES = 245;
+
 interface PaymentNavigationState {
   orderData?: any;
   checkoutSessionId?: number;
@@ -276,13 +278,12 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   private async createTransportJob(orderIds: number[], transportData: any): Promise<void> {
     try {
+      const requestedDate = this.resolveTransportRequestedDate(transportData);
       const transportRequest: TransportRequestWithOrders = {
         distance: transportData.distance || 50,
         delivery_type: transportData.delivery_type,
         urgency: transportData.urgency || null,
-        requested_date: transportData.requested_date
-          ? new Date(transportData.requested_date)
-          : null,
+        requested_date: requestedDate,
         load_type: transportData.load_type || 'general',
         status: 'open',
         order_ids: orderIds,
@@ -302,6 +303,25 @@ export class PaymentComponent implements OnInit, OnDestroy {
         'warning'
       );
     }
+  }
+
+  private resolveTransportRequestedDate(transportData: any): Date {
+    const minimumRequestedDate = this.buildDefaultTransportRequestedDate();
+    const rawRequestedDate = transportData?.requested_date;
+    if (rawRequestedDate) {
+      const parsedDate = new Date(rawRequestedDate);
+      if (!Number.isNaN(parsedDate.getTime()) && parsedDate.getTime() >= minimumRequestedDate.getTime()) {
+        return parsedDate;
+      }
+    }
+
+    return minimumRequestedDate;
+  }
+
+  private buildDefaultTransportRequestedDate(): Date {
+    const requestedDate = new Date();
+    requestedDate.setMinutes(requestedDate.getMinutes() + DEFAULT_TRANSPORT_REQUEST_LEAD_MINUTES);
+    return requestedDate;
   }
 
   async processPayment() {
@@ -609,6 +629,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
           urgency: existingTransportInfo?.urgency || 'standard',
           distance: existingTransportInfo?.distance || 0,
           distance_km: existingTransportInfo?.distance_km || existingTransportInfo?.distance || 0,
+          requested_date: existingTransportInfo?.requested_date || this.resolveTransportRequestedDate(existingTransportInfo).toISOString(),
           load_type: existingTransportInfo?.load_type || 'general',
         }
       : null;
@@ -666,7 +687,9 @@ export class PaymentComponent implements OnInit, OnDestroy {
       payableAmount: Number(detail.payable_amount ?? 0),
       grandTotal: Number(detail.payable_amount ?? 0),
       hasTransport: detail.delivery_amount > 0,
-      transportData: detail.delivery_amount > 0 ? { base_price: detail.delivery_amount } : null,
+      transportData: detail.delivery_amount > 0
+        ? { base_price: detail.delivery_amount, requested_date: this.resolveTransportRequestedDate(null).toISOString() }
+        : null,
       transporterCost: detail.delivery_amount,
       retailerBranchId: detail.retailer_branch_id,
     };
