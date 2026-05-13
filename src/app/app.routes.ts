@@ -20,6 +20,9 @@ const appRoutes: Routes = [
     path: 'payment-details',
     loadComponent: () => import('./payment-details/payment-details.page').then((m) => m.PaymentDetailsPage),
   },
+
+  //ROUTES BEFORE THIS ARE REQUIRED FOR ALL MODULES.
+
   {
     path: 'wholesaler/home',
     loadComponent: () => import('./Wholesaler/home/home.page').then((m) => m.HomePage),
