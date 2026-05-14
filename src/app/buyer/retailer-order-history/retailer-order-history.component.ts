@@ -60,6 +60,15 @@ interface DisplayCheckoutSession {
   canRetryPayment: boolean;
 }
 
+type UnifiedItemType = 'order' | 'checkout-pending' | 'checkout-failed';
+
+interface UnifiedItem {
+  type: UnifiedItemType;
+  date: string; // ISO date string used for sorting
+  order?: DisplayOrder;
+  session?: DisplayCheckoutSession;
+}
+
 @Component({
   selector: 'app-retailer-order-history',
   standalone: true,
@@ -73,6 +82,10 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   checkoutSessions: DisplayCheckoutSession[] = [];
   pendingCheckoutSessions: DisplayCheckoutSession[] = [];
   failedCheckoutSessions: DisplayCheckoutSession[] = [];
+
+  /** Used only in the 'all' tab — merges orders + checkout sessions sorted by date descending */
+  unifiedAllItems: UnifiedItem[] = [];
+
   selectedFilter: string = 'all';
   isLoading = true;
   hasError = false;
@@ -142,20 +155,7 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
               });
             }
 
-            // Sort newest first
-            allOrders.sort((a, b) => {
-              const dateA = new Date(a.placedAt).getTime();
-              const dateB = new Date(b.placedAt).getTime();
-
-              // First, compare by date
-              if (dateB !== dateA) {
-                return dateB - dateA;
-              }
-
-              // If dates are equal, compare by order ID
-              return b.rawOrderId - a.rawOrderId;
-            });
-            this.orders = allOrders;
+            this.orders = this.sortNewestFirst(allOrders);
             this.filterOrders(this.selectedFilter);
 
             const checkoutSessions = (response.checkout_sessions || [])
@@ -163,22 +163,45 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
               .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
             this.checkoutSessions = checkoutSessions;
             this.updateCheckoutSessionBuckets();
+            this.rebuildUnifiedAllItems();
             this.startCheckoutCountdown();
             this.isLoading = false;
           } catch (error) {
-            // Error in data processing - show generic message
             this.errorMessage = this.translate.instant('RETAILER_ORDER_HISTORY.ERROR_MESSAGE');
             this.hasError = true;
             this.isLoading = false;
           }
         },
         error: (err) => {
-          // Error comes from service with user-friendly message
           this.errorMessage = err?.message || this.translate.instant('RETAILER_ORDER_HISTORY.ERROR_MESSAGE');
           this.hasError = true;
           this.isLoading = false;
         },
       });
+  }
+
+  /**
+   * Merges all orders and all checkout sessions (pending + failed) into one
+   * list sorted newest-first. Used exclusively by the 'all' tab so that nothing
+   * is pinned to the top purely because of its type.
+   */
+  private rebuildUnifiedAllItems(): void {
+    const items: UnifiedItem[] = [];
+
+    for (const order of this.orders) {
+      items.push({ type: 'order', date: order.placedAt, order });
+    }
+
+    for (const session of this.pendingCheckoutSessions) {
+      items.push({ type: 'checkout-pending', date: session.createdAt, session });
+    }
+
+    for (const session of this.failedCheckoutSessions) {
+      items.push({ type: 'checkout-failed', date: session.createdAt, session });
+    }
+
+    items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    this.unifiedAllItems = items;
   }
 
   private mapToDisplayCheckoutSession(session: RetailerCheckoutSessionSummary): DisplayCheckoutSession {
@@ -206,6 +229,17 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     }
   }
 
+  private sortNewestFirst(orders: DisplayOrder[]): DisplayOrder[] {
+    return orders.sort((a, b) => {
+      const dateA = new Date(a.placedAt).getTime();
+      const dateB = new Date(b.placedAt).getTime();
+      if (dateB !== dateA) {
+        return dateB - dateA;
+      }
+      return b.rawOrderId - a.rawOrderId;
+    });
+  }
+
   filterOrders(filter: string): void {
     this.selectedFilter = filter;
 
@@ -224,22 +258,20 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       return value.includes('return') || value.includes('refund');
     };
 
-    if (filter === 'pending' || filter === 'failed') {
+    if (filter === 'all' || filter === 'pending' || filter === 'failed') {
+      // 'all' uses unifiedAllItems; 'pending'/'failed' use their own checkout session arrays
       this.filteredOrders = [];
-    } else if (filter === 'all') {
-      this.filteredOrders = [...this.orders];
     } else if (filter === 'active') {
-      // Source of truth for active is backend grouping (current_orders).
-      this.filteredOrders = this.orders.filter((o) => o.isCurrent);
+      this.filteredOrders = this.sortNewestFirst(this.orders.filter((o) => o.isCurrent));
     } else if (filter === 'successful') {
-      this.filteredOrders = this.orders.filter((o) => isSuccessful(o.statusName));
+      this.filteredOrders = this.sortNewestFirst(this.orders.filter((o) => isSuccessful(o.statusName)));
     } else if (filter === 'cancelled') {
-      this.filteredOrders = this.orders.filter((o) => isCancelled(o.statusName));
+      this.filteredOrders = this.sortNewestFirst(this.orders.filter((o) => isCancelled(o.statusName)));
     } else if (filter === 'returned') {
-      this.filteredOrders = this.orders.filter((o) => isReturned(o.statusName));
+      this.filteredOrders = this.sortNewestFirst(this.orders.filter((o) => isReturned(o.statusName)));
     } else {
-      this.filteredOrders = this.orders.filter(
-        (o) => o.statusName.toLowerCase() === filter.toLowerCase()
+      this.filteredOrders = this.sortNewestFirst(
+        this.orders.filter((o) => o.statusName.toLowerCase() === filter.toLowerCase())
       );
     }
   }
@@ -279,44 +311,23 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   }
 
   getStatusColor(statusId: number | null): string {
-    if (statusId === null) {
-      return 'medium';
-    }
-
+    if (statusId === null) return 'medium';
     const colors: { [key: number]: string } = {
-      1: 'warning',
-      2: 'primary',
-      3: 'secondary',
-      4: 'danger',
-      5: 'success',
-      6: 'success',
-      7: 'medium',
-      8: 'tertiary',
-      9: 'medium',
-      10: 'danger',
+      1: 'warning', 2: 'primary', 3: 'secondary', 4: 'danger',
+      5: 'success', 6: 'success', 7: 'medium', 8: 'tertiary',
+      9: 'medium', 10: 'danger',
     };
-
     return colors[statusId] || 'medium';
   }
 
   getStatusIcon(statusId: number | null): string {
-    if (statusId === null) {
-      return 'help-outline';
-    }
-
+    if (statusId === null) return 'help-outline';
     const icons: { [key: number]: string } = {
-      1: 'time-outline',
-      2: 'checkmark-circle-outline',
-      3: 'card-outline',
-      4: 'close-circle-outline',
-      5: 'checkmark-done-circle',
-      6: 'checkmark-done-circle',
-      7: 'arrow-undo-outline',
-      8: 'cube-outline',
-      9: 'arrow-undo-outline',
+      1: 'time-outline', 2: 'checkmark-circle-outline', 3: 'card-outline',
+      4: 'close-circle-outline', 5: 'checkmark-done-circle', 6: 'checkmark-done-circle',
+      7: 'arrow-undo-outline', 8: 'cube-outline', 9: 'arrow-undo-outline',
       10: 'close-circle-outline',
     };
-
     return icons[statusId] || 'help-outline';
   }
 
@@ -331,23 +342,11 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   }
 
   getOrderProgress(statusId: number | null): number {
-    if (statusId === null) {
-      return 0;
-    }
-
+    if (statusId === null) return 0;
     const progress: { [key: number]: number } = {
-      1: 0.2,
-      2: 0.4,
-      3: 0.6,
-      4: 0,
-      5: 0.8,
-      6: 1,
-      7: 0.5,
-      8: 0.8,
-      9: 0.5,
-      10: 0,
+      1: 0.2, 2: 0.4, 3: 0.6, 4: 0, 5: 0.8,
+      6: 1, 7: 0.5, 8: 0.8, 9: 0.5, 10: 0,
     };
-
     return progress[statusId] || 0;
   }
 
@@ -362,22 +361,16 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       payment_captured: this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_SUCCESS'),
       materialized: this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_SUCCESS'),
     };
-
     return map[normalized] || this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_STATUS_PENDING');
   }
 
   getCheckoutSessionStatusColor(status: string): string {
     const normalized = (status || '').toLowerCase();
     const map: { [key: string]: string } = {
-      created: 'warning',
-      payment_pending: 'warning',
-      payment_failed: 'danger',
-      payment_expired: 'medium',
-      cancelled: 'medium',
-      payment_captured: 'success',
-      materialized: 'success',
+      created: 'warning', payment_pending: 'warning', payment_failed: 'danger',
+      payment_expired: 'medium', cancelled: 'medium',
+      payment_captured: 'success', materialized: 'success',
     };
-
     return map[normalized] || 'medium';
   }
 
@@ -385,25 +378,24 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     if (!seconds || seconds <= 0) {
       return this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_TIMEOUT_EXPIRED');
     }
-
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     const formatted = `${minutes}m ${remainingSeconds}s`;
     return this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_TIMEOUT_REMAINING', { time: formatted });
   }
 
+  // In 'all' mode, checkout sessions are shown inline via unifiedAllItems.
+  // These methods now only control the dedicated pending/failed filter tabs.
   showPendingPayments(): boolean {
-    return (this.selectedFilter === 'all' || this.selectedFilter === 'pending')
-      && this.pendingCheckoutSessions.length > 0;
+    return this.selectedFilter === 'pending' && this.pendingCheckoutSessions.length > 0;
   }
 
   showFailedPayments(): boolean {
-    return (this.selectedFilter === 'all' || this.selectedFilter === 'failed')
-      && this.failedCheckoutSessions.length > 0;
+    return this.selectedFilter === 'failed' && this.failedCheckoutSessions.length > 0;
   }
 
   showOrdersList(): boolean {
-    return this.selectedFilter !== 'pending' && this.selectedFilter !== 'failed';
+    return this.selectedFilter !== 'pending' && this.selectedFilter !== 'failed' && this.selectedFilter !== 'all';
   }
 
   openCheckoutSessionPayment(session: DisplayCheckoutSession): void {
@@ -435,34 +427,24 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   }
 
   private startCheckoutCountdown(): void {
-    if (this.pendingCheckoutSessions.length === 0) {
-      return;
-    }
+    if (this.pendingCheckoutSessions.length === 0) return;
 
     this.checkoutCountdownSub = interval(1000)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         let updated = false;
         this.checkoutSessions = this.checkoutSessions.map(session => {
-          if (!this.isPendingCheckoutSession(session.status)) {
-            return session;
-          }
-          if (session.secondsUntilTimeout === null || session.secondsUntilTimeout === undefined) {
-            return session;
-          }
-          if (session.secondsUntilTimeout <= 0) {
-            return session;
-          }
+          if (!this.isPendingCheckoutSession(session.status)) return session;
+          if (session.secondsUntilTimeout === null || session.secondsUntilTimeout === undefined) return session;
+          if (session.secondsUntilTimeout <= 0) return session;
 
           updated = true;
-          return {
-            ...session,
-            secondsUntilTimeout: session.secondsUntilTimeout - 1
-          };
+          return { ...session, secondsUntilTimeout: session.secondsUntilTimeout - 1 };
         });
 
         if (updated) {
           this.updateCheckoutSessionBuckets();
+          this.rebuildUnifiedAllItems();
         }
       });
   }

@@ -2191,7 +2191,12 @@
     "ERROR_WS_ESTABLISH": "Unable to start live updates. Trying again...",
     "ERROR_WS_RECONNECT_FAILED": "Live connection could not be restored. Please check your internet and retry.",
     "ERROR_AUTH_TOKEN_LOST": "Your session is no longer available. Please log in again.",
-    "ERROR_AUTH_TOKEN_EXPIRED_RECONNECTING": "Refreshing session for live updates..."
+    "ERROR_AUTH_TOKEN_EXPIRED_RECONNECTING": "Refreshing session for live updates...",
+    "AREA": "Area",
+    "EXPIRES_AT": "Expires At",
+    "OFFERED_RATE": "Offered Rate",
+    "RETRY": "Retry",
+    "UNDER_COOLDOWN": "You are under a {{hours}}-hour cooldown. Please wait before accepting new jobs."
   },
   "PICKUP_ORDERS": {
     "JOBS": "Jobs",

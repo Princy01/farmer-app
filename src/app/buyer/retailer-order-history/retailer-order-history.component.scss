@@ -1,72 +1,352 @@
-// Global variables for consistency
-$primary-gradient-start: #667eea;
-$primary-gradient-end: #764ba2;
-$card-bg: #ffffff;
-$card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-$border-radius: 16px;
-$text-primary: #2d3436;
-$text-secondary: #636e72;
-$success-color: #00b894;
+// ─── Design tokens ────────────────────────────────────────────────────────────
+$gradient-start:    #667eea;
+$gradient-end:      #764ba2;
 
-// Loading container
+$card-bg:           #ffffff;
+$card-radius:       16px;
+$card-shadow:       0 4px 20px rgba(0, 0, 0, 0.07);
+$card-shadow-hover: 0 8px 28px rgba(0, 0, 0, 0.12);
+$card-border:       1px solid rgba(0, 0, 0, 0.06);
+
+$text-primary:      #1e2330;
+$text-secondary:    #7a8499;
+$text-muted:        #b0b8c9;
+
+$divider:           1px dashed #eaecf0;
+$success:           #00c48c;
+$danger:            #e05460;
+$warning-bg:        #fff8ec;
+$danger-bg:         #fff1f2;
+
+$spacing-xs:        4px;
+$spacing-sm:        8px;
+$spacing-md:        12px;
+$spacing-lg:        16px;
+$spacing-xl:        24px;
+
+
+// ─── Loading skeleton ─────────────────────────────────────────────────────────
 .loading-container {
-  padding: 16px;
+  padding: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
 }
 
-// Filter tabs
+
+// ─── Filter tabs ──────────────────────────────────────────────────────────────
 .filter-tabs {
-  padding: 16px 16px 8px 16px;
+  padding: $spacing-lg $spacing-lg $spacing-sm;
   background: $card-bg;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
 
   ion-segment {
-    background: #f8f9fa;
+    background: #f2f4f8;
     border-radius: 12px;
     padding: 4px;
     display: flex;
     flex-wrap: nowrap;
     min-width: max-content;
+    gap: 2px;
 
     ion-segment-button {
       flex: 0 0 auto;
-      --background: transparent;
-      --color: #636e72;
-      --background-checked: white;
-      --color-checked: $text-primary;
-      --indicator-color: transparent;
-      --border-radius: 10px;
-      --padding-start: 16px;
-      --padding-end: 16px;
-      min-height: 40px;
+      --background:         transparent;
+      --color:              #{$text-secondary};
+      --background-checked: #{$card-bg};
+      --color-checked:      #{$text-primary};
+      --indicator-color:    transparent;
+      --border-radius:      10px;
+      --padding-start:      14px;
+      --padding-end:        14px;
+      min-height: 38px;
+      font-size: 0.88rem;
       font-weight: 500;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
 
       &.segment-button-checked {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        font-weight: 600;
       }
     }
   }
 }
 
-// Checkout sessions section
+
+// ─── Shared: orders + checkout container ─────────────────────────────────────
+.orders-container {
+  padding: $spacing-sm 0 $spacing-xl;
+}
+
+.orders-grid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  padding: $spacing-sm $spacing-lg $spacing-lg;
+}
+
+
+// ─── Shared card base ────────────────────────────────────────────────────────
+// Both .modern-order-card and .checkout-card share these base traits.
+%card-base {
+  background: $card-bg;
+  border-radius: $card-radius;
+  border: $card-border;
+  box-shadow: $card-shadow;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+
+  &:active {
+    transform: scale(0.985);
+    box-shadow: $card-shadow-hover;
+  }
+}
+
+// ─── Shared inner sections ───────────────────────────────────────────────────
+%card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-md;
+  padding: $spacing-lg $spacing-lg $spacing-md;
+}
+
+%card-id {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $text-primary;
+  letter-spacing: -0.2px;
+}
+
+%card-date {
+  font-size: 0.82rem;
+  color: $text-muted;
+  margin-top: 3px;
+}
+
+%card-address {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: 0 $spacing-lg $spacing-md;
+  font-size: 0.88rem;
+  color: $text-secondary;
+  line-height: 1.5;
+
+  ion-icon {
+    font-size: 1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+    color: $text-muted;
+  }
+
+  .address-text {
+    word-break: break-word;
+  }
+}
+
+%card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md $spacing-lg $spacing-lg;
+  border-top: $divider;
+
+  .label {
+    font-size: 0.78rem;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 3px;
+  }
+
+  .amount {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: $text-primary;
+    letter-spacing: -0.5px;
+  }
+}
+
+%status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+
+  ion-icon {
+    font-size: 0.9rem;
+  }
+}
+
+
+// ─── Regular order card ───────────────────────────────────────────────────────
+.modern-order-card {
+  @extend %card-base;
+  cursor: pointer;
+
+  .order-header {
+    @extend %card-header;
+
+    .order-info {
+      .order-id   { @extend %card-id; }
+      .order-date { @extend %card-date; }
+    }
+
+    .status-badge { @extend %status-badge; }
+  }
+
+  .address-section { @extend %card-address; }
+
+  .footer-section {
+    @extend %card-footer;
+
+    .amount-info {
+      .label  { } // inherits from %card-footer
+      .amount { }
+    }
+
+    .delivery-info {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font-size: 0.85rem;
+      color: $success;
+      font-weight: 600;
+
+      ion-icon {
+        font-size: 1.1rem;
+      }
+    }
+  }
+
+  // Progress bar (if re-enabled)
+  .progress-container {
+    margin: 0 $spacing-lg $spacing-md;
+
+    ion-progress-bar {
+      --progress-background: linear-gradient(90deg, #{$gradient-start}, #{$gradient-end});
+      --background: #eaecf0;
+      height: 5px;
+      border-radius: 3px;
+    }
+  }
+}
+
+
+// ─── Checkout session card (unified list + dedicated tabs) ───────────────────
+.checkout-card {
+  @extend %card-base;
+
+  .checkout-card-header {
+    @extend %card-header;
+
+    .checkout-id   { @extend %card-id; }
+    .checkout-date { @extend %card-date; }
+    .status-badge  { @extend %status-badge; }
+  }
+
+  .address-section { @extend %card-address; }
+
+  // Amount + timeout row
+  .checkout-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: $spacing-md $spacing-lg $spacing-md;
+    border-top: $divider;
+
+    .amount-info {
+      .label {
+        font-size: 0.78rem;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 3px;
+      }
+
+      .amount {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: $text-primary;
+        letter-spacing: -0.5px;
+      }
+    }
+
+    .timeout-info {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #e67e22;
+      background: $warning-bg;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(230, 126, 34, 0.2);
+    }
+  }
+
+  // Inline error messages
+  .error-text {
+    margin: 0 $spacing-lg $spacing-sm;
+    font-size: 0.82rem;
+    color: $danger;
+    background: $danger-bg;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border-left: 3px solid $danger;
+    line-height: 1.4;
+  }
+
+  // Action buttons row
+  .checkout-actions {
+    display: flex;
+    gap: $spacing-sm;
+    justify-content: flex-end;
+    padding: $spacing-sm $spacing-lg $spacing-lg;
+
+    ion-button {
+      --border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      height: 36px;
+    }
+  }
+
+  // Pending variant — subtle warm left border
+  &.pending-card {
+    border-left: 3px solid #f39c12;
+  }
+
+  // Failed variant — subtle danger left border
+  &.failed-card {
+    border-left: 3px solid $danger;
+  }
+}
+
+
+// ─── Dedicated checkout sections (pending / failed filter tabs) ───────────────
 .checkout-sessions {
-  padding: 8px 16px 16px 16px;
+  padding: $spacing-sm $spacing-lg $spacing-lg;
 
   .checkout-header {
-    margin-bottom: 12px;
+    margin-bottom: $spacing-md;
 
     h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 1rem;
+      font-weight: 700;
       color: $text-primary;
-      margin: 0 0 4px 0;
+      margin: 0 0 $spacing-xs 0;
     }
 
     p {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: $text-secondary;
     }
   }
@@ -74,261 +354,77 @@ $success-color: #00b894;
   .checkout-grid {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: $spacing-md;
   }
 
-  .checkout-card {
-    background: $card-bg;
-    border-radius: $border-radius;
-    padding: 14px 16px;
-    box-shadow: $card-shadow;
-    border: 1px solid #f0f0f0;
-
-    .checkout-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-
-      .checkout-id {
-        font-weight: 600;
-        color: $text-primary;
-      }
-
-      .checkout-date {
-        font-size: 0.85rem;
-        color: $text-secondary;
-      }
-    }
-
-    .checkout-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px dashed #eee;
-
-      .amount-info {
-        .label {
-          font-size: 0.85rem;
-          color: $text-secondary;
-        }
-
-        .amount {
-          font-size: 1.2rem;
-          font-weight: 700;
-          color: $text-primary;
-        }
-      }
-
-      .timeout-info {
-        font-size: 0.85rem;
-        color: $text-secondary;
-        text-align: right;
-      }
-    }
-
-    .error-text {
-      margin-top: 8px;
-      font-size: 0.85rem;
-      color: #d63031;
-    }
-
-    .checkout-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      justify-content: flex-end;
-    }
+  &.failed .checkout-header h3 {
+    color: $danger;
   }
 }
 
-.checkout-sessions.failed {
-  .checkout-header h3 {
-    color: #b23b3b;
-  }
-}
 
-// Orders grid
-.orders-grid {
+// ─── Empty state ──────────────────────────────────────────────────────────────
+.empty-state {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 0 16px 16px 16px;
-}
-
-.modern-order-card {
-  background: $card-bg;
-  border-radius: $border-radius;
-  padding: 16px;
-  box-shadow: $card-shadow;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid #f0f0f0;
-
-  &:active {
-    transform: scale(0.98);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  // Order header
-  .order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-
-    .order-info {
-      .order-id {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: $text-primary;
-        margin-bottom: 4px;
-      }
-
-      .order-date {
-        font-size: 0.9rem;
-        color: $text-secondary;
-      }
-    }
-
-    .status-badge {
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-
-      ion-icon {
-        font-size: 1rem;
-      }
-    }
-  }
-
-  // Progress bar
-  .progress-container {
-    margin: 12px 0;
-
-    ion-progress-bar {
-      --progress-background: var(--ion-color-primary);
-      --background: #e9ecef;
-      height: 6px;
-      border-radius: 3px;
-      overflow: hidden;
-    }
-  }
-
-  // Address section
-  .address-section {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin: 12px 0;
-    font-size: 0.95rem;
-    color: $text-secondary;
-    line-height: 1.5;
-
-    ion-icon {
-      font-size: 1.2rem;
-      margin-top: 2px;
-      flex-shrink: 0;
-    }
-
-    .address-text {
-      word-break: break-word;
-    }
-  }
-
-  // Footer section
-  .footer-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 16px;
-    padding-top: 12px;
-    border-top: 1px dashed #eee;
-
-    .amount-info {
-      .label {
-        font-size: 0.85rem;
-        color: $text-secondary;
-        margin-bottom: 4px;
-      }
-
-      .amount {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: $text-primary;
-      }
-    }
-
-    .delivery-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      color: $success-color;
-      font-weight: 500;
-
-      ion-icon {
-        font-size: 1.3rem;
-      }
-    }
-  }
-}
-
-// Empty state
-.empty-state {
+  align-items: center;
   text-align: center;
-  padding: 60px 32px;
-  color: $text-secondary;
+  padding: 64px $spacing-xl $spacing-xl;
+
+  .empty-illustration {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, rgba($gradient-start, 0.08), rgba($gradient-end, 0.08));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-xl;
+  }
 
   .empty-icon {
-    font-size: 80px;
-    color: #ddd;
-    margin-bottom: 24px;
+    font-size: 48px;
+    color: rgba($gradient-start, 0.5);
   }
 
   h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: $text-primary;
-    margin-bottom: 12px;
+    margin: 0 0 $spacing-sm 0;
   }
 
   p {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    color: $text-secondary;
     line-height: 1.6;
-    margin-bottom: 32px;
+    margin: 0 0 $spacing-xl 0;
+    max-width: 280px;
   }
 
   .cta-button {
-    --border-radius: 12px;
-    height: 48px;
-    font-weight: 600;
+    --background: linear-gradient(135deg, #{$gradient-start}, #{$gradient-end});
+    --border-radius: 14px;
+    --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    height: 50px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    min-width: 200px;
   }
 }
 
-// Error state
-.empty-state .empty-icon {
-  color: #fab1a0;
-}
 
-// Responsive adjustments
+// ─── Responsive ──────────────────────────────────────────────────────────────
 @media (max-width: 360px) {
-  .modern-order-card {
-    padding: 14px;
+  .modern-order-card,
+  .checkout-card {
+    border-radius: 12px;
   }
 
-  .footer-section {
+  .footer-section,
+  .checkout-meta {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-  }
-
-  .amount-info .amount {
-    font-size: 1.2rem;
+    gap: $spacing-sm;
   }
 }
