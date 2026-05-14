@@ -38,30 +38,42 @@ export interface BusinessBranch {
   type_id: number;
   location: number;
   state: number;
-  city_id: number;
+  b_city_id: number;
   address: string;
   email: string;
   number: string;
-  gst_num: string;
-  pan_num: string;
-  privilege_user: boolean;
-  established_year: string;
+  gst_num: string | null;
+  privilege_user: boolean | null;
+  established_year: string | null;
   active_status: boolean;
   latitude: number;
   longitude: number;
   image: string;
+  document_verification_status?: string | null;
+  document_verified_at?: string | null;
+  document_verified_by?: number | null;
+  document_verification_notes?: string | null;
   location_capture_source?: string | null;
   location_verification_status?: string | null;
   location_captured_at?: string | null;
   location_verified_at?: string | null;
   location_verified_by?: number | null;
   location_verification_notes?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 export interface BusinessBranchWithNames extends BusinessBranch {
-  state_name?: string;
-  city_name?: string;
-  location_name?: string;
+  location_id: number;
+  location_name: string;
+  state_id: number;
+  state_name: string;
+  state_shortname: string;
+  city_id: number;
+  city_name: string;
+  city_shortname: string;
+  document_verification_status: string;
+  location_verification_status: string;
 }
 
 export interface BranchAddressResolutionCandidate {
