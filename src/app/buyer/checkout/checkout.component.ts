@@ -85,9 +85,12 @@ interface TransportData {
   base_price: number;
   distance: number;
   distance_km: number;
+  requested_date: string;
   load_type: string;
   status: string;
 }
+
+const DEFAULT_TRANSPORT_REQUEST_LEAD_MINUTES = 245;
 
 @Component({
   selector: 'app-checkout',
@@ -392,6 +395,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           base_price: this.estimatedRidePrice,
           distance: this.distance,
           distance_km: this.distance,
+          requested_date: this.buildDefaultTransportRequestedDate(),
           load_type: 'general',
           status: 'pending'
         }
@@ -471,6 +475,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   private getTransportCostForCheckout(): number {
     return this.hasRideRequest ? this.estimatedRidePrice : 0;
+  }
+
+  private buildDefaultTransportRequestedDate(): string {
+    const requestedAt = new Date();
+    requestedAt.setMinutes(requestedAt.getMinutes() + DEFAULT_TRANSPORT_REQUEST_LEAD_MINUTES);
+    return requestedAt.toISOString();
   }
 
   goBack(): void {
