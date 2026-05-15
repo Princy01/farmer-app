@@ -44,7 +44,6 @@ export interface BusinessBranch {
   email: string;
   number: string;
   gst_num: string;
-  pan_num: string;
   privilege_user: boolean;
   established_year: string;
   active_status: boolean;

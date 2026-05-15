@@ -1,374 +1,401 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
+<ion-header mode="ios">
+  <ion-toolbar class="add-location-toolbar">
     <ion-buttons slot="start">
-      <ion-back-button
-        defaultHref="/buyer/business-locations"
-      ></ion-back-button>
+      <ion-back-button defaultHref="/buyer/business-locations"></ion-back-button>
     </ion-buttons>
     <ion-title>{{ pageTitle | translate }}</ion-title>
-    <ion-item slot="end" lines="none" class="header-badge">
-      <ion-badge color="success">{{ (isEditMode ? 'EDIT_MODE' : 'CREATE_MODE') | translate }}</ion-badge>
+    <ion-item slot="end" lines="none" class="header-mode-badge">
+      <ion-badge [color]="isEditMode ? 'warning' : 'success'">
+        {{ (isEditMode ? 'ADD_BUSINESS_LOCATION.EDIT_MODE' : 'ADD_BUSINESS_LOCATION.CREATE_MODE') | translate }}
+      </ion-badge>
     </ion-item>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <div class="container">
-    <!-- Form Progress Indicator -->
-    <div class="form-progress">
-      <div class="progress-bar" [style.width]="(getFormProgress() + '%')"></div>
+<ion-content class="add-location-content" [fullscreen]="true">
+  <div class="page-wrapper">
+
+    <!-- Progress Bar -->
+    <div class="progress-block">
+      <div class="progress-track">
+        <div class="progress-fill" [style.width]="getFormProgress() + '%'"></div>
+      </div>
+      <span class="progress-label">{{ getFormProgress() }}%</span>
     </div>
 
     <form [formGroup]="businessForm" (ngSubmit)="onSubmit()">
 
-
-      <!-- Camera Capture Section -->
-      <div class="camera-section">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>
-              <ion-icon name="camera"></ion-icon>
-              {{ 'ADD_BUSINESS_LOCATION.SHOP_LOCATION_IMAGE' | translate }}
-            </ion-card-title>
+      <!-- ═══════════════════════════════════════════
+           CAMERA CAPTURE SECTION
+      ════════════════════════════════════════════ -->
+      <div class="form-section camera-section">
+        <div class="section-header">
+          <div class="section-icon-wrap">
+            <ion-icon name="camera"></ion-icon>
+          </div>
+          <div>
+            <h2>{{ 'ADD_BUSINESS_LOCATION.SHOP_LOCATION_IMAGE' | translate }}</h2>
             <p class="section-subtitle">{{ 'ADD_BUSINESS_LOCATION.CAPTURE_HELP_TEXT' | translate }}</p>
-          </ion-card-header>
-          <ion-card-content>
-            <div *ngIf="!capturedImage" class="capture-prompt">
-              <div class="capture-icon-wrapper">
-                <ion-icon name="camera-outline"></ion-icon>
-              </div>
-              <h3 class="capture-title">{{ 'ADD_BUSINESS_LOCATION.CAPTURE_SHOP_IMAGE' | translate }}</h3>
-              <ion-button expand="block" (click)="captureShopImage()" color="primary" class="capture-button">
-                <ion-icon name="camera" slot="start"></ion-icon>
-                {{ 'ADD_BUSINESS_LOCATION.CAPTURE_SHOP_IMAGE' | translate }}
-              </ion-button>
-            </div>
-
-            <div *ngIf="capturedImage" class="image-preview">
-              <img [src]="capturedImage" alt="Shop Image" />
-              <div class="location-info" *ngIf="locationCaptured">
-                <ion-chip color="success">
-                  <ion-icon name="location"></ion-icon>
-                  <ion-label>
-                    {{ 'ADD_BUSINESS_LOCATION.LOCATION_CAPTURED' | translate }}
-                  </ion-label>
-                </ion-chip>
-              </div>
-              <div class="action-buttons">
-                <ion-button size="small" (click)="captureShopImage()" color="primary">
-                  <ion-icon name="camera" slot="start"></ion-icon>
-                  {{ 'ADD_BUSINESS_LOCATION.RETAKE' | translate }}
-                </ion-button>
-                <ion-button size="small" (click)="removeImage()" color="danger" fill="outline">
-                  <ion-icon name="trash" slot="start"></ion-icon>
-                  {{ 'ADD_BUSINESS_LOCATION.REMOVE' | translate }}
-                </ion-button>
-              </div>
-            </div>
-          </ion-card-content>
-        </ion-card>
-      </div>
-
-
-      <!-- Basic Business Information Section -->
-      <div class="form-section">
-        <div class="section-header">
-          <ion-icon name="information-circle"></ion-icon>
-          <h2>{{ 'ADD_BUSINESS_LOCATION.BASIC_INFO' | translate }}</h2>
-        </div>
-
-        <!-- Shop Name -->
-        <ion-item
-        [class.ion-invalid]="
-          businessForm.get('shopName')?.invalid &&
-          businessForm.get('shopName')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.SHOP_NAME' | translate }} *</ion-label>
-        <ion-input
-          formControlName="shopName"
-          [placeholder]="'ADD_BUSINESS_LOCATION.SHOP_NAME_PLACEHOLDER' | translate"
-          type="text"
-          [disabled]="isEditMode"
-        >
-        </ion-input>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('shopName')">
-        {{ getErrorMessage("shopName") }}
-      </div>
-
-      <!-- Phone Number (editable in edit mode) -->
-      <ion-item
-        [class.ion-invalid]="
-          businessForm.get('number')?.invalid &&
-          businessForm.get('number')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.PHONE_NUMBER' | translate }} *</ion-label>
-        <ion-input
-          formControlName="number"
-          [placeholder]="'ADD_BUSINESS_LOCATION.PHONE_PLACEHOLDER' | translate"
-          type="tel"
-          [disabled]="false"
-        >
-        </ion-input>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('number')">
-        {{ getErrorMessage("number") }}
-      </div>
-      </div>
-
-      <!-- Location Details Section -->
-      <div class="form-section">
-        <div class="section-header">
-          <ion-icon name="location"></ion-icon>
-          <h2>{{ 'ADD_BUSINESS_LOCATION.LOCATION_DETAILS' | translate }}</h2>
-        </div>
-
-        <!-- State -->
-        <ion-item
-        [class.ion-invalid]="
-          businessForm.get('state')?.invalid &&
-          businessForm.get('state')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.STATE' | translate }} *</ion-label>
-        <ion-select
-          formControlName="state"
-          [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_STATE' | translate"
-          [disabled]="isEditMode"
-        >
-          <ion-select-option *ngFor="let state of states" [value]="state.id">
-            {{ state.state_name }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('state')">
-        {{ getErrorMessage("state") }}
-      </div>
-
-      <!-- City -->
-      <div class="typeahead-container">
-        <ion-item
-          [class.ion-invalid]="
-            businessForm.get('city')?.invalid && businessForm.get('city')?.touched
-          "
-        >
-          <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.CITY' | translate }} *</ion-label>
-          <ion-input
-            [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_CITY' | translate"
-            [value]="citySearchTerm"
-            (ionInput)="onCitySearchChange($event)"
-            (focus)="onCityInputFocus()"
-            (blur)="onCityInputBlur()"
-            [disabled]="isEditMode || !businessForm.get('state')?.value">
-          </ion-input>
-        </ion-item>
-        <ion-button
-          *ngIf="businessForm.get('city')?.value && !isEditMode"
-          fill="clear"
-          size="small"
-          class="clear-selection-btn"
-          (click)="clearSelectedCity()">
-          {{ 'ADD_BUSINESS_LOCATION.CLEAR_SELECTION' | translate }}
-        </ion-button>
-        <div class="typeahead-results" *ngIf="showCitySuggestions && businessForm.get('state')?.value && !isEditMode">
-          <button
-            type="button"
-            class="typeahead-option"
-            *ngFor="let city of filteredCities"
-            (mousedown)="selectCity(city, $event)">
-            {{ city.city_name }}
-          </button>
-          <div class="typeahead-empty" *ngIf="filteredCities.length === 0">
-            {{ 'ADD_BUSINESS_LOCATION.NO_CITIES_FOUND' | translate }}
           </div>
         </div>
-        <div class="typeahead-helper" *ngIf="!businessForm.get('state')?.value">
-          {{ 'ADD_BUSINESS_LOCATION.SELECT_STATE_FIRST' | translate }}
-        </div>
-      </div>
-      <div class="error-message" *ngIf="getErrorMessage('city')">
-        {{ getErrorMessage("city") }}
-      </div>
 
-      <!-- Location (editable in edit mode) -->
-      <div class="typeahead-container">
-        <ion-item
-          [class.ion-invalid]="
-            businessForm.get('location')?.invalid &&
-            businessForm.get('location')?.touched
-          "
-        >
-          <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.LOCATION' | translate }} *</ion-label>
-          <ion-input
-            [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_LOCATION' | translate"
-            [value]="locationSearchTerm"
-            (ionInput)="onLocationSearchChange($event)"
-            (focus)="onLocationInputFocus()"
-            (blur)="onLocationInputBlur()"
-            [disabled]="!businessForm.get('city')?.value">
-          </ion-input>
-        </ion-item>
-        <ion-button
-          *ngIf="businessForm.get('location')?.value"
-          fill="clear"
-          size="small"
-          class="clear-selection-btn"
-          (click)="clearSelectedLocation()">
-          {{ 'ADD_BUSINESS_LOCATION.CLEAR_SELECTION' | translate }}
-        </ion-button>
-        <div class="typeahead-results" *ngIf="showLocationSuggestions && businessForm.get('city')?.value">
-          <button
-            type="button"
-            class="typeahead-option"
-            *ngFor="let location of filteredLocations"
-            (mousedown)="selectLocation(location, $event)">
-            {{ location.location_name }}
-          </button>
-          <div class="typeahead-empty" *ngIf="filteredLocations.length === 0">
-            {{ 'ADD_BUSINESS_LOCATION.NO_LOCATIONS_FOUND' | translate }}
+        <!-- No Image Yet -->
+        <div *ngIf="!capturedImage" class="capture-empty-state">
+          <div class="capture-empty-icon">
+            <ion-icon name="camera-outline"></ion-icon>
           </div>
+          <p class="capture-empty-title">{{ 'ADD_BUSINESS_LOCATION.CAPTURE_SHOP_IMAGE' | translate }}</p>
+          <p class="capture-empty-hint">{{ 'ADD_BUSINESS_LOCATION.CAPTURE_HELP_TEXT' | translate }}</p>
+          <ion-button expand="block" (click)="captureShopImage()" class="capture-btn">
+            <ion-icon name="camera" slot="start"></ion-icon>
+            {{ 'ADD_BUSINESS_LOCATION.CAPTURE_SHOP_IMAGE' | translate }}
+          </ion-button>
         </div>
-        <div class="typeahead-helper" *ngIf="!businessForm.get('city')?.value">
-          {{ 'ADD_BUSINESS_LOCATION.SELECT_CITY_FIRST' | translate }}
-        </div>
-      </div>
-      <div class="error-message" *ngIf="getErrorMessage('location')">
-        {{ getErrorMessage("location") }}
-      </div>
 
-      <!-- Address (editable in edit mode) -->
-      <ion-item
-        [class.ion-invalid]="
-          businessForm.get('address')?.invalid &&
-          businessForm.get('address')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.ADDRESS' | translate }} *</ion-label>
-        <ion-textarea
-          formControlName="address"
-          [placeholder]="'ADD_BUSINESS_LOCATION.ADDRESS_PLACEHOLDER' | translate"
-          rows="3"
-          [disabled]="false"
-        >
-        </ion-textarea>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('address')">
-        {{ getErrorMessage("address") }}
-      </div>
+        <!-- Image Captured -->
+        <div *ngIf="capturedImage" class="captured-image-wrapper">
+          <div class="captured-image-frame">
+            <img [src]="capturedImage" alt="Shop Image" class="captured-img" />
+            <div class="captured-badge">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              {{ 'ADD_BUSINESS_LOCATION.IMAGE_CAPTURED' | translate }}
+            </div>
+          </div>
 
-      <ion-card *ngIf="showAddressResolutionChecking || addressResolution" class="address-resolution-card">
-        <ion-card-content>
-          <ion-chip *ngIf="showAddressResolutionChecking" color="medium">
-            <ion-label>{{ 'ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_CHECKING' | translate }}</ion-label>
-          </ion-chip>
+          <div class="gps-info-card" *ngIf="locationCaptured && latitude && longitude">
+            <div class="gps-info-header">
+              <ion-icon name="navigate"></ion-icon>
+              <span>{{ 'ADD_BUSINESS_LOCATION.GPS_COORDINATES' | translate }}</span>
+            </div>
+            <div class="gps-coords-grid">
+              <div class="gps-coord-item">
+                <span class="gps-coord-label">{{ 'ADD_BUSINESS_LOCATION.LATITUDE' | translate }}</span>
+                <span class="gps-coord-value">{{ latitude.toFixed(6) }}°</span>
+              </div>
+              <div class="gps-coord-divider"></div>
+              <div class="gps-coord-item">
+                <span class="gps-coord-label">{{ 'ADD_BUSINESS_LOCATION.LONGITUDE' | translate }}</span>
+                <span class="gps-coord-value">{{ longitude.toFixed(6) }}°</span>
+              </div>
+            </div>
+            <div class="gps-source-chip">
+              <ion-icon name="location"></ion-icon>
+              {{ 'ADD_BUSINESS_LOCATION.LOCATION_CAPTURED' | translate }}
+            </div>
+          </div>
 
-          <ng-container *ngIf="!showAddressResolutionChecking && addressResolution">
-            <ion-chip [color]="getAddressResolutionTone()">
-              <ion-label>{{ getAddressResolutionMessage() }}</ion-label>
-            </ion-chip>
-
-            <p class="resolution-query" *ngIf="getAddressResolutionHint()">
-              {{ getAddressResolutionHint() }}
-            </p>
-
-            <p class="resolution-query" *ngIf="addressResolution.normalized_query">
-              {{ 'ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_QUERY' | translate:{ query: addressResolution.normalized_query } }}
-            </p>
-
-            <ion-button
-              *ngIf="addressResolution.resolved_location_id && businessForm.get('location')?.value !== addressResolution.resolved_location_id"
-              size="small"
-              fill="outline"
-              (click)="applySuggestedLocation()"
-            >
-              {{ 'ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_APPLY' | translate }}
+          <div class="image-action-row">
+            <ion-button size="small" fill="outline" (click)="captureShopImage()" color="primary">
+              <ion-icon name="camera" slot="start"></ion-icon>
+              {{ 'ADD_BUSINESS_LOCATION.RETAKE' | translate }}
             </ion-button>
-          </ng-container>
-        </ion-card-content>
-      </ion-card>
+            <ion-button size="small" fill="outline" (click)="removeImage()" color="danger">
+              <ion-icon name="trash" slot="start"></ion-icon>
+              {{ 'ADD_BUSINESS_LOCATION.REMOVE' | translate }}
+            </ion-button>
+          </div>
+        </div>
       </div>
 
-      <!-- Business Identity Section -->
+      <!-- ═══════════════════════════════════════════
+           BASIC BUSINESS INFORMATION
+      ════════════════════════════════════════════ -->
       <div class="form-section">
         <div class="section-header">
-          <ion-icon name="business"></ion-icon>
-          <h2>{{ 'ADD_BUSINESS_LOCATION.BUSINESS_IDENTITY' | translate }}</h2>
+          <div class="section-icon-wrap">
+            <ion-icon name="information-circle"></ion-icon>
+          </div>
+          <div>
+            <h2>{{ 'ADD_BUSINESS_LOCATION.BASIC_INFO' | translate }}</h2>
+          </div>
         </div>
 
-        <!-- Email (editable in edit mode) -->
-        <ion-item
-        [class.ion-invalid]="
-          businessForm.get('email')?.invalid &&
-          businessForm.get('email')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.EMAIL' | translate }} *</ion-label>
-        <ion-input
-          formControlName="email"
-          [placeholder]="'ADD_BUSINESS_LOCATION.EMAIL_PLACEHOLDER' | translate"
-          type="email"
-          [disabled]="false"
-        >
-        </ion-input>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('email')">
-        {{ getErrorMessage("email") }}
+        <div class="section-body">
+          <div class="fields-grid">
+            <!-- Shop Name -->
+            <div class="field-wrap">
+              <ion-item class="custom-item"
+                [class.item-invalid]="businessForm.get('shopName')?.invalid && businessForm.get('shopName')?.touched">
+                <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.SHOP_NAME' | translate }} <span class="required">*</span></ion-label>
+                <ion-input
+                  formControlName="shopName"
+                  [placeholder]="'ADD_BUSINESS_LOCATION.SHOP_NAME_PLACEHOLDER' | translate"
+                  type="text"
+                  [disabled]="isEditMode">
+                </ion-input>
+              </ion-item>
+              <div class="field-error" *ngIf="getErrorMessage('shopName')">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                {{ getErrorMessage('shopName') }}
+              </div>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="field-wrap">
+              <ion-item class="custom-item"
+                [class.item-invalid]="businessForm.get('number')?.invalid && businessForm.get('number')?.touched">
+                <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.PHONE_NUMBER' | translate }} <span class="required">*</span></ion-label>
+                <ion-input
+                  formControlName="number"
+                  [placeholder]="'ADD_BUSINESS_LOCATION.PHONE_PLACEHOLDER' | translate"
+                  type="tel">
+                </ion-input>
+              </ion-item>
+              <div class="field-error" *ngIf="getErrorMessage('number')">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                {{ getErrorMessage('number') }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- GST Number -->
-      <ion-item
-        [class.ion-invalid]="
-          businessForm.get('gstNumber')?.invalid &&
-          businessForm.get('gstNumber')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.GST_NUMBER' | translate }} *</ion-label>
-        <ion-input
-          formControlName="gstNumber"
-          [placeholder]="'ADD_BUSINESS_LOCATION.GST_PLACEHOLDER' | translate"
-          type="text"
-          [disabled]="isEditMode"
-        >
-        </ion-input>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('gstNumber')">
-        {{ getErrorMessage("gstNumber") }}
+      <!-- ═══════════════════════════════════════════
+           LOCATION DETAILS
+      ════════════════════════════════════════════ -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrap">
+            <ion-icon name="location"></ion-icon>
+          </div>
+          <div>
+            <h2>{{ 'ADD_BUSINESS_LOCATION.LOCATION_DETAILS' | translate }}</h2>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <!-- State -->
+          <div class="field-wrap">
+            <ion-item class="custom-item"
+              [class.item-invalid]="businessForm.get('state')?.invalid && businessForm.get('state')?.touched">
+              <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.STATE' | translate }} <span class="required">*</span></ion-label>
+              <ion-select
+                formControlName="state"
+                [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_STATE' | translate"
+                [disabled]="isEditMode">
+                <ion-select-option *ngFor="let state of states" [value]="state.id">
+                  {{ state.state_name }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+            <div class="field-error" *ngIf="getErrorMessage('state')">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              {{ getErrorMessage('state') }}
+            </div>
+          </div>
+
+          <!-- City Typeahead -->
+          <div class="field-wrap typeahead-wrap">
+            <ion-item class="custom-item"
+              [class.item-invalid]="businessForm.get('city')?.invalid && businessForm.get('city')?.touched">
+              <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.CITY' | translate }} <span class="required">*</span></ion-label>
+              <ion-input
+                [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_CITY' | translate"
+                [value]="citySearchTerm"
+                (ionInput)="onCitySearchChange($event)"
+                (focus)="onCityInputFocus()"
+                (blur)="onCityInputBlur()"
+                [disabled]="isEditMode || !businessForm.get('state')?.value">
+              </ion-input>
+              <ion-button
+                *ngIf="businessForm.get('city')?.value && !isEditMode"
+                fill="clear" size="small" slot="end"
+                (click)="clearSelectedCity()" color="medium">
+                <ion-icon name="close-circle" slot="icon-only"></ion-icon>
+              </ion-button>
+            </ion-item>
+            <div class="typeahead-dropdown" *ngIf="showCitySuggestions && businessForm.get('state')?.value && !isEditMode">
+              <button type="button" class="typeahead-item"
+                *ngFor="let city of filteredCities"
+                (mousedown)="selectCity(city, $event)">
+                <ion-icon name="business-outline"></ion-icon>
+                {{ city.city_name }}
+              </button>
+              <div class="typeahead-empty" *ngIf="filteredCities.length === 0">
+                <ion-icon name="search-outline"></ion-icon>
+                {{ 'ADD_BUSINESS_LOCATION.NO_CITIES_FOUND' | translate }}
+              </div>
+            </div>
+            <div class="field-hint" *ngIf="!businessForm.get('state')?.value">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              {{ 'ADD_BUSINESS_LOCATION.SELECT_STATE_FIRST' | translate }}
+            </div>
+            <div class="field-error" *ngIf="getErrorMessage('city')">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              {{ getErrorMessage('city') }}
+            </div>
+          </div>
+
+          <!-- Location Typeahead -->
+          <div class="field-wrap typeahead-wrap">
+            <ion-item class="custom-item"
+              [class.item-invalid]="businessForm.get('location')?.invalid && businessForm.get('location')?.touched">
+              <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.LOCATION' | translate }} <span class="required">*</span></ion-label>
+              <ion-input
+                [placeholder]="'ADD_BUSINESS_LOCATION.SELECT_LOCATION' | translate"
+                [value]="locationSearchTerm"
+                (ionInput)="onLocationSearchChange($event)"
+                (focus)="onLocationInputFocus()"
+                (blur)="onLocationInputBlur()"
+                [disabled]="!businessForm.get('city')?.value">
+              </ion-input>
+              <ion-button
+                *ngIf="businessForm.get('location')?.value"
+                fill="clear" size="small" slot="end"
+                (click)="clearSelectedLocation()" color="medium">
+                <ion-icon name="close-circle" slot="icon-only"></ion-icon>
+              </ion-button>
+            </ion-item>
+            <div class="typeahead-dropdown" *ngIf="showLocationSuggestions && businessForm.get('city')?.value">
+              <button type="button" class="typeahead-item"
+                *ngFor="let location of filteredLocations"
+                (mousedown)="selectLocation(location, $event)">
+                <ion-icon name="location-outline"></ion-icon>
+                {{ location.location_name }}
+              </button>
+              <div class="typeahead-empty" *ngIf="filteredLocations.length === 0">
+                <ion-icon name="search-outline"></ion-icon>
+                {{ 'ADD_BUSINESS_LOCATION.NO_LOCATIONS_FOUND' | translate }}
+              </div>
+            </div>
+            <div class="field-hint" *ngIf="!businessForm.get('city')?.value">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              {{ 'ADD_BUSINESS_LOCATION.SELECT_CITY_FIRST' | translate }}
+            </div>
+            <div class="field-error" *ngIf="getErrorMessage('location')">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              {{ getErrorMessage('location') }}
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="field-wrap">
+            <ion-item class="custom-item"
+              [class.item-invalid]="businessForm.get('address')?.invalid && businessForm.get('address')?.touched">
+              <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.ADDRESS' | translate }} <span class="required">*</span></ion-label>
+              <ion-textarea
+                formControlName="address"
+                [placeholder]="'ADD_BUSINESS_LOCATION.ADDRESS_PLACEHOLDER' | translate"
+                rows="3">
+              </ion-textarea>
+            </ion-item>
+            <div class="field-error" *ngIf="getErrorMessage('address')">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              {{ getErrorMessage('address') }}
+            </div>
+          </div>
+
+          <!-- Address Resolution Card -->
+          <div class="resolution-card" *ngIf="showAddressResolutionChecking || addressResolution">
+            <div *ngIf="showAddressResolutionChecking" class="resolution-checking">
+              <ion-spinner name="dots" color="medium"></ion-spinner>
+              <span>{{ 'ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_CHECKING' | translate }}</span>
+            </div>
+
+            <ng-container *ngIf="!showAddressResolutionChecking && addressResolution">
+              <div class="resolution-status" [class]="'resolution-' + getAddressResolutionTone()">
+                <ion-icon [name]="addressResolution.status === 'resolved' ? 'checkmark-circle' : addressResolution.status === 'suggested' ? 'warning' : 'help-circle'"></ion-icon>
+                <span>{{ getAddressResolutionMessage() }}</span>
+              </div>
+              <p class="resolution-hint" *ngIf="getAddressResolutionHint()">{{ getAddressResolutionHint() }}</p>
+              <p class="resolution-query" *ngIf="addressResolution.normalized_query">
+                {{ 'ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_QUERY' | translate:{ query: addressResolution.normalized_query } }}
+              </p>
+              <ion-button
+                *ngIf="addressResolution.resolved_location_id && businessForm.get('location')?.value !== addressResolution.resolved_location_id"
+                size="small" fill="outline" class="resolution-apply-btn"
+                (click)="applySuggestedLocation()">
+                <ion-icon name="checkmark" slot="start"></ion-icon>
+                {{ 'ADD_BUSINESS_LOCATION.ADDRESS_RESOLUTION_APPLY' | translate }}
+              </ion-button>
+            </ng-container>
+          </div>
+        </div>
       </div>
 
-      <!-- Established Year -->
-      <ion-item
-        [class.ion-invalid]="
-          businessForm.get('establishedYear')?.invalid &&
-          businessForm.get('establishedYear')?.touched
-        "
-      >
-        <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.ESTABLISHED_YEAR' | translate }}</ion-label>
-        <ion-input
-          formControlName="establishedYear"
-          [placeholder]="'ADD_BUSINESS_LOCATION.YEAR_PLACEHOLDER' | translate"
-          type="text"
-          [disabled]="isEditMode"
-        >
-        </ion-input>
-      </ion-item>
-      <div class="error-message" *ngIf="getErrorMessage('establishedYear')">
-        {{ getErrorMessage("establishedYear") }}
-      </div>
+      <!-- ═══════════════════════════════════════════
+           BUSINESS IDENTITY
+      ════════════════════════════════════════════ -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon-wrap">
+            <ion-icon name="business"></ion-icon>
+          </div>
+          <div>
+            <h2>{{ 'ADD_BUSINESS_LOCATION.BUSINESS_IDENTITY' | translate }}</h2>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <div class="fields-grid">
+            <!-- Email -->
+            <div class="field-wrap">
+              <ion-item class="custom-item"
+                [class.item-invalid]="businessForm.get('email')?.invalid && businessForm.get('email')?.touched">
+                <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.EMAIL' | translate }} <span class="required">*</span></ion-label>
+                <ion-input
+                  formControlName="email"
+                  [placeholder]="'ADD_BUSINESS_LOCATION.EMAIL_PLACEHOLDER' | translate"
+                  type="email">
+                </ion-input>
+              </ion-item>
+              <div class="field-error" *ngIf="getErrorMessage('email')">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                {{ getErrorMessage('email') }}
+              </div>
+            </div>
+
+            <!-- GST Number -->
+            <div class="field-wrap">
+              <ion-item class="custom-item"
+                [class.item-invalid]="businessForm.get('gstNumber')?.invalid && businessForm.get('gstNumber')?.touched">
+                <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.GST_NUMBER' | translate }} <span class="required">*</span></ion-label>
+                <ion-input
+                  formControlName="gstNumber"
+                  [placeholder]="'ADD_BUSINESS_LOCATION.GST_PLACEHOLDER' | translate"
+                  type="text"
+                  [disabled]="isEditMode">
+                </ion-input>
+              </ion-item>
+              <div class="field-error" *ngIf="getErrorMessage('gstNumber')">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                {{ getErrorMessage('gstNumber') }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Established Year -->
+          <div class="field-wrap">
+            <ion-item class="custom-item"
+              [class.item-invalid]="businessForm.get('establishedYear')?.invalid && businessForm.get('establishedYear')?.touched">
+              <ion-label position="stacked">{{ 'ADD_BUSINESS_LOCATION.ESTABLISHED_YEAR' | translate }}</ion-label>
+              <ion-input
+                formControlName="establishedYear"
+                [placeholder]="'ADD_BUSINESS_LOCATION.YEAR_PLACEHOLDER' | translate"
+                type="text"
+                [disabled]="isEditMode">
+              </ion-input>
+            </ion-item>
+            <div class="field-error" *ngIf="getErrorMessage('establishedYear')">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              {{ getErrorMessage('establishedYear') }}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Submit Button -->
-      <ion-button
-        expand="block"
-        type="submit"
-        color="primary"
-        class="submit-btn"
-        [disabled]="businessForm.invalid"
-      >
-        <ion-icon name="save" slot="start"></ion-icon>
-        {{ (isEditMode ? 'ADD_BUSINESS_LOCATION.UPDATE_BUTTON' : 'ADD_BUSINESS_LOCATION.SAVE_BUTTON') | translate }}
-      </ion-button>
+      <!-- Submit -->
+      <div class="submit-section">
+        <ion-button
+          expand="block"
+          type="submit"
+          class="submit-btn"
+          [disabled]="businessForm.invalid">
+          <ion-icon name="save" slot="start"></ion-icon>
+          {{ (isEditMode ? 'ADD_BUSINESS_LOCATION.UPDATE_BUTTON' : 'ADD_BUSINESS_LOCATION.SAVE_BUTTON') | translate }}
+        </ion-button>
+      </div>
+
     </form>
   </div>
 </ion-content>

@@ -3,7 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, ToastController, LoadingController, ModalController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { save, create, chevronBack, close } from 'ionicons/icons';
+import {
+  chevronBack,
+  create,
+  close,
+  businessOutline,
+  locationOutline,
+  callOutline,
+  informationCircleOutline,
+  documentTextOutline,
+  save
+} from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
@@ -50,7 +60,17 @@ export class BusinessInfoComponent implements OnInit, OnDestroy {
       pan_number: [{ value: '', disabled: true }],
     });
 
-    addIcons({ save, create, chevronBack, close });
+    addIcons({
+      chevronBack,
+      create,
+      close,
+      businessOutline,
+      locationOutline,
+      callOutline,
+      informationCircleOutline,
+      documentTextOutline,
+      save
+    });
   }
 
   ngOnInit(): void {

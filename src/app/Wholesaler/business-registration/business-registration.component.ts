@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule, ToastController, LoadingController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { save, informationCircleOutline, documentTextOutline } from 'ionicons/icons';
+import { businessOutline, informationCircleOutline, documentTextOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { BusinessRegistrationService } from './business-registration.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
@@ -45,7 +45,7 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
       privileged_user: [false],
     });
 
-    addIcons({ save, informationCircleOutline, documentTextOutline });
+    addIcons({ businessOutline, informationCircleOutline, documentTextOutline, checkmarkCircleOutline });
   }
 
   ngOnInit(): void {

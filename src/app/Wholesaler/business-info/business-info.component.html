@@ -27,27 +27,27 @@
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="business-outline"></ion-icon>
-            <h3>{{ 'WHOLESALER_BUSINESS_REGISTRATION.Business Information' | translate }}</h3>
+            <h3>{{ 'WHOLESALER_BUSINESS_INFO.Business Information' | translate }}</h3>
           </div>
           <ion-list>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Registration Number' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.Registration Number' | translate }}</ion-label>
               <ion-input formControlName="b_registration_num" readonly></ion-input>
             </ion-item>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Owner Name' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.Owner Name' | translate }}</ion-label>
               <ion-input formControlName="b_owner_name" readonly></ion-input>
             </ion-item>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Business Category' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.Business Category' | translate }}</ion-label>
               <ion-input formControlName="b_category_name" readonly></ion-input>
             </ion-item>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Business Type' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.Business Type' | translate }}</ion-label>
               <ion-input formControlName="b_type_name" readonly></ion-input>
             </ion-item>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Established Year' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.Established Year' | translate }}</ion-label>
               <ion-input formControlName="established_year" readonly></ion-input>
             </ion-item>
           </ion-list>
@@ -57,35 +57,35 @@
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="location-outline"></ion-icon>
-            <h3>{{ 'WHOLESALER_BUSINESS_REGISTRATION.Location Information' | translate }}</h3>
+            <h3>{{ 'WHOLESALER_BUSINESS_INFO.Location Information' | translate }}</h3>
           </div>
           <ion-list>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.State' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.State' | translate }}</ion-label>
               <ion-input formControlName="state_name" readonly></ion-input>
             </ion-item>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.City' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.City' | translate }}</ion-label>
               <ion-input formControlName="city_name" readonly></ion-input>
             </ion-item>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Location' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.Location' | translate }}</ion-label>
               <ion-input formControlName="location_name" readonly></ion-input>
             </ion-item>
             <ion-item [class.ion-invalid]="form.get('address')?.invalid && form.get('address')?.touched">
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Address' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.Address' | translate }}</ion-label>
               <ion-textarea formControlName="address" [readonly]="!isEditMode" maxlength="500" rows="3"></ion-textarea>
             </ion-item>
           </ion-list>
           <div class="error-message" *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
             <span *ngIf="form.get('address')?.errors?.['required']">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Address is required' | translate }}
+              {{ 'WHOLESALER_BUSINESS_INFO.Address is required' | translate }}
             </span>
             <span *ngIf="form.get('address')?.errors?.['minlength']">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Address must be at least 5 characters' | translate }}
+              {{ 'WHOLESALER_BUSINESS_INFO.Address must be at least 5 characters' | translate }}
             </span>
             <span *ngIf="form.get('address')?.errors?.['maxlength']">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.Address cannot exceed 500 characters' | translate }}
+              {{ 'WHOLESALER_BUSINESS_INFO.Address cannot exceed 500 characters' | translate }}
             </span>
           </div>
         </div>
@@ -94,15 +94,15 @@
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="call-outline"></ion-icon>
-            <h3>{{ 'WHOLESALER_BUSINESS_REGISTRATION.Contact Information' | translate }}</h3>
+            <h3>{{ 'WHOLESALER_BUSINESS_INFO.Contact Information' | translate }}</h3>
           </div>
           <ion-list>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Mobile Number' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.Mobile Number' | translate }}</ion-label>
               <ion-input formControlName="mobile_number" type="tel" readonly></ion-input>
             </ion-item>
             <ion-item button="true" (click)="openEmailVerificationModal()" class="editable-item" [class.disabled]="isLoading">
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.Email' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.Email' | translate }}</ion-label>
               <ion-input formControlName="email" type="email" readonly></ion-input>
               <ion-icon name="create" slot="end" class="edit-icon" *ngIf="!isLoading"></ion-icon>
               <ion-spinner slot="end" *ngIf="isLoading" name="crescent"></ion-spinner>
@@ -118,24 +118,24 @@
         <div class="info-section">
           <div class="section-header">
             <ion-icon name="document-text-outline"></ion-icon>
-            <h3>{{ 'WHOLESALER_BUSINESS_REGISTRATION.Legal Information' | translate }}</h3>
+            <h3>{{ 'WHOLESALER_BUSINESS_INFO.Legal Information' | translate }}</h3>
           </div>
           <ion-list>
             <ion-item [class.ion-invalid]="form.get('gst_number')?.invalid && form.get('gst_number')?.touched">
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.GST Number' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.GST Number' | translate }}</ion-label>
               <ion-input formControlName="gst_number" [readonly]="!isEditMode" autocapitalize="characters"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_REGISTRATION.PAN Number' | translate }}</ion-label>
+              <ion-label position="stacked">{{ 'WHOLESALER_BUSINESS_INFO.PAN Number' | translate }}</ion-label>
               <ion-input formControlName="pan_number" readonly></ion-input>
             </ion-item>
           </ion-list>
           <div class="error-message" *ngIf="form.get('gst_number')?.invalid && form.get('gst_number')?.touched">
             <span *ngIf="form.get('gst_number')?.errors?.['required']">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.GST number is required' | translate }}
+              {{ 'WHOLESALER_BUSINESS_INFO.GST number is required' | translate }}
             </span>
             <span *ngIf="form.get('gst_number')?.errors?.['pattern']">
-              {{ 'WHOLESALER_BUSINESS_REGISTRATION.GST must be 15 alphanumeric characters' | translate }}
+              {{ 'WHOLESALER_BUSINESS_INFO.GST must be 15 alphanumeric characters' | translate }}
             </span>
           </div>
         </div>

@@ -66,7 +66,6 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 		address: 'ADD_BUSINESS_FORM.ADDRESS',
 		email: 'ADD_BUSINESS_FORM.EMAIL',
 		gstNumber: 'ADD_BUSINESS_FORM.GST_NUMBER',
-		pan: 'ADD_BUSINESS_FORM.PAN',
 		privilegedUser: 'ADD_BUSINESS_FORM.PRIVILEGED_USER',
 		b_type_id: 'ADD_BUSINESS_FORM.BUSINESS_TYPE',
 		establishedYear: 'ADD_BUSINESS_FORM.ESTABLISHED_YEAR',
@@ -97,7 +96,6 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 			address: ['', Validators.required],
 			email: ['', [Validators.required, Validators.email]],
 			gstNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/)]],
-			pan: ['', [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
 			privilegedUser: [false],
 			active_status: [true],
 			b_type_id: [null],
@@ -567,7 +565,6 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 						address: location.address || '',
 						email: location.email || '',
 						gstNumber: location.gst_num || '',
-						pan: location.pan_num || '',
 						privilegedUser: location.privilege_user || false,
 						active_status: location.active_status ? 1 : 0,
 						b_type_id: location.type_id || null,
@@ -614,7 +611,6 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 							address: data.address || '',
 							email: data.email || '',
 							gstNumber: data.gst_num || '',
-							pan: data.pan_num || '',
 							privilegedUser: data.privilege_user || false,
 							active_status: data.active_status,
 							b_type_id: data.type_id || null,
@@ -656,7 +652,6 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 			this.businessForm.get('state')?.disable();
 			this.businessForm.get('city')?.disable();
 			this.businessForm.get('gstNumber')?.disable();
-			this.businessForm.get('pan')?.disable();
 			this.businessForm.get('privilegedUser')?.disable();
 			this.businessForm.get('b_type_id')?.disable();
 			this.businessForm.get('establishedYear')?.disable();
@@ -1016,7 +1011,6 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 					address: formValue.address,
 					email: formValue.email,
 					gst_num: formValue.gstNumber,
-					pan_num: formValue.pan,
 					privilege_user: false,
 					established_year: formValue.establishedYear || '',
 					active_status: true,
@@ -1216,8 +1210,6 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 						return this.translate.instant('ADD_BUSINESS_FORM.INVALID_PHONE');
 					case 'gstNumber':
 						return this.translate.instant('ADD_BUSINESS_FORM.INVALID_GST');
-					case 'pan':
-						return this.translate.instant('ADD_BUSINESS_FORM.INVALID_PAN');
 					case 'establishedYear':
 						return this.translate.instant('ADD_BUSINESS_FORM.INVALID_YEAR');
 					default:
@@ -1226,6 +1218,15 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 			}
 		}
 		return '';
+	}
+
+	getFormProgress(): number {
+		const requiredFields = ['shopName', 'number', 'state', 'city', 'location', 'address', 'email', 'gstNumber', 'pan'];
+		const filled = requiredFields.filter(field => {
+			const value = this.businessForm.get(field)?.value;
+			return value !== null && value !== undefined && value !== '';
+		}).length;
+		return Math.round((filled / requiredFields.length) * 100);
 	}
 
 	goBack() {
