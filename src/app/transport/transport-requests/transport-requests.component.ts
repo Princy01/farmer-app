@@ -657,6 +657,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
                 },
                 error: (error) => {
                   this.isAcceptingOffer[requestKey] = false;
+                  if (this.isPaymentDetailsRequiredError(error)) {
+                    this.failedOperations.delete(operationId);
+                    return;
+                  }
                   const errorMsg = this.getErrorMessage(error, 'TRANSPORT_REQUESTS.ACCEPT_FAILED');
                   this.failedOperations.set(operationId, {
                     type: 'accept',
@@ -910,12 +914,13 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
     }
 
     // Handle backend error codes
-    const errorCode = error?.error?.error_code || error?.status;
+    const errorCode = error?.error?.error_code || error?.error?.error || error?.status;
     const errorCodeMap: { [key: string]: string } = {
       'offer_already_taken': 'TRANSPORT_REQUESTS.ERROR_OFFER_TAKEN',
       'offer_not_open': 'TRANSPORT_REQUESTS.ERROR_OFFER_EXPIRED',
       'schedule_conflict': 'TRANSPORT_REQUESTS.ERROR_SCHEDULE_CONFLICT',
       'driver_busy': 'TRANSPORT_REQUESTS.ERROR_DRIVER_BUSY',
+      'payment_details_required': 'PAYMENT_DETAILS.MISSING_MESSAGE',
       'job_not_cancelable': 'TRANSPORT_REQUESTS.ERROR_NOT_CANCELABLE',
       'driver_under_cooldown': 'TRANSPORT_REQUESTS.ERROR_UNDER_COOLDOWN',
       'driver_under_dispute': 'TRANSPORT_REQUESTS.ERROR_UNDER_DISPUTE',
@@ -928,6 +933,14 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     const messageKey = errorCodeMap[errorCode] || defaultKey;
     return this.translate.instant(messageKey);
+  }
+
+  private isPaymentDetailsRequiredError(error: any): boolean {
+    const errorBody = error?.error || {};
+    return error?.status === 403 && (
+      errorBody?.error_code === 'payment_details_required' ||
+      errorBody?.error === 'payment_details_required'
+    );
   }
 
   private async showRetryOption(
@@ -980,6 +993,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
         error: (error) => {
           this.isAcceptingOffer[requestKey] = false;
           this.retryingOperationId = null;
+          if (this.isPaymentDetailsRequiredError(error)) {
+            return;
+          }
           const errorMsg = this.getErrorMessage(error, 'TRANSPORT_REQUESTS.ACCEPT_FAILED');
           this.showToast(errorMsg, 'danger');
         }
