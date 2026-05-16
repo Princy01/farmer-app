@@ -174,16 +174,19 @@ export class TransportRealtimeService {
 
         // Job removed (accepted by driver, expired, or cancelled)
         case 'job_removed':
-          if (message.ride_id !== undefined) {
-            const currentOffers = this.offersSubject.value.filter(
-              o => !(o.ride_id === message.ride_id && o.attempt_no === message.attempt_no)
-            );
-            this.offersSubject.next(currentOffers);
-            this.offerRemovedSubject.next({
-              ride_id: message.ride_id,
-              job_id: message.job_id || 0,
-              attempt_no: message.attempt_no || 0
-            });
+          {
+            const payload = message.data || message;
+            if (payload.ride_id !== undefined) {
+              const currentOffers = this.offersSubject.value.filter(
+                o => !(o.ride_id === payload.ride_id && o.attempt_no === payload.attempt_no)
+              );
+              this.offersSubject.next(currentOffers);
+              this.offerRemovedSubject.next({
+                ride_id: payload.ride_id,
+                job_id: payload.job_id || 0,
+                attempt_no: payload.attempt_no || 0
+              });
+            }
           }
           break;
 
@@ -204,11 +207,17 @@ export class TransportRealtimeService {
 
         // Job cancelled
         case 'job_cancelled':
-          if (message.ride_id !== undefined) {
-            const currentOffers = this.offersSubject.value.filter(
-              o => !(o.ride_id === message.ride_id && o.attempt_no === message.attempt_no)
-            );
-            this.offersSubject.next(currentOffers);
+          {
+            const payload = message.data || message;
+            if (payload.ride_id !== undefined) {
+              const currentOffers = this.offersSubject.value.filter(
+                o => !(o.ride_id === payload.ride_id && o.attempt_no === payload.attempt_no)
+              );
+              this.offersSubject.next(currentOffers);
+            }
+            if (payload.cooldown_until) {
+              this.cancelCooldownSubject.next(new Date(payload.cooldown_until));
+            }
           }
           break;
 
@@ -232,11 +241,14 @@ export class TransportRealtimeService {
 
         // Job cancelled by retailer
         case 'job_cancelled_by_retailer':
-          if (message.ride_id !== undefined) {
-            const currentOffers = this.offersSubject.value.filter(
-              o => !(o.ride_id === message.ride_id && o.attempt_no === message.attempt_no)
-            );
-            this.offersSubject.next(currentOffers);
+          {
+            const payload = message.data || message;
+            if (payload.ride_id !== undefined) {
+              const currentOffers = this.offersSubject.value.filter(
+                o => !(o.ride_id === payload.ride_id && o.attempt_no === payload.attempt_no)
+              );
+              this.offersSubject.next(currentOffers);
+            }
           }
           break;
       }

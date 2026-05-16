@@ -127,6 +127,17 @@
       </div>
 
       <div class="card-body transport-body" *ngIf="hasRideRequest">
+        <p class="transport-hint">{{ "CHECKOUT.ARRANGE_TRANSPORT_MSG" | translate }}</p>
+
+        <div class="standard-transport-card">
+          <ion-icon name="car-outline" class="t-icon"></ion-icon>
+          <div>
+            <div class="t-name">{{ "RIDE.STANDARD_DELIVERY" | translate }}</div>
+            <div class="t-time">{{ "RIDE.STANDARD_TIME" | translate }}</div>
+          </div>
+          <span class="t-badge badge-std">{{ "CHECKOUT.SELECTED" | translate }}</span>
+        </div>
+
         <div class="dist-row">
           <span class="dist-label">
             <ion-icon name="navigate-outline"></ion-icon>

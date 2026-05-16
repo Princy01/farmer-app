@@ -977,6 +977,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       'job_not_cancelable': 'TRANSPORT_REQUESTS.ERROR_NOT_CANCELABLE',
       'driver_under_cooldown': 'TRANSPORT_REQUESTS.ERROR_UNDER_COOLDOWN',
       'driver_under_dispute': 'TRANSPORT_REQUESTS.ERROR_UNDER_DISPUTE',
+      'driver_unavailable': 'TRANSPORT_REQUESTS.CANNOT_ACCEPT_LOCKED',
       'driver_verification_required': 'TRANSPORT_REQUESTS.ERROR_VERIFICATION_REQUIRED',
       409: 'TRANSPORT_REQUESTS.ERROR_CONFLICT',
       404: 'TRANSPORT_REQUESTS.ERROR_NOT_FOUND',
@@ -1025,6 +1026,20 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   private retryAcceptOrder(request: DriverJobOffer) {
+    if (!this.canActOnLiveRequests()) {
+      this.showVerificationRequiredMessage();
+      return;
+    }
+    if (this.isUnderCooldown || this.isAvailabilityLocked) {
+      this.showToast(
+        this.isUnderCooldown
+          ? this.translate.instant('TRANSPORT_REQUESTS.CANNOT_ACCEPT_COOLDOWN')
+          : this.translate.instant('TRANSPORT_REQUESTS.CANNOT_ACCEPT_LOCKED'),
+        'warning'
+      );
+      return;
+    }
+
     this.retryingOperationId = `retry-accept-${request.ride_id}-${request.attempt_no}`;
     const requestKey = `${request.ride_id}-${request.attempt_no}`;
     this.isAcceptingOffer[requestKey] = true;
