@@ -180,14 +180,11 @@ export class CartComponent implements OnInit, OnDestroy, ViewWillEnter {
   private buildGroups(): void {
     // snapshot previous state by key so we can restore selection/expansion
     const prevState = new Map<string, { isSelected: boolean; isExpanded: boolean }>();
-    let firstOne = true
     for (const g of this.wholesalerGroups) {
       prevState.set(this.groupKey(g.wholesalerId, g.branchId), {
         isSelected: g.isSelected,
-        isExpanded: g.isExpanded && firstOne
+        isExpanded: g.isExpanded
       });
-
-      firstOne = false;
     }
 
     const map = new Map<string, WholesalerGroup>();

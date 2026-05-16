@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { AlertController, MenuController } from '@ionic/angular';
 import {
   IonApp, IonButtons, IonContent, IonHeader, IonMenu, IonMenuButton, IonMenuToggle,
   IonTitle, IonToolbar, IonRouterOutlet, IonList, IonItem, IonLabel, IonIcon
@@ -12,7 +13,8 @@ import { addIcons } from 'ionicons';
 import {
   speedometerOutline, pricetagOutline, carOutline, personOutline, navigateOutline,
   locationOutline, checkmarkCircleOutline, cashOutline, timeOutline, notificationsOutline,
-  documentTextOutline, checkmarkDoneOutline, personAddOutline, listOutline, personCircleOutline, settingsOutline, alertCircleOutline } from 'ionicons/icons';
+  documentTextOutline, checkmarkDoneOutline, personAddOutline, listOutline, personCircleOutline, settingsOutline, alertCircleOutline, logOutOutline } from 'ionicons/icons';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-transport',
@@ -56,8 +58,14 @@ export class TransportComponent implements OnDestroy {
     '/transport/settings': 'TRANSPORT_MENU.SETTINGS'
   };
 
-  constructor(private router: Router, private translate: TranslateService) {
-    addIcons({personCircleOutline,speedometerOutline,documentTextOutline,personAddOutline,listOutline,checkmarkCircleOutline,timeOutline,alertCircleOutline,settingsOutline,pricetagOutline,carOutline,personOutline,locationOutline,cashOutline,notificationsOutline,navigateOutline,checkmarkDoneOutline});
+  constructor(
+    private router: Router,
+    private translate: TranslateService,
+    private authService: AuthService,
+    private alertCtrl: AlertController,
+    private menuCtrl: MenuController
+  ) {
+    addIcons({personCircleOutline,speedometerOutline,documentTextOutline,personAddOutline,listOutline,checkmarkCircleOutline,timeOutline,alertCircleOutline,settingsOutline,logOutOutline,pricetagOutline,carOutline,personOutline,locationOutline,cashOutline,notificationsOutline,navigateOutline,checkmarkDoneOutline});
     this.router.events
       .pipe(takeUntil(this.destroy$))
       .subscribe((event) => {
@@ -87,5 +95,37 @@ export class TransportComponent implements OnDestroy {
   // Function to check if a menu item is active
   isActive(route: string): boolean {
     return this.activeRoute.startsWith(route);
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.menuCtrl.close();
+
+      const alert = await this.alertCtrl.create({
+        header: this.translate.instant('MENU.LOGOUT_TITLE'),
+        message: this.translate.instant('MENU.LOGOUT_MESSAGE'),
+        buttons: [
+          {
+            text: this.translate.instant('MENU.CANCEL'),
+            role: 'cancel'
+          },
+          {
+            text: this.translate.instant('MENU.LOGOUT_CONFIRM'),
+            handler: async () => {
+              try {
+                this.authService.logout();
+                await this.router.navigate(['/login']);
+              } catch (error) {
+                // Silently ignore logout navigation errors
+              }
+            }
+          }
+        ]
+      });
+
+      await alert.present();
+    } catch (error) {
+      // Silently ignore menu/alert errors
+    }
   }
 }

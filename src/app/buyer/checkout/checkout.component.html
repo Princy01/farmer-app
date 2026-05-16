@@ -13,32 +13,6 @@
   <div class="checkout-bg-glow"></div>
 
   <div class="content-wrapper">
-    <div class="card" role="region" aria-label="Order Details">
-      <div class="card-head">
-        <div class="card-head-left">
-          <div class="card-icon icon-blue">
-            <ion-icon name="receipt-outline"></ion-icon>
-          </div>
-          <span class="card-title">{{ "CHECKOUT.ORDER_DETAILS" | translate }}</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="seller-row">
-          <div class="seller-icon-wrap">
-            <ion-icon name="storefront-outline"></ion-icon>
-          </div>
-          <div class="seller-details">
-            <div class="party-label">
-              <ion-icon name="storefront-outline"></ion-icon>
-              {{ "CHECKOUT.SELLER" | translate }}
-            </div>
-            <div class="party-name">{{ getWholesellerInfo() }}</div>
-            <div class="party-sub" *ngIf="wholesalerGroups.length === 1">{{ wholesalerGroups[0].branchName }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="card" role="region" aria-label="Delivery Address">
       <div class="card-head">
         <div class="card-head-left">

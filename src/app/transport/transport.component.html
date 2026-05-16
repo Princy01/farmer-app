@@ -100,6 +100,13 @@
             <ion-label>{{ 'TRANSPORT_MENU.SETTINGS' | translate }}</ion-label>
           </ion-item>
         </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item (click)="logout()">
+            <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
+            <ion-label color="danger">{{ 'MENU.LOGOUT' | translate }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
       </ion-list>
     </ion-content>
   </ion-menu>

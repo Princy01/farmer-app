@@ -619,19 +619,19 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let orderDetails = `${this.translate.instant('TRANSPORT_REQUESTS.JOB_ID')}: ${request.job_id}\n\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.PICKUP')}: ${request.pickup_address}\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.DELIVERY')}: ${request.drop_address}\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.WEIGHT')}: ${request.load_weight_kg}kg\n`;
-    orderDetails += `${this.translate.instant('TRANSPORT_REQUESTS.BASE_PRICE')}: ₹${request.offered_rate}\n`;
-
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('TRANSPORT_REQUESTS.ACCEPT_HEADER'),
-      message: orderDetails,
+      message: this.buildRequestAlertMessage(request, 'accept'),
+      cssClass: 'transport-request-alert',
       buttons: [
-        { text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'), role: 'cancel' },
+        {
+          text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'),
+          role: 'cancel',
+          cssClass: 'alert-action-cancel'
+        },
         {
           text: this.translate.instant('TRANSPORT_REQUESTS.ACCEPT'),
+          cssClass: 'alert-action-accept',
           handler: async () => {
             this.isAcceptingOffer[requestKey] = true;
             const operationId = `accept-${request.ride_id}-${request.attempt_no}-${Date.now()}`;
@@ -703,16 +703,18 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('TRANSPORT_REQUESTS.REJECT_HEADER'),
-      message: this.translate.instant('TRANSPORT_REQUESTS.REJECT_CONFIRM', {
-        jobId: request.job_id,
-        pickup: request.pickup_address,
-        delivery: request.drop_address
-      }),
+      message: this.buildRequestAlertMessage(request, 'reject'),
+      cssClass: 'transport-request-alert',
       buttons: [
-        { text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'), role: 'cancel' },
+        {
+          text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'),
+          role: 'cancel',
+          cssClass: 'alert-action-cancel'
+        },
         {
           text: this.translate.instant('TRANSPORT_REQUESTS.REJECT'),
           role: 'destructive',
+          cssClass: 'alert-action-reject',
           handler: async () => {
             this.isRejectingOffer[requestKey] = true;
             const operationId = `reject-${request.ride_id}-${request.attempt_no}-${Date.now()}`;
@@ -754,6 +756,57 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
   private checkLoadWithinCapacity(orderWeight: number): boolean {
     return this.maxLoad >= this.currentLoad + orderWeight;
+  }
+
+  private buildRequestAlertMessage(request: DriverJobOffer, mode: 'accept' | 'reject'): string {
+    const jobIdLabel = this.translate.instant('TRANSPORT_REQUESTS.JOB_ID');
+    const pickupLabel = this.translate.instant('TRANSPORT_REQUESTS.PICKUP');
+    const deliveryLabel = this.translate.instant('TRANSPORT_REQUESTS.DELIVERY');
+    const weightLabel = this.translate.instant('TRANSPORT_REQUESTS.WEIGHT');
+    const rateLabel = this.translate.instant('TRANSPORT_REQUESTS.OFFERED_RATE');
+
+    const pickup = this.escapeHtml(
+      request.pickup_address || this.translate.instant('TRANSPORT_REQUESTS.NO_PICKUP_INFO')
+    );
+    const delivery = this.escapeHtml(
+      request.drop_address || this.translate.instant('TRANSPORT_REQUESTS.NO_DELIVERY_INFO')
+    );
+    const jobId = this.escapeHtml(String(request.job_id ?? ''));
+    const weight = this.escapeHtml(`${request.load_weight_kg ?? 0} kg`);
+    const rate = this.escapeHtml(`₹${request.offered_rate ?? 0}`);
+
+    const metaRow = mode === 'accept'
+      ? `
+        <div class="request-alert__meta">
+          <span class="request-alert__pill">${weightLabel}: ${weight}</span>
+          <span class="request-alert__pill">${rateLabel}: ${rate}</span>
+        </div>
+      `
+      : '';
+
+    return `
+      <div class="request-alert">
+        <div class="request-alert__id">${jobIdLabel}${jobId}</div>
+        <div class="request-alert__row">
+          <span class="request-alert__label">${pickupLabel}</span>
+          <span class="request-alert__value">${pickup}</span>
+        </div>
+        <div class="request-alert__row">
+          <span class="request-alert__label">${deliveryLabel}</span>
+          <span class="request-alert__value">${delivery}</span>
+        </div>
+        ${metaRow}
+      </div>
+    `;
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   async promptForMoreOrders(remainingCapacity: number) {
