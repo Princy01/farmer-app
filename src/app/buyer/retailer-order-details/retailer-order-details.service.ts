@@ -19,6 +19,8 @@ export interface OrderItem {
 
 export interface RetailerOrderDetails {
   order_id: number;
+  order_ids?: number[];
+  checkout_session_id?: number | null;
   date_of_order: string;
   order_status: number;
   order_status_name: string;

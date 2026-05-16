@@ -265,6 +265,14 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     this.loadOrderDetails();
   }
 
+  getOrderNumberDisplay(): string {
+    const orderIds = this.order?.order_ids ?? [];
+    if (orderIds.length > 0) {
+      return orderIds.map((orderId) => `#${orderId}`).join(', ');
+    }
+    return this.order?.order_id ? `#${this.order.order_id}` : '#';
+  }
+
   /**
    * Navigates back to the order history page.
    */

@@ -81,6 +81,9 @@ export const authInterceptor: HttpInterceptorFn = (
             userMessage: errorBody?.message || 'PAYMENT_DETAILS.MISSING_MESSAGE'
           }));
         }
+        if (isAuthEndpoint) {
+          return throwError(() => error);
+        }
         switch (error.status) {
           case 401:
             return handleUnauthorizedError(modifiedReq, next, authService);
