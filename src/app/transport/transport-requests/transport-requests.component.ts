@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { AlertController, ToastController, IonicModule, ModalController } from '@ionic/angular';
+import { AlertController, ToastController, IonicModule, ModalController, ActionSheetController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { addIcons } from 'ionicons';
@@ -104,6 +104,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   constructor(
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
+    private actionSheetCtrl: ActionSheetController,
     private transportRequestService: TransportRequestService,
     private transportRealtimeService: TransportRealtimeService,
     private locationPreferenceService: LocationPreferenceService,
@@ -619,10 +620,17 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const jobId = request.job_id ?? '';
+    const rate = `₹${request.offered_rate ?? 0}`;
+    const weight = `${request.load_weight_kg ?? 0} kg`;
+    const pickup = request.pickup_address || this.translate.instant('TRANSPORT_REQUESTS.NO_PICKUP_INFO');
+    const drop = request.drop_address || this.translate.instant('TRANSPORT_REQUESTS.NO_DELIVERY_INFO');
+
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('TRANSPORT_REQUESTS.ACCEPT_HEADER'),
-      message: this.buildRequestAlertMessage(request, 'accept'),
-      cssClass: 'transport-request-alert',
+      subHeader: `${this.translate.instant('TRANSPORT_REQUESTS.JOB_ID')}${jobId}  ·  ${rate}  ·  ${weight}`,
+      message: `${pickup}  →  ${drop}`,
+      cssClass: 'transport-request-alert transport-request-alert--accept',
       buttons: [
         {
           text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'),
@@ -701,21 +709,20 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('TRANSPORT_REQUESTS.REJECT_HEADER'),
-      message: this.buildRequestAlertMessage(request, 'reject'),
-      cssClass: 'transport-request-alert',
+    const jobId = request.job_id ?? '';
+    const rate = `₹${request.offered_rate ?? 0}`;
+
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: `${this.translate.instant('TRANSPORT_REQUESTS.JOB_ID')}${jobId}  ·  ${rate}`,
+      subHeader: this.translate.instant('TRANSPORT_REQUESTS.REJECT_HEADER'),
+      cssClass: 'transport-reject-sheet',
       buttons: [
-        {
-          text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'),
-          role: 'cancel',
-          cssClass: 'alert-action-cancel'
-        },
         {
           text: this.translate.instant('TRANSPORT_REQUESTS.REJECT'),
           role: 'destructive',
-          cssClass: 'alert-action-reject',
-          handler: async () => {
+          icon: 'close-circle-outline',
+          cssClass: 'action-sheet-reject',
+          handler: () => {
             this.isRejectingOffer[requestKey] = true;
             const operationId = `reject-${request.ride_id}-${request.attempt_no}-${Date.now()}`;
 
@@ -748,65 +755,19 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
               });
             this.subscription.add(sub);
           }
+        },
+        {
+          text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'),
+          role: 'cancel',
+          icon: 'arrow-back-outline'
         }
       ]
     });
-    await alert.present();
+    await actionSheet.present();
   }
 
   private checkLoadWithinCapacity(orderWeight: number): boolean {
     return this.maxLoad >= this.currentLoad + orderWeight;
-  }
-
-  private buildRequestAlertMessage(request: DriverJobOffer, mode: 'accept' | 'reject'): string {
-    const jobIdLabel = this.translate.instant('TRANSPORT_REQUESTS.JOB_ID');
-    const pickupLabel = this.translate.instant('TRANSPORT_REQUESTS.PICKUP');
-    const deliveryLabel = this.translate.instant('TRANSPORT_REQUESTS.DELIVERY');
-    const weightLabel = this.translate.instant('TRANSPORT_REQUESTS.WEIGHT');
-    const rateLabel = this.translate.instant('TRANSPORT_REQUESTS.OFFERED_RATE');
-
-    const pickup = this.escapeHtml(
-      request.pickup_address || this.translate.instant('TRANSPORT_REQUESTS.NO_PICKUP_INFO')
-    );
-    const delivery = this.escapeHtml(
-      request.drop_address || this.translate.instant('TRANSPORT_REQUESTS.NO_DELIVERY_INFO')
-    );
-    const jobId = this.escapeHtml(String(request.job_id ?? ''));
-    const weight = this.escapeHtml(`${request.load_weight_kg ?? 0} kg`);
-    const rate = this.escapeHtml(`₹${request.offered_rate ?? 0}`);
-
-    const metaRow = mode === 'accept'
-      ? `
-        <div class="request-alert__meta">
-          <span class="request-alert__pill">${weightLabel}: ${weight}</span>
-          <span class="request-alert__pill">${rateLabel}: ${rate}</span>
-        </div>
-      `
-      : '';
-
-    return `
-      <div class="request-alert">
-        <div class="request-alert__id">${jobIdLabel}${jobId}</div>
-        <div class="request-alert__row">
-          <span class="request-alert__label">${pickupLabel}</span>
-          <span class="request-alert__value">${pickup}</span>
-        </div>
-        <div class="request-alert__row">
-          <span class="request-alert__label">${deliveryLabel}</span>
-          <span class="request-alert__value">${delivery}</span>
-        </div>
-        ${metaRow}
-      </div>
-    `;
-  }
-
-  private escapeHtml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
   }
 
   async promptForMoreOrders(remainingCapacity: number) {
