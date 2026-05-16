@@ -185,6 +185,8 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
           ...this.orderData,
           // Core order info
           orderId: response.order_id,
+          orderIds: response.order_ids?.length ? response.order_ids : this.resolveOrderIds(),
+          order_ids: response.order_ids?.length ? response.order_ids : this.resolveOrderIds(),
           orderDate: response.date_of_order,
           orderStatus: response.order_status,
           actualDeliveryDate: response.actual_delivery_date,
@@ -342,6 +344,14 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
     return (this.orderData?.items?.length ?? 0) > 0;
   }
 
+  getOrderIdBadgeText(): string {
+    const orderIds = this.resolveOrderIds();
+    if (orderIds.length === 0) {
+      return this.orderData?.orderId ? `#${this.orderData.orderId}` : '#';
+    }
+    return orderIds.map((orderId) => `#${orderId}`).join(', ');
+  }
+
   usedSimulatedPayment(): boolean {
     return this.paymentMeta?.mode === 'simulated';
   }
@@ -361,8 +371,22 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
   }
 
   private resolveOrderId(): number | undefined {
-    const idFromArray = this.orderData?.orderIds?.[0] ?? this.orderData?.order_ids?.[0];
+    const idFromArray = this.resolveOrderIds()[0];
     return idFromArray ?? this.orderData?.orderId;
+  }
+
+  private resolveOrderIds(): number[] {
+    const ids = this.orderData?.orderIds ?? this.orderData?.order_ids ?? [];
+    const normalizedIds = Array.isArray(ids)
+      ? ids.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0)
+      : [];
+
+    const fallbackId = Number(this.orderData?.orderId ?? 0);
+    if (Number.isFinite(fallbackId) && fallbackId > 0 && !normalizedIds.includes(fallbackId)) {
+      normalizedIds.unshift(fallbackId);
+    }
+
+    return normalizedIds;
   }
 
   private getOrderErrorMessageKey(error: unknown): string {

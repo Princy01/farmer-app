@@ -49,6 +49,8 @@ export interface CreateBatchOrderResponse {
 
 export interface RetailerOrderResponse {
   order_id: number;
+  order_ids?: number[];
+  checkout_session_id?: number | null;
   date_of_order: string; // ISO 8601 string from backend
   order_status: number;
   actual_delivery_date?: string | null;

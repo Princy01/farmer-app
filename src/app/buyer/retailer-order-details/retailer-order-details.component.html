@@ -38,7 +38,7 @@
     <ion-card class="order-header-card">
       <ion-card-header>
         <ion-card-title>
-          {{ 'RETAILER_ORDER_DETAILS.ORDER_NUMBER' | translate }} #{{ order.order_id }}
+          {{ 'RETAILER_ORDER_DETAILS.ORDER_NUMBER' | translate }} {{ getOrderNumberDisplay() }}
         </ion-card-title>
         <ion-card-subtitle>
           {{ order.date_of_order | date: 'dd MMM yyyy, HH:mm:ss' }}

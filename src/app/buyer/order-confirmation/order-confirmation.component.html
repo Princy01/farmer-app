@@ -27,7 +27,7 @@
           <h2 class="card-title">{{ 'ORDER_CONFIRMATION.ORDER_DETAILS' | translate }}</h2>
         </div>
         <div class="order-id-badge">
-          #{{ orderData.orderId }}
+          {{ getOrderIdBadgeText() }}
         </div>
       </div>
 
@@ -106,6 +106,7 @@
             <div class="item-details">
               <span class="item-name">{{ item.product_name }}</span>
               <span class="item-quantity">{{ item.quantity }} {{ item.unit_name }}</span>
+              <span class="item-specs" *ngIf="item.wholeseller_name">{{ item.wholeseller_name }}</span>
               <span class="item-price">{{ item.price | currency:'INR':'symbol':'1.2-2' }}</span>
             </div>
           </div>
