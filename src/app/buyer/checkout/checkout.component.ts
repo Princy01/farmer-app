@@ -16,6 +16,7 @@ import {
   storefrontOutline,
   bagOutline,
   carOutline,
+  rocketOutline,
   navigateOutline,
   cashOutline,
   informationCircleOutline,
@@ -76,6 +77,8 @@ interface WholesalerGroupSummary {
 }
 
 interface TransportData {
+  delivery_type?: 'standard';
+  urgency?: 'standard';
   base_price: number;
   distance: number;
   distance_km: number;
@@ -148,6 +151,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       storefrontOutline,
       bagOutline,
       carOutline,
+      rocketOutline,
       navigateOutline,
       cashOutline,
       informationCircleOutline,
@@ -187,27 +191,20 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         ? navigationCartItems
         : navigationGroups.flatMap((group: any) => group.items || []);
 
-      this.cartItems = sourceItems.map((item: any) => {
-        const price = this.firstPositivePrice(
-          item.price_while_added,
-          item.latest_wholesaler_price,
-          item.price
-        );
-        return {
-          selected_id: item.selected_id,
-          product_id: item.product_id,
-          product_name: item.product_name || item.name,
-          quantity: item.quantity,
-          unit_id: item.unit_id,
-          unit_name: item.unit_name,
-          price_while_added: price,
-          latest_wholesaler_price: price,
-          price_updated_at: item.price_updated_at,
-          is_active: !item.is_deleted
-        } as CartItem;
-      });
+      this.cartItems = sourceItems.map((item: any) => this.normalizeCartItem(item));
 
-      this.wholesalerGroups = navigationGroups;
+      this.wholesalerGroups = navigationGroups.map((group: any) => {
+        const items = (group.items || []).map((item: any) => this.normalizeCartItem(item));
+        return {
+          ...group,
+          itemCount: items.length,
+          subtotal: this.firstPositivePrice(
+            group.subtotal,
+            items.reduce((sum: number, item: CartItem) => sum + this.itemUnitPrice(item) * (item.quantity || 0), 0)
+          ),
+          items
+        } as WholesalerGroupSummary;
+      });
       this.totalPrice = state['totalPrice'] ||
         this.wholesalerGroups.reduce((sum, group) => sum + (group.subtotal || 0), 0);
       this.retailerInfo = state['retailer'] || null;
@@ -353,6 +350,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
     const finalTransportData: TransportData | null = this.hasRideRequest
       ? {
+          delivery_type: 'standard',
+          urgency: 'standard',
           base_price: this.estimatedRidePrice,
           distance: this.distance,
           distance_km: this.distance,
@@ -373,7 +372,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           quantity: item.quantity,
           unit_id: item.unit_id,
           unit_name: item.unit_name,
-          price: this.firstPositivePrice(item.price_while_added, item.latest_wholesaler_price),
+          price: this.itemUnitPrice(item),
           discount_amount: 0,
           tax_amount: 0,
           wholeseller_id: group.wholesalerId,
@@ -426,7 +425,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         }
       });
     } catch (error: any) {
-      const errorMessage = error?.message || this.translate.instant('CHECKOUT.CHECKOUT_SESSION_ERROR');
+      const errorMessage =
+        error?.error?.error ||
+        error?.error?.message ||
+        error?.message ||
+        this.translate.instant('CHECKOUT.CHECKOUT_SESSION_ERROR');
       void this.showErrorAlert(errorMessage);
     } finally {
       this.paymentInProgress = false;
@@ -597,6 +600,34 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       }
     }
     return 0;
+  }
+
+  private itemUnitPrice(item: Partial<CartItem> | any): number {
+    return this.firstPositivePrice(
+      item?.price_while_added,
+      item?.latest_wholesaler_price,
+      item?.price
+    );
+  }
+
+  private normalizeCartItem(item: any): CartItem {
+    const price = this.itemUnitPrice(item);
+    return {
+      selected_id: item.selected_id,
+      product_id: item.product_id,
+      product_name: item.product_name || item.name,
+      quantity: Number(item.quantity ?? 0),
+      unit_id: item.unit_id,
+      unit_name: item.unit_name,
+      price,
+      price_while_added: price,
+      latest_wholesaler_price: price,
+      price_updated_at: item.price_updated_at,
+      is_active: !item.is_deleted,
+      branch_id: item.branch_id,
+      wholesaler_id: item.wholesaler_id ?? item.wholeseller_id,
+      wholesaler_name: item.wholesaler_name
+    } as CartItem;
   }
 
   private async showAuthError(): Promise<void> {
