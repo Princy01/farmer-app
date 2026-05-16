@@ -16,8 +16,6 @@ import {
   storefrontOutline,
   bagOutline,
   carOutline,
-  bicycleOutline,
-  rocketOutline,
   navigateOutline,
   cashOutline,
   informationCircleOutline,
@@ -33,8 +31,6 @@ import { CheckoutSessionService, CreateCheckoutSessionRequest } from '../service
 import { AuthService } from 'src/app/auth/auth.service';
 import { BuyerApiService } from '../services/buyer-api.service';
 
-type TransportType = 'standard' | 'express' | 'priority';
-
 interface CartItem {
   selected_id?: number;
   product_id: number;
@@ -42,7 +38,6 @@ interface CartItem {
   quantity: number;
   unit_id: number;
   unit_name: string;
-  price?: number;
   price_while_added: number;
   latest_wholesaler_price: number;
   price_updated_at?: string;
@@ -81,8 +76,6 @@ interface WholesalerGroupSummary {
 }
 
 interface TransportData {
-  delivery_type: TransportType;
-  urgency: 'low' | 'standard' | 'high';
   base_price: number;
   distance: number;
   distance_km: number;
@@ -122,12 +115,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   isLoadingBranches = false;
 
   hasRideRequest = false;
-  selectedDeliveryType: TransportType | null = null;
   estimatedRidePrice = 0;
   distance = 0;
   isLoadingDistance = false;
   isLoadingQuote = false;
-  isPremiumUser = false;
 
   isLoading = false;
 
@@ -157,8 +148,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       storefrontOutline,
       bagOutline,
       carOutline,
-      bicycleOutline,
-      rocketOutline,
       navigateOutline,
       cashOutline,
       informationCircleOutline,
@@ -198,20 +187,27 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         ? navigationCartItems
         : navigationGroups.flatMap((group: any) => group.items || []);
 
-      this.cartItems = sourceItems.map((item: any) => this.normalizeCartItem(item));
-
-      this.wholesalerGroups = navigationGroups.map((group: any) => {
-        const items = (group.items || []).map((item: any) => this.normalizeCartItem(item));
+      this.cartItems = sourceItems.map((item: any) => {
+        const price = this.firstPositivePrice(
+          item.price_while_added,
+          item.latest_wholesaler_price,
+          item.price
+        );
         return {
-          ...group,
-          itemCount: items.length,
-          subtotal: this.firstPositivePrice(
-            group.subtotal,
-            items.reduce((sum: number, item: CartItem) => sum + this.itemUnitPrice(item) * (item.quantity || 0), 0)
-          ),
-          items
-        } as WholesalerGroupSummary;
+          selected_id: item.selected_id,
+          product_id: item.product_id,
+          product_name: item.product_name || item.name,
+          quantity: item.quantity,
+          unit_id: item.unit_id,
+          unit_name: item.unit_name,
+          price_while_added: price,
+          latest_wholesaler_price: price,
+          price_updated_at: item.price_updated_at,
+          is_active: !item.is_deleted
+        } as CartItem;
       });
+
+      this.wholesalerGroups = navigationGroups;
       this.totalPrice = state['totalPrice'] ||
         this.wholesalerGroups.reduce((sum, group) => sum + (group.subtotal || 0), 0);
       this.retailerInfo = state['retailer'] || null;
@@ -225,7 +221,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
     if (state['transportData']) {
       this.transportData = state['transportData'];
-      this.selectedDeliveryType = this.transportData?.delivery_type || null;
       this.estimatedRidePrice = this.transportData?.base_price || 0;
       this.distance = this.transportData?.distance_km || this.transportData?.distance || 0;
     }
@@ -324,38 +319,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         return;
       }
 
-      if (!this.selectedDeliveryType) {
-        this.selectedDeliveryType = 'standard';
-      }
-
       this.tryCalculateDistance();
       return;
     }
 
     this.estimatedRidePrice = 0;
     this.calculateGroupPricing();
-  }
-
-  async selectTransportType(type: TransportType): Promise<void> {
-    if (type === 'priority' && !this.isPremiumUser) {
-      await this.showPremiumUpgradeAlert();
-      return;
-    }
-
-    this.selectedDeliveryType = type;
-    await this.refreshPriceQuote();
-  }
-
-  getSelectedDeliveryTypeKey(): string {
-    if (this.selectedDeliveryType === 'express') {
-      return 'RIDE.EXPRESS_DELIVERY';
-    }
-
-    if (this.selectedDeliveryType === 'priority') {
-      return 'RIDE.PRIORITY_DELIVERY';
-    }
-
-    return 'RIDE.STANDARD_DELIVERY';
   }
 
   async proceedToPayment(): Promise<void> {
@@ -382,10 +351,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.calculateGroupPricing();
 
-    const finalTransportData: TransportData | null = this.hasRideRequest && this.selectedDeliveryType
+    const finalTransportData: TransportData | null = this.hasRideRequest
       ? {
-          delivery_type: this.selectedDeliveryType,
-          urgency: this.selectedDeliveryType === 'priority' ? 'high' : 'standard',
           base_price: this.estimatedRidePrice,
           distance: this.distance,
           distance_km: this.distance,
@@ -406,7 +373,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           quantity: item.quantity,
           unit_id: item.unit_id,
           unit_name: item.unit_name,
-          price: this.itemUnitPrice(item),
+          price: this.firstPositivePrice(item.price_while_added, item.latest_wholesaler_price),
           discount_amount: 0,
           tax_amount: 0,
           wholeseller_id: group.wholesalerId,
@@ -459,11 +426,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         }
       });
     } catch (error: any) {
-      const errorMessage =
-        error?.error?.error ||
-        error?.error?.message ||
-        error?.message ||
-        this.translate.instant('CHECKOUT.CHECKOUT_SESSION_ERROR');
+      const errorMessage = error?.message || this.translate.instant('CHECKOUT.CHECKOUT_SESSION_ERROR');
       void this.showErrorAlert(errorMessage);
     } finally {
       this.paymentInProgress = false;
@@ -551,7 +514,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   private async refreshPriceQuote(): Promise<void> {
     const branch = this.selectedBranch;
-    if (!this.selectedDeliveryType || this.distance <= 0 || !branch?.city_shortname) {
+    if (this.distance <= 0 || !branch?.city_shortname) {
       return;
     }
 
@@ -563,7 +526,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         this.buyerApiService.calculateTransportPricePreview(
           this.distance,
           totalWeight,
-          this.selectedDeliveryType,
+          'standard',
           branch.city_shortname,
           branch.city_name || branch.city_shortname,
           'general'
@@ -634,47 +597,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       }
     }
     return 0;
-  }
-
-  private itemUnitPrice(item: Partial<CartItem> | any): number {
-    return this.firstPositivePrice(
-      item?.price_while_added,
-      item?.latest_wholesaler_price,
-      item?.price
-    );
-  }
-
-  private normalizeCartItem(item: any): CartItem {
-    const price = this.itemUnitPrice(item);
-    return {
-      selected_id: item.selected_id,
-      product_id: item.product_id,
-      product_name: item.product_name || item.name,
-      quantity: Number(item.quantity ?? 0),
-      unit_id: item.unit_id,
-      unit_name: item.unit_name,
-      price,
-      price_while_added: price,
-      latest_wholesaler_price: price,
-      price_updated_at: item.price_updated_at,
-      is_active: !item.is_deleted,
-      branch_id: item.branch_id,
-      wholesaler_id: item.wholesaler_id ?? item.wholeseller_id,
-      wholesaler_name: item.wholesaler_name
-    } as CartItem;
-  }
-
-  private async showPremiumUpgradeAlert(): Promise<void> {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('RIDE.PREMIUM_REQUIRED_TITLE'),
-      message: this.translate.instant('RIDE.PREMIUM_UPGRADE_MESSAGE'),
-      buttons: [
-        { text: this.translate.instant('COMMON.CANCEL'), role: 'cancel' },
-        { text: this.translate.instant('RIDE.UPGRADE_NOW'), handler: () => undefined }
-      ]
-    });
-
-    await alert.present();
   }
 
   private async showAuthError(): Promise<void> {

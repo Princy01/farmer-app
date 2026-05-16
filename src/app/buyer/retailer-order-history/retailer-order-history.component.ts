@@ -215,9 +215,9 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       grossAmount: session.gross_amount || 0,
       createdAt: session.created_at,
       secondsUntilTimeout: session.seconds_until_timeout ?? null,
-      lastPaymentError: session.last_payment_error ?? null,
+      lastPaymentError: this.getPaymentErrorMessage(session.last_payment_error ?? null),
       retryAvailableAt: session.retry_available_at ?? null,
-      retryBlockReason: session.retry_block_reason ?? null,
+      retryBlockReason: this.getRetryBlockMessage(session.retry_block_reason ?? null),
       canResumePayment: session.can_resume_payment,
       canRetryPayment: session.can_retry_payment,
     };
@@ -382,6 +382,47 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     const remainingSeconds = seconds % 60;
     const formatted = `${minutes}m ${remainingSeconds}s`;
     return this.translate.instant('RETAILER_ORDER_HISTORY.CHECKOUT_TIMEOUT_REMAINING', { time: formatted });
+  }
+
+  private getPaymentErrorMessage(rawMessage: string | null): string | null {
+    if (!rawMessage) return null;
+    const message = rawMessage.toLowerCase();
+
+    if (
+      message.includes('timeout') ||
+      message.includes('timed out') ||
+      message.includes('deadline exceeded')
+    ) {
+      return this.translate.instant('RETAILER_ORDER_HISTORY.PAYMENT_ERROR_TIMEOUT');
+    }
+
+    if (
+      message.includes('gateway error') ||
+      message.includes('failed to call gateway') ||
+      message.includes('connection refused') ||
+      message.includes('dial tcp') ||
+      message.includes('econnrefused') ||
+      message.includes('network')
+    ) {
+      return this.translate.instant('RETAILER_ORDER_HISTORY.PAYMENT_ERROR_NETWORK');
+    }
+
+    if (
+      message.includes('declined') ||
+      message.includes('insufficient') ||
+      message.includes('card') ||
+      message.includes('upi') ||
+      message.includes('bank')
+    ) {
+      return this.translate.instant('RETAILER_ORDER_HISTORY.PAYMENT_ERROR_DECLINED');
+    }
+
+    return this.translate.instant('RETAILER_ORDER_HISTORY.PAYMENT_ERROR_GENERIC');
+  }
+
+  private getRetryBlockMessage(rawReason: string | null): string | null {
+    if (!rawReason) return null;
+    return this.translate.instant('RETAILER_ORDER_HISTORY.PAYMENT_RETRY_BLOCKED');
   }
 
   // In 'all' mode, checkout sessions are shown inline via unifiedAllItems.

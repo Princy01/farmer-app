@@ -6,10 +6,8 @@
       </ion-button>
     </ion-buttons>
     <ion-title class="page-title">{{ 'RETAILER_BUSINESS_INFO.Business Info' | translate }}</ion-title>
-    <ion-buttons slot="end" *ngIf="!isEditMode">
-      <ion-button (click)="enableEdit()" class="edit-btn">
-        <ion-icon slot="icon-only" name="create"></ion-icon>
-      </ion-button>
+    <ion-buttons slot="end">
+      <ion-spinner *ngIf="isLoading" name="crescent" class="header-spinner"></ion-spinner>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -17,7 +15,7 @@
 <ion-content [fullscreen]="true">
   <div class="container">
     <ion-card>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <form [formGroup]="form">
 
         <!-- Business Information Section -->
         <div class="info-section">
@@ -30,87 +28,7 @@
               <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Registration Number' | translate }}</ion-label>
               <ion-input formControlName="b_registration_num" readonly></ion-input>
             </ion-item>
-            <ion-item>
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Owner Name' | translate }}</ion-label>
-              <ion-input formControlName="b_owner_name" readonly></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Business Category' | translate }}</ion-label>
-              <ion-input formControlName="b_category_name" readonly></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Business Type' | translate }}</ion-label>
-              <ion-input formControlName="b_type_name" readonly></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Established Year' | translate }}</ion-label>
-              <ion-input formControlName="established_year" readonly></ion-input>
-            </ion-item>
           </ion-list>
-        </div>
-
-        <!-- Location Information Section -->
-        <div class="info-section">
-          <div class="section-header">
-            <ion-icon name="location-outline"></ion-icon>
-            <h3>{{ 'RETAILER_BUSINESS_INFO.Location Information' | translate }}</h3>
-          </div>
-          <ion-list>
-            <ion-item>
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.State' | translate }}</ion-label>
-              <ion-input formControlName="state_name" readonly></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.City' | translate }}</ion-label>
-              <ion-input formControlName="city_name" readonly></ion-input>
-            </ion-item>
-            <ion-item>
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Location' | translate }}</ion-label>
-              <ion-input formControlName="location_name" readonly></ion-input>
-            </ion-item>
-            <ion-item [class.ion-invalid]="form.get('address')?.invalid && form.get('address')?.touched">
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Address' | translate }}</ion-label>
-              <ion-textarea formControlName="address" [readonly]="!isEditMode"></ion-textarea>
-            </ion-item>
-          </ion-list>
-          <div class="error-message" *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
-            {{ 'RETAILER_BUSINESS_INFO.Address is required' | translate }}
-          </div>
-        </div>
-
-        <!-- Contact Information Section -->
-        <div class="info-section">
-          <div class="section-header">
-            <ion-icon name="call-outline"></ion-icon>
-            <h3>{{ 'RETAILER_BUSINESS_INFO.Contact Information' | translate }}</h3>
-          </div>
-          <ion-list>
-            <ion-item [class.ion-invalid]="form.get('mobile_number')?.invalid && form.get('mobile_number')?.touched">
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Mobile Number' | translate }}</ion-label>
-              <ion-input formControlName="mobile_number" type="tel" [readonly]="!isEditMode" placeholder="10-digit number"></ion-input>
-            </ion-item>
-            <ion-item button="true" (click)="openEmailVerificationModal()" [class.ion-invalid]="form.get('email')?.invalid && form.get('email')?.touched" class="editable-item">
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Email' | translate }}</ion-label>
-              <ion-input formControlName="email" type="email" readonly></ion-input>
-              <ion-icon name="create" slot="end" class="edit-icon"></ion-icon>
-            </ion-item>
-          </ion-list>
-          <div class="error-message" *ngIf="form.get('mobile_number')?.invalid && form.get('mobile_number')?.touched">
-            <span *ngIf="form.get('mobile_number')?.errors?.['required']">
-              {{ 'RETAILER_BUSINESS_INFO.Mobile number is required' | translate }}
-            </span>
-            <span *ngIf="form.get('mobile_number')?.errors?.['pattern']">
-              {{ 'RETAILER_BUSINESS_INFO.Please enter a valid 10-digit mobile number' | translate }}
-            </span>
-          </div>
-          <div class="error-message" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
-            <span *ngIf="form.get('email')?.errors?.['required']">
-              {{ 'RETAILER_BUSINESS_INFO.Email is required' | translate }}
-            </span>
-            <span *ngIf="form.get('email')?.errors?.['email']">
-              {{ 'RETAILER_BUSINESS_INFO.Please enter a valid email address' | translate }}
-            </span>
-          </div>
         </div>
 
         <!-- Legal Information Section -->
@@ -120,29 +38,21 @@
             <h3>{{ 'RETAILER_BUSINESS_INFO.Legal Information' | translate }}</h3>
           </div>
           <ion-list>
-            <ion-item [class.ion-invalid]="form.get('gst_number')?.invalid && form.get('gst_number')?.touched">
-              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.GST Number' | translate }}</ion-label>
-              <ion-input formControlName="gst_number" [readonly]="!isEditMode"></ion-input>
-            </ion-item>
             <ion-item>
               <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.PAN Number' | translate }}</ion-label>
               <ion-input formControlName="pan_number" readonly></ion-input>
             </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Aadhaar Number' | translate }}</ion-label>
+              <ion-input formControlName="aadhaar_number" readonly></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">{{ 'RETAILER_BUSINESS_INFO.Government License Number' | translate }}</ion-label>
+              <ion-input formControlName="government_license_number" readonly></ion-input>
+            </ion-item>
           </ion-list>
-          <div class="error-message" *ngIf="form.get('gst_number')?.invalid && form.get('gst_number')?.touched">
-            {{ 'RETAILER_BUSINESS_INFO.GST number is required' | translate }}
-          </div>
         </div>
 
-        <div class="button-group" *ngIf="isEditMode">
-          <ion-button expand="block" type="submit" [disabled]="form.invalid || isLoading" class="save-btn">
-            <ion-icon name="save" slot="start"></ion-icon>
-            {{ 'RETAILER_BUSINESS_INFO.Save Changes' | translate }}
-          </ion-button>
-          <ion-button expand="block" type="button" (click)="cancelEdit()" [disabled]="isLoading" class="cancel-btn" fill="outline">
-            {{ 'RETAILER_BUSINESS_INFO.Back' | translate }}
-          </ion-button>
-        </div>
       </form>
     </ion-card>
   </div>

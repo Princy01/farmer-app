@@ -127,48 +127,6 @@
       </div>
 
       <div class="card-body transport-body" *ngIf="hasRideRequest">
-        <p class="transport-hint">{{ "CHECKOUT.ARRANGE_TRANSPORT_MSG" | translate }}</p>
-
-        <div class="transport-options">
-          <button
-            type="button"
-            class="t-card"
-            [class.selected]="selectedDeliveryType === 'standard'"
-            (click)="selectTransportType('standard')"
-          >
-            <ion-icon name="bicycle-outline" class="t-icon"></ion-icon>
-            <div class="t-name">{{ "RIDE.STANDARD_DELIVERY" | translate }}</div>
-            <div class="t-time">{{ "RIDE.STANDARD_TIME" | translate }}</div>
-            <span class="t-badge badge-std">{{ "RIDE.ECONOMICAL" | translate }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="t-card"
-            [class.selected]="selectedDeliveryType === 'express'"
-            (click)="selectTransportType('express')"
-          >
-            <ion-icon name="car-outline" class="t-icon"></ion-icon>
-            <div class="t-name">{{ "RIDE.EXPRESS_DELIVERY" | translate }}</div>
-            <div class="t-time">{{ "RIDE.EXPRESS_TIME" | translate }}</div>
-            <span class="t-badge badge-exp">{{ "RIDE.FAST" | translate }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="t-card"
-            [class.selected]="selectedDeliveryType === 'priority'"
-            [class.locked]="!isPremiumUser"
-            (click)="selectTransportType('priority')"
-          >
-            <div class="premium-lock" *ngIf="!isPremiumUser">{{ "RIDE.FOR_PREMIUM_USERS" | translate }}</div>
-            <ion-icon name="rocket-outline" class="t-icon"></ion-icon>
-            <div class="t-name">{{ "RIDE.PRIORITY_DELIVERY" | translate }}</div>
-            <div class="t-time">{{ "RIDE.PRIORITY_TIME" | translate }}</div>
-            <span class="t-badge badge-pri">{{ "RIDE.PREMIUM" | translate }}</span>
-          </button>
-        </div>
-
         <div class="dist-row">
           <span class="dist-label">
             <ion-icon name="navigate-outline"></ion-icon>
@@ -180,7 +138,7 @@
           </span>
         </div>
 
-        <div class="cost-row" *ngIf="selectedDeliveryType">
+        <div class="cost-row">
           <span class="cost-label">
             <ion-icon name="cash-outline"></ion-icon>
             {{ "CHECKOUT.ESTIMATED_COST" | translate }}
@@ -189,11 +147,6 @@
             <ion-spinner name="dots" *ngIf="isLoadingQuote" class="inline-spinner"></ion-spinner>
             <span *ngIf="!isLoadingQuote">₹{{ estimatedRidePrice | number:'1.2-2' }}</span>
           </span>
-        </div>
-
-        <div class="delivery-summary-inline" *ngIf="selectedDeliveryType">
-          <span>{{ "CHECKOUT.DELIVERY_TYPE" | translate }}</span>
-          <strong>{{ getSelectedDeliveryTypeKey() | translate }}</strong>
         </div>
 
         <div class="info-box">
