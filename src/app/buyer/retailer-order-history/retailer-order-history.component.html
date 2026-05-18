@@ -89,6 +89,13 @@
               <ion-icon name="checkmark-circle" color="success"></ion-icon>
               <span>{{ 'RETAILER_ORDER_HISTORY.DELIVERED_ON' | translate: { date: (item.order!.actualDeliveryDate | date: 'MMM dd, yyyy') } }}</span>
             </div>
+            <div class="order-actions" *ngIf="canCancelOrder(item.order!)">
+              <ion-button size="small" fill="outline" color="danger"
+                [disabled]="cancellingOrderIds.has(item.order!.rawOrderId)"
+                (click)="confirmCancelPaidOrder(item.order!, $event)">
+                {{ 'RETAILER_ORDER_HISTORY.CANCEL_ORDER' | translate }}
+              </ion-button>
+            </div>
           </div>
         </div>
 
@@ -135,6 +142,12 @@
               (click)="openCheckoutSessionPayment(item.session!)">
               {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
             </ion-button>
+            <ion-button size="small" fill="clear" color="medium"
+              *ngIf="item.session!.canCancelCheckout"
+              [disabled]="isCancellingCheckoutSession(item.session!)"
+              (click)="confirmCancelCheckoutSession(item.session!, $event)">
+              {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT' | translate }}
+            </ion-button>
           </div>
         </div>
 
@@ -172,6 +185,12 @@
               [disabled]="!item.session!.canRetryPayment"
               (click)="openCheckoutSessionPayment(item.session!)">
               {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
+            </ion-button>
+            <ion-button size="small" fill="clear" color="medium"
+              *ngIf="item.session!.canCancelCheckout"
+              [disabled]="isCancellingCheckoutSession(item.session!)"
+              (click)="confirmCancelCheckoutSession(item.session!, $event)">
+              {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT' | translate }}
             </ion-button>
           </div>
         </div>
@@ -252,6 +271,12 @@
             (click)="openCheckoutSessionPayment(session)">
             {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
           </ion-button>
+          <ion-button size="small" fill="clear" color="medium"
+            *ngIf="session.canCancelCheckout"
+            [disabled]="isCancellingCheckoutSession(session)"
+            (click)="confirmCancelCheckoutSession(session, $event)">
+            {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT' | translate }}
+          </ion-button>
         </div>
       </div>
     </div>
@@ -304,6 +329,12 @@
             (click)="openCheckoutSessionPayment(session)">
             {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
           </ion-button>
+          <ion-button size="small" fill="clear" color="medium"
+            *ngIf="session.canCancelCheckout"
+            [disabled]="isCancellingCheckoutSession(session)"
+            (click)="confirmCancelCheckoutSession(session, $event)">
+            {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT' | translate }}
+          </ion-button>
         </div>
       </div>
     </div>
@@ -340,6 +371,13 @@
           <div class="delivery-info" *ngIf="order.actualDeliveryDate && isSuccessfulStatus(order.statusName)">
             <ion-icon name="checkmark-circle" color="success"></ion-icon>
             <span>{{ 'RETAILER_ORDER_HISTORY.DELIVERED_ON' | translate: { date: (order.actualDeliveryDate | date: 'MMM dd, yyyy') } }}</span>
+          </div>
+          <div class="order-actions" *ngIf="canCancelOrder(order)">
+            <ion-button size="small" fill="outline" color="danger"
+              [disabled]="cancellingOrderIds.has(order.rawOrderId)"
+              (click)="confirmCancelPaidOrder(order, $event)">
+              {{ 'RETAILER_ORDER_HISTORY.CANCEL_ORDER' | translate }}
+            </ion-button>
           </div>
         </div>
       </div>
