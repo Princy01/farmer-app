@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, AlertController } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
@@ -58,6 +58,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   ratingSubmitting = false;
   ratingFeedback: { type: 'success' | 'danger'; message: string } | null = null;
   readonly starValues = [1, 2, 3, 4, 5];
+  isCancelling = false;
 
   private destroy$ = new Subject<void>();
 
@@ -66,6 +67,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private orderService: RetailerOrderService,
     private ratingsService: BuyerRatingsService,
+    private alertCtrl: AlertController,
     private translate: TranslateService
   ) {
     addIcons({
@@ -311,6 +313,94 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
   getStatusDisplay(status: number): string {
     return this.order?.order_status_name || this.translate.instant('RETAILER_ORDER_DETAILS.STATUS_UNKNOWN');
+  }
+
+  canCancelOrder(): boolean {
+    if (!this.order) {
+      return false;
+    }
+
+    const statusName = (this.order.order_status_name || '').toLowerCase();
+    if (statusName.includes('cancel') || statusName.includes('return') || statusName.includes('reject')) {
+      return false;
+    }
+
+    const blockedStatuses = new Set([5, 6, 7, 9, 10]);
+    if (blockedStatuses.has(this.order.order_status)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  async promptCancelOrder(): Promise<void> {
+    if (!this.order || this.isCancelling) {
+      return;
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_CONFIRM_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_CONFIRM_MESSAGE'),
+      inputs: [
+        {
+          name: 'reason',
+          type: 'text',
+          placeholder: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_REASON_PLACEHOLDER')
+        }
+      ],
+      buttons: [
+        {
+          text: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_ABORT'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_ACTION'),
+          handler: (data) => this.submitCancelOrder(data?.reason)
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private submitCancelOrder(reason?: string): void {
+    if (!this.order || this.isCancelling) {
+      return;
+    }
+
+    this.isCancelling = true;
+    const cancellationReason = (reason || '').trim() || 'retailer_cancelled';
+
+    this.orderService.cancelOrder(this.order.order_id, cancellationReason)
+      .subscribe({
+        next: async () => {
+          this.isCancelling = false;
+          await this.showCancelSuccess();
+          this.loadOrderDetails();
+        },
+        error: async () => {
+          this.isCancelling = false;
+          await this.showCancelError();
+        }
+      });
+  }
+
+  private async showCancelSuccess(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_SUCCESS_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_SUCCESS_MESSAGE'),
+      buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
+    });
+    await alert.present();
+  }
+
+  private async showCancelError(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_ERROR_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_ERROR_MESSAGE'),
+      buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
+    });
+    await alert.present();
   }
 
   isSuccessfulStatus(statusName: string): boolean {

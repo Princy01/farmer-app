@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
@@ -11,6 +11,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PopoverController } from '@ionic/angular';
 import { LanguagePopoverComponent } from './language-popover.component';
 import { TranslateApiService } from '@/services/translate-api.service';
+import { TransportRequestService } from '../transport-requests/transport-requests.service';
 
 interface Language {
   id: number;
@@ -33,6 +34,7 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
   completedDeliveries: any[] = [];
   isLoading = false;
   errorMessage: string | null = null;
+  isCancellingJob: { [key: number]: boolean } = {};
 
   languages: Language[] = [];
   currentLanguage = 'English'; // Default
@@ -43,7 +45,9 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
     private deliveryService: DeliveryService,
     private translate: TranslateService,
     private popoverCtrl: PopoverController,
-    private translateApiService: TranslateApiService
+    private translateApiService: TranslateApiService,
+    private transportRequestService: TransportRequestService,
+    private alertCtrl: AlertController
   ) {
     this.translate.setDefaultLang('en');
     addIcons({ languageOutline, carOutline, timeOutline, checkmarkCircleOutline });
@@ -220,5 +224,64 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
 
     // Otherwise use delivery_address
     return firstOrder.delivery_address || 'Address not available';
+  }
+
+  async promptCancelDelivery(job: any): Promise<void> {
+    const jobId = job?.job_id;
+    if (!jobId || this.isCancellingJob[jobId]) {
+      return;
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('TRANSPORT_DASHBOARD.CANCEL_JOB_TITLE'),
+      message: this.translate.instant('TRANSPORT_DASHBOARD.CANCEL_JOB_MESSAGE', { jobId }),
+      buttons: [
+        {
+          text: this.translate.instant('TRANSPORT_DASHBOARD.CANCEL_JOB_ABORT'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('TRANSPORT_DASHBOARD.CANCEL_JOB_ACTION'),
+          handler: () => this.cancelDeliveryJob(jobId)
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private cancelDeliveryJob(jobId: number): void {
+    this.isCancellingJob[jobId] = true;
+
+    this.transportRequestService.cancelJob(jobId, 'driver_cancelled')
+      .subscribe({
+        next: async () => {
+          this.isCancellingJob[jobId] = false;
+          await this.showCancelJobSuccess();
+          this.loadDeliveries('active');
+        },
+        error: async () => {
+          this.isCancellingJob[jobId] = false;
+          await this.showCancelJobError();
+        }
+      });
+  }
+
+  private async showCancelJobSuccess(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('TRANSPORT_DASHBOARD.CANCEL_JOB_SUCCESS_TITLE'),
+      message: this.translate.instant('TRANSPORT_DASHBOARD.CANCEL_JOB_SUCCESS_MESSAGE'),
+      buttons: [this.translate.instant('TRANSPORT_DASHBOARD.OK')]
+    });
+    await alert.present();
+  }
+
+  private async showCancelJobError(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('TRANSPORT_DASHBOARD.CANCEL_JOB_ERROR_TITLE'),
+      message: this.translate.instant('TRANSPORT_DASHBOARD.CANCEL_JOB_ERROR_MESSAGE'),
+      buttons: [this.translate.instant('TRANSPORT_DASHBOARD.OK')]
+    });
+    await alert.present();
   }
 }

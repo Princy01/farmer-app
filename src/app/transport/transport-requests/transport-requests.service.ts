@@ -83,6 +83,10 @@ export interface RejectJobRequest {
   attempt_no: number;
 }
 
+export interface CancelJobRequest {
+  reason: string;
+}
+
 export interface DriverStatusResponse {
   driver_id: number;
   status: string; // 'active' | 'inactive'
@@ -150,6 +154,13 @@ export class TransportRequestService {
     const headers = this.getAuthHeaders();
     const body: RejectJobRequest = { attempt_no: attemptNo };
     const url = `${this.realtimeApiUrl}/api/driver/jobs/${rideId}/reject`;
+    return this.http.post<any>(url, body, { headers });
+  }
+
+  cancelJob(rideId: number, reason: string = 'driver_cancelled'): Observable<any> {
+    const headers = this.getAuthHeaders();
+    const body: CancelJobRequest = { reason };
+    const url = `${this.realtimeApiUrl}/api/driver/jobs/${rideId}/cancel`;
     return this.http.post<any>(url, body, { headers });
   }
 

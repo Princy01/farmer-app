@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
@@ -29,6 +29,7 @@ import {
   RetailerOrderHistory,
   RetailerCheckoutSessionSummary,
 } from './retailer-order-history.service';
+import { CheckoutSessionService } from '../services/checkout-session.service';
 
 interface DisplayOrder {
   orderId: string;
@@ -58,6 +59,7 @@ interface DisplayCheckoutSession {
   retryBlockReason?: string | null;
   canResumePayment: boolean;
   canRetryPayment: boolean;
+  canCancelCheckout: boolean;
 }
 
 type UnifiedItemType = 'order' | 'checkout-pending' | 'checkout-failed';
@@ -90,6 +92,7 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   isLoading = true;
   hasError = false;
   errorMessage: string = '';
+  isCancellingCheckout: { [key: number]: boolean } = {};
 
   private destroy$ = new Subject<void>();
   private checkoutCountdownSub: Subscription | null = null;
@@ -97,7 +100,9 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private translate: TranslateService,
-    private orderService: RetailerOrderHistoryService
+    private orderService: RetailerOrderHistoryService,
+    private checkoutSessionService: CheckoutSessionService,
+    private alertCtrl: AlertController
   ) {
     addIcons({
       alertCircleOutline,
@@ -220,6 +225,7 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       retryBlockReason: this.getRetryBlockMessage(session.retry_block_reason ?? null),
       canResumePayment: session.can_resume_payment,
       canRetryPayment: session.can_retry_payment,
+      canCancelCheckout: session.can_cancel_checkout,
     };
   }
 
@@ -446,6 +452,66 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
         fromOrderHistory: true
       }
     });
+  }
+
+  async promptCancelCheckoutSession(session: DisplayCheckoutSession): Promise<void> {
+    if (!session.canCancelCheckout || this.isCancellingCheckout[session.checkoutSessionId]) {
+      return;
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_MESSAGE', {
+        id: session.checkoutSessionId
+      }),
+      buttons: [
+        {
+          text: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ABORT'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION'),
+          handler: () => this.cancelCheckoutSession(session)
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private cancelCheckoutSession(session: DisplayCheckoutSession): void {
+    this.isCancellingCheckout[session.checkoutSessionId] = true;
+
+    this.checkoutSessionService.cancelCheckoutSession(session.checkoutSessionId)
+      .subscribe({
+        next: async () => {
+          this.isCancellingCheckout[session.checkoutSessionId] = false;
+          await this.showCancelCheckoutSuccess();
+          this.loadOrders();
+        },
+        error: async () => {
+          this.isCancellingCheckout[session.checkoutSessionId] = false;
+          await this.showCancelCheckoutError();
+        }
+      });
+  }
+
+  private async showCancelCheckoutSuccess(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_SUCCESS_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_SUCCESS_MESSAGE'),
+      buttons: [this.translate.instant('RETAILER_ORDER_HISTORY.OK')]
+    });
+    await alert.present();
+  }
+
+  private async showCancelCheckoutError(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ERROR_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ERROR_MESSAGE'),
+      buttons: [this.translate.instant('RETAILER_ORDER_HISTORY.OK')]
+    });
+    await alert.present();
   }
 
   private isPendingCheckoutSession(status: string): boolean {

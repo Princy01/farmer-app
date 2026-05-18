@@ -71,6 +71,18 @@
                   <span>{{ 'TRANSPORT_DASHBOARD.DELIVERY_LOCATION' | translate }}: {{ getDropoffLocation(order.orders) }}</span>
                 </div>
               </div>
+
+              <div class="card-actions">
+                <ion-button
+                  size="small"
+                  fill="outline"
+                  color="danger"
+                  [disabled]="isCancellingJob[order.job_id]"
+                  (click)="promptCancelDelivery(order)"
+                >
+                  {{ 'TRANSPORT_DASHBOARD.CANCEL_JOB_ACTION' | translate }}
+                </ion-button>
+              </div>
             </div>
           </div>
         </div>

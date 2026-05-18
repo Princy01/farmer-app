@@ -142,6 +142,12 @@ export interface RetailerCheckoutSessionDetailResponse {
   data: RetailerCheckoutSessionDetail;
 }
 
+export interface CancelCheckoutSessionResponse {
+  status: string;
+  message: string;
+  data: RetailerCheckoutSessionSummary;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -161,6 +167,14 @@ export class CheckoutSessionService {
   getCheckoutSessionDetail(checkoutSessionId: number): Observable<RetailerCheckoutSessionDetailResponse> {
     return this.withResilience(this.http.get<RetailerCheckoutSessionDetailResponse>(
       `${this.apiUrl}/retailer/checkout-sessions/${checkoutSessionId}`
+    ));
+  }
+
+  cancelCheckoutSession(checkoutSessionId: number, reason: string = 'retailer_cancelled'):
+    Observable<CancelCheckoutSessionResponse> {
+    return this.withResilience(this.http.post<CancelCheckoutSessionResponse>(
+      `${this.apiUrl}/retailer/checkout-sessions/${checkoutSessionId}/cancel`,
+      { reason }
     ));
   }
 

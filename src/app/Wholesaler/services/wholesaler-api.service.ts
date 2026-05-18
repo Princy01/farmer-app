@@ -74,6 +74,7 @@ export interface OrderFullDetails {
   order_id: number;
   date_of_order: string;
   order_status: number;
+  order_status_name?: string;
   actual_delivery_date?: string;
 
   retailer_id: number;
@@ -206,6 +207,11 @@ export interface WholesellerEntry {
 export interface WholesellerEntryResponse {
   message: string;
   entry_id: number;
+}
+
+export interface CancelOrderResponse {
+  status: string;
+  message: string;
 }
 
 //  Mandi (market) information
@@ -431,6 +437,19 @@ export class WholesalerApiService {
     const headers = this.getAuthHeaders();
     return this.http.get<OrderFullDetails>(
       `${this.apiUrl}/getAllOrderDetails/${orderId}`,
+      { headers }
+    ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  cancelOrder(orderId: number, reason: string): Observable<CancelOrderResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.post<CancelOrderResponse>(
+      `${this.apiUrl}/wholesaler/cancel-order/${orderId}`,
+      { cancellation_reason: reason },
       { headers }
     ).pipe(
       timeout(30000),

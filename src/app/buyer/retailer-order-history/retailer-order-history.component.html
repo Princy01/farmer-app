@@ -135,6 +135,12 @@
               (click)="openCheckoutSessionPayment(item.session!)">
               {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
             </ion-button>
+            <ion-button size="small" fill="outline" color="danger"
+              *ngIf="item.session!.canCancelCheckout"
+              [disabled]="isCancellingCheckout[item.session!.checkoutSessionId]"
+              (click)="promptCancelCheckoutSession(item.session!)">
+              {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION' | translate }}
+            </ion-button>
           </div>
         </div>
 
@@ -172,6 +178,12 @@
               [disabled]="!item.session!.canRetryPayment"
               (click)="openCheckoutSessionPayment(item.session!)">
               {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
+            </ion-button>
+            <ion-button size="small" fill="outline" color="danger"
+              *ngIf="item.session!.canCancelCheckout"
+              [disabled]="isCancellingCheckout[item.session!.checkoutSessionId]"
+              (click)="promptCancelCheckoutSession(item.session!)">
+              {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION' | translate }}
             </ion-button>
           </div>
         </div>
@@ -252,6 +264,12 @@
             (click)="openCheckoutSessionPayment(session)">
             {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
           </ion-button>
+          <ion-button size="small" fill="outline" color="danger"
+            *ngIf="session.canCancelCheckout"
+            [disabled]="isCancellingCheckout[session.checkoutSessionId]"
+            (click)="promptCancelCheckoutSession(session)">
+            {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION' | translate }}
+          </ion-button>
         </div>
       </div>
     </div>
@@ -303,6 +321,12 @@
             [disabled]="!session.canRetryPayment"
             (click)="openCheckoutSessionPayment(session)">
             {{ 'RETAILER_ORDER_HISTORY.RETRY_PAYMENT' | translate }}
+          </ion-button>
+          <ion-button size="small" fill="outline" color="danger"
+            *ngIf="session.canCancelCheckout"
+            [disabled]="isCancellingCheckout[session.checkoutSessionId]"
+            (click)="promptCancelCheckoutSession(session)">
+            {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION' | translate }}
           </ion-button>
         </div>
       </div>

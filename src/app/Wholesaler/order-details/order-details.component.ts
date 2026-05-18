@@ -29,6 +29,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   orderDetails?: OrderFullDetails;
   loading = true;
   error = false;
+  isCancelling = false;
   private subscription: Subscription = new Subscription();
 
   ratingContext: PeerRatingContextResponse | null = null;
@@ -152,6 +153,97 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
       10: 'ORDER_DETAILS.STATUS_REJECTED'
     };
     return statusMap[statusId] || 'ORDER_DETAILS.STATUS_UNKNOWN';
+  }
+
+  getStatusText(statusId: number): string {
+    const statusName = this.orderDetails?.order_status_name?.trim();
+    if (statusName) {
+      return statusName;
+    }
+    return this.translate.instant(this.getStatusLabel(statusId));
+  }
+
+  canCancelOrder(statusId: number): boolean {
+    const blockedStatuses = new Set([5, 6, 7, 9, 10]);
+    if (blockedStatuses.has(statusId)) {
+      return false;
+    }
+    const statusName = this.orderDetails?.order_status_name?.toLowerCase() || '';
+    if (statusName.includes('cancel') || statusName.includes('return') || statusName.includes('reject')) {
+      return false;
+    }
+    return true;
+  }
+
+  async promptCancelOrder(): Promise<void> {
+    if (!this.orderDetails || this.isCancelling) {
+      return;
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_CONFIRM_TITLE'),
+      message: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_CONFIRM_MESSAGE'),
+      inputs: [
+        {
+          name: 'reason',
+          type: 'text',
+          placeholder: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_REASON_PLACEHOLDER')
+        }
+      ],
+      buttons: [
+        {
+          text: this.translate.instant('ORDER_DETAILS.DISMISS'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER'),
+          handler: (data) => this.submitCancelOrder(data?.reason)
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private submitCancelOrder(reason?: string): void {
+    if (!this.orderDetails || this.isCancelling) {
+      return;
+    }
+
+    this.isCancelling = true;
+    const cancellationReason = (reason || '').trim() || 'wholesaler_cancelled';
+
+    this.wholesalerService.cancelOrder(this.orderId, cancellationReason)
+      .pipe(finalize(() => {
+        this.isCancelling = false;
+      }))
+      .subscribe({
+        next: async () => {
+          await this.showCancelSuccess();
+          this.loadOrderDetails();
+        },
+        error: async () => {
+          await this.showCancelError();
+        }
+      });
+  }
+
+  private async showCancelSuccess(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_SUCCESS_TITLE'),
+      message: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_SUCCESS_MESSAGE'),
+      buttons: [this.translate.instant('ORDER_DETAILS.OK')]
+    });
+    await alert.present();
+  }
+
+  private async showCancelError(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('ORDER_DETAILS.ERROR'),
+      message: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_ERROR_MESSAGE'),
+      buttons: [this.translate.instant('ORDER_DETAILS.OK')]
+    });
+    await alert.present();
   }
 
   getStatusClass(statusId: number): string {

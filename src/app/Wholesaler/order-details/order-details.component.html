@@ -31,8 +31,17 @@
           class="status-chip"
           [ngClass]="getStatusClass(orderDetails.order_status)"
         >
-          {{ getStatusLabel(orderDetails.order_status) | translate }}
+          {{ getStatusText(orderDetails.order_status) }}
         </div>
+        <ion-button
+          expand="block"
+          color="danger"
+          fill="outline"
+          [disabled]="isCancelling || !canCancelOrder(orderDetails.order_status)"
+          (click)="promptCancelOrder()"
+        >
+          {{ "ORDER_DETAILS.CANCEL_ORDER" | translate }}
+        </ion-button>
       </ion-card-content>
     </ion-card>
 

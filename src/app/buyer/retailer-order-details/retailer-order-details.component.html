@@ -55,6 +55,17 @@
           </ion-chip>
         </div>
 
+        <ion-button
+          expand="block"
+          color="danger"
+          fill="outline"
+          *ngIf="canCancelOrder()"
+          [disabled]="isCancelling"
+          (click)="promptCancelOrder()"
+        >
+          {{ 'RETAILER_ORDER_DETAILS.CANCEL_ORDER_ACTION' | translate }}
+        </ion-button>
+
         <div class="info-row" *ngIf="order.actual_delivery_date && isSuccessfulStatus(order.order_status_name)">
           <ion-icon name="checkmark-done-circle" color="success"></ion-icon>
           <div>

@@ -35,6 +35,11 @@ export interface RetailerOrderDetails {
   items: OrderItem[];
 }
 
+export interface CancelRetailerOrderResponse {
+  status: string;
+  message: string;
+}
+
 /**
  * Service for managing retailer order details.
  * Handles API communication with automatic retry and timeout logic.
@@ -63,6 +68,23 @@ export class RetailerOrderService {
         count: 3,
         delay: (error, retryCount) => {
           // Exponential backoff: 1s, 2s, 4s
+          const delayMs = Math.pow(2, retryCount - 1) * 1000;
+          return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
+        }
+      }),
+      catchError((error: HttpErrorResponse | TimeoutError) => this.handleError(error))
+    );
+  }
+
+  cancelOrder(orderId: number, reason: string = 'retailer_cancelled'): Observable<CancelRetailerOrderResponse> {
+    return this.http.post<CancelRetailerOrderResponse>(
+      `${this.apiUrl}/retailer/orders/${orderId}/cancel`,
+      { cancellation_reason: reason }
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      retry({
+        count: 2,
+        delay: (error, retryCount) => {
           const delayMs = Math.pow(2, retryCount - 1) * 1000;
           return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
         }
