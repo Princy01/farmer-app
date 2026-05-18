@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { AlertController, IonicModule, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
@@ -29,7 +29,6 @@ import {
   RetailerOrderHistory,
   RetailerCheckoutSessionSummary,
 } from './retailer-order-history.service';
-import { CheckoutSessionService } from '../services/checkout-session.service';
 
 interface DisplayOrder {
   orderId: string;
@@ -92,7 +91,8 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
   isLoading = true;
   hasError = false;
   errorMessage: string = '';
-  isCancellingCheckout: { [key: number]: boolean } = {};
+  cancellingCheckoutSessionIds = new Set<number>();
+  cancellingOrderIds = new Set<number>();
 
   private destroy$ = new Subject<void>();
   private checkoutCountdownSub: Subscription | null = null;
@@ -101,8 +101,8 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     private router: Router,
     private translate: TranslateService,
     private orderService: RetailerOrderHistoryService,
-    private checkoutSessionService: CheckoutSessionService,
-    private alertCtrl: AlertController
+    private alertController: AlertController,
+    private loadingController: LoadingController
   ) {
     addIcons({
       alertCircleOutline,
@@ -347,6 +347,146 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     this.router.navigate(['/buyer/retailer-order-details', order.rawOrderId]);
   }
 
+  canCancelOrder(order: DisplayOrder): boolean {
+    if (!order?.isCurrent || this.cancellingOrderIds.has(order.rawOrderId)) {
+      return false;
+    }
+    const statusName = (order.statusName || '').toLowerCase();
+    return !(
+      statusName.includes('delivered') ||
+      statusName.includes('complete') ||
+      statusName.includes('cancel') ||
+      statusName.includes('reject') ||
+      statusName.includes('fail') ||
+      statusName.includes('return') ||
+      statusName.includes('refund') ||
+      statusName.includes('dispute')
+    );
+  }
+
+  isCancellingCheckoutSession(session: DisplayCheckoutSession): boolean {
+    return this.cancellingCheckoutSessionIds.has(session.checkoutSessionId);
+  }
+
+  async confirmCancelCheckoutSession(session: DisplayCheckoutSession, event?: Event): Promise<void> {
+    event?.stopPropagation();
+    const alert = await this.alertController.create({
+      header: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_MESSAGE'),
+      buttons: [
+        {
+          text: this.translate.instant('RETAILER_ORDER_HISTORY.KEEP_ORDER'),
+          role: 'cancel',
+        },
+        {
+          text: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT'),
+          role: 'destructive',
+          handler: () => {
+            this.cancelCheckoutSession(session);
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  async confirmCancelPaidOrder(order: DisplayOrder, event?: Event): Promise<void> {
+    event?.stopPropagation();
+    const alert = await this.alertController.create({
+      header: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_ORDER_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_ORDER_MESSAGE'),
+      buttons: [
+        {
+          text: this.translate.instant('RETAILER_ORDER_HISTORY.KEEP_ORDER'),
+          role: 'cancel',
+        },
+        {
+          text: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_ORDER'),
+          role: 'destructive',
+          handler: () => {
+            this.cancelPaidOrder(order);
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async cancelCheckoutSession(session: DisplayCheckoutSession): Promise<void> {
+    if (this.cancellingCheckoutSessionIds.has(session.checkoutSessionId)) return;
+
+    this.cancellingCheckoutSessionIds.add(session.checkoutSessionId);
+    const loading = await this.loadingController.create({
+      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCELLING'),
+    });
+    await loading.present();
+
+    this.orderService
+      .cancelCheckoutSession(session.checkoutSessionId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async () => {
+          this.cancellingCheckoutSessionIds.delete(session.checkoutSessionId);
+          await loading.dismiss();
+          await this.showInfoAlert(
+            this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_SUCCESS_TITLE'),
+            this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_SUCCESS')
+          );
+          this.loadOrders();
+        },
+        error: async (err) => {
+          this.cancellingCheckoutSessionIds.delete(session.checkoutSessionId);
+          await loading.dismiss();
+          await this.showInfoAlert(
+            this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_FAILED_TITLE'),
+            err?.message || this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_FAILED')
+          );
+        },
+      });
+  }
+
+  private async cancelPaidOrder(order: DisplayOrder): Promise<void> {
+    if (this.cancellingOrderIds.has(order.rawOrderId)) return;
+
+    this.cancellingOrderIds.add(order.rawOrderId);
+    const loading = await this.loadingController.create({
+      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCELLING'),
+    });
+    await loading.present();
+
+    this.orderService
+      .cancelPaidOrder(order.rawOrderId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async () => {
+          this.cancellingOrderIds.delete(order.rawOrderId);
+          await loading.dismiss();
+          await this.showInfoAlert(
+            this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_SUCCESS_TITLE'),
+            this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_ORDER_SUCCESS')
+          );
+          this.loadOrders();
+        },
+        error: async (err) => {
+          this.cancellingOrderIds.delete(order.rawOrderId);
+          await loading.dismiss();
+          await this.showInfoAlert(
+            this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_FAILED_TITLE'),
+            err?.message || this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_FAILED')
+          );
+        },
+      });
+  }
+
+  private async showInfoAlert(header: string, message: string): Promise<void> {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: [this.translate.instant('COMMON.OK') || 'OK'],
+    });
+    await alert.present();
+  }
+
   getOrderProgress(statusId: number | null): number {
     if (statusId === null) return 0;
     const progress: { [key: number]: number } = {
@@ -452,66 +592,6 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
         fromOrderHistory: true
       }
     });
-  }
-
-  async promptCancelCheckoutSession(session: DisplayCheckoutSession): Promise<void> {
-    if (!session.canCancelCheckout || this.isCancellingCheckout[session.checkoutSessionId]) {
-      return;
-    }
-
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_TITLE'),
-      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_MESSAGE', {
-        id: session.checkoutSessionId
-      }),
-      buttons: [
-        {
-          text: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ABORT'),
-          role: 'cancel'
-        },
-        {
-          text: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION'),
-          handler: () => this.cancelCheckoutSession(session)
-        }
-      ]
-    });
-
-    await alert.present();
-  }
-
-  private cancelCheckoutSession(session: DisplayCheckoutSession): void {
-    this.isCancellingCheckout[session.checkoutSessionId] = true;
-
-    this.checkoutSessionService.cancelCheckoutSession(session.checkoutSessionId)
-      .subscribe({
-        next: async () => {
-          this.isCancellingCheckout[session.checkoutSessionId] = false;
-          await this.showCancelCheckoutSuccess();
-          this.loadOrders();
-        },
-        error: async () => {
-          this.isCancellingCheckout[session.checkoutSessionId] = false;
-          await this.showCancelCheckoutError();
-        }
-      });
-  }
-
-  private async showCancelCheckoutSuccess(): Promise<void> {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_SUCCESS_TITLE'),
-      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_SUCCESS_MESSAGE'),
-      buttons: [this.translate.instant('RETAILER_ORDER_HISTORY.OK')]
-    });
-    await alert.present();
-  }
-
-  private async showCancelCheckoutError(): Promise<void> {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ERROR_TITLE'),
-      message: this.translate.instant('RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ERROR_MESSAGE'),
-      buttons: [this.translate.instant('RETAILER_ORDER_HISTORY.OK')]
-    });
-    await alert.present();
   }
 
   private isPendingCheckoutSession(status: string): boolean {
