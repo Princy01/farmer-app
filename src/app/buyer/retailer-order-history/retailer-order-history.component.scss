@@ -207,6 +207,8 @@ $spacing-xl:        24px;
 
   .footer-section {
     @extend %card-footer;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
 
     .amount-info {
       .label  { } // inherits from %card-footer
@@ -223,6 +225,18 @@ $spacing-xl:        24px;
 
       ion-icon {
         font-size: 1.1rem;
+      }
+    }
+
+    .order-actions {
+      margin-left: auto;
+
+      ion-button {
+        --border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        height: 34px;
+        margin: 0;
       }
     }
   }
@@ -307,6 +321,7 @@ $spacing-xl:        24px;
   .checkout-actions {
     display: flex;
     gap: $spacing-sm;
+    flex-wrap: wrap;
     justify-content: flex-end;
     padding: $spacing-sm $spacing-lg $spacing-lg;
 

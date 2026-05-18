@@ -89,6 +89,13 @@
               <ion-icon name="checkmark-circle" color="success"></ion-icon>
               <span>{{ 'RETAILER_ORDER_HISTORY.DELIVERED_ON' | translate: { date: (item.order!.actualDeliveryDate | date: 'MMM dd, yyyy') } }}</span>
             </div>
+            <div class="order-actions" *ngIf="canCancelOrder(item.order!)">
+              <ion-button size="small" fill="outline" color="danger"
+                [disabled]="cancellingOrderIds.has(item.order!.rawOrderId)"
+                (click)="confirmCancelPaidOrder(item.order!, $event)">
+                {{ 'RETAILER_ORDER_HISTORY.CANCEL_ORDER' | translate }}
+              </ion-button>
+            </div>
           </div>
         </div>
 
@@ -137,9 +144,9 @@
             </ion-button>
             <ion-button size="small" fill="outline" color="danger"
               *ngIf="item.session!.canCancelCheckout"
-              [disabled]="isCancellingCheckout[item.session!.checkoutSessionId]"
-              (click)="promptCancelCheckoutSession(item.session!)">
-              {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION' | translate }}
+              [disabled]="cancellingCheckoutSessionIds.has(item.session!.checkoutSessionId)"
+              (click)="confirmCancelCheckoutSession(item.session!, $event)">
+              {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT' | translate }}
             </ion-button>
           </div>
         </div>
@@ -181,9 +188,9 @@
             </ion-button>
             <ion-button size="small" fill="outline" color="danger"
               *ngIf="item.session!.canCancelCheckout"
-              [disabled]="isCancellingCheckout[item.session!.checkoutSessionId]"
-              (click)="promptCancelCheckoutSession(item.session!)">
-              {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION' | translate }}
+              [disabled]="cancellingCheckoutSessionIds.has(item.session!.checkoutSessionId)"
+              (click)="confirmCancelCheckoutSession(item.session!, $event)">
+              {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT' | translate }}
             </ion-button>
           </div>
         </div>
@@ -266,9 +273,9 @@
           </ion-button>
           <ion-button size="small" fill="outline" color="danger"
             *ngIf="session.canCancelCheckout"
-            [disabled]="isCancellingCheckout[session.checkoutSessionId]"
-            (click)="promptCancelCheckoutSession(session)">
-            {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION' | translate }}
+            [disabled]="cancellingCheckoutSessionIds.has(session.checkoutSessionId)"
+            (click)="confirmCancelCheckoutSession(session, $event)">
+            {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT' | translate }}
           </ion-button>
         </div>
       </div>
@@ -324,9 +331,9 @@
           </ion-button>
           <ion-button size="small" fill="outline" color="danger"
             *ngIf="session.canCancelCheckout"
-            [disabled]="isCancellingCheckout[session.checkoutSessionId]"
-            (click)="promptCancelCheckoutSession(session)">
-            {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT_ACTION' | translate }}
+            [disabled]="cancellingCheckoutSessionIds.has(session.checkoutSessionId)"
+            (click)="confirmCancelCheckoutSession(session, $event)">
+            {{ 'RETAILER_ORDER_HISTORY.CANCEL_CHECKOUT' | translate }}
           </ion-button>
         </div>
       </div>
@@ -364,6 +371,13 @@
           <div class="delivery-info" *ngIf="order.actualDeliveryDate && isSuccessfulStatus(order.statusName)">
             <ion-icon name="checkmark-circle" color="success"></ion-icon>
             <span>{{ 'RETAILER_ORDER_HISTORY.DELIVERED_ON' | translate: { date: (order.actualDeliveryDate | date: 'MMM dd, yyyy') } }}</span>
+          </div>
+          <div class="order-actions" *ngIf="canCancelOrder(order)">
+            <ion-button size="small" fill="outline" color="danger"
+              [disabled]="cancellingOrderIds.has(order.rawOrderId)"
+              (click)="confirmCancelPaidOrder(order, $event)">
+              {{ 'RETAILER_ORDER_HISTORY.CANCEL_ORDER' | translate }}
+            </ion-button>
           </div>
         </div>
       </div>

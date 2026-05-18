@@ -61,6 +61,13 @@ export interface RetailerCheckoutSessionsResponse {
   };
 }
 
+export interface RetailerCancellationResponse<T = unknown> {
+  status: string;
+  message?: string;
+  data?: T;
+  error?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -87,6 +94,32 @@ export class RetailerOrderHistoryService {
           return timer(delayMs);
         },
       }),
+      catchError((error) => this.handleError(error))
+    );
+  }
+
+  cancelCheckoutSession(
+    checkoutSessionId: number,
+    reason = 'retailer_cancelled'
+  ): Observable<RetailerCancellationResponse<RetailerCheckoutSessionSummary>> {
+    return this.http.post<RetailerCancellationResponse<RetailerCheckoutSessionSummary>>(
+      `${this.apiUrl}/retailer/checkout-sessions/${checkoutSessionId}/cancel`,
+      { reason }
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT_MS),
+      catchError((error) => this.handleError(error))
+    );
+  }
+
+  cancelPaidOrder(
+    orderId: number,
+    reason = 'retailer_cancelled'
+  ): Observable<RetailerCancellationResponse> {
+    return this.http.post<RetailerCancellationResponse>(
+      `${this.apiUrl}/retailer/orders/${orderId}/cancel`,
+      { reason }
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT_MS),
       catchError((error) => this.handleError(error))
     );
   }
