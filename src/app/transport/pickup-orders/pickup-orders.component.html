@@ -39,6 +39,15 @@
     &larr; {{ 'PICKUP_ORDERS.BACK_TO_JOBS' | translate }}
   </ion-button>
 
+  <ion-button
+    color="danger"
+    fill="outline"
+    [disabled]="isCancellingJob"
+    (click)="promptCancelJob()"
+  >
+    {{ 'PICKUP_ORDERS.CANCEL_JOB_ACTION' | translate }}
+  </ion-button>
+
   <ion-card>
     <ion-card-header>
       <ion-card-title>{{ 'PICKUP_ORDERS.ORDERS_FOR_JOB' | translate }} #{{ selectedJob.job_id }}</ion-card-title>

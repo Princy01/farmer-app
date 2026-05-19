@@ -8,7 +8,9 @@ import {
   locationOutline, flagOutline, cubeOutline, navigateOutline, calendarOutline,
   pricetagOutline, checkmarkOutline, checkmarkCircleOutline, checkmarkCircle,
   listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline,
-  settingsOutline, mapOutline, cartOutline, leafOutline
+  settingsOutline, mapOutline, cartOutline, leafOutline,
+  wifi, wifiOutline, timerOutline, lockClosedOutline, closeCircle,
+  helpCircleOutline, arrowBackOutline, time
 } from 'ionicons/icons';
 import { FilterModalComponent } from '../filter-modal/filter-modal.component';
 import { SortModalComponent } from '../sort-modal/sort-modal.component';
@@ -116,7 +118,9 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       locationOutline, flagOutline, cubeOutline, navigateOutline, calendarOutline,
       pricetagOutline, checkmarkOutline, checkmarkCircleOutline, checkmarkCircle,
       listOutline, carOutline, arrowForwardOutline, timeOutline, flash, closeCircleOutline,
-      settingsOutline, mapOutline, cartOutline, leafOutline
+      settingsOutline, mapOutline, cartOutline, leafOutline,
+      wifi, wifiOutline, timerOutline, lockClosedOutline, closeCircle,
+      helpCircleOutline, arrowBackOutline, time
     });
   }
 
@@ -711,17 +715,24 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
 
     const jobId = request.job_id ?? '';
     const rate = `₹${request.offered_rate ?? 0}`;
+    const weight = `${request.load_weight_kg ?? 0} kg`;
+    const pickup = request.pickup_address || this.translate.instant('TRANSPORT_REQUESTS.NO_PICKUP_INFO');
+    const drop = request.drop_address || this.translate.instant('TRANSPORT_REQUESTS.NO_DELIVERY_INFO');
 
-    const actionSheet = await this.actionSheetCtrl.create({
-      header: `${this.translate.instant('TRANSPORT_REQUESTS.JOB_ID')}${jobId}  ·  ${rate}`,
-      subHeader: this.translate.instant('TRANSPORT_REQUESTS.REJECT_HEADER'),
-      cssClass: 'transport-reject-sheet',
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('TRANSPORT_REQUESTS.REJECT_HEADER'),
+      subHeader: `${this.translate.instant('TRANSPORT_REQUESTS.JOB_ID')}${jobId}  ·  ${rate}  ·  ${weight}`,
+      message: `${pickup}  →  ${drop}`,
+      cssClass: 'transport-request-alert transport-request-alert--reject',
       buttons: [
         {
+          text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'),
+          role: 'cancel',
+          cssClass: 'alert-action-cancel'
+        },
+        {
           text: this.translate.instant('TRANSPORT_REQUESTS.REJECT'),
-          role: 'destructive',
-          icon: 'close-circle-outline',
-          cssClass: 'action-sheet-reject',
+          cssClass: 'alert-action-reject',
           handler: () => {
             this.isRejectingOffer[requestKey] = true;
             const operationId = `reject-${request.ride_id}-${request.attempt_no}-${Date.now()}`;
@@ -755,15 +766,10 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
               });
             this.subscription.add(sub);
           }
-        },
-        {
-          text: this.translate.instant('TRANSPORT_REQUESTS.CANCEL'),
-          role: 'cancel',
-          icon: 'arrow-back-outline'
         }
       ]
     });
-    await actionSheet.present();
+    await alert.present();
   }
 
   private checkLoadWithinCapacity(orderWeight: number): boolean {

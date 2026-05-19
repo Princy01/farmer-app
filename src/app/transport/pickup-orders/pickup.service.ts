@@ -70,6 +70,16 @@ export class PickupService {
     ) as Observable<JobOrder[]>;
   }
 
+  cancelJob(jobId: number): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/transportation/delivery/cancel-job/${jobId}`,
+      {}
+    ).pipe(
+      timeout(this.TIMEOUT_MS),
+      this.exponentialBackoffRetry()
+    );
+  }
+
   confirmPickup(orderId: number, otp: string): Observable<any> {
     return this.http.post<any>(
       `${this.apiUrl}/transportation/delivery/confirm-pickup-otp`,

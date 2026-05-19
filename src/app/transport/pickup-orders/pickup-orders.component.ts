@@ -1,6 +1,6 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, AlertController } from '@ionic/angular';
 import { HttpClientModule } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
@@ -25,10 +25,12 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
   otpLoading = false;
   otpError = '';
   otpSuccess = '';
+  isCancellingJob = false;
 
   constructor(
     private pickupService: PickupService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private alertCtrl: AlertController
   ) {}
 
   getStatusTitle(status: string): string {
@@ -121,6 +123,66 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
     this.selectedOrder = null;
     this.otpError = '';
     this.otpSuccess = '';
+  }
+
+  async promptCancelJob(): Promise<void> {
+    if (!this.selectedJob || this.isCancellingJob) {
+      return;
+    }
+
+    const jobId = this.selectedJob.job_id;
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('PICKUP_ORDERS.CANCEL_JOB_TITLE'),
+      message: this.translate.instant('PICKUP_ORDERS.CANCEL_JOB_MESSAGE', { jobId }),
+      buttons: [
+        {
+          text: this.translate.instant('PICKUP_ORDERS.CANCEL_JOB_ABORT'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('PICKUP_ORDERS.CANCEL_JOB_ACTION'),
+          handler: () => this.cancelJob(jobId)
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private cancelJob(jobId: number): void {
+    this.isCancellingJob = true;
+    this.pickupService.cancelJob(jobId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async () => {
+          this.isCancellingJob = false;
+          await this.showCancelSuccess();
+          this.backToJobs();
+          this.fetchJobs();
+        },
+        error: async () => {
+          this.isCancellingJob = false;
+          await this.showCancelError();
+        }
+      });
+  }
+
+  private async showCancelSuccess(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('PICKUP_ORDERS.CANCEL_JOB_SUCCESS_TITLE'),
+      message: this.translate.instant('PICKUP_ORDERS.CANCEL_JOB_SUCCESS_MESSAGE'),
+      buttons: [this.translate.instant('PICKUP_ORDERS.OK')]
+    });
+    await alert.present();
+  }
+
+  private async showCancelError(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('PICKUP_ORDERS.CANCEL_JOB_ERROR_TITLE'),
+      message: this.translate.instant('PICKUP_ORDERS.CANCEL_JOB_ERROR_MESSAGE'),
+      buttons: [this.translate.instant('PICKUP_ORDERS.OK')]
+    });
+    await alert.present();
   }
 
   isToday(date: string) {
