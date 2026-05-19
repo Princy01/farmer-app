@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, finalize, take } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 import { DriverJobOffer } from './transport-requests.service';
@@ -27,6 +27,8 @@ export class TransportRealtimeService {
   private reconnectTimeout: any;
   private messageQueue: string[] = [];
   private isConnected = false;
+  private shouldReconnect = true;
+  private tokenRefreshInProgress = false;
   private tokenRefreshCheckInterval: any;
   private readonly TOKEN_CHECK_INTERVAL = 5 * 60 * 1000; // Check every 5 minutes
 
@@ -64,9 +66,10 @@ export class TransportRealtimeService {
   }
 
   connect(): void {
-    if (this.isConnected || this.ws) {
+    if (this.isConnected || (this.ws && this.ws.readyState !== WebSocket.CLOSED)) {
       return;
     }
+    this.shouldReconnect = true;
 
     const token = this.authService.getToken();
     if (!token) {
@@ -103,24 +106,29 @@ export class TransportRealtimeService {
       };
 
       this.ws.onclose = () => {
+        const shouldReconnect = this.shouldReconnect;
         this.isConnected = false;
+        this.ws = null;
         this.connectionStatusSubject.next(false);
-        this.reconnect();
+        this.stopTokenRefreshCheck();
+        if (shouldReconnect) {
+          this.reconnect();
+        }
       };
     } catch (error) {
+      this.ws = null;
       this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_WS_ESTABLISH');
       this.reconnect();
     }
   }
 
   disconnect(): void {
+    this.shouldReconnect = false;
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
     }
-    if (this.tokenRefreshCheckInterval) {
-      clearInterval(this.tokenRefreshCheckInterval);
-      this.tokenRefreshCheckInterval = null;
-    }
+    this.stopTokenRefreshCheck();
     this.isConnected = false;
     if (this.ws) {
       this.ws.close();
@@ -132,6 +140,8 @@ export class TransportRealtimeService {
   private reconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_WS_RECONNECT_FAILED');
+      this.offersSubject.next([]);
+      this.connectionStatusSubject.next(false);
       return;
     }
 
@@ -152,7 +162,7 @@ export class TransportRealtimeService {
         case 'initial_jobs':
           if (Array.isArray(message.data)) {
             const offers = message.data.map((o: any) => this.mapToDriverJobOffer(o));
-            this.offersSubject.next(offers);
+            this.offersSubject.next(this.mergeUniqueOffers([], offers));
           }
           break;
 
@@ -161,13 +171,7 @@ export class TransportRealtimeService {
           if (message.data) {
             const offer: DriverJobOffer = this.mapToDriverJobOffer(message.data);
             const currentOffers = this.offersSubject.value;
-            // Check if offer already exists (avoid duplicates)
-            const existingIndex = currentOffers.findIndex(
-              o => o.ride_id === offer.ride_id && o.attempt_no === offer.attempt_no
-            );
-            if (existingIndex === -1) {
-              this.offersSubject.next([...currentOffers, offer]);
-            }
+            this.offersSubject.next(this.mergeUniqueOffers(currentOffers, [offer]));
             this.newOfferSubject.next(offer);
           }
           break;
@@ -177,9 +181,7 @@ export class TransportRealtimeService {
           {
             const payload = message.data || message;
             if (payload.ride_id !== undefined) {
-              const currentOffers = this.offersSubject.value.filter(
-                o => !(o.ride_id === payload.ride_id && o.attempt_no === payload.attempt_no)
-              );
+              const currentOffers = this.removeOfferFromList(this.offersSubject.value, payload);
               this.offersSubject.next(currentOffers);
               this.offerRemovedSubject.next({
                 ride_id: payload.ride_id,
@@ -210,9 +212,7 @@ export class TransportRealtimeService {
           {
             const payload = message.data || message;
             if (payload.ride_id !== undefined) {
-              const currentOffers = this.offersSubject.value.filter(
-                o => !(o.ride_id === payload.ride_id && o.attempt_no === payload.attempt_no)
-              );
+              const currentOffers = this.removeOfferFromList(this.offersSubject.value, payload);
               this.offersSubject.next(currentOffers);
             }
             if (payload.cooldown_until) {
@@ -244,9 +244,7 @@ export class TransportRealtimeService {
           {
             const payload = message.data || message;
             if (payload.ride_id !== undefined) {
-              const currentOffers = this.offersSubject.value.filter(
-                o => !(o.ride_id === payload.ride_id && o.attempt_no === payload.attempt_no)
-              );
+              const currentOffers = this.removeOfferFromList(this.offersSubject.value, payload);
               this.offersSubject.next(currentOffers);
             }
           }
@@ -255,6 +253,36 @@ export class TransportRealtimeService {
     } catch (error) {
       // Silent fail for parsing errors - don't spam console
     }
+  }
+
+  private mergeUniqueOffers(existingOffers: DriverJobOffer[], incomingOffers: DriverJobOffer[]): DriverJobOffer[] {
+    const uniqueOffers = new Map<string, DriverJobOffer>();
+
+    for (const offer of existingOffers) {
+      uniqueOffers.set(this.offerKey(offer), offer);
+    }
+
+    for (const offer of incomingOffers) {
+      uniqueOffers.set(this.offerKey(offer), offer);
+    }
+
+    return Array.from(uniqueOffers.values());
+  }
+
+  private removeOfferFromList(offers: DriverJobOffer[], payload: any): DriverJobOffer[] {
+    return offers.filter((offer) => {
+      if (payload.attempt_no !== undefined && payload.attempt_no !== null) {
+        return !(offer.ride_id === payload.ride_id && offer.attempt_no === payload.attempt_no);
+      }
+      if (payload.job_id !== undefined && payload.job_id !== null) {
+        return offer.job_id !== payload.job_id;
+      }
+      return offer.ride_id !== payload.ride_id;
+    });
+  }
+
+  private offerKey(offer: DriverJobOffer): string {
+    return `${offer.ride_id}-${offer.attempt_no}`;
   }
 
   private mapToDriverJobOffer(data: any): DriverJobOffer {
@@ -349,9 +377,7 @@ export class TransportRealtimeService {
    */
   private startTokenRefreshCheck(): void {
     // Clear existing check
-    if (this.tokenRefreshCheckInterval) {
-      clearInterval(this.tokenRefreshCheckInterval);
-    }
+    this.stopTokenRefreshCheck();
 
     // Start new check
     this.tokenRefreshCheckInterval = setInterval(() => {
@@ -363,17 +389,61 @@ export class TransportRealtimeService {
       }
 
       if (this.isTokenExpired(token)) {
-        // Token is expired or about to expire, reconnect
-        this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_AUTH_TOKEN_EXPIRED_RECONNECTING');
-        this.disconnect();
-
-        // Wait a moment then reconnect with new token
-        setTimeout(() => {
-          this.connect();
-        }, 1000);
+        this.refreshTokenAndReconnect();
       }
     }, this.TOKEN_CHECK_INTERVAL);
 
+  }
+
+  private stopTokenRefreshCheck(): void {
+    if (this.tokenRefreshCheckInterval) {
+      clearInterval(this.tokenRefreshCheckInterval);
+      this.tokenRefreshCheckInterval = null;
+    }
+  }
+
+  private refreshTokenAndReconnect(): void {
+    if (this.tokenRefreshInProgress) {
+      return;
+    }
+
+    this.tokenRefreshInProgress = true;
+    this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_AUTH_TOKEN_EXPIRED_RECONNECTING');
+    this.closeSocketWithoutReconnect();
+
+    this.authService.refreshToken()
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.tokenRefreshInProgress = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.reconnectAttempts = 0;
+          this.connect();
+        },
+        error: () => {
+          this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_AUTH_TOKEN_EXPIRED_LOGIN');
+          this.offersSubject.next([]);
+          this.connectionStatusSubject.next(false);
+        }
+      });
+  }
+
+  private closeSocketWithoutReconnect(): void {
+    this.shouldReconnect = false;
+    this.stopTokenRefreshCheck();
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+    this.isConnected = false;
+    this.connectionStatusSubject.next(false);
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
   }
 
   isWebSocketConnected(): boolean {
