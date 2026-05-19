@@ -72,6 +72,15 @@ export class DeliveryService {
       );
   }
 
+  cancelDeliveryJob(jobId: number): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.post(`${this.apiUrl}/transportation/delivery/cancel-job/${jobId}`, {}, { headers })
+      .pipe(
+        timeout(this.REQUEST_TIMEOUT_MS),
+        catchError(this.handleError.bind(this))
+      );
+  }
+
   private handleError(error: any): Observable<never> {
     let errorMessage = 'TRANSPORT_DASHBOARD.LOAD_DELIVERIES_ERROR';
 

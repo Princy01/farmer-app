@@ -11,7 +11,6 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PopoverController } from '@ionic/angular';
 import { LanguagePopoverComponent } from './language-popover.component';
 import { TranslateApiService } from '@/services/translate-api.service';
-import { TransportRequestService } from '../transport-requests/transport-requests.service';
 
 interface Language {
   id: number;
@@ -46,7 +45,6 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private popoverCtrl: PopoverController,
     private translateApiService: TranslateApiService,
-    private transportRequestService: TransportRequestService,
     private alertCtrl: AlertController
   ) {
     this.translate.setDefaultLang('en');
@@ -253,7 +251,7 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
   private cancelDeliveryJob(jobId: number): void {
     this.isCancellingJob[jobId] = true;
 
-    this.transportRequestService.cancelJob(jobId, 'driver_cancelled')
+    this.deliveryService.cancelDeliveryJob(jobId)
       .subscribe({
         next: async () => {
           this.isCancellingJob[jobId] = false;

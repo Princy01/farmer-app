@@ -253,23 +253,27 @@
           <div class="action-buttons" *ngIf="!isRequestAccepted(request.ride_id, request.attempt_no) && !isRequestRejected(request.ride_id, request.attempt_no)">
             <ion-button class="accept-button" (click)="acceptOrder(request)" [disabled]="isLoadingRequests || isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)] || isUnderCooldown || isAvailabilityLocked || !isDriverVerifiedForLiveJobs">
               <ion-spinner *ngIf="isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)]" name="crescent"></ion-spinner>
-              <ion-icon *ngIf="!isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)]" name="checkmark-circle-outline" slot="start"></ion-icon>
-              {{ 'TRANSPORT_REQUESTS.ACCEPT' | translate }}
+              <ng-container *ngIf="!isAcceptingOffer[(request.ride_id + '-' + request.attempt_no)]">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                {{ 'TRANSPORT_REQUESTS.ACCEPT' | translate }}
+              </ng-container>
             </ion-button>
             <ion-button class="reject-button" (click)="rejectOrder(request)" [disabled]="isLoadingRequests || isRejectingOffer[(request.ride_id + '-' + request.attempt_no)] || isUnderCooldown || !isDriverVerifiedForLiveJobs">
               <ion-spinner *ngIf="isRejectingOffer[(request.ride_id + '-' + request.attempt_no)]" name="crescent"></ion-spinner>
-              <ion-icon *ngIf="!isRejectingOffer[(request.ride_id + '-' + request.attempt_no)]" name="close-circle-outline" slot="start"></ion-icon>
-              {{ 'TRANSPORT_REQUESTS.REJECT' | translate }}
+              <ng-container *ngIf="!isRejectingOffer[(request.ride_id + '-' + request.attempt_no)]">
+                <ion-icon name="close-circle-outline"></ion-icon>
+                {{ 'TRANSPORT_REQUESTS.REJECT' | translate }}
+              </ng-container>
             </ion-button>
           </div>
 
           <ion-button expand="block" class="accepted-button" *ngIf="isRequestAccepted(request.ride_id, request.attempt_no)" disabled>
-            <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+            <ion-icon name="checkmark-circle"></ion-icon>
             {{ 'TRANSPORT_REQUESTS.ACCEPTED' | translate }}
           </ion-button>
 
           <ion-button expand="block" class="rejected-button" *ngIf="isRequestRejected(request.ride_id, request.attempt_no)" disabled>
-            <ion-icon name="close-circle" slot="start"></ion-icon>
+            <ion-icon name="close-circle"></ion-icon>
             {{ 'TRANSPORT_REQUESTS.REJECTED' | translate }}
           </ion-button>
         </div>
