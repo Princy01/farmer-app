@@ -67,8 +67,8 @@
               <strong>{{ 'DELIVERY_HISTORY.JOB_STATUS' | translate }}:</strong>
               {{ getDeliveryStatus(delivery) }}
             </p>
-            <p *ngIf="delivery.status_note" class="status-note">
-              {{ delivery.status_note }}
+            <p *ngIf="getDeliveryStatusNote(delivery)" class="status-note">
+              {{ getDeliveryStatusNote(delivery) }}
             </p>
             <p>
               <strong>{{ 'DELIVERY_HISTORY.PICKUP' | translate }}:</strong>

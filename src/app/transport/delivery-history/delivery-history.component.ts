@@ -140,7 +140,21 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
   }
 
   getDeliveryStatus(delivery: Delivery): string {
+    const statusKey = this.getDeliveryStatusKey(delivery);
+    if (statusKey) {
+      return this.translate.instant(statusKey);
+    }
+
     return delivery.display_status || delivery.delivery_status || delivery.job_status || this.translate.instant('DELIVERY_HISTORY.NOT_AVAILABLE');
+  }
+
+  getDeliveryStatusNote(delivery: Delivery): string {
+    const noteKey = this.getDeliveryStatusNoteKey(delivery);
+    if (noteKey) {
+      return this.translate.instant(noteKey);
+    }
+
+    return delivery.status_note || '';
   }
 
   getDeliveryStatusClass(delivery: Delivery): string {
@@ -158,6 +172,74 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
       return 'status-cancelled';
     }
     return 'status-active';
+  }
+
+  private getDeliveryStatusKey(delivery: Delivery): string {
+    if (delivery.is_reassigned) {
+      return 'TRANSPORT_STATUS.REASSIGNED_BY_OPS';
+    }
+    if (delivery.is_overdue && !delivery.pickup_confirmed_at) {
+      return 'TRANSPORT_STATUS.OVERDUE_PICKUP_PENDING';
+    }
+    if (delivery.is_overdue) {
+      return 'TRANSPORT_STATUS.OVERDUE_DELIVERY_PENDING';
+    }
+
+    const status = [
+      delivery.display_status,
+      delivery.delivery_status,
+      delivery.job_status,
+    ].find(value => !!value)?.toString().trim().toLowerCase();
+
+    switch (status) {
+      case 'reassigned by ops':
+        return 'TRANSPORT_STATUS.REASSIGNED_BY_OPS';
+      case 'overdue - pickup pending':
+        return 'TRANSPORT_STATUS.OVERDUE_PICKUP_PENDING';
+      case 'overdue - delivery pending':
+        return 'TRANSPORT_STATUS.OVERDUE_DELIVERY_PENDING';
+      case 'picked up - delivery pending':
+      case 'picked_up':
+      case 'partially_picked':
+        return 'TRANSPORT_STATUS.PICKED_UP_DELIVERY_PENDING';
+      case 'accepted - pickup pending':
+      case 'accepted':
+      case 'pending':
+        return 'TRANSPORT_STATUS.ACCEPTED_PICKUP_PENDING';
+      case 'delivered':
+      case 'completed':
+        return 'TRANSPORT_STATUS.DELIVERED';
+      case 'cancelled':
+      case 'canceled':
+        return 'TRANSPORT_STATUS.CANCELLED';
+      default:
+        return '';
+    }
+  }
+
+  private getDeliveryStatusNoteKey(delivery: Delivery): string {
+    if (delivery.is_reassigned) {
+      return 'TRANSPORT_STATUS.NOTES.REASSIGNED_BY_OPS';
+    }
+    if (delivery.is_overdue && !delivery.pickup_confirmed_at) {
+      return 'TRANSPORT_STATUS.NOTES.OVERDUE_PICKUP_PENDING';
+    }
+    if (delivery.is_overdue) {
+      return 'TRANSPORT_STATUS.NOTES.OVERDUE_DELIVERY_PENDING';
+    }
+
+    const status = delivery.display_status?.trim().toLowerCase();
+    if (status === 'reassigned by ops') {
+      return 'TRANSPORT_STATUS.NOTES.REASSIGNED_BY_OPS';
+    }
+    if (status === 'overdue - pickup pending') {
+      return 'TRANSPORT_STATUS.NOTES.OVERDUE_PICKUP_PENDING';
+    }
+    if (status === 'overdue - delivery pending') {
+      return 'TRANSPORT_STATUS.NOTES.OVERDUE_DELIVERY_PENDING';
+    }
+
+    return '';
   }
 
   toggleDeliveryDetails(jobId: number) {

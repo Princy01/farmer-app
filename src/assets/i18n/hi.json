@@ -2088,6 +2088,20 @@
     "CANCEL_JOB_ERROR_MESSAGE": "इस डिलीवरी को अभी रद्द नहीं किया जा सकता।",
     "OK": "ठीक है"
   },
+  "TRANSPORT_STATUS": {
+    "REASSIGNED_BY_OPS": "ऑप्स टीम द्वारा फिर से असाइन किया गया",
+    "OVERDUE_PICKUP_PENDING": "समय से अधिक - पिकअप बाकी",
+    "OVERDUE_DELIVERY_PENDING": "समय से अधिक - डिलीवरी बाकी",
+    "PICKED_UP_DELIVERY_PENDING": "पिकअप हो गया - डिलीवरी बाकी",
+    "ACCEPTED_PICKUP_PENDING": "स्वीकार किया गया - पिकअप बाकी",
+    "DELIVERED": "डिलीवर किया गया",
+    "CANCELLED": "रद्द किया गया",
+    "NOTES": {
+      "REASSIGNED_BY_OPS": "यह डिलीवरी ऑप्स टीम संभाल रही है। नए ट्रांसपोर्टर की जानकारी छिपाई गई है।",
+      "OVERDUE_PICKUP_PENDING": "डिलीवरी की तारीख निकल चुकी है और पिकअप की पुष्टि नहीं हुई है। ऑप्स समीक्षा जरूरी है।",
+      "OVERDUE_DELIVERY_PENDING": "डिलीवरी की तारीख निकल चुकी है और डिलीवरी पूरी नहीं हुई है। ऑप्स समीक्षा जरूरी है।"
+    }
+  },
   "TRANSPORT_REQUESTS": {
     "SERVICE_AREAS": "सर्विस क्षेत्र",
     "CHANGE": "बदलें",
