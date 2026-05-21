@@ -58,10 +58,14 @@
               <div class="job-info">
                 <h3 class="job-id">{{ 'TRANSPORT_DASHBOARD.JOB_ID' | translate }} {{ order.job_id }}</h3>
                 <span class="job-type">{{ 'TRANSPORT_DASHBOARD.WHOLESALER_TO_RETAILER' | translate }}</span>
+                <span class="job-status" *ngIf="order.display_status || order.delivery_status || order.job_status">
+                  {{ order.display_status || order.delivery_status || order.job_status }}
+                </span>
               </div>
             </div>
 
             <div class="card-content">
+              <p class="status-note" *ngIf="order.status_note">{{ order.status_note }}</p>
               <div class="location-section">
                 <div class="location-item pickup">
                   <span>{{ 'TRANSPORT_DASHBOARD.PICKUP_LOCATION' | translate }}: {{ getPickupLocations(order.orders) }}</span>
@@ -109,10 +113,14 @@
               <div class="job-info">
                 <h3 class="job-id">{{ 'TRANSPORT_DASHBOARD.JOB_ID' | translate }} {{ order.job_id }}</h3>
                 <span class="job-type">{{ 'TRANSPORT_DASHBOARD.WHOLESALER_TO_RETAILER' | translate }}</span>
+                <span class="job-status" *ngIf="order.display_status || order.delivery_status || order.job_status">
+                  {{ order.display_status || order.delivery_status || order.job_status }}
+                </span>
               </div>
             </div>
 
             <div class="card-content">
+              <p class="status-note" *ngIf="order.status_note">{{ order.status_note }}</p>
               <div class="location-section">
                 <div class="location-item pickup">
                   <span>{{ 'TRANSPORT_DASHBOARD.PICKUP_LOCATION' | translate }}: {{ getPickupLocations(order.orders) }}</span>
@@ -160,10 +168,14 @@
               <div class="job-info">
                 <h3 class="job-id">{{ 'TRANSPORT_DASHBOARD.JOB_ID' | translate }} {{ order.job_id }}</h3>
                 <span class="job-type">{{ 'TRANSPORT_DASHBOARD.WHOLESALER_TO_RETAILER' | translate }}</span>
+                <span class="job-status" *ngIf="order.display_status || order.delivery_status || order.job_status">
+                  {{ order.display_status || order.delivery_status || order.job_status }}
+                </span>
               </div>
             </div>
 
             <div class="card-content">
+              <p class="status-note" *ngIf="order.status_note">{{ order.status_note }}</p>
               <div class="location-section">
                 <div class="location-item pickup">
                   <span>{{ 'TRANSPORT_DASHBOARD.PICKUP_LOCATION' | translate }}: {{ getPickupLocations(order.orders) }}</span>

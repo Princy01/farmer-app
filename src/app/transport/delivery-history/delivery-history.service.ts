@@ -10,6 +10,15 @@ export interface Delivery {
   weight_kg: number;
   base_price: number;
   delivery_date: string;
+  job_status?: string;
+  delivery_status?: string;
+  display_status?: string;
+  status_note?: string;
+  is_overdue?: boolean;
+  is_reassigned?: boolean;
+  accepted_at?: string;
+  pickup_confirmed_at?: string;
+  delivered_at?: string;
   orders: DeliveryOrder[] | null;
 }
 

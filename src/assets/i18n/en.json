@@ -2354,6 +2354,7 @@
     "TOTAL_ORDERS": "Total Orders",
     "DELIVERY_ADDRESS": "Delivery Address",
     "ORDER_STATUS": "Order Status",
+    "JOB_STATUS": "Job Status",
     "FINAL_AMOUNT": "Final Amount",
     "ITEMS": "Items",
     "NOT_AVAILABLE": "Not available",

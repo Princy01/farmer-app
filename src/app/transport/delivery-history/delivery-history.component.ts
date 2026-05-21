@@ -100,6 +100,10 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
         delivery.job_id?.toString() ?? '',
         (delivery.order_ids ?? []).join(','),
         delivery.delivery_date,
+        delivery.display_status ?? '',
+        delivery.status_note ?? '',
+        delivery.job_status ?? '',
+        delivery.delivery_status ?? '',
         ...orders.flatMap(order => [
           order.order_id?.toString() ?? '',
           this.getOrderDeliveryAddress(order),
@@ -133,6 +137,27 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
   getDropAddress(delivery: Delivery): string {
     const firstOrder = this.getFirstOrder(delivery);
     return firstOrder ? this.getOrderDeliveryAddress(firstOrder) : '';
+  }
+
+  getDeliveryStatus(delivery: Delivery): string {
+    return delivery.display_status || delivery.delivery_status || delivery.job_status || this.translate.instant('DELIVERY_HISTORY.NOT_AVAILABLE');
+  }
+
+  getDeliveryStatusClass(delivery: Delivery): string {
+    if (delivery.is_reassigned) {
+      return 'status-reassigned';
+    }
+    if (delivery.is_overdue) {
+      return 'status-overdue';
+    }
+    const status = this.getDeliveryStatus(delivery).toLowerCase();
+    if (status.includes('delivered') || status.includes('completed')) {
+      return 'status-completed';
+    }
+    if (status.includes('cancel')) {
+      return 'status-cancelled';
+    }
+    return 'status-active';
   }
 
   toggleDeliveryDetails(jobId: number) {
