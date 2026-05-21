@@ -31,6 +31,7 @@ export interface RetailerOrderDetails {
   total_order_amount: number;
   discount_amount: number;
   tax_amount: number;
+  delivery_amount: number;
   final_amount: number;
   items: OrderItem[];
 }

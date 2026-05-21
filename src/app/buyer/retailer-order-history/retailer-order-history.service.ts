@@ -7,6 +7,10 @@ import { TranslateService } from '@ngx-translate/core';
 
 export interface RetailerOrderHistory {
   order_id: number;
+  checkout_session_id?: number | null;
+  checkout_order_count?: number;
+  checkout_delivery_amount?: number;
+  checkout_gross_amount?: number;
   date_of_order: string;
   order_status: number | null;
   order_status_name?: string | null;
@@ -14,6 +18,7 @@ export interface RetailerOrderHistory {
   total_order_amount: number;
   discount_amount: number;
   tax_amount: number;
+  delivery_amount: number;
   final_amount: number;
   actual_delivery_date?: string | null;
 }
