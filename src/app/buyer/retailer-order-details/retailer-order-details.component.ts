@@ -456,7 +456,11 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
    * @returns Final total amount
    */
   getTotal(): number {
-    return this.order?.final_amount || 0;
+    return (this.order?.final_amount || 0) + (this.order?.delivery_amount || 0);
+  }
+
+  getDeliveryAmount(): number {
+    return this.order?.delivery_amount || 0;
   }
 
   /**

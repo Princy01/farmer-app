@@ -124,6 +124,45 @@ ion-content {
   background: var(--ion-color-primary);
 }
 
+.status-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.status-pill-state {
+  background: var(--ion-color-medium);
+}
+
+.status-overdue {
+  background: var(--ion-color-danger);
+}
+
+.status-reassigned {
+  background: var(--ion-color-warning);
+  color: #2f2500;
+}
+
+.status-completed {
+  background: var(--ion-color-success);
+}
+
+.status-cancelled {
+  background: var(--ion-color-medium);
+}
+
+.status-active {
+  background: var(--ion-color-primary);
+}
+
+.status-note {
+  color: var(--ion-color-danger);
+  background: rgba(var(--ion-color-danger-rgb), 0.08);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+}
+
 .expand-icon {
   font-size: 1.15rem;
   color: var(--ion-color-primary);

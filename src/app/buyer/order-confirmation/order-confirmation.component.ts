@@ -48,6 +48,7 @@ interface OrderConfirmationData {
   totalOrderAmount?: number;
   discountAmount?: number;
   taxAmount?: number;
+  deliveryAmount?: number;
   finalAmount?: number;
   grand_total?: number;
   grandTotal?: number;
@@ -179,6 +180,7 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
       next: (response: RetailerOrderResponse) => {
         const safeItems = Array.isArray(response.items) ? response.items : [];
         const existingGrandTotal = this.orderData?.grandTotal ?? this.orderData?.grand_total;
+        const deliveryAmount = response.delivery_amount || 0;
 
         // Merge backend response with existing data
         this.orderData = {
@@ -202,10 +204,11 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
           totalOrderAmount: response.total_order_amount,
           discountAmount: response.discount_amount,
           taxAmount: response.tax_amount,
+          deliveryAmount,
           finalAmount: response.final_amount,
 
           // Keep grand_total from original (includes all orders + delivery)
-          grandTotal: existingGrandTotal ?? response.final_amount,
+          grandTotal: existingGrandTotal ?? (response.final_amount + deliveryAmount),
 
           // Items with full details
           items: safeItems.map((item) => ({
@@ -336,8 +339,12 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
   }
 
   getOrderGrandTotal(): number {
-    const total = this.orderData?.grandTotal ?? this.orderData?.grand_total ?? this.orderData?.finalAmount;
-    return typeof total === 'number' ? total : 0;
+    const total = this.orderData?.grandTotal ?? this.orderData?.grand_total;
+    if (typeof total === 'number') {
+      return total;
+    }
+
+    return (this.orderData?.finalAmount || 0) + (this.orderData?.deliveryAmount || 0);
   }
 
   hasOrderItems(): boolean {

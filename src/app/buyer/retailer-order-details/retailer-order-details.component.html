@@ -159,10 +159,14 @@
             <span>{{ 'RETAILER_ORDER_DETAILS.TAX' | translate }}</span>
             <span>₹{{ order.tax_amount | number:'1.2-2' }}</span>
           </div>
+          <div class="summary-row" *ngIf="getDeliveryAmount() > 0">
+            <span>{{ 'CHECKOUT.TRANSPORT_COST' | translate }}</span>
+            <span>₹{{ getDeliveryAmount() | number:'1.2-2' }}</span>
+          </div>
           <ion-item-divider></ion-item-divider>
           <div class="summary-row final-row">
             <span><strong>{{ 'RETAILER_ORDER_DETAILS.FINAL_AMOUNT' | translate }}</strong></span>
-            <span class="final-amount"><strong>₹{{ order.final_amount | number:'1.2-2' }}</strong></span>
+            <span class="final-amount"><strong>₹{{ getTotal() | number:'1.2-2' }}</strong></span>
           </div>
         </div>
       </ion-card-content>

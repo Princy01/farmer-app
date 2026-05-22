@@ -2127,6 +2127,20 @@
     "CANCEL_JOB_ERROR_MESSAGE": "Unable to cancel this delivery right now.",
     "OK": "OK"
   },
+  "TRANSPORT_STATUS": {
+    "REASSIGNED_BY_OPS": "Reassigned by ops",
+    "OVERDUE_PICKUP_PENDING": "Overdue - pickup pending",
+    "OVERDUE_DELIVERY_PENDING": "Overdue - delivery pending",
+    "PICKED_UP_DELIVERY_PENDING": "Picked up - delivery pending",
+    "ACCEPTED_PICKUP_PENDING": "Accepted - pickup pending",
+    "DELIVERED": "Delivered",
+    "CANCELLED": "Cancelled",
+    "NOTES": {
+      "REASSIGNED_BY_OPS": "This delivery is being handled by operations. Replacement transporter details are hidden.",
+      "OVERDUE_PICKUP_PENDING": "The delivery date has passed and pickup is not confirmed. Operations review is required.",
+      "OVERDUE_DELIVERY_PENDING": "The delivery date has passed and delivery is not completed. Operations review is required."
+    }
+  },
   "TRANSPORT_REQUESTS": {
     "SERVICE_AREAS": "Service Areas",
     "CHANGE": "Change",
@@ -2354,6 +2368,7 @@
     "TOTAL_ORDERS": "Total Orders",
     "DELIVERY_ADDRESS": "Delivery Address",
     "ORDER_STATUS": "Order Status",
+    "JOB_STATUS": "Job Status",
     "FINAL_AMOUNT": "Final Amount",
     "ITEMS": "Items",
     "NOT_AVAILABLE": "Not available",

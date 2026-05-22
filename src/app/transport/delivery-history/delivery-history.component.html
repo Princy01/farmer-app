@@ -45,7 +45,12 @@
             <div class="summary-main">
               <div class="summary-top-row">
                 <h3>{{ 'DELIVERY_HISTORY.JOB_ID' | translate }} #{{ delivery.job_id }}</h3>
-                <span class="status-pill">{{ (delivery.orders?.length || 0) }} {{ 'DELIVERY_HISTORY.TOTAL_ORDERS' | translate }}</span>
+                <div class="status-pill-group">
+                  <span class="status-pill">{{ (delivery.orders?.length || 0) }} {{ 'DELIVERY_HISTORY.TOTAL_ORDERS' | translate }}</span>
+                  <span class="status-pill status-pill-state" [ngClass]="getDeliveryStatusClass(delivery)">
+                    {{ getDeliveryStatus(delivery) }}
+                  </span>
+                </div>
               </div>
               <p>{{ 'DELIVERY_HISTORY.ORDER_IDS' | translate }}: {{ (delivery.order_ids?.length || 0) > 0 ? delivery.order_ids?.join(', ') : ('DELIVERY_HISTORY.NOT_AVAILABLE' | translate) }}</p>
               <p>{{ 'DELIVERY_HISTORY.LOAD' | translate }}: {{ delivery.weight_kg }} {{ 'DELIVERY_HISTORY.KG' | translate }} | {{ 'DELIVERY_HISTORY.CHARGES' | translate }}: ₹{{ delivery.base_price }}</p>
@@ -57,6 +62,13 @@
             <p>
               <strong>{{ 'DELIVERY_HISTORY.DELIVERY_DATE' | translate }}:</strong>
               {{ delivery.delivery_date ? (delivery.delivery_date | date: 'medium') : ('DELIVERY_HISTORY.NOT_AVAILABLE' | translate) }}
+            </p>
+            <p>
+              <strong>{{ 'DELIVERY_HISTORY.JOB_STATUS' | translate }}:</strong>
+              {{ getDeliveryStatus(delivery) }}
+            </p>
+            <p *ngIf="getDeliveryStatusNote(delivery)" class="status-note">
+              {{ getDeliveryStatusNote(delivery) }}
             </p>
             <p>
               <strong>{{ 'DELIVERY_HISTORY.PICKUP' | translate }}:</strong>

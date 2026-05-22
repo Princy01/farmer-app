@@ -33,12 +33,18 @@ import {
 interface DisplayOrder {
   orderId: string;
   rawOrderId: number;
+  rawOrderIds: number[];
+  checkoutSessionId?: number | null;
+  checkoutOrderCount: number;
+  checkoutDeliveryAmount: number;
+  checkoutGrossAmount: number;
   placedAt: string;
   statusId: number | null;
   statusName: string;
   statusLabel: string;
   deliveryAddress: string;
   totalAmount: number;
+  deliveryAmount: number;
   finalAmount: number;
   actualDeliveryDate?: string;
   isCurrent: boolean;
@@ -146,20 +152,21 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           try {
-            const allOrders: DisplayOrder[] = [];
+            const rawOrders: DisplayOrder[] = [];
 
             if (response.current_orders && Array.isArray(response.current_orders)) {
               response.current_orders.forEach((o) => {
-                allOrders.push(this.mapToDisplayOrder(o, true));
+                rawOrders.push(this.mapToDisplayOrder(o, true));
               });
             }
 
             if (response.order_history && Array.isArray(response.order_history)) {
               response.order_history.forEach((o) => {
-                allOrders.push(this.mapToDisplayOrder(o, false));
+                rawOrders.push(this.mapToDisplayOrder(o, false));
               });
             }
 
+            const allOrders = this.collapseCheckoutOrderGroups(rawOrders);
             this.orders = this.sortNewestFirst(allOrders);
             this.filterOrders(this.selectedFilter);
 
@@ -304,16 +311,64 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     return {
       orderId: `ORD-${o.order_id.toString().padStart(6, '0')}`,
       rawOrderId: o.order_id,
+      rawOrderIds: [o.order_id],
+      checkoutSessionId: o.checkout_session_id ?? null,
+      checkoutOrderCount: o.checkout_order_count || 0,
+      checkoutDeliveryAmount: o.checkout_delivery_amount || 0,
+      checkoutGrossAmount: o.checkout_gross_amount || 0,
       placedAt: o.date_of_order,
       statusId: o.order_status,
       statusName,
       statusLabel,
       deliveryAddress: o.delivery_address || '',
       totalAmount: o.total_order_amount || 0,
+      deliveryAmount: o.delivery_amount || 0,
       finalAmount: o.final_amount || 0,
       actualDeliveryDate: o.actual_delivery_date || undefined,
       isCurrent,
     };
+  }
+
+  private collapseCheckoutOrderGroups(orders: DisplayOrder[]): DisplayOrder[] {
+    const grouped = new Map<number, DisplayOrder[]>();
+    const result: DisplayOrder[] = [];
+
+    for (const order of orders) {
+      if (order.checkoutSessionId && order.checkoutOrderCount > 1) {
+        const existing = grouped.get(order.checkoutSessionId) || [];
+        existing.push(order);
+        grouped.set(order.checkoutSessionId, existing);
+      } else {
+        result.push({
+          ...order,
+          deliveryAmount: order.deliveryAmount,
+          finalAmount: order.finalAmount + order.deliveryAmount,
+        });
+      }
+    }
+
+    for (const groupOrders of grouped.values()) {
+      const sortedGroup = this.sortNewestFirst([...groupOrders]);
+      const primary = sortedGroup[0];
+      const productFinalAmount = groupOrders.reduce((sum, order) => sum + order.finalAmount, 0);
+      const totalOrderAmount = groupOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+      const checkoutDeliveryAmount = primary.checkoutDeliveryAmount || primary.deliveryAmount || 0;
+      const checkoutGrossAmount = primary.checkoutGrossAmount || productFinalAmount + checkoutDeliveryAmount;
+      const orderIds = sortedGroup.map(order => order.rawOrderId);
+
+      result.push({
+        ...primary,
+        orderId: `${primary.orderId} +${sortedGroup.length - 1}`,
+        rawOrderIds: orderIds,
+        checkoutOrderCount: sortedGroup.length,
+        totalAmount: totalOrderAmount,
+        deliveryAmount: checkoutDeliveryAmount,
+        finalAmount: checkoutGrossAmount,
+        isCurrent: groupOrders.some(order => order.isCurrent),
+      });
+    }
+
+    return result;
   }
 
   getStatusColor(statusId: number | null): string {

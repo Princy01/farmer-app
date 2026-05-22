@@ -100,6 +100,10 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
         delivery.job_id?.toString() ?? '',
         (delivery.order_ids ?? []).join(','),
         delivery.delivery_date,
+        delivery.display_status ?? '',
+        delivery.status_note ?? '',
+        delivery.job_status ?? '',
+        delivery.delivery_status ?? '',
         ...orders.flatMap(order => [
           order.order_id?.toString() ?? '',
           this.getOrderDeliveryAddress(order),
@@ -133,6 +137,109 @@ export class DeliveryHistoryComponent implements OnInit, OnDestroy {
   getDropAddress(delivery: Delivery): string {
     const firstOrder = this.getFirstOrder(delivery);
     return firstOrder ? this.getOrderDeliveryAddress(firstOrder) : '';
+  }
+
+  getDeliveryStatus(delivery: Delivery): string {
+    const statusKey = this.getDeliveryStatusKey(delivery);
+    if (statusKey) {
+      return this.translate.instant(statusKey);
+    }
+
+    return delivery.display_status || delivery.delivery_status || delivery.job_status || this.translate.instant('DELIVERY_HISTORY.NOT_AVAILABLE');
+  }
+
+  getDeliveryStatusNote(delivery: Delivery): string {
+    const noteKey = this.getDeliveryStatusNoteKey(delivery);
+    if (noteKey) {
+      return this.translate.instant(noteKey);
+    }
+
+    return delivery.status_note || '';
+  }
+
+  getDeliveryStatusClass(delivery: Delivery): string {
+    if (delivery.is_reassigned) {
+      return 'status-reassigned';
+    }
+    if (delivery.is_overdue) {
+      return 'status-overdue';
+    }
+    const status = this.getDeliveryStatus(delivery).toLowerCase();
+    if (status.includes('delivered') || status.includes('completed')) {
+      return 'status-completed';
+    }
+    if (status.includes('cancel')) {
+      return 'status-cancelled';
+    }
+    return 'status-active';
+  }
+
+  private getDeliveryStatusKey(delivery: Delivery): string {
+    if (delivery.is_reassigned) {
+      return 'TRANSPORT_STATUS.REASSIGNED_BY_OPS';
+    }
+    if (delivery.is_overdue && !delivery.pickup_confirmed_at) {
+      return 'TRANSPORT_STATUS.OVERDUE_PICKUP_PENDING';
+    }
+    if (delivery.is_overdue) {
+      return 'TRANSPORT_STATUS.OVERDUE_DELIVERY_PENDING';
+    }
+
+    const status = [
+      delivery.display_status,
+      delivery.delivery_status,
+      delivery.job_status,
+    ].find(value => !!value)?.toString().trim().toLowerCase();
+
+    switch (status) {
+      case 'reassigned by ops':
+        return 'TRANSPORT_STATUS.REASSIGNED_BY_OPS';
+      case 'overdue - pickup pending':
+        return 'TRANSPORT_STATUS.OVERDUE_PICKUP_PENDING';
+      case 'overdue - delivery pending':
+        return 'TRANSPORT_STATUS.OVERDUE_DELIVERY_PENDING';
+      case 'picked up - delivery pending':
+      case 'picked_up':
+      case 'partially_picked':
+        return 'TRANSPORT_STATUS.PICKED_UP_DELIVERY_PENDING';
+      case 'accepted - pickup pending':
+      case 'accepted':
+      case 'pending':
+        return 'TRANSPORT_STATUS.ACCEPTED_PICKUP_PENDING';
+      case 'delivered':
+      case 'completed':
+        return 'TRANSPORT_STATUS.DELIVERED';
+      case 'cancelled':
+      case 'canceled':
+        return 'TRANSPORT_STATUS.CANCELLED';
+      default:
+        return '';
+    }
+  }
+
+  private getDeliveryStatusNoteKey(delivery: Delivery): string {
+    if (delivery.is_reassigned) {
+      return 'TRANSPORT_STATUS.NOTES.REASSIGNED_BY_OPS';
+    }
+    if (delivery.is_overdue && !delivery.pickup_confirmed_at) {
+      return 'TRANSPORT_STATUS.NOTES.OVERDUE_PICKUP_PENDING';
+    }
+    if (delivery.is_overdue) {
+      return 'TRANSPORT_STATUS.NOTES.OVERDUE_DELIVERY_PENDING';
+    }
+
+    const status = delivery.display_status?.trim().toLowerCase();
+    if (status === 'reassigned by ops') {
+      return 'TRANSPORT_STATUS.NOTES.REASSIGNED_BY_OPS';
+    }
+    if (status === 'overdue - pickup pending') {
+      return 'TRANSPORT_STATUS.NOTES.OVERDUE_PICKUP_PENDING';
+    }
+    if (status === 'overdue - delivery pending') {
+      return 'TRANSPORT_STATUS.NOTES.OVERDUE_DELIVERY_PENDING';
+    }
+
+    return '';
   }
 
   toggleDeliveryDetails(jobId: number) {

@@ -473,7 +473,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   private canLoadRequests(): boolean {
-    return this.isDriverAvailable && this.hasLocationPreferences && !this.isAvailabilityLocked;
+    return this.isDriverAvailable && !this.isAvailabilityLocked;
   }
 
   private syncRequestLoadingState() {
@@ -482,7 +482,7 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
       this.loadRequestsSubscription?.unsubscribe();
       this.loadRequestsSubscription = null;
       this.isLoadingRequests = false;
-      if (!this.isDriverAvailable || this.isAvailabilityLocked || !this.hasLocationPreferences) {
+      if (!this.isDriverAvailable || this.isAvailabilityLocked) {
         this.transportRequests = [];
         this.filteredRequests = [];
       }
@@ -519,7 +519,8 @@ export class TransportRequestsComponent implements OnInit, OnDestroy {
   }
 
   private loadTransportRequests() {
-    // Only load requests if driver is available
+    // Location preferences are display/filter intent only. Server-side offers are
+    // already driver-specific, so missing local preferences must not hide jobs.
     if (!this.canLoadRequests()) {
       this.loadRequestsSubscription?.unsubscribe();
       this.loadRequestsSubscription = null;
