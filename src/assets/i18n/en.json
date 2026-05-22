@@ -2296,7 +2296,7 @@
     "CANCEL_JOB_SUCCESS_MESSAGE": "The pickup job was cancelled successfully.",
     "CANCEL_JOB_ERROR_TITLE": "Cancellation failed",
     "CANCEL_JOB_ERROR_MESSAGE": "Unable to cancel this pickup right now.",
-    "OK": "OK"
+    "OK": "OK",
     "TOTAL_AMOUNT": "Total Amount",
     "FINAL_AMOUNT": "Final Amount",
     "ACTUAL_DELIVERY_DATE": "Actual Delivery Date",
