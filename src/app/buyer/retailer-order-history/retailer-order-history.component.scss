@@ -205,6 +205,39 @@ $spacing-xl:        24px;
 
   .address-section { @extend %card-address; }
 
+  .transport-status-section {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    margin: $spacing-sm 0;
+    padding: $spacing-sm;
+    border-radius: 12px;
+    background: rgba(245, 158, 11, 0.08);
+    color: $text-primary;
+
+    ion-icon {
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    div {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    strong {
+      font-size: 0.82rem;
+      line-height: 1.2;
+    }
+
+    span {
+      color: $text-muted;
+      font-size: 0.74rem;
+      line-height: 1.3;
+    }
+  }
+
   .footer-section {
     @extend %card-footer;
     flex-wrap: wrap;

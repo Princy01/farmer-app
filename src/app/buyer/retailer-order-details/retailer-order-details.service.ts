@@ -34,6 +34,17 @@ export interface RetailerOrderDetails {
   delivery_amount: number;
   final_amount: number;
   items: OrderItem[];
+  transport?: OrderTransportStatus | null;
+}
+
+export interface OrderTransportStatus {
+  job_id?: number | null;
+  job_status?: string;
+  delivery_status?: string;
+  cancelled_at?: string | null;
+  status_label?: string;
+  status_note?: string;
+  needs_admin_action?: boolean;
 }
 
 export interface CancelRetailerOrderResponse {

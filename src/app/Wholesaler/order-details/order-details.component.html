@@ -33,6 +33,17 @@
         >
           {{ getStatusText(orderDetails.order_status) }}
         </div>
+        <div class="transport-status-note" *ngIf="orderDetails.transport?.status_label">
+          <ion-icon
+            [name]="orderDetails.transport?.needs_admin_action ? 'alert-circle-outline' : 'car-outline'"
+            [color]="orderDetails.transport?.needs_admin_action ? 'warning' : 'primary'">
+          </ion-icon>
+          <div>
+            <strong>{{ "ORDER_DETAILS.TRANSPORT_STATUS" | translate }}</strong>
+            <span>{{ getTransportStatusLabel(orderDetails.transport) }}</span>
+            <small *ngIf="getTransportStatusNote(orderDetails.transport)">{{ getTransportStatusNote(orderDetails.transport) }}</small>
+          </div>
+        </div>
         <ion-button
           expand="block"
           color="danger"

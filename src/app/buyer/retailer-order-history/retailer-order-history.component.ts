@@ -28,6 +28,7 @@ import {
   RetailerOrderHistoryService,
   RetailerOrderHistory,
   RetailerCheckoutSessionSummary,
+  OrderTransportStatus,
 } from './retailer-order-history.service';
 
 interface DisplayOrder {
@@ -48,6 +49,9 @@ interface DisplayOrder {
   finalAmount: number;
   actualDeliveryDate?: string;
   isCurrent: boolean;
+  transportStatusLabel?: string;
+  transportStatusNote?: string;
+  transportNeedsAdminAction?: boolean;
 }
 
 interface DisplayCheckoutSession {
@@ -326,7 +330,58 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       finalAmount: o.final_amount || 0,
       actualDeliveryDate: o.actual_delivery_date || undefined,
       isCurrent,
+      transportStatusLabel: this.getTransportStatusLabel(o.transport),
+      transportStatusNote: this.getTransportStatusNote(o.transport),
+      transportNeedsAdminAction: !!o.transport?.needs_admin_action,
     };
+  }
+
+  private getTransportStatusLabel(transport?: OrderTransportStatus | null): string | undefined {
+    if (!transport?.status_label && !transport?.job_status && !transport?.delivery_status) {
+      return undefined;
+    }
+    const key = this.getTransportStatusLabelKey(transport);
+    if (key) {
+      return this.translate.instant(key);
+    }
+    return transport.status_label || undefined;
+  }
+
+  private getTransportStatusNote(transport?: OrderTransportStatus | null): string | undefined {
+    if (!transport?.status_note && !transport?.job_status && !transport?.delivery_status) {
+      return undefined;
+    }
+    const key = this.getTransportStatusNoteKey(transport);
+    if (key) {
+      return this.translate.instant(key);
+    }
+    return transport.status_note || undefined;
+  }
+
+  private getTransportStatusLabelKey(transport: OrderTransportStatus): string | null {
+    const jobStatus = (transport.job_status || '').toLowerCase();
+    const deliveryStatus = (transport.delivery_status || '').toLowerCase();
+
+    if (transport.needs_admin_action) return 'TRANSPORT_STATUS.ADMIN_REVIEW';
+    if (jobStatus === 'cancelled' || jobStatus === 'canceled') return 'TRANSPORT_STATUS.CANCELLED';
+    if (jobStatus === 'expired') return 'TRANSPORT_STATUS.NOT_ASSIGNED';
+    if (jobStatus === 'ride_offered') return 'TRANSPORT_STATUS.BEING_OFFERED';
+    if (jobStatus === 'open') return 'TRANSPORT_STATUS.REQUEST_OPEN';
+    if (jobStatus === 'accepted' && deliveryStatus === 'pending') return 'TRANSPORT_STATUS.ACCEPTED_PICKUP_PENDING';
+    if (jobStatus === 'accepted') return 'TRANSPORT_STATUS.DRIVER_ASSIGNED';
+    if (jobStatus === 'picked_up' || deliveryStatus === 'picked_up') return 'TRANSPORT_STATUS.PICKED_UP_DELIVERY_PENDING';
+    if (jobStatus === 'delivered' || deliveryStatus === 'delivered') return 'TRANSPORT_STATUS.DELIVERED';
+    return null;
+  }
+
+  private getTransportStatusNoteKey(transport: OrderTransportStatus): string | null {
+    const jobStatus = (transport.job_status || '').toLowerCase();
+
+    if (transport.needs_admin_action) return 'TRANSPORT_STATUS.NOTES.ADMIN_REVIEW';
+    if (jobStatus === 'cancelled' || jobStatus === 'canceled') return 'TRANSPORT_STATUS.NOTES.CANCELLED';
+    if (jobStatus === 'expired') return 'TRANSPORT_STATUS.NOTES.NOT_ASSIGNED';
+    if (jobStatus === 'open') return 'TRANSPORT_STATUS.NOTES.REQUEST_OPEN';
+    return null;
   }
 
   private collapseCheckoutOrderGroups(orders: DisplayOrder[]): DisplayOrder[] {

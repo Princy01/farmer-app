@@ -55,6 +55,18 @@
           </ion-chip>
         </div>
 
+        <div class="info-row transport-status-row" *ngIf="order.transport?.status_label">
+          <ion-icon
+            [name]="order.transport?.needs_admin_action ? 'alert-circle-outline' : 'car-outline'"
+            [color]="order.transport?.needs_admin_action ? 'warning' : 'primary'">
+          </ion-icon>
+          <div>
+            <strong>{{ 'RETAILER_ORDER_DETAILS.TRANSPORT_STATUS' | translate }}:</strong>
+            <p>{{ getTransportStatusLabel(order.transport) }}</p>
+            <small *ngIf="getTransportStatusNote(order.transport)">{{ getTransportStatusNote(order.transport) }}</small>
+          </div>
+        </div>
+
         <ion-button
           expand="block"
           color="danger"

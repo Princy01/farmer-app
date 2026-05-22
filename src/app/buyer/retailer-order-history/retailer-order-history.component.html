@@ -80,6 +80,17 @@
             <span class="address-text">{{ item.order!.deliveryAddress }}</span>
           </div>
 
+          <div class="transport-status-section" *ngIf="item.order!.transportStatusLabel">
+            <ion-icon
+              [name]="item.order!.transportNeedsAdminAction ? 'alert-circle-outline' : 'car-outline'"
+              [color]="item.order!.transportNeedsAdminAction ? 'warning' : 'primary'">
+            </ion-icon>
+            <div>
+              <strong>{{ item.order!.transportStatusLabel }}</strong>
+              <span *ngIf="item.order!.transportStatusNote">{{ item.order!.transportStatusNote }}</span>
+            </div>
+          </div>
+
           <div class="footer-section">
             <div class="amount-info">
               <div class="label">{{ 'RETAILER_ORDER_HISTORY.TOTAL_AMOUNT' | translate }}</div>
@@ -361,6 +372,17 @@
         <div class="address-section">
           <ion-icon name="location-outline" color="medium"></ion-icon>
           <span class="address-text">{{ order.deliveryAddress }}</span>
+        </div>
+
+        <div class="transport-status-section" *ngIf="order.transportStatusLabel">
+          <ion-icon
+            [name]="order.transportNeedsAdminAction ? 'alert-circle-outline' : 'car-outline'"
+            [color]="order.transportNeedsAdminAction ? 'warning' : 'primary'">
+          </ion-icon>
+          <div>
+            <strong>{{ order.transportStatusLabel }}</strong>
+            <span *ngIf="order.transportStatusNote">{{ order.transportStatusNote }}</span>
+          </div>
         </div>
 
         <div class="footer-section">

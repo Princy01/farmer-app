@@ -301,6 +301,7 @@
     "Discount": "Discount",
     "Tax Amount": "Tax Amount",
     "Delivery Charges": "Delivery Charges",
+    "TRANSPORT_STATUS": "Transport Status",
     "Final Amount": "Final Amount",
     "Retry": "Retry",
     "AUTH_ERROR": "Authentication Error",
@@ -1820,6 +1821,7 @@
     "RETRY": "Retry",
     "ORDER_NUMBER": "Order",
     "STATUS": "Status",
+    "TRANSPORT_STATUS": "Transport Status",
     "DELIVERED_AT": "Delivered At",
     "DELIVERY_ADDRESS": "Delivery Address",
     "ORDER_ITEMS": "Order Items",
@@ -2135,10 +2137,19 @@
     "ACCEPTED_PICKUP_PENDING": "Accepted - pickup pending",
     "DELIVERED": "Delivered",
     "CANCELLED": "Cancelled",
+    "ADMIN_REVIEW": "Transport cancelled - admin review",
+    "NOT_ASSIGNED": "Transport not assigned",
+    "BEING_OFFERED": "Transport being offered",
+    "REQUEST_OPEN": "Transport request open",
+    "DRIVER_ASSIGNED": "Driver assigned",
     "NOTES": {
       "REASSIGNED_BY_OPS": "This delivery is being handled by operations. Replacement transporter details are hidden.",
       "OVERDUE_PICKUP_PENDING": "The delivery date has passed and pickup is not confirmed. Operations review is required.",
-      "OVERDUE_DELIVERY_PENDING": "The delivery date has passed and delivery is not completed. Operations review is required."
+      "OVERDUE_DELIVERY_PENDING": "The delivery date has passed and delivery is not completed. Operations review is required.",
+      "ADMIN_REVIEW": "Driver cancelled transport. Ops must reassign transport or decide fulfilment/refund.",
+      "CANCELLED": "Transport is no longer active for this order.",
+      "NOT_ASSIGNED": "Transport offer window expired without assignment. Ops action may be required.",
+      "REQUEST_OPEN": "The transport request is waiting for offer sync or driver assignment."
     }
   },
   "TRANSPORT_REQUESTS": {
