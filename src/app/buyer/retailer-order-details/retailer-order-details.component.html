@@ -53,10 +53,9 @@
             <ion-icon [name]="getStatusIcon(order.order_status)"></ion-icon>
             <ion-label>{{ getStatusDisplay(order.order_status) }}</ion-label>
           </ion-chip>
-          <!-- Return Status Badge -->
-          <ion-chip *ngIf="hasReturnRequest()" color="warning">
-            <ion-icon name="return-down-back-outline"></ion-icon>
-            <ion-label>{{ 'RETAILER_ORDER_DETAILS.RETURN_REQUESTED_BADGE' | translate }}</ion-label>
+          <ion-chip *ngIf="hasPostDelivery()" [color]="getPostDeliveryColor(order.post_delivery)">
+            <ion-icon [name]="order.post_delivery?.needs_admin_action ? 'alert-circle-outline' : 'return-down-back-outline'"></ion-icon>
+            <ion-label>{{ getPostDeliveryLabel(order.post_delivery) }}</ion-label>
           </ion-chip>
         </div>
 
@@ -99,7 +98,6 @@
           {{ 'RETAILER_ORDER_DETAILS.RETURN_ORDER_ACTION' | translate }}
         </ion-button>
 
-        <!-- View Return Status button if return already requested -->
         <ion-button
           expand="block"
           color="primary"
@@ -108,7 +106,7 @@
           disabled
         >
           <ion-icon slot="start" name="checkmark-circle"></ion-icon>
-          {{ 'RETAILER_ORDER_DETAILS.RETURN_REQUESTED_BADGE' | translate }}
+          {{ getPostDeliveryLabel(order.post_delivery) }}
         </ion-button>
 
         <div class="info-row" *ngIf="order.actual_delivery_date && isSuccessfulStatus(order.order_status_name)">

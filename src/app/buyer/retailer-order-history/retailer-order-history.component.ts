@@ -30,6 +30,12 @@ import {
   RetailerCheckoutSessionSummary,
   OrderTransportStatus,
 } from './retailer-order-history.service';
+import {
+  OrderPostDeliveryStatus,
+  getPostDeliveryColor,
+  getPostDeliveryLabelKey,
+  hasPostDeliveryStatus,
+} from 'src/app/shared/order-post-delivery-status';
 
 interface DisplayOrder {
   orderId: string;
@@ -52,6 +58,10 @@ interface DisplayOrder {
   transportStatusLabel?: string;
   transportStatusNote?: string;
   transportNeedsAdminAction?: boolean;
+  postDelivery?: OrderPostDeliveryStatus | null;
+  postDeliveryLabel?: string;
+  postDeliveryColor?: string;
+  postDeliveryNeedsAdminAction?: boolean;
 }
 
 interface DisplayCheckoutSession {
@@ -285,7 +295,7 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     } else if (filter === 'cancelled') {
       this.filteredOrders = this.sortNewestFirst(this.orders.filter((o) => isCancelled(o.statusName)));
     } else if (filter === 'returned') {
-      this.filteredOrders = this.sortNewestFirst(this.orders.filter((o) => isReturned(o.statusName)));
+      this.filteredOrders = this.sortNewestFirst(this.orders.filter((o) => isReturned(o.statusName) || hasPostDeliveryStatus(o.postDelivery)));
     } else {
       this.filteredOrders = this.sortNewestFirst(
         this.orders.filter((o) => o.statusName.toLowerCase() === filter.toLowerCase())
@@ -333,7 +343,26 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       transportStatusLabel: this.getTransportStatusLabel(o.transport),
       transportStatusNote: this.getTransportStatusNote(o.transport),
       transportNeedsAdminAction: !!o.transport?.needs_admin_action,
+      postDelivery: o.post_delivery ?? null,
+      postDeliveryLabel: this.getPostDeliveryLabel(o.post_delivery),
+      postDeliveryColor: getPostDeliveryColor(o.post_delivery),
+      postDeliveryNeedsAdminAction: !!o.post_delivery?.needs_admin_action,
     };
+  }
+
+  private getPostDeliveryLabel(status?: OrderPostDeliveryStatus | null): string | undefined {
+    const key = getPostDeliveryLabelKey(status);
+    if (key) {
+      const translated = this.translate.instant(key);
+      if (translated !== key) {
+        return translated;
+      }
+    }
+    return status?.return_status_description ||
+      status?.return_status_name ||
+      status?.dispute_status ||
+      status?.finance_exception_status ||
+      undefined;
   }
 
   private getTransportStatusLabel(transport?: OrderTransportStatus | null): string | undefined {
@@ -420,10 +449,44 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
         deliveryAmount: checkoutDeliveryAmount,
         finalAmount: checkoutGrossAmount,
         isCurrent: groupOrders.some(order => order.isCurrent),
+        ...this.pickGroupPostDelivery(groupOrders),
       });
     }
 
     return result;
+  }
+
+  private pickGroupPostDelivery(orders: DisplayOrder[]): Partial<DisplayOrder> {
+    const ranked = orders
+      .filter(order => hasPostDeliveryStatus(order.postDelivery))
+      .sort((a, b) => this.getPostDeliveryPriority(b.postDelivery) - this.getPostDeliveryPriority(a.postDelivery));
+
+    if (ranked.length === 0) {
+      return {};
+    }
+
+    const selected = ranked[0];
+    return {
+      postDelivery: selected.postDelivery,
+      postDeliveryLabel: selected.postDeliveryLabel,
+      postDeliveryColor: selected.postDeliveryColor,
+      postDeliveryNeedsAdminAction: selected.postDeliveryNeedsAdminAction,
+    };
+  }
+
+  private getPostDeliveryPriority(status?: OrderPostDeliveryStatus | null): number {
+    switch (status?.post_delivery_type) {
+      case 'dispute':
+        return 4;
+      case 'return_dispute':
+        return 3;
+      case 'return':
+        return 2;
+      case 'finance_exception':
+        return 1;
+      default:
+        return 0;
+    }
   }
 
   getStatusColor(statusId: number | null): string {
@@ -470,7 +533,8 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       statusName.includes('fail') ||
       statusName.includes('return') ||
       statusName.includes('refund') ||
-      statusName.includes('dispute')
+      statusName.includes('dispute') ||
+      hasPostDeliveryStatus(order.postDelivery)
     );
   }
 

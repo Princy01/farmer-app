@@ -6,6 +6,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { alertCircleOutline, star, starOutline, carOutline } from 'ionicons/icons';
 import { WholesalerApiService, OrderFullDetails, OrderTransportStatus } from '../services/wholesaler-api.service';
+import {
+  OrderPostDeliveryStatus,
+  getPostDeliveryColor,
+  getPostDeliveryLabelKey,
+  hasPostDeliveryStatus,
+} from 'src/app/shared/order-post-delivery-status';
 import { AuthService } from 'src/app/auth/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
@@ -321,6 +327,29 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
       return this.translate.instant(key);
     }
     return transport?.status_note || '';
+  }
+
+  hasPostDeliveryStatus(status?: OrderPostDeliveryStatus | null): boolean {
+    return hasPostDeliveryStatus(status);
+  }
+
+  getPostDeliveryColor(status?: OrderPostDeliveryStatus | null): string {
+    return getPostDeliveryColor(status);
+  }
+
+  getPostDeliveryLabel(status?: OrderPostDeliveryStatus | null): string {
+    const key = getPostDeliveryLabelKey(status);
+    if (key) {
+      const translated = this.translate.instant(key);
+      if (translated !== key) {
+        return translated;
+      }
+    }
+    return status?.return_status_description ||
+      status?.return_status_name ||
+      status?.dispute_status ||
+      status?.finance_exception_status ||
+      '';
   }
 
   private getTransportStatusLabelKey(transport?: OrderTransportStatus | null): string | null {

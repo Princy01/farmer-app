@@ -4,6 +4,7 @@ import { Observable, throwError, timer } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { TranslateService } from '@ngx-translate/core';
+import { OrderPostDeliveryStatus } from 'src/app/shared/order-post-delivery-status';
 
 export interface RetailerOrderHistory {
   order_id: number;
@@ -22,6 +23,7 @@ export interface RetailerOrderHistory {
   final_amount: number;
   actual_delivery_date?: string | null;
   transport?: OrderTransportStatus | null;
+  post_delivery?: OrderPostDeliveryStatus | null;
 }
 
 export interface OrderTransportStatus {

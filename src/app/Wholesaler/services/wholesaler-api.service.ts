@@ -4,6 +4,7 @@ import { Observable, throwError, timer, MonoTypeOperatorFunction } from 'rxjs';
 import { map, catchError, retryWhen, concatMap, finalize, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
+import { OrderPostDeliveryStatus } from 'src/app/shared/order-post-delivery-status';
 
 
 export interface ApiErrorResponse {
@@ -48,6 +49,7 @@ export interface OrderItemDetails {
   total_order_amount: number;
   order_items: OrderItem[];
   created_at: string;
+  post_delivery?: OrderPostDeliveryStatus | null;
 }
 
 //  Detailed order view for Order Details screen
@@ -89,6 +91,7 @@ export interface OrderFullDetails {
 
   products: ProductDetail[];
   transport?: OrderTransportStatus | null;
+  post_delivery?: OrderPostDeliveryStatus | null;
 }
 
 export interface OrderTransportStatus {

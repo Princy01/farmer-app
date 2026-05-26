@@ -30,6 +30,12 @@ import {
 import { RetailerOrderService, RetailerOrderDetails, OrderItem, OrderTransportStatus, ReturnReason, CreateReturnRequest } from './retailer-order-details.service';
 import { ReturnRequestModalComponent } from './return-request-modal/return-request-modal.component';
 import {
+  OrderPostDeliveryStatus,
+  getPostDeliveryColor,
+  getPostDeliveryLabelKey,
+  hasPostDeliveryStatus,
+} from 'src/app/shared/order-post-delivery-status';
+import {
   BuyerRatingsService,
   PeerRatingContextResponse,
   PeerRatingPairOption,
@@ -399,7 +405,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     }
 
     // Prevent cancellation if return is already requested
-    if (this.returnsSubmittedIds.has(this.order.order_id)) {
+    if (this.hasPostDelivery() || this.returnsSubmittedIds.has(this.order.order_id)) {
       return false;
     }
 
@@ -531,7 +537,11 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     }
 
     // Don't allow return if already submitted or currently submitting
-    if (this.returningOrderIds.has(this.order.order_id) || this.returnsSubmittedIds.has(this.order.order_id)) {
+    if (
+      this.returningOrderIds.has(this.order.order_id) ||
+      this.returnsSubmittedIds.has(this.order.order_id) ||
+      this.hasPostDelivery()
+    ) {
       return false;
     }
 
@@ -565,7 +575,34 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     if (!this.order) {
       return false;
     }
-    return this.returnsSubmittedIds.has(this.order.order_id);
+    const postDeliveryType = this.order.post_delivery?.post_delivery_type || 'none';
+    return this.returnsSubmittedIds.has(this.order.order_id) ||
+      postDeliveryType === 'return' ||
+      postDeliveryType === 'return_dispute';
+  }
+
+  hasPostDelivery(): boolean {
+    return hasPostDeliveryStatus(this.order?.post_delivery);
+  }
+
+  getPostDeliveryColor(status?: OrderPostDeliveryStatus | null): string {
+    return getPostDeliveryColor(status);
+  }
+
+  getPostDeliveryLabel(status?: OrderPostDeliveryStatus | null): string {
+    const key = getPostDeliveryLabelKey(status);
+    if (key) {
+      const translated = this.translate.instant(key);
+      if (translated !== key) {
+        return translated;
+      }
+    }
+
+    return status?.return_status_description ||
+      status?.return_status_name ||
+      status?.dispute_status ||
+      status?.finance_exception_status ||
+      '';
   }
 
   /**

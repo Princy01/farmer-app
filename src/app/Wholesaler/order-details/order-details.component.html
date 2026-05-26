@@ -33,6 +33,17 @@
         >
           {{ getStatusText(orderDetails.order_status) }}
         </div>
+        <div class="transport-status-note" *ngIf="hasPostDeliveryStatus(orderDetails.post_delivery)">
+          <ion-icon
+            name="alert-circle-outline"
+            [color]="getPostDeliveryColor(orderDetails.post_delivery)">
+          </ion-icon>
+          <div>
+            <strong>{{ "POST_DELIVERY.TITLE" | translate }}</strong>
+            <span>{{ getPostDeliveryLabel(orderDetails.post_delivery) }}</span>
+            <small *ngIf="orderDetails.post_delivery?.needs_admin_action">{{ "POST_DELIVERY.ADMIN_ACTION_REQUIRED" | translate }}</small>
+          </div>
+        </div>
         <div class="transport-status-note" *ngIf="orderDetails.transport?.status_label">
           <ion-icon
             [name]="orderDetails.transport?.needs_admin_action ? 'alert-circle-outline' : 'car-outline'"

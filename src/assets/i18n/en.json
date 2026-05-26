@@ -1904,7 +1904,27 @@
   "BACK": "Back",
   "CLOSE": "Close",
   "TRY_AGAIN": "Try Again",
-
+  "POST_DELIVERY": {
+    "TITLE": "Post-delivery status",
+    "RETURN": "Return in progress",
+    "RETURN_REQUESTED": "Return requested",
+    "RETURN_APPROVED": "Return approved",
+    "RETURN_REJECTED": "Return rejected",
+    "RETURN_PICKUP_SCHEDULED": "Return pickup scheduled",
+    "RETURN_PICKED_UP": "Return picked up",
+    "RETURN_IN_TRANSIT": "Return in transit",
+    "RETURN_DELIVERED_TO_WHOLESALER": "Returned to wholesaler",
+    "RETURN_QUALITY_CHECKED": "Return quality checked",
+    "RETURN_REFUND_INITIATED": "Refund initiated",
+    "RETURN_REFUND_COMPLETED": "Refund completed",
+    "RETURN_DISPUTED": "Return under dispute",
+    "RETURN_CLOSED": "Return closed",
+    "RETURN_CANCELLED": "Return cancelled",
+    "DISPUTE": "Issue under review",
+    "RETURN_DISPUTE": "Return dispute under review",
+    "FINANCE_EXCEPTION": "Finance action pending",
+    "ADMIN_ACTION_REQUIRED": "Admin action required"
+  },
   "BUYER_DISPUTES": {
     "REPORT_ISSUE_TITLE": "Report Issue",
     "MY_ISSUES_TITLE": "My Issues",

@@ -91,6 +91,17 @@
             </div>
           </div>
 
+          <div class="transport-status-section" *ngIf="item.order!.postDeliveryLabel">
+            <ion-icon
+              [name]="item.order!.postDeliveryNeedsAdminAction ? 'alert-circle-outline' : 'arrow-undo-outline'"
+              [color]="item.order!.postDeliveryColor || 'secondary'">
+            </ion-icon>
+            <div>
+              <strong>{{ item.order!.postDeliveryLabel }}</strong>
+              <span *ngIf="item.order!.postDeliveryNeedsAdminAction">{{ 'POST_DELIVERY.ADMIN_ACTION_REQUIRED' | translate }}</span>
+            </div>
+          </div>
+
           <div class="footer-section">
             <div class="amount-info">
               <div class="label">{{ 'RETAILER_ORDER_HISTORY.TOTAL_AMOUNT' | translate }}</div>
@@ -382,6 +393,17 @@
           <div>
             <strong>{{ order.transportStatusLabel }}</strong>
             <span *ngIf="order.transportStatusNote">{{ order.transportStatusNote }}</span>
+          </div>
+        </div>
+
+        <div class="transport-status-section" *ngIf="order.postDeliveryLabel">
+          <ion-icon
+            [name]="order.postDeliveryNeedsAdminAction ? 'alert-circle-outline' : 'arrow-undo-outline'"
+            [color]="order.postDeliveryColor || 'secondary'">
+          </ion-icon>
+          <div>
+            <strong>{{ order.postDeliveryLabel }}</strong>
+            <span *ngIf="order.postDeliveryNeedsAdminAction">{{ 'POST_DELIVERY.ADMIN_ACTION_REQUIRED' | translate }}</span>
           </div>
         </div>
 

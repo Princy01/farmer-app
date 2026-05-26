@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, TimeoutError } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { OrderPostDeliveryStatus } from 'src/app/shared/order-post-delivery-status';
 
 export interface OrderItem {
   product_id: number;
@@ -35,6 +36,7 @@ export interface RetailerOrderDetails {
   final_amount: number;
   items: OrderItem[];
   transport?: OrderTransportStatus | null;
+  post_delivery?: OrderPostDeliveryStatus | null;
 }
 
 export interface OrderTransportStatus {

@@ -119,6 +119,12 @@
               <span class="detail-label">{{ 'PAST_ORDERS.STATUS' | translate }}</span>
               <span class="detail-value status-badge">{{ order.order_status }}</span>
             </div>
+            <div class="detail-item" *ngIf="hasPostDelivery(order.post_delivery)">
+              <span class="detail-label">{{ 'POST_DELIVERY.TITLE' | translate }}</span>
+              <ion-badge [color]="getPostDeliveryColor(order.post_delivery)">
+                {{ getPostDeliveryLabel(order.post_delivery) }}
+              </ion-badge>
+            </div>
           </div>
 
           <div class="items-section">
