@@ -367,6 +367,21 @@ export class WholesalerApiService {
       );
   }
 
+  /**
+   * Returns true for errors that are safe to surface as network/timeout failures.
+   * Used to keep mutation error-handling consistent with read error-handling.
+   */
+  static isNetworkOrTimeout(err: any): boolean {
+    if (!err) return false;
+    const msg = (err.message || '').toLowerCase();
+    // Wrapped errors from handleError have a message key like 'ERRORS.NETWORK_ERROR'
+    if (msg.includes('errors.network_error')) return true;
+    // Raw HttpErrorResponse: status 0 = no connection, name TimeoutError
+    if (err.originalError?.status === 0) return true;
+    if (err.originalError?.name === 'TimeoutError') return true;
+    return false;
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'ERRORS.UNKNOWN_ERROR';
 
@@ -390,6 +405,9 @@ export class WholesalerApiService {
           break;
         case 404:
           errorMessage = 'ERRORS.NOT_FOUND';
+          break;
+        case 409:
+          errorMessage = 'ERRORS.CONFLICT';
           break;
         case 429:
           errorMessage = 'ERRORS.RATE_LIMIT_EXCEEDED';
@@ -458,15 +476,45 @@ export class WholesalerApiService {
 
   cancelOrder(orderId: number, reason: string): Observable<CancelOrderResponse> {
     const headers = this.getAuthHeaders();
+    // NOTE: No exponential-backoff retry for this mutation.
+    // Retrying a cancel POST could attempt a duplicate cancellation on the backend.
     return this.http.post<CancelOrderResponse>(
       `${this.apiUrl}/wholesaler/cancel-order/${orderId}`,
       { cancellation_reason: reason },
       { headers }
     ).pipe(
       timeout(30000),
-      this.getExponentialBackoffRetry(),
-      catchError(this.handleError.bind(this))
+      // Re-wrap to expose httpStatus alongside the translated message key,
+      // so callers can distinguish 401 / 409 / 5xx / network errors.
+      catchError((error: HttpErrorResponse) =>
+        throwError(() => ({
+          message: this.handleErrorMessage(error),
+          httpStatus: error.status ?? 0,
+          originalError: error,
+        }))
+      )
     );
+  }
+
+  /**
+   * Translate an HttpErrorResponse into a message-key string.
+   * Extracted from handleError so it can be called without returning Observable<never>.
+   */
+  private handleErrorMessage(error: HttpErrorResponse): string {
+    if (error.error instanceof ErrorEvent || error.status === 0) {
+      return 'ERRORS.NETWORK_ERROR';
+    }
+    switch (error.status) {
+      case 400: return 'ERRORS.BAD_REQUEST';
+      case 401: return 'ERRORS.UNAUTHORIZED';
+      case 403: return 'ERRORS.FORBIDDEN';
+      case 404: return 'ERRORS.NOT_FOUND';
+      case 409: return 'ERRORS.CONFLICT';
+      case 429: return 'ERRORS.RATE_LIMIT_EXCEEDED';
+      case 500: return 'ERRORS.SERVER_ERROR';
+      case 503: return 'ERRORS.SERVICE_UNAVAILABLE';
+      default:  return 'ERRORS.UNKNOWN_ERROR';
+    }
   }
 
   getCompletedOrders(wholesalerId?: number, daysAgo?: number): Observable<OrderItemDetails[]> {

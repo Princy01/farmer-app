@@ -43,7 +43,7 @@ import {
 @Component({
   selector: 'app-retailer-order-details',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe, ReturnRequestModalComponent],
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe],
   templateUrl: './retailer-order-details.component.html',
   styleUrls: ['./retailer-order-details.component.scss'],
 })
@@ -301,26 +301,43 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       });
   }
 
-  private getRatingErrorMessage(message: string): string {
-  if (!message) {
+  private getRatingErrorMessage(errorKey: string): string {
+    if (!errorKey) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_SUBMIT_ERROR');
+    }
+
+    // The service emits i18n translation keys. Map the known ones to
+    // rating-specific messages; fall back to a generic submit error.
+    const keyMap: Record<string, string> = {
+      'NETWORK_ERROR': 'RETAILER_ORDER_DETAILS.RATING_NETWORK_ERROR',
+      'REQUEST_TIMEOUT_ERROR': 'RETAILER_ORDER_DETAILS.RATING_NETWORK_ERROR',
+      'SERVER_ERROR': 'RETAILER_ORDER_DETAILS.RATING_SUBMIT_ERROR',
+      'SESSION_EXPIRED': 'SESSION_EXPIRED',
+      'ACCESS_DENIED': 'RETAILER_ORDER_DETAILS.RATING_FORBIDDEN',
+      'NOT_FOUND': 'RETAILER_ORDER_DETAILS.RATING_SUBMIT_ERROR',
+    };
+
+    if (keyMap[errorKey]) {
+      return this.translate.instant(keyMap[errorKey]);
+    }
+
+    // Legacy path: service may occasionally pass a raw message for unexpected errors
+    const normalized = errorKey.toLowerCase();
+    if (normalized.includes('already exists')) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_DUPLICATE');
+    }
+    if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_FORBIDDEN');
+    }
+    if (normalized.includes('must be delivered')) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_NOT_DELIVERED');
+    }
+    if (normalized.includes('required') || normalized.includes('invalid')) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_BAD_REQUEST');
+    }
+
     return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_SUBMIT_ERROR');
   }
-
-  const normalized = message.toLowerCase();
-  if (normalized.includes('already exists')) {
-    return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_DUPLICATE');
-  }
-  if (normalized.includes('not valid') || normalized.includes('only available') || normalized.includes('access')) {
-    return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_FORBIDDEN');
-  }
-  if (normalized.includes('must be delivered')) {
-    return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_NOT_DELIVERED');
-  }
-  if (normalized.includes('required') || normalized.includes('invalid')) {
-    return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_BAD_REQUEST');
-  }
-  return message;
-}
   /**
    * Retries loading order details after an error.
    */
@@ -429,24 +446,33 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  private submitCancelOrder(reason?: string): void {
+  private async submitCancelOrder(reason?: string): Promise<void> {
     if (!this.order || this.isCancelling) {
       return;
     }
 
     this.isCancelling = true;
     const cancellationReason = (reason || '').trim() || 'retailer_cancelled';
+    const orderId = this.order.order_id;
 
-    this.orderService.cancelOrder(this.order.order_id, cancellationReason)
+    const loading = await this.loadingCtrl.create({
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.CANCELLING_ORDER'),
+    });
+    await loading.present();
+
+    this.orderService.cancelOrder(orderId, cancellationReason)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: async () => {
+          await loading.dismiss();
           this.isCancelling = false;
           await this.showCancelSuccess();
           this.loadOrderDetails();
         },
-        error: async () => {
+        error: async (err: Error) => {
+          await loading.dismiss();
           this.isCancelling = false;
-          await this.showCancelError();
+          await this.showCancelError(err?.message, cancellationReason);
         }
       });
   }
@@ -460,11 +486,33 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  private async showCancelError(): Promise<void> {
+  private async showCancelError(errorKey?: string, cancellationReason?: string): Promise<void> {
+    // Map the error translation key from the service to a human-readable message.
+    // Falls back to a generic error if the key is unrecognised.
+    const networkKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR']);
+    const isNetworkError = errorKey && networkKeys.has(errorKey);
+
+    const message = isNetworkError
+      ? this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_NETWORK_ERROR')
+      : this.translate.instant(errorKey || 'RETAILER_ORDER_DETAILS.CANCEL_ORDER_ERROR_MESSAGE');
+
+    const buttons: any[] = [
+      { text: this.translate.instant('RETAILER_ORDER_DETAILS.OK'), role: 'cancel' }
+    ];
+
+    // Offer a retry button for transient errors (network / timeout / 5xx)
+    const retryableKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR', 'SERVER_ERROR']);
+    if (errorKey && retryableKeys.has(errorKey) && cancellationReason) {
+      buttons.unshift({
+        text: this.translate.instant('RETAILER_ORDER_DETAILS.RETRY'),
+        handler: () => this.submitCancelOrder(cancellationReason)
+      });
+    }
+
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_ERROR_TITLE'),
-      message: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL_ORDER_ERROR_MESSAGE'),
-      buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
+      message,
+      buttons
     });
     await alert.present();
   }
@@ -530,17 +578,36 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
     // Load return reasons if not already loaded
     if (this.returnReasons.length === 0) {
-      await this.loadReturnReasons();
-    }
+      const errorKey = await this.loadReturnReasons();
 
-    if (this.returnReasons.length === 0) {
-      const alert = await this.alertCtrl.create({
-        header: this.translate.instant('RETAILER_ORDER_DETAILS.ERROR'),
-        message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_REASONS_LOAD_FAILED'),
-        buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
-      });
-      await alert.present();
-      return;
+      if (this.returnReasons.length === 0) {
+        const networkKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR']);
+        const retryableKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR', 'SERVER_ERROR']);
+        const isNetwork = errorKey && networkKeys.has(errorKey);
+
+        const message = isNetwork
+          ? this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_REASONS_NETWORK_ERROR')
+          : this.translate.instant(errorKey || 'RETAILER_ORDER_DETAILS.RETURN_REASONS_LOAD_FAILED');
+
+        const buttons: any[] = [
+          { text: this.translate.instant('RETAILER_ORDER_DETAILS.OK'), role: 'cancel' }
+        ];
+
+        if (errorKey && retryableKeys.has(errorKey)) {
+          buttons.unshift({
+            text: this.translate.instant('RETAILER_ORDER_DETAILS.RETRY'),
+            handler: () => this.promptReturnOrder()
+          });
+        }
+
+        const alert = await this.alertCtrl.create({
+          header: this.translate.instant('RETAILER_ORDER_DETAILS.ERROR'),
+          message,
+          buttons
+        });
+        await alert.present();
+        return;
+      }
     }
 
     // Create and present the modal
@@ -594,8 +661,10 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
   /**
    * Loads return reasons from backend.
+   * Resolves with the error translation key on failure so the caller can show
+   * a context-aware message instead of silently swallowing the failure.
    */
-  private loadReturnReasons(): Promise<void> {
+  private loadReturnReasons(): Promise<string | null> {
     return new Promise((resolve) => {
       this.returnLoadingReasons = true;
 
@@ -604,16 +673,15 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (reasons) => {
-            console.log('Return reasons loaded:', reasons);
             this.returnReasons = reasons || [];
             this.returnLoadingReasons = false;
-            resolve();
+            resolve(null);
           },
-          error: (err) => {
+          error: (err: Error) => {
             console.error('Failed to load return reasons:', err);
             this.returnReasons = [];
             this.returnLoadingReasons = false;
-            resolve();
+            resolve(err?.message || 'RETAILER_ORDER_DETAILS.RETURN_REASONS_LOAD_FAILED');
           }
         });
     });
@@ -640,7 +708,8 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     await loading.present();
 
     let successCount = 0;
-    let failedWholesellers: string[] = [];
+    const failedWholesellers: string[] = [];
+    let lastErrorKey: string | null = null;
 
     // Process returns for each wholeseller
     for (const wholesellerId of uniqueWholesellers) {
@@ -665,20 +734,22 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
             .createReturnRequest(returnRequest)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
-              next: (response) => {
+              next: () => {
                 successCount++;
                 resolve();
               },
-              error: (err) => {
+              error: (err: Error) => {
                 const wholesellerName = wholesellerItems[0]?.wholeseller_name || `Wholeseller ${wholesellerId}`;
                 failedWholesellers.push(wholesellerName);
+                lastErrorKey = err?.message || null;
                 resolve(); // Continue with other wholesellers
               }
             });
         });
-      } catch (err) {
+      } catch (err: any) {
         const wholesellerName = wholesellerItems[0]?.wholeseller_name || `Wholeseller ${wholesellerId}`;
         failedWholesellers.push(wholesellerName);
+        lastErrorKey = err?.message || null;
       }
     }
 
@@ -693,10 +764,10 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     } else if (successCount > 0 && failedWholesellers.length > 0) {
       // Partial success still counts as submitted
       this.returnsSubmittedIds.add(this.order!.order_id);
-      await this.showReturnPartialError(failedWholesellers);
+      await this.showReturnPartialError(failedWholesellers, lastErrorKey);
       this.loadOrderDetails();
     } else {
-      await this.showReturnError();
+      await this.showReturnError(lastErrorKey, returnReasonId, remarks);
     }
 
     this.returningOrderIds.delete(this.order!.order_id);
@@ -711,20 +782,46 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  private async showReturnPartialError(failedWholesellers: string[]): Promise<void> {
+  private async showReturnPartialError(failedWholesellers: string[], errorKey?: string | null): Promise<void> {
+    const networkKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR']);
+    const hint = errorKey && networkKeys.has(errorKey)
+      ? ` ${this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_PARTIAL_NETWORK_HINT')}`
+      : '';
+
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_PARTIAL_ERROR_TITLE'),
-      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_PARTIAL_ERROR_MESSAGE', { wholesellers: failedWholesellers.join(', ') }),
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_PARTIAL_ERROR_MESSAGE', {
+        wholesellers: failedWholesellers.join(', ')
+      }) + hint,
       buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
     });
     await alert.present();
   }
 
-  private async showReturnError(): Promise<void> {
+  private async showReturnError(errorKey?: string | null, returnReasonId?: number, remarks?: string): Promise<void> {
+    const networkKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR']);
+    const retryableKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR', 'SERVER_ERROR']);
+    const isNetwork = errorKey && networkKeys.has(errorKey);
+
+    const message = isNetwork
+      ? this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_NETWORK_ERROR')
+      : this.translate.instant(errorKey || 'RETAILER_ORDER_DETAILS.RETURN_ERROR_MESSAGE');
+
+    const buttons: any[] = [
+      { text: this.translate.instant('RETAILER_ORDER_DETAILS.OK'), role: 'cancel' }
+    ];
+
+    if (errorKey && retryableKeys.has(errorKey) && returnReasonId != null) {
+      buttons.unshift({
+        text: this.translate.instant('RETAILER_ORDER_DETAILS.RETRY'),
+        handler: () => this.submitReturnOrder(returnReasonId, remarks || '')
+      });
+    }
+
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ERROR_TITLE'),
-      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ERROR_MESSAGE'),
-      buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
+      message,
+      buttons
     });
     await alert.present();
   }

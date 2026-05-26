@@ -123,6 +123,10 @@ export class RetailerOrderService {
       retry({
         count: 2,
         delay: (error, retryCount) => {
+          // Do not retry client errors (4xx) — they will not resolve on retry
+          if (error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500) {
+            return throwError(() => error);
+          }
           const delayMs = Math.pow(2, retryCount - 1) * 1000;
           return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
         }
@@ -146,6 +150,9 @@ export class RetailerOrderService {
       retry({
         count: 2,
         delay: (error, retryCount) => {
+          if (error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500) {
+            return throwError(() => error);
+          }
           const delayMs = Math.pow(2, retryCount - 1) * 1000;
           return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
         }
@@ -174,6 +181,9 @@ export class RetailerOrderService {
       retry({
         count: 2,
         delay: (error, retryCount) => {
+          if (error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500) {
+            return throwError(() => error);
+          }
           const delayMs = Math.pow(2, retryCount - 1) * 1000;
           return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
         }

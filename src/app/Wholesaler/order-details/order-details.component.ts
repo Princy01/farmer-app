@@ -223,25 +223,69 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
           await this.showCancelSuccess();
           this.loadOrderDetails();
         },
-        error: async () => {
-          await this.showCancelError();
+        error: async (err) => {
+          await this.showCancelError(err, cancellationReason);
         }
       });
+  }
+
+  private async showCancelError(err: any, cancellationReason: string): Promise<void> {
+    const httpStatus: number = err?.httpStatus ?? err?.originalError?.status ?? 0;
+    const isNetwork = httpStatus === 0 || err?.message === 'ERRORS.NETWORK_ERROR';
+    const isTimeout = err?.originalError?.name === 'TimeoutError';
+    const isUnauthorized = httpStatus === 401;
+    const isConflict = httpStatus === 409;
+    const isServerError = httpStatus >= 500;
+
+    let message: string;
+    let offerRetry = false;
+
+    if (isUnauthorized) {
+      // Session expired — don't offer retry, re-auth instead
+      message = this.translate.instant('ORDER_DETAILS.SESSION_EXPIRED');
+    } else if (isConflict) {
+      // Order already cancelled / in a terminal state
+      message = this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_ALREADY_CANCELLED');
+    } else if (isNetwork || isTimeout) {
+      message = this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_NETWORK_ERROR');
+      offerRetry = true;
+    } else if (isServerError) {
+      message = this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_SERVER_ERROR');
+      offerRetry = true;
+    } else {
+      message = this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_ERROR_MESSAGE');
+    }
+
+    const buttons: any[] = [
+      { text: this.translate.instant('ORDER_DETAILS.OK'), role: 'cancel' }
+    ];
+
+    if (offerRetry) {
+      buttons.push({
+        text: this.translate.instant('ORDER_DETAILS.RETRY'),
+        handler: () => this.submitCancelOrder(cancellationReason)
+      });
+    }
+
+    if (isUnauthorized) {
+      buttons[0].handler = () => {
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      };
+    }
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('ORDER_DETAILS.ERROR'),
+      message,
+      buttons
+    });
+    await alert.present();
   }
 
   private async showCancelSuccess(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_SUCCESS_TITLE'),
       message: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_SUCCESS_MESSAGE'),
-      buttons: [this.translate.instant('ORDER_DETAILS.OK')]
-    });
-    await alert.present();
-  }
-
-  private async showCancelError(): Promise<void> {
-    const alert = await this.alertCtrl.create({
-      header: this.translate.instant('ORDER_DETAILS.ERROR'),
-      message: this.translate.instant('ORDER_DETAILS.CANCEL_ORDER_ERROR_MESSAGE'),
       buttons: [this.translate.instant('ORDER_DETAILS.OK')]
     });
     await alert.present();
@@ -315,18 +359,21 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
       .pipe(
         catchError(error => {
           this.error = true;
+          // handleError wraps errors as { message, originalError }.
+          // Read the HTTP status from originalError.status.
+          const httpStatus: number = error?.originalError?.status ?? error?.httpStatus ?? 0;
 
-          if (error.status === 401) {
+          if (httpStatus === 401) {
             this.showAuthError();
             return of(null);
           }
 
-          if (error.status === 403) {
+          if (httpStatus === 403) {
             this.showOrderAccessError();
             return of(null);
           }
 
-          if (error.status === 404) {
+          if (httpStatus === 404) {
             this.showOrderNotFoundError();
             return of(null);
           }
