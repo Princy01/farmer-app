@@ -62,7 +62,7 @@ export class StockService {
 
   // Cache for reference data (24-hour TTL)
   private branchesCache: { [userId: number]: { data: BusinessBranchWithNames[], timestamp: number } } = {};
-  private productsCache: { data: any[], timestamp: number } | null = null;
+  private productsCache: { data: any[], timestamp: number, language: string } | null = null;
   private qualitiesCache: { data: any[], timestamp: number } | null = null;
   private wastageMeasuresCache: { data: any[], timestamp: number } | null = null;
   private unitsCache: { data: any[], timestamp: number } | null = null;
@@ -78,8 +78,20 @@ export class StockService {
     const token = this.authService.getToken();
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-App-Language': this.getPreferredLanguage()
     });
+  }
+
+  private getPreferredLanguage(): string {
+    const rawLang = (
+      localStorage.getItem('preferred_language') ||
+      localStorage.getItem('appLang') ||
+      'en'
+    ).toLowerCase();
+    const baseLang = rawLang.split('-')[0];
+    const supportedLangs = ['en', 'hi', 'te', 'ta', 'kn', 'ml', 'or', 'mr', 'gu', 'bn', 'pa', 'ur'];
+    return supportedLangs.includes(baseLang) ? baseLang : 'en';
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
@@ -248,8 +260,13 @@ export class StockService {
   }
 
   getProducts(): Observable<any[]> {
+    const language = this.getPreferredLanguage();
     // Check cache first
-    if (this.productsCache && this.isCacheValid(this.productsCache.timestamp)) {
+    if (
+      this.productsCache &&
+      this.productsCache.language === language &&
+      this.isCacheValid(this.productsCache.timestamp)
+    ) {
       return new Observable(observer => {
         observer.next(this.productsCache!.data);
         observer.complete();
@@ -274,7 +291,8 @@ export class StockService {
       tap((data: any[]) => {
         this.productsCache = {
           data,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          language
         };
       })
     );
