@@ -27,6 +27,7 @@
     "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया दोबारा लॉगिन करें।",
     "OK": "ठीक है",
     "ACCESS_DENIED": "पहुंच अस्वीकृत",
+    "CHARACTERS": "अक्षर",
     "NO_PERMISSION": "आपको इस पेज तक पहुंचने की अनुमति नहीं है।",
     "LOADING_INVENTORY": "इन्वेंटरी लोड हो रही है...",
     "NOTICE": "सूचना",
@@ -1829,6 +1830,7 @@
     "PROCESSING_RETURN": "रिटर्न अनुरोध प्रक्रिया में है...",
     "RETURN_SUCCESS_TITLE": "रिटर्न शुरू हुआ",
     "RETURN_SUCCESS_MESSAGE": "आपका रिटर्न अनुरोध सफलतापूर्वक सबमिट हो गया।",
+    "RETURN_SUCCESS_SUBTITLE": "हम जल्द ही आपको पिकअप विवरण के साथ संपर्क करेंगे।",
     "RETURN_ERROR_TITLE": "रिटर्न विफल",
     "RETURN_ERROR_MESSAGE": "रिटर्न अनुरोध सबमिट नहीं हो सका। कृपया दोबारा कोशिश करें।",
     "RETURN_PARTIAL_ERROR_TITLE": "आंशिक रिटर्न त्रुटि",
@@ -1840,7 +1842,8 @@
     "RETURN_COMPLETED_BADGE": "रिटर्न पूर्ण",
     "VIEW_RETURN_STATUS": "रिटर्न स्थिति देखें",
     "RETURN_CANNOT_BE_CANCELLED": "इस ऑर्डर के लिए रिटर्न अनुरोध है और इसे रद्द नहीं किया जा सकता।",
-    "OK": "ठीक है",
+    "OPTIONAL": "वैकल्पिक",
+    "ADDITIONAL_DETAILS": "अतिरिक्त विवरण",
     "ISSUE_HELP_TITLE": "क्या इस ऑर्डर में मदद चाहिए?",
     "ISSUE_HELP_NOTE": "इस ऑर्डर के लिए समस्या रिपोर्ट करें या अपने दर्ज किए गए मुद्दे देखें।",
     "REPORT_ISSUE": "समस्या रिपोर्ट करें",
@@ -1862,8 +1865,15 @@
     "RATING_FORBIDDEN": "आपको यह रेटिंग सबमिट करने की अनुमति नहीं है।",
     "RATING_BAD_REQUEST": "कृपया रेटिंग विवरण जांचें और फिर से प्रयास करें।",
     "RATING_EXISTING": "पहले से दर्ज रेटिंग",
-    "RATING_NOT_DELIVERED": "रेटिंग देने से पहले ऑर्डर डिलीवर होना चाहिए"
+    "RATING_NOT_DELIVERED": "रेटिंग देने से पहले ऑर्डर डिलीवर होना चाहिए",
+    "CANCEL": "रद्द करें",
+    "OK": "आगे बढ़ें"
   },
+  "CHARACTERS": "अक्षर",
+  "BACK": "वापस",
+  "CLOSE": "बंद करें",
+  "TRY_AGAIN": "पुनः प्रयास करें",
+
   "BUYER_DISPUTES": {
     "REPORT_ISSUE_TITLE": "समस्या रिपोर्ट करें",
     "MY_ISSUES_TITLE": "मेरे मुद्दे",

@@ -25,8 +25,10 @@ import {
   starOutline,
   refreshOutline,
   returnDownBackOutline,
+  chevronForwardOutline,
 } from 'ionicons/icons';
 import { RetailerOrderService, RetailerOrderDetails, OrderItem, OrderTransportStatus, ReturnReason, CreateReturnRequest } from './retailer-order-details.service';
+import { ReturnRequestModalComponent } from './return-request-modal/return-request-modal.component';
 import {
   BuyerRatingsService,
   PeerRatingContextResponse,
@@ -41,7 +43,7 @@ import {
 @Component({
   selector: 'app-retailer-order-details',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe],
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe, ReturnRequestModalComponent],
   templateUrl: './retailer-order-details.component.html',
   styleUrls: ['./retailer-order-details.component.scss'],
 })
@@ -101,6 +103,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       starOutline,
       refreshOutline,
       returnDownBackOutline,
+      chevronForwardOutline,
     });
   }
 
@@ -540,34 +543,24 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // First step: Select return reason
-    const reasonAlert = await this.alertCtrl.create({
-      header: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_TITLE'),
-      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_MESSAGE'),
-      inputs: this.returnReasons.map((reason) => ({
-        name: 'returnReason',
-        type: 'radio' as const,
-        label: reason.reason_description,
-        value: reason.reason_id.toString()
-      })),
-      buttons: [
-        {
-          text: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL'),
-          role: 'cancel'
-        },
-        {
-          text: this.translate.instant('RETAILER_ORDER_DETAILS.OK'),
-          handler: (data) => {
-            if (data) {
-              // Second step: Get remarks if user selected a reason
-              this.promptReturnRemarks(parseInt(data));
-            }
-          }
-        }
-      ]
+    // Create and present the modal
+    const modal = await this.modalCtrl.create({
+      component: ReturnRequestModalComponent,
+      componentProps: {
+        returnReasons: this.returnReasons
+      },
+      breakpoints: [0, 0.95],
+      initialBreakpoint: 0.95
     });
 
-    await reasonAlert.present();
+    await modal.present();
+
+    const { data, role } = await modal.onDidDismiss();
+
+    // Handle modal result
+    if (role !== 'backdrop' && data?.returnReasonId) {
+      await this.submitReturnOrder(data.returnReasonId, data.remarks || '');
+    }
   }
 
   /**

@@ -27,6 +27,7 @@
     "SESSION_EXPIRED": "Your session has expired. Please login again.",
     "OK": "OK",
     "ACCESS_DENIED": "Access Denied",
+    "CHARACTERS": "Characters",
     "NO_PERMISSION": "You do not have permission to access this page.",
     "LOADING_INVENTORY": "Loading inventory...",
     "NOTICE": "Notice",
@@ -1860,6 +1861,7 @@
     "PROCESSING_RETURN": "Processing return request...",
     "RETURN_SUCCESS_TITLE": "Return Initiated",
     "RETURN_SUCCESS_MESSAGE": "Your return request has been submitted successfully.",
+    "RETURN_SUCCESS_SUBTITLE": "We will contact you soon with pickup details.",
     "RETURN_ERROR_TITLE": "Return Failed",
     "RETURN_ERROR_MESSAGE": "Failed to submit return request. Please try again.",
     "RETURN_PARTIAL_ERROR_TITLE": "Partial Return Error",
@@ -1871,7 +1873,8 @@
     "RETURN_COMPLETED_BADGE": "Return Completed",
     "VIEW_RETURN_STATUS": "View Return Status",
     "RETURN_CANNOT_BE_CANCELLED": "This order has a return request and cannot be cancelled.",
-    "OK": "OK",
+    "OPTIONAL": "Optional",
+    "ADDITIONAL_DETAILS": "Additional Details",
     "ISSUE_HELP_TITLE": "Need help with this order?",
     "ISSUE_HELP_NOTE": "Report an issue for this order or review your submitted issues.",
     "REPORT_ISSUE": "Report Issue",
@@ -1893,8 +1896,15 @@
     "RATING_FORBIDDEN": "You are not allowed to submit this rating.",
     "RATING_BAD_REQUEST": "Please review your rating details and try again.",
     "RATING_EXISTING": "Already Captured Ratings",
-    "RATING_NOT_DELIVERED": "Order must be delivered before a rating can be submitted"
+    "RATING_NOT_DELIVERED": "Order must be delivered before a rating can be submitted",
+    "CANCEL": "Cancel",
+    "OK": "Next"
   },
+  "CHARACTERS": "characters",
+  "BACK": "Back",
+  "CLOSE": "Close",
+  "TRY_AGAIN": "Try Again",
+
   "BUYER_DISPUTES": {
     "REPORT_ISSUE_TITLE": "Report Issue",
     "MY_ISSUES_TITLE": "My Issues",

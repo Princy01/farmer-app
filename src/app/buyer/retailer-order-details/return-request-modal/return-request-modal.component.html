@@ -1,0 +1,160 @@
+<ion-header class="return-modal-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="close()" fill="clear">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="modal-title">{{ 'RETAILER_ORDER_DETAILS.RETURN_ORDER_TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="false" class="return-modal-content">
+
+  <!-- Step Indicator -->
+  <div class="step-indicator" *ngIf="currentStep !== 'success' && currentStep !== 'error'">
+    <div class="steps">
+      <div class="step" [class.active]="currentStep === 'reasons'" [class.completed]="currentStep === 'remarks'">
+        <div class="step-number">1</div>
+        <div class="step-label">{{ 'RETAILER_ORDER_DETAILS.RETURN_REASON_REQUIRED' | translate }}</div>
+      </div>
+      <div class="step-connector" [class.completed]="currentStep === 'remarks'"></div>
+      <div class="step" [class.active]="currentStep === 'remarks'">
+        <div class="step-number">2</div>
+        <div class="step-label">{{ 'RETAILER_ORDER_DETAILS.RETURN_REMARKS_PLACEHOLDER' | translate }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Select Return Reason -->
+  <div *ngIf="currentStep === 'reasons'" class="step-content fade-in">
+    <ion-card class="reason-card-header">
+      <ion-card-content>
+        <p class="step-description">{{ 'RETAILER_ORDER_DETAILS.RETURN_ORDER_MESSAGE' | translate }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="reasons-list">
+      <div
+        *ngFor="let reason of returnReasons"
+        class="reason-item"
+        [class.selected]="selectedReasonId === reason.reason_id"
+        (click)="selectReason(reason.reason_id, reason.reason_description)"
+      >
+        <div class="reason-radio">
+          <div class="radio-circle" [class.checked]="selectedReasonId === reason.reason_id"></div>
+        </div>
+        <div class="reason-content">
+          <p>{{ reason.reason_description }}</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" *ngIf="selectedReasonId === reason.reason_id" color="primary"></ion-icon>
+      </div>
+    </div>
+
+    <div class="step-actions">
+      <ion-button expand="block" fill="clear" color="medium" (click)="close()">
+        {{ 'RETAILER_ORDER_DETAILS.CANCEL' | translate }}
+      </ion-button>
+      <ion-button
+        expand="block"
+        color="primary"
+        [disabled]="!selectedReasonId"
+        (click)="proceedToRemarks()"
+      >
+        {{ 'RETAILER_ORDER_DETAILS.OK' | translate }}
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Add Remarks -->
+  <div *ngIf="currentStep === 'remarks'" class="step-content fade-in">
+    <ion-card class="selected-reason-card">
+      <ion-card-content>
+        <div class="selected-summary">
+          <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+          <div>
+            <p class="summary-label">{{ 'RETAILER_ORDER_DETAILS.RETURN_REASON_REQUIRED' | translate }}</p>
+            <p class="summary-value">{{ selectedReasonDescription }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <form [formGroup]="returnForm">
+      <ion-card class="remarks-card">
+        <ion-card-header>
+          <ion-card-title>{{ 'RETAILER_ORDER_DETAILS.ADDITIONAL_DETAILS' | translate }}</ion-card-title>
+          <ion-card-subtitle>{{ 'RETAILER_ORDER_DETAILS.OPTIONAL' | translate }}</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-textarea
+              formControlName="remarks"
+              placeholder="{{ 'RETAILER_ORDER_DETAILS.RETURN_REMARKS_PLACEHOLDER' | translate }}"
+              rows="5"
+              counter
+              maxlength="500"
+            ></ion-textarea>
+          </ion-item>
+          <p class="char-count">{{ getRemarksCharCount() }}/500 {{ 'CHARACTERS' | translate }}</p>
+        </ion-card-content>
+      </ion-card>
+    </form>
+
+    <div class="step-actions">
+      <ion-button expand="block" fill="clear" color="medium" (click)="backToReasons()">
+        {{ 'BACK' | translate }}
+      </ion-button>
+      <ion-button
+        expand="block"
+        color="primary"
+        [disabled]="submitting"
+        (click)="submitReturn()"
+      >
+        <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
+        {{ submitting ? 'RETAILER_ORDER_DETAILS.PROCESSING_RETURN' : 'RETAILER_ORDER_DETAILS.RETURN_ORDER_ACTION' | translate }}
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- SUCCESS STATE -->
+  <div *ngIf="currentStep === 'success'" class="step-content success-state fade-in">
+    <div class="success-animation">
+      <div class="success-circle">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+      </div>
+    </div>
+    <ion-card class="result-card">
+      <ion-card-content class="text-center">
+        <h2 color="success">{{ 'RETAILER_ORDER_DETAILS.RETURN_SUCCESS_TITLE' | translate }}</h2>
+        <p>{{ 'RETAILER_ORDER_DETAILS.RETURN_SUCCESS_MESSAGE' | translate }}</p>
+        <p class="small-text">{{ 'RETAILER_ORDER_DETAILS.RETURN_SUCCESS_SUBTITLE' | translate }}</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div *ngIf="currentStep === 'error'" class="step-content error-state fade-in">
+    <div class="error-animation">
+      <div class="error-circle">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+      </div>
+    </div>
+    <ion-card class="result-card error">
+      <ion-card-content class="text-center">
+        <h2 color="danger">{{ 'RETAILER_ORDER_DETAILS.RETURN_ERROR_TITLE' | translate }}</h2>
+        <p>{{ errorMessage || ('RETAILER_ORDER_DETAILS.RETURN_ERROR_MESSAGE' | translate) }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="step-actions">
+      <ion-button expand="block" fill="clear" color="medium" (click)="close()">
+        {{ 'CLOSE' | translate }}
+      </ion-button>
+      <ion-button expand="block" color="primary" (click)="backToReasons()">
+        {{ 'TRY_AGAIN' | translate }}
+      </ion-button>
+    </div>
+  </div>
+
+</ion-content>
