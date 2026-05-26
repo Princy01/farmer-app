@@ -1966,6 +1966,27 @@
     "ERROR_VALIDATION": "कृपया अपनी जानकारी जांचें और फिर से प्रयास करें।",
     "ERROR_GENERIC": "अभी आपका अनुरोध पूरा नहीं हो सका। कृपया फिर से कोशिश करें।"
   },
+  "POST_DELIVERY": {
+    "TITLE": "डिलीवरी के बाद की स्थिति",
+    "RETURN": "रिटर्न प्रक्रिया में",
+    "RETURN_REQUESTED": "रिटर्न अनुरोध किया गया",
+    "RETURN_APPROVED": "रिटर्न स्वीकृत",
+    "RETURN_REJECTED": "रिटर्न अस्वीकृत",
+    "RETURN_PICKUP_SCHEDULED": "रिटर्न पिकअप तय",
+    "RETURN_PICKED_UP": "रिटर्न पिकअप हो गया",
+    "RETURN_IN_TRANSIT": "रिटर्न रास्ते में",
+    "RETURN_DELIVERED_TO_WHOLESALER": "माल होलसेलर तक लौट गया",
+    "RETURN_QUALITY_CHECKED": "रिटर्न गुणवत्ता जांच पूरी",
+    "RETURN_REFUND_INITIATED": "रिफंड शुरू",
+    "RETURN_REFUND_COMPLETED": "रिफंड पूरा",
+    "RETURN_DISPUTED": "रिटर्न विवाद में",
+    "RETURN_CLOSED": "रिटर्न बंद",
+    "RETURN_CANCELLED": "रिटर्न रद्द",
+    "DISPUTE": "मुद्दा समीक्षा में",
+    "RETURN_DISPUTE": "रिटर्न विवाद समीक्षा में",
+    "FINANCE_EXCEPTION": "फाइनेंस कार्रवाई लंबित",
+    "ADMIN_ACTION_REQUIRED": "एडमिन कार्रवाई आवश्यक"
+  },
   "RETAILER_ORDER_HISTORY": {
     "PAGE_TITLE": "ऑर्डर इतिहास",
     "ERROR_TITLE": "ऑर्डर लोड नहीं हो पाए",

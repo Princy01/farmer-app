@@ -8,9 +8,15 @@ import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { addIcons } from 'ionicons';
 import {
   searchOutline, ellipsisVertical, menuOutline, closeOutline, chevronDownCircleOutline,
-  chevronForwardOutline, receiptOutline, refreshOutline
+  chevronForwardOutline, receiptOutline, refreshOutline, alertCircleOutline
 } from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
+import {
+  OrderPostDeliveryStatus,
+  getPostDeliveryColor,
+  getPostDeliveryLabelKey,
+  hasPostDeliveryStatus,
+} from 'src/app/shared/order-post-delivery-status';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -27,6 +33,10 @@ interface DisplayOrder {
   id: number;
   items: string;
   total: number;
+  postDelivery?: OrderPostDeliveryStatus | null;
+  postDeliveryLabel?: string;
+  postDeliveryColor?: string;
+  postDeliveryNeedsAdminAction?: boolean;
 }
 
 @Component({
@@ -70,7 +80,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   ) {
     addIcons({
       searchOutline, ellipsisVertical, menuOutline, closeOutline,
-      chevronDownCircleOutline, chevronForwardOutline, receiptOutline, refreshOutline
+      chevronDownCircleOutline, chevronForwardOutline, receiptOutline, refreshOutline, alertCircleOutline
     });
   }
 
@@ -235,7 +245,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
             this.orders = data.map(order => ({
               id: order.order_id,
               items: this.formatOrderItems(order.order_items),
-              total: order.total_order_amount
+              total: order.total_order_amount,
+              postDelivery: order.post_delivery ?? null,
+              postDeliveryLabel: this.getPostDeliveryLabel(order.post_delivery),
+              postDeliveryColor: getPostDeliveryColor(order.post_delivery),
+              postDeliveryNeedsAdminAction: !!order.post_delivery?.needs_admin_action
             }));
 
             // Sort by order ID descending (most recent first)
@@ -270,6 +284,25 @@ export class OrdersComponent implements OnInit, OnDestroy {
       });
       await alert.present();
     }
+  }
+
+  hasPostDelivery(status?: OrderPostDeliveryStatus | null): boolean {
+    return hasPostDeliveryStatus(status);
+  }
+
+  private getPostDeliveryLabel(status?: OrderPostDeliveryStatus | null): string | undefined {
+    const key = getPostDeliveryLabelKey(status);
+    if (key) {
+      const translated = this.translate.instant(key);
+      if (translated !== key) {
+        return translated;
+      }
+    }
+    return status?.return_status_description ||
+      status?.return_status_name ||
+      status?.dispute_status ||
+      status?.finance_exception_status ||
+      undefined;
   }
 
   /**

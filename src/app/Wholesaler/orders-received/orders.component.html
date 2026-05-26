@@ -76,6 +76,13 @@
                 <span class="label">{{ 'ORDERS_RECEIVED.TOTAL_AMOUNT' | translate }}</span>
                 <span class="amount">₹{{ order.total }}</span>
               </div>
+              <ion-badge
+                *ngIf="order.postDeliveryLabel"
+                [color]="order.postDeliveryColor || 'secondary'"
+                class="status-badge">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                {{ order.postDeliveryLabel }}
+              </ion-badge>
               <ion-button
                 fill="solid"
                 size="small"

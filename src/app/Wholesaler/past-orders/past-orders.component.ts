@@ -9,6 +9,12 @@ import { filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, 
 import { WholesalerApiService, OrderItemDetails } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import {
+  OrderPostDeliveryStatus,
+  getPostDeliveryColor,
+  getPostDeliveryLabelKey,
+  hasPostDeliveryStatus,
+} from 'src/app/shared/order-post-delivery-status';
 
 interface FilterOption {
   value: string;
@@ -198,6 +204,29 @@ export class PastOrdersComponent implements AfterViewInit, OnDestroy {
       color: 'medium'
     });
     await toast.present();
+  }
+
+  hasPostDelivery(status?: OrderPostDeliveryStatus | null): boolean {
+    return hasPostDeliveryStatus(status);
+  }
+
+  getPostDeliveryColor(status?: OrderPostDeliveryStatus | null): string {
+    return getPostDeliveryColor(status);
+  }
+
+  getPostDeliveryLabel(status?: OrderPostDeliveryStatus | null): string {
+    const key = getPostDeliveryLabelKey(status);
+    if (key) {
+      const translated = this.translate.instant(key);
+      if (translated !== key) {
+        return translated;
+      }
+    }
+    return status?.return_status_description ||
+      status?.return_status_name ||
+      status?.dispute_status ||
+      status?.finance_exception_status ||
+      '';
   }
 
   /**
