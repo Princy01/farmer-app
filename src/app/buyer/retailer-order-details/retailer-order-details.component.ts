@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, ModalController, LoadingController } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
@@ -24,8 +24,9 @@ import {
   star,
   starOutline,
   refreshOutline,
+  returnDownBackOutline,
 } from 'ionicons/icons';
-import { RetailerOrderService, RetailerOrderDetails, OrderItem, OrderTransportStatus } from './retailer-order-details.service';
+import { RetailerOrderService, RetailerOrderDetails, OrderItem, OrderTransportStatus, ReturnReason, CreateReturnRequest } from './retailer-order-details.service';
 import {
   BuyerRatingsService,
   PeerRatingContextResponse,
@@ -60,6 +61,16 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   readonly starValues = [1, 2, 3, 4, 5];
   isCancelling = false;
 
+  // Return order properties
+  isReturning = false;
+  returnReasons: ReturnReason[] = [];
+  returningOrderIds = new Set<number>(); // Orders currently submitting returns
+  returnsSubmittedIds = new Set<number>(); // Orders with successfully submitted returns
+  selectedReturnItems: Map<number, number> = new Map(); // Map of product_id to quantity
+  selectedReturnReason: ReturnReason | null = null;
+  returnRemarks = '';
+  returnLoadingReasons = false;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -68,6 +79,8 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     private orderService: RetailerOrderService,
     private ratingsService: BuyerRatingsService,
     private alertCtrl: AlertController,
+    private modalCtrl: ModalController,
+    private loadingCtrl: LoadingController,
     private translate: TranslateService
   ) {
     addIcons({
@@ -87,6 +100,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       star,
       starOutline,
       refreshOutline,
+      returnDownBackOutline,
     });
   }
 
@@ -364,6 +378,11 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       return false;
     }
 
+    // Prevent cancellation if return is already requested
+    if (this.returnsSubmittedIds.has(this.order.order_id)) {
+      return false;
+    }
+
     const statusName = (this.order.order_status_name || '').toLowerCase();
     if (statusName.includes('cancel') || statusName.includes('return') || statusName.includes('reject')) {
       return false;
@@ -450,6 +469,271 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   isSuccessfulStatus(statusName: string): boolean {
     const value = statusName.toLowerCase();
     return value.includes('successful') || value.includes('delivered') || value.includes('complete');
+  }
+
+  /**
+   * Checks if order can be returned (only delivered orders).
+   */
+  canReturnOrder(): boolean {
+    if (!this.order) {
+      return false;
+    }
+
+    // Don't allow return if already submitted or currently submitting
+    if (this.returningOrderIds.has(this.order.order_id) || this.returnsSubmittedIds.has(this.order.order_id)) {
+      return false;
+    }
+
+    // Only allow return for delivered orders
+    return this.isSuccessfulStatus(this.order.order_status_name);
+  }
+
+  /**
+   * Gets the return status badge text for the order.
+   */
+  getReturnStatusBadge(): string | null {
+    if (!this.order) {
+      return null;
+    }
+
+    if (this.returningOrderIds.has(this.order.order_id)) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.PROCESSING_RETURN');
+    }
+
+    if (this.returnsSubmittedIds.has(this.order.order_id)) {
+      return this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_REQUESTED_BADGE');
+    }
+
+    return null;
+  }
+
+  /**
+   * Checks if order has a pending return request.
+   */
+  hasReturnRequest(): boolean {
+    if (!this.order) {
+      return false;
+    }
+    return this.returnsSubmittedIds.has(this.order.order_id);
+  }
+
+  /**
+   * Opens modal to initiate return request.
+   */
+  async promptReturnOrder(): Promise<void> {
+    if (!this.order || this.isReturning || this.returningOrderIds.has(this.order.order_id)) {
+      return;
+    }
+
+    // Load return reasons if not already loaded
+    if (this.returnReasons.length === 0) {
+      await this.loadReturnReasons();
+    }
+
+    if (this.returnReasons.length === 0) {
+      const alert = await this.alertCtrl.create({
+        header: this.translate.instant('RETAILER_ORDER_DETAILS.ERROR'),
+        message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_REASONS_LOAD_FAILED'),
+        buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
+      });
+      await alert.present();
+      return;
+    }
+
+    // First step: Select return reason
+    const reasonAlert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_MESSAGE'),
+      inputs: this.returnReasons.map((reason) => ({
+        name: 'returnReason',
+        type: 'radio' as const,
+        label: reason.reason_description,
+        value: reason.reason_id.toString()
+      })),
+      buttons: [
+        {
+          text: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('RETAILER_ORDER_DETAILS.OK'),
+          handler: (data) => {
+            if (data) {
+              // Second step: Get remarks if user selected a reason
+              this.promptReturnRemarks(parseInt(data));
+            }
+          }
+        }
+      ]
+    });
+
+    await reasonAlert.present();
+  }
+
+  /**
+   * Prompts user for return remarks after reason selection.
+   */
+  private async promptReturnRemarks(returnReasonId: number): Promise<void> {
+    const remarksAlert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_MESSAGE'),
+      inputs: [
+        {
+          name: 'remarks',
+          type: 'textarea',
+          placeholder: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_REMARKS_PLACEHOLDER')
+        }
+      ],
+      buttons: [
+        {
+          text: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_ACTION'),
+          handler: (data) => this.submitReturnOrder(returnReasonId, data?.remarks || '')
+        }
+      ]
+    });
+
+    await remarksAlert.present();
+  }
+
+  /**
+   * Loads return reasons from backend.
+   */
+  private loadReturnReasons(): Promise<void> {
+    return new Promise((resolve) => {
+      this.returnLoadingReasons = true;
+
+      this.orderService
+        .getReturnReasons('retailer')
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (reasons) => {
+            console.log('Return reasons loaded:', reasons);
+            this.returnReasons = reasons || [];
+            this.returnLoadingReasons = false;
+            resolve();
+          },
+          error: (err) => {
+            console.error('Failed to load return reasons:', err);
+            this.returnReasons = [];
+            this.returnLoadingReasons = false;
+            resolve();
+          }
+        });
+    });
+  }
+
+  /**
+   * Submits return request with selected items and reason.
+   */
+  private async submitReturnOrder(returnReasonId: number, remarks: string): Promise<void> {
+    if (!this.order || this.isReturning) {
+      return;
+    }
+
+    // Get unique wholesellers for this order
+    const uniqueWholesellers = [...new Set(this.order.items.map(item => item.wholeseller_id))];
+
+    // For each wholeseller, create a return request for all their items
+    this.isReturning = true;
+    this.returningOrderIds.add(this.order.order_id);
+
+    const loading = await this.loadingCtrl.create({
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.PROCESSING_RETURN'),
+    });
+    await loading.present();
+
+    let successCount = 0;
+    let failedWholesellers: string[] = [];
+
+    // Process returns for each wholeseller
+    for (const wholesellerId of uniqueWholesellers) {
+      const wholesellerItems = this.order.items.filter(item => item.wholeseller_id === wholesellerId);
+      const returnItems = wholesellerItems.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit: item.unit_name || 'kg'
+      }));
+
+      const returnRequest: CreateReturnRequest = {
+        order_id: this.order.order_id,
+        wholeseller_id: wholesellerId,
+        return_reason_id: returnReasonId,
+        items: returnItems,
+        remarks: remarks
+      };
+
+      try {
+        await new Promise<void>((resolve, reject) => {
+          this.orderService
+            .createReturnRequest(returnRequest)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (response) => {
+                successCount++;
+                resolve();
+              },
+              error: (err) => {
+                const wholesellerName = wholesellerItems[0]?.wholeseller_name || `Wholeseller ${wholesellerId}`;
+                failedWholesellers.push(wholesellerName);
+                resolve(); // Continue with other wholesellers
+              }
+            });
+        });
+      } catch (err) {
+        const wholesellerName = wholesellerItems[0]?.wholeseller_name || `Wholeseller ${wholesellerId}`;
+        failedWholesellers.push(wholesellerName);
+      }
+    }
+
+    await loading.dismiss();
+    this.isReturning = false;
+
+    if (successCount > 0 && failedWholesellers.length === 0) {
+      // Mark order as having a submitted return
+      this.returnsSubmittedIds.add(this.order!.order_id);
+      await this.showReturnSuccess();
+      this.loadOrderDetails();
+    } else if (successCount > 0 && failedWholesellers.length > 0) {
+      // Partial success still counts as submitted
+      this.returnsSubmittedIds.add(this.order!.order_id);
+      await this.showReturnPartialError(failedWholesellers);
+      this.loadOrderDetails();
+    } else {
+      await this.showReturnError();
+    }
+
+    this.returningOrderIds.delete(this.order!.order_id);
+  }
+
+  private async showReturnSuccess(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_SUCCESS_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_SUCCESS_MESSAGE'),
+      buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
+    });
+    await alert.present();
+  }
+
+  private async showReturnPartialError(failedWholesellers: string[]): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_PARTIAL_ERROR_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_PARTIAL_ERROR_MESSAGE', { wholesellers: failedWholesellers.join(', ') }),
+      buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
+    });
+    await alert.present();
+  }
+
+  private async showReturnError(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ERROR_TITLE'),
+      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ERROR_MESSAGE'),
+      buttons: [this.translate.instant('RETAILER_ORDER_DETAILS.OK')]
+    });
+    await alert.present();
   }
 
   /**

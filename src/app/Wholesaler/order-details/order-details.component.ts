@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { alertCircleOutline, carOutline, star, starOutline } from 'ionicons/icons';
+import { alertCircleOutline, star, starOutline, carOutline } from 'ionicons/icons';
 import { WholesalerApiService, OrderFullDetails, OrderTransportStatus } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
@@ -53,9 +53,9 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   ) {
     addIcons({
       alertCircleOutline,
-      carOutline,
       star,
       starOutline,
+      carOutline,
     });
   }
 
@@ -164,50 +164,6 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
     return this.translate.instant(this.getStatusLabel(statusId));
   }
 
-  getTransportStatusLabel(transport?: OrderTransportStatus | null): string {
-    const key = this.getTransportStatusLabelKey(transport);
-    if (key) {
-      return this.translate.instant(key);
-    }
-    return transport?.status_label || '';
-  }
-
-  getTransportStatusNote(transport?: OrderTransportStatus | null): string {
-    const key = this.getTransportStatusNoteKey(transport);
-    if (key) {
-      return this.translate.instant(key);
-    }
-    return transport?.status_note || '';
-  }
-
-  private getTransportStatusLabelKey(transport?: OrderTransportStatus | null): string | null {
-    if (!transport) return null;
-    const jobStatus = (transport.job_status || '').toLowerCase();
-    const deliveryStatus = (transport.delivery_status || '').toLowerCase();
-
-    if (transport.needs_admin_action) return 'TRANSPORT_STATUS.ADMIN_REVIEW';
-    if (jobStatus === 'cancelled' || jobStatus === 'canceled') return 'TRANSPORT_STATUS.CANCELLED';
-    if (jobStatus === 'expired') return 'TRANSPORT_STATUS.NOT_ASSIGNED';
-    if (jobStatus === 'ride_offered') return 'TRANSPORT_STATUS.BEING_OFFERED';
-    if (jobStatus === 'open') return 'TRANSPORT_STATUS.REQUEST_OPEN';
-    if (jobStatus === 'accepted' && deliveryStatus === 'pending') return 'TRANSPORT_STATUS.ACCEPTED_PICKUP_PENDING';
-    if (jobStatus === 'accepted') return 'TRANSPORT_STATUS.DRIVER_ASSIGNED';
-    if (jobStatus === 'picked_up' || deliveryStatus === 'picked_up') return 'TRANSPORT_STATUS.PICKED_UP_DELIVERY_PENDING';
-    if (jobStatus === 'delivered' || deliveryStatus === 'delivered') return 'TRANSPORT_STATUS.DELIVERED';
-    return null;
-  }
-
-  private getTransportStatusNoteKey(transport?: OrderTransportStatus | null): string | null {
-    if (!transport) return null;
-    const jobStatus = (transport.job_status || '').toLowerCase();
-
-    if (transport.needs_admin_action) return 'TRANSPORT_STATUS.NOTES.ADMIN_REVIEW';
-    if (jobStatus === 'cancelled' || jobStatus === 'canceled') return 'TRANSPORT_STATUS.NOTES.CANCELLED';
-    if (jobStatus === 'expired') return 'TRANSPORT_STATUS.NOTES.NOT_ASSIGNED';
-    if (jobStatus === 'open') return 'TRANSPORT_STATUS.NOTES.REQUEST_OPEN';
-    return null;
-  }
-
   canCancelOrder(statusId: number): boolean {
     const blockedStatuses = new Set([5, 6, 7, 9, 10]);
     if (blockedStatuses.has(statusId)) {
@@ -305,6 +261,50 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
       10: 'rejected'
     };
     return statusClassMap[statusId] || 'unknown';
+  }
+
+  getTransportStatusLabel(transport?: OrderTransportStatus | null): string {
+    const key = this.getTransportStatusLabelKey(transport);
+    if (key) {
+      return this.translate.instant(key);
+    }
+    return transport?.status_label || '';
+  }
+
+  getTransportStatusNote(transport?: OrderTransportStatus | null): string {
+    const key = this.getTransportStatusNoteKey(transport);
+    if (key) {
+      return this.translate.instant(key);
+    }
+    return transport?.status_note || '';
+  }
+
+  private getTransportStatusLabelKey(transport?: OrderTransportStatus | null): string | null {
+    if (!transport) return null;
+    const jobStatus = (transport.job_status || '').toLowerCase();
+    const deliveryStatus = (transport.delivery_status || '').toLowerCase();
+
+    if (transport.needs_admin_action) return 'TRANSPORT_STATUS.ADMIN_REVIEW';
+    if (jobStatus === 'cancelled' || jobStatus === 'canceled') return 'TRANSPORT_STATUS.CANCELLED';
+    if (jobStatus === 'expired') return 'TRANSPORT_STATUS.NOT_ASSIGNED';
+    if (jobStatus === 'ride_offered') return 'TRANSPORT_STATUS.BEING_OFFERED';
+    if (jobStatus === 'open') return 'TRANSPORT_STATUS.REQUEST_OPEN';
+    if (jobStatus === 'accepted' && deliveryStatus === 'pending') return 'TRANSPORT_STATUS.ACCEPTED_PICKUP_PENDING';
+    if (jobStatus === 'accepted') return 'TRANSPORT_STATUS.DRIVER_ASSIGNED';
+    if (jobStatus === 'picked_up' || deliveryStatus === 'picked_up') return 'TRANSPORT_STATUS.PICKED_UP_DELIVERY_PENDING';
+    if (jobStatus === 'delivered' || deliveryStatus === 'delivered') return 'TRANSPORT_STATUS.DELIVERED';
+    return null;
+  }
+
+  private getTransportStatusNoteKey(transport?: OrderTransportStatus | null): string | null {
+    if (!transport) return null;
+    const jobStatus = (transport.job_status || '').toLowerCase();
+
+    if (transport.needs_admin_action) return 'TRANSPORT_STATUS.NOTES.ADMIN_REVIEW';
+    if (jobStatus === 'cancelled' || jobStatus === 'canceled') return 'TRANSPORT_STATUS.NOTES.CANCELLED';
+    if (jobStatus === 'expired') return 'TRANSPORT_STATUS.NOTES.NOT_ASSIGNED';
+    if (jobStatus === 'open') return 'TRANSPORT_STATUS.NOTES.REQUEST_OPEN';
+    return null;
   }
 
   loadOrderDetails() {

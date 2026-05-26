@@ -52,6 +52,32 @@ export interface CancelRetailerOrderResponse {
   message: string;
 }
 
+export interface ReturnReason {
+  reason_id: number;
+  reason_code: string;
+  reason_description: string;
+  reason_category: string;
+}
+
+export interface ReturnItem {
+  product_id: number;
+  quantity: number;
+  unit: string;
+}
+
+export interface CreateReturnRequest {
+  order_id: number;
+  wholeseller_id: number;
+  return_reason_id: number;
+  items: ReturnItem[];
+  remarks?: string;
+}
+
+export interface CreateReturnResponse {
+  message: string;
+  return_id: number;
+}
+
 /**
  * Service for managing retailer order details.
  * Handles API communication with automatic retry and timeout logic.
@@ -92,6 +118,57 @@ export class RetailerOrderService {
     return this.http.post<CancelRetailerOrderResponse>(
       `${this.apiUrl}/retailer/orders/${orderId}/cancel`,
       { cancellation_reason: reason }
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      retry({
+        count: 2,
+        delay: (error, retryCount) => {
+          const delayMs = Math.pow(2, retryCount - 1) * 1000;
+          return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
+        }
+      }),
+      catchError((error: HttpErrorResponse | TimeoutError) => this.handleError(error))
+    );
+  }
+
+  /**
+   * Fetches return reasons from the backend.
+   * @param category Optional category filter (retailer | logistics | system)
+   * @returns Observable of return reasons array
+   */
+  getReturnReasons(category?: string): Observable<ReturnReason[]> {
+    let url = `${this.apiUrl}/returns/reasons`;
+    if (category) {
+      url += `?category=${category}`;
+    }
+    return this.http.get<ReturnReason[]>(url).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      retry({
+        count: 2,
+        delay: (error, retryCount) => {
+          const delayMs = Math.pow(2, retryCount - 1) * 1000;
+          return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
+        }
+      }),
+      catchError((error: HttpErrorResponse | TimeoutError) => this.handleError(error))
+    );
+  }
+
+  /**
+   * Creates a return request for an order.
+   * @param returnRequest The return request containing order, items, and reason details
+   * @returns Observable of return response with return_id
+   */
+  createReturnRequest(returnRequest: CreateReturnRequest): Observable<CreateReturnResponse> {
+    return this.http.post<CreateReturnResponse>(
+      `${this.apiUrl}/returns/request`,
+      {
+        order_id: returnRequest.order_id,
+        wholeseller_id: returnRequest.wholeseller_id,
+        return_reason_id: returnRequest.return_reason_id,
+        items: returnRequest.items,
+        remarks: returnRequest.remarks || ''
+      }
     ).pipe(
       timeout(this.HTTP_TIMEOUT),
       retry({

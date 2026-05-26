@@ -53,6 +53,11 @@
             <ion-icon [name]="getStatusIcon(order.order_status)"></ion-icon>
             <ion-label>{{ getStatusDisplay(order.order_status) }}</ion-label>
           </ion-chip>
+          <!-- Return Status Badge -->
+          <ion-chip *ngIf="hasReturnRequest()" color="warning">
+            <ion-icon name="return-down-back-outline"></ion-icon>
+            <ion-label>{{ 'RETAILER_ORDER_DETAILS.RETURN_REQUESTED_BADGE' | translate }}</ion-label>
+          </ion-chip>
         </div>
 
         <div class="info-row transport-status-row" *ngIf="order.transport?.status_label">
@@ -76,6 +81,34 @@
           (click)="promptCancelOrder()"
         >
           {{ 'RETAILER_ORDER_DETAILS.CANCEL_ORDER_ACTION' | translate }}
+        </ion-button>
+
+        <!-- Message if cancel is disabled due to return -->
+        <ion-text color="medium" *ngIf="!canCancelOrder() && hasReturnRequest()" class="ion-padding-top ion-padding-bottom">
+          <p><small>{{ 'RETAILER_ORDER_DETAILS.RETURN_CANNOT_BE_CANCELLED' | translate }}</small></p>
+        </ion-text>
+
+        <ion-button
+          expand="block"
+          color="warning"
+          fill="outline"
+          *ngIf="canReturnOrder()"
+          [disabled]="returningOrderIds.has(order.order_id) || isReturning"
+          (click)="promptReturnOrder()"
+        >
+          {{ 'RETAILER_ORDER_DETAILS.RETURN_ORDER_ACTION' | translate }}
+        </ion-button>
+
+        <!-- View Return Status button if return already requested -->
+        <ion-button
+          expand="block"
+          color="primary"
+          fill="outline"
+          *ngIf="hasReturnRequest() && !canReturnOrder()"
+          disabled
+        >
+          <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+          {{ 'RETAILER_ORDER_DETAILS.RETURN_REQUESTED_BADGE' | translate }}
         </ion-button>
 
         <div class="info-row" *ngIf="order.actual_delivery_date && isSuccessfulStatus(order.order_status_name)">
