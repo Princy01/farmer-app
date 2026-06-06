@@ -12,6 +12,36 @@
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
 }
 
+/* Home breadcrumb chip (shown on direct/post-login entry, no back button) */
+.home-chip {
+  --color: rgba(255, 255, 255, 0.9);
+  --padding-start: 8px;
+  --padding-end: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 20px;
+  height: 32px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s ease;
+}
+
+.home-chip ion-icon {
+  font-size: 0.95rem;
+  margin-right: 4px;
+}
+
+.home-chip span {
+  line-height: 1;
+}
+
+.home-chip:hover,
+.home-chip:active {
+  --background: rgba(255, 255, 255, 0.15);
+}
+
+
 .page-title {
   font-weight: 600;
   font-size: 1.2rem;

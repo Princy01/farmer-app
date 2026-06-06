@@ -70,7 +70,7 @@ export class BusinessRegistrationComponent implements OnInit, OnDestroy {
           await loading.dismiss();
           if (exists) {
             await this.showInfoToast('WHOLESALER_BUSINESS_REGISTRATION.BUSINESS_ALREADY_EXISTS');
-            this.router.navigate(['/wholesaler/home']);
+            this.router.navigate(['/wholesaler/orders']);
           } else {
             this.initializeRegistrationForm();
           }

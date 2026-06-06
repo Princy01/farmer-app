@@ -127,6 +127,21 @@
       </ion-card-content>
     </ion-card>
 
+    <!-- Dispute Evidence Gallery Card -->
+    <!-- Shown once a return dispute exists (order.post_delivery.return_dispute_id is set).
+         Allows viewing existing evidence and uploading additional photos. -->
+    <ion-card *ngIf="canShowReturnEvidence()" class="return-evidence-card">
+      <ion-card-header>
+        <ion-card-title>{{ 'RETAILER_ORDER_DETAILS.RETURN_EVIDENCE_TITLE' | translate }}</ion-card-title>
+        <ion-card-subtitle>{{ 'RETAILER_ORDER_DETAILS.RETURN_EVIDENCE_SUBTITLE' | translate }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <app-dispute-evidence-gallery
+          [disputeId]="getReturnDisputeId()">
+        </app-dispute-evidence-gallery>
+      </ion-card-content>
+    </ion-card>
+
     <!-- Order Items Card -->
     <ion-card *ngIf="order.items && order.items.length > 0">
       <ion-card-header>

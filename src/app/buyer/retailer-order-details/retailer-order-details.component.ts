@@ -7,6 +7,8 @@ import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { addIcons } from 'ionicons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 import {
   timeOutline,
   checkmarkCircleOutline,
@@ -41,6 +43,7 @@ import {
   PeerRatingPairOption,
   PeerRatingRecentItem,
 } from '../ratings/buyer-ratings.service';
+import { DisputeEvidenceGalleryComponent } from './dispute-evidence-gallery/dispute-evidence-gallery.component';
 
 /**
  * Component for displaying retailer order details.
@@ -49,7 +52,7 @@ import {
 @Component({
   selector: 'app-retailer-order-details',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe],
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe, DisputeEvidenceGalleryComponent],
   templateUrl: './retailer-order-details.component.html',
   styleUrls: ['./retailer-order-details.component.scss'],
 })
@@ -72,12 +75,13 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   // Return order properties
   isReturning = false;
   returnReasons: ReturnReason[] = [];
-  returningOrderIds = new Set<number>(); // Orders currently submitting returns
-  returnsSubmittedIds = new Set<number>(); // Orders with successfully submitted returns
-  selectedReturnItems: Map<number, number> = new Map(); // Map of product_id to quantity
-  selectedReturnReason: ReturnReason | null = null;
-  returnRemarks = '';
+  returningOrderIds = new Set<number>();
+  returnsSubmittedIds = new Set<number>();
   returnLoadingReasons = false;
+
+  // Pending evidence upload after return submission
+  pendingEvidenceFiles: Array<{ file: File; capturedAt: string }> = [];
+  pendingEvidenceUploadDelay: any = null;
 
   private destroy$ = new Subject<void>();
 
@@ -118,6 +122,9 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.pendingEvidenceUploadDelay) {
+      clearTimeout(this.pendingEvidenceUploadDelay);
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -168,7 +175,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
   /**
    * Loads order details from the API based on order ID from route parameters.
-   * Handles invalid IDs and API errors gracefully.
    */
   private loadOrderDetails(): void {
     const orderId = this.route.snapshot.paramMap.get('id');
@@ -193,7 +199,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
           this.loadRatingContext();
         },
         error: (err: Error) => {
-          // Error message is a translation key from service
           const translationKey = err.message || 'RETAILER_ORDER_DETAILS.ERROR_LOAD_FAILED';
           this.error = this.translate.instant(translationKey);
           this.loading = false;
@@ -312,8 +317,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_SUBMIT_ERROR');
     }
 
-    // The service emits i18n translation keys. Map the known ones to
-    // rating-specific messages; fall back to a generic submit error.
     const keyMap: Record<string, string> = {
       'NETWORK_ERROR': 'RETAILER_ORDER_DETAILS.RATING_NETWORK_ERROR',
       'REQUEST_TIMEOUT_ERROR': 'RETAILER_ORDER_DETAILS.RATING_NETWORK_ERROR',
@@ -327,7 +330,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       return this.translate.instant(keyMap[errorKey]);
     }
 
-    // Legacy path: service may occasionally pass a raw message for unexpected errors
     const normalized = errorKey.toLowerCase();
     if (normalized.includes('already exists')) {
       return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_DUPLICATE');
@@ -344,6 +346,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
     return this.translate.instant('RETAILER_ORDER_DETAILS.RATING_SUBMIT_ERROR');
   }
+
   /**
    * Retries loading order details after an error.
    */
@@ -404,7 +407,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    // Prevent cancellation if return is already requested
     if (this.hasPostDelivery() || this.returnsSubmittedIds.has(this.order.order_id)) {
       return false;
     }
@@ -493,8 +495,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   private async showCancelError(errorKey?: string, cancellationReason?: string): Promise<void> {
-    // Map the error translation key from the service to a human-readable message.
-    // Falls back to a generic error if the key is unrecognised.
     const networkKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR']);
     const isNetworkError = errorKey && networkKeys.has(errorKey);
 
@@ -506,7 +506,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       { text: this.translate.instant('RETAILER_ORDER_DETAILS.OK'), role: 'cancel' }
     ];
 
-    // Offer a retry button for transient errors (network / timeout / 5xx)
     const retryableKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR', 'SERVER_ERROR']);
     if (errorKey && retryableKeys.has(errorKey) && cancellationReason) {
       buttons.unshift({
@@ -536,7 +535,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    // Don't allow return if already submitted or currently submitting
     if (
       this.returningOrderIds.has(this.order.order_id) ||
       this.returnsSubmittedIds.has(this.order.order_id) ||
@@ -545,13 +543,9 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    // Only allow return for delivered orders
     return this.isSuccessfulStatus(this.order.order_status_name);
   }
 
-  /**
-   * Gets the return status badge text for the order.
-   */
   getReturnStatusBadge(): string | null {
     if (!this.order) {
       return null;
@@ -568,9 +562,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  /**
-   * Checks if order has a pending return request.
-   */
   hasReturnRequest(): boolean {
     if (!this.order) {
       return false;
@@ -606,6 +597,25 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Returns the dispute ID from post_delivery if one exists.
+   */
+  getReturnDisputeId(): number | null {
+    const disputeId = this.order?.post_delivery?.return_dispute_id;
+    if (typeof disputeId === 'number' && disputeId > 0) {
+      return disputeId;
+    }
+    return null;
+  }
+
+  /**
+   * Whether to show the dispute evidence gallery card.
+   * Requires a dispute ID to be present on the order.
+   */
+  canShowReturnEvidence(): boolean {
+    return this.getReturnDisputeId() !== null;
+  }
+
+  /**
    * Opens modal to initiate return request.
    */
   async promptReturnOrder(): Promise<void> {
@@ -613,7 +623,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Load return reasons if not already loaded
     if (this.returnReasons.length === 0) {
       const errorKey = await this.loadReturnReasons();
 
@@ -647,7 +656,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Create and present the modal
     const modal = await this.modalCtrl.create({
       component: ReturnRequestModalComponent,
       componentProps: {
@@ -661,45 +669,13 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
     const { data, role } = await modal.onDidDismiss();
 
-    // Handle modal result
     if (role !== 'backdrop' && data?.returnReasonId) {
-      await this.submitReturnOrder(data.returnReasonId, data.remarks || '');
+      await this.submitReturnOrder(data.returnReasonId, data.remarks || '', data.evidenceUrls || []);
     }
   }
 
   /**
-   * Prompts user for return remarks after reason selection.
-   */
-  private async promptReturnRemarks(returnReasonId: number): Promise<void> {
-    const remarksAlert = await this.alertCtrl.create({
-      header: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_TITLE'),
-      message: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_MESSAGE'),
-      inputs: [
-        {
-          name: 'remarks',
-          type: 'textarea',
-          placeholder: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_REMARKS_PLACEHOLDER')
-        }
-      ],
-      buttons: [
-        {
-          text: this.translate.instant('RETAILER_ORDER_DETAILS.CANCEL'),
-          role: 'cancel'
-        },
-        {
-          text: this.translate.instant('RETAILER_ORDER_DETAILS.RETURN_ORDER_ACTION'),
-          handler: (data) => this.submitReturnOrder(returnReasonId, data?.remarks || '')
-        }
-      ]
-    });
-
-    await remarksAlert.present();
-  }
-
-  /**
    * Loads return reasons from backend.
-   * Resolves with the error translation key on failure so the caller can show
-   * a context-aware message instead of silently swallowing the failure.
    */
   private loadReturnReasons(): Promise<string | null> {
     return new Promise((resolve) => {
@@ -726,16 +702,21 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
   /**
    * Submits return request with selected items and reason.
+   * Evidence files are collected locally in the modal. After the return is submitted
+   * and the order reloads with the dispute_id, evidence is uploaded via the
+   * DisputeEvidenceGalleryComponent using the proper /returns/disputes/{id}/evidence endpoint.
    */
-  private async submitReturnOrder(returnReasonId: number, remarks: string): Promise<void> {
+  private async submitReturnOrder(
+    returnReasonId: number,
+    remarks: string,
+    evidenceFiles: Array<{ file: File; capturedAt: string }> = []
+  ): Promise<void> {
     if (!this.order || this.isReturning) {
       return;
     }
 
-    // Get unique wholesellers for this order
     const uniqueWholesellers = [...new Set(this.order.items.map(item => item.wholeseller_id))];
 
-    // For each wholeseller, create a return request for all their items
     this.isReturning = true;
     this.returningOrderIds.add(this.order.order_id);
 
@@ -748,7 +729,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     const failedWholesellers: string[] = [];
     let lastErrorKey: string | null = null;
 
-    // Process returns for each wholeseller
     for (const wholesellerId of uniqueWholesellers) {
       const wholesellerItems = this.order.items.filter(item => item.wholeseller_id === wholesellerId);
       const returnItems = wholesellerItems.map(item => ({
@@ -779,7 +759,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
                 const wholesellerName = wholesellerItems[0]?.wholeseller_name || `Wholeseller ${wholesellerId}`;
                 failedWholesellers.push(wholesellerName);
                 lastErrorKey = err?.message || null;
-                resolve(); // Continue with other wholesellers
+                resolve();
               }
             });
         });
@@ -794,20 +774,77 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     this.isReturning = false;
 
     if (successCount > 0 && failedWholesellers.length === 0) {
-      // Mark order as having a submitted return
       this.returnsSubmittedIds.add(this.order!.order_id);
       await this.showReturnSuccess();
+
+      // Reload order to get the dispute_id
       this.loadOrderDetails();
+
+      // Store evidence files temporarily for upload after order reloads
+      if (evidenceFiles.length > 0) {
+        this.pendingEvidenceFiles = evidenceFiles;
+        if (this.pendingEvidenceUploadDelay) {
+          clearTimeout(this.pendingEvidenceUploadDelay);
+        }
+        this.pendingEvidenceUploadDelay = setTimeout(() => {
+          this.uploadPendingEvidenceToDispute();
+        }, 1500); // Wait for order to reload with dispute_id
+      }
     } else if (successCount > 0 && failedWholesellers.length > 0) {
-      // Partial success still counts as submitted
       this.returnsSubmittedIds.add(this.order!.order_id);
       await this.showReturnPartialError(failedWholesellers, lastErrorKey);
       this.loadOrderDetails();
+
+      if (evidenceFiles.length > 0) {
+        this.pendingEvidenceFiles = evidenceFiles;
+        if (this.pendingEvidenceUploadDelay) {
+          clearTimeout(this.pendingEvidenceUploadDelay);
+        }
+        this.pendingEvidenceUploadDelay = setTimeout(() => {
+          this.uploadPendingEvidenceToDispute();
+        }, 1500);
+      }
     } else {
-      await this.showReturnError(lastErrorKey, returnReasonId, remarks);
+      await this.showReturnError(lastErrorKey, returnReasonId, remarks, evidenceFiles);
     }
 
     this.returningOrderIds.delete(this.order!.order_id);
+  }
+
+  /**
+   * Uploads pending evidence files to the dispute after return is created.
+   * Called after order reloads with the dispute_id.
+   */
+  private uploadPendingEvidenceToDispute(): void {
+    const disputeId = this.getReturnDisputeId();
+    if (!disputeId || this.pendingEvidenceFiles.length === 0) {
+      this.pendingEvidenceFiles = [];
+      return;
+    }
+
+    // Upload files sequentially to avoid race conditions
+    const uploadNext = (index: number): void => {
+      if (index >= this.pendingEvidenceFiles.length) {
+        this.pendingEvidenceFiles = [];
+        return;
+      }
+
+      const evidence = this.pendingEvidenceFiles[index];
+      this.orderService
+        .addReturnDisputeEvidence(disputeId, evidence.file)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            uploadNext(index + 1);
+          },
+          error: (err: Error) => {
+            console.error(`Failed to upload evidence file ${index + 1}:`, err);
+            uploadNext(index + 1);
+          }
+        });
+    };
+
+    uploadNext(0);
   }
 
   private async showReturnSuccess(): Promise<void> {
@@ -835,7 +872,12 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  private async showReturnError(errorKey?: string | null, returnReasonId?: number, remarks?: string): Promise<void> {
+  private async showReturnError(
+    errorKey?: string | null,
+    returnReasonId?: number,
+    remarks?: string,
+    evidenceFiles: Array<{ file: File; capturedAt: string }> = []
+  ): Promise<void> {
     const networkKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR']);
     const retryableKeys = new Set(['NETWORK_ERROR', 'REQUEST_TIMEOUT_ERROR', 'SERVER_ERROR']);
     const isNetwork = errorKey && networkKeys.has(errorKey);
@@ -851,7 +893,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     if (errorKey && retryableKeys.has(errorKey) && returnReasonId != null) {
       buttons.unshift({
         text: this.translate.instant('RETAILER_ORDER_DETAILS.RETRY'),
-        handler: () => this.submitReturnOrder(returnReasonId, remarks || '')
+        handler: () => this.submitReturnOrder(returnReasonId, remarks || '', evidenceFiles)
       });
     }
 
@@ -865,8 +907,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
   /**
    * Returns the Ionic color for an order status badge.
-   * @param status Order status code
-   * @returns Color name suitable for Ionic color attribute
    */
   getStatusColor(status: number): string {
     const colors: { [key: number]: string } = {
@@ -882,8 +922,6 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
   /**
    * Returns the Ionicon name for an order status.
-   * @param status Order status code
-   * @returns Ionicon name
    */
   getStatusIcon(status: number): string {
     const icons: { [key: number]: string } = {
@@ -897,19 +935,10 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     return icons[status] || 'help-outline';
   }
 
-
-  /**
-   * Calculates the subtotal for the order (before discount and tax).
-   * @returns Subtotal amount
-   */
   getSubtotal(): number {
     return this.order?.total_order_amount || 0;
   }
 
-  /**
-   * Calculates the final total for the order (after discount and tax).
-   * @returns Final total amount
-   */
   getTotal(): number {
     return (this.order?.final_amount || 0) + (this.order?.delivery_amount || 0);
   }
@@ -918,38 +947,18 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     return this.order?.delivery_amount || 0;
   }
 
-  /**
-   * Calculates the subtotal for a single item (quantity × price).
-   * @param item Order item
-   * @returns Item subtotal
-   */
   getItemTotal(item: OrderItem): number {
     return item.quantity * item.price;
   }
 
-  /**
-   * Gets the discount amount for an item.
-   * @param item Order item
-   * @returns Discount amount or 0
-   */
   getItemDiscount(item: OrderItem): number {
     return item.discount_amount || 0;
   }
 
-  /**
-   * Gets the tax amount for an item.
-   * @param item Order item
-   * @returns Tax amount or 0
-   */
   getItemTax(item: OrderItem): number {
     return item.tax_amount || 0;
   }
 
-  /**
-   * Calculates the final total for a single item (subtotal - discount + tax).
-   * @param item Order item
-   * @returns Final item total
-   */
   getItemFinalTotal(item: OrderItem): number {
     const subtotal = this.getItemTotal(item);
     const discount = this.getItemDiscount(item);

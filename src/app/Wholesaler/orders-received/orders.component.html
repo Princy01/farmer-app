@@ -1,7 +1,15 @@
 <ion-header class="ion-no-border">
   <ion-toolbar class="orders-toolbar" mode="ios">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/wholesaler/home" color="light"></ion-back-button>
+      <ion-button
+        routerLink="/wholesaler/home"
+        routerDirection="root"
+        fill="clear"
+        class="home-chip"
+        aria-label="Go to home">
+        <ion-icon name="home-outline" slot="start"></ion-icon>
+        <span>{{ 'ORDERS_RECEIVED.HOME' | translate }}</span>
+      </ion-button>
     </ion-buttons>
 
     <ion-title *ngIf="!isSearchVisible" class="page-title">

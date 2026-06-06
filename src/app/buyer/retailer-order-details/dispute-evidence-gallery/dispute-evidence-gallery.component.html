@@ -1,0 +1,149 @@
+<div class="dispute-evidence-container" *ngIf="disputeEvidence">
+
+  <!-- Loading state -->
+  <div *ngIf="disputeEvidence.loading" class="evidence-loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>{{ 'DISPUTE_EVIDENCE.LOADING' | translate }}</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="disputeEvidence.error && !disputeEvidence.loading" class="evidence-error">
+    <ion-card>
+      <ion-card-content>
+        <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+        <p>{{ disputeEvidence.error | translate }}</p>
+        <ion-button
+          fill="clear"
+          color="primary"
+          size="small"
+          (click)="retryLoadEvidenceGallery()"
+        >
+          {{ 'RETRY' | translate }}
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Loaded state -->
+  <div *ngIf="!disputeEvidence.loading && !disputeEvidence.error" class="evidence-loaded">
+
+    <!-- Existing evidence gallery -->
+    <div *ngIf="disputeEvidence.evidenceUrls.length > 0" class="existing-evidence">
+      <h3 class="gallery-title">{{ 'DISPUTE_EVIDENCE.GALLERY_TITLE' | translate }}</h3>
+      <div class="evidence-grid">
+        <div
+          *ngFor="let url of disputeEvidence.evidenceUrls"
+          class="evidence-item"
+          (click)="openEvidenceImage(url)"
+        >
+          <img [src]="url" [alt]="'Evidence image'" loading="lazy" />
+          <div class="evidence-overlay">
+            <ion-icon name="download-outline" color="light"></ion-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No evidence -->
+    <div *ngIf="disputeEvidence.evidenceUrls.length === 0 && uploadingItems.length === 0" class="no-evidence">
+      <ion-card>
+        <ion-card-content class="text-center">
+          <ion-icon name="image-outline" color="medium"></ion-icon>
+          <p>{{ 'DISPUTE_EVIDENCE.NO_EVIDENCE' | translate }}</p>
+          <small>{{ 'DISPUTE_EVIDENCE.NO_EVIDENCE_HINT' | translate }}</small>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Evidence count -->
+    <p class="evidence-count">
+      {{ disputeEvidence.evidenceUrls.length }}/{{ MAX_IMAGES }}
+      {{ 'DISPUTE_EVIDENCE.PHOTOS_TOTAL' | translate }}
+    </p>
+
+    <!-- Add evidence section -->
+    <div class="add-evidence-section" *ngIf="canAddMoreEvidence">
+      <h3 class="add-title">{{ 'DISPUTE_EVIDENCE.ADD_MORE_TITLE' | translate }}</h3>
+
+      <!-- Uploading items -->
+      <div *ngIf="uploadingItems.length > 0" class="uploading-grid">
+        <div
+          *ngFor="let item of uploadingItems; let i = index"
+          class="uploading-item"
+          [class.uploading]="item.uploading"
+          [class.error]="item.error"
+        >
+          <!-- Preview -->
+          <img *ngIf="item.previewUrl && !item.error" [src]="item.previewUrl" alt="preview" />
+
+          <!-- Error placeholder -->
+          <div *ngIf="item.error" class="thumb-error">
+            <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+          </div>
+
+          <!-- Uploading overlay -->
+          <div *ngIf="item.uploading" class="thumb-overlay">
+            <ion-spinner name="crescent" color="light"></ion-spinner>
+          </div>
+
+          <!-- Success badge -->
+          <div *ngIf="!item.uploading && item.uploadedUrl && !item.error" class="thumb-success-badge">
+            <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+          </div>
+
+          <!-- Actions -->
+          <div class="thumb-actions">
+            <ion-button
+              *ngIf="item.error"
+              fill="clear"
+              size="small"
+              color="primary"
+              (click)="retryUpload(item)"
+            >
+              {{ 'RETRY' | translate }}
+            </ion-button>
+            <ion-button
+              fill="clear"
+              size="small"
+              color="danger"
+              (click)="removeUploadingItem(i)"
+              [disabled]="item.uploading"
+            >
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </div>
+
+          <!-- Error text -->
+          <p *ngIf="item.error" class="thumb-error-text">{{ item.error | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Add button -->
+      <label class="add-evidence-btn" for="disputeEvidenceFileInput">
+        <ion-icon name="add-outline"></ion-icon>
+        <span>{{ 'DISPUTE_EVIDENCE.ADD_PHOTO' | translate }}</span>
+        <input
+          id="disputeEvidenceFileInput"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          (change)="onEvidenceFileSelected($event)"
+          hidden
+        />
+      </label>
+
+      <p class="add-hint">{{ 'DISPUTE_EVIDENCE.ADD_HINT' | translate }}</p>
+    </div>
+
+    <!-- All evidence added message -->
+    <div *ngIf="!canAddMoreEvidence" class="max-evidence-reached">
+      <ion-card>
+        <ion-card-content class="text-center">
+          <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+          <p>{{ 'DISPUTE_EVIDENCE.MAX_REACHED' | translate }}</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+  </div>
+
+</div>

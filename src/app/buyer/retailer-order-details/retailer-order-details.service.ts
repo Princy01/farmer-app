@@ -80,6 +80,23 @@ export interface CreateReturnResponse {
   return_id: number;
 }
 
+export interface ReturnEvidenceUploadResponse {
+  file_url: string;
+  message: string;
+}
+
+export interface ReturnEvidenceListResponse {
+  evidence_urls: string[];
+}
+
+export interface ReturnDispute {
+  dispute_id: number;
+  return_id: number;
+  wholeseller_id: number;
+  dispute_status: string;
+  created_at: string;
+}
+
 /**
  * Service for managing retailer order details.
  * Handles API communication with automatic retry and timeout logic.
@@ -91,7 +108,7 @@ export class RetailerOrderService {
   private apiUrl = environment.apiUrl;
   private readonly HTTP_TIMEOUT = 30000; // 30 seconds
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Fetches retailer order details by order ID.
@@ -178,6 +195,54 @@ export class RetailerOrderService {
         items: returnRequest.items,
         remarks: returnRequest.remarks || ''
       }
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      retry({
+        count: 2,
+        delay: (error, retryCount) => {
+          if (error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500) {
+            return throwError(() => error);
+          }
+          const delayMs = Math.pow(2, retryCount - 1) * 1000;
+          return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
+        }
+      }),
+      catchError((error: HttpErrorResponse | TimeoutError) => this.handleError(error))
+    );
+  }
+
+  /**
+   * Adds evidence to an existing return dispute.
+   * @param disputeId The ID of the return dispute
+   * @param image The image file to upload
+   * @returns Observable of upload response with file_url
+   */
+  addReturnDisputeEvidence(disputeId: number, image: File): Observable<ReturnEvidenceUploadResponse> {
+    const formData = new FormData();
+    formData.append('image', image, image.name);
+
+    return this.http.post<ReturnEvidenceUploadResponse>(
+      `${this.apiUrl}/returns/disputes/${disputeId}/evidence`,
+      formData
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      retry({
+        count: 2,
+        delay: (error, retryCount) => {
+          if (error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500) {
+            return throwError(() => error);
+          }
+          const delayMs = Math.pow(2, retryCount - 1) * 1000;
+          return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
+        }
+      }),
+      catchError((error: HttpErrorResponse | TimeoutError) => this.handleError(error))
+    );
+  }
+
+  getReturnDisputeEvidence(disputeId: number): Observable<ReturnEvidenceListResponse> {
+    return this.http.get<ReturnEvidenceListResponse>(
+      `${this.apiUrl}/returns/disputes/${disputeId}/evidence`
     ).pipe(
       timeout(this.HTTP_TIMEOUT),
       retry({

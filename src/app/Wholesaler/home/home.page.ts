@@ -288,10 +288,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     await this.safeNavigate('/wholesaler/stock-dashboard');
   }
 
-  async navigateToPastOrders() {
-    await this.safeNavigate('/wholesaler/past-orders');
-  }
-
   async navigateToRestockingRecommendations() {
     await this.safeNavigate('/wholesaler/restocking-recommendations');
   }

@@ -8,7 +8,7 @@ import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { addIcons } from 'ionicons';
 import {
   searchOutline, ellipsisVertical, menuOutline, closeOutline, chevronDownCircleOutline,
-  chevronForwardOutline, receiptOutline, refreshOutline, alertCircleOutline
+  chevronForwardOutline, receiptOutline, refreshOutline, alertCircleOutline, homeOutline
 } from 'ionicons/icons';
 import { WholesalerApiService } from '../services/wholesaler-api.service';
 import {
@@ -17,7 +17,7 @@ import {
   getPostDeliveryLabelKey,
   hasPostDeliveryStatus,
 } from 'src/app/shared/order-post-delivery-status';
-import { Router } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -44,7 +44,7 @@ interface DisplayOrder {
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe, RouterModule]
 })
 
 export class OrdersComponent implements OnInit, OnDestroy {
@@ -76,11 +76,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private translate: TranslateService
-
   ) {
     addIcons({
       searchOutline, ellipsisVertical, menuOutline, closeOutline,
-      chevronDownCircleOutline, chevronForwardOutline, receiptOutline, refreshOutline, alertCircleOutline
+      chevronDownCircleOutline, chevronForwardOutline, receiptOutline, refreshOutline, alertCircleOutline, homeOutline
     });
   }
 

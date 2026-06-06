@@ -14,14 +14,23 @@
   <!-- Step Indicator -->
   <div class="step-indicator" *ngIf="currentStep !== 'success' && currentStep !== 'error'">
     <div class="steps">
-      <div class="step" [class.active]="currentStep === 'reasons'" [class.completed]="currentStep === 'remarks'">
+      <div class="step"
+        [class.active]="currentStep === 'reasons'"
+        [class.completed]="currentStep === 'remarks' || currentStep === 'evidence'">
         <div class="step-number">1</div>
         <div class="step-label">{{ 'RETAILER_ORDER_DETAILS.RETURN_REASON_REQUIRED' | translate }}</div>
       </div>
-      <div class="step-connector" [class.completed]="currentStep === 'remarks'"></div>
-      <div class="step" [class.active]="currentStep === 'remarks'">
+      <div class="step-connector" [class.completed]="currentStep === 'remarks' || currentStep === 'evidence'"></div>
+      <div class="step"
+        [class.active]="currentStep === 'remarks'"
+        [class.completed]="currentStep === 'evidence'">
         <div class="step-number">2</div>
         <div class="step-label">{{ 'RETAILER_ORDER_DETAILS.RETURN_REMARKS_PLACEHOLDER' | translate }}</div>
+      </div>
+      <div class="step-connector" [class.completed]="currentStep === 'evidence'"></div>
+      <div class="step" [class.active]="currentStep === 'evidence'">
+        <div class="step-number">3</div>
+        <div class="step-label">{{ 'RETAILER_ORDER_DETAILS.EVIDENCE_STEP_LABEL' | translate }}</div>
       </div>
     </div>
   </div>
@@ -108,11 +117,126 @@
       <ion-button
         expand="block"
         color="primary"
-        [disabled]="submitting"
+        (click)="proceedToEvidence()"
+      >
+        {{ 'RETAILER_ORDER_DETAILS.OK' | translate }}
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Collect Evidence (local, no upload yet) -->
+  <div *ngIf="currentStep === 'evidence'" class="step-content fade-in">
+
+    <ion-card class="selected-reason-card">
+      <ion-card-content>
+        <div class="selected-summary">
+          <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+          <div>
+            <p class="summary-label">{{ 'RETAILER_ORDER_DETAILS.RETURN_REASON_REQUIRED' | translate }}</p>
+            <p class="summary-value">{{ selectedReasonDescription }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="evidence-card">
+      <ion-card-header>
+        <ion-card-title>{{ 'RETAILER_ORDER_DETAILS.EVIDENCE_TITLE' | translate }}</ion-card-title>
+        <ion-card-subtitle>{{ 'RETAILER_ORDER_DETAILS.EVIDENCE_SUBTITLE' | translate }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+
+        <p class="evidence-hint">{{ 'RETAILER_ORDER_DETAILS.EVIDENCE_HINT' | translate }}</p>
+
+        <!-- Web camera panel -->
+        <div *ngIf="isWebCameraOpen" class="camera-panel">
+          <video #returnEvidenceModalVideo id="returnEvidenceModalVideo" autoplay playsinline muted class="camera-video"></video>
+          <div class="camera-actions">
+            <ion-button
+              type="button"
+              (click)="captureFromWebCamera()">
+              {{ 'RETAILER_ORDER_DETAILS.RETURN_EVIDENCE_CAPTURE' | translate }}
+            </ion-button>
+            <ion-button
+              type="button"
+              fill="outline"
+              (click)="cancelEvidenceCapture()">
+              {{ 'RETAILER_ORDER_DETAILS.RETURN_EVIDENCE_CANCEL' | translate }}
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Start camera / pick file button -->
+        <ion-button
+          expand="block"
+          type="button"
+          [disabled]="submitting || isStartingCamera || evidenceImages.length >= MAX_IMAGES"
+          (click)="startEvidenceCapture()"
+          *ngIf="!isWebCameraOpen">
+          <ion-icon name="camera-outline" slot="start"></ion-icon>
+          {{ 'RETAILER_ORDER_DETAILS.RETURN_EVIDENCE_OPEN_CAMERA' | translate }}
+        </ion-button>
+
+        <!-- Pick from gallery -->
+        <label *ngIf="!isWebCameraOpen && canAddMoreImages" class="file-picker-label">
+          <ion-button expand="block" type="button">
+            <ion-icon name="image-outline" slot="start"></ion-icon>
+            {{ 'RETAILER_ORDER_DETAILS.EVIDENCE_ADD_PHOTO' | translate }}
+          </ion-button>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="onImageSelected($event)"
+            hidden
+          />
+        </label>
+
+        <!-- Error message -->
+        <ion-note color="danger" *ngIf="evidenceError" class="error-note">
+          {{ evidenceError }}
+        </ion-note>
+
+        <!-- Evidence grid (local preview) -->
+        <div class="evidence-grid" *ngIf="evidenceImages.length > 0">
+          <div
+            *ngFor="let img of evidenceImages; let i = index; trackBy: trackByEvidence"
+            class="evidence-thumb">
+            <img [src]="img.previewUrl" alt="evidence" />
+            <div class="thumb-actions">
+              <ion-button
+                fill="clear"
+                size="small"
+                color="danger"
+                (click)="removeImage(i)"
+                type="button">
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </div>
+
+        <p class="evidence-count-hint">
+          {{ evidenceImages.length }}/{{ MAX_IMAGES }} {{ 'RETAILER_ORDER_DETAILS.EVIDENCE_PHOTOS_ADDED' | translate }}
+          <span *ngIf="!hasMinimumEvidence" class="evidence-required-note">
+            &nbsp;— {{ 'RETAILER_ORDER_DETAILS.EVIDENCE_MIN_ONE_REQUIRED' | translate }}
+          </span>
+        </p>
+
+      </ion-card-content>
+    </ion-card>
+
+    <div class="step-actions">
+      <ion-button expand="block" fill="clear" color="medium" (click)="backToReasons()">
+        {{ 'BACK' | translate }}
+      </ion-button>
+      <ion-button
+        expand="block"
+        color="primary"
+        [disabled]="submitting || !hasMinimumEvidence || isStartingCamera"
         (click)="submitReturn()"
       >
         <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
-        {{ submitting ? 'RETAILER_ORDER_DETAILS.PROCESSING_RETURN' : 'RETAILER_ORDER_DETAILS.RETURN_ORDER_ACTION' | translate }}
+        {{ (submitting ? 'RETAILER_ORDER_DETAILS.PROCESSING_RETURN' : 'RETAILER_ORDER_DETAILS.RETURN_ORDER_ACTION') | translate }}
       </ion-button>
     </div>
   </div>
