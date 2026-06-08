@@ -892,12 +892,12 @@
         {{ 'DRIVER_REGISTRATION.PREVIOUS' | translate }}
       </ion-button>
 
-      <ion-button *ngIf="currentStep < 5" (click)="nextStep()" class="nav-btn next-btn">
+      <ion-button *ngIf="currentStep < 4" (click)="nextStep()" class="nav-btn next-btn">
         {{ 'DRIVER_REGISTRATION.SAVE_NEXT' | translate }}
         <ion-icon name="chevron-forward" slot="end"></ion-icon>
       </ion-button>
 
-      <ion-button *ngIf="currentStep === 5" (click)="submitForm()" class="nav-btn submit-btn">
+      <ion-button *ngIf="currentStep === 4" (click)="nextStep()" class="nav-btn submit-btn">
         <ion-icon name="checkmark-circle" slot="start"></ion-icon>
         {{ 'DRIVER_REGISTRATION.COMPLETE_REGISTRATION' | translate }}
       </ion-button>

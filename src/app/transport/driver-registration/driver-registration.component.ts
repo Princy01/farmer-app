@@ -526,8 +526,10 @@ export class DriverRegistrationComponent implements OnInit {
     }
 
     const currentForm = this.getCurrentForm();
+
+    // Step 4 is Review & Submit — no form to validate, proceed directly
     if (!currentForm) {
-      await this.showToast('DRIVER_REGISTRATION.FORM_NOT_FOUND', 'danger');
+      await this.saveCurrentStepData();
       return;
     }
 
@@ -559,7 +561,7 @@ export class DriverRegistrationComponent implements OnInit {
       case 1: return this.driverInfoForm;
       case 2: return this.documentsForm;
       case 3: return this.vehicleForm;
-      case 4: return this.insuranceForm;
+      case 4: return null; // Review & Submit step - no form to validate
       default: return null;
     }
   }
@@ -596,7 +598,8 @@ export class DriverRegistrationComponent implements OnInit {
           await this.saveVehicle(loading);
           break;
         case 4:
-          await this.saveInsurance(loading);
+          await loading.dismiss();
+          await this.submitForm();
           break;
         default:
           await loading.dismiss();
@@ -962,13 +965,13 @@ export class DriverRegistrationComponent implements OnInit {
       'DRIVER_REGISTRATION.STEP_1_TITLE',
       'DRIVER_REGISTRATION.STEP_2_TITLE',
       'DRIVER_REGISTRATION.STEP_3_TITLE',
-      'DRIVER_REGISTRATION.STEP_4_TITLE'
+      'DRIVER_REGISTRATION.REVIEW_SUBMIT'
     ];
     return titleKeys[this.currentStep] || '';
   }
 
   getStepIcon(): string {
-    const icons = ['', 'person', 'document-text', 'car', 'shield'];
+    const icons = ['', 'person', 'document-text', 'car', 'checkmark-circle'];
     return icons[this.currentStep] || '';
   }
 
@@ -1157,7 +1160,7 @@ export class DriverRegistrationComponent implements OnInit {
       case 1: return this.driverInfoForm.valid;
       case 2: return this.documentsForm.valid;
       case 3: return this.vehicleForm.valid;
-      case 4: return this.insuranceForm.valid;
+      case 4: return true; // Review & Submit step is always considered complete
       default: return false;
     }
   }
