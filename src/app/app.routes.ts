@@ -189,6 +189,10 @@ const appRoutes: Routes = [
         loadComponent: () => import('./buyer/retailer-order-history/retailer-order-history.component').then((m) => m.RetailerOrderHistoryComponent),
       },
       {
+        path: 'spends',
+        loadComponent: () => import('./buyer/spends/spends.component').then((m) => m.SpendsComponent),
+      },
+      {
         path: 'retailer-order-details/:id',
         loadComponent: () => import('./buyer/retailer-order-details/retailer-order-details.component').then((m) => m.RetailerOrderDetailsComponent),
       },

@@ -83,6 +83,16 @@
 
         <ion-menu-toggle>
           <ion-item
+            routerLink="/transport/earnings-dashboard"
+            [ngClass]="{ selected: isActive('/transport/earnings-dashboard') }"
+          >
+            <ion-icon name="cash-outline" slot="start"></ion-icon>
+            <ion-label>{{ 'TRANSPORT_MENU.EARNINGS_REPORTS' | translate }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <ion-menu-toggle>
+          <ion-item
             routerLink="/transport/my-issues"
             [ngClass]="{ selected: isActive('/transport/my-issues') || isActive('/transport/dispute-management') }"
           >

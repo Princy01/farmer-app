@@ -27,7 +27,8 @@ import {
   logOutOutline,
   languageOutline,
   chevronDownOutline,
-  businessOutline
+  businessOutline,
+  walletOutline
 } from 'ionicons/icons';
 import { LanguagePopoverComponent } from './language-popover.component';
 import { TranslateApiService } from '../../services/translate-api.service';
@@ -95,7 +96,8 @@ export class BuyerHomeComponent implements OnDestroy {
       logOutOutline,
       languageOutline,
       chevronDownOutline,
-      businessOutline
+      businessOutline,
+      walletOutline
     });
 
     this.translate.setDefaultLang('en');
@@ -265,6 +267,15 @@ export class BuyerHomeComponent implements OnDestroy {
       await this.router.navigate(['/buyer/retailer-order-history'], {
         queryParams: { id: 'ORD123456' }
       });
+    } catch (error) {
+      this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
+    }
+  }
+
+  async navigateToSpends() {
+    try {
+      await this.closeMenu();
+      await this.router.navigate(['/buyer/spends']);
     } catch (error) {
       this.showErrorToast('BUYER_HOME.NAVIGATION_ERROR');
     }

@@ -77,6 +77,96 @@ interface UserPreference {
   language: string;
 }
 
+export interface RetailerSpendsQuery {
+  from?: string;
+  to?: string;
+  status?: 'all' | 'paid' | 'pending' | 'failed' | 'cancelled' | 'refunded';
+}
+
+export interface RetailerSpendsSummary {
+  from_date?: string;
+  to_date?: string;
+  status: string;
+  gross_amount: number;
+  paid_amount: number;
+  net_spend_amount: number;
+  goods_amount: number;
+  delivery_amount: number;
+  platform_fee_amount: number;
+  handling_fee_amount?: number;
+  refunded_amount: number;
+  pending_amount: number;
+  failed_amount: number;
+  payment_intent_count: number;
+  order_count: number;
+  timezone: string;
+  generated_at: string;
+}
+
+export interface RetailerSpendsDay {
+  date: string;
+  payment_intent_count: number;
+  order_count: number;
+  paid_count?: number;
+  gross_amount: number;
+  paid_amount: number;
+  net_spend_amount: number;
+  pending_amount: number;
+  refunded_amount: number;
+}
+
+export interface RetailerSpendsPayment {
+  payment_intent_id: number;
+  checkout_session_id?: number;
+  provider_payment_id?: string;
+  provider_order_id?: string;
+  order_ids: number[];
+  order_numbers?: string;
+  event_date?: string;
+  initiated_at?: string;
+  collected_at?: string;
+  failed_at?: string;
+  status: string;
+  status_label: string;
+  branch_name?: string;
+  delivery_address?: string;
+  goods_amount: number;
+  delivery_amount: number;
+  platform_fee_amount: number;
+  refunded_amount: number;
+  gross_amount: number;
+  paid_amount: number;
+  net_spend_amount?: number;
+  pending_amount: number;
+  failed_amount: number;
+  difference_amount?: number;
+  reason_summary?: string;
+  failure_reason?: string;
+}
+
+export interface RetailerSpendsItem {
+  order_id: number;
+  product_id?: number;
+  product_name: string;
+  branch_name?: string;
+  quantity: number;
+  unit_name?: string;
+  price_per_unit: number;
+  line_amount: number;
+}
+
+export interface RetailerSpendsPaymentsResponse {
+  items: RetailerSpendsPayment[];
+  page: number;
+  page_size: number;
+  has_more: boolean;
+}
+
+export interface RetailerSpendsPaymentDetail {
+  payment: RetailerSpendsPayment;
+  items: RetailerSpendsItem[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -324,5 +414,53 @@ export class BuyerApiService {
         { headers: new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getToken()}` }) }
       )
     );
+  }
+
+  getRetailerSpendsSummary(query: RetailerSpendsQuery = {}): Observable<RetailerSpendsSummary> {
+    return this.applyRetryLogic(
+      this.http.get<RetailerSpendsSummary>(
+        `${this.apiUrl}/retailer/spends/summary`,
+        { headers: this.getAuthHeaders(), params: this.buildSpendsParams(query) }
+      )
+    );
+  }
+
+  getRetailerSpendsDays(query: RetailerSpendsQuery = {}): Observable<RetailerSpendsDay[]> {
+    return this.applyRetryLogic(
+      this.http.get<RetailerSpendsDay[]>(
+        `${this.apiUrl}/retailer/spends/days`,
+        { headers: this.getAuthHeaders(), params: this.buildSpendsParams(query) }
+      )
+    );
+  }
+
+  getRetailerSpendsPayments(
+    query: RetailerSpendsQuery & { date?: string; page?: number; page_size?: number } = {}
+  ): Observable<RetailerSpendsPaymentsResponse> {
+    return this.applyRetryLogic(
+      this.http.get<RetailerSpendsPaymentsResponse>(
+        `${this.apiUrl}/retailer/spends/payments`,
+        { headers: this.getAuthHeaders(), params: this.buildSpendsParams(query) }
+      )
+    );
+  }
+
+  getRetailerSpendsPaymentDetail(orderId: number): Observable<RetailerSpendsPaymentDetail> {
+    return this.applyRetryLogic(
+      this.http.get<RetailerSpendsPaymentDetail>(
+        `${this.apiUrl}/retailer/spends/orders/${orderId}`,
+        { headers: this.getAuthHeaders() }
+      )
+    );
+  }
+
+  private buildSpendsParams(query: RetailerSpendsQuery & Record<string, any>): Record<string, string> {
+    const params: Record<string, string> = {};
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params[key] = String(value);
+      }
+    });
+    return params;
   }
 }

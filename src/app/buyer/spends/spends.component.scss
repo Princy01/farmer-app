@@ -2,6 +2,17 @@
   --background: #f4f6fb;
 }
 
+.finance-toolbar {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color: #ffffff;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.28);
+
+  ion-title {
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+}
+
 .summary-card,
 .filter-card,
 .section-card,
@@ -236,22 +247,6 @@
   }
 }
 
-.route-line {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  margin-top: 10px;
-  color: #58647a;
-  font-size: 0.78rem;
-  line-height: 1.35;
-
-  ion-icon {
-    flex: 0 0 auto;
-    margin-top: 1px;
-    color: #667eea;
-  }
-}
-
 .order-money {
   margin-top: 12px;
 
@@ -351,7 +346,6 @@
   }
 }
 
-.deductions,
 .items {
   margin-top: 16px;
 
@@ -363,7 +357,6 @@
   }
 }
 
-.deduction-row,
 .item-row {
   display: flex;
   justify-content: space-between;

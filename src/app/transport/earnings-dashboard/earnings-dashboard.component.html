@@ -1,55 +1,233 @@
-<ion-content>
-  <!-- Earnings Summary -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Total Earnings</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <h2>₹{{ totalEarnings }}</h2>
-      <p>Trips Completed: {{ totalTrips }}</p>
-      <p>Pending Payments: ₹{{ pendingPayments }}</p>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="finance-content">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <!-- Total Trips Completed -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Recent Completed Trips</ion-card-title>
-    </ion-card-header>
-    <ion-list>
-      <ion-item *ngFor="let trip of trips">
-        <ion-label>
-          <h3>Trip ID: #{{ trip.id }}</h3>
-          <p>{{ trip.pickup }} → {{ trip.drop }}</p>
-          <p>Earnings: ₹{{ trip.earnings }} | Status: {{ trip.status }}</p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-  </ion-card>
+  <div class="loading-state" *ngIf="isLoading">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>{{ 'TRANSPORT_EARNINGS.LOADING' | translate }}</p>
+  </div>
 
-  <!-- Pending Payments -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Pending Payments</ion-card-title>
-    </ion-card-header>
-    <ion-list>
-      <ion-item *ngFor="let payment of pendingPaymentsList">
-        <ion-label>
-          <h3>Order ID: #{{ payment.orderId }}</h3>
-          <p>Amount Due: ₹{{ payment.amount }}</p>
-          <p>Expected Date: {{ payment.dueDate }}</p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-  </ion-card>
+  <div class="error-state" *ngIf="errorMessage && !isLoading">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>{{ errorMessage }}</p>
+    <ion-button fill="outline" (click)="loadDashboard()">{{ 'TRANSPORT_EARNINGS.TRY_AGAIN' | translate }}</ion-button>
+  </div>
 
-  <!-- Withdraw Funds Button -->
-  <ion-footer>
-    <ion-toolbar>
-      <div class="center-button">
-      <ion-button class="custom-button" (click)="withdrawFunds()">Withdraw Funds</ion-button>
-    </div>
-    </ion-toolbar>
-  </ion-footer>
+  <ng-container *ngIf="!isLoading && !errorMessage">
+    <section class="summary-card" *ngIf="summary as data">
+      <div class="summary-header">
+        <div>
+          <p>{{ 'TRANSPORT_EARNINGS.SUMMARY' | translate }}</p>
+          <h1>₹{{ data.credited_amount | number:'1.2-2' }}</h1>
+          <span>{{ 'TRANSPORT_EARNINGS.CREDITED' | translate }}</span>
+        </div>
+        <ion-icon name="wallet-outline"></ion-icon>
+      </div>
+
+      <div class="summary-grid">
+        <div>
+          <span>{{ 'TRANSPORT_EARNINGS.EXPECTED' | translate }}</span>
+          <strong>₹{{ data.expected_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'TRANSPORT_EARNINGS.NET_PAYABLE' | translate }}</span>
+          <strong>₹{{ data.net_payable_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'TRANSPORT_EARNINGS.PENDING' | translate }}</span>
+          <strong>₹{{ data.pending_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'TRANSPORT_EARNINGS.DEDUCTIONS' | translate }}</span>
+          <strong>₹{{ data.deduction_amount | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="destination" *ngIf="data.payout_destination">
+        <ion-icon name="cash-outline"></ion-icon>
+        <span>{{ data.payout_destination }}</span>
+      </div>
+    </section>
+
+    <section class="filter-card">
+      <label>{{ 'TRANSPORT_EARNINGS.RANGE' | translate }}</label>
+      <ion-segment [(ngModel)]="range" (ionChange)="changeRange($any($event.detail.value))" mode="ios">
+        <ion-segment-button value="7">{{ 'TRANSPORT_EARNINGS.LAST_7_DAYS' | translate }}</ion-segment-button>
+        <ion-segment-button value="30">{{ 'TRANSPORT_EARNINGS.LAST_30_DAYS' | translate }}</ion-segment-button>
+        <ion-segment-button value="all">{{ 'TRANSPORT_EARNINGS.ALL_TIME' | translate }}</ion-segment-button>
+      </ion-segment>
+
+      <label>{{ 'TRANSPORT_EARNINGS.STATUS' | translate }}</label>
+      <ion-segment [(ngModel)]="status" (ionChange)="changeStatus($any($event.detail.value))" mode="ios" scrollable="true">
+        <ion-segment-button value="all">{{ 'TRANSPORT_EARNINGS.ALL' | translate }}</ion-segment-button>
+        <ion-segment-button value="pending">{{ 'TRANSPORT_EARNINGS.PENDING' | translate }}</ion-segment-button>
+        <ion-segment-button value="credited">{{ 'TRANSPORT_EARNINGS.CREDITED' | translate }}</ion-segment-button>
+        <ion-segment-button value="held">{{ 'TRANSPORT_EARNINGS.HELD' | translate }}</ion-segment-button>
+        <ion-segment-button value="deducted">{{ 'TRANSPORT_EARNINGS.DEDUCTED' | translate }}</ion-segment-button>
+      </ion-segment>
+    </section>
+
+    <section class="detail-card" *ngIf="detail as details">
+      <div class="section-header">
+        <div>
+          <p>{{ 'TRANSPORT_EARNINGS.DETAILS' | translate }}</p>
+          <h2>{{ 'TRANSPORT_EARNINGS.JOB' | translate }} #{{ details.job.job_id }}</h2>
+        </div>
+        <ion-button fill="clear" (click)="closeDetail()">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="status-line">
+        <ion-badge [color]="statusColor(details.job)">{{ details.job.settlement_status_label }}</ion-badge>
+        <span *ngIf="details.job.reason_summary">{{ details.job.reason_summary }}</span>
+      </div>
+
+      <div class="money-stack">
+        <div>
+          <span>{{ 'TRANSPORT_EARNINGS.EXPECTED_AMOUNT' | translate }}</span>
+          <strong>₹{{ details.job.expected_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'TRANSPORT_EARNINGS.ACTUAL_CREDIT' | translate }}</span>
+          <strong>₹{{ details.job.actual_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'TRANSPORT_EARNINGS.DIFFERENCE' | translate }}</span>
+          <strong>₹{{ details.job.difference_amount | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="detail-list">
+        <div *ngIf="details.job.pickup_location">
+          <span>{{ 'TRANSPORT_EARNINGS.PICKUP' | translate }}</span>
+          <strong>{{ details.job.pickup_location }}</strong>
+        </div>
+        <div *ngIf="details.job.delivery_location">
+          <span>{{ 'TRANSPORT_EARNINGS.DROP' | translate }}</span>
+          <strong>{{ details.job.delivery_location }}</strong>
+        </div>
+        <div>
+          <span>{{ 'TRANSPORT_EARNINGS.WEIGHT_DISTANCE' | translate }}</span>
+          <strong>{{ details.job.weight | number:'1.0-2' }} kg · {{ details.job.distance | number:'1.0-2' }} km</strong>
+        </div>
+        <div *ngIf="details.job.event_date">
+          <span>{{ 'TRANSPORT_EARNINGS.EVENT_DATE' | translate }}</span>
+          <strong>{{ details.job.event_date | date:'mediumDate' }}</strong>
+        </div>
+        <div *ngIf="details.job.payout_reference">
+          <span>{{ 'TRANSPORT_EARNINGS.PAYOUT_REFERENCE' | translate }}</span>
+          <strong>{{ details.job.payout_reference }}</strong>
+        </div>
+        <div *ngIf="details.job.release_after">
+          <span>{{ 'TRANSPORT_EARNINGS.RELEASE_AFTER' | translate }}</span>
+          <strong>{{ details.job.release_after | date:'medium' }}</strong>
+        </div>
+        <div *ngIf="details.job.released_at">
+          <span>{{ 'TRANSPORT_EARNINGS.CREDITED_ON' | translate }}</span>
+          <strong>{{ details.job.released_at | date:'medium' }}</strong>
+        </div>
+      </div>
+
+      <div class="deductions" *ngIf="details.deduction_reasons.length > 0">
+        <h3>{{ 'TRANSPORT_EARNINGS.DEDUCTION_REASONS' | translate }}</h3>
+        <div class="deduction-row" *ngFor="let reason of details.deduction_reasons">
+          <div>
+            <strong>{{ reason.label }}</strong>
+            <p *ngIf="reason.detail">{{ reason.detail }}</p>
+          </div>
+          <span>₹{{ reason.amount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="items" *ngIf="details.orders.length > 0">
+        <h3>{{ 'TRANSPORT_EARNINGS.LINKED_ORDERS' | translate }}</h3>
+        <div class="item-row" *ngFor="let order of details.orders">
+          <div>
+            <strong>{{ 'TRANSPORT_EARNINGS.ORDER' | translate }} #{{ order.order_id }}</strong>
+            <p>{{ order.wholesaler_name || '-' }} → {{ order.retailer_name || '-' }}</p>
+            <p>{{ order.order_status || '-' }}</p>
+          </div>
+          <span>₹{{ order.final_amount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <div class="section-header">
+        <div>
+          <p>{{ 'TRANSPORT_EARNINGS.DAILY_SUMMARY' | translate }}</p>
+          <h2>{{ days.length }} {{ 'TRANSPORT_EARNINGS.DAYS' | translate }}</h2>
+        </div>
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+
+      <div class="empty-state" *ngIf="days.length === 0">
+        <ion-icon name="car-outline"></ion-icon>
+        <p>{{ 'TRANSPORT_EARNINGS.NO_EARNINGS' | translate }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="day-row"
+        *ngFor="let day of days; trackBy: trackDay"
+        [class.active]="day.date === selectedDate"
+        (click)="selectDay(day)">
+        <div>
+          <strong>{{ day.date | date:'mediumDate' }}</strong>
+          <span>{{ day.job_count }} {{ 'TRANSPORT_EARNINGS.JOBS' | translate }}</span>
+        </div>
+        <div>
+          <strong>₹{{ day.credited_amount | number:'1.2-2' }}</strong>
+          <span>{{ 'TRANSPORT_EARNINGS.PENDING' | translate }} ₹{{ day.pending_amount | number:'1.2-2' }}</span>
+        </div>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </button>
+    </section>
+
+    <section class="section-card" *ngIf="selectedDate">
+      <div class="section-header">
+        <div>
+          <p>{{ selectedDate | date:'mediumDate' }}</p>
+          <h2>{{ 'TRANSPORT_EARNINGS.JOB_PAYMENTS' | translate }}</h2>
+        </div>
+        <ion-spinner name="crescent" *ngIf="isLoadingJobs"></ion-spinner>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoadingJobs && jobs.length === 0">
+        <ion-icon name="time-outline"></ion-icon>
+        <p>{{ 'TRANSPORT_EARNINGS.NO_JOB_SETTLEMENT' | translate }}</p>
+      </div>
+
+      <div class="order-row" *ngFor="let job of jobs; trackBy: trackJob" (click)="loadJobDetail(job.job_id)">
+        <div class="order-main">
+          <div>
+            <strong>{{ 'TRANSPORT_EARNINGS.JOB' | translate }} #{{ job.job_id }}</strong>
+            <span>{{ job.order_count }} {{ 'TRANSPORT_EARNINGS.ORDERS' | translate }}</span>
+          </div>
+          <ion-badge [color]="statusColor(job)">{{ job.settlement_status_label }}</ion-badge>
+        </div>
+        <div class="route-line">
+          <ion-icon name="location-outline"></ion-icon>
+          <span>{{ job.pickup_location || '-' }} → {{ job.delivery_location || '-' }}</span>
+        </div>
+        <div class="order-money">
+          <span>{{ 'TRANSPORT_EARNINGS.EXPECTED' | translate }} ₹{{ job.expected_amount | number:'1.2-2' }}</span>
+          <strong>₹{{ job.actual_amount | number:'1.2-2' }}</strong>
+        </div>
+        <p *ngIf="job.reason_summary">{{ job.reason_summary }}</p>
+      </div>
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="load-more"
+        *ngIf="hasMoreJobs"
+        [disabled]="isLoadingJobs"
+        (click)="loadMoreJobs()">
+        {{ 'TRANSPORT_EARNINGS.LOAD_MORE' | translate }}
+      </ion-button>
+    </section>
+  </ng-container>
 </ion-content>
-

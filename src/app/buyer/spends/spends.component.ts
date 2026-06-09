@@ -1,17 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
+  arrowBackOutline,
   calendarOutline,
-  carOutline,
+  cardOutline,
   cashOutline,
+  checkmarkCircleOutline,
   chevronForwardOutline,
   closeOutline,
-  locationOutline,
+  receiptOutline,
+  refreshOutline,
   timeOutline,
   walletOutline
 } from 'ionicons/icons';
@@ -19,59 +23,63 @@ import { forkJoin, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import {
-  TransportEarningsApiService,
-  TransporterEarningsDay,
-  TransporterEarningsJob,
-  TransporterEarningsJobDetail,
-  TransporterEarningsQuery,
-  TransporterEarningsSummary
-} from '../services/transport-earnings-api.service';
+  BuyerApiService,
+  RetailerSpendsDay,
+  RetailerSpendsPayment,
+  RetailerSpendsPaymentDetail,
+  RetailerSpendsQuery,
+  RetailerSpendsSummary
+} from '../services/buyer-api.service';
 
-type EarningsRange = '7' | '30' | 'all';
-type EarningsStatus = NonNullable<TransporterEarningsQuery['status']>;
+type SpendsRange = '7' | '30' | 'all';
+type SpendsStatus = NonNullable<RetailerSpendsQuery['status']>;
 
 @Component({
-  selector: 'app-earnings-dashboard',
+  selector: 'app-retailer-spends',
+  templateUrl: './spends.component.html',
+  styleUrls: ['./spends.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, TranslatePipe],
-  templateUrl: './earnings-dashboard.component.html',
-  styleUrls: ['./earnings-dashboard.component.scss']
+  imports: [CommonModule, FormsModule, IonicModule, TranslatePipe]
 })
-export class EarningsDashboardComponent implements OnInit, OnDestroy {
-  summary?: TransporterEarningsSummary;
-  days: TransporterEarningsDay[] = [];
-  jobs: TransporterEarningsJob[] = [];
-  detail?: TransporterEarningsJobDetail;
+export class SpendsComponent implements OnInit, OnDestroy {
+  summary?: RetailerSpendsSummary;
+  days: RetailerSpendsDay[] = [];
+  payments: RetailerSpendsPayment[] = [];
+  detail?: RetailerSpendsPaymentDetail;
 
-  range: EarningsRange = '30';
-  status: EarningsStatus = 'all';
+  range: SpendsRange = '30';
+  status: SpendsStatus = 'all';
   fromDate = this.formatDate(this.daysAgo(30));
   toDate = this.formatDate(new Date());
   selectedDate = '';
 
   isLoading = false;
-  isLoadingJobs = false;
+  isLoadingPayments = false;
   isLoadingDetail = false;
   errorMessage = '';
   page = 1;
   pageSize = 20;
-  hasMoreJobs = false;
+  hasMorePayments = false;
 
   private subscriptions = new Subscription();
 
   constructor(
+    private router: Router,
     private toastController: ToastController,
     private translate: TranslateService,
-    private earningsApi: TransportEarningsApiService
+    private buyerApi: BuyerApiService
   ) {
     addIcons({
       alertCircleOutline,
+      arrowBackOutline,
       calendarOutline,
-      carOutline,
+      cardOutline,
       cashOutline,
+      checkmarkCircleOutline,
       chevronForwardOutline,
       closeOutline,
-      locationOutline,
+      receiptOutline,
+      refreshOutline,
       timeOutline,
       walletOutline
     });
@@ -85,11 +93,15 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+  goBack(): void {
+    this.router.navigate(['/buyer/buyer-home']);
+  }
+
   handleRefresh(event: any): void {
     this.loadDashboard(() => event?.target?.complete());
   }
 
-  changeRange(value: EarningsRange): void {
+  changeRange(value: SpendsRange): void {
     this.range = value;
     if (value === 'all') {
       this.fromDate = '';
@@ -102,42 +114,45 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
     this.loadDashboard();
   }
 
-  changeStatus(value: EarningsStatus): void {
+  changeStatus(value: SpendsStatus): void {
     this.status = value || 'all';
     this.detail = undefined;
     this.loadDashboard();
   }
 
-  selectDay(day: TransporterEarningsDay): void {
+  selectDay(day: RetailerSpendsDay): void {
     this.selectedDate = day.date;
     this.detail = undefined;
     this.page = 1;
-    this.loadJobs(true);
+    this.loadPayments(true);
   }
 
-  loadMoreJobs(): void {
-    if (!this.hasMoreJobs || this.isLoadingJobs) {
+  loadMorePayments(): void {
+    if (!this.hasMorePayments || this.isLoadingPayments) {
       return;
     }
     this.page += 1;
-    this.loadJobs(false);
+    this.loadPayments(false);
   }
 
-  loadJobDetail(jobId?: number): void {
-    if (!jobId) {
+  loadPaymentDetail(payment: RetailerSpendsPayment): void {
+    const orderId = payment.order_ids?.[0];
+    if (!orderId) {
+      this.showToast(this.translate.instant('SPENDS.NO_ORDER_LINK'), 'warning');
       return;
     }
+
     this.isLoadingDetail = true;
-    const subscription = this.earningsApi.getJobDetail(jobId)
+    const subscription = this.buyerApi.getRetailerSpendsPaymentDetail(orderId)
       .pipe(finalize(() => this.isLoadingDetail = false))
       .subscribe({
         next: (detail) => {
           this.detail = detail;
-          if (detail.job.event_date) {
-            this.selectedDate = detail.job.event_date;
+          if (detail.payment.event_date) {
+            this.selectedDate = detail.payment.event_date;
           }
         },
-        error: () => this.showToast(this.translate.instant('TRANSPORT_EARNINGS.DETAIL_LOAD_ERROR'), 'danger')
+        error: () => this.showToast(this.translate.instant('SPENDS.DETAIL_LOAD_ERROR'), 'danger')
       });
     this.subscriptions.add(subscription);
   }
@@ -146,44 +161,48 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
     this.detail = undefined;
   }
 
-  statusColor(job: TransporterEarningsJob): string {
-    switch (job.settlement_status) {
-      case 'released':
+  statusColor(payment: RetailerSpendsPayment): string {
+    switch (payment.status) {
+      case 'captured':
+      case 'paid':
+      case 'success':
         return 'success';
-      case 'ready_for_release':
-      case 'release_initiated':
+      case 'pending':
+      case 'initiated':
         return 'primary';
-      case 'hold':
-      case 'blocked':
-      case 'pending_finance_link':
-        return 'warning';
-      case 'cancelled':
+      case 'failed':
+      case 'expired':
         return 'danger';
+      case 'cancelled':
+        return 'medium';
+      case 'refunded':
+      case 'partially_refunded':
+        return 'tertiary';
       default:
         return 'medium';
     }
   }
 
-  trackDay(_index: number, day: TransporterEarningsDay): string {
+  trackDay(_index: number, day: RetailerSpendsDay): string {
     return day.date;
   }
 
-  trackJob(_index: number, job: TransporterEarningsJob): number {
-    return job.job_id;
+  trackPayment(_index: number, payment: RetailerSpendsPayment): number {
+    return payment.payment_intent_id;
   }
 
   loadDashboard(done?: () => void): void {
     this.isLoading = true;
     this.errorMessage = '';
     this.selectedDate = '';
-    this.jobs = [];
+    this.payments = [];
     this.page = 1;
-    this.hasMoreJobs = false;
+    this.hasMorePayments = false;
 
     const query = this.buildQuery();
     const subscription = forkJoin({
-      summary: this.earningsApi.getSummary(query),
-      days: this.earningsApi.getDays(query)
+      summary: this.buyerApi.getRetailerSpendsSummary(query),
+      days: this.buyerApi.getRetailerSpendsDays(query)
     })
       .pipe(finalize(() => {
         this.isLoading = false;
@@ -198,36 +217,36 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
           }
         },
         error: () => {
-          this.errorMessage = this.translate.instant('TRANSPORT_EARNINGS.LOAD_ERROR');
+          this.errorMessage = this.translate.instant('SPENDS.LOAD_ERROR');
         }
       });
     this.subscriptions.add(subscription);
   }
 
-  private loadJobs(reset: boolean): void {
+  private loadPayments(reset: boolean): void {
     if (!this.selectedDate) {
       return;
     }
 
-    this.isLoadingJobs = true;
+    this.isLoadingPayments = true;
     const query = this.buildQuery({
       date: this.selectedDate,
       page: this.page,
       page_size: this.pageSize
     });
-    const subscription = this.earningsApi.getJobs(query)
-      .pipe(finalize(() => this.isLoadingJobs = false))
+    const subscription = this.buyerApi.getRetailerSpendsPayments(query)
+      .pipe(finalize(() => this.isLoadingPayments = false))
       .subscribe({
         next: (response) => {
-          this.jobs = reset ? response.items : [...this.jobs, ...response.items];
-          this.hasMoreJobs = response.has_more;
+          this.payments = reset ? response.items : [...this.payments, ...response.items];
+          this.hasMorePayments = response.has_more;
         },
-        error: () => this.showToast(this.translate.instant('TRANSPORT_EARNINGS.JOBS_LOAD_ERROR'), 'danger')
+        error: () => this.showToast(this.translate.instant('SPENDS.PAYMENTS_LOAD_ERROR'), 'danger')
       });
     this.subscriptions.add(subscription);
   }
 
-  private buildQuery(extra: Record<string, any> = {}): TransporterEarningsQuery & Record<string, any> {
+  private buildQuery(extra: Record<string, any> = {}): RetailerSpendsQuery & Record<string, any> {
     return {
       from: this.fromDate || undefined,
       to: this.toDate || undefined,
