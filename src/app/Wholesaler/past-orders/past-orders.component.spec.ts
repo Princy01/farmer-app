@@ -1,19 +1,18 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { Screen4Component } from './past-orders.component';
+import { PastOrdersComponent } from './past-orders.component';
 
-describe('Screen4Component', () => {
-  let component: Screen4Component;
-  let fixture: ComponentFixture<Screen4Component>;
+describe('PastOrdersComponent', () => {
+  let component: PastOrdersComponent;
+  let fixture: ComponentFixture<PastOrdersComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ Screen4Component ],
-      imports: [IonicModule.forRoot()]
+      imports: [PastOrdersComponent, IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Screen4Component);
+    fixture = TestBed.createComponent(PastOrdersComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

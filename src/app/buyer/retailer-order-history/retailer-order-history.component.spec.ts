@@ -1,19 +1,18 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { RetailerOrderTrackingComponent } from './retailer-order-history.component';
+import { RetailerOrderHistoryComponent } from './retailer-order-history.component';
 
-describe('RetailerOrderTrackingComponent', () => {
-  let component: RetailerOrderTrackingComponent;
-  let fixture: ComponentFixture<RetailerOrderTrackingComponent>;
+describe('RetailerOrderHistoryComponent', () => {
+  let component: RetailerOrderHistoryComponent;
+  let fixture: ComponentFixture<RetailerOrderHistoryComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ RetailerOrderTrackingComponent ],
-      imports: [IonicModule.forRoot()]
+      imports: [RetailerOrderHistoryComponent, IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(RetailerOrderTrackingComponent);
+    fixture = TestBed.createComponent(RetailerOrderHistoryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
