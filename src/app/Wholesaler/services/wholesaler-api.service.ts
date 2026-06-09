@@ -313,6 +313,109 @@ interface UserPreference {
   language: string;
 }
 
+export interface WholesalerEarningsQuery {
+  from?: string;
+  to?: string;
+  status?: 'all' | 'pending' | 'ready' | 'credited' | 'held' | 'deducted' | 'cancelled';
+}
+
+export interface WholesalerEarningsSummary {
+  from_date?: string;
+  to_date?: string;
+  status: string;
+  expected_amount: number;
+  deduction_amount: number;
+  net_payable_amount: number;
+  credited_amount: number;
+  pending_amount: number;
+  held_amount: number;
+  ready_amount: number;
+  allocation_count: number;
+  order_count: number;
+  payout_destination?: string;
+  timezone: string;
+  generated_at: string;
+}
+
+export interface WholesalerEarningsDay {
+  date: string;
+  order_count: number;
+  allocation_count: number;
+  credited_count: number;
+  expected_amount: number;
+  deduction_amount: number;
+  net_payable: number;
+  credited_amount: number;
+  pending_amount: number;
+}
+
+export interface WholesalerEarningsOrder {
+  allocation_id: number;
+  checkout_session_id?: number;
+  order_id?: number;
+  job_id?: number;
+  event_date?: string;
+  order_date?: string;
+  delivered_at?: string;
+  release_after?: string;
+  released_at?: string;
+  retailer_id?: number;
+  retailer_name?: string;
+  order_status_id?: number;
+  order_status?: string;
+  settlement_status: string;
+  settlement_status_label: string;
+  expected_amount: number;
+  fee_amount: number;
+  tax_amount: number;
+  hold_amount: number;
+  deduction_amount: number;
+  actual_amount: number;
+  credited_amount: number;
+  pending_amount: number;
+  difference_amount: number;
+  payout_reference?: string;
+  payout_destination?: string;
+  reason_summary?: string;
+  hold_reason?: string;
+  release_block_reason?: string;
+  admin_note?: string;
+  delivery_address?: string;
+}
+
+export interface WholesalerEarningsOrderItem {
+  order_item_id: number;
+  product_id?: number;
+  product_name?: string;
+  branch_id?: number;
+  branch_name?: string;
+  quantity: number;
+  unit_name?: string;
+  price_per_unit: number;
+  line_amount: number;
+}
+
+export interface WholesalerEarningsDeductionReason {
+  code: string;
+  label: string;
+  detail?: string;
+  amount: number;
+}
+
+export interface WholesalerEarningsOrderDetail {
+  order: WholesalerEarningsOrder;
+  items: WholesalerEarningsOrderItem[];
+  deduction_reasons: WholesalerEarningsDeductionReason[];
+}
+
+export interface WholesalerEarningsOrdersResponse {
+  items: WholesalerEarningsOrder[];
+  page: number;
+  page_size: number;
+  total: number;
+  has_more: boolean;
+}
+
 /**
  * Service for handling all wholesaler-related API calls
  * Provides methods for orders, products, inventory, and business operations
@@ -336,8 +439,20 @@ export class WholesalerApiService {
     const token = this.authService.getToken();
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-App-Language': this.getPreferredLanguage()
     });
+  }
+
+  private getPreferredLanguage(): string {
+    const rawLang = (
+      localStorage.getItem('preferred_language') ||
+      localStorage.getItem('appLang') ||
+      'en'
+    ).toLowerCase();
+    const baseLang = rawLang.split('-')[0];
+    const supportedLangs = ['en', 'hi', 'te', 'ta', 'kn', 'ml', 'or', 'mr', 'gu', 'bn', 'pa', 'ur'];
+    return supportedLangs.includes(baseLang) ? baseLang : 'en';
   }
 
   /**
@@ -848,5 +963,61 @@ export class WholesalerApiService {
       this.getExponentialBackoffRetry(),
       catchError(this.handleError.bind(this))
     );
+  }
+
+  getWholesalerEarningsSummary(query: WholesalerEarningsQuery = {}): Observable<WholesalerEarningsSummary> {
+    return this.http.get<WholesalerEarningsSummary>(
+      `${this.apiUrl}/wholesaler/earnings/summary`,
+      { headers: this.getAuthHeaders(), params: this.buildEarningsParams(query) }
+    ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  getWholesalerEarningsDays(query: WholesalerEarningsQuery = {}): Observable<WholesalerEarningsDay[]> {
+    return this.http.get<WholesalerEarningsDay[]>(
+      `${this.apiUrl}/wholesaler/earnings/days`,
+      { headers: this.getAuthHeaders(), params: this.buildEarningsParams(query) }
+    ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  getWholesalerEarningsOrders(
+    query: WholesalerEarningsQuery & { date?: string; page?: number; page_size?: number } = {}
+  ): Observable<WholesalerEarningsOrdersResponse> {
+    return this.http.get<WholesalerEarningsOrdersResponse>(
+      `${this.apiUrl}/wholesaler/earnings/orders`,
+      { headers: this.getAuthHeaders(), params: this.buildEarningsParams(query) }
+    ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  getWholesalerEarningsOrderDetail(orderId: number): Observable<WholesalerEarningsOrderDetail> {
+    return this.http.get<WholesalerEarningsOrderDetail>(
+      `${this.apiUrl}/wholesaler/earnings/orders/${orderId}`,
+      { headers: this.getAuthHeaders() }
+    ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  private buildEarningsParams(query: WholesalerEarningsQuery & Record<string, any>): Record<string, string> {
+    const params: Record<string, string> = {};
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params[key] = String(value);
+      }
+    });
+    return params;
   }
 }

@@ -4,7 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
   home, business, list, cube, time, analytics, pulse, bulb,
-  personOutline, settingsOutline, logOutOutline, closeOutline, menuOutline
+  personOutline, settingsOutline, logOutOutline, closeOutline, menuOutline, walletOutline
 } from 'ionicons/icons';
 import { MenuService } from './services/menu.service';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -52,6 +52,11 @@ import { Subject } from 'rxjs';
             <ion-label>{{ 'MENU.PAST_ORDERS' | translate }}</ion-label>
           </ion-item>
 
+          <ion-item button (click)="navigateToEarnings()">
+            <ion-icon name="wallet-outline" slot="start"></ion-icon>
+            <ion-label>{{ 'MENU.EARNINGS' | translate }}</ion-label>
+          </ion-item>
+
           <ion-item button (click)="navigateToRestockingRecommendations()">
             <ion-icon name="bulb" slot="start"></ion-icon>
             <ion-label>{{ 'MENU.RESTOCKING_RECOMMENDATIONS' | translate }}</ion-label>
@@ -95,7 +100,7 @@ export class HamburgerMenuComponent implements OnDestroy {
   constructor(public menuService: MenuService) {
     addIcons({
       home, business, list, cube, time, analytics, pulse, bulb,
-      personOutline, settingsOutline, logOutOutline, closeOutline, menuOutline
+      personOutline, settingsOutline, logOutOutline, closeOutline, menuOutline, walletOutline
     });
   }
 
@@ -147,6 +152,13 @@ export class HamburgerMenuComponent implements OnDestroy {
    */
   async navigateToPastOrders(): Promise<void> {
     await this.menuService.navigateToPastOrders();
+  }
+
+  /**
+   * Navigate to earnings
+   */
+  async navigateToEarnings(): Promise<void> {
+    await this.menuService.navigateToEarnings();
   }
 
   /**

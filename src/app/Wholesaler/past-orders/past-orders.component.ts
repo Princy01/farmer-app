@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { addIcons } from 'ionicons';
-import { filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, chevronDownOutline } from 'ionicons/icons';
+import { filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, chevronDownOutline, walletOutline } from 'ionicons/icons';
 import { WholesalerApiService, OrderItemDetails } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -58,7 +58,7 @@ export class PastOrdersComponent implements AfterViewInit, OnDestroy {
     private authService: AuthService,
     private translate: TranslateService
   ) {
-    addIcons({ filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, chevronDownOutline });
+    addIcons({ filterOutline, alertCircleOutline, receiptOutline, closeCircleOutline, chevronDownOutline, walletOutline });
   }
 
   ngAfterViewInit(): void {
@@ -380,6 +380,16 @@ export class PastOrdersComponent implements AfterViewInit, OnDestroy {
     }
 
     this.selectedOrderId = this.selectedOrderId === order.order_id ? null : order.order_id;
+  }
+
+  viewPaymentDetails(order: OrderItemDetails, event: Event): void {
+    event.stopPropagation();
+    if (!order?.order_id) {
+      return;
+    }
+    this.router.navigate(['/wholesaler/earnings'], {
+      queryParams: { orderId: order.order_id }
+    });
   }
 
   /**

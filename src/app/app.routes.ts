@@ -68,6 +68,10 @@ const appRoutes: Routes = [
     loadComponent: () => import('./Wholesaler/past-orders/past-orders.component').then((m) => m.PastOrdersComponent),
   },
   {
+    path: 'wholesaler/earnings',
+    loadComponent: () => import('./Wholesaler/earnings/earnings.component').then((m) => m.EarningsComponent),
+  },
+  {
     path: 'wholesaler/trends',
     loadComponent: () => import('./Wholesaler/trends/trends.component').then((m) => m.TrendsComponent),
   },

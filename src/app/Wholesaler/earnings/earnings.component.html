@@ -1,0 +1,237 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="earnings-toolbar" mode="ios">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" color="light">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'EARNINGS.TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadDashboard()" color="light">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="earnings-content">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <ion-spinner name="circular"></ion-spinner>
+    <p>{{ 'EARNINGS.LOADING' | translate }}</p>
+  </div>
+
+  <div class="error-state" *ngIf="errorMessage && !isLoading">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>{{ errorMessage }}</p>
+    <ion-button fill="outline" (click)="loadDashboard()">{{ 'EARNINGS.TRY_AGAIN' | translate }}</ion-button>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !errorMessage">
+    <section class="summary-card" *ngIf="summary as data">
+      <div class="summary-header">
+        <div>
+          <p>{{ 'EARNINGS.SUMMARY' | translate }}</p>
+          <h1>₹{{ data.credited_amount | number:'1.2-2' }}</h1>
+          <span>{{ 'EARNINGS.CREDITED' | translate }}</span>
+        </div>
+        <ion-icon name="wallet-outline"></ion-icon>
+      </div>
+
+      <div class="summary-grid">
+        <div>
+          <span>{{ 'EARNINGS.EXPECTED' | translate }}</span>
+          <strong>₹{{ data.expected_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'EARNINGS.NET_PAYABLE' | translate }}</span>
+          <strong>₹{{ data.net_payable_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'EARNINGS.PENDING' | translate }}</span>
+          <strong>₹{{ data.pending_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'EARNINGS.DEDUCTIONS' | translate }}</span>
+          <strong>₹{{ data.deduction_amount | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="destination" *ngIf="data.payout_destination">
+        <ion-icon name="cash-outline"></ion-icon>
+        <span>{{ data.payout_destination }}</span>
+      </div>
+    </section>
+
+    <section class="filter-card">
+      <label>{{ 'EARNINGS.RANGE' | translate }}</label>
+      <ion-segment [(ngModel)]="range" (ionChange)="changeRange($any($event.detail.value))" mode="ios">
+        <ion-segment-button value="7">{{ 'EARNINGS.LAST_7_DAYS' | translate }}</ion-segment-button>
+        <ion-segment-button value="30">{{ 'EARNINGS.LAST_30_DAYS' | translate }}</ion-segment-button>
+        <ion-segment-button value="all">{{ 'EARNINGS.ALL_TIME' | translate }}</ion-segment-button>
+      </ion-segment>
+
+      <label>{{ 'EARNINGS.STATUS' | translate }}</label>
+      <ion-segment [(ngModel)]="status" (ionChange)="changeStatus($any($event.detail.value))" mode="ios" scrollable="true">
+        <ion-segment-button value="all">{{ 'EARNINGS.ALL' | translate }}</ion-segment-button>
+        <ion-segment-button value="pending">{{ 'EARNINGS.PENDING' | translate }}</ion-segment-button>
+        <ion-segment-button value="credited">{{ 'EARNINGS.CREDITED' | translate }}</ion-segment-button>
+        <ion-segment-button value="held">{{ 'EARNINGS.HELD' | translate }}</ion-segment-button>
+        <ion-segment-button value="deducted">{{ 'EARNINGS.DEDUCTED' | translate }}</ion-segment-button>
+      </ion-segment>
+    </section>
+
+    <section class="detail-card" *ngIf="detail as details">
+      <div class="section-header">
+        <div>
+          <p>{{ 'EARNINGS.DETAILS' | translate }}</p>
+          <h2>{{ 'EARNINGS.ORDER' | translate }} #{{ details.order.order_id }}</h2>
+        </div>
+        <ion-button fill="clear" (click)="closeDetail()">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="status-line">
+        <ion-badge [color]="statusColor(details.order)">{{ details.order.settlement_status_label }}</ion-badge>
+        <span *ngIf="details.order.reason_summary">{{ details.order.reason_summary }}</span>
+      </div>
+
+      <div class="money-stack">
+        <div>
+          <span>{{ 'EARNINGS.EXPECTED_AMOUNT' | translate }}</span>
+          <strong>₹{{ details.order.expected_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'EARNINGS.ACTUAL_CREDIT' | translate }}</span>
+          <strong>₹{{ details.order.actual_amount | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>{{ 'EARNINGS.DIFFERENCE' | translate }}</span>
+          <strong>₹{{ details.order.difference_amount | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="detail-list">
+        <div *ngIf="details.order.retailer_name">
+          <span>{{ 'EARNINGS.RETAILER' | translate }}</span>
+          <strong>{{ details.order.retailer_name }}</strong>
+        </div>
+        <div *ngIf="details.order.event_date">
+          <span>{{ 'EARNINGS.EVENT_DATE' | translate }}</span>
+          <strong>{{ details.order.event_date | date:'mediumDate' }}</strong>
+        </div>
+        <div *ngIf="details.order.payout_reference">
+          <span>{{ 'EARNINGS.PAYOUT_REFERENCE' | translate }}</span>
+          <strong>{{ details.order.payout_reference }}</strong>
+        </div>
+        <div *ngIf="details.order.release_after">
+          <span>{{ 'EARNINGS.RELEASE_AFTER' | translate }}</span>
+          <strong>{{ details.order.release_after | date:'medium' }}</strong>
+        </div>
+        <div *ngIf="details.order.released_at">
+          <span>{{ 'EARNINGS.CREDITED_ON' | translate }}</span>
+          <strong>{{ details.order.released_at | date:'medium' }}</strong>
+        </div>
+      </div>
+
+      <div class="deductions" *ngIf="details.deduction_reasons.length > 0">
+        <h3>{{ 'EARNINGS.DEDUCTION_REASONS' | translate }}</h3>
+        <div class="deduction-row" *ngFor="let reason of details.deduction_reasons">
+          <div>
+            <strong>{{ reason.label }}</strong>
+            <p *ngIf="reason.detail">{{ reason.detail }}</p>
+          </div>
+          <span>₹{{ reason.amount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="items" *ngIf="details.items.length > 0">
+        <h3>{{ 'EARNINGS.ITEMS' | translate }}</h3>
+        <div class="item-row" *ngFor="let item of details.items">
+          <div>
+            <strong>{{ item.product_name }}</strong>
+            <p>{{ item.branch_name }}</p>
+            <p>{{ item.quantity }} {{ item.unit_name }} × ₹{{ item.price_per_unit | number:'1.2-2' }}</p>
+          </div>
+          <span>₹{{ item.line_amount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <div class="section-header">
+        <div>
+          <p>{{ 'EARNINGS.DAILY_SUMMARY' | translate }}</p>
+          <h2>{{ days.length }} {{ 'EARNINGS.DAYS' | translate }}</h2>
+        </div>
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+
+      <div class="empty-state" *ngIf="days.length === 0">
+        <ion-icon name="receipt-outline"></ion-icon>
+        <p>{{ 'EARNINGS.NO_EARNINGS' | translate }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="day-row"
+        *ngFor="let day of days; trackBy: trackDay"
+        [class.active]="day.date === selectedDate"
+        (click)="selectDay(day)">
+        <div>
+          <strong>{{ day.date | date:'mediumDate' }}</strong>
+          <span>{{ day.order_count }} {{ 'EARNINGS.ORDERS' | translate }}</span>
+        </div>
+        <div>
+          <strong>₹{{ day.credited_amount | number:'1.2-2' }}</strong>
+          <span>{{ 'EARNINGS.PENDING' | translate }} ₹{{ day.pending_amount | number:'1.2-2' }}</span>
+        </div>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </button>
+    </section>
+
+    <section class="section-card" *ngIf="selectedDate">
+      <div class="section-header">
+        <div>
+          <p>{{ selectedDate | date:'mediumDate' }}</p>
+          <h2>{{ 'EARNINGS.ORDER_PAYMENTS' | translate }}</h2>
+        </div>
+        <ion-spinner name="crescent" *ngIf="isLoadingOrders"></ion-spinner>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoadingOrders && orders.length === 0">
+        <ion-icon name="time-outline"></ion-icon>
+        <p>{{ 'EARNINGS.NO_ORDER_SETTLEMENT' | translate }}</p>
+      </div>
+
+      <div class="order-row" *ngFor="let order of orders; trackBy: trackOrder" (click)="loadOrderDetail(order.order_id)">
+        <div class="order-main">
+          <div>
+            <strong>{{ 'EARNINGS.ORDER' | translate }} #{{ order.order_id }}</strong>
+            <span>{{ order.retailer_name || '-' }}</span>
+          </div>
+          <ion-badge [color]="statusColor(order)">{{ order.settlement_status_label }}</ion-badge>
+        </div>
+        <div class="order-money">
+          <span>{{ 'EARNINGS.EXPECTED' | translate }} ₹{{ order.expected_amount | number:'1.2-2' }}</span>
+          <strong>₹{{ order.actual_amount | number:'1.2-2' }}</strong>
+        </div>
+        <p *ngIf="order.reason_summary">{{ order.reason_summary }}</p>
+      </div>
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="load-more"
+        *ngIf="hasMoreOrders"
+        [disabled]="isLoadingOrders"
+        (click)="loadMoreOrders()">
+        {{ 'EARNINGS.LOAD_MORE' | translate }}
+      </ion-button>
+    </section>
+  </ng-container>
+</ion-content>

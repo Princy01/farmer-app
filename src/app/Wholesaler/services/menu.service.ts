@@ -96,6 +96,10 @@ export class MenuService {
     return this.navigateSafely(['/wholesaler/past-orders']);
   }
 
+  async navigateToEarnings() {
+    return this.navigateSafely(['/wholesaler/earnings']);
+  }
+
   async navigateToRestockingRecommendations() {
     return this.navigateSafely(['/wholesaler/restocking-recommendations']);
   }

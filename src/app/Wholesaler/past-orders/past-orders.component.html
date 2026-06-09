@@ -139,6 +139,15 @@
               </ion-item>
             </ion-list>
           </div>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            class="payment-details-btn"
+            (click)="viewPaymentDetails(order, $event)">
+            <ion-icon name="wallet-outline" slot="start"></ion-icon>
+            {{ 'PAST_ORDERS.VIEW_PAYMENT_DETAILS' | translate }}
+          </ion-button>
         </div>
 
         <div class="expand-hint" *ngIf="selectedOrderId !== order.order_id">
