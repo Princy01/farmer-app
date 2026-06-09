@@ -21,12 +21,11 @@ import {
   logOutOutline, createOutline, notificationsOutline,
   receiptOutline, searchOutline, chevronDownCircleOutline,
   languageOutline, chevronDownOutline, checkmarkOutline,
-  carOutline, informationCircleOutline
+  carOutline, informationCircleOutline, cashOutline
 } from 'ionicons/icons';
 
 import { WholesalerApiService, WholesalerProduct } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
-import { MenuService } from '../services/menu.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LanguagePopoverComponent } from './language-popover.component';
 import { Subject, takeUntil, debounceTime, switchMap } from 'rxjs';
@@ -75,7 +74,6 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private authService: AuthService,
-    public menuService: MenuService,
     private translate: TranslateService,
     private popoverCtrl: PopoverController
   ) {
@@ -90,7 +88,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       logOutOutline, createOutline, notificationsOutline,
       receiptOutline, searchOutline, chevronDownCircleOutline,
       languageOutline, chevronDownOutline, checkmarkOutline,
-      carOutline, informationCircleOutline
+      carOutline, informationCircleOutline, cashOutline
     });
 
     this.translate.setDefaultLang('en');
@@ -260,7 +258,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   async navigateToHome() {
     try {
-      await this.menuService.closeMenu();
+      await this.menuCtrl.close('main-menu');
       const content = document.querySelector('ion-content');
       content?.scrollToTop(300);
     } catch (error) {
@@ -304,6 +302,10 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     await this.safeNavigate('/wholesaler/settings');
   }
 
+  async navigateToEarnings() {
+    await this.safeNavigate('/wholesaler/earnings');
+  }
+
   createOrder() {
     try {
       this.router.navigate(['/wholesaler/for-sale']);
@@ -314,7 +316,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   private async safeNavigate(route: string) {
     try {
-      await this.menuService.closeMenu();
+      await this.menuCtrl.close('main-menu');
       await this.router.navigate([route]);
     } catch (error) {
       await this.showErrorAlert(
@@ -326,7 +328,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   async openMenu() {
     try {
-      await this.menuService.openMenu();
+      await this.menuCtrl.open('main-menu');
     } catch (error) {
       // Menu failed to open - user can try again
     }
@@ -334,7 +336,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   async closeMenu() {
     try {
-      await this.menuService.closeMenu();
+      await this.menuCtrl.close('main-menu');
     } catch (error) {
       // Menu failed to close - silently continue
     }
