@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, TimeoutError } from 'rxjs';
-import { catchError, retry, timeout } from 'rxjs/operators';
+import { catchError, map, retry, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { OrderPostDeliveryStatus } from 'src/app/shared/order-post-delivery-status';
 
@@ -78,6 +78,8 @@ export interface CreateReturnRequest {
 export interface CreateReturnResponse {
   message: string;
   return_id: number;
+  dispute_case_id?: number;
+  return_window_expires_at?: string;
 }
 
 export interface ReturnEvidenceUploadResponse {
@@ -87,6 +89,19 @@ export interface ReturnEvidenceUploadResponse {
 
 export interface ReturnEvidenceListResponse {
   evidence_urls: string[];
+}
+
+interface DisputeEvidenceItem {
+  file_url?: string;
+}
+
+interface DisputeEvidenceListApiResponse {
+  items?: DisputeEvidenceItem[];
+}
+
+export interface ReturnEvidenceUploadOptions {
+  caption?: string;
+  capturedAt?: string;
 }
 
 export interface ReturnDispute {
@@ -217,14 +232,29 @@ export class RetailerOrderService {
    * @param image The image file to upload
    * @returns Observable of upload response with file_url
    */
-  addReturnDisputeEvidence(disputeId: number, image: File): Observable<ReturnEvidenceUploadResponse> {
+  addReturnDisputeEvidence(
+    disputeId: number,
+    image: File,
+    options: ReturnEvidenceUploadOptions = {}
+  ): Observable<ReturnEvidenceUploadResponse> {
     const formData = new FormData();
     formData.append('image', image, image.name);
+    formData.append('capture_source', 'camera');
+    if (options.caption) {
+      formData.append('caption', options.caption);
+    }
+    if (options.capturedAt) {
+      formData.append('captured_at', options.capturedAt);
+    }
 
     return this.http.post<ReturnEvidenceUploadResponse>(
-      `${this.apiUrl}/returns/disputes/${disputeId}/evidence`,
+      `${this.apiUrl}/disputes/${disputeId}/evidence`,
       formData
     ).pipe(
+      map((response) => ({
+        ...response,
+        file_url: this.toAbsoluteApiUrl(response.file_url)
+      })),
       timeout(this.HTTP_TIMEOUT),
       retry({
         count: 2,
@@ -241,9 +271,15 @@ export class RetailerOrderService {
   }
 
   getReturnDisputeEvidence(disputeId: number): Observable<ReturnEvidenceListResponse> {
-    return this.http.get<ReturnEvidenceListResponse>(
-      `${this.apiUrl}/returns/disputes/${disputeId}/evidence`
+    return this.http.get<DisputeEvidenceListApiResponse>(
+      `${this.apiUrl}/disputes/${disputeId}/evidence`
     ).pipe(
+      map((response) => ({
+        evidence_urls: (response.items || [])
+          .map((item) => item.file_url)
+          .filter((url): url is string => !!url)
+          .map((url) => this.toAbsoluteApiUrl(url))
+      })),
       timeout(this.HTTP_TIMEOUT),
       retry({
         count: 2,
@@ -288,5 +324,12 @@ export class RetailerOrderService {
 
     const apiError = new Error(translationKey);
     return throwError(() => apiError);
+  }
+
+  private toAbsoluteApiUrl(url: string): string {
+    if (!url || /^https?:\/\//i.test(url) || url.startsWith('blob:') || url.startsWith('data:')) {
+      return url;
+    }
+    return `${this.apiUrl.replace(/\/$/, '')}/${url.replace(/^\//, '')}`;
   }
 }

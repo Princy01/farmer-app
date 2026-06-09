@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, ModalController, LoadingController } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { addIcons } from 'ionicons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -600,7 +600,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
    * Returns the dispute ID from post_delivery if one exists.
    */
   getReturnDisputeId(): number | null {
-    const disputeId = this.order?.post_delivery?.return_dispute_id;
+    const disputeId = this.order?.post_delivery?.return_dispute_id ?? this.order?.post_delivery?.dispute_case_id;
     if (typeof disputeId === 'number' && disputeId > 0) {
       return disputeId;
     }
@@ -670,7 +670,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     const { data, role } = await modal.onDidDismiss();
 
     if (role !== 'backdrop' && data?.returnReasonId) {
-      await this.submitReturnOrder(data.returnReasonId, data.remarks || '', data.evidenceUrls || []);
+      await this.submitReturnOrder(data.returnReasonId, data.remarks || '', data.evidenceFiles || []);
     }
   }
 
@@ -702,9 +702,9 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
   /**
    * Submits return request with selected items and reason.
-   * Evidence files are collected locally in the modal. After the return is submitted
-   * and the order reloads with the dispute_id, evidence is uploaded via the
-   * DisputeEvidenceGalleryComponent using the proper /returns/disputes/{id}/evidence endpoint.
+   * Evidence files are collected locally in the modal. The return response includes
+   * the linked dispute case id, so evidence can be uploaded to /disputes/{id}/evidence
+   * immediately. The delayed reload fallback is kept for older backend responses.
    */
   private async submitReturnOrder(
     returnReasonId: number,
@@ -728,6 +728,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     let successCount = 0;
     const failedWholesellers: string[] = [];
     let lastErrorKey: string | null = null;
+    const createdDisputeIds: number[] = [];
 
     for (const wholesellerId of uniqueWholesellers) {
       const wholesellerItems = this.order.items.filter(item => item.wholeseller_id === wholesellerId);
@@ -751,8 +752,11 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
             .createReturnRequest(returnRequest)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
-              next: () => {
+              next: (response) => {
                 successCount++;
+                if (typeof response?.dispute_case_id === 'number' && response.dispute_case_id > 0) {
+                  createdDisputeIds.push(response.dispute_case_id);
+                }
                 resolve();
               },
               error: (err: Error) => {
@@ -775,13 +779,14 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
     if (successCount > 0 && failedWholesellers.length === 0) {
       this.returnsSubmittedIds.add(this.order!.order_id);
+      if (evidenceFiles.length > 0 && createdDisputeIds.length > 0) {
+        await this.uploadEvidenceFilesToDisputes(createdDisputeIds, evidenceFiles);
+      }
       await this.showReturnSuccess();
 
-      // Reload order to get the dispute_id
       this.loadOrderDetails();
 
-      // Store evidence files temporarily for upload after order reloads
-      if (evidenceFiles.length > 0) {
+      if (evidenceFiles.length > 0 && createdDisputeIds.length === 0) {
         this.pendingEvidenceFiles = evidenceFiles;
         if (this.pendingEvidenceUploadDelay) {
           clearTimeout(this.pendingEvidenceUploadDelay);
@@ -792,10 +797,13 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       }
     } else if (successCount > 0 && failedWholesellers.length > 0) {
       this.returnsSubmittedIds.add(this.order!.order_id);
+      if (evidenceFiles.length > 0 && createdDisputeIds.length > 0) {
+        await this.uploadEvidenceFilesToDisputes(createdDisputeIds, evidenceFiles);
+      }
       await this.showReturnPartialError(failedWholesellers, lastErrorKey);
       this.loadOrderDetails();
 
-      if (evidenceFiles.length > 0) {
+      if (evidenceFiles.length > 0 && createdDisputeIds.length === 0) {
         this.pendingEvidenceFiles = evidenceFiles;
         if (this.pendingEvidenceUploadDelay) {
           clearTimeout(this.pendingEvidenceUploadDelay);
@@ -809,6 +817,30 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     }
 
     this.returningOrderIds.delete(this.order!.order_id);
+  }
+
+  private async uploadEvidenceFilesToDisputes(
+    disputeIds: number[],
+    evidenceFiles: Array<{ file: File; capturedAt: string }>
+  ): Promise<void> {
+    const uniqueDisputeIds = [...new Set(disputeIds.filter((id) => id > 0))];
+    for (const disputeId of uniqueDisputeIds) {
+      for (let index = 0; index < evidenceFiles.length; index++) {
+        const evidence = evidenceFiles[index];
+        try {
+          await firstValueFrom(
+            this.orderService
+              .addReturnDisputeEvidence(disputeId, evidence.file, {
+                caption: `Return evidence ${index + 1}`,
+                capturedAt: evidence.capturedAt,
+              })
+              .pipe(takeUntil(this.destroy$))
+          );
+        } catch (err) {
+          console.error(`Failed to upload return evidence ${index + 1} for dispute ${disputeId}:`, err);
+        }
+      }
+    }
   }
 
   /**
@@ -831,7 +863,10 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
 
       const evidence = this.pendingEvidenceFiles[index];
       this.orderService
-        .addReturnDisputeEvidence(disputeId, evidence.file)
+        .addReturnDisputeEvidence(disputeId, evidence.file, {
+          caption: `Return evidence ${index + 1}`,
+          capturedAt: evidence.capturedAt,
+        })
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
