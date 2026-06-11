@@ -2061,8 +2061,7 @@
     "EVIDENCE_TOO_LARGE": "Image must be 3 MB or smaller",
     "EVIDENCE_UPLOAD_FAILED": "Upload failed — try again",
     "CHARACTERS": "characters",
-    "RETURN_EVIDENCE_SUBTITLE": "Photos submitted with your return request",
-    "EVIDENCE_LIMIT": "You can add a maximum of 3 photos."
+    "RETURN_EVIDENCE_SUBTITLE": "Photos submitted with your return request"
   },
   "CHARACTERS": "characters",
   "BACK": "Back",

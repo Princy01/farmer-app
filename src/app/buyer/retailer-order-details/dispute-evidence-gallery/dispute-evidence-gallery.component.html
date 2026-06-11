@@ -119,17 +119,17 @@
       </div>
 
       <!-- Add button -->
-      <label class="add-evidence-btn" for="disputeEvidenceFileInput">
+      <div class="add-evidence-btn" (click)="triggerFileInput()">
         <ion-icon name="add-outline"></ion-icon>
         <span>{{ 'DISPUTE_EVIDENCE.ADD_PHOTO' | translate }}</span>
-        <input
-          id="disputeEvidenceFileInput"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          (change)="onEvidenceFileSelected($event)"
-          hidden
-        />
-      </label>
+      </div>
+      <input
+        #evidenceFileInput
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        (change)="onEvidenceFileSelected($event)"
+        style="display:none"
+      />
 
       <p class="add-hint">{{ 'DISPUTE_EVIDENCE.ADD_HINT' | translate }}</p>
     </div>

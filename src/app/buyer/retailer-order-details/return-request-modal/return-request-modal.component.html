@@ -178,18 +178,19 @@
         </ion-button>
 
         <!-- Pick from gallery -->
-        <label *ngIf="!isWebCameraOpen && canAddMoreImages" class="file-picker-label">
-          <ion-button expand="block" type="button">
+        <ng-container *ngIf="!isWebCameraOpen && canAddMoreImages">
+          <ion-button expand="block" type="button" (click)="triggerImageFilePicker()">
             <ion-icon name="image-outline" slot="start"></ion-icon>
             {{ 'RETAILER_ORDER_DETAILS.EVIDENCE_ADD_PHOTO' | translate }}
           </ion-button>
           <input
+            #imageFileInput
             type="file"
             accept="image/jpeg,image/png,image/webp"
             (change)="onImageSelected($event)"
-            hidden
+            style="display:none"
           />
-        </label>
+        </ng-container>
 
         <!-- Error message -->
         <ion-note color="danger" *ngIf="evidenceError" class="error-note">

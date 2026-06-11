@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
@@ -37,6 +37,8 @@ export interface EvidenceUploadItem {
 })
 export class DisputeEvidenceGalleryComponent implements OnInit, OnDestroy {
   @Input() disputeId: number | null = null;
+
+  @ViewChild('evidenceFileInput') evidenceFileInput!: ElementRef<HTMLInputElement>;
 
   disputeEvidence: DisputeEvidence | null = null;
   uploadingItems: EvidenceUploadItem[] = [];
@@ -191,12 +193,24 @@ export class DisputeEvidenceGalleryComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Check if more evidence can be added
+   * Programmatically trigger the hidden file input.
+   * Using a direct click() call avoids Ionic swallowing the label→input click chain.
+   */
+  triggerFileInput(): void {
+    this.evidenceFileInput?.nativeElement?.click();
+  }
+
+  /**
+   * Check if more evidence can be added.
+   * Only counts items still pending/uploading — successfully uploaded ones
+   * have already been pushed into disputeEvidence.evidenceUrls.
    */
   get canAddMoreEvidence(): boolean {
     const existingCount = this.disputeEvidence?.evidenceUrls.length || 0;
-    const uploadingCount = this.uploadingItems.length;
-    return existingCount + uploadingCount < this.MAX_IMAGES;
+    const pendingCount = this.uploadingItems.filter(
+      item => !item.uploadedUrl && !item.error
+    ).length;
+    return existingCount + pendingCount < this.MAX_IMAGES;
   }
 
   /**

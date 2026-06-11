@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonicModule, ModalController } from '@ionic/angular';
@@ -34,6 +34,8 @@ export interface EvidenceImage {
 })
 export class ReturnRequestModalComponent implements OnInit {
   @Input() returnReasons: ReturnReason[] = [];
+
+  @ViewChild('imageFileInput') imageFileInput!: ElementRef<HTMLInputElement>;
 
   returnForm!: FormGroup;
   currentStep: 'reasons' | 'remarks' | 'evidence' | 'success' | 'error' = 'reasons';
@@ -163,6 +165,10 @@ export class ReturnRequestModalComponent implements OnInit {
 
   cancelEvidenceCapture(): void {
     this.closeWebCamera();
+  }
+
+  triggerImageFilePicker(): void {
+    this.imageFileInput?.nativeElement?.click();
   }
 
   onImageSelected(event: Event): void {
