@@ -80,8 +80,8 @@
 
           <div class="order-info">
             <div class="info-row">
-              <ion-icon name="person-circle"></ion-icon>
-              <span>{{ "PICKUP_ORDERS.RETAILER_ID" | translate }}: {{ order.retailer_id }}</span>
+              <ion-icon name="storefront-outline"></ion-icon>
+              <span>{{ order.retailer_name }}</span>
             </div>
             <div class="info-row">
               <ion-icon name="cube-outline"></ion-icon>
@@ -95,7 +95,7 @@
 
           <div class="otp-section" *ngIf="order.canGenerateOtp" (click)="$event.stopPropagation()">
             <ion-button
-              *ngIf="!order.otp"
+              *ngIf="!order.otpGenerated"
               color="primary"
               fill="solid"
               size="small"
@@ -107,14 +107,27 @@
               {{ "PICKUP_ORDERS.GENERATE_OTP" | translate }}
             </ion-button>
 
-            <div *ngIf="order.otp" class="otp-display">
-              <div class="otp-info">
-                <span class="otp-label">{{ "PICKUP_ORDERS.OTP" | translate }}:</span>
-                <span class="otp-value" *ngIf="otpVisible[order.order_id]">{{ order.otp }}</span>
-                <span class="otp-value hidden" *ngIf="!otpVisible[order.order_id]">••••</span>
-              </div>
-              <ion-button fill="clear" size="small" (click)="toggleOtpVisibility(order, $event)">
-                <ion-icon [name]="otpVisible[order.order_id] ? 'eye-off' : 'eye-outline'" slot="icon-only"></ion-icon>
+            <div *ngIf="order.otpGenerated" class="otp-confirm-section">
+              <p class="otp-instructions">{{ "PICKUP_ORDERS.ENTER_OTP_FROM_DRIVER" | translate }}</p>
+              <ion-input
+                type="text"
+                [(ngModel)]="otpInput[order.order_id.toString()]"
+                [placeholder]="'PICKUP_ORDERS.ENTER_OTP_PLACEHOLDER' | translate"
+                inputmode="numeric"
+                maxlength="6"
+                fill="outline"
+                (click)="$event.stopPropagation()"
+              ></ion-input>
+              <ion-button
+                color="success"
+                fill="solid"
+                size="small"
+                expand="block"
+                [disabled]="confirmPickupLoading[order.order_id.toString()]"
+                (click)="confirmPickup(order, $event)"
+              >
+                <ion-icon name="checkmark-done-circle" slot="start"></ion-icon>
+                {{ "PICKUP_ORDERS.CONFIRM_PICKUP" | translate }}
               </ion-button>
             </div>
           </div>
@@ -149,9 +162,9 @@
       <ion-card-content>
         <div class="info-grid">
           <div class="info-item">
-            <ion-icon name="person-circle"></ion-icon>
-            <span class="label">{{ "PICKUP_ORDERS.RETAILER_ID" | translate }}</span>
-            <span class="value">{{ selectedOrderDetails.retailer_id || 'N/A' }}</span>
+            <ion-icon name="storefront-outline"></ion-icon>
+            <span class="label">{{ "PICKUP_ORDERS.RETAILER" | translate }}</span>
+            <span class="value">{{ selectedOrderDetails.retailer_name || 'N/A' }}</span>
           </div>
           <div class="info-item">
             <ion-icon name="cash-outline"></ion-icon>
@@ -172,7 +185,7 @@
 
         <div class="otp-section-details" *ngIf="selectedOrder?.canGenerateOtp">
           <ion-button
-            *ngIf="!selectedOrder?.otp"
+            *ngIf="!selectedOrder?.otpGenerated"
             color="primary"
             expand="block"
             [disabled]="otpLoading[selectedOrder!.order_id.toString()]"
@@ -182,15 +195,25 @@
             {{ "PICKUP_ORDERS.GENERATE_OTP" | translate }}
           </ion-button>
 
-          <div *ngIf="selectedOrder?.otp" class="otp-display-large">
-            <span class="otp-label">{{ "PICKUP_ORDERS.OTP" | translate }}</span>
-            <div class="otp-value-row">
-              <span class="otp-value" *ngIf="otpVisible[selectedOrder!.order_id.toString()]">{{ selectedOrder.otp }}</span>
-              <span class="otp-value hidden" *ngIf="!otpVisible[selectedOrder!.order_id.toString()]">••••••</span>
-              <ion-button fill="clear" (click)="toggleOtpVisibility(selectedOrder)">
-                <ion-icon [name]="otpVisible[selectedOrder!.order_id.toString()] ? 'eye-off' : 'eye-outline'" slot="icon-only"></ion-icon>
-              </ion-button>
-            </div>
+          <div *ngIf="selectedOrder?.otpGenerated" class="otp-confirm-section-details">
+            <p class="otp-instructions">{{ "PICKUP_ORDERS.ENTER_OTP_FROM_DRIVER" | translate }}</p>
+            <ion-input
+              type="text"
+              [(ngModel)]="otpInput[selectedOrder!.order_id.toString()]"
+              [placeholder]="'PICKUP_ORDERS.ENTER_OTP_PLACEHOLDER' | translate"
+              inputmode="numeric"
+              maxlength="6"
+              fill="outline"
+            ></ion-input>
+            <ion-button
+              color="success"
+              expand="block"
+              [disabled]="confirmPickupLoading[selectedOrder!.order_id.toString()]"
+              (click)="confirmPickup(selectedOrder)"
+            >
+              <ion-icon name="checkmark-done-circle" slot="start"></ion-icon>
+              {{ "PICKUP_ORDERS.CONFIRM_PICKUP" | translate }}
+            </ion-button>
           </div>
         </div>
 

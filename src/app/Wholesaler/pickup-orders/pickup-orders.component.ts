@@ -13,13 +13,12 @@ import {
   personCircle,
   call,
   cube,
-  eyeOff,
   checkmarkCircle,
-  eyeOutline,
   calendarOutline,
   locationOutline,
   cashOutline,
-  checkmarkDoneCircle
+  checkmarkDoneCircle,
+  storefrontOutline
 } from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WholesalerOrderService, WholesalerOrderSummary, WholesalerOrderDetails, OrderStatus } from './pickup-orders.service';
@@ -28,7 +27,7 @@ interface PickupOrder extends WholesalerOrderSummary {
   driverName?: string;
   driverPhone?: string;
   totalWeight: string;
-  otp?: string;
+  otpGenerated?: boolean;
   canGenerateOtp?: boolean;
 }
 @Component({
@@ -41,8 +40,9 @@ interface PickupOrder extends WholesalerOrderSummary {
 export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
   orders: PickupOrder[] = [];
   groupedOrders: { date: string, orders: PickupOrder[] }[] = [];
-  otpVisible: { [orderId: string]: boolean } = {};
+  otpInput: { [orderId: string]: string } = {};
   otpLoading: { [orderId: string]: boolean } = {};
+  confirmPickupLoading: { [orderId: string]: boolean } = {};
   viewMode: 'list' | 'details' = 'list';
   selectedOrderDetails: WholesalerOrderDetails | null = null;
   orderStatuses: OrderStatus[] = [];
@@ -70,13 +70,12 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
       personCircle,
       call,
       cube,
-      eyeOff,
       checkmarkCircle,
-      eyeOutline,
       calendarOutline,
       locationOutline,
       cashOutline,
-      checkmarkDoneCircle
+      checkmarkDoneCircle,
+      storefrontOutline
     });
   }
 
@@ -244,7 +243,8 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Loads and displays detailed information for a specific order
+   * Loads and displays detailed information for a specific order,
+   * fetching details and history in parallel
    * @param order The order to view details for
    */
   async viewOrderDetails(order: PickupOrder | null) {
@@ -263,8 +263,8 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
       this.orderService.getWholesalerOrderDetails(order.order_id)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: async (data) => {
-            if (!data) {
+          next: async (details) => {
+            if (!details) {
               await loading.dismiss();
               await this.showError(
                 this.translate.instant('PICKUP_ORDERS.ERRORS.LOAD_DETAILS_FAILED'),
@@ -272,7 +272,7 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
               );
               return;
             }
-            this.selectedOrderDetails = data;
+            this.selectedOrderDetails = details;
             this.selectedOrder = order;
             this.viewMode = 'details';
             await loading.dismiss();
@@ -328,7 +328,7 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: async (data) => {
-            if (!data || !data.otp_code) {
+            if (!data) {
               this.otpLoading[order.order_id.toString()] = false;
               await this.showError(
                 this.translate.instant('PICKUP_ORDERS.ERRORS.GENERATE_OTP_FAILED'),
@@ -336,9 +336,8 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
               );
               return;
             }
-            order.otp = data.otp_code;
+            order.otpGenerated = true;
             order.order_status = 'otp_generated';
-            this.otpVisible[order.order_id.toString()] = false;
             this.otpLoading[order.order_id.toString()] = false;
             await this.showToast(
               this.translate.instant('PICKUP_ORDERS.OTP_GENERATED_SUCCESS'),
@@ -358,6 +357,64 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Confirms the pickup by submitting the OTP entered by the wholesaler
+   * @param order The order to confirm pickup for
+   * @param event Optional click event to stop propagation
+   */
+  async confirmPickup(order: PickupOrder | null, event?: Event) {
+    if (!order || !order.order_id) {
+      return;
+    }
+    if (event) {
+      event.stopPropagation();
+    }
+
+    const orderId = order.order_id.toString();
+    const otp = String(this.otpInput[orderId] ?? '').trim();
+
+    if (!otp) {
+      await this.showToast(
+        this.translate.instant('PICKUP_ORDERS.ERRORS.ENTER_OTP'),
+        'warning'
+      );
+      return;
+    }
+
+    this.confirmPickupLoading[orderId] = true;
+
+    this.orderService.confirmPickup(order.order_id, otp)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async () => {
+          this.confirmPickupLoading[orderId] = false;
+          this.otpInput[orderId] = '';
+          // Update the order status locally so UI reflects confirmed state
+          order.order_status_id = 8;
+          order.order_status = 'picked_up';
+          order.canGenerateOtp = false;
+          order.otpGenerated = false;
+          // Refresh the grouped list
+          this.groupOrdersByDate();
+          await this.showToast(
+            this.translate.instant('PICKUP_ORDERS.PICKUP_CONFIRMED_SUCCESS'),
+            'success'
+          );
+          if (this.viewMode === 'details') {
+            this.goBackToList();
+          }
+        },
+        error: async (err) => {
+          this.confirmPickupLoading[orderId] = false;
+          await this.showError(
+            this.translate.instant('PICKUP_ORDERS.ERRORS.CONFIRM_PICKUP_FAILED'),
+            this.translate.instant(err?.message) || this.translate.instant('PICKUP_ORDERS.ERRORS.GENERIC')
+          );
+        }
+      });
+  }
+
+
   getStatusColor(statusId: number): string {
     const colors: { [key: number]: string } = {
       1: 'warning', 2: 'primary', 3: 'secondary', 4: 'danger',
@@ -365,32 +422,6 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
       9: 'medium', 10: 'danger'
     };
     return colors[statusId] || 'medium';
-  }
-
-  /**
-   * Toggles OTP visibility for a specific order
-   * @param order The order to toggle OTP visibility for
-   */
-  toggleOtpVisibility(order: PickupOrder | null, event?: Event) {
-    if (!order || !order.order_id) {
-      return;
-    }
-    if (event) {
-      event.stopPropagation();
-    }
-    const orderId = order.order_id.toString();
-    this.otpVisible[orderId] = !this.otpVisible[orderId];
-  }
-
-  /**
-   * Hides the OTP for a specific order
-   * @param order The order to hide OTP for
-   */
-  hideOtp(order: PickupOrder | null) {
-    if (!order || !order.order_id) {
-      return;
-    }
-    this.otpVisible[order.order_id.toString()] = false;
   }
 
   /**

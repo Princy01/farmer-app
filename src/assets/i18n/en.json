@@ -2571,6 +2571,13 @@
     "OTP_GENERATED_SUCCESS": "OTP generated successfully",
     "DISMISS": "Dismiss",
     "RETRY": "Retry",
+    "RETAILER": "Retailer",
+    "ENTER_OTP_FROM_DRIVER": "Ask the driver for the OTP and enter it below",
+    "ENTER_OTP_PLACEHOLDER": "Enter OTP",
+    "CONFIRM_PICKUP": "Confirm Pickup",
+    "ORDER_HISTORY": "Order History",
+    "NO_HISTORY": "No history available",
+    "PICKUP_CONFIRMED_SUCCESS": "Pickup confirmed successfully",
     "ERRORS": {
       "GENERIC": "Something went wrong. Please try again later.",
       "NETWORK": "Network error. Please check your connection.",
@@ -2586,7 +2593,10 @@
       "LOAD_STATUSES_FAILED": "Failed to Load Status Options",
       "LOAD_ORDERS_FAILED": "Failed to Load Orders",
       "LOAD_DETAILS_FAILED": "Failed to Load Order Details",
-      "GENERATE_OTP_FAILED": "Failed to Generate OTP"
+      "GENERATE_OTP_FAILED": "Failed to Generate OTP",
+      "INVALID_OTP": "Please enter a valid OTP.",
+      "ENTER_OTP": "Please enter the OTP provided by the driver.",
+      "CONFIRM_PICKUP_FAILED": "Failed to confirm pickup"
     }
   },
   "DELIVERY_HISTORY": {

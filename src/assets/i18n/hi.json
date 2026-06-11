@@ -2534,6 +2534,13 @@
     "OTP_GENERATED_SUCCESS": "OTP सफलतापूर्वक बन गया",
     "DISMISS": "बंद करें",
     "RETRY": "दोबारा कोशिश करें",
+    "RETAILER": "रिटेलर",
+    "ENTER_OTP_FROM_DRIVER": "ड्राइवर से OTP पूछें और नीचे दर्ज करें",
+    "ENTER_OTP_PLACEHOLDER": "OTP दर्ज करें",
+    "CONFIRM_PICKUP": "पिकअप की पुष्टि करें",
+    "ORDER_HISTORY": "ऑर्डर इतिहास",
+    "NO_HISTORY": "कोई इतिहास उपलब्ध नहीं",
+    "PICKUP_CONFIRMED_SUCCESS": "पिकअप सफलतापूर्वक पुष्टि हो गई",
     "ERRORS": {
       "GENERIC": "कुछ गलत हो गया। कृपया बाद में फिर कोशिश करें।",
       "NETWORK": "नेटवर्क समस्या है। कृपया अपना इंटरनेट जांचें।",
@@ -2549,7 +2556,10 @@
       "LOAD_STATUSES_FAILED": "स्थिति विकल्प लोड नहीं हो पाए",
       "LOAD_ORDERS_FAILED": "ऑर्डर लोड नहीं हो पाए",
       "LOAD_DETAILS_FAILED": "ऑर्डर विवरण लोड नहीं हो पाया",
-      "GENERATE_OTP_FAILED": "OTP बनाने में समस्या आई"
+      "GENERATE_OTP_FAILED": "OTP बनाने में समस्या आई",
+      "INVALID_OTP": "कृपया एक वैध OTP दर्ज करें।",
+      "ENTER_OTP": "कृपया ड्राइवर द्वारा दिया गया OTP दर्ज करें।",
+      "CONFIRM_PICKUP_FAILED": "पिकअप की पुष्टि करने में विफल"
     }
   },
   "DELIVERY_HISTORY": {

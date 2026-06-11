@@ -23,10 +23,11 @@ export interface WholesalerOrderItem {
 
 export interface WholesalerOrderSummary {
   order_id: number;
-  date_of_order: string; // ISO date string
+  date_of_order: string;
   order_status_id: number;
   order_status: string;
   retailer_id: number;
+  retailer_name: string;
   total_items: number;
   total_quantity: number;
   total_order_amount: number;
@@ -43,6 +44,7 @@ export interface WholesalerOrderDetails {
   order_status_id: number;
   order_status: string;
   retailer_id: number;
+  retailer_name: string;
   total_order_amount: number;
   final_amount: number;
   delivery_address: string;
@@ -56,10 +58,24 @@ export interface WholesalerOrderDetails {
 export interface PickupOTP {
   order_id: number;
   user_id: number;
-  otp_code: string;
-  expires_at: string; // ISO date string
+  expires_at: string;
   is_used?: boolean;
   used_at?: string;
+}
+
+export interface OrderHistoryRow {
+  history_id: number;
+  order_status_id: number;
+  order_status: string;
+  command: string;
+  at: string;
+  user_id: number;
+  cancellation_reason?: string;
+}
+
+export interface PickupConfirmation {
+  order_id: number;
+  otp: string;
 }
 
 export interface OrderStatus {
@@ -152,6 +168,53 @@ export class WholesalerOrderService {
         )),
         catchError(err => this.handleError(err))
       );
+  }
+
+  getOrderHistory(id: number): Observable<OrderHistoryRow[]> {
+    if (!id || id <= 0) {
+      return throwError(() => ({
+        message: 'PICKUP_ORDERS.ERRORS.INVALID_ORDER_ID',
+        status: 400
+      }));
+    }
+    return this.http.get<OrderHistoryRow[]>(`${this.apiUrl}/GetWholesalerOrders/${id}/history`)
+      .pipe(
+        timeout(this.HTTP_TIMEOUT_MS),
+        retryWhen(errors => errors.pipe(
+          concatMap((err, idx) => {
+            if (idx < this.MAX_RETRIES && this.isRetryableError(err)) {
+              const delay = Math.pow(2, idx) * 1000;
+              return timer(delay);
+            }
+            return throwError(() => err);
+          })
+        )),
+        catchError(err => this.handleError(err))
+      );
+  }
+
+  confirmPickup(orderId: number, otp: string): Observable<{ message: string }> {
+    if (!orderId || orderId <= 0) {
+      return throwError(() => ({
+        message: 'PICKUP_ORDERS.ERRORS.INVALID_ORDER_ID',
+        status: 400
+      }));
+    }
+    if (!otp || otp.trim().length === 0) {
+      return throwError(() => ({
+        message: 'PICKUP_ORDERS.ERRORS.INVALID_OTP',
+        status: 400
+      }));
+    }
+
+    const body: PickupConfirmation = { order_id: orderId, otp: otp.trim() };
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/transportation/delivery/confirm-pickup-otp`,
+      body
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT_MS),
+      catchError(err => this.handleError(err))
+    );
   }
 
   getOrderStatuses(): Observable<OrderStatus[]> {
