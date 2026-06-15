@@ -1,6 +1,6 @@
 {
   "WHOLESALER_HOME": {
-    "Go4u": "Go4u",
+    "Melato": "Melato",
     "Menu": "Menu",
     "Profile": "Profile",
     "Business Locations": "Business Locations",
@@ -54,7 +54,17 @@
     "UNIT_KG": "KG",
     "UNIT_GRAM": "gm",
     "UNIT_QUINTAL": "Quintal",
-    "UNIT_TON": "Ton"
+    "UNIT_TON": "Ton",
+    "Today's Earnings": "Today's Earnings",
+    "This Week": "This Week",
+    "Pending Payout": "Pending Payout",
+    "Active Orders": "Active Orders",
+    "Orders": "Orders",
+    "items needed for tomorrow": "items needed for tomorrow",
+    "short on stock": "short on stock",
+    "Short by": "Short by",
+    "for tomorrow": "for tomorrow",
+    "Tomorrow covered": "Tomorrow covered"
   },
   "LANGUAGE_POPOVER": {
     "SELECT": "Select {{language}} language",

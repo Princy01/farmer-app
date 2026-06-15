@@ -14,26 +14,41 @@ import {
   chatbubblesOutline, personCircleSharp, arrowForwardCircleSharp,
   chevronForwardOutline, listCircleOutline, addCircleOutline,
   timeOutline, statsChartOutline, personOutline,
-  trendingUpOutline, reloadOutline, settingsOutline,
+  trendingUpOutline, trendingDownOutline, removeOutline, reloadOutline, settingsOutline,
   closeOutline, locationOutline, menuOutline,
   homeOutline, businessOutline, cubeOutline,
   analyticsOutline, pulse, bulbOutline,
   logOutOutline, createOutline, notificationsOutline,
   receiptOutline, searchOutline, chevronDownCircleOutline,
   languageOutline, chevronDownOutline, checkmarkOutline,
-  carOutline, informationCircleOutline, cashOutline
+  carOutline, informationCircleOutline, cashOutline,
+  calendarOutline
 } from 'ionicons/icons';
 
 import { WholesalerApiService, WholesalerProduct } from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LanguagePopoverComponent } from './language-popover.component';
-import { Subject, takeUntil, debounceTime, switchMap } from 'rxjs';
+import { Subject, takeUntil, debounceTime, switchMap, forkJoin, of, catchError } from 'rxjs';
 
 interface Language {
   id: number;
   code: string;
   name: string;
+}
+
+/**
+ * Represents a product that needs to be prepared/stocked for next day's
+ * confirmed orders, along with how much current stock is available.
+ *
+ * NOTE: Currently populated with DUMMY DATA. See backend API requirements
+ * documented at the bottom of this file / in the accompanying notes.
+ */
+interface NextDayDemandItem {
+  product_id: number;
+  product_name: string;
+  qty_needed: number;       // total quantity required for tomorrow's confirmed/expected orders
+  stock_available: number;  // current available stock for this product
 }
 
 @Component({
@@ -63,6 +78,43 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   languages: Language[] = [];
   currentLanguage = 'English';
 
+  // ============================
+  // DASHBOARD STATE (NEW)
+  // ============================
+
+  /** Loading flag for the dashboard summary section (earnings, stats, next-day demand) */
+  isDashboardLoading = false;
+
+  /** Today's earnings amount (from WholesalerEarningsSummary.expected_amount for today) */
+  todaysEarnings = 0;
+
+  /** This week's earnings total */
+  weekEarnings = 0;
+
+  /** Amount still pending payout / settlement */
+  pendingPayout = 0;
+
+  /**
+   * % change in today's earnings vs yesterday.
+   * null = not enough data to compute a trend.
+   */
+  earningsTrendPercent: number | null = null;
+
+  /** Sum of total_stock across all wholesaler products */
+  totalStockAcrossProducts = 0;
+
+  /** Count of active (non-completed/non-cancelled) orders */
+  totalActiveOrders = 0;
+
+  /** Items that need to be catered for tomorrow (top 5 shown on home) */
+  nextDayDemand: NextDayDemandItem[] = [];
+
+  /** Quick lookup map: product_id -> demand item, used by the product list */
+  private nextDayDemandMap: Map<number, NextDayDemandItem> = new Map();
+
+  /** Count of products in nextDayDemand that are short on stock */
+  shortageCount = 0;
+
   /** Polling interval for auto-refresh */
   private pollInterval: any;
 
@@ -81,14 +133,15 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       chatbubblesOutline, personCircleSharp, arrowForwardCircleSharp,
       chevronForwardOutline, listCircleOutline, addCircleOutline,
       timeOutline, statsChartOutline, personOutline,
-      trendingUpOutline, reloadOutline, settingsOutline,
+      trendingUpOutline, trendingDownOutline, removeOutline, reloadOutline, settingsOutline,
       closeOutline, locationOutline, menuOutline,
       homeOutline, businessOutline, cubeOutline,
       analyticsOutline, pulse, bulbOutline,
       logOutOutline, createOutline, notificationsOutline,
       receiptOutline, searchOutline, chevronDownCircleOutline,
       languageOutline, chevronDownOutline, checkmarkOutline,
-      carOutline, informationCircleOutline, cashOutline
+      carOutline, informationCircleOutline, cashOutline,
+      calendarOutline
     });
 
     this.translate.setDefaultLang('en');
@@ -101,6 +154,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     this.fetchLanguages();
     this.startPolling();
     this.initializeSearch();
+    this.loadDashboardData();
   }
 
   //  Initialize search with debounce and switchMap to prevent race conditions
@@ -228,6 +282,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   refreshItems() {
     this.checkAuthAndLoad();
+    this.loadDashboardData();
   }
 
   onInfiniteScroll(event: any) {
@@ -241,7 +296,10 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   async handleRefresh(event: any) {
     try {
-      await this.loadProducts(true);
+      await Promise.all([
+        this.loadProducts(true),
+        this.loadDashboardDataAsync()
+      ]);
     } finally {
       event.target.complete();
     }
@@ -254,6 +312,11 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   viewDetails(item: WholesalerProduct) {
     this.router.navigate(['/wholesaler/product-details', item.product_id]);
+  }
+
+  /** Navigate to product details given just a product_id (used by next-day demand cards) */
+  viewDetailsById(productId: number) {
+    this.router.navigate(['/wholesaler/product-details', productId]);
   }
 
   async navigateToHome() {
@@ -304,6 +367,14 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   async navigateToEarnings() {
     await this.safeNavigate('/wholesaler/earnings');
+  }
+
+  /**
+   * Navigate to the full "Next Day Demand" screen (new screen - to be designed next).
+   * Route name is a placeholder; adjust to match routing module once created.
+   */
+  async navigateToNextDayDemand() {
+    await this.safeNavigate('/wholesaler/next-day-demand');
   }
 
   createOrder() {
@@ -532,5 +603,155 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       buttons: [this.translate.instant('WHOLESALER_HOME.OK')]
     });
     await alert.present();
+  }
+
+  // ============================================================
+  // DASHBOARD DATA LOADING (NEW)
+  // ============================================================
+  //
+  // CURRENT STATE:
+  //  - Earnings figures (todaysEarnings, weekEarnings, pendingPayout,
+  //    earningsTrendPercent) use the EXISTING getWholesalerEarningsSummary
+  //    and getWholesalerEarningsDays endpoints (real backend data).
+  //  - totalStockAcrossProducts / totalActiveOrders are derived from the
+  //    EXISTING getWholesalerProducts response (real backend data) as a
+  //    reasonable proxy until dedicated summary endpoints exist.
+  //  - nextDayDemand currently uses DUMMY DATA (see loadNextDayDemandDummy
+  //    below). A new backend endpoint is required - see notes at end of file.
+  // ============================================================
+
+  private loadDashboardData(): void {
+    this.isDashboardLoading = true;
+    this.loadDashboardDataAsync().finally(() => {
+      this.isDashboardLoading = false;
+    });
+  }
+
+  private async loadDashboardDataAsync(): Promise<void> {
+    return new Promise((resolve) => {
+      forkJoin({
+        todaySummary: this.wholesalerService.getWholesalerEarningsSummary({
+          from: this.todayDateString(),
+          to: this.todayDateString()
+        }).pipe(catchError(() => of(null))),
+
+        weekSummary: this.wholesalerService.getWholesalerEarningsSummary({
+          from: this.daysAgoDateString(6),
+          to: this.todayDateString()
+        }).pipe(catchError(() => of(null))),
+
+        yesterdaySummary: this.wholesalerService.getWholesalerEarningsSummary({
+          from: this.daysAgoDateString(1),
+          to: this.daysAgoDateString(1)
+        }).pipe(catchError(() => of(null))),
+
+        // Reuse existing product list endpoint for stock/orders totals.
+        // Using a large limit to approximate "all products" for summary purposes.
+        productsSummary: this.wholesalerService.getWholesalerProducts(0, 100)
+          .pipe(catchError(() => of([] as WholesalerProduct[])))
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ todaySummary, weekSummary, yesterdaySummary, productsSummary }) => {
+          // --- Earnings ---
+          this.todaysEarnings = todaySummary?.expected_amount ?? 0;
+          this.weekEarnings = weekSummary?.expected_amount ?? 0;
+          this.pendingPayout = todaySummary?.pending_amount ?? weekSummary?.pending_amount ?? 0;
+
+          const yesterdayAmount = yesterdaySummary?.expected_amount ?? 0;
+          if (yesterdayAmount > 0) {
+            this.earningsTrendPercent = ((this.todaysEarnings - yesterdayAmount) / yesterdayAmount) * 100;
+          } else if (this.todaysEarnings > 0) {
+            this.earningsTrendPercent = 100;
+          } else {
+            this.earningsTrendPercent = 0;
+          }
+
+          // --- Stock & Orders totals (derived from product list) ---
+          this.totalStockAcrossProducts = productsSummary.reduce(
+            (sum, p) => sum + (p.total_stock || 0), 0
+          );
+          this.totalActiveOrders = productsSummary.reduce(
+            (sum, p) => sum + (p.total_orders || 0), 0
+          );
+
+          // --- Next day demand (dummy until backend endpoint exists) ---
+          this.nextDayDemand = this.loadNextDayDemandDummy(productsSummary);
+          this.nextDayDemandMap = new Map(
+            this.nextDayDemand.map(d => [d.product_id, d])
+          );
+          this.shortageCount = this.nextDayDemand.filter(
+            d => d.stock_available < d.qty_needed
+          ).length;
+
+          resolve();
+        },
+        error: () => {
+          // Non-critical: dashboard widgets just show zero/empty state
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * TEMPORARY DUMMY DATA for "Cater for Tomorrow" card.
+   *
+   * Once the backend exposes a real endpoint (see notes below), replace this
+   * with a direct API call, e.g.:
+   *
+   *   this.wholesalerService.getNextDayDemand()
+   *     .subscribe(data => this.nextDayDemand = data);
+   *
+   * For now, we synthesize plausible demand figures from the existing
+   * product list so the UI can be reviewed with realistic-looking data.
+   */
+  private loadNextDayDemandDummy(products: WholesalerProduct[]): NextDayDemandItem[] {
+    if (!products || products.length === 0) {
+      return [];
+    }
+
+    // Take up to 5 products with the highest order counts as a stand-in
+    // for "products with confirmed orders for tomorrow".
+    const sorted = [...products]
+      .sort((a, b) => (b.total_orders || 0) - (a.total_orders || 0))
+      .slice(0, 5);
+
+    return sorted.map((p, index) => {
+      // Synthesize a plausible "needed" quantity (dummy)
+      const qtyNeeded = Math.max(10, Math.round((p.total_orders || 1) * 3.5));
+      // Vary stock availability so some items show shortages (dummy)
+      const stockFactor = index % 3 === 0 ? 0.6 : index % 3 === 1 ? 1.4 : 1.0;
+      const stockAvailable = Math.max(0, Math.round(qtyNeeded * stockFactor));
+
+      return {
+        product_id: p.product_id,
+        product_name: p.product_name,
+        qty_needed: qtyNeeded,
+        stock_available: stockAvailable
+      };
+    });
+  }
+
+  /** Returns 0-100 capped percentage of stock coverage for progress bar */
+  getStockCoveragePercent(demand: NextDayDemandItem): number {
+    if (demand.qty_needed <= 0) return 100;
+    const pct = (demand.stock_available / demand.qty_needed) * 100;
+    return Math.min(100, Math.max(0, pct));
+  }
+
+  /** Returns tomorrow's demand info for a given product, or null if none */
+  getDemandForProduct(productId: number): NextDayDemandItem | null {
+    return this.nextDayDemandMap.get(productId) || null;
+  }
+
+  private todayDateString(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  private daysAgoDateString(days: number): string {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    return d.toISOString().split('T')[0];
   }
 }

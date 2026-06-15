@@ -1,6 +1,6 @@
 {
   "WHOLESALER_HOME": {
-    "Go4u": "गो4यू",
+    "Melato": "Melato",
     "Menu": "मेनू",
     "Profile": "प्रोफ़ाइल",
     "Business Locations": "व्यवसाय स्थान",
@@ -54,7 +54,17 @@
     "UNIT_KG": "किलोग्राम",
     "UNIT_GRAM": "ग्राम",
     "UNIT_QUINTAL": "क्विंटल",
-    "UNIT_TON": "टन"
+    "UNIT_TON": "टन",
+    "Today's Earnings": "आज की कमाई",
+    "This Week": "इस सप्ताह",
+    "Pending Payout": "बाकी भुगतान",
+    "Active Orders": "सक्रिय ऑर्डर",
+    "Orders": "ऑर्डर",
+    "items needed for tomorrow": "वस्तुएं कल के लिए आवश्यक",
+    "short on stock": "स्टॉक में कम",
+    "Short by": "कम है",
+    "for tomorrow": "कल के लिए",
+    "Tomorrow covered": "कल के लिए पूरा स्टॉक उपलब्ध"
   },
   "MENU": {
     "DISMISS": "बंद करें",
