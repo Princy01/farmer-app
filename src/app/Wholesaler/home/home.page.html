@@ -6,9 +6,9 @@
       </ion-menu-button>
     </ion-buttons>
 
-<ion-title>
-  <span class="brand-name">{{ 'WHOLESALER_HOME.Melato' | translate }}</span>
-</ion-title>
+    <ion-title>
+      <span class="brand-name">{{ 'WHOLESALER_HOME.Melato' | translate }}</span>
+    </ion-title>
 
     <ion-buttons slot="end">
       <ion-button
@@ -32,6 +32,9 @@
   </ion-toolbar>
 </ion-header>
 
+<!-- ======================== -->
+<!-- SIDE MENU                -->
+<!-- ======================== -->
 <ion-menu side="start" menuId="main-menu" contentId="main-content">
   <ion-header>
     <ion-toolbar>
@@ -47,35 +50,19 @@
   <ion-content>
     <ion-list>
       <ion-item button (click)="navigateToProfile()" lines="none">
-        <ion-icon
-          name="person-outline"
-          slot="start"
-          class="menu-icon"
-        ></ion-icon>
+        <ion-icon name="person-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Profile' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToBusinessLocations()" lines="none">
-        <ion-icon
-          name="business-outline"
-          slot="start"
-          class="menu-icon"
-        ></ion-icon>
+        <ion-icon name="business-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Business Locations' | translate }}</ion-label>
-        </ion-item>
+      </ion-item>
       <ion-item button (click)="navigateToBusinessInfo()" lines="none">
-        <ion-icon
-          name="information-circle-outline"
-          slot="start"
-          class="menu-icon"
-        ></ion-icon>
+        <ion-icon name="information-circle-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Business Info' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToMyOrders()" lines="none">
-        <ion-icon
-          name="receipt-outline"
-          slot="start"
-          class="menu-icon"
-        ></ion-icon>
+        <ion-icon name="receipt-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Orders Received' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToPickupOrders()" lines="none">
@@ -86,36 +73,20 @@
         <ion-icon name="cube-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Stock Dashboard' | translate }}</ion-label>
       </ion-item>
-      <ion-item
-        button
-        (click)="navigateToRestockingRecommendations()"
-        lines="none"
-      >
+      <ion-item button (click)="navigateToRestockingRecommendations()" lines="none">
         <ion-icon name="bulb-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Restocking Recommendations' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToMarketOpportunities()" lines="none">
-        <ion-icon
-          name="analytics-outline"
-          slot="start"
-          class="menu-icon"
-        ></ion-icon>
+        <ion-icon name="analytics-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Market Opportunities' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToEarnings()" lines="none">
-        <ion-icon
-          name="cash-outline"
-          slot="start"
-          class="menu-icon"
-        ></ion-icon>
+        <ion-icon name="cash-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Earnings' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="navigateToSettings()" lines="none">
-        <ion-icon
-          name="settings-outline"
-          slot="start"
-          class="menu-icon"
-        ></ion-icon>
+        <ion-icon name="settings-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Settings' | translate }}</ion-label>
       </ion-item>
       <ion-item button (click)="logout()" lines="none">
@@ -126,197 +97,371 @@
   </ion-content>
 </ion-menu>
 
+<!-- ======================== -->
+<!-- MAIN CONTENT             -->
+<!-- ======================== -->
 <ion-content id="main-content" [scrollEvents]="true">
-  <div class="content-container">
-    <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
-      <ion-refresher-content
-        pullingIcon="chevron-down-circle-outline"
-        pullingText="{{ 'WHOLESALER_HOME.Pull to refresh' | translate }}"
-        refreshingSpinner="circular"
-        refreshingText="{{ 'WHOLESALER_HOME.Refreshing...' | translate }}"
-      >
-      </ion-refresher-content>
-    </ion-refresher>
 
-    <!-- ============================= -->
-    <!-- DASHBOARD SECTION (NEW)       -->
-    <!-- ============================= -->
-    <div class="dashboard-section">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="{{ 'WHOLESALER_HOME.Pull to refresh' | translate }}"
+      refreshingSpinner="circular"
+      refreshingText="{{ 'WHOLESALER_HOME.Refreshing...' | translate }}"
+    ></ion-refresher-content>
+  </ion-refresher>
 
-      <!-- Earnings Hero Card -->
-      <div class="earnings-hero" (click)="navigateToEarnings()">
-        <div class="earnings-hero-top">
-          <div class="earnings-label">
+  <!-- ======================== -->
+  <!-- COMMAND CENTER           -->
+  <!-- ======================== -->
+  <div class="command-center">
+    <div class="cc-card" (click)="navigateToEarnings()">
+
+      <!-- Earnings row -->
+      <div class="earnings-row">
+        <div class="earnings-left">
+          <div class="earnings-eyebrow">
             <ion-icon name="cash-outline"></ion-icon>
-            <span>{{ 'WHOLESALER_HOME.Today\'s Earnings' | translate }}</span>
+            {{ 'WHOLESALER_HOME.Today\'s Earnings' | translate }}
           </div>
-          <ion-icon name="chevron-forward-outline" class="hero-arrow"></ion-icon>
-        </div>
 
-        <div class="earnings-amount" *ngIf="!isDashboardLoading">
-          ₹{{ todaysEarnings | number:'1.0-2' }}
-          <span
-            class="earnings-trend"
-            [ngClass]="{
-              'trend-up': earningsTrendPercent > 0,
-              'trend-down': earningsTrendPercent < 0,
-              'trend-flat': earningsTrendPercent === 0
-            }"
-            *ngIf="earningsTrendPercent !== null"
-          >
-            <ion-icon
-              [name]="earningsTrendPercent > 0 ? 'trending-up-outline' : (earningsTrendPercent < 0 ? 'trending-down-outline' : 'remove-outline')"
-            ></ion-icon>
-            {{ earningsTrendPercent | number:'1.0-1' }}%
-          </span>
-        </div>
-        <ion-skeleton-text
-          *ngIf="isDashboardLoading"
-          animated
-          style="width: 60%; height: 2rem; margin: 0.25rem 0;"
-        ></ion-skeleton-text>
-
-        <div class="earnings-hero-footer">
-          <div class="earnings-mini-stat">
-            <span class="mini-label">{{ 'WHOLESALER_HOME.This Week' | translate }}</span>
-            <span class="mini-value" *ngIf="!isDashboardLoading">₹{{ weekEarnings | number:'1.0-2' }}</span>
-            <ion-skeleton-text *ngIf="isDashboardLoading" animated style="width: 70px; height: 1rem;"></ion-skeleton-text>
-          </div>
-          <div class="earnings-divider"></div>
-          <div class="earnings-mini-stat">
-            <span class="mini-label">{{ 'WHOLESALER_HOME.Pending Payout' | translate }}</span>
-            <span class="mini-value" *ngIf="!isDashboardLoading">₹{{ pendingPayout | number:'1.0-2' }}</span>
-            <ion-skeleton-text *ngIf="isDashboardLoading" animated style="width: 70px; height: 1rem;"></ion-skeleton-text>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stock & Orders Quick Stats -->
-      <div class="quick-stats-row">
-        <div class="stat-card" (click)="navigateToStockDashboard()">
-          <div class="stat-icon stock-icon">
-            <ion-icon name="cube-outline"></ion-icon>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value" *ngIf="!isDashboardLoading">
-              {{ totalStockAcrossProducts | number:'1.0-2' }}
-              <small>{{ 'WHOLESALER_HOME.UNIT_KG' | translate }}</small>
+          <div class="earnings-amount" *ngIf="!isDashboardLoading">
+            ₹{{ todaysEarnings | number:'1.0-2' }}
+            <span
+              class="earnings-trend"
+              [ngClass]="{
+                'trend-up':   earningsTrendPercent > 0,
+                'trend-down': earningsTrendPercent < 0,
+                'trend-flat': earningsTrendPercent === 0
+              }"
+              *ngIf="earningsTrendPercent !== null"
+            >
+              <ion-icon
+                [name]="earningsTrendPercent > 0
+                  ? 'trending-up-outline'
+                  : (earningsTrendPercent < 0 ? 'trending-down-outline' : 'remove-outline')"
+              ></ion-icon>
+              {{ earningsTrendPercent | number:'1.0-1' }}%
             </span>
-            <ion-skeleton-text *ngIf="isDashboardLoading" animated style="width: 60px; height: 1.2rem;"></ion-skeleton-text>
-            <span class="stat-label">{{ 'WHOLESALER_HOME.Total Stock' | translate }}</span>
           </div>
+          <ion-skeleton-text
+            *ngIf="isDashboardLoading"
+            animated
+            style="width: 55%; height: 2rem; margin: 0.25rem 0; border-radius: 8px;"
+          ></ion-skeleton-text>
         </div>
 
-        <div class="stat-card" (click)="navigateToMyOrders()">
-          <div class="stat-icon orders-icon">
-            <ion-icon name="receipt-outline"></ion-icon>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value" *ngIf="!isDashboardLoading">{{ totalActiveOrders }}</span>
-            <ion-skeleton-text *ngIf="isDashboardLoading" animated style="width: 40px; height: 1.2rem;"></ion-skeleton-text>
-            <span class="stat-label">{{ 'WHOLESALER_HOME.Active Orders' | translate }}</span>
-          </div>
+        <ion-icon name="chevron-forward-outline" class="earnings-arrow"></ion-icon>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="stats-strip">
+        <div class="stat-strip-item" (click)="$event.stopPropagation(); navigateToEarnings()">
+          <span class="strip-val" *ngIf="!isDashboardLoading">
+            ₹{{ weekEarnings | number:'1.0-2' }}
+          </span>
+          <ion-skeleton-text *ngIf="isDashboardLoading" animated style="width: 50px; height: 1rem; border-radius: 6px;"></ion-skeleton-text>
+          <span class="strip-lbl">{{ 'WHOLESALER_HOME.This Week' | translate }}</span>
+        </div>
+
+        <div class="strip-divider"></div>
+
+        <div class="stat-strip-item" (click)="$event.stopPropagation(); navigateToStockDashboard()">
+          <span class="strip-val" *ngIf="!isDashboardLoading">
+            {{ totalStockAcrossProducts | number:'1.0-0' }}<small> {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}</small>
+          </span>
+          <ion-skeleton-text *ngIf="isDashboardLoading" animated style="width: 50px; height: 1rem; border-radius: 6px;"></ion-skeleton-text>
+          <span class="strip-lbl">{{ 'WHOLESALER_HOME.Total Stock' | translate }}</span>
+        </div>
+
+        <div class="strip-divider"></div>
+
+        <div class="stat-strip-item" (click)="$event.stopPropagation(); navigateToMyOrders()">
+          <span class="strip-val" *ngIf="!isDashboardLoading">{{ totalActiveOrders }}</span>
+          <ion-skeleton-text *ngIf="isDashboardLoading" animated style="width: 30px; height: 1rem; border-radius: 6px;"></ion-skeleton-text>
+          <span class="strip-lbl">{{ 'WHOLESALER_HOME.Active Orders' | translate }}</span>
         </div>
       </div>
 
-      <!-- Tomorrow's Demand Summary Banner -->
+    </div>
+  </div>
+  <!-- END COMMAND CENTER -->
+
+  <!-- ======================== -->
+  <!-- BODY SCROLL AREA         -->
+  <!-- ======================== -->
+  <div class="body-scroll">
+
+    <!-- Tomorrow's Demand Alert -->
+    <div class="alert-strip" *ngIf="!isDashboardLoading">
+
+      <!-- Items are short -->
       <div
-        class="tomorrow-banner"
-        *ngIf="!isDashboardLoading && nextDayDemand.length > 0"
+        class="alert-card alert-danger"
+        *ngIf="shortageCount > 0"
         (click)="navigateToNextDayDemand()"
       >
-        <div class="tomorrow-banner-icon">
-          <ion-icon name="calendar-outline"></ion-icon>
+        <div class="alert-icon-wrap alert-icon-danger">
+          <ion-icon name="warning-outline"></ion-icon>
         </div>
-        <div class="tomorrow-banner-text">
-          <strong>{{ nextDayDemand.length }}</strong>
-          {{ 'WHOLESALER_HOME.items needed for tomorrow' | translate }}
-          <span class="shortage-count" *ngIf="shortageCount > 0">
-            · {{ shortageCount }} {{ 'WHOLESALER_HOME.short on stock' | translate }}
-          </span>
+        <div class="alert-body">
+          <div class="alert-title">
+            {{ shortageCount }} {{ 'WHOLESALER_HOME.items short for tomorrow' | translate }}
+          </div>
+          <div class="alert-sub alert-sub-danger">
+            {{ 'WHOLESALER_HOME.Tap to see what needs restocking' | translate }}
+          </div>
         </div>
-        <ion-icon name="chevron-forward-outline" class="tomorrow-banner-arrow"></ion-icon>
+        <ion-icon name="chevron-forward-outline" class="alert-chevron alert-chevron-danger"></ion-icon>
       </div>
 
-      <div class="tomorrow-banner skeleton-banner" *ngIf="isDashboardLoading">
-        <ion-skeleton-text animated style="width: 100%; height: 1.2rem; border-radius: 8px;"></ion-skeleton-text>
-      </div>
-
-    </div>
-    <!-- ============================= -->
-    <!-- END DASHBOARD SECTION         -->
-    <!-- ============================= -->
-
-    <div class="search-wrapper">
-      <ion-searchbar
-        [placeholder]="'WHOLESALER_HOME.Search items...' | translate"
-        (ionInput)="searchItems($event)"
-        mode="ios"
-        [disabled]="isSearching"
-      ></ion-searchbar>
-      <ion-button (click)="refreshItems()" fill="solid" color="light" [disabled]="isLoading || isSearching">
-        <ion-icon name="reload-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-    </div>
-
-    <!-- Loading State -->
-    <div *ngIf="(isLoading || isSearching) && items.length === 0" class="loading-state">
-      <ion-spinner name="circular"></ion-spinner>
-      <p>{{ 'WHOLESALER_HOME.Loading products...' | translate }}</p>
-    </div>
-
-    <!-- Product List -->
-    <ion-list *ngIf="(!isLoading && !isSearching) || items.length > 0">
-      <ion-item
-        *ngFor="let item of filteredItems"
-        lines="none"
-        (click)="viewDetails(item)"
-        button
-        [detail]="false"
+      <!-- All covered -->
+      <div
+        class="alert-card alert-success"
+        *ngIf="shortageCount === 0 && nextDayItemsCount > 0"
+        (click)="navigateToNextDayDemand()"
       >
-<!-- I removed the double arrows of ios with [detail]="false" -->
+        <div class="alert-icon-wrap alert-icon-success">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <div class="alert-body">
+          <div class="alert-title">
+            {{ 'WHOLESALER_HOME.Tomorrow fully covered' | translate }}
+          </div>
+          <div class="alert-sub alert-sub-success">
+            {{ nextDayItemsCount }} {{ 'WHOLESALER_HOME.items ready for delivery' | translate }}
+          </div>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="alert-chevron alert-chevron-success"></ion-icon>
+      </div>
 
-        <ion-label>
-          <h2>{{ item.product_name }}</h2>
-          <div class="item-stats">
-            <span class="stat-chip stock-chip" [ngClass]="{ 'out-of-stock': item.total_stock === 0 }">
-              <ion-icon name="cube-outline"></ion-icon>
-              {{ item.total_stock | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
-            </span>
-            <span class="stat-chip orders-chip">
-              <ion-icon name="receipt-outline"></ion-icon>
-              {{ item.total_orders }} {{ 'WHOLESALER_HOME.Orders' | translate }}
+    </div>
+
+    <!-- Alert skeleton -->
+    <div class="alert-strip" *ngIf="isDashboardLoading">
+      <div class="alert-card alert-skeleton">
+        <ion-skeleton-text animated style="width: 100%; height: 1.1rem; border-radius: 8px;"></ion-skeleton-text>
+      </div>
+    </div>
+
+    <!-- ======================== -->
+    <!-- RECENTLY IN DEMAND       -->
+    <!-- ======================== -->
+    <div class="section-block" *ngIf="!isDashboardLoading && pastDemand.length > 0">
+      <div class="section-header">
+        <div class="section-title">
+          <ion-icon name="trending-up-outline"></ion-icon>
+          {{ 'WHOLESALER_HOME.Recently in Demand' | translate }}
+        </div>
+        <button class="view-all-btn" (click)="navigateToPastDemand()">
+          {{ 'WHOLESALER_HOME.View all' | translate }}
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
+
+      <!-- Horizontal scrolling demand pills -->
+      <div class="demand-scroll">
+        <div
+          class="demand-pill"
+          *ngFor="let pd of pastDemand"
+          [ngClass]="{ 'demand-pill-oos': pd.total_stock === 0 }"
+          (click)="viewDetailsById(pd.product_id)"
+        >
+          <div class="pill-name">{{ pd.product_name }}</div>
+          <div class="pill-chips">
+            <span class="pill-chip chip-ordered">
+              <ion-icon name="trending-up-outline"></ion-icon>
+              {{ pd.total_ordered_quantity | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
             </span>
             <span
-              class="stat-chip demand-chip"
-              *ngIf="getDemandForProduct(item.product_id) as demand"
-              [ngClass]="{ 'demand-short': demand.stock_available < demand.qty_needed }"
+              class="pill-chip"
+              [ngClass]="pd.total_stock === 0 ? 'chip-oos' : 'chip-instock'"
             >
-              <ion-icon name="calendar-outline"></ion-icon>
-              <ng-container *ngIf="demand.stock_available < demand.qty_needed">
-                {{ 'WHOLESALER_HOME.Short by' | translate }}
-                {{ (demand.qty_needed - demand.stock_available) | number:'1.0-2' }}
-                {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
-                {{ 'WHOLESALER_HOME.for tomorrow' | translate }}
+              <ion-icon name="cube-outline"></ion-icon>
+              <ng-container *ngIf="pd.total_stock === 0">
+                {{ 'WHOLESALER_HOME.Out of stock' | translate }}
               </ng-container>
-              <ng-container *ngIf="demand.stock_available >= demand.qty_needed">
-                {{ 'WHOLESALER_HOME.Tomorrow covered' | translate }}
+              <ng-container *ngIf="pd.total_stock > 0">
+                {{ pd.total_stock | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
               </ng-container>
             </span>
           </div>
-        </ion-label>
-        <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
-      </ion-item>
-    </ion-list>
-
-    <div
-      class="empty-state"
-      *ngIf="!isLoading && !isSearching && filteredItems.length === 0"
-    >
-      <ion-icon name="search-outline"></ion-icon>
-      <h3>{{ 'WHOLESALER_HOME.No items found' | translate }}</h3>
-      <p>{{ 'WHOLESALER_HOME.Try adjusting your search' | translate }}</p>
+        </div>
+      </div>
     </div>
+
+    <!-- Past demand skeleton -->
+    <div class="section-block" *ngIf="isDashboardLoading">
+      <div class="section-header">
+        <ion-skeleton-text animated style="width: 160px; height: 1rem; border-radius: 6px;"></ion-skeleton-text>
+      </div>
+      <div class="demand-scroll">
+        <div class="demand-pill demand-pill-skeleton" *ngFor="let s of [1,2,3]">
+          <ion-skeleton-text animated style="width: 80px; height: 0.85rem; margin-bottom: 8px; border-radius: 6px;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 100%; height: 0.75rem; border-radius: 6px;"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 70%; height: 0.75rem; margin-top: 4px; border-radius: 6px;"></ion-skeleton-text>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== -->
+    <!-- INVENTORY LIST           -->
+    <!-- ======================== -->
+    <div class="section-block inventory-block">
+
+      <!-- Section header + search -->
+      <div class="section-header">
+        <div class="section-title">
+          <ion-icon name="cube-outline"></ion-icon>
+          {{ 'WHOLESALER_HOME.My Inventory' | translate }}
+        </div>
+      </div>
+
+      <div class="search-row">
+        <ion-searchbar
+          class="inv-searchbar"
+          [placeholder]="'WHOLESALER_HOME.Search items...' | translate"
+          (ionInput)="searchItems($event)"
+          mode="ios"
+          [disabled]="isSearching"
+        ></ion-searchbar>
+        <ion-button
+          class="refresh-btn"
+          fill="clear"
+          (click)="refreshItems()"
+          [disabled]="isLoading || isSearching"
+        >
+          <ion-icon name="reload-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Loading state -->
+      <div *ngIf="(isLoading || isSearching) && items.length === 0" class="loading-state">
+        <ion-spinner name="circular"></ion-spinner>
+        <p>{{ 'WHOLESALER_HOME.Loading products...' | translate }}</p>
+      </div>
+
+      <!-- Inventory list -->
+      <div class="inv-list" *ngIf="(!isLoading && !isSearching) || items.length > 0">
+
+        <!-- "Needs attention" group: out-of-stock items first -->
+        <ng-container *ngIf="getOutOfStockItems().length > 0">
+          <div class="list-divider">
+            <span class="divider-label">{{ 'WHOLESALER_HOME.Needs attention' | translate }}</span>
+            <div class="divider-line"></div>
+          </div>
+
+          <div
+            class="inv-item inv-item-oos"
+            *ngFor="let item of getOutOfStockItems()"
+            (click)="viewDetails(item)"
+          >
+            <div class="inv-icon-wrap inv-icon-oos">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+            </div>
+            <div class="inv-body">
+              <div class="inv-name">{{ item.product_name }}</div>
+              <div class="inv-chips">
+                <span class="inv-chip chip-stock chip-stock-oos">
+                  <ion-icon name="cube-outline"></ion-icon>
+                  0 {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
+                </span>
+                <span class="inv-chip chip-orders">
+                  <ion-icon name="receipt-outline"></ion-icon>
+                  {{ item.total_orders }} {{ 'WHOLESALER_HOME.Orders' | translate }}
+                </span>
+                <ng-container *ngIf="getDemandForProduct(item.product_id) as demand">
+                  <span
+                    class="inv-chip"
+                    [ngClass]="demand.stock_available < demand.qty_needed ? 'chip-short' : 'chip-covered'"
+                  >
+                    <ion-icon
+                      [name]="demand.stock_available < demand.qty_needed
+                        ? 'calendar-outline'
+                        : 'calendar-clear-outline'"
+                    ></ion-icon>
+                    <ng-container *ngIf="demand.stock_available < demand.qty_needed">
+                      {{ 'WHOLESALER_HOME.Short by' | translate }}
+                      {{ (demand.qty_needed - demand.stock_available) | number:'1.0-2' }}
+                      {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
+                    </ng-container>
+                    <ng-container *ngIf="demand.stock_available >= demand.qty_needed">
+                      {{ 'WHOLESALER_HOME.Tomorrow covered' | translate }}
+                    </ng-container>
+                  </span>
+                </ng-container>
+              </div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="inv-arrow"></ion-icon>
+          </div>
+        </ng-container>
+
+        <!-- "In stock" group -->
+        <ng-container *ngIf="getInStockItems().length > 0">
+          <div class="list-divider" [style.margin-top]="getOutOfStockItems().length > 0 ? '0.5rem' : '0'">
+            <span class="divider-label">{{ 'WHOLESALER_HOME.In stock' | translate }}</span>
+            <div class="divider-line"></div>
+          </div>
+
+          <div
+            class="inv-item"
+            *ngFor="let item of getInStockItems()"
+            (click)="viewDetails(item)"
+          >
+            <div class="inv-icon-wrap">
+              <ion-icon name="cube-outline"></ion-icon>
+            </div>
+            <div class="inv-body">
+              <div class="inv-name">{{ item.product_name }}</div>
+              <div class="inv-chips">
+                <span class="inv-chip chip-stock">
+                  <ion-icon name="cube-outline"></ion-icon>
+                  {{ item.total_stock | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
+                </span>
+                <span class="inv-chip chip-orders">
+                  <ion-icon name="receipt-outline"></ion-icon>
+                  {{ item.total_orders }} {{ 'WHOLESALER_HOME.Orders' | translate }}
+                </span>
+                <ng-container *ngIf="getDemandForProduct(item.product_id) as demand">
+                  <span
+                    class="inv-chip"
+                    [ngClass]="demand.stock_available < demand.qty_needed ? 'chip-short' : 'chip-covered'"
+                  >
+                    <ion-icon
+                      [name]="demand.stock_available < demand.qty_needed
+                        ? 'calendar-outline'
+                        : 'calendar-clear-outline'"
+                    ></ion-icon>
+                    <ng-container *ngIf="demand.stock_available < demand.qty_needed">
+                      {{ 'WHOLESALER_HOME.Short by' | translate }}
+                      {{ (demand.qty_needed - demand.stock_available) | number:'1.0-2' }}
+                      {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
+                    </ng-container>
+                    <ng-container *ngIf="demand.stock_available >= demand.qty_needed">
+                      {{ 'WHOLESALER_HOME.Tomorrow covered' | translate }}
+                    </ng-container>
+                  </span>
+                </ng-container>
+              </div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="inv-arrow"></ion-icon>
+          </div>
+        </ng-container>
+
+      </div>
+
+      <!-- Empty state -->
+      <div
+        class="empty-state"
+        *ngIf="!isLoading && !isSearching && filteredItems.length === 0"
+      >
+        <ion-icon name="search-outline"></ion-icon>
+        <h3>{{ 'WHOLESALER_HOME.No items found' | translate }}</h3>
+        <p>{{ 'WHOLESALER_HOME.Try adjusting your search' | translate }}</p>
+      </div>
+
+    </div>
+    <!-- END INVENTORY -->
 
     <ion-infinite-scroll
       threshold="100px"
@@ -326,8 +471,10 @@
       <ion-infinite-scroll-content
         loadingSpinner="bubbles"
         loadingText="{{ 'WHOLESALER_HOME.Loading more items...' | translate }}"
-      >
-      </ion-infinite-scroll-content>
+      ></ion-infinite-scroll-content>
     </ion-infinite-scroll>
+
   </div>
+  <!-- END BODY SCROLL -->
+
 </ion-content>

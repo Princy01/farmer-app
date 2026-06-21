@@ -1,0 +1,96 @@
+<ion-header mode="ios">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'WHOLESALER_HOME.Items Needed for Tomorrow' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="demand-page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="{{ 'WHOLESALER_HOME.Pull to refresh' | translate }}"
+      refreshingSpinner="circular"
+      refreshingText="{{ 'WHOLESALER_HOME.Refreshing...' | translate }}"
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="demand-page-container">
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading && items.length === 0" class="loading-state">
+      <ion-spinner name="circular"></ion-spinner>
+      <p>{{ 'WHOLESALER_HOME.Loading products...' | translate }}</p>
+    </div>
+
+    <!-- Demand List -->
+    <div class="demand-card-list" *ngIf="items.length > 0">
+      <div
+        class="demand-card"
+        *ngFor="let item of items"
+        (click)="viewDetails(item.product_id)"
+      >
+        <div class="demand-card-top">
+          <span class="demand-card-name">{{ item.product_name }}</span>
+          <span class="demand-card-badge" [ngClass]="{ 'badge-short': isShort(item), 'badge-covered': !isShort(item) }">
+            <ion-icon [name]="isShort(item) ? 'alert-circle-outline' : 'checkmark-circle-outline'"></ion-icon>
+            <ng-container *ngIf="isShort(item)">
+              {{ 'WHOLESALER_HOME.Short by' | translate }}
+              {{ item.shortage | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
+            </ng-container>
+            <ng-container *ngIf="!isShort(item)">
+              {{ 'WHOLESALER_HOME.Tomorrow covered' | translate }}
+            </ng-container>
+          </span>
+        </div>
+
+        <div class="demand-card-stats">
+          <div class="demand-stat">
+            <span class="demand-stat-label">{{ 'WHOLESALER_HOME.Needed' | translate }}</span>
+            <span class="demand-stat-value">
+              {{ item.qty_needed | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
+            </span>
+          </div>
+          <div class="demand-stat">
+            <span class="demand-stat-label">{{ 'WHOLESALER_HOME.Available' | translate }}</span>
+            <span class="demand-stat-value">
+              {{ item.total_stock | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
+            </span>
+          </div>
+        </div>
+
+        <div class="demand-progress-track">
+          <div
+            class="demand-progress-fill"
+            [ngClass]="{ 'fill-short': isShort(item) }"
+            [style.width.%]="getStockCoveragePercent(item)"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && items.length === 0">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <h3>{{ 'WHOLESALER_HOME.No items needed for tomorrow' | translate }}</h3>
+      <p>{{ 'WHOLESALER_HOME.All caught up for now' | translate }}</p>
+    </div>
+
+    <ion-infinite-scroll
+      threshold="100px"
+      (ionInfinite)="onInfiniteScroll($event)"
+      [disabled]="!isInfiniteScrollEnabled"
+    >
+      <ion-infinite-scroll-content
+        loadingSpinner="bubbles"
+        loadingText="{{ 'WHOLESALER_HOME.Loading more items...' | translate }}"
+      >
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  </div>
+</ion-content>

@@ -22,10 +22,17 @@ import {
   receiptOutline, searchOutline, chevronDownCircleOutline,
   languageOutline, chevronDownOutline, checkmarkOutline,
   carOutline, informationCircleOutline, cashOutline,
-  calendarOutline
+  calendarOutline, warningOutline, checkmarkCircleOutline,
+  alertCircleOutline
 } from 'ionicons/icons';
 
-import { WholesalerApiService, WholesalerProduct } from '../services/wholesaler-api.service';
+import {
+  WholesalerApiService,
+  WholesalerProductWithDemand,
+  WholesalerDashboardSummary,
+  WholesalerDemandProduct,
+  WholesalerPastDemandProduct
+} from '../services/wholesaler-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LanguagePopoverComponent } from './language-popover.component';
@@ -40,9 +47,8 @@ interface Language {
 /**
  * Represents a product that needs to be prepared/stocked for next day's
  * confirmed orders, along with how much current stock is available.
- *
- * NOTE: Currently populated with DUMMY DATA. See backend API requirements
- * documented at the bottom of this file / in the accompanying notes.
+ * Populated from the real backend endpoints (dashboard-summary / next-day-demand
+ * / products-with-demand).
  */
 interface NextDayDemandItem {
   product_id: number;
@@ -62,8 +68,8 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private search$ = new Subject<string>();
 
-  items: WholesalerProduct[] = [];
-  filteredItems: WholesalerProduct[] = [];
+  items: WholesalerProductWithDemand[] = [];
+  filteredItems: WholesalerProductWithDemand[] = [];
   currentPage = 0;
   itemsPerPage = 10;
   isInfiniteScrollEnabled = true;
@@ -109,11 +115,17 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   /** Items that need to be catered for tomorrow (top 5 shown on home) */
   nextDayDemand: NextDayDemandItem[] = [];
 
+  /** True total count of items needed tomorrow (from dashboard-summary; nextDayDemand above is capped at 5) */
+  nextDayItemsCount = 0;
+
   /** Quick lookup map: product_id -> demand item, used by the product list */
   private nextDayDemandMap: Map<number, NextDayDemandItem> = new Map();
 
   /** Count of products in nextDayDemand that are short on stock */
   shortageCount = 0;
+
+  /** Recently-in-demand products (top 5 by past order volume) shown on home */
+  pastDemand: WholesalerPastDemandProduct[] = [];
 
   /** Polling interval for auto-refresh */
   private pollInterval: any;
@@ -141,7 +153,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
       receiptOutline, searchOutline, chevronDownCircleOutline,
       languageOutline, chevronDownOutline, checkmarkOutline,
       carOutline, informationCircleOutline, cashOutline,
-      calendarOutline
+      calendarOutline, warningOutline, checkmarkCircleOutline, alertCircleOutline
     });
 
     this.translate.setDefaultLang('en');
@@ -166,7 +178,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
         switchMap(searchTerm => {
           this.isSearching = true;
           this.searchTerm = searchTerm;
-          return this.wholesalerService.getWholesalerProducts(0, this.itemsPerPage, searchTerm || undefined);
+          return this.wholesalerService.getWholesalerProductsWithDemand(0, this.itemsPerPage, searchTerm || undefined);
         }),
         takeUntil(this.destroy$)
       )
@@ -177,6 +189,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
           this.currentPage = 0;
           this.isSearching = false;
           this.isInfiniteScrollEnabled = data.length >= this.itemsPerPage;
+          this.updateNextDayDemandMapFromItems(data);
         },
         error: () => {
           this.isSearching = false;
@@ -250,7 +263,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
 
     this.wholesalerService
-      .getWholesalerProducts(
+      .getWholesalerProductsWithDemand(
         this.currentPage,
         this.itemsPerPage,
         this.searchTerm || undefined
@@ -260,6 +273,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
         next: (data) => {
           this.items = [...this.items, ...data];
           this.filteredItems = [...this.items];
+          this.updateNextDayDemandMapFromItems(this.items);
 
           if (data.length < this.itemsPerPage) {
             this.isInfiniteScrollEnabled = false;
@@ -310,7 +324,7 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     this.search$.next(value);
   }
 
-  viewDetails(item: WholesalerProduct) {
+  viewDetails(item: WholesalerProductWithDemand) {
     this.router.navigate(['/wholesaler/product-details', item.product_id]);
   }
 
@@ -375,6 +389,14 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
    */
   async navigateToNextDayDemand() {
     await this.safeNavigate('/wholesaler/next-day-demand');
+  }
+
+  /**
+   * Navigate to the full "Past Demand" screen (new screen - to be designed next).
+   * Route name is a placeholder; adjust to match routing module once created.
+   */
+  async navigateToPastDemand() {
+    await this.safeNavigate('/wholesaler/past-demand');
   }
 
   createOrder() {
@@ -606,18 +628,16 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ============================================================
-  // DASHBOARD DATA LOADING (NEW)
+  // DASHBOARD DATA LOADING
   // ============================================================
   //
-  // CURRENT STATE:
   //  - Earnings figures (todaysEarnings, weekEarnings, pendingPayout,
-  //    earningsTrendPercent) use the EXISTING getWholesalerEarningsSummary
-  //    and getWholesalerEarningsDays endpoints (real backend data).
-  //  - totalStockAcrossProducts / totalActiveOrders are derived from the
-  //    EXISTING getWholesalerProducts response (real backend data) as a
-  //    reasonable proxy until dedicated summary endpoints exist.
-  //  - nextDayDemand currently uses DUMMY DATA (see loadNextDayDemandDummy
-  //    below). A new backend endpoint is required - see notes at end of file.
+  //    earningsTrendPercent) use the existing getWholesalerEarningsSummary
+  //    endpoint.
+  //  - totalStockAcrossProducts / totalActiveOrders / nextDayDemand counts
+  //    come from the new getWholesalerDashboardSummary endpoint.
+  //  - nextDayDemand (top items shown on home) comes from the new
+  //    getWholesalerNextDayDemand endpoint.
   // ============================================================
 
   private loadDashboardData(): void {
@@ -645,14 +665,18 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
           to: this.daysAgoDateString(1)
         }).pipe(catchError(() => of(null))),
 
-        // Reuse existing product list endpoint for stock/orders totals.
-        // Using a large limit to approximate "all products" for summary purposes.
-        productsSummary: this.wholesalerService.getWholesalerProducts(0, 100)
-          .pipe(catchError(() => of([] as WholesalerProduct[])))
+        dashboardSummary: this.wholesalerService.getWholesalerDashboardSummary()
+          .pipe(catchError(() => of(null as WholesalerDashboardSummary | null))),
+
+        nextDayDemand: this.wholesalerService.getWholesalerNextDayDemand(0, 5)
+          .pipe(catchError(() => of([] as WholesalerDemandProduct[]))),
+
+        pastDemand: this.wholesalerService.getWholesalerPastDemand(0, 5)
+          .pipe(catchError(() => of([] as WholesalerPastDemandProduct[])))
       })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: ({ todaySummary, weekSummary, yesterdaySummary, productsSummary }) => {
+        next: ({ todaySummary, weekSummary, yesterdaySummary, dashboardSummary, nextDayDemand, pastDemand }) => {
           // --- Earnings ---
           this.todaysEarnings = todaySummary?.expected_amount ?? 0;
           this.weekEarnings = weekSummary?.expected_amount ?? 0;
@@ -667,22 +691,28 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
             this.earningsTrendPercent = 0;
           }
 
-          // --- Stock & Orders totals (derived from product list) ---
-          this.totalStockAcrossProducts = productsSummary.reduce(
-            (sum, p) => sum + (p.total_stock || 0), 0
-          );
-          this.totalActiveOrders = productsSummary.reduce(
-            (sum, p) => sum + (p.total_orders || 0), 0
-          );
+          // --- Stock & Orders totals + next-day counts ---
+          this.totalStockAcrossProducts = dashboardSummary?.total_stock ?? 0;
+          this.totalActiveOrders = dashboardSummary?.active_orders ?? 0;
+          this.shortageCount = dashboardSummary?.next_day_shortage_count ?? 0;
+          this.nextDayItemsCount = dashboardSummary?.next_day_items_count ?? 0;
 
-          // --- Next day demand (dummy until backend endpoint exists) ---
-          this.nextDayDemand = this.loadNextDayDemandDummy(productsSummary);
+          // --- Next day demand (top items for the "Cater for Tomorrow" card) ---
+          this.nextDayDemand = (nextDayDemand || []).map(d => ({
+            product_id: d.product_id,
+            product_name: d.product_name,
+            qty_needed: d.qty_needed,
+            stock_available: d.total_stock
+          }));
           this.nextDayDemandMap = new Map(
             this.nextDayDemand.map(d => [d.product_id, d])
           );
-          this.shortageCount = this.nextDayDemand.filter(
-            d => d.stock_available < d.qty_needed
-          ).length;
+          // Merge any demand info embedded in the already-loaded product list,
+          // in case those items aren't part of the top-5 nextDayDemand list.
+          this.updateNextDayDemandMapFromItems(this.items, false);
+
+          // --- Past demand (recently-in-demand products) ---
+          this.pastDemand = pastDemand || [];
 
           resolve();
         },
@@ -695,42 +725,29 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * TEMPORARY DUMMY DATA for "Cater for Tomorrow" card.
+   * Builds/merges the product_id -> demand lookup map used by the product
+   * list from the next_day_demand field embedded in each product returned
+   * by the products-with-demand endpoint.
    *
-   * Once the backend exposes a real endpoint (see notes below), replace this
-   * with a direct API call, e.g.:
-   *
-   *   this.wholesalerService.getNextDayDemand()
-   *     .subscribe(data => this.nextDayDemand = data);
-   *
-   * For now, we synthesize plausible demand figures from the existing
-   * product list so the UI can be reviewed with realistic-looking data.
+   * @param items the product list (with embedded next_day_demand)
+   * @param resetMap when true, replaces the map entirely; when false, merges
+   *   into the existing map (used so the dashboard's top-5 demand list isn't
+   *   clobbered by a product list that doesn't include demand for those items)
    */
-  private loadNextDayDemandDummy(products: WholesalerProduct[]): NextDayDemandItem[] {
-    if (!products || products.length === 0) {
-      return [];
+  private updateNextDayDemandMapFromItems(items: WholesalerProductWithDemand[], resetMap = true): void {
+    if (resetMap) {
+      this.nextDayDemandMap = new Map();
     }
-
-    // Take up to 5 products with the highest order counts as a stand-in
-    // for "products with confirmed orders for tomorrow".
-    const sorted = [...products]
-      .sort((a, b) => (b.total_orders || 0) - (a.total_orders || 0))
-      .slice(0, 5);
-
-    return sorted.map((p, index) => {
-      // Synthesize a plausible "needed" quantity (dummy)
-      const qtyNeeded = Math.max(10, Math.round((p.total_orders || 1) * 3.5));
-      // Vary stock availability so some items show shortages (dummy)
-      const stockFactor = index % 3 === 0 ? 0.6 : index % 3 === 1 ? 1.4 : 1.0;
-      const stockAvailable = Math.max(0, Math.round(qtyNeeded * stockFactor));
-
-      return {
-        product_id: p.product_id,
-        product_name: p.product_name,
-        qty_needed: qtyNeeded,
-        stock_available: stockAvailable
-      };
-    });
+    for (const item of items) {
+      if (item.next_day_demand) {
+        this.nextDayDemandMap.set(item.product_id, {
+          product_id: item.product_id,
+          product_name: item.product_name,
+          qty_needed: item.next_day_demand.qty_needed,
+          stock_available: item.total_stock
+        });
+      }
+    }
   }
 
   /** Returns 0-100 capped percentage of stock coverage for progress bar */
@@ -743,6 +760,22 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   /** Returns tomorrow's demand info for a given product, or null if none */
   getDemandForProduct(productId: number): NextDayDemandItem | null {
     return this.nextDayDemandMap.get(productId) || null;
+  }
+
+  /**
+   * Returns items where total_stock === 0.
+   * These surface first under the "Needs attention" divider.
+   */
+  getOutOfStockItems(): WholesalerProductWithDemand[] {
+    return this.filteredItems.filter(item => item.total_stock === 0);
+  }
+
+  /**
+   * Returns items where total_stock > 0.
+   * These appear under the "In stock" divider.
+   */
+  getInStockItems(): WholesalerProductWithDemand[] {
+    return this.filteredItems.filter(item => item.total_stock > 0);
   }
 
   private todayDateString(): string {

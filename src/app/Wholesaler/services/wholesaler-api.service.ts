@@ -262,6 +262,42 @@ export interface WholesalerProduct {
   total_orders: number;
 }
 
+// Next-day demand info embedded in a wholesaler product (from products-with-demand endpoint)
+export interface NextDayDemand {
+  qty_needed: number;
+  shortage: number;
+}
+
+// Wholesaler product with optional next-day demand info
+export interface WholesalerProductWithDemand extends WholesalerProduct {
+  next_day_demand?: NextDayDemand | null;
+}
+
+// Dashboard summary (home screen quick stats)
+export interface WholesalerDashboardSummary {
+  total_stock: number;
+  active_orders: number;
+  next_day_items_count: number;
+  next_day_shortage_count: number;
+}
+
+// Single product entry in the next-day demand list
+export interface WholesalerDemandProduct {
+  product_id: number;
+  product_name: string;
+  total_stock: number;
+  qty_needed: number;
+  shortage: number;
+}
+
+// Single product entry in the past-demand list
+export interface WholesalerPastDemandProduct {
+  product_id: number;
+  product_name: string;
+  total_stock: number;
+  total_ordered_quantity: number;
+}
+
   // Detailed wholesaler product information
 
 export interface WholesalerProductDetails {
@@ -902,6 +938,94 @@ export class WholesalerApiService {
 
     return this.http.get<WholesalerProduct[]>(
       `${this.apiUrl}/wholesaler/products`,
+      { headers, params }
+    ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  getWholesalerProductsWithDemand(
+    page?: number,
+    limit?: number,
+    search?: string
+  ): Observable<WholesalerProductWithDemand[]> {
+    const headers = this.getAuthHeaders();
+    const params: any = {};
+
+    if (page !== undefined) {
+      params.page = page;
+    }
+    if (limit !== undefined) {
+      params.limit = limit;
+    }
+    if (search) {
+      params.search = search;
+    }
+
+    return this.http.get<WholesalerProductWithDemand[]>(
+      `${this.apiUrl}/wholesaler/products-with-demand`,
+      { headers, params }
+    ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  getWholesalerDashboardSummary(): Observable<WholesalerDashboardSummary> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<WholesalerDashboardSummary>(
+      `${this.apiUrl}/wholesaler/dashboard-summary`,
+      { headers }
+    ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  getWholesalerNextDayDemand(
+    page?: number,
+    limit?: number
+  ): Observable<WholesalerDemandProduct[]> {
+    const headers = this.getAuthHeaders();
+    const params: any = {};
+
+    if (page !== undefined) {
+      params.page = page;
+    }
+    if (limit !== undefined) {
+      params.limit = limit;
+    }
+
+    return this.http.get<WholesalerDemandProduct[]>(
+      `${this.apiUrl}/wholesaler/next-day-demand`,
+      { headers, params }
+    ).pipe(
+      timeout(30000),
+      this.getExponentialBackoffRetry(),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  getWholesalerPastDemand(
+    page?: number,
+    limit?: number
+  ): Observable<WholesalerPastDemandProduct[]> {
+    const headers = this.getAuthHeaders();
+    const params: any = {};
+
+    if (page !== undefined) {
+      params.page = page;
+    }
+    if (limit !== undefined) {
+      params.limit = limit;
+    }
+
+    return this.http.get<WholesalerPastDemandProduct[]>(
+      `${this.apiUrl}/wholesaler/past-demand`,
       { headers, params }
     ).pipe(
       timeout(30000),

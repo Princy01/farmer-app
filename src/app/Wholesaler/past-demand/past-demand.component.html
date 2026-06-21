@@ -1,0 +1,79 @@
+<ion-header mode="ios">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'WHOLESALER_HOME.Recently in Demand' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="past-demand-page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="{{ 'WHOLESALER_HOME.Pull to refresh' | translate }}"
+      refreshingSpinner="circular"
+      refreshingText="{{ 'WHOLESALER_HOME.Refreshing...' | translate }}"
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="past-demand-page-container">
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading && items.length === 0" class="loading-state">
+      <ion-spinner name="circular"></ion-spinner>
+      <p>{{ 'WHOLESALER_HOME.Loading products...' | translate }}</p>
+    </div>
+
+    <!-- Past Demand List -->
+    <div class="past-demand-card-list" *ngIf="items.length > 0">
+      <div
+        class="past-demand-card"
+        *ngFor="let item of items"
+        (click)="viewDetails(item.product_id)"
+      >
+        <div class="past-demand-card-icon">
+          <ion-icon name="trending-up-outline"></ion-icon>
+        </div>
+
+        <div class="past-demand-card-body">
+          <span class="past-demand-card-name">{{ item.product_name }}</span>
+          <div class="past-demand-card-stats">
+            <span class="past-demand-chip ordered-chip">
+              <ion-icon name="trending-up-outline"></ion-icon>
+              {{ item.total_ordered_quantity | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
+              {{ 'WHOLESALER_HOME.ordered' | translate }}
+            </span>
+            <span class="past-demand-chip stock-chip" [ngClass]="{ 'out-of-stock': isOutOfStock(item) }">
+              <ion-icon name="cube-outline"></ion-icon>
+              {{ item.total_stock | number:'1.0-2' }} {{ 'WHOLESALER_HOME.UNIT_KG' | translate }}
+              {{ 'WHOLESALER_HOME.in stock' | translate }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && items.length === 0">
+      <ion-icon name="time-outline"></ion-icon>
+      <h3>{{ 'WHOLESALER_HOME.No past demand data' | translate }}</h3>
+      <p>{{ 'WHOLESALER_HOME.Demand history will appear here' | translate }}</p>
+    </div>
+
+    <ion-infinite-scroll
+      threshold="100px"
+      (ionInfinite)="onInfiniteScroll($event)"
+      [disabled]="!isInfiniteScrollEnabled"
+    >
+      <ion-infinite-scroll-content
+        loadingSpinner="bubbles"
+        loadingText="{{ 'WHOLESALER_HOME.Loading more items...' | translate }}"
+      >
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  </div>
+</ion-content>

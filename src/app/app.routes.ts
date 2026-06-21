@@ -135,6 +135,14 @@ const appRoutes: Routes = [
     path: 'wholesaler/pickup-orders',
     loadComponent: () => import('./Wholesaler/pickup-orders/pickup-orders.component').then((m) => m.WholesalerPickupOrdersComponent),
   },
+  {
+    path: 'wholesaler/next-day-demand',
+    loadComponent: () => import('./Wholesaler/next-day-demand/next-day-demand.component').then((m) => m.NextDayDemandPage),
+  },
+  {
+    path: 'wholesaler/past-demand',
+    loadComponent: () => import('./Wholesaler/past-demand/past-demand.component').then((m) => m.PastDemandPage),
+  },
 
   {
     path: 'buyer',
