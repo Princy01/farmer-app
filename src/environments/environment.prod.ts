@@ -53,6 +53,7 @@ function runtimeDefault(publicUrl: string, tunnelPort: number): string {
 const defaultApiUrl = runtimeDefault('http://160.250.204.132:3000', 8082);
 const defaultRealtimeUrl = runtimeDefault('http://160.250.204.132:8083', 8083);
 const defaultTranslateUrl = runtimeDefault('http://160.250.204.132:8000', 8000);
+const defaultPaymentGatewayUrl = runtimeDefault('http://160.250.204.132:8081', 8081);
 
 export const environment = {
   production: true,
@@ -60,7 +61,7 @@ export const environment = {
   realtimeApiUrl: runtimeOverride('realtimeApiUrl', runtimeOverride('transportRealtimeUrl', defaultRealtimeUrl)),
   transportRealtimeUrl: runtimeOverride('transportRealtimeUrl', runtimeOverride('realtimeApiUrl', defaultRealtimeUrl)),
   paymentMode: runtimeOverride('paymentMode', 'simulated'),
-  paymentGatewayUrl: runtimeOverride('paymentGatewayUrl', runtimeOverride('apiUrl', defaultApiUrl)),
+  paymentGatewayUrl: runtimeOverride('paymentGatewayUrl', defaultPaymentGatewayUrl),
   translateApiUrl: runtimeOverride('translateApiUrl', defaultTranslateUrl),
   supportEmail: 'support@farmerapp.com',
   supportPhone: '+91-1234-567-890',

@@ -410,7 +410,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       await loading.dismiss();
 
       if (response?.data?.payment_url && response?.data?.order_id) {
-        const paymentUrl = response.data.payment_url;
+        const paymentUrl = this.gatewayUrlForBrowser(response.data.payment_url);
         const paymentOrderId = response.data.order_id;
 
         // We need the returned window handle here to distinguish a real popup block
@@ -431,6 +431,44 @@ export class PaymentComponent implements OnInit, OnDestroy {
       this.isProcessingPayment = false;
       await this.showPaymentError(error instanceof Error ? error.message : undefined);
     }
+  }
+
+  private gatewayUrlForBrowser(rawUrl: string): string {
+    const gatewayBase = environment.paymentGatewayUrl?.trim();
+
+    let paymentUrl: URL;
+    try {
+      paymentUrl = new URL(rawUrl, gatewayBase || window.location.origin);
+    } catch {
+      return rawUrl;
+    }
+
+    if (!this.isLoopbackGatewayHost(paymentUrl.hostname)) {
+      return paymentUrl.toString();
+    }
+
+    if (!gatewayBase) {
+      return rawUrl;
+    }
+
+    try {
+      const baseUrl = new URL(gatewayBase);
+      paymentUrl.protocol = baseUrl.protocol;
+      paymentUrl.host = baseUrl.host;
+      return paymentUrl.toString();
+    } catch {
+      return rawUrl;
+    }
+  }
+
+  private isLoopbackGatewayHost(hostname: string): boolean {
+    const host = hostname.toLowerCase();
+    return host === 'localhost' ||
+      host === '0.0.0.0' ||
+      host === '127.0.0.1' ||
+      host.startsWith('127.') ||
+      host === '::1' ||
+      host === '[::1]';
   }
 
   private async pollPaymentStatus(paymentOrderId: string): Promise<void> {
