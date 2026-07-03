@@ -1800,6 +1800,8 @@
     "EMPTY_CART_ERROR": "Your cart is empty. Please add items before proceeding to payment.",
     "WHOLESALERS": "wholesalers",
     "NO_ITEMS_ERROR": "No items in order. Please add items before proceeding to payment.",
+    "TRANSPORT_QUOTE_IN_PROGRESS": "Transport distance and cost are still being calculated. Please wait a moment.",
+    "TRANSPORT_QUOTE_UNAVAILABLE": "Transport cost could not be calculated for the selected pickup and delivery locations. Please check branch locations or try again.",
     "CHECKOUT_SESSION_ERROR": "Unable to create checkout session. Please try again."
   },
   "ORDER_CONFIRMATION": {

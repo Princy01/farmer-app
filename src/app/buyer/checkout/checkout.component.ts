@@ -46,6 +46,8 @@ interface CartItem {
   branch_id?: number;
   wholesaler_id?: number;
   wholesaler_name?: string;
+  wholesaler_branch_latitude?: number;
+  wholesaler_branch_longitude?: number;
 }
 
 interface RetailerInfo {
@@ -68,6 +70,8 @@ interface WholesalerGroupSummary {
   branchId: number;
   wholesalerName: string;
   branchName: string;
+  pickupLatitude?: number;
+  pickupLongitude?: number;
   itemCount: number;
   subtotal: number;
   items: CartItem[];
@@ -88,6 +92,8 @@ interface TransportData {
 }
 
 const DEFAULT_TRANSPORT_REQUEST_LEAD_MINUTES = 245;
+const CHECKOUT_STATE_KEY = 'retailer.checkout.activeState';
+const CHECKOUT_STATE_TTL_MS = 30 * 60 * 1000;
 
 @Component({
   selector: 'app-checkout',
@@ -177,9 +183,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   private handleNavigationState(): void {
     const nav = this.router.getCurrentNavigation();
-    const state = nav?.extras?.state || history.state;
+    const state = this.extractCheckoutState(nav?.extras?.state || history.state) ||
+      this.readPersistedCheckoutState();
 
-    if (!state || Object.keys(state).length <= 1) {
+    if (!state) {
       return;
     }
 
@@ -197,6 +204,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         const items = (group.items || []).map((item: any) => this.normalizeCartItem(item));
         return {
           ...group,
+          pickupLatitude: this.validCoordinate(group.pickupLatitude) ?? this.firstItemCoordinate(items, 'wholesaler_branch_latitude'),
+          pickupLongitude: this.validCoordinate(group.pickupLongitude) ?? this.firstItemCoordinate(items, 'wholesaler_branch_longitude'),
           itemCount: items.length,
           subtotal: this.firstPositivePrice(
             group.subtotal,
@@ -227,6 +236,71 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     }
 
     this.calculateGroupPricing();
+    this.persistCheckoutState(state);
+  }
+
+  private extractCheckoutState(rawState: any): any | null {
+    if (!rawState || typeof rawState !== 'object') {
+      return null;
+    }
+
+    const hasCheckoutPayload =
+      Array.isArray(rawState['cartItems']) ||
+      Array.isArray(rawState['wholesalerGroups']) ||
+      rawState['selectedBranch'] ||
+      rawState['transportData'];
+
+    return hasCheckoutPayload ? rawState : null;
+  }
+
+  private persistCheckoutState(state: any): void {
+    try {
+      sessionStorage.setItem(CHECKOUT_STATE_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        state: {
+          cartItems: this.cartItems,
+          wholesalerGroups: this.wholesalerGroups,
+          retailer: this.retailerInfo,
+          wholeseller: this.wholeSeller,
+          selectedBranch: this.selectedBranch,
+          discount: this.discount,
+          totalPrice: this.totalPrice,
+          hasRideRequest: this.hasRideRequest,
+          hasTransport: this.hasRideRequest,
+          transportData: this.transportData ?? state['transportData'] ?? null
+        }
+      }));
+    } catch {
+      // Ignore storage failures; normal navigation state still works.
+    }
+  }
+
+  private readPersistedCheckoutState(): any | null {
+    try {
+      const raw = sessionStorage.getItem(CHECKOUT_STATE_KEY);
+      if (!raw) {
+        return null;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!parsed?.savedAt || Date.now() - parsed.savedAt > CHECKOUT_STATE_TTL_MS) {
+        sessionStorage.removeItem(CHECKOUT_STATE_KEY);
+        return null;
+      }
+
+      return this.extractCheckoutState(parsed.state);
+    } catch {
+      sessionStorage.removeItem(CHECKOUT_STATE_KEY);
+      return null;
+    }
+  }
+
+  private clearPersistedCheckoutState(): void {
+    try {
+      sessionStorage.removeItem(CHECKOUT_STATE_KEY);
+    } catch {
+      // Nothing to clear when storage is unavailable.
+    }
   }
 
   private async checkAuthAndLoadBranches(): Promise<void> {
@@ -269,6 +343,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.businessBranches[0];
       }
 
+      this.persistCheckoutState({});
+
       if (this.hasRideRequest && this.selectedBranch) {
         this.tryCalculateDistance();
       }
@@ -292,6 +368,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     }
 
     this.calculateGroupPricing();
+    this.persistCheckoutState({});
   }
 
   trackByBranchId(_: number, branch: BusinessBranch): number {
@@ -317,11 +394,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       }
 
       this.tryCalculateDistance();
+      this.persistCheckoutState({});
       return;
     }
 
     this.estimatedRidePrice = 0;
     this.calculateGroupPricing();
+    this.persistCheckoutState({});
   }
 
   async proceedToPayment(): Promise<void> {
@@ -342,6 +421,18 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     if (this.wholesalerGroups.length === 0) {
       void this.showErrorAlert(this.translate.instant('CHECKOUT.NO_ITEMS_ERROR'));
       return;
+    }
+
+    if (this.hasRideRequest) {
+      if (this.isLoadingDistance || this.isLoadingQuote) {
+        void this.showErrorAlert(this.translate.instant('CHECKOUT.TRANSPORT_QUOTE_IN_PROGRESS'));
+        return;
+      }
+
+      if (this.distance <= 0 || this.estimatedRidePrice <= 0) {
+        void this.showErrorAlert(this.translate.instant('CHECKOUT.TRANSPORT_QUOTE_UNAVAILABLE'));
+        return;
+      }
     }
 
     this.paymentInProgress = true;
@@ -402,6 +493,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         throw new Error(this.translate.instant('CHECKOUT.CHECKOUT_SESSION_ERROR'));
       }
 
+      this.clearPersistedCheckoutState();
       this.router.navigate(['/buyer/payment'], {
         state: {
           orderData: {
@@ -448,6 +540,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
+    this.clearPersistedCheckoutState();
     this.router.navigate(['/buyer/cart']);
   }
 
@@ -480,10 +573,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   private tryCalculateDistance(): void {
-    const pickupLat = this.wholeSeller?.latitude;
-    const pickupLon = this.wholeSeller?.longitude;
-    const dropLat = this.selectedBranch?.latitude;
-    const dropLon = this.selectedBranch?.longitude;
+    const pickup = this.getPickupCoordinates();
+    const pickupLat = this.validCoordinate(pickup?.latitude);
+    const pickupLon = this.validCoordinate(pickup?.longitude);
+    const dropLat = this.validCoordinate(this.selectedBranch?.latitude);
+    const dropLon = this.validCoordinate(this.selectedBranch?.longitude);
 
     if (pickupLat && pickupLon && dropLat && dropLon) {
       this.isLoadingDistance = true;
@@ -496,7 +590,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
             void this.refreshPriceQuote();
           },
           error: () => {
-            this.distance = this.fallbackDistance();
+            this.distance = 0;
             this.isLoadingDistance = false;
             void this.refreshPriceQuote();
           }
@@ -504,20 +598,44 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.distance <= 0) {
-      this.distance = this.fallbackDistance();
-    }
-
+    this.distance = 0;
+    this.estimatedRidePrice = 0;
     void this.refreshPriceQuote();
   }
 
-  private fallbackDistance(): number {
-    return Math.floor(Math.random() * 46) + 5;
+  private getPickupCoordinates(): { latitude: number; longitude: number } | null {
+    const wholeSellerLat = this.validCoordinate(this.wholeSeller?.latitude);
+    const wholeSellerLon = this.validCoordinate(this.wholeSeller?.longitude);
+    if (wholeSellerLat && wholeSellerLon) {
+      return { latitude: wholeSellerLat, longitude: wholeSellerLon };
+    }
+
+    for (const group of this.wholesalerGroups) {
+      const groupLat = this.validCoordinate(group.pickupLatitude);
+      const groupLon = this.validCoordinate(group.pickupLongitude);
+      if (groupLat && groupLon) {
+        return { latitude: groupLat, longitude: groupLon };
+      }
+    }
+
+    for (const item of this.cartItems) {
+      const itemLat = this.validCoordinate(item.wholesaler_branch_latitude);
+      const itemLon = this.validCoordinate(item.wholesaler_branch_longitude);
+      if (itemLat && itemLon) {
+        return { latitude: itemLat, longitude: itemLon };
+      }
+    }
+
+    return null;
   }
 
   private async refreshPriceQuote(): Promise<void> {
     const branch = this.selectedBranch;
     if (this.distance <= 0 || !branch?.city_shortname) {
+      this.estimatedRidePrice = 0;
+      this.transportData = null;
+      this.calculateGroupPricing();
+      this.persistCheckoutState({});
       return;
     }
 
@@ -542,6 +660,19 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoadingQuote = false;
       this.calculateGroupPricing();
+      this.transportData = this.hasRideRequest
+        ? {
+            delivery_type: 'standard',
+            urgency: 'standard',
+            base_price: this.estimatedRidePrice,
+            distance: this.distance,
+            distance_km: this.distance,
+            requested_date: this.buildDefaultTransportRequestedDate(),
+            load_type: 'general',
+            status: 'pending'
+          }
+        : null;
+      this.persistCheckoutState({});
     }
   }
 
@@ -602,6 +733,21 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     return 0;
   }
 
+  private validCoordinate(value: unknown): number | undefined {
+    const coordinate = Number(value);
+    return Number.isFinite(coordinate) && coordinate !== 0 ? coordinate : undefined;
+  }
+
+  private firstItemCoordinate(items: CartItem[], field: 'wholesaler_branch_latitude' | 'wholesaler_branch_longitude'): number | undefined {
+    for (const item of items) {
+      const coordinate = this.validCoordinate(item[field]);
+      if (coordinate) {
+        return coordinate;
+      }
+    }
+    return undefined;
+  }
+
   private itemUnitPrice(item: Partial<CartItem> | any): number {
     return this.firstPositivePrice(
       item?.price_while_added,
@@ -626,7 +772,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       is_active: !item.is_deleted,
       branch_id: item.branch_id,
       wholesaler_id: item.wholesaler_id ?? item.wholeseller_id,
-      wholesaler_name: item.wholesaler_name
+      wholesaler_name: item.wholesaler_name,
+      wholesaler_branch_latitude: this.validCoordinate(
+        item.wholesaler_branch_latitude ?? item.branch_latitude ?? item.pickupLatitude
+      ),
+      wholesaler_branch_longitude: this.validCoordinate(
+        item.wholesaler_branch_longitude ?? item.branch_longitude ?? item.pickupLongitude
+      )
     } as CartItem;
   }
 

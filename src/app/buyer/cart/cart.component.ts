@@ -36,6 +36,8 @@ export interface WholesalerGroup {
   branchId: number;
   wholesalerName: string;
   branchName: string;
+  pickupLatitude?: number;
+  pickupLongitude?: number;
   items: CartItem[];
   subtotal: number;
   isSelected: boolean;   // whether this group is checked for checkout
@@ -201,6 +203,8 @@ export class CartComponent implements OnInit, OnDestroy, ViewWillEnter {
           branchId: bId,
           wholesalerName: item.wholesaler_name ?? `Wholesaler ${wId}`,
           branchName: item.branch_name ?? `Branch ${bId}`,
+          pickupLatitude: this.validCoordinate(item.wholesaler_branch_latitude),
+          pickupLongitude: this.validCoordinate(item.wholesaler_branch_longitude),
           items: [],
           subtotal: 0,
           isSelected: prev?.isSelected ?? false,   // default not selected when single-select
@@ -209,6 +213,8 @@ export class CartComponent implements OnInit, OnDestroy, ViewWillEnter {
       }
 
       const group = map.get(key)!;
+      group.pickupLatitude = group.pickupLatitude ?? this.validCoordinate(item.wholesaler_branch_latitude);
+      group.pickupLongitude = group.pickupLongitude ?? this.validCoordinate(item.wholesaler_branch_longitude);
       group.items.push(item);
       group.subtotal += item.price * item.quantity;
     }
@@ -470,6 +476,8 @@ export class CartComponent implements OnInit, OnDestroy, ViewWillEnter {
           branchId: g.branchId,
           wholesalerName: g.wholesalerName,
           branchName: g.branchName,
+          pickupLatitude: g.pickupLatitude,
+          pickupLongitude: g.pickupLongitude,
           itemCount: g.items.length,
           subtotal: g.subtotal,
           items: g.items
@@ -484,6 +492,11 @@ export class CartComponent implements OnInit, OnDestroy, ViewWillEnter {
 
   getSelectAllIconName(wholesalerGroups: WholesalerGroup[]): string {
     return wholesalerGroups.every(g => g.isSelected) ? 'checkbox-outline' : 'square-outline';
+  }
+
+  private validCoordinate(value: unknown): number | undefined {
+    const coordinate = Number(value);
+    return Number.isFinite(coordinate) && coordinate !== 0 ? coordinate : undefined;
   }
 
   /**

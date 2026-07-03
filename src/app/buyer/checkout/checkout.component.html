@@ -145,7 +145,8 @@
           </span>
           <span class="dist-val">
             <ion-spinner name="dots" *ngIf="isLoadingDistance" class="inline-spinner"></ion-spinner>
-            <span *ngIf="!isLoadingDistance">{{ distance }} km</span>
+            <span *ngIf="!isLoadingDistance && distance > 0">{{ distance }} km</span>
+            <span *ngIf="!isLoadingDistance && distance <= 0">--</span>
           </span>
         </div>
 

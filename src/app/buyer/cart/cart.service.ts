@@ -12,6 +12,8 @@ export interface CartItem {
   wholesaler_id: number;
   branch_id: number;
   branch_name: string;
+  wholesaler_branch_latitude?: number;
+  wholesaler_branch_longitude?: number;
   image_path: string;
   wholesaler_name: string;
   unit_id: number;
