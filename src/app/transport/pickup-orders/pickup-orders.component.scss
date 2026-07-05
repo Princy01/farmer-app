@@ -1,158 +1,706 @@
-/* ===== Page Background ===== */
+/* ======================================================
+   BRAND TOKENS — matches the app's existing identity
+   (profile screen: indigo→violet gradient, soft gray
+   canvas, white elevated cards, uppercase micro-labels)
+====================================================== */
+:host {
+  --brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --brand-gradient-hover: linear-gradient(135deg, #5568d3 0%, #663a8f 100%);
+  --brand-primary: #667eea;
+  --brand-primary-rgb: 102, 126, 234;
+  --brand-violet: #764ba2;
+  --surface-bg: #f8f9fa;
+  --ink-strong: #111827;
+  --ink-muted: #6b7280;
+  --ink-soft: #9ca3af;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --amber: #fbbf24;
+}
+
 ion-content {
-  --background: #f5f7fb;
-  padding: 12px;
+  --background: var(--surface-bg);
 }
 
-/* ===== Section Cards (Jobs / Orders) ===== */
-ion-card {
-  border-radius: 18px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
-  margin-bottom: 14px;
-}
+/* ======================================================
+   PAGE HERO — gradient app-bar replacing the plain
+   ion-card-header, gives every screen a strong anchor
+====================================================== */
+.page-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px 26px;
+  background: var(--brand-gradient);
+  color: #fff;
+  border-radius: 0 0 26px 26px;
+  box-shadow: 0 8px 24px rgba(var(--brand-primary-rgb), 0.28);
+  margin-bottom: -14px;
 
-/* ===== Card Headers ===== */
-ion-card-header {
-  padding-bottom: 8px;
+  .hero-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 
-  ion-card-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: #111827;
+    ion-icon {
+      font-size: 22px;
+      color: #fff;
+    }
   }
 
-  ion-card-subtitle {
-    font-size: 13px;
-    color: #6b7280;
+  .hero-back,
+  .hero-action {
+    --color: #fff;
+    --padding-start: 6px;
+    --padding-end: 6px;
+    margin: 0;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 22px;
+    }
   }
-}
 
-/* ===== Job & Order Items ===== */
-ion-item {
-  --background: transparent;
-  --padding-start: 12px;
-  --padding-end: 12px;
-  --inner-padding-end: 0;
-  margin-bottom: 6px;
+  .hero-text {
+    flex: 1;
+    min-width: 0;
 
-  ion-label {
-    h2,
-    h3 {
-      font-size: 15px;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 2px;
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     p {
-      font-size: 13px;
-      color: #6b7280;
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .hero-count {
+    flex-shrink: 0;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 8px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .hero-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 5px 10px;
+    --background: rgba(255, 255, 255, 0.22);
+    --color: #fff;
+  }
+}
+
+/* ===== Content below the hero ===== */
+.list-wrap {
+  position: relative;
+  padding: 26px 12px 16px;
+}
+
+/* ======================================================
+   JOB & ORDER CARDS
+====================================================== */
+.job-item,
+.order-item {
+  border-radius: 16px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.06);
+  margin-bottom: 12px;
+  padding: 14px 14px 12px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(var(--brand-primary-rgb), 0.18);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+
+    ion-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      border-radius: 8px;
+      padding: 4px 9px;
+      letter-spacing: 0.2px;
+    }
+
+    .amount {
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--brand-violet);
+    }
+  }
+
+  .order-id {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--ink-strong);
+
+    ion-icon {
+      font-size: 16px;
+      color: var(--brand-primary);
+    }
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #eef0fb;
+
+    ion-icon {
+      font-size: 14px;
+      color: var(--ink-soft);
+    }
+
+    &.split {
+      justify-content: space-between;
+      border-top: none;
+      margin-top: 0;
+      padding-top: 0;
+
+      span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .amount {
+        font-weight: 800;
+        font-size: 14px;
+        color: var(--brand-violet);
+
+        ion-icon {
+          color: var(--brand-violet);
+        }
+      }
     }
   }
 }
 
-/* ===== Back Button ===== */
-ion-button[fill='clear'] {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 6px;
+/* ===== "tap to get OTP" hint row on order cards ===== */
+.card-cta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #eef0fb;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-primary);
+
+  ion-icon {
+    font-size: 16px;
+
+    &.chevron {
+      margin-left: auto;
+      font-size: 15px;
+      opacity: 0.6;
+    }
+  }
+
+  &.muted {
+    color: var(--ink-muted);
+  }
 }
 
-/* ===== Empty State ===== */
+/* ===== Route timeline (pickup → dropoff) ===== */
+.route-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  min-height: 46px;
+
+  .route-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 12px;
+    flex-shrink: 0;
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-start {
+      background: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), 0.18);
+    }
+
+    .dot-end {
+      background: var(--brand-violet);
+      box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.18);
+    }
+
+    .rail-line {
+      flex: 1;
+      width: 2px;
+      margin: 3px 0;
+      min-height: 16px;
+      background: repeating-linear-gradient(
+        to bottom,
+        #d8dcf5 0,
+        #d8dcf5 4px,
+        transparent 4px,
+        transparent 8px
+      );
+    }
+  }
+
+  .route-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+
+    .route-loc {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink-strong);
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+/* ===== Empty state ===== */
 .empty-state {
   text-align: center;
-  padding: 32px 16px;
-  background: #f9fafb;
-  border-radius: 12px;
-  margin: 12px 0;
+  padding: 40px 20px;
+  background: #fff;
+  border: 1.5px dashed #d8dcf0;
+  border-radius: 16px;
+  margin: 4px 0;
+
+  .empty-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 12px;
+    border-radius: 16px;
+    background: rgba(var(--brand-primary-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 26px;
+      color: var(--brand-primary);
+    }
+  }
 
   ion-text {
     display: block;
     font-size: 14px;
     font-weight: 500;
+    color: var(--ink-muted);
+  }
+}
+
+/* ===== Inline error / status rows ===== */
+.state-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  font-size: 13px;
+
+  &.center {
+    margin-top: 12px;
+  }
+
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  ion-text {
+    font-size: 13px;
+    font-weight: 500;
+  }
+}
+
+.page-spinner {
+  display: block;
+  margin: 20px auto;
+  color: var(--brand-primary);
+}
+
+/* ======================================================
+   OTP SHEET — bottom sheet modal, opens directly off an
+   order tap and auto-fetches the code
+====================================================== */
+.otp-sheet {
+  --border-radius: 22px 22px 0 0;
+  --backdrop-opacity: 0.45;
+}
+
+.sheet-content {
+  --background: #fff;
+  --padding-top: 6px;
+  --padding-bottom: 24px;
+  --padding-start: 18px;
+  --padding-end: 18px;
+  min-height: 300px;
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: #e2e5f5;
+  margin: 6px auto 14px;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+
+  .sheet-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .sheet-order {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--ink-strong);
+  }
+
+  .sheet-close {
+    --color: var(--ink-muted);
+    --padding-start: 6px;
+    --padding-end: 6px;
+    margin: -6px -6px 0 0;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 22px;
+    }
+  }
+}
+
+.sheet-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .amount {
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--brand-violet);
+  }
+
+  ion-icon {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+}
+
+.sheet-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed #eef0fb;
+
+  ion-icon {
+    font-size: 15px;
+    color: var(--brand-primary);
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+}
+
+.not-eligible-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  background: rgba(34, 197, 94, 0.08);
+  border-left: 3px solid var(--success);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2f6b45;
+
+  ion-icon {
+    font-size: 18px;
+    color: var(--success);
+    flex-shrink: 0;
   }
 }
 
 /* ======================================================
-   OTP CARD – MODERN APP STYLE
+   OTP SECTION — the pickup-pass hero moment
 ====================================================== */
-
 .otp-section {
-  margin-top: 18px;
-  padding: 16px 0 10px;
-  text-align: center;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  position: relative;
 
-  h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    color: #111827;
-  }
-
-  p {
-    font-size: 13px;
-    color: #6b7280;
-    margin-bottom: 12px;
-  }
-
-  .otp-input-wrapper {
+  .tell-wholesaler-hint {
     display: flex;
-    justify-content: center;
-    margin-bottom: 10px;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: rgba(var(--brand-primary-rgb), 0.08);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4c4f6b;
+
+    ion-icon {
+      font-size: 17px;
+      color: var(--brand-primary);
+      flex-shrink: 0;
+    }
   }
 
-  ion-item {
-    --background: transparent;
-    margin-bottom: 8px;
-    width: 180px;
-    margin-left: auto;
-    margin-right: auto;
+  .done-btn {
+    margin: 18px auto 4px;
+    width: fit-content;
+    min-width: 160px;
+    height: 42px;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0.3px;
+    border-radius: 22px;
+    display: block;
+    --border-color: var(--brand-primary);
+    --color: var(--brand-primary);
+  }
+}
+
+/* ===== Auto-fetched pickup pass card ===== */
+.otp-fetch-card {
+  position: relative;
+  margin: 0 0 4px;
+  padding: 16px 14px 14px;
+  background: var(--surface-bg);
+  border-radius: 16px;
+  border: 1px solid #eef0fb;
+  text-align: center;
+
+  ion-spinner {
+    margin: 4px auto;
+    display: block;
+    color: var(--brand-primary);
+  }
+
+  .fetch-retry {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0 2px;
+
+    ion-button {
+      --border-radius: 16px;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: none;
+    }
+  }
+
+  .fetched-otp {
+    margin-top: 2px;
+    animation: fadeIn 0.3s ease;
+
+    .fetched-otp-code {
+      position: relative;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 9px;
+      font-variant-numeric: tabular-nums;
+      color: var(--brand-primary);
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 14px 0 18px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+
+      /* dashed perforation, like a torn ticket */
+      &::after {
+        content: '';
+        position: absolute;
+        left: -1px;
+        right: -1px;
+        bottom: 8px;
+        border-bottom: 2px dashed #e2e5f5;
+      }
+    }
+
+    .fetched-otp-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+
+      ion-badge {
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 8px;
+        padding: 4px 9px;
+      }
+
+      .otp-expiry {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--ink-muted);
+        background: #fff;
+        border-radius: 999px;
+        padding: 4px 10px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+
+        ion-icon {
+          font-size: 13px;
+        }
+
+        &.expired {
+          color: var(--danger);
+        }
+      }
+    }
+
+    .refresh-otp-btn {
+      margin-top: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      --color: var(--ink-muted);
+    }
+  }
+
+  .fetch-error {
+    font-size: 13px;
+  }
+}
+
+/* ===== Motion & accessibility ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .job-item,
+  .order-item,
+  .done-btn,
+  .fetched-otp,
+  .state-row {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ===== Dark theme support (matches app-wide pattern) ===== */
+@media (prefers-color-scheme: dark) {
+  ion-content {
+    --background: #1a1a1a;
+  }
+
+  .job-item,
+  .order-item,
+  .otp-fetch-card .fetched-otp-code {
+    background: #2d2d2d;
+    box-shadow: none;
+  }
+
+  .sheet-content {
+    --background: #1f1f1f;
+  }
+
+  .sheet-order {
+    color: #e5e5e5;
+  }
+
+  .empty-state {
+    background: #2d2d2d;
+    border-color: #3a3a3a;
+  }
+
+  .otp-fetch-card {
+    background: #232323;
+    border-color: #3a3a3a;
   }
 
   ion-input {
-    width: 160px;
-    height: 46px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 6px;
-    border-radius: 14px;
-    background: #f1f5f9;
-    --padding-start: 0;
-    --padding-end: 0;
-  }
-
-  .confirm-btn {
-    margin: 12px auto 6px;
-    width: fit-content;
-    height: 40px;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 20px;
-    box-shadow: 0 10px 22px rgba(var(--ion-color-primary-rgb), 0.35);
-    display: block;
-  }
-
-  ion-spinner {
-    margin: 8px auto;
-    display: block;
-  }
-
-  ion-text {
-    display: block;
-    margin-top: 6px;
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  ion-text[color='danger'] {
-    color: #ef4444;
-  }
-
-  ion-text[color='success'] {
-    color: #22c55e;
+    background: #3a3a3a !important;
+    color: #e5e5e5 !important;
   }
 }

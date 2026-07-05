@@ -28,8 +28,9 @@ import {
   refreshOutline,
   returnDownBackOutline,
   chevronForwardOutline,
+  keyOutline,
 } from 'ionicons/icons';
-import { RetailerOrderService, RetailerOrderDetails, OrderItem, OrderTransportStatus, ReturnReason, CreateReturnRequest } from './retailer-order-details.service';
+import { RetailerOrderService, RetailerOrderDetails, OrderItem, OrderTransportStatus, ReturnReason, CreateReturnRequest, DeliveryOTP } from './retailer-order-details.service';
 import { ReturnRequestModalComponent } from './return-request-modal/return-request-modal.component';
 import {
   OrderPostDeliveryStatus,
@@ -83,6 +84,14 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
   pendingEvidenceFiles: Array<{ file: File; capturedAt: string }> = [];
   pendingEvidenceUploadDelay: any = null;
 
+  // Delivery OTP (mirrors the OTP the driver has generated in their app,
+  // shown here so the retailer can verify/hand over the order)
+  deliveryOtp: DeliveryOTP | null = null;
+  otpLoading = false;
+  otpError: string | null = null;
+  otpCountdownText = '';
+  private otpCountdownInterval: any = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -114,6 +123,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
       refreshOutline,
       returnDownBackOutline,
       chevronForwardOutline,
+      keyOutline,
     });
   }
 
@@ -125,6 +135,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
     if (this.pendingEvidenceUploadDelay) {
       clearTimeout(this.pendingEvidenceUploadDelay);
     }
+    this.clearOtpCountdown();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -197,6 +208,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
           this.loading = false;
           this.error = null;
           this.loadRatingContext();
+          this.refreshDeliveryOtpState();
         },
         error: (err: Error) => {
           const translationKey = err.message || 'RETAILER_ORDER_DETAILS.ERROR_LOAD_FAILED';
@@ -204,6 +216,118 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
       });
+  }
+
+  /**
+   * Decides whether an active delivery OTP should be shown for the current
+   * order's transport job, and fetches/clears it accordingly. Called whenever
+   * the order (and therefore its transport status) is (re)loaded.
+   */
+  private refreshDeliveryOtpState(): void {
+    if (this.canShowDeliveryOtp()) {
+      this.loadDeliveryOtp();
+    } else {
+      this.deliveryOtp = null;
+      this.otpError = null;
+      this.clearOtpCountdown();
+    }
+  }
+
+  /**
+   * Whether the driver could plausibly have an active delivery OTP for this
+   * order right now, i.e. a job has been assigned and picked up but delivery
+   * has not yet been confirmed.
+   */
+  canShowDeliveryOtp(): boolean {
+    const transport = this.order?.transport;
+    if (!transport || !transport.job_id || transport.needs_admin_action) {
+      return false;
+    }
+    const jobStatus = (transport.job_status || '').toLowerCase();
+    return jobStatus === 'accepted' || jobStatus === 'picked_up';
+  }
+
+  /**
+   * Fetches the active delivery OTP for the current transport job.
+   */
+  loadDeliveryOtp(): void {
+    const jobId = this.order?.transport?.job_id;
+    if (!jobId) {
+      return;
+    }
+
+    this.otpLoading = true;
+    this.otpError = null;
+
+    this.orderService
+      .getActiveDeliveryOTP(jobId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (otp: DeliveryOTP) => {
+          this.deliveryOtp = otp;
+          this.otpLoading = false;
+          this.otpError = null;
+          this.startOtpCountdown();
+        },
+        error: (err: Error) => {
+          this.otpLoading = false;
+          this.deliveryOtp = null;
+          this.clearOtpCountdown();
+          // NOT_FOUND simply means the driver hasn't generated an OTP yet —
+          // that's an expected waiting state, not an error to alarm the retailer with.
+          this.otpError = err.message === 'NOT_FOUND'
+            ? null
+            : this.translate.instant('RETAILER_ORDER_DETAILS.OTP_ERROR');
+        },
+      });
+  }
+
+  /**
+   * Manual refresh triggered by the retailer (e.g. after the countdown ends
+   * or if they suspect the driver has regenerated the code).
+   */
+  refreshDeliveryOtp(): void {
+    this.loadDeliveryOtp();
+  }
+
+  private startOtpCountdown(): void {
+    this.clearOtpCountdown();
+    if (!this.deliveryOtp?.expires_at) {
+      this.otpCountdownText = '';
+      return;
+    }
+    this.updateOtpCountdown();
+    this.otpCountdownInterval = setInterval(() => this.updateOtpCountdown(), 1000);
+  }
+
+  private updateOtpCountdown(): void {
+    if (!this.deliveryOtp?.expires_at) {
+      this.otpCountdownText = '';
+      this.clearOtpCountdown();
+      return;
+    }
+
+    const remainingMs = new Date(this.deliveryOtp.expires_at).getTime() - Date.now();
+
+    if (remainingMs <= 0) {
+      this.otpCountdownText = this.translate.instant('RETAILER_ORDER_DETAILS.OTP_EXPIRED');
+      this.clearOtpCountdown();
+      // The driver's app may have generated a fresh code — check for one.
+      this.loadDeliveryOtp();
+      return;
+    }
+
+    const totalSeconds = Math.floor(remainingMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    this.otpCountdownText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  private clearOtpCountdown(): void {
+    if (this.otpCountdownInterval) {
+      clearInterval(this.otpCountdownInterval);
+      this.otpCountdownInterval = null;
+    }
   }
 
   loadRatingContext(): void {

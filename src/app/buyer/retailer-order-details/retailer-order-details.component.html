@@ -127,6 +127,67 @@
       </ion-card-content>
     </ion-card>
 
+    <!-- Delivery OTP Card -->
+    <!-- Shown while the driver has an active job (accepted or picked up, not yet delivered).
+         Mirrors the OTP the driver generates in their app so the retailer can confirm the handover. -->
+    <ion-card *ngIf="canShowDeliveryOtp()" class="delivery-otp-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="key-outline" color="primary"></ion-icon>
+          {{ 'RETAILER_ORDER_DETAILS.OTP_TITLE' | translate }}
+        </ion-card-title>
+        <!-- <ion-card-subtitle>{{ 'RETAILER_ORDER_DETAILS.OTP_SUBTITLE' | translate }}</ion-card-subtitle> -->
+      </ion-card-header>
+      <ion-card-content>
+
+        <!-- Loading -->
+        <div class="otp-loading" *ngIf="otpLoading && !deliveryOtp">
+          <ion-spinner name="dots"></ion-spinner>
+          <span>{{ 'RETAILER_ORDER_DETAILS.OTP_LOADING' | translate }}</span>
+        </div>
+
+        <!-- Waiting for driver to generate OTP -->
+        <div class="otp-waiting" *ngIf="!otpLoading && !deliveryOtp && !otpError">
+          <ion-icon name="time-outline" color="medium"></ion-icon>
+          <span>{{ 'RETAILER_ORDER_DETAILS.OTP_WAITING' | translate }}</span>
+          <ion-button size="small" fill="clear" (click)="refreshDeliveryOtp()">
+            <ion-icon slot="start" name="refresh-outline"></ion-icon>
+            {{ 'RETAILER_ORDER_DETAILS.RETRY' | translate }}
+          </ion-button>
+        </div>
+
+        <!-- Error -->
+        <div class="otp-error" *ngIf="otpError && !otpLoading">
+          <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+          <span>{{ otpError }}</span>
+          <ion-button size="small" fill="outline" (click)="refreshDeliveryOtp()">
+            <ion-icon slot="start" name="refresh-outline"></ion-icon>
+            {{ 'RETAILER_ORDER_DETAILS.RETRY' | translate }}
+          </ion-button>
+        </div>
+
+        <!-- Active OTP -->
+        <div class="otp-display" *ngIf="deliveryOtp">
+          <div class="otp-code-row">
+            <span class="otp-code">{{ deliveryOtp.otp_code }}</span>
+          </div>
+
+          <div class="otp-meta">
+            <ion-note *ngIf="otpCountdownText" color="medium">
+              {{ 'RETAILER_ORDER_DETAILS.OTP_EXPIRES_IN' | translate }} {{ otpCountdownText }}
+            </ion-note>
+            <ion-button size="small" fill="clear" [disabled]="otpLoading" (click)="refreshDeliveryOtp()">
+              <ion-icon slot="start" name="refresh-outline"></ion-icon>
+              {{ 'RETAILER_ORDER_DETAILS.OTP_REFRESH' | translate }}
+            </ion-button>
+          </div>
+
+          <p class="otp-hint">{{ 'RETAILER_ORDER_DETAILS.OTP_HINT' | translate }}</p>
+        </div>
+
+      </ion-card-content>
+    </ion-card>
+
     <!-- Dispute Evidence Gallery Card -->
     <!-- Shown once a return dispute exists (order.post_delivery.return_dispute_id is set).
          Allows viewing existing evidence and uploading additional photos. -->

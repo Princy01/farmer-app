@@ -112,6 +112,14 @@ export interface ReturnDispute {
   created_at: string;
 }
 
+export interface DeliveryOTP {
+  job_id: number;
+  otp_code: string;
+  expires_at: string;
+  retailer_id: number;
+  is_new?: boolean;
+}
+
 /**
  * Service for managing retailer order details.
  * Handles API communication with automatic retry and timeout logic.
@@ -284,6 +292,36 @@ export class RetailerOrderService {
       retry({
         count: 2,
         delay: (error, retryCount) => {
+          if (error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500) {
+            return throwError(() => error);
+          }
+          const delayMs = Math.pow(2, retryCount - 1) * 1000;
+          return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
+        }
+      }),
+      catchError((error: HttpErrorResponse | TimeoutError) => this.handleError(error))
+    );
+  }
+
+  /**
+   * Fetches the currently active delivery OTP for a transport job, so the
+   * retailer can view/share the same code the driver has generated in their
+   * app to confirm the handover.
+   * Returns a 404-backed error (translated to NOT_FOUND) when no OTP has
+   * been generated for this job yet.
+   * @param jobId The transport job ID (order.transport.job_id)
+   * @returns Observable of the active delivery OTP
+   */
+  getActiveDeliveryOTP(jobId: number): Observable<DeliveryOTP> {
+    return this.http.post<DeliveryOTP>(
+      `${this.apiUrl}/transportation/delivery/get-delivery-otp`,
+      { job_id: jobId }
+    ).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      retry({
+        count: 2,
+        delay: (error, retryCount) => {
+          // Do not retry client errors (4xx, e.g. no active OTP yet) — they will not resolve on retry
           if (error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500) {
             return throwError(() => error);
           }

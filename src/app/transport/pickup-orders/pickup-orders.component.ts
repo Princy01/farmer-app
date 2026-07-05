@@ -1,11 +1,26 @@
-import { Component, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { HttpClientModule } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { PickupService, ActiveJob, JobOrder } from './pickup.service';
+import { addIcons } from 'ionicons';
+import {
+  arrowBack,
+  cubeOutline,
+  calendarOutline,
+  cashOutline,
+  locationOutline,
+  closeCircleOutline,
+  checkmarkDoneCircle,
+  keyOutline,
+  timeOutline,
+  alertCircleOutline,
+  closeOutline,
+  chevronForwardOutline
+} from 'ionicons/icons';
+import { PickupService, ActiveJob, JobOrder, PickupOTP } from './pickup.service';
 
 @Component({
   selector: 'app-pickup-orders',
@@ -19,19 +34,45 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
   jobs = signal<ActiveJob[]>([]);
   selectedJob: ActiveJob | null = null;
   orders = signal<JobOrder[]>([]);
+
+  // The order the OTP sheet is currently showing. Kept separate from "page
+  // navigation" — opening it no longer means leaving the order list.
   selectedOrder: JobOrder | null = null;
+  isOtpSheetOpen = false;
+
   loading = false;
   error = '';
-  otpLoading = false;
-  otpError = '';
-  otpSuccess = '';
   isCancellingJob = false;
+
+  // The driver only ever *reads* this code aloud to the wholesaler — the
+  // wholesaler is the one who enters/confirms it in their own app. So this
+  // screen has no manual-entry field and no "confirm" action of its own.
+  pickupOtp: PickupOTP | null = null;
+  otpFetchLoading = false;
+  otpFetchError = '';
+  otpRemainingSeconds = 0;
+  private otpCountdownHandle: ReturnType<typeof setInterval> | null = null;
 
   constructor(
     private pickupService: PickupService,
     private translate: TranslateService,
     private alertCtrl: AlertController
-  ) {}
+  ) {
+    addIcons({
+      arrowBack,
+      cubeOutline,
+      calendarOutline,
+      cashOutline,
+      locationOutline,
+      closeCircleOutline,
+      checkmarkDoneCircle,
+      keyOutline,
+      timeOutline,
+      alertCircleOutline,
+      closeOutline,
+      chevronForwardOutline
+    });
+  }
 
   getStatusTitle(status: string): string {
     switch (status) {
@@ -46,9 +87,27 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
     }
   }
 
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'accepted':
+        return 'primary';
+      case 'picked_up':
+        return 'success';
+      case 'partially_picked':
+        return 'warning';
+      default:
+        return 'medium';
+    }
+  }
+
+  getOrderStatusColor(order: JobOrder): string {
+    return [5, 8].includes(order.order_status_id) ? 'success' : 'medium';
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.clearOtpCountdown();
   }
 
   ngOnInit() {
@@ -80,9 +139,6 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
 
   selectJob(job: ActiveJob) {
     this.selectedJob = job;
-    this.selectedOrder = null;
-    this.otpError = '';
-    this.otpSuccess = '';
     this.error = '';
     this.loading = true;
     this.pickupService.getJobOrders(job.job_id)
@@ -105,24 +161,48 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
     );
   }
 
-  selectOrder(order: JobOrder) {
+  // ===== OTP bottom sheet =====
+  // Tapping an order opens the sheet directly and immediately kicks off the
+  // OTP fetch (when eligible), so the driver sees a code with a single tap
+  // on the order — no separate "details" page and no separate "Get OTP" tap.
+  openOrderSheet(order: JobOrder): void {
     this.selectedOrder = order;
-    this.otpError = '';
-    this.otpSuccess = '';
+    this.pickupOtp = null;
+    this.otpFetchError = '';
+    this.clearOtpCountdown();
+    this.isOtpSheetOpen = true;
+
+    if (this.canViewOtp()) {
+      this.fetchPickupOtp();
+    }
+  }
+
+  closeOtpSheet(): void {
+    this.isOtpSheetOpen = false;
+    this.selectedOrder = null;
+    this.pickupOtp = null;
+    this.otpFetchError = '';
+    this.clearOtpCountdown();
+
+    // The wholesaler confirms the pickup on their own app, possibly while
+    // this sheet was open, so refresh the order list on close to pick up
+    // any status change (e.g. "Order Created" -> "Picked Up").
+    if (this.selectedJob) {
+      this.selectJob(this.selectedJob);
+    }
   }
 
   backToJobs() {
+    if (this.isOtpSheetOpen) {
+      this.isOtpSheetOpen = false;
+      this.selectedOrder = null;
+      this.pickupOtp = null;
+      this.otpFetchError = '';
+      this.clearOtpCountdown();
+    }
     this.selectedJob = null;
-    this.selectedOrder = null;
     this.orders.set([]);
-    this.otpError = '';
-    this.otpSuccess = '';
-  }
-
-  backToOrders() {
-    this.selectedOrder = null;
-    this.otpError = '';
-    this.otpSuccess = '';
+    this.error = '';
   }
 
   async promptCancelJob(): Promise<void> {
@@ -185,55 +265,61 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  isToday(date: string) {
-    const today = new Date().toISOString().slice(0, 10);
-    return date.slice(0, 10) === today;
-  }
-
-  canVerifyPickup() {
-    if (!this.selectedJob || !this.selectedOrder) {
+  // Viewing/fetching the OTP is a harmless read. Only exclude orders that
+  // are already picked up or delivered — there's nothing to show for those.
+  canViewOtp(): boolean {
+    if (!this.selectedOrder) {
       return false;
     }
-
-    const jobIsToday = this.isToday(this.selectedJob.delivery_date);
-    const pickupWindowOpen = ['accepted', 'partially_picked'].includes(this.selectedJob.job_status);
-    const orderAlreadyPickedOrDelivered = [5, 8].includes(this.selectedOrder.order_status_id);
-
-    return jobIsToday && pickupWindowOpen && !orderAlreadyPickedOrDelivered;
+    return ![5, 8].includes(this.selectedOrder.order_status_id);
   }
 
-  verifyOtp(enteredOtp: string) {
-    if (!enteredOtp?.trim()) {
-      this.otpError = this.translate.instant('PICKUP_ORDERS.ENTER_OTP');
-      this.otpSuccess = '';
+  fetchPickupOtp(): void {
+    if (!this.selectedOrder || this.otpFetchLoading) {
       return;
     }
-
-    if (enteredOtp.length !== 6 || !/^\d+$/.test(enteredOtp)) {
-      this.otpError = this.translate.instant('PICKUP_ORDERS.INVALID_OTP_FORMAT');
-      this.otpSuccess = '';
-      return;
-    }
-
-    if (!this.selectedOrder) return;
-    this.otpLoading = true;
-    this.otpError = '';
-    this.otpSuccess = '';
-    this.pickupService.confirmPickup(this.selectedOrder.order_id, enteredOtp)
+    this.otpFetchLoading = true;
+    this.otpFetchError = '';
+    this.clearOtpCountdown();
+    this.pickupService.getActivePickupOTP(this.selectedOrder.order_id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: res => {
-          this.otpSuccess = res.message || this.translate.instant('PICKUP_ORDERS.PICKUP_CONFIRMED');
-          this.otpError = '';
-          this.otpLoading = false;
-          this.selectJob(this.selectedJob!);
-          this.selectedOrder = null;
+        next: otp => {
+          this.pickupOtp = otp;
+          this.otpFetchLoading = false;
+          this.startOtpCountdown(otp.expires_at);
         },
         error: err => {
-          this.otpError = err.error?.error || this.translate.instant('PICKUP_ORDERS.INVALID_OTP');
-          this.otpSuccess = '';
-          this.otpLoading = false;
+          this.pickupOtp = null;
+          this.otpFetchError = err.error?.error || this.translate.instant('PICKUP_ORDERS.GET_OTP_ERROR');
+          this.otpFetchLoading = false;
         }
       });
+  }
+
+  formatCountdown(): string {
+    const minutes = Math.floor(this.otpRemainingSeconds / 60);
+    const seconds = this.otpRemainingSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  private startOtpCountdown(expiresAt: string): void {
+    const tick = () => {
+      const remainingMs = new Date(expiresAt).getTime() - Date.now();
+      this.otpRemainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+      if (this.otpRemainingSeconds <= 0) {
+        this.clearOtpCountdown();
+      }
+    };
+    tick();
+    this.otpCountdownHandle = setInterval(tick, 1000);
+  }
+
+  private clearOtpCountdown(): void {
+    if (this.otpCountdownHandle) {
+      clearInterval(this.otpCountdownHandle);
+      this.otpCountdownHandle = null;
+    }
+    this.otpRemainingSeconds = 0;
   }
 }

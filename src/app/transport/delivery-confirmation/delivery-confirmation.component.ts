@@ -448,14 +448,24 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     }
   }
 
-  goToNextDelivery() {
+  // Called after a delivery is confirmed (via the success modal's button or
+  // by dismissing it) to take the driver back to the exact same list view
+  // they'd see if they opened this page fresh from the menu.
+  async returnToDeliveryList() {
     this.showSuccessModal = false;
-    this.router.navigate(['/transport/active-deliveries']);
-  }
+    this.deliveryConfirmed = false;
+    this.jobId = null;
+    this.orders = [];
+    this.otpDigits = '';
+    this.otpGenerated = false;
+    this.otpError = '';
+    this.selectedIssueType = null;
+    this.orderRatings = {};
+    this.clearTimers();
+    this.showList = true;
 
-  goToDashboard() {
-    this.showSuccessModal = false;
-    this.router.navigate(['/transport/transport-dashboard']);
+    this.router.navigate(['/transport/delivery-confirmation']);
+    await this.loadActiveJobs();
   }
 
   goBack() {
@@ -467,11 +477,6 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
       this.orders = [];
       this.router.navigate(['/transport/delivery-confirmation']);
     }
-  }
-
-  hasMoreDeliveries(): boolean {
-    // Check if driver has more deliveries
-    return true; // This would come from delivery service
   }
 
   // Utility Methods

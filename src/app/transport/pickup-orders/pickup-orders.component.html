@@ -1,144 +1,222 @@
 <!--  JOB LIST  -->
 <ion-content *ngIf="!selectedJob">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>{{ 'PICKUP_ORDERS.JOBS' | translate }}</ion-card-title>
-      <ion-card-subtitle>{{ 'PICKUP_ORDERS.SORTED_BY_DELIVERY' | translate }}</ion-card-subtitle>
-    </ion-card-header>
+  <div class="page-hero">
+    <div class="hero-icon">
+      <ion-icon name="cube-outline"></ion-icon>
+    </div>
+    <div class="hero-text">
+      <h1>{{ 'PICKUP_ORDERS.JOBS' | translate }}</h1>
+      <p>{{ 'PICKUP_ORDERS.SORTED_BY_DELIVERY' | translate }}</p>
+    </div>
+    <div class="hero-count" *ngIf="sortedJobs().length">{{ sortedJobs().length }}</div>
+  </div>
 
-    <ion-card-content>
-      <ion-item
-        button
-        detail
-        *ngFor="let job of sortedJobs()"
-        (click)="selectJob(job)"
-      >
-        <ion-label>
-          <h2>{{ job.pickup_location }} → {{ job.dropoff_location }}</h2>
-          <p>{{ 'PICKUP_ORDERS.DELIVERY_DATE' | translate }}: {{ job.delivery_date | date }}</p>
-          <p>{{ 'PICKUP_ORDERS.STATUS' | translate }}: {{ getStatusTitle(job.job_status) }}</p>
-          <p>{{ 'PICKUP_ORDERS.BASE_PRICE' | translate }}: ₹{{ job.base_price }}</p>
-        </ion-label>
-      </ion-item>
-
-      <div *ngIf="sortedJobs().length === 0 && !loading" class="empty-state">
-        <ion-text color="medium">
-          {{ 'PICKUP_ORDERS.NO_JOBS' | translate }}
-        </ion-text>
-      </div>
-
-      <ion-text color="danger" *ngIf="error">{{ error }}</ion-text>
-      <ion-spinner *ngIf="loading"></ion-spinner>
-    </ion-card-content>
-  </ion-card>
-</ion-content>
-
-<!--  ORDER LIST  -->
-<ion-content *ngIf="selectedJob && !selectedOrder">
-  <ion-button fill="clear" (click)="backToJobs()">
-    &larr; {{ 'PICKUP_ORDERS.BACK_TO_JOBS' | translate }}
-  </ion-button>
-
-  <ion-button
-    color="danger"
-    fill="outline"
-    [disabled]="isCancellingJob"
-    (click)="promptCancelJob()"
-  >
-    {{ 'PICKUP_ORDERS.CANCEL_JOB_ACTION' | translate }}
-  </ion-button>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>{{ 'PICKUP_ORDERS.ORDERS_FOR_JOB' | translate }} #{{ selectedJob.job_id }}</ion-card-title>
-      <ion-card-subtitle
-        >{{ selectedJob.pickup_location }} →
-        {{ selectedJob.dropoff_location }}</ion-card-subtitle
-      >
-    </ion-card-header>
-
-    <ion-card-content>
-      <ion-item
-        button
-        detail
-        *ngFor="let order of sortedOrders()"
-        (click)="selectOrder(order)"
-      >
-        <ion-label>
-          <h3>{{ 'PICKUP_ORDERS.ORDER' | translate }} #{{ order.order_id }}</h3>
-          <p>{{ 'PICKUP_ORDERS.DATE' | translate }}: {{ order.date_of_order | date }}</p>
-          <p>{{ 'PICKUP_ORDERS.STATUS' | translate }}: {{ order.order_status_text }}</p>
-          <p>{{ 'PICKUP_ORDERS.AMOUNT' | translate }}: ₹{{ order.final_amount }}</p>
-        </ion-label>
-      </ion-item>
-
-      <div *ngIf="sortedOrders().length === 0 && !loading" class="empty-state">
-        <ion-text color="medium">
-          {{ 'PICKUP_ORDERS.NO_ORDERS' | translate }}
-        </ion-text>
-      </div>
-
-      <ion-text color="danger" *ngIf="error">{{ error }}</ion-text>
-      <ion-spinner *ngIf="loading"></ion-spinner>
-    </ion-card-content>
-  </ion-card>
-</ion-content>
-
-<!--  ORDER DETAILS  -->
-<ion-content *ngIf="selectedOrder">
-  <ion-button fill="clear" (click)="backToOrders()">
-    &larr; {{ 'PICKUP_ORDERS.BACK_TO_ORDERS' | translate }}
-  </ion-button>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>{{ 'PICKUP_ORDERS.ORDER_DETAILS' | translate }}</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p><b>{{ 'PICKUP_ORDERS.ORDER_ID' | translate }}:</b> {{ selectedOrder.order_id }}</p>
-      <p><b>{{ 'PICKUP_ORDERS.DATE' | translate }}:</b> {{ selectedOrder.date_of_order | date }}</p>
-      <p><b>{{ 'PICKUP_ORDERS.STATUS' | translate }}:</b> {{ selectedOrder.order_status_text }}</p>
-      <p><b>{{ 'PICKUP_ORDERS.DELIVERY_ADDRESS' | translate }}:</b> {{ selectedOrder.delivery_address }}</p>
-      <p><b>{{ 'PICKUP_ORDERS.AMOUNT' | translate }}:</b> ₹{{ selectedOrder.final_amount }}</p>
-    </ion-card-content>
-  </ion-card>
-
-  <div
-    class="otp-section"
-    *ngIf="canVerifyPickup()"
-  >
-    <ion-text>
-      <h3>{{ 'PICKUP_ORDERS.VERIFY_PICKUP' | translate }}</h3>
-      <p>{{ 'PICKUP_ORDERS.ENTER_OTP_HINT' | translate }}</p>
-    </ion-text>
-
-    <ion-item>
-      <ion-label position="floating">{{ 'PICKUP_ORDERS.OTP' | translate }}</ion-label>
-      <ion-input
-        #otpInput
-        type="text"
-        inputmode="numeric"
-        maxlength="6"
-        [disabled]="otpLoading"
-        pattern="[0-9]*"
-      ></ion-input>
-    </ion-item>
-
-    <ion-button
-      class="confirm-btn"
-      [disabled]="otpLoading || !otpInput.value || otpInput.value.toString().trim().length === 0"
-      (click)="verifyOtp(otpInput.value ? otpInput.value.toString() : '')"
+  <div class="list-wrap">
+    <ion-card
+      button="true"
+      class="job-item"
+      *ngFor="let job of sortedJobs()"
+      (click)="selectJob(job)"
     >
-      {{ 'PICKUP_ORDERS.CONFIRM' | translate }}
-    </ion-button>
-    <ion-spinner *ngIf="otpLoading"></ion-spinner>
+      <div class="card-top">
+        <ion-badge [color]="getStatusColor(job.job_status)">{{ getStatusTitle(job.job_status) }}</ion-badge>
+        <div class="amount">₹{{ job.base_price }}</div>
+      </div>
 
-    <ion-text color="danger" *ngIf="otpError">
-      {{ otpError }}
-    </ion-text>
+      <div class="route-row">
+        <div class="route-rail">
+          <span class="dot dot-start"></span>
+          <span class="rail-line"></span>
+          <span class="dot dot-end"></span>
+        </div>
+        <div class="route-text">
+          <div class="route-loc">{{ job.pickup_location }}</div>
+          <div class="route-loc">{{ job.dropoff_location }}</div>
+        </div>
+      </div>
 
-    <ion-text color="success" *ngIf="otpSuccess">
-      {{ otpSuccess }}
-    </ion-text>
+      <div class="card-footer">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <span>{{ 'PICKUP_ORDERS.DELIVERY_DATE' | translate }}: {{ job.delivery_date | date }}</span>
+      </div>
+    </ion-card>
+
+    <div *ngIf="sortedJobs().length === 0 && !loading" class="empty-state">
+      <div class="empty-icon"><ion-icon name="cube-outline"></ion-icon></div>
+      <ion-text color="medium">
+        {{ 'PICKUP_ORDERS.NO_JOBS' | translate }}
+      </ion-text>
+    </div>
+
+    <div class="state-row" *ngIf="error">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <ion-text color="danger">{{ error }}</ion-text>
+    </div>
+    <ion-spinner *ngIf="loading" class="page-spinner"></ion-spinner>
   </div>
 </ion-content>
+
+<!--
+  ORDER LIST — tapping an order opens the OTP sheet directly (below).
+  There is no separate "order details" page anymore: one tap on an order
+  takes the driver straight to a fetched pickup code.
+-->
+<ion-content *ngIf="selectedJob">
+  <div class="page-hero">
+    <ion-button fill="clear" class="hero-back" (click)="backToJobs()">
+      <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+    </ion-button>
+    <div class="hero-text">
+      <h1>{{ 'PICKUP_ORDERS.ORDERS_FOR_JOB' | translate }} #{{ selectedJob.job_id }}</h1>
+      <p>{{ selectedJob.pickup_location }} → {{ selectedJob.dropoff_location }}</p>
+    </div>
+    <ion-button
+      fill="clear"
+      class="hero-action"
+      [disabled]="isCancellingJob"
+      (click)="promptCancelJob()"
+    >
+      <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+  </div>
+
+  <div class="list-wrap">
+    <ion-card
+      button="true"
+      class="order-item"
+      *ngFor="let order of sortedOrders()"
+      (click)="openOrderSheet(order)"
+    >
+      <div class="card-top">
+        <div class="order-id">
+          <ion-icon name="cube-outline"></ion-icon>
+          <span>{{ 'PICKUP_ORDERS.ORDER' | translate }} #{{ order.order_id }}</span>
+        </div>
+        <ion-badge [color]="getOrderStatusColor(order)">{{ order.order_status_text }}</ion-badge>
+      </div>
+
+      <div class="card-footer split">
+        <span><ion-icon name="calendar-outline"></ion-icon>{{ order.date_of_order | date }}</span>
+        <span class="amount"><ion-icon name="cash-outline"></ion-icon>₹{{ order.final_amount }}</span>
+      </div>
+
+      <div class="card-cta" [class.muted]="[5, 8].includes(order.order_status_id)">
+        <ion-icon name="key-outline"></ion-icon>
+        <span>
+          {{ (
+            [5, 8].includes(order.order_status_id)
+              ? 'PICKUP_ORDERS.VIEW_DETAILS'
+              : 'PICKUP_ORDERS.TAP_FOR_OTP'
+          ) | translate }}
+        </span>
+        <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
+      </div>
+    </ion-card>
+
+    <div *ngIf="sortedOrders().length === 0 && !loading" class="empty-state">
+      <div class="empty-icon"><ion-icon name="cube-outline"></ion-icon></div>
+      <ion-text color="medium">
+        {{ 'PICKUP_ORDERS.NO_ORDERS' | translate }}
+      </ion-text>
+    </div>
+
+    <div class="state-row" *ngIf="error">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <ion-text color="danger">{{ error }}</ion-text>
+    </div>
+    <ion-spinner *ngIf="loading" class="page-spinner"></ion-spinner>
+  </div>
+</ion-content>
+
+<!--
+  PICKUP OTP SHEET — bottom sheet, not a page. Opens the instant an order is
+  tapped and auto-fetches the code, so getting the OTP is a single tap from
+  the order list instead of a multi-screen drill-down.
+-->
+<ion-modal
+  class="otp-sheet"
+  [isOpen]="isOtpSheetOpen"
+  [breakpoints]="[0, 0.65]"
+  [initialBreakpoint]="0.65"
+  (didDismiss)="closeOtpSheet()"
+>
+  <ng-template>
+    <ion-content class="sheet-content" *ngIf="selectedOrder as order">
+      <div class="sheet-handle"></div>
+
+      <div class="sheet-header">
+        <div class="sheet-title">
+          <span class="sheet-order">{{ 'PICKUP_ORDERS.ORDER' | translate }} #{{ order.order_id }}</span>
+          <ion-badge [color]="getOrderStatusColor(order)">{{ order.order_status_text }}</ion-badge>
+        </div>
+        <ion-button fill="clear" class="sheet-close" (click)="closeOtpSheet()">
+          <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="sheet-info-row">
+        <span><ion-icon name="calendar-outline"></ion-icon>{{ order.date_of_order | date }}</span>
+        <span class="amount"><ion-icon name="cash-outline"></ion-icon>₹{{ order.final_amount }}</span>
+      </div>
+      <div class="sheet-address">
+        <ion-icon name="location-outline"></ion-icon>
+        <span>{{ order.delivery_address }}</span>
+      </div>
+
+      <!--  OTP not applicable to already-picked-up / delivered orders  -->
+      <div class="not-eligible-note" *ngIf="!canViewOtp()">
+        <ion-icon name="checkmark-done-circle"></ion-icon>
+        <span>{{ 'PICKUP_ORDERS.ALREADY_PICKED_HINT' | translate }}</span>
+      </div>
+
+      <div class="otp-section" *ngIf="canViewOtp()">
+        <!--  Auto-fetched as soon as the sheet opens  -->
+        <div class="otp-fetch-card">
+          <ion-spinner *ngIf="otpFetchLoading" name="dots"></ion-spinner>
+
+          <div class="fetched-otp" *ngIf="pickupOtp && !otpFetchLoading">
+            <div class="fetched-otp-code">{{ pickupOtp.otp_code }}</div>
+            <div class="fetched-otp-meta">
+              <ion-badge *ngIf="pickupOtp.is_new" color="success">{{ 'PICKUP_ORDERS.OTP_FRESH' | translate }}</ion-badge>
+              <ion-badge *ngIf="pickupOtp.is_used" color="medium">{{ 'PICKUP_ORDERS.OTP_USED' | translate }}</ion-badge>
+              <span class="otp-expiry" *ngIf="otpRemainingSeconds > 0">
+                <ion-icon name="time-outline"></ion-icon>
+                {{ 'PICKUP_ORDERS.OTP_EXPIRES_IN' | translate }} {{ formatCountdown() }}
+              </span>
+              <span class="otp-expiry expired" *ngIf="otpRemainingSeconds === 0 && !pickupOtp.is_used">
+                {{ 'PICKUP_ORDERS.OTP_EXPIRED' | translate }}
+              </span>
+            </div>
+
+            <ion-button
+              fill="clear"
+              size="small"
+              class="refresh-otp-btn"
+              [disabled]="otpFetchLoading"
+              (click)="fetchPickupOtp()"
+            >
+              {{ 'PICKUP_ORDERS.REFRESH_OTP' | translate }}
+            </ion-button>
+          </div>
+
+          <div class="fetch-retry" *ngIf="otpFetchError && !otpFetchLoading">
+            <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+            <ion-text color="danger" class="fetch-error">{{ otpFetchError }}</ion-text>
+            <ion-button fill="outline" size="small" (click)="fetchPickupOtp()">
+              {{ 'PICKUP_ORDERS.RETRY' | translate }}
+            </ion-button>
+          </div>
+        </div>
+
+        <div class="tell-wholesaler-hint" *ngIf="pickupOtp && !otpFetchLoading">
+          <ion-icon name="key-outline"></ion-icon>
+          <span>{{ 'PICKUP_ORDERS.TELL_WHOLESALER_HINT' | translate }}</span>
+        </div>
+
+        <ion-button fill="outline" class="done-btn" (click)="closeOtpSheet()">
+          {{ 'PICKUP_ORDERS.DONE' | translate }}
+        </ion-button>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

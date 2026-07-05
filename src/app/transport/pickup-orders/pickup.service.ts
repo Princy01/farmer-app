@@ -19,6 +19,16 @@ export interface ActiveJob {
   delivery_status: string;
 }
 
+export interface PickupOTP {
+  order_id: number;
+  user_id: number;
+  otp_code: string;
+  expires_at: string; // ISO string
+  is_used?: boolean;
+  used_at?: string;
+  is_new?: boolean;
+}
+
 export interface JobOrder {
   order_id: number;
   date_of_order: string; // ISO string
@@ -78,6 +88,16 @@ export class PickupService {
       timeout(this.TIMEOUT_MS),
       this.exponentialBackoffRetry()
     );
+  }
+
+  getActivePickupOTP(orderId: number): Observable<PickupOTP> {
+    return this.http.post<PickupOTP>(
+      `${this.apiUrl}/transportation/delivery/get-pickup-otp`,
+      { order_id: orderId }
+    ).pipe(
+      timeout(this.TIMEOUT_MS),
+      this.exponentialBackoffRetry()
+    ) as Observable<PickupOTP>;
   }
 
   confirmPickup(orderId: number, otp: string): Observable<any> {

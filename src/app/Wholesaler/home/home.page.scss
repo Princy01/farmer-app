@@ -118,17 +118,28 @@ $radius-xl:   20px;
 // ============================================================
 ion-menu {
   --background: #f8f9fa;
+  --width: 300px;
 
   ion-toolbar {
-    --background: #{$brand-primary};
+    --background: linear-gradient(120deg, #{$brand-primary} 0%, #{$brand-dark} 100%);
     --color: white;
 
     ion-title {
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1.2rem;
+      font-family: 'Poppins', 'Segoe UI', sans-serif;
     }
 
-    ion-button {
+    ion-buttons ion-button {
       --color: white;
+      --background: rgba(255, 255, 255, 0.15);
+      --border-radius: 50%;
+      width: 34px;
+      height: 34px;
+
+      ion-icon {
+        font-size: 1.1rem;
+      }
     }
   }
 
@@ -138,16 +149,17 @@ ion-menu {
 
   ion-list {
     background: transparent;
-    padding: 1rem 0.5rem;
+    padding: 1rem 0.75rem;
   }
 
   ion-item {
     --background: #{$card-bg};
     --border-radius: #{$radius-md};
-    margin-bottom: 0.5rem;
-    --padding-start: 1rem;
-    --padding-end: 1rem;
-    --min-height: 52px;
+    --inner-padding-end: 0.75rem;
+    margin-bottom: 0.6rem;
+    --padding-start: 0.75rem;
+    --padding-end: 0.25rem;
+    --min-height: 56px;
     border-radius: $radius-md;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
@@ -156,26 +168,47 @@ ion-menu {
       box-shadow: 0 4px 12px rgba($brand-primary, 0.15);
     }
 
-    .menu-icon {
-      color: $brand-primary;
-      font-size: 1.3rem;
-      margin-right: 0.5rem;
+    .menu-icon-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: $radius-sm;
+      background: $brand-light;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.75rem;
+
+      .menu-icon {
+        color: $brand-primary;
+        font-size: 1.2rem;
+        margin: 0;
+      }
     }
 
     ion-label {
       font-weight: 500;
+      font-size: 0.95rem;
       color: $text-primary;
     }
 
-    &:last-child {
-      margin-top: 1rem;
+    .menu-arrow {
+      color: #C7C5DA;
+      font-size: 1.1rem;
+    }
 
-      ion-icon {
-        color: #ff4757;
+    &.menu-item-danger {
+      margin-top: 0.75rem;
+
+      .menu-icon-wrap-danger {
+        background: $danger-icon-bg;
+
+        .menu-icon {
+          color: $danger;
+        }
       }
 
       ion-label {
-        color: #ff4757;
+        color: $danger;
         font-weight: 600;
       }
     }

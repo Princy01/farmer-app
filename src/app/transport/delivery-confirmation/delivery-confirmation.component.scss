@@ -1,118 +1,267 @@
-// Variables for modern theme
-:root {
-  --primary-color: #4CAF50;
-  --secondary-color: #FFC107;
-  --accent-color: #FF5722;
-  --background-color: #F5F5F5;
-  --card-background: #FFFFFF;
-  --text-color: #333333;
-  --muted-text: #666666;
-  --border-radius: 12px;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --transition: all 0.3s ease;
+// ============================================
+// Delivery Confirmation — Modern Theme (v2, bolder)
+// Matches the app's purple gradient design language
+// ============================================
+
+:host {
+  --primary-color: #667eea;
+  --primary-color-dark: #5568d3;
+  --secondary-color: #764ba2;
+  --accent-color: #f59e0b;
+  --danger-color: #ef4444;
+  --success-color: #22c55e;
+  --background-color: #f0f1f8;
+  --card-background: #ffffff;
+  --text-color: #1f2937;
+  --muted-text: #6b7280;
+  --border-radius: 18px;
+  --border-radius-sm: 12px;
+  --shadow: 0 4px 24px rgba(102, 126, 234, 0.1);
+  --shadow-hover: 0 8px 24px rgba(102, 126, 234, 0.22);
+  --transition: all 0.25s ease;
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #5568d3 0%, #663a8f 100%);
+  display: block;
 }
 
 // Global styles
 .delivery-content {
-  background: var(--background-color);
-  font-family: 'Roboto', sans-serif;
+  --background: var(--background-color);
+  font-family: inherit;
 }
 
-// Header
-ion-header {
-  background: linear-gradient(135deg, var(--primary-color), #66BB6A);
-  color: white;
-  box-shadow: var(--shadow);
-
-  ion-toolbar {
-    --background: transparent;
-  }
-
-  ion-title {
-    font-weight: 600;
-    font-size: 1.2rem;
-  }
-
-  ion-button {
-    --color: white;
-  }
-}
-
-// Content container
 .content-container {
   padding: 16px;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
+// ============================================
+// Bold gradient card header (used by primary cards)
+// ============================================
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: var(--gradient-primary);
+  color: #fff;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+
+    .header-icon-wrap {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+
+      .header-icon {
+        font-size: 21px;
+        color: #fff;
+        margin: 0;
+      }
+    }
+
+    .header-info {
+      min-width: 0;
+
+      .card-title {
+        margin: 0;
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
+
+.job-count-badge,
+.item-count-badge {
+  background: #fff;
+  color: var(--primary-color-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 9px;
+  flex-shrink: 0;
+}
+
+// ============================================
 // Jobs list card
+// ============================================
 .jobs-list-card {
   background: var(--card-background);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
-  margin-bottom: 16px;
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #E0E0E0;
-
-    .header-left {
-      display: flex;
-      align-items: center;
-
-      .header-icon {
-        font-size: 24px;
-        color: var(--primary-color);
-        margin-right: 12px;
-      }
-
-      .header-info {
-        .card-title {
-          margin: 0;
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--text-color);
-        }
-      }
-    }
-  }
+  margin-bottom: 18px;
+  overflow: hidden;
 
   .jobs-list {
+    padding: 12px;
+
     .job-item {
+      position: relative;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       padding: 16px;
-      border-bottom: 1px solid #F0F0F0;
+      padding-right: 40px;
+      border-radius: var(--border-radius-sm);
       cursor: pointer;
       transition: var(--transition);
+      margin-bottom: 10px;
+      background: #fafaff;
+      border: 1px solid #ececf7;
+      border-left: 4px solid var(--primary-color);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
 
       &:hover {
-        background: #F9F9F9;
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-2px);
+        background: #f5f6ff;
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      .job-item-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
       }
 
       .job-details {
-        .job-id {
-          margin: 0 0 8px 0;
-          font-size: 1rem;
-          font-weight: 600;
-          color: var(--primary-color);
+        flex: 1;
+        display: flex;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .job-id {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-color);
+      }
+
+      .status-chip {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: capitalize;
+        letter-spacing: 0.3px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        background: var(--gradient-primary);
+        color: #fff;
+        white-space: nowrap;
+      }
+
+      .route-track {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 5px;
+        width: 14px;
+        flex-shrink: 0;
+
+        .route-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          border: 2px solid #fff;
+          box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+
+          &.pickup-dot {
+            background: var(--primary-color);
+          }
+
+          &.dropoff-dot {
+            background: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(118, 75, 162, 0.25);
+          }
         }
 
-        .job-info {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
+        .route-line {
+          width: 3px;
+          flex: 1;
+          min-height: 28px;
+          background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+          border-radius: 2px;
+          margin: 4px 0;
+        }
+      }
 
-          span {
-            font-size: 0.9rem;
-            color: var(--muted-text);
+      .job-info {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+        min-width: 0;
+        flex: 1;
+
+        span {
+          font-size: 0.88rem;
+          color: var(--muted-text);
+          display: block;
+
+          strong {
+            color: var(--text-color);
+            font-weight: 700;
+            margin-right: 5px;
+          }
+        }
+
+        .date {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.8rem;
+          color: var(--primary-color-dark);
+          font-weight: 600;
+          margin-top: 2px;
+
+          ion-icon {
+            font-size: 14px;
           }
         }
       }
 
       .job-arrow {
-        color: var(--primary-color);
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #fff;
+        font-size: 16px;
+        background: var(--gradient-primary);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
 
@@ -120,175 +269,204 @@ ion-header {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 32px;
+      flex-direction: column;
+      gap: 8px;
+      padding: 48px 24px;
       color: var(--muted-text);
+      text-align: center;
 
       ion-icon {
-        margin-right: 8px;
+        font-size: 32px;
+        color: #d1d5db;
       }
     }
   }
 }
 
-// Order section
+// ============================================
+// Order details card
+// ============================================
 .order-section {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
-// Order details card
 .order-details-card {
   background: var(--card-background);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  overflow: hidden;
 
   .card-header {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #E0E0E0;
-    gap: 12px;
+    gap: 8px;
 
     .back-btn {
-      --color: var(--primary-color);
+      --color: #fff;
+      --padding-start: 4px;
+      --padding-end: 4px;
+      margin: 0 4px 0 -8px;
     }
+  }
 
-    .header-left {
-      display: flex;
-      align-items: center;
+  .order-id {
+    margin: 0 0 2px 0;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #fff;
+  }
 
-      .header-icon {
-        font-size: 24px;
-        color: var(--primary-color);
-        margin-right: 12px;
-      }
-
-      .header-info {
-        .order-id {
-          margin: 0 0 4px 0;
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--text-color);
-        }
-
-        .order-type {
-          font-size: 0.9rem;
-          color: var(--muted-text);
-        }
-      }
-    }
-
-    .priority-badge {
-      display: flex;
-      align-items: center;
-      background: var(--secondary-color);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 16px;
-      font-size: 0.8rem;
-
-      ion-icon {
-        margin-right: 4px;
-      }
-    }
+  .order-type {
+    font-size: 0.72rem;
+    color: #fff;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 9px;
+    border-radius: 8px;
+    white-space: nowrap;
   }
 
   .delivery-info {
-    padding: 16px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 
     .info-row {
       display: flex;
-      align-items: center;
-      margin-bottom: 12px;
-
-      .info-icon {
-        font-size: 20px;
-        color: var(--primary-color);
-        margin-right: 12px;
-        min-width: 20px;
-      }
-
-      .info-details {
-        .info-label {
-          display: block;
-          font-size: 0.8rem;
-          color: var(--muted-text);
-          margin-bottom: 2px;
-        }
-
-        .info-value {
-          font-size: 1rem;
-          color: var(--text-color);
-          font-weight: 500;
-        }
-      }
-    }
-  }
-}
-
-// Items summary card
-.items-summary-card {
-  background: var(--card-background);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #E0E0E0;
-
-    .header-left {
-      display: flex;
-      align-items: center;
-
-      .header-icon {
-        font-size: 24px;
-        color: var(--primary-color);
-        margin-right: 12px;
-      }
-
-      .header-info {
-        .card-title {
-          margin: 0;
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--text-color);
-        }
-      }
-    }
-  }
-
-  .items-list {
-    padding: 16px;
-
-    .item-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #F0F0F0;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid #f4f5f8;
 
       &:last-child {
         border-bottom: none;
       }
 
+      .info-icon {
+        font-size: 18px;
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #fff;
+
+        &.retailer-icon {
+          background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        &.location-icon {
+          background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        &.contact-icon {
+          background: linear-gradient(135deg, #4facfe, #00c2fe);
+        }
+      }
+
+      .info-details {
+        min-width: 0;
+
+        .info-label {
+          display: block;
+          font-size: 0.72rem;
+          color: var(--muted-text);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 700;
+          margin-bottom: 3px;
+        }
+
+        .info-value {
+          font-size: 0.95rem;
+          color: var(--text-color);
+          font-weight: 600;
+          word-break: break-word;
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// Items summary card
+// ============================================
+.items-summary-card {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+
+  .items-list {
+    padding: 12px;
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border-radius: var(--border-radius-sm);
+      background: #fafaff;
+      border: 1px solid #ececf7;
+      margin-bottom: 8px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .item-index {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
       .item-details {
+        flex: 1;
+        min-width: 0;
+
         .item-name {
           margin: 0 0 8px 0;
-          font-size: 1rem;
-          font-weight: 600;
+          font-size: 0.95rem;
+          font-weight: 700;
           color: var(--text-color);
         }
 
         .item-quantities {
           display: flex;
-          flex-direction: column;
-          gap: 4px;
+          flex-wrap: wrap;
+          gap: 8px;
 
           span {
-            font-size: 0.9rem;
-            color: var(--muted-text);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.76rem;
+            color: var(--primary-color-dark);
+            background: rgba(102, 126, 234, 0.1);
+            border: none;
+            padding: 5px 11px;
+            border-radius: 20px;
+            font-weight: 600;
+
+            ion-icon {
+              font-size: 13px;
+              color: var(--primary-color);
+            }
+
+            strong {
+              color: var(--text-color);
+              font-weight: 700;
+            }
           }
         }
       }
@@ -296,30 +474,159 @@ ion-header {
   }
 }
 
+// ============================================
 // OTP card
+// ============================================
 .otp-card {
   background: var(--card-background);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  overflow: hidden;
+
+  .otp-stepper {
+    display: flex;
+    align-items: center;
+    padding: 22px 24px 8px;
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.45;
+      transition: var(--transition);
+
+      .step-circle {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #f1f2f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted-text);
+        transition: var(--transition);
+
+        ion-icon {
+          font-size: 17px;
+        }
+      }
+
+      span {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: var(--muted-text);
+        text-align: center;
+        max-width: 92px;
+      }
+
+      &.active {
+        opacity: 1;
+
+        .step-circle {
+          background: var(--gradient-primary);
+          color: #fff;
+          box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+        }
+
+        span {
+          color: var(--text-color);
+        }
+      }
+
+      &.done .step-circle {
+        background: var(--success-color);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+      }
+    }
+
+    .step-connector {
+      flex: 1;
+      height: 3px;
+      background: #eef0f4;
+      margin: 0 8px;
+      margin-bottom: 24px;
+      border-radius: 2px;
+
+      &.done {
+        background: var(--success-color);
+      }
+    }
+  }
 
   .otp-section {
-    padding: 16px;
+    padding: 22px 20px;
 
+    .generate-otp-step {
+      text-align: center;
+      padding: 8px 0 4px;
+
+      .generate-otp-illustration {
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+
+        ion-icon {
+          font-size: 34px;
+          color: #fff;
+        }
+      }
+
+      .generate-otp-btn {
+        display: block;
+        width: 100%;
+        --background: var(--gradient-primary);
+        --background-hover: var(--gradient-primary-hover);
+        --background-activated: var(--gradient-primary-hover);
+        --color: #ffffff;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        height: 52px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        text-transform: none;
+
+        .btn-label {
+          color: #ffffff;
+          font-size: 1rem;
+          font-weight: 700;
+        }
+
+        &[disabled] {
+          --background: #d1d5db;
+          --box-shadow: none;
+
+          .btn-label {
+            color: #9ca3af;
+          }
+        }
+      }
+    }
 
     .otp-input-step {
       .otp-timer {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #FFF3CD;
-        color: #856404;
-        padding: 8px;
-        border-radius: 8px;
-        margin-bottom: 16px;
+        gap: 8px;
+        background: #fff3d6;
+        color: #92610a;
+        padding: 11px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
 
         ion-icon {
-          margin-right: 8px;
+          font-size: 16px;
         }
       }
 
@@ -327,25 +634,29 @@ ion-header {
         .otp-inputs {
           display: flex;
           justify-content: center;
-          margin-bottom: 16px;
+          margin-bottom: 18px;
 
           .otp-box-group {
             display: flex;
-            gap: 8px;
+            gap: 10px;
 
             .otp-box {
-              width: 40px;
-              height: 40px;
+              width: 44px;
+              height: 54px;
               text-align: center;
-              border: 2px solid #E0E0E0;
-              border-radius: 8px;
-              font-size: 1.2rem;
-              font-weight: 600;
+              border: 2px solid #e5e7eb;
+              border-radius: 12px;
+              font-size: 1.35rem;
+              font-weight: 800;
+              color: var(--text-color);
+              background: #fafaff;
               transition: var(--transition);
 
               &:focus {
                 border-color: var(--primary-color);
+                background: #fff;
                 outline: none;
+                box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
               }
             }
           }
@@ -355,29 +666,47 @@ ion-header {
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--accent-color);
+          gap: 6px;
+          color: var(--danger-color);
+          background: rgba(239, 68, 68, 0.08);
+          padding: 9px 12px;
+          border-radius: 10px;
           margin-bottom: 16px;
-
-          ion-icon {
-            margin-right: 8px;
-          }
+          font-size: 0.85rem;
+          font-weight: 600;
         }
 
         .otp-actions {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
 
           .verify-otp-btn {
-            --background: var(--primary-color);
-            --border-radius: var(--border-radius);
-            font-weight: 600;
+            display: block;
+            width: 100%;
+            --background: var(--gradient-primary);
+            --background-hover: var(--gradient-primary-hover);
+            --color: #ffffff;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+            font-weight: 700;
+            height: 50px;
+
+            &[disabled] {
+              --background: #d1d5db;
+              --box-shadow: none;
+              --color: #9ca3af;
+            }
           }
 
           .regenerate-otp-btn {
+            display: block;
+            width: 100%;
             --border-color: var(--primary-color);
             --color: var(--primary-color);
-            --border-radius: var(--border-radius);
+            --border-radius: 12px;
+            font-weight: 700;
+            height: 46px;
           }
         }
       }
@@ -385,18 +714,19 @@ ion-header {
 
     .delivery-confirmed-step {
       text-align: center;
+      padding: 12px 0;
 
       .success-message {
         .success-icon-large {
-          font-size: 48px;
-          color: var(--primary-color);
-          margin-bottom: 16px;
+          font-size: 58px;
+          color: var(--success-color);
+          margin-bottom: 12px;
         }
 
         h3 {
           margin: 0 0 8px 0;
           font-size: 1.2rem;
-          font-weight: 600;
+          font-weight: 700;
           color: var(--text-color);
         }
 
@@ -410,53 +740,70 @@ ion-header {
   }
 }
 
+// ============================================
 // Action sections
-.action-section, .emergency-section, .success-actions {
-  margin-bottom: 16px;
+// ============================================
+.action-section,
+.emergency-section {
+  margin-bottom: 18px;
 
   ion-button {
-    --border-radius: var(--border-radius);
-    font-weight: 600;
+    --border-radius: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
   }
 
   .contact-customer-btn {
+    display: block;
+    width: 100%;
     --border-color: var(--primary-color);
+    --border-width: 2px;
     --color: var(--primary-color);
-  }
-
-  .next-delivery-btn {
-    --background: var(--primary-color);
-  }
-
-  .back-dashboard-btn {
-    --background: var(--secondary-color);
-    --color: white;
+    --background: #fff;
+    height: 50px;
   }
 }
 
 .emergency-section {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+
   .emergency-title {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 700;
     color: var(--text-color);
-    margin-bottom: 12px;
+    margin: 0 0 12px 0;
   }
 
   .emergency-buttons {
     display: flex;
-    gap: 12px;
+    gap: 10px;
 
     ion-button {
       flex: 1;
       --color: var(--muted-text);
+      --background: #f4f5f9;
+      margin: 0;
+      height: 44px;
+      font-size: 0.85rem;
+    }
+
+    .issue-btn {
+      --color: var(--danger-color);
+      --background: rgba(239, 68, 68, 0.08);
     }
   }
 }
 
+// ============================================
 // Modals
-.success-modal, .issue-modal {
-  --border-radius: var(--border-radius);
-  --background: rgba(0, 0, 0, 0.5);
+// ============================================
+.success-modal,
+.issue-modal {
+  --border-radius: 20px;
+  --background: rgba(15, 15, 25, 0.6);
 
   .modal-wrapper {
     display: flex;
@@ -466,66 +813,80 @@ ion-header {
 
     .modal-content {
       background: var(--card-background);
-      border-radius: var(--border-radius);
-      padding: 24px;
-      max-width: 400px;
+      border-radius: 20px;
+      padding: 0 0 24px;
+      max-width: 420px;
       width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
       text-align: center;
-      box-shadow: var(--shadow);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 
       .success-animation {
-        margin-bottom: 16px;
+        background: var(--gradient-primary);
+        padding: 32px 24px 24px;
+        margin-bottom: 20px;
       }
 
       .success-icon-large {
-        font-size: 48px;
-        color: var(--primary-color);
+        font-size: 60px;
+        color: #fff;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
       }
 
       .success-title {
         margin: 0 0 8px 0;
-        font-size: 1.2rem;
-        font-weight: 600;
+        padding: 0 24px;
+        font-size: 1.3rem;
+        font-weight: 700;
         color: var(--text-color);
       }
 
       .success-message {
         margin: 0 0 16px 0;
+        padding: 0 24px;
         font-size: 0.9rem;
         color: var(--muted-text);
+        line-height: 1.5;
       }
 
       .delivery-summary {
-        margin-bottom: 24px;
+        margin: 0 24px 20px;
+        background: rgba(102, 126, 234, 0.08);
+        border-radius: 12px;
+        padding: 12px;
 
         p {
           margin: 0;
-          font-size: 0.9rem;
+          font-size: 0.88rem;
           color: var(--text-color);
+          font-weight: 600;
         }
       }
 
       .post-delivery-ratings {
-        margin: 8px 0 18px;
+        margin: 8px 24px 18px;
         text-align: left;
 
         h3 {
-          margin: 0 0 10px;
+          margin: 0 0 12px;
           font-size: 1rem;
-          color: #334155;
+          font-weight: 700;
+          color: var(--text-color);
         }
 
         .order-rating-card {
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          padding: 10px;
+          border: 1px solid #ececf7;
+          border-radius: 14px;
+          padding: 14px;
           margin-bottom: 10px;
-          background: #f8fafc;
+          background: #fafaff;
 
           h4 {
-            margin: 0 0 8px;
+            margin: 0 0 10px;
             font-size: 0.9rem;
-            color: #1e293b;
+            font-weight: 700;
+            color: var(--text-color);
           }
         }
 
@@ -534,18 +895,19 @@ ion-header {
           display: flex;
           align-items: center;
           gap: 6px;
-          color: #64748b;
+          color: var(--muted-text);
           margin-bottom: 8px;
+          font-size: 0.85rem;
         }
 
         .rating-empty {
-          color: #475569;
+          color: var(--muted-text);
           font-size: 0.85rem;
         }
 
         .rating-form {
           display: grid;
-          gap: 6px;
+          gap: 8px;
         }
 
         .star-row {
@@ -553,7 +915,8 @@ ion-header {
           justify-content: space-between;
           align-items: center;
           font-size: 0.82rem;
-          color: #334155;
+          color: var(--text-color);
+          font-weight: 700;
         }
 
         .star-buttons {
@@ -570,7 +933,7 @@ ion-header {
 
           ion-icon {
             font-size: 20px;
-            color: #f59e0b;
+            color: var(--accent-color);
           }
         }
 
@@ -578,27 +941,28 @@ ion-header {
           display: block;
           margin-top: 6px;
           font-size: 0.82rem;
-          font-weight: 500;
+          font-weight: 700;
         }
       }
 
       .success-actions {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
+        margin: 0 24px;
 
         ion-button {
-          --border-radius: var(--border-radius);
-          font-weight: 600;
+          --border-radius: 12px;
+          font-weight: 700;
+          height: 48px;
+          display: block;
+          width: 100%;
         }
 
-        .next-delivery-btn {
-          --background: var(--primary-color);
-        }
-
-        .dashboard-btn {
-          --border-color: var(--primary-color);
-          --color: var(--primary-color);
+        .done-btn {
+          --background: var(--gradient-primary);
+          --background-hover: var(--gradient-primary-hover);
+          --color: #ffffff;
         }
       }
     }
@@ -606,13 +970,27 @@ ion-header {
 }
 
 .issue-modal {
+  ion-toolbar {
+    --background: var(--gradient-primary);
+    --color: #fff;
+
+    ion-title {
+      font-weight: 700;
+    }
+
+    ion-button {
+      --color: #fff;
+    }
+  }
+
   .modal-body {
-    padding: 16px;
+    padding: 20px;
 
     .modal-description {
-      margin: 0 0 16px 0;
+      margin: 0 0 18px 0;
       font-size: 0.9rem;
       color: var(--muted-text);
+      line-height: 1.5;
     }
 
     .issue-types {
@@ -622,28 +1000,41 @@ ion-header {
       margin-bottom: 16px;
 
       .issue-type-btn {
-        --border-radius: var(--border-radius);
+        display: block;
+        width: 100%;
+        --border-radius: 12px;
+        --border-width: 2px;
+        height: 48px;
+        font-weight: 700;
+        margin: 0;
       }
     }
 
     .issue-details {
+      animation: fadeInUp 0.25s ease;
+
       .issue-selected-info {
         display: flex;
         align-items: center;
-        background: #FFF3CD;
-        color: #856404;
-        padding: 12px;
-        border-radius: 8px;
+        background: #fff3d6;
+        color: #92610a;
+        padding: 12px 14px;
+        border-radius: 12px;
         margin-bottom: 16px;
+        font-weight: 700;
+        font-size: 0.88rem;
 
         .selected-icon {
           margin-right: 8px;
+          font-size: 18px;
         }
       }
 
       .description-item {
-        --background: transparent;
-        --border-radius: 8px;
+        --background: #fafaff;
+        --border-radius: 12px;
+        border: 1px solid #ececf7;
+        border-radius: 12px;
       }
     }
   }
@@ -651,30 +1042,130 @@ ion-header {
   .modal-actions {
     display: flex;
     gap: 12px;
+    padding: 8px 4px;
 
     ion-button {
-      --border-radius: var(--border-radius);
-      font-weight: 600;
+      flex: 1;
+      --border-radius: 12px;
+      font-weight: 700;
+      height: 48px;
+      margin: 0;
     }
 
     .submit-issue-btn {
-      --background: var(--accent-color);
+      --background: var(--gradient-primary);
+      --background-hover: var(--gradient-primary-hover);
+      --color: #ffffff;
+
+      &[disabled] {
+        --background: #d1d5db;
+        --color: #9ca3af;
+      }
     }
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================
 // Responsive adjustments
+// ============================================
 @media (max-width: 576px) {
   .content-container {
-    padding: 8px;
+    padding: 10px;
   }
 
   .otp-inputs .otp-box-group {
-    gap: 4px;
+    gap: 6px;
 
     .otp-box {
-      width: 32px;
-      height: 32px;
+      width: 38px;
+      height: 48px;
+      font-size: 1.15rem;
+    }
+  }
+
+  .otp-stepper {
+    padding: 18px 12px 6px;
+
+    .step span {
+      max-width: 72px;
+      font-size: 0.62rem;
+    }
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .delivery-content {
+    --background: #17171c;
+  }
+
+  .jobs-list-card,
+  .order-details-card,
+  .items-summary-card,
+  .otp-card,
+  .emergency-section {
+    background: #24242b;
+
+    .job-item {
+      background: #2c2c35;
+      border-color: #34343e;
+
+      &:hover {
+        background: #32323c;
+      }
+
+      .job-id {
+        color: #e5e5e5;
+      }
+    }
+
+    .item-row {
+      background: #2c2c35;
+      border-color: #34343e;
+
+      .item-name {
+        color: #e5e5e5;
+      }
+    }
+
+    .info-row {
+      border-bottom-color: #34343e;
+
+      .info-value {
+        color: #e5e5e5;
+      }
+    }
+
+    .otp-box {
+      background: #2c2c35;
+      border-color: #3a3a44;
+      color: #e5e5e5;
+    }
+
+    .emergency-title {
+      color: #e5e5e5;
+    }
+  }
+
+  .success-modal .modal-content {
+    background: #24242b;
+
+    .success-title,
+    h3,
+    h4,
+    .info-value {
+      color: #e5e5e5 !important;
     }
   }
 }
