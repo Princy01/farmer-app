@@ -5,7 +5,26 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ToastController, LoadingController, AlertController } from '@ionic/angular/standalone';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { save, arrowBack, camera, location } from 'ionicons/icons';
+import {
+	save,
+	arrowBack,
+	camera,
+	cameraOutline,
+	location,
+	locationOutline,
+	checkmarkCircle,
+	navigate,
+	trash,
+	informationCircle,
+	informationCircleOutline,
+	alertCircleOutline,
+	closeCircle,
+	searchOutline,
+	warning,
+	helpCircle,
+	checkmark,
+	business
+} from 'ionicons/icons';
 import { AddBusinessService, State, City, Location, BusinessType, BusinessBranch, BranchAddressResolutionResponse } from './add-business.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { BusinessBranchWithNames } from '../business-locations/business-locations.service';
@@ -31,7 +50,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 	businessForm: FormGroup;
 	isEditMode = false;
 	locationId: number | null = null;
-	pageTitle = 'Add Business Location';
+	pageTitle = 'ADD_BUSINESS_FORM.PAGE_TITLE';
 	states: State[] = [];
 	cities: City[] = [];
 	locations: Location[] = [];
@@ -85,7 +104,26 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 		private authService: AuthService,
 		private translate: TranslateService
 	) {
-		addIcons({ save, arrowBack, camera, location });
+		addIcons({
+			save,
+			arrowBack,
+			camera,
+			'camera-outline': cameraOutline,
+			location,
+			'location-outline': locationOutline,
+			'checkmark-circle': checkmarkCircle,
+			navigate,
+			trash,
+			'information-circle': informationCircle,
+			'information-circle-outline': informationCircleOutline,
+			'alert-circle-outline': alertCircleOutline,
+			'close-circle': closeCircle,
+			'search-outline': searchOutline,
+			warning,
+			'help-circle': helpCircle,
+			checkmark,
+			business
+		});
 
 		this.businessForm = this.formBuilder.group({
 			shopName: ['', Validators.required],
@@ -118,7 +156,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 
 				this.isEditMode = true;
 				this.locationId = +params['locationId'];
-				this.pageTitle = this.translate.instant('ADD_BUSINESS_FORM.EDIT_PAGE_TITLE');
+				this.pageTitle = 'ADD_BUSINESS_FORM.EDIT_PAGE_TITLE';
 				this.loadLocationData();
 			}
 		});
@@ -1011,6 +1049,11 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 					address: formValue.address,
 					email: formValue.email,
 					gst_num: formValue.gstNumber,
+					// PAN field is not collected in the UI. GSTIN format embeds the PAN
+					// in characters 3-11 (e.g. "22AAAAA0000A1Z5" -> "AAAAA0000A"), so
+					// derive it from the GST number already validated above. This keeps
+					// the value backend-accurate rather than sending a dummy placeholder.
+					pan_num: formValue.gstNumber ? String(formValue.gstNumber).substring(2, 12) : '',
 					privilege_user: false,
 					established_year: formValue.establishedYear || '',
 					active_status: true,
@@ -1221,7 +1264,7 @@ export class AddBusinessLocationComponent implements OnInit, OnDestroy {
 	}
 
 	getFormProgress(): number {
-		const requiredFields = ['shopName', 'number', 'state', 'city', 'location', 'address', 'email', 'gstNumber', 'pan'];
+		const requiredFields = ['shopName', 'number', 'state', 'city', 'location', 'address', 'email', 'gstNumber'];
 		const filled = requiredFields.filter(field => {
 			const value = this.businessForm.get(field)?.value;
 			return value !== null && value !== undefined && value !== '';

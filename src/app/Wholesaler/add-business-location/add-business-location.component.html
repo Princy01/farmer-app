@@ -3,24 +3,24 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/wholesaler/business-locations"></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ 'ADD_BUSINESS_FORM.PAGE_TITLE' | translate }}</ion-title>
-    <ion-item slot="end" lines="none" class="header-mode-badge">
-      <ion-badge [color]="isEditMode ? 'warning' : 'success'">
-        {{ (isEditMode ? 'ADD_BUSINESS_LOCATION.EDIT_MODE' : 'ADD_BUSINESS_LOCATION.CREATE_MODE') | translate }}
-      </ion-badge>
-    </ion-item>
+    <ion-title>{{ pageTitle | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="add-location-content" [fullscreen]="true">
   <div class="page-wrapper">
 
-    <!-- Progress Bar -->
-    <div class="progress-block">
-      <div class="progress-track">
-        <div class="progress-fill" [style.width]="getFormProgress() + '%'"></div>
+    <!-- Page Status Row: mode badge + progress -->
+    <div class="page-status-row">
+      <ion-badge class="mode-badge" [color]="isEditMode ? 'warning' : 'success'">
+        {{ (isEditMode ? 'ADD_BUSINESS_LOCATION.EDIT_MODE' : 'ADD_BUSINESS_LOCATION.CREATE_MODE') | translate }}
+      </ion-badge>
+      <div class="progress-block">
+        <div class="progress-track">
+          <div class="progress-fill" [style.width]="getFormProgress() + '%'"></div>
+        </div>
+        <span class="progress-label">{{ getFormProgress() }}%</span>
       </div>
-      <span class="progress-label">{{ getFormProgress() }}%</span>
     </div>
 
     <form [formGroup]="businessForm" (ngSubmit)="onSubmit()">
@@ -361,24 +361,6 @@
               <div class="field-error" *ngIf="getErrorMessage('gstNumber')">
                 <ion-icon name="alert-circle-outline"></ion-icon>
                 {{ getErrorMessage('gstNumber') }}
-              </div>
-            </div>
-
-            <!-- PAN -->
-            <div class="field-wrap">
-              <ion-item class="custom-item"
-                [class.item-invalid]="businessForm.get('pan')?.invalid && businessForm.get('pan')?.touched">
-                <ion-label position="stacked">{{ 'ADD_BUSINESS_FORM.PAN' | translate }} <span class="required">*</span></ion-label>
-                <ion-input
-                  formControlName="pan"
-                  [placeholder]="'ADD_BUSINESS_FORM.PAN_PLACEHOLDER' | translate"
-                  type="text"
-                  [disabled]="isEditMode">
-                </ion-input>
-              </ion-item>
-              <div class="field-error" *ngIf="getErrorMessage('pan')">
-                <ion-icon name="alert-circle-outline"></ion-icon>
-                {{ getErrorMessage('pan') }}
               </div>
             </div>
 
