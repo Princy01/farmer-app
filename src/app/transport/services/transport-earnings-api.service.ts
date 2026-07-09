@@ -9,6 +9,7 @@ export interface TransporterEarningsQuery {
   from?: string;
   to?: string;
   status?: 'all' | 'pending' | 'ready' | 'credited' | 'held' | 'deducted' | 'cancelled';
+  job_status?: 'all' | 'completed' | string;
 }
 
 export interface TransporterEarningsSummary {
@@ -49,6 +50,7 @@ export interface TransporterEarningsJob {
   delivery_date?: string;
   accepted_at?: string;
   delivered_at?: string;
+  job_status?: string;
   release_after?: string;
   released_at?: string;
   transport_status?: string;

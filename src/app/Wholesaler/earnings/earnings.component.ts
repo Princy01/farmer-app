@@ -48,7 +48,7 @@ export class EarningsComponent implements OnInit, OnDestroy {
 
   range: EarningsRange = '30';
   status: EarningsStatus = 'all';
-  fromDate = this.formatDate(this.daysAgo(30));
+  fromDate = this.formatDate(this.startDateForRange(30));
   toDate = this.formatDate(new Date());
   selectedDate = '';
 
@@ -110,7 +110,7 @@ export class EarningsComponent implements OnInit, OnDestroy {
       this.fromDate = '';
       this.toDate = '';
     } else {
-      this.fromDate = this.formatDate(this.daysAgo(Number(value)));
+      this.fromDate = this.formatDate(this.startDateForRange(Number(value)));
       this.toDate = this.formatDate(new Date());
     }
     this.detail = undefined;
@@ -250,9 +250,9 @@ export class EarningsComponent implements OnInit, OnDestroy {
     };
   }
 
-  private daysAgo(days: number): Date {
+  private startDateForRange(daysBack: number): Date {
     const date = new Date();
-    date.setDate(date.getDate() - days);
+    date.setDate(date.getDate() - Math.max(daysBack - 1, 0));
     return date;
   }
 

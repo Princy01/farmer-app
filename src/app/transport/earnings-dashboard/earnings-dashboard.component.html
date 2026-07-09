@@ -197,7 +197,7 @@
 
       <div class="empty-state" *ngIf="!isLoadingJobs && jobs.length === 0">
         <ion-icon name="time-outline"></ion-icon>
-        <p>{{ 'TRANSPORT_EARNINGS.NO_JOB_SETTLEMENT' | translate }}</p>
+        <p>{{ 'TRANSPORT_EARNINGS.NO_JOB_PAYMENTS' | translate }}</p>
       </div>
 
       <div class="order-row" *ngFor="let job of jobs; trackBy: trackJob" (click)="loadJobDetail(job.job_id)">
@@ -219,15 +219,20 @@
         <p *ngIf="job.reason_summary">{{ job.reason_summary }}</p>
       </div>
 
-      <ion-button
-        expand="block"
-        fill="outline"
-        class="load-more"
-        *ngIf="hasMoreJobs"
-        [disabled]="isLoadingJobs"
-        (click)="loadMoreJobs()">
-        {{ 'TRANSPORT_EARNINGS.LOAD_MORE' | translate }}
-      </ion-button>
+      <div class="pager-actions" *ngIf="hasPreviousJobs || hasNextJobs">
+        <ion-button
+          fill="outline"
+          [disabled]="!hasPreviousJobs || isLoadingJobs"
+          (click)="previousJobsPage()">
+          {{ 'TRANSPORT_EARNINGS.PREVIOUS' | translate }}
+        </ion-button>
+        <ion-button
+          fill="outline"
+          [disabled]="!hasNextJobs || isLoadingJobs"
+          (click)="nextJobsPage()">
+          {{ 'TRANSPORT_EARNINGS.NEXT' | translate }}
+        </ion-button>
+      </div>
     </section>
   </ng-container>
 </ion-content>

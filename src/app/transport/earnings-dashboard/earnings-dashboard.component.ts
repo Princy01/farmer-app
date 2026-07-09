@@ -45,7 +45,7 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
 
   range: EarningsRange = '30';
   status: EarningsStatus = 'all';
-  fromDate = this.formatDate(this.daysAgo(30));
+  fromDate = this.formatDate(this.startDateForRange(30));
   toDate = this.formatDate(new Date());
   selectedDate = '';
 
@@ -54,8 +54,9 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
   isLoadingDetail = false;
   errorMessage = '';
   page = 1;
-  pageSize = 20;
-  hasMoreJobs = false;
+  pageSize = 10;
+  hasPreviousJobs = false;
+  hasNextJobs = false;
 
   private subscriptions = new Subscription();
 
@@ -95,7 +96,7 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
       this.fromDate = '';
       this.toDate = '';
     } else {
-      this.fromDate = this.formatDate(this.daysAgo(Number(value)));
+      this.fromDate = this.formatDate(this.startDateForRange(Number(value)));
       this.toDate = this.formatDate(new Date());
     }
     this.detail = undefined;
@@ -112,15 +113,23 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
     this.selectedDate = day.date;
     this.detail = undefined;
     this.page = 1;
-    this.loadJobs(true);
+    this.loadJobs();
   }
 
-  loadMoreJobs(): void {
-    if (!this.hasMoreJobs || this.isLoadingJobs) {
+  previousJobsPage(): void {
+    if (!this.hasPreviousJobs || this.isLoadingJobs) {
+      return;
+    }
+    this.page -= 1;
+    this.loadJobs();
+  }
+
+  nextJobsPage(): void {
+    if (!this.hasNextJobs || this.isLoadingJobs) {
       return;
     }
     this.page += 1;
-    this.loadJobs(false);
+    this.loadJobs();
   }
 
   loadJobDetail(jobId?: number): void {
@@ -137,7 +146,9 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
             this.selectedDate = detail.job.event_date;
           }
         },
-        error: () => this.showToast(this.translate.instant('TRANSPORT_EARNINGS.DETAIL_LOAD_ERROR'), 'danger')
+        error: () => {
+          this.detail = undefined;
+        }
       });
     this.subscriptions.add(subscription);
   }
@@ -178,7 +189,8 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
     this.selectedDate = '';
     this.jobs = [];
     this.page = 1;
-    this.hasMoreJobs = false;
+    this.hasPreviousJobs = false;
+    this.hasNextJobs = false;
 
     const query = this.buildQuery();
     const subscription = forkJoin({
@@ -204,7 +216,7 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
     this.subscriptions.add(subscription);
   }
 
-  private loadJobs(reset: boolean): void {
+  private loadJobs(): void {
     if (!this.selectedDate) {
       return;
     }
@@ -219,8 +231,9 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.isLoadingJobs = false))
       .subscribe({
         next: (response) => {
-          this.jobs = reset ? response.items : [...this.jobs, ...response.items];
-          this.hasMoreJobs = response.has_more;
+          this.jobs = response.items;
+          this.hasPreviousJobs = this.page > 1;
+          this.hasNextJobs = response.has_more;
         },
         error: () => this.showToast(this.translate.instant('TRANSPORT_EARNINGS.JOBS_LOAD_ERROR'), 'danger')
       });
@@ -232,13 +245,14 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
       from: this.fromDate || undefined,
       to: this.toDate || undefined,
       status: this.status,
+      job_status: 'completed',
       ...extra
     };
   }
 
-  private daysAgo(days: number): Date {
+  private startDateForRange(daysBack: number): Date {
     const date = new Date();
-    date.setDate(date.getDate() - days);
+    date.setDate(date.getDate() - Math.max(daysBack - 1, 0));
     return date;
   }
 

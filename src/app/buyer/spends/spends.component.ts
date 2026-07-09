@@ -49,7 +49,7 @@ export class SpendsComponent implements OnInit, OnDestroy {
 
   range: SpendsRange = '30';
   status: SpendsStatus = 'all';
-  fromDate = this.formatDate(this.daysAgo(30));
+  fromDate = this.formatDate(this.startDateForRange(30));
   toDate = this.formatDate(new Date());
   selectedDate = '';
 
@@ -107,7 +107,7 @@ export class SpendsComponent implements OnInit, OnDestroy {
       this.fromDate = '';
       this.toDate = '';
     } else {
-      this.fromDate = this.formatDate(this.daysAgo(Number(value)));
+      this.fromDate = this.formatDate(this.startDateForRange(Number(value)));
       this.toDate = this.formatDate(new Date());
     }
     this.detail = undefined;
@@ -255,9 +255,9 @@ export class SpendsComponent implements OnInit, OnDestroy {
     };
   }
 
-  private daysAgo(days: number): Date {
+  private startDateForRange(daysBack: number): Date {
     const date = new Date();
-    date.setDate(date.getDate() - days);
+    date.setDate(date.getDate() - Math.max(daysBack - 1, 0));
     return date;
   }
 
