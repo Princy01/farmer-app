@@ -231,7 +231,7 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.isLoadingJobs = false))
       .subscribe({
         next: (response) => {
-          this.jobs = response.items;
+          this.jobs = response.items.filter(job => this.isSuccessfullyCompleted(job));
           this.hasPreviousJobs = this.page > 1;
           this.hasNextJobs = response.has_more;
         },
@@ -248,6 +248,38 @@ export class EarningsDashboardComponent implements OnInit, OnDestroy {
       job_status: 'completed',
       ...extra
     };
+  }
+
+  private isSuccessfullyCompleted(job: TransporterEarningsJob): boolean {
+    const statuses = [
+      job.job_status,
+      job.transport_status,
+      job.delivery_status
+    ]
+      .map(status => (status || '').toLowerCase().trim())
+      .filter(Boolean);
+
+    if (statuses.some(status => this.hasAnyStatusToken(status, [
+      'cancel',
+      'reject',
+      'fail',
+      'abort',
+      'return'
+    ]))) {
+      return false;
+    }
+
+    return statuses.some(status => this.hasAnyStatusToken(status, [
+      'completed',
+      'delivered',
+      'delivery_confirmed',
+      'delivery confirmed',
+      'success'
+    ])) || Boolean(job.delivered_at?.trim());
+  }
+
+  private hasAnyStatusToken(status: string, tokens: string[]): boolean {
+    return tokens.some(token => status.includes(token));
   }
 
   private startDateForRange(daysBack: number): Date {
