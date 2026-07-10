@@ -15,42 +15,6 @@
 
       <div class="form-content">
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-          <!-- Business Information Section -->
-          <div class="form-section">
-            <div class="section-title">
-              <ion-icon name="information-circle-outline" class="section-icon"></ion-icon>
-              {{ 'BUSINESS_REGISTRATION.SECTION_BUSINESS_INFO' | translate }}
-            </div>
-
-            <!-- Registration Number -->
-            <div>
-              <ion-item
-                [class.ion-invalid]="
-                  form.get('b_registration_num')?.invalid &&
-                  form.get('b_registration_num')?.touched
-                "
-              >
-                <ion-label position="stacked">{{ 'BUSINESS_REGISTRATION.REGISTRATION_NUMBER' | translate }} *</ion-label>
-                <ion-input
-                  formControlName="b_registration_num"
-                  [placeholder]="'BUSINESS_REGISTRATION.REGISTRATION_NUMBER_PLACEHOLDER' | translate"
-                  type="text"
-                >
-                </ion-input>
-              </ion-item>
-              <div
-                class="error-message"
-                *ngIf="
-                  form.get('b_registration_num')?.invalid &&
-                  form.get('b_registration_num')?.touched
-                "
-              >
-                {{ 'BUSINESS_REGISTRATION.ERROR_REGISTRATION_NUMBER' | translate }}
-              </div>
-            </div>
-          </div>
-
           <!-- Legal Information Section -->
           <div class="form-section">
             <div class="section-title">

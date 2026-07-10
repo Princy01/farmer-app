@@ -30,7 +30,7 @@ export class BusinessRegistrationComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       bid: [null],
-      b_registration_num: ['', Validators.required],
+      b_registration_num: [null],
       is_active: [true],
       user_id: [null, Validators.required],
       pan_number: ['', [Validators.required, Validators.pattern(/[A-Z]{5}[0-9]{4}[A-Z]{1}/)]],
@@ -92,7 +92,10 @@ export class BusinessRegistrationComponent implements OnInit {
       message: this.translate.instant('BUSINESS_REGISTRATION.SUBMITTING'),
     });
 
-    const payload = this.form.value;
+    const payload = {
+      ...this.form.value,
+      b_registration_num: this.form.value.b_registration_num?.trim() || null,
+    };
 
     this.businessRegistrationService.addNewBusiness(payload).subscribe({
       next: async () => {

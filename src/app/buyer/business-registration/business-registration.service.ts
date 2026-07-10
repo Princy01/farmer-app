@@ -27,7 +27,7 @@ export interface Location {
 
 export interface BusinessRegistrationPayload {
   bid?: number | null;
-  b_registration_num: string;
+  b_registration_num?: string | null;
   is_active: boolean;
   user_id: number;
   pan_number: string;
