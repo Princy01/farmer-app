@@ -1810,7 +1810,7 @@
     "SELECT_DELIVERY_ADDRESS": "Please select a delivery address",
     "DRIVER_INFO_TITLE": "Driver Assignment",
     "DRIVER_INFO_MSG": "A driver will be assigned to your order after payment confirmation.",
-    "BRANCH_VERIFICATION_REQUIRED_MESSAGE": "Please verify this branch location before arranging transport or placing live orders.",
+    "BRANCH_VERIFICATION_REQUIRED_MESSAGE": "Please verify this branch document and location before arranging transport or placing live orders.",
     "DISCOUNT": "Discount",
     "HANDLING_CHARGES": "Handling Charges",
     "PLATFORM_FEE": "Platform Fee",

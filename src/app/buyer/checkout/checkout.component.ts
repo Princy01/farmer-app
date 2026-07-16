@@ -337,11 +337,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
       this.businessBranches = branches?.filter(branch => branch.active_status) || [];
 
-      if (this.businessBranches.length > 0 && !this.selectedBranch) {
-        this.selectedBranch =
-          this.businessBranches.find(branch => this.isBranchVerified(branch)) ||
-          this.businessBranches[0];
-      }
+      this.selectedBranch = this.resolveSelectedBranch(this.selectedBranch, this.businessBranches);
 
       this.persistCheckoutState({});
 
@@ -569,7 +565,34 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   private isBranchVerified(branch: BusinessBranch | null | undefined): boolean {
-    return !!branch && branch.location_verification_status === 'verified';
+    if (!branch) {
+      return false;
+    }
+
+    return this.normalizeVerificationStatus(branch.document_verification_status) === 'verified' &&
+      this.normalizeVerificationStatus(branch.location_verification_status) === 'verified';
+  }
+
+  private resolveSelectedBranch(
+    currentBranch: BusinessBranch | null | undefined,
+    freshBranches: BusinessBranch[]
+  ): BusinessBranch | null {
+    if (freshBranches.length === 0) {
+      return null;
+    }
+
+    const selectedBranchId = Number(currentBranch?.branch_id);
+    const freshSelectedBranch = Number.isFinite(selectedBranchId)
+      ? freshBranches.find(branch => branch.branch_id === selectedBranchId)
+      : null;
+
+    return freshSelectedBranch ||
+      freshBranches.find(branch => this.isBranchVerified(branch)) ||
+      freshBranches[0];
+  }
+
+  private normalizeVerificationStatus(status: string | null | undefined): string {
+    return (status || '').trim().toLowerCase();
   }
 
   private tryCalculateDistance(): void {
