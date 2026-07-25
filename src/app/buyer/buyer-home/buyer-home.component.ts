@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnDestroy } from '@angular/core';
+import { Component, ViewChild, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, IonContent, MenuController, AlertController, PopoverController, ToastController } from '@ionic/angular';
 import { RouterModule, Router } from '@angular/router';
@@ -28,10 +28,16 @@ import {
   languageOutline,
   chevronDownOutline,
   businessOutline,
-  walletOutline
+  walletOutline,
+  timeOutline,
+  checkmarkCircleOutline
 } from 'ionicons/icons';
 import { LanguagePopoverComponent } from './language-popover.component';
 import { TranslateApiService } from '../../services/translate-api.service';
+import {
+  RetailerOrderHistory,
+  RetailerOrderHistoryResponse,
+} from '../retailer-order-history/retailer-order-history.service';
 
 interface UserPreference {
   language: string;
@@ -44,6 +50,17 @@ interface Language {
   name: string;
 }
 
+interface RecentDeliveredOrder {
+  orderId: string;
+  rawOrderId: number;
+  deliveredAt: string;
+  deliveredAgo: string;
+  deliveryAddress: string;
+  finalAmount: number;
+  totalAmount: number;
+  statusLabel: string;
+}
+
 @Component({
   selector: 'app-buyer-home',
   standalone: true,
@@ -51,13 +68,17 @@ interface Language {
   templateUrl: './buyer-home.component.html',
   styleUrls: ['./buyer-home.component.scss'],
 })
-export class BuyerHomeComponent implements OnDestroy {
+export class BuyerHomeComponent implements OnInit, OnDestroy {
   @ViewChild(IonContent, { static: false }) content!: IonContent;
 
   hideHeader = false;
   loadingCategories = false;
   errorLoadingCategories = false;
   categories: Category[] = [];
+  recentDeliveriesLoading = false;
+  recentDeliveriesError = false;
+  recentDeliveriesExpanded = false;
+  recentDeliveredOrders: RecentDeliveredOrder[] = [];
   languages: Language[] = [];
   currentLanguage = 'English';
   userPreference: UserPreference | null = null;
@@ -97,7 +118,9 @@ export class BuyerHomeComponent implements OnDestroy {
       languageOutline,
       chevronDownOutline,
       businessOutline,
-      walletOutline
+      walletOutline,
+      timeOutline,
+      checkmarkCircleOutline
     });
 
     this.translate.setDefaultLang('en');
@@ -105,6 +128,7 @@ export class BuyerHomeComponent implements OnDestroy {
 
   ngOnInit() {
     this.fetchCategories();
+    this.fetchRecentDeliveries();
     this.fetchLanguages();
     this.applyStoredLanguage();
   }
@@ -218,6 +242,128 @@ export class BuyerHomeComponent implements OnDestroy {
           this.showErrorToast('BUYER_HOME.ERROR_LOADING_CATEGORIES_DESC');
         }
       });
+  }
+
+  fetchRecentDeliveries() {
+    this.recentDeliveriesLoading = true;
+    this.recentDeliveriesError = false;
+
+    this.buyerApiService.getOrderHistory()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: RetailerOrderHistoryResponse) => {
+          this.recentDeliveredOrders = this.extractRecentDeliveredOrders(response);
+          this.recentDeliveriesExpanded = false;
+          this.recentDeliveriesLoading = false;
+        },
+        error: () => {
+          this.recentDeliveriesError = true;
+          this.recentDeliveriesLoading = false;
+        }
+      });
+  }
+
+  toggleRecentDeliveries() {
+    this.recentDeliveriesExpanded = !this.recentDeliveriesExpanded;
+  }
+
+  openRecentDelivery(order: RecentDeliveredOrder) {
+    void this.router.navigate(['/buyer/retailer-order-details', order.rawOrderId]);
+  }
+
+  getRecentDeliveriesCountLabel(): string {
+    const count = this.recentDeliveredOrders.length;
+    return count === 1
+      ? this.translate.instant('BUYER_HOME.RECENT_DELIVERIES_COUNT_ONE')
+      : this.translate.instant('BUYER_HOME.RECENT_DELIVERIES_COUNT_MANY', { count });
+  }
+
+  private extractRecentDeliveredOrders(response: RetailerOrderHistoryResponse): RecentDeliveredOrder[] {
+    const combinedOrders = [
+      ...(response.current_orders || []),
+      ...(response.order_history || [])
+    ];
+
+    const now = Date.now();
+    const recentWindowMs = 30 * 60 * 1000;
+    const seenOrderIds = new Set<number>();
+
+    return combinedOrders
+      .filter((order) => this.isRecentlyDelivered(order, now, recentWindowMs))
+      .map((order) => this.mapToRecentDeliveredOrder(order))
+      .filter((order) => {
+        if (seenOrderIds.has(order.rawOrderId)) {
+          return false;
+        }
+        seenOrderIds.add(order.rawOrderId);
+        return true;
+      })
+      .sort((a, b) => new Date(b.deliveredAt).getTime() - new Date(a.deliveredAt).getTime());
+  }
+
+  private isRecentlyDelivered(order: RetailerOrderHistory, now: number, recentWindowMs: number): boolean {
+    const deliveredAt = this.getDeliveredAt(order);
+    if (!deliveredAt) {
+      return false;
+    }
+
+    const deliveredAtMs = new Date(deliveredAt).getTime();
+    if (Number.isNaN(deliveredAtMs)) {
+      return false;
+    }
+
+    const ageMs = now - deliveredAtMs;
+    if (ageMs < 0 || ageMs > recentWindowMs) {
+      return false;
+    }
+
+    return this.isDeliveredStatus(order);
+  }
+
+  private isDeliveredStatus(order: RetailerOrderHistory): boolean {
+    const statusText = [
+      order.order_status_name,
+      order.transport?.job_status,
+      order.transport?.delivery_status
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    return statusText.includes('delivered') || statusText.includes('complete');
+  }
+
+  private getDeliveredAt(order: RetailerOrderHistory): string | null {
+    return order.actual_delivery_date || order.date_of_order || null;
+  }
+
+  private mapToRecentDeliveredOrder(order: RetailerOrderHistory): RecentDeliveredOrder {
+    const deliveredAt = this.getDeliveredAt(order) || new Date().toISOString();
+
+    return {
+      orderId: `ORD-${order.order_id.toString().padStart(6, '0')}`,
+      rawOrderId: order.order_id,
+      deliveredAt,
+      deliveredAgo: this.getRelativeTimeLabel(deliveredAt),
+      deliveryAddress: order.delivery_address || '',
+      finalAmount: order.final_amount || 0,
+      totalAmount: order.total_order_amount || 0,
+      statusLabel: this.translate.instant('BUYER_HOME.RECENT_DELIVERED_STATUS'),
+    };
+  }
+
+  private getRelativeTimeLabel(dateString: string): string {
+    const timestamp = new Date(dateString).getTime();
+    if (Number.isNaN(timestamp)) {
+      return this.translate.instant('BUYER_HOME.RECENT_DELIVERED_JUST_NOW');
+    }
+
+    const minutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
+    if (minutes < 1) {
+      return this.translate.instant('BUYER_HOME.RECENT_DELIVERED_JUST_NOW');
+    }
+
+    return this.translate.instant('BUYER_HOME.RECENT_DELIVERED_MINUTES_AGO', { minutes });
   }
 
   onScroll(event: any) {

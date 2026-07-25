@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
-import { FormsModule } from '@angular/forms';
 import { Router, NavigationEnd } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
@@ -21,7 +20,8 @@ import {
   cashOutline,
   informationCircleOutline,
   calculatorOutline,
-  arrowForwardOutline
+  arrowForwardOutline,
+  checkmarkCircle
 } from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, firstValueFrom } from 'rxjs';
@@ -98,7 +98,7 @@ const CHECKOUT_STATE_TTL_MS = 30 * 60 * 1000;
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, IonicModule, TranslatePipe],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
 })
@@ -123,7 +123,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   selectedBranch: BusinessBranch | null = null;
   isLoadingBranches = false;
 
-  hasRideRequest = false;
+  hasRideRequest = true;
   estimatedRidePrice = 0;
   distance = 0;
   isLoadingDistance = false;
@@ -162,7 +162,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       cashOutline,
       informationCircleOutline,
       calculatorOutline,
-      arrowForwardOutline
+      arrowForwardOutline,
+      checkmarkCircle
     });
 
     this.handleNavigationState();
@@ -221,15 +222,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       this.discount = state['discount'] || 0;
     }
 
-    if (state['hasRideRequest'] !== undefined || state['hasTransport'] !== undefined) {
-      this.hasRideRequest = state['hasRideRequest'] || state['hasTransport'] || false;
-    }
-
     if (state['transportData']) {
       this.transportData = state['transportData'];
       this.estimatedRidePrice = this.transportData?.base_price || 0;
       this.distance = this.transportData?.distance_km || this.transportData?.distance || 0;
     }
+
+    this.hasRideRequest = true;
 
     if (state['selectedBranch']) {
       this.selectedBranch = state['selectedBranch'];
@@ -265,8 +264,8 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           selectedBranch: this.selectedBranch,
           discount: this.discount,
           totalPrice: this.totalPrice,
-          hasRideRequest: this.hasRideRequest,
-          hasTransport: this.hasRideRequest,
+          hasRideRequest: true,
+          hasTransport: true,
           transportData: this.transportData ?? state['transportData'] ?? null
         }
       }));
@@ -373,30 +372,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   addNewAddress(): void {
     this.router.navigate(['/buyer/add-business-location']);
-  }
-
-  onTransportToggle(): void {
-    if (this.hasRideRequest) {
-      if (!this.selectedBranch) {
-        this.hasRideRequest = false;
-        void this.showErrorAlert(this.translate.instant('CHECKOUT.SELECT_ADDRESS_FIRST'));
-        return;
-      }
-
-      if (!this.isBranchVerified(this.selectedBranch)) {
-        this.hasRideRequest = false;
-        void this.showErrorAlert(this.translate.instant('CHECKOUT.BRANCH_VERIFICATION_REQUIRED_MESSAGE'));
-        return;
-      }
-
-      this.tryCalculateDistance();
-      this.persistCheckoutState({});
-      return;
-    }
-
-    this.estimatedRidePrice = 0;
-    this.calculateGroupPricing();
-    this.persistCheckoutState({});
   }
 
   async proceedToPayment(): Promise<void> {

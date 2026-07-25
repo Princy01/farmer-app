@@ -150,6 +150,91 @@
     ></ion-searchbar>
   </div>
 
+  <div class="recent-deliveries-section">
+    <div
+      class="recent-deliveries-card"
+      [class.expanded]="recentDeliveriesExpanded"
+      (click)="toggleRecentDeliveries()"
+      role="button"
+      tabindex="0"
+    >
+      <div class="recent-deliveries-hero">
+        <div class="recent-deliveries-icon-wrap">
+          <ion-icon name="time-outline" class="recent-deliveries-icon"></ion-icon>
+        </div>
+
+        <div class="recent-deliveries-copy">
+          <span class="recent-deliveries-kicker">
+            {{ 'BUYER_HOME.RECENT_DELIVERIES_KICKER' | translate }}
+          </span>
+          <h2 class="recent-deliveries-title">
+            {{ 'BUYER_HOME.RECENT_DELIVERIES_TITLE' | translate }}
+          </h2>
+          <p class="recent-deliveries-subtitle">
+            {{ 'BUYER_HOME.RECENT_DELIVERIES_SUBTITLE' | translate }}
+          </p>
+        </div>
+
+        <div class="recent-deliveries-meta">
+          <div class="recent-deliveries-count-pill" *ngIf="!recentDeliveriesLoading && !recentDeliveriesError">
+            {{ getRecentDeliveriesCountLabel() }}
+          </div>
+          <ion-icon name="chevron-down-outline" class="recent-deliveries-chevron"></ion-icon>
+        </div>
+      </div>
+
+      <div class="recent-deliveries-body" *ngIf="recentDeliveriesExpanded">
+        <div class="recent-deliveries-loading" *ngIf="recentDeliveriesLoading">
+          <ion-spinner name="crescent" color="success"></ion-spinner>
+          <span>{{ 'BUYER_HOME.RECENT_DELIVERIES_LOADING' | translate }}</span>
+        </div>
+
+        <div class="recent-deliveries-error" *ngIf="recentDeliveriesError && !recentDeliveriesLoading">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <div>
+            <strong>{{ 'BUYER_HOME.RECENT_DELIVERIES_ERROR_TITLE' | translate }}</strong>
+            <p>{{ 'BUYER_HOME.RECENT_DELIVERIES_ERROR_DESC' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="recent-deliveries-empty" *ngIf="!recentDeliveriesLoading && !recentDeliveriesError && recentDeliveredOrders.length === 0">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <div>
+            <strong>{{ 'BUYER_HOME.RECENT_DELIVERIES_EMPTY_TITLE' | translate }}</strong>
+            <p>{{ 'BUYER_HOME.RECENT_DELIVERIES_EMPTY_DESC' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="recent-deliveries-list" *ngIf="!recentDeliveriesLoading && !recentDeliveriesError && recentDeliveredOrders.length > 0">
+          <button
+            type="button"
+            class="recent-delivery-item"
+            *ngFor="let order of recentDeliveredOrders"
+            (click)="openRecentDelivery(order); $event.stopPropagation()"
+          >
+            <div class="recent-delivery-status">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+            <div class="recent-delivery-copy">
+              <div class="recent-delivery-topline">
+                <strong>{{ order.orderId }}</strong>
+                <span>{{ order.deliveredAgo }}</span>
+              </div>
+              <div class="recent-delivery-address" *ngIf="order.deliveryAddress">
+                {{ order.deliveryAddress }}
+              </div>
+              <div class="recent-delivery-bottomline">
+                <span>{{ order.statusLabel }}</span>
+                <span>{{ (order.finalAmount || order.totalAmount) | currency:'INR':'symbol':'1.0-0' }}</span>
+              </div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="recent-delivery-arrow"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="categories-section">
     <div class="loading-container" *ngIf="loadingCategories">
       <ion-spinner name="crescent" color="primary"></ion-spinner>

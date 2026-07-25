@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { catchError, retryWhen, concatMap, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
+import { RetailerOrderHistoryResponse } from '../retailer-order-history/retailer-order-history.service';
 
 export interface Category {
   category_id: number;
@@ -346,6 +347,15 @@ export class BuyerApiService {
   getSuperCategories(): Observable<Category[]> {
     return this.applyRetryLogic(
       this.http.get<Category[]>(`${this.apiUrl}/getSuperCategories`)
+    );
+  }
+
+  getOrderHistory(): Observable<RetailerOrderHistoryResponse> {
+    return this.applyRetryLogic(
+      this.http.get<RetailerOrderHistoryResponse>(
+        `${this.apiUrl}/order_history`,
+        { headers: this.getAuthHeaders() }
+      )
     );
   }
 

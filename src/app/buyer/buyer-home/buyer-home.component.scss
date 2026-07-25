@@ -244,6 +244,254 @@ ion-menu {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
 }
 
+/* Recent Deliveries */
+.recent-deliveries-section {
+  padding: 0 1rem 1rem;
+}
+
+.recent-deliveries-card {
+  width: 100%;
+  border: 0;
+  border-radius: 22px;
+  padding: 1rem;
+  text-align: left;
+  color: white;
+  background: linear-gradient(135deg, #0f766e 0%, #059669 45%, #10b981 100%);
+  box-shadow: 0 16px 40px rgba(16, 185, 129, 0.22);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  outline: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.22), transparent 42%);
+    pointer-events: none;
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  &.expanded {
+    box-shadow: 0 18px 44px rgba(5, 150, 105, 0.28);
+  }
+}
+
+.recent-deliveries-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+.recent-deliveries-icon-wrap {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  flex: 0 0 auto;
+}
+
+.recent-deliveries-icon {
+  font-size: 1.4rem;
+}
+
+.recent-deliveries-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.recent-deliveries-kicker {
+  display: inline-flex;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  opacity: 0.9;
+  margin-bottom: 0.3rem;
+}
+
+.recent-deliveries-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.recent-deliveries-subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  opacity: 0.92;
+}
+
+.recent-deliveries-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.recent-deliveries-count-pill {
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f766e;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.18);
+}
+
+.recent-deliveries-chevron {
+  font-size: 1.2rem;
+  transition: transform 0.25s ease;
+}
+
+.recent-deliveries-card.expanded .recent-deliveries-chevron {
+  transform: rotate(180deg);
+}
+
+.recent-deliveries-body {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  position: relative;
+  z-index: 1;
+}
+
+.recent-deliveries-loading,
+.recent-deliveries-error,
+.recent-deliveries-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 0;
+  color: white;
+
+  ion-icon {
+    font-size: 1.2rem;
+    flex: 0 0 auto;
+    margin-top: 0.1rem;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.96rem;
+    margin-bottom: 0.2rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    opacity: 0.9;
+  }
+}
+
+.recent-deliveries-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.recent-delivery-item {
+  width: 100%;
+  border: 0;
+  border-radius: 18px;
+  padding: 0.85rem;
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: var(--ion-color-dark);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 20px rgba(4, 120, 87, 0.12);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  appearance: none;
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+.recent-delivery-status {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+  flex: 0 0 auto;
+  margin-top: 0.05rem;
+
+  ion-icon {
+    font-size: 1.1rem;
+  }
+}
+
+.recent-delivery-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.recent-delivery-topline,
+.recent-delivery-bottomline {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.recent-delivery-topline {
+  align-items: center;
+  margin-bottom: 0.2rem;
+
+  strong {
+    font-size: 0.98rem;
+  }
+
+  span {
+    color: var(--ion-color-medium);
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+}
+
+.recent-delivery-address {
+  color: var(--ion-color-medium);
+  font-size: 0.84rem;
+  line-height: 1.35;
+  margin-bottom: 0.35rem;
+}
+
+.recent-delivery-bottomline {
+  align-items: center;
+  color: var(--ion-color-medium);
+  font-size: 0.8rem;
+
+  span:last-child {
+    font-weight: 700;
+    color: #059669;
+  }
+}
+
+.recent-delivery-arrow {
+  color: #059669;
+  font-size: 1.05rem;
+  flex: 0 0 auto;
+  margin-top: 0.2rem;
+}
+
 .main-searchbar {
   --background: white;
   --border-radius: 25px;
@@ -450,6 +698,14 @@ ion-menu {
     gap: 0.5rem;
   }
 
+  .recent-deliveries-title {
+    font-size: 1.1rem;
+  }
+
+  .recent-deliveries-subtitle {
+    font-size: 0.85rem;
+  }
+
   .location-title {
     font-size: 0.8rem;
   }
@@ -468,6 +724,15 @@ ion-menu {
 @media (max-width: 480px) {
   .app-title {
     font-size: 1.3rem;
+  }
+
+  .recent-deliveries-section {
+    padding: 0 0.5rem 0.9rem;
+  }
+
+  .recent-deliveries-card {
+    padding: 0.9rem;
+    border-radius: 20px;
   }
 
   .card-image-container {

@@ -98,74 +98,79 @@
       </div>
     </div>
 
-    <div class="card" role="region" aria-label="Transport Options">
+    <!-- MODERN TRANSPORT SECTION -->
+    <div class="card transport-card" role="region" aria-label="Delivery Options">
       <div class="card-head">
         <div class="card-head-left">
           <div class="card-icon icon-sky">
             <ion-icon name="car-outline"></ion-icon>
           </div>
-          <span class="card-title">{{ "CHECKOUT.TRANSPORT_OPTIONS" | translate }}</span>
-          <span class="selected-tag" *ngIf="hasRideRequest">{{ "CHECKOUT.SELECTED" | translate }}</span>
-        </div>
-
-        <ion-toggle
-          [(ngModel)]="hasRideRequest"
-          (ionChange)="onTransportToggle()"
-          mode="ios"
-          class="transport-toggle"
-        ></ion-toggle>
-      </div>
-
-      <div class="card-body transport-body" *ngIf="!hasRideRequest">
-        <div class="transport-off-state">
-          <ion-icon name="rocket-outline" class="transport-off-icon"></ion-icon>
-          <div>
-            <h3>{{ "CHECKOUT.NEED_FAST_DELIVERY" | translate }}</h3>
-            <p>{{ "CHECKOUT.ARRANGE_TRANSPORT_MSG" | translate }}</p>
-          </div>
+          <span class="card-title">{{ "CHECKOUT.DELIVERY" | translate }}</span>
         </div>
       </div>
 
-      <div class="card-body transport-body" *ngIf="hasRideRequest">
-        <p class="transport-hint">{{ "CHECKOUT.ARRANGE_TRANSPORT_MSG" | translate }}</p>
-
-        <div class="standard-transport-card">
-          <ion-icon name="car-outline" class="t-icon"></ion-icon>
-          <div>
-            <div class="t-name">{{ "RIDE.STANDARD_DELIVERY" | translate }}</div>
-            <div class="t-time">{{ "RIDE.STANDARD_TIME" | translate }}</div>
+      <div class="card-body transport-body-modern">
+        <!-- Delivery Status Banner -->
+        <div class="delivery-status">
+          <div class="status-icon">
+            <ion-icon name="checkmark-circle"></ion-icon>
           </div>
-          <span class="t-badge badge-std">{{ "CHECKOUT.SELECTED" | translate }}</span>
+          <div class="status-info">
+            <div class="status-label">{{ "CHECKOUT.DELIVERY_ARRANGED" | translate }}</div>
+            <div class="status-desc">{{ "CHECKOUT.DELIVERY_ARRANGED_DESC" | translate }}</div>
+          </div>
         </div>
 
-        <div class="dist-row">
-          <span class="dist-label">
-            <ion-icon name="navigate-outline"></ion-icon>
-            {{ "RIDE.ESTIMATED_DISTANCE" | translate }}
-          </span>
-          <span class="dist-val">
-            <ion-spinner name="dots" *ngIf="isLoadingDistance" class="inline-spinner"></ion-spinner>
-            <span *ngIf="!isLoadingDistance && distance > 0">{{ distance }} km</span>
-            <span *ngIf="!isLoadingDistance && distance <= 0">--</span>
-          </span>
+        <!-- Delivery Method Card -->
+        <div class="delivery-method">
+          <div class="method-icon">
+            <ion-icon name="car-outline"></ion-icon>
+          </div>
+          <div class="method-content">
+            <div class="method-name">{{ "RIDE.STANDARD_DELIVERY" | translate }}</div>
+            <div class="method-time">{{ "RIDE.STANDARD_TIME" | translate }}</div>
+          </div>
         </div>
 
-        <div class="cost-row">
-          <span class="cost-label">
-            <ion-icon name="cash-outline"></ion-icon>
-            {{ "CHECKOUT.ESTIMATED_COST" | translate }}
-          </span>
-          <span class="cost-val">
-            <ion-spinner name="dots" *ngIf="isLoadingQuote" class="inline-spinner"></ion-spinner>
-            <span *ngIf="!isLoadingQuote">₹{{ estimatedRidePrice | number:'1.2-2' }}</span>
-          </span>
+        <!-- Distance and Cost Row -->
+        <div class="delivery-details">
+          <div class="detail-item">
+            <div class="detail-icon">
+              <ion-icon name="navigate-outline"></ion-icon>
+            </div>
+            <div class="detail-info">
+              <div class="detail-label">{{ "RIDE.ESTIMATED_DISTANCE" | translate }}</div>
+              <div class="detail-value">
+                <span *ngIf="!isLoadingDistance && distance > 0">{{ distance }} km</span>
+                <span *ngIf="!isLoadingDistance && distance <= 0" class="placeholder">--</span>
+                <ion-spinner name="dots" *ngIf="isLoadingDistance" class="inline-spinner"></ion-spinner>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-divider"></div>
+
+          <div class="detail-item">
+            <div class="detail-icon">
+              <ion-icon name="cash-outline"></ion-icon>
+            </div>
+            <div class="detail-info">
+              <div class="detail-label">{{ "CHECKOUT.ESTIMATED_COST" | translate }}</div>
+              <div class="detail-value">
+                <span *ngIf="!isLoadingQuote">₹{{ estimatedRidePrice | number:'1.2-2' }}</span>
+                <ion-spinner name="dots" *ngIf="isLoadingQuote" class="inline-spinner"></ion-spinner>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="info-box">
-          <ion-icon name="information-circle-outline"></ion-icon>
-          <div>
-            <strong>{{ "CHECKOUT.DRIVER_INFO_TITLE" | translate }}</strong>
-            <p>{{ "CHECKOUT.DRIVER_INFO_MSG" | translate }}</p>
+        <!-- Info Section -->
+        <div class="delivery-info">
+          <div class="info-icon">
+            <ion-icon name="information-circle-outline"></ion-icon>
+          </div>
+          <div class="info-text">
+            <strong>{{ "CHECKOUT.DRIVER_ASSIGNED_AFTER_PAYMENT" | translate }}</strong>
           </div>
         </div>
       </div>
