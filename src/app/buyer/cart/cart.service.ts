@@ -77,6 +77,28 @@ export class CartService {
     return `${operation}-${itemId || 'all'}`;
   }
 
+  private validateAddCartItem(item: AddCartItemRequest): string | null {
+    if (!item.wholesaler_id || item.wholesaler_id <= 0) {
+      return 'Wholesaler ID is required';
+    }
+    if (!item.branch_id || item.branch_id <= 0) {
+      return 'Wholesaler branch ID is required';
+    }
+    if (!item.product_id || item.product_id <= 0) {
+      return 'Product ID is required';
+    }
+    if (!item.unit_id || item.unit_id <= 0) {
+      return 'Unit ID is required';
+    }
+    if (!item.quantity || item.quantity <= 0) {
+      return 'Quantity must be greater than 0';
+    }
+    if (!Number.isFinite(item.price) || item.price < 0) {
+      return 'Price cannot be negative';
+    }
+    return null;
+  }
+
   /**
    * Implements exponential backoff retry strategy
    * Attempts: 1s → 2s → 4s delays between retries
@@ -126,6 +148,11 @@ export class CartService {
   }
 
   addItemToCart(item: AddCartItemRequest): Observable<any> {
+    const validationError = this.validateAddCartItem(item);
+    if (validationError) {
+      return throwError(() => new Error(validationError));
+    }
+
     const operationKey = this.createOperationKey('add', item.product_id);
 
     if (this.pendingOperations.has(operationKey)) {

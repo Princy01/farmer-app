@@ -30,7 +30,6 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
 
   // Constants
   private readonly DEFAULT_LOADING_TIMEOUT = 10000; // 10 seconds
-  private readonly DEFAULT_UNIT_ID = 1;
   private readonly DEFAULT_INITIAL_QUANTITY = 1;
 
   /** Polling interval for auto-refresh */
@@ -157,7 +156,24 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
     try {
       await loading.present();
 
-      if (!wholesaler || wholesaler.price_per_unit < 0) {
+      const productId = Number(this.selectedProduct.product_id);
+      const wholesalerId = Number(wholesaler?.wholesaler_id);
+      const branchId = Number(wholesaler?.branch_id ?? wholesaler?.id);
+      const unitId = Number(wholesaler?.unit_id);
+      const pricePerUnit = Number(wholesaler?.price_per_unit);
+
+      if (!Number.isFinite(productId) || productId <= 0) {
+        await loading.dismiss();
+        const alert = await this.alertCtrl.create({
+          header: this.translate.instant('CATEGORY.ERROR'),
+          message: this.translate.instant('CATEGORY.NO_PRODUCT_SELECTED'),
+          buttons: [this.translate.instant('CATEGORY.OK')]
+        });
+        await alert.present();
+        return;
+      }
+
+      if (!Number.isFinite(pricePerUnit) || pricePerUnit < 0) {
         await loading.dismiss();
         const alert = await this.alertCtrl.create({
           header: this.translate.instant('CATEGORY.ERROR'),
@@ -168,7 +184,7 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
         return;
       }
 
-      if (!wholesaler.wholesaler_id || !wholesaler.id) {
+      if (!Number.isFinite(wholesalerId) || wholesalerId <= 0 || !Number.isFinite(branchId) || branchId <= 0 || !Number.isFinite(unitId) || unitId <= 0) {
         await loading.dismiss();
         const alert = await this.alertCtrl.create({
           header: this.translate.instant('CATEGORY.ERROR'),
@@ -180,12 +196,12 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
       }
 
       const cartRequest: AddCartItemRequest = {
-        wholesaler_id: wholesaler.wholesaler_id,
-        branch_id: wholesaler.id,
-        product_id: this.selectedProduct.product_id,
+        wholesaler_id: wholesalerId,
+        branch_id: branchId,
+        product_id: productId,
         quantity: this.DEFAULT_INITIAL_QUANTITY,
-        unit_id: this.DEFAULT_UNIT_ID,
-        price: wholesaler.price_per_unit
+        unit_id: unitId,
+        price: pricePerUnit
       };
 
       this.cartService.addItemToCart(cartRequest).pipe(
