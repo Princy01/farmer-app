@@ -575,7 +575,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     }));
 
     return {
-      date_of_order: new Date().toISOString().split('T')[0],
+      date_of_order: new Date().toISOString(),
       order_status: 1,
       delivery_address: orderData.deliveryAddress,
       retailer_branch_id: orderData.retailerBranchId,

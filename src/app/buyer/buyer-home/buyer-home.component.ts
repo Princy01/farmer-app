@@ -6,7 +6,7 @@ import { BuyerApiService, Category } from '../services/buyer-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { addIcons } from 'ionicons';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, Subscription, interval, takeUntil } from 'rxjs';
 import {
   personCircleOutline,
   locationOutline,
@@ -84,7 +84,9 @@ export class BuyerHomeComponent implements OnInit, OnDestroy {
   userPreference: UserPreference | null = null;
 
   private destroy$ = new Subject<void>();
+  private recentDeliveriesRefreshSub: Subscription | null = null;
   private readonly DEFAULT_CATEGORY_IMAGE = 'assets/images/category-placeholder.png';
+  private readonly RECENT_DELIVERIES_REFRESH_MS = 30000;
 
   constructor(
     private router: Router,
@@ -133,7 +135,17 @@ export class BuyerHomeComponent implements OnInit, OnDestroy {
     this.applyStoredLanguage();
   }
 
+  ionViewWillEnter() {
+    this.startRecentDeliveriesAutoRefresh();
+    this.fetchRecentDeliveries(true);
+  }
+
+  ionViewWillLeave() {
+    this.stopRecentDeliveriesAutoRefresh();
+  }
+
   ngOnDestroy() {
+    this.stopRecentDeliveriesAutoRefresh();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -244,7 +256,7 @@ export class BuyerHomeComponent implements OnInit, OnDestroy {
       });
   }
 
-  fetchRecentDeliveries() {
+  fetchRecentDeliveries(preserveExpanded = false) {
     this.recentDeliveriesLoading = true;
     this.recentDeliveriesError = false;
 
@@ -253,7 +265,9 @@ export class BuyerHomeComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response: RetailerOrderHistoryResponse) => {
           this.recentDeliveredOrders = this.extractRecentDeliveredOrders(response);
-          this.recentDeliveriesExpanded = false;
+          if (!preserveExpanded) {
+            this.recentDeliveriesExpanded = false;
+          }
           this.recentDeliveriesLoading = false;
         },
         error: () => {
@@ -261,6 +275,22 @@ export class BuyerHomeComponent implements OnInit, OnDestroy {
           this.recentDeliveriesLoading = false;
         }
       });
+  }
+
+  private startRecentDeliveriesAutoRefresh() {
+    this.stopRecentDeliveriesAutoRefresh();
+    this.recentDeliveriesRefreshSub = interval(this.RECENT_DELIVERIES_REFRESH_MS)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.fetchRecentDeliveries(true);
+      });
+  }
+
+  private stopRecentDeliveriesAutoRefresh() {
+    if (this.recentDeliveriesRefreshSub) {
+      this.recentDeliveriesRefreshSub.unsubscribe();
+      this.recentDeliveriesRefreshSub = null;
+    }
   }
 
   toggleRecentDeliveries() {
