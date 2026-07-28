@@ -15,11 +15,13 @@ export interface MandiProduct {
   quality_name?: string;
   wastage_measure_name?: string;
   product_id: number;
-  id: number;
+  id?: number;
+  branch_id: number;
   wholesaler_id: number;
   current_stock: number;
   price_per_unit: number;
   date_of_entry: string;
+  unit_id: number;
   unit_name: string;
 }
 
