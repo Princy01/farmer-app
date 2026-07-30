@@ -41,7 +41,7 @@
           {{ 'RETAILER_ORDER_DETAILS.ORDER_NUMBER' | translate }} {{ getOrderNumberDisplay() }}
         </ion-card-title>
         <ion-card-subtitle>
-          {{ order.date_of_order | date: 'dd MMM yyyy, HH:mm:ss' }}
+          {{ order.date_of_order | date: 'dd MMM yyyy, HH:mm:ss':'UTC' }}
         </ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
@@ -113,7 +113,7 @@
           <ion-icon name="checkmark-done-circle" color="success"></ion-icon>
           <div>
             <strong>{{ 'RETAILER_ORDER_DETAILS.DELIVERED_AT' | translate }}:</strong>
-            <p>{{ order.actual_delivery_date | date: 'dd MMM yyyy, HH:mm:ss' }}</p>
+            <p>{{ order.actual_delivery_date | date: 'dd MMM yyyy, HH:mm:ss':'UTC' }}</p>
           </div>
         </div>
 

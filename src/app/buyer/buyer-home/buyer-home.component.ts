@@ -328,7 +328,24 @@ export class BuyerHomeComponent implements OnInit, OnDestroy {
         seenOrderIds.add(order.rawOrderId);
         return true;
       })
-      .sort((a, b) => new Date(b.deliveredAt).getTime() - new Date(a.deliveredAt).getTime());
+      .sort((a, b) => this.parseServerTimestamp(b.deliveredAt) - this.parseServerTimestamp(a.deliveredAt));
+  }
+
+  /**
+   * The backend returns timestamps (e.g. actual_delivery_date, date_of_order)
+   * as ISO-8601 strings suffixed with 'Z', but the values are already in the
+   * server's local timezone rather than true UTC. Parsing them as-is makes
+   * `Date` apply an extra local-timezone shift on top of a value that was
+   * never UTC to begin with, pushing computed timestamps hours into the
+   * future and breaking any "is this recent" comparison against Date.now().
+   * Stripping the trailing 'Z' makes `Date` parse the same digits as local
+   * wall-clock time, matching what the backend actually meant.
+   * TODO: remove this once the backend serializes true UTC (or a correct
+   * offset) for these fields.
+   */
+  private parseServerTimestamp(dateString: string): number {
+    const localTimeString = dateString.replace(/Z$/i, '');
+    return new Date(localTimeString).getTime();
   }
 
   private isRecentlyDelivered(order: RetailerOrderHistory, now: number, recentWindowMs: number): boolean {
@@ -337,7 +354,7 @@ export class BuyerHomeComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    const deliveredAtMs = new Date(deliveredAt).getTime();
+    const deliveredAtMs = this.parseServerTimestamp(deliveredAt);
     if (Number.isNaN(deliveredAtMs)) {
       return false;
     }
@@ -383,7 +400,7 @@ export class BuyerHomeComponent implements OnInit, OnDestroy {
   }
 
   private getRelativeTimeLabel(dateString: string): string {
-    const timestamp = new Date(dateString).getTime();
+    const timestamp = this.parseServerTimestamp(dateString);
     if (Number.isNaN(timestamp)) {
       return this.translate.instant('BUYER_HOME.RECENT_DELIVERED_JUST_NOW');
     }
