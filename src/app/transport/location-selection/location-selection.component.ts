@@ -30,6 +30,7 @@ export class LocationSelectionModalComponent implements OnInit, OnDestroy {
   selectedCities: number[] = [];
   selectedBranches: number[] = [];
   isLoading = false;
+  isSaving = false;
 
   // Search properties
   citySearchTerm: string = '';
@@ -55,6 +56,7 @@ export class LocationSelectionModalComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadCurrentPreferences();
+    this.loadServerPreferences();
     this.loadCities();
   }
 
@@ -66,6 +68,22 @@ export class LocationSelectionModalComponent implements OnInit, OnDestroy {
     const preferences = this.locationService.getCurrentPreferences();
     this.selectedCities = [...preferences.cities];
     this.selectedBranches = [...preferences.branches];
+  }
+
+  private loadServerPreferences() {
+    const sub = this.locationService.loadPreferencesFromServer().subscribe({
+      next: (preferences) => {
+        this.selectedCities = [...preferences.cities];
+        this.selectedBranches = [...preferences.branches];
+        if (this.cities.length > 0 && this.selectedCities.length > 0) {
+          this.loadBranches();
+        }
+      },
+      error: (error) => {
+        console.warn('Failed to load saved location preferences:', error);
+      }
+    });
+    this.subscription.add(sub);
   }
 
   private loadCities() {
@@ -254,9 +272,22 @@ export class LocationSelectionModalComponent implements OnInit, OnDestroy {
       branches: this.selectedBranches
     };
 
-    this.locationService.savePreferences(preferences);
-    await this.showToast('Preferences saved successfully', 'success');
-    await this.modalController.dismiss(preferences);
+    this.isSaving = true;
+    const sub = this.locationService.savePreferences(preferences).subscribe({
+      next: async (savedPreferences) => {
+        this.selectedCities = [...savedPreferences.cities];
+        this.selectedBranches = [...savedPreferences.branches];
+        this.isSaving = false;
+        await this.showToast('Preferences saved successfully', 'success');
+        await this.modalController.dismiss(savedPreferences);
+      },
+      error: async (error) => {
+        console.error('Failed to save preferences:', error);
+        this.isSaving = false;
+        await this.showToast(this.getErrorMessage(error), 'danger');
+      }
+    });
+    this.subscription.add(sub);
   }
 
   async cancel() {
@@ -271,5 +302,9 @@ export class LocationSelectionModalComponent implements OnInit, OnDestroy {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  private getErrorMessage(error: any): string {
+    return error?.error?.error || error?.message || 'Failed to save preferences';
   }
 }

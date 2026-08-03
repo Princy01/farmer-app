@@ -173,9 +173,10 @@
         fill="solid"
         color="primary"
         (click)="savePreferences()"
-        [disabled]="selectedCities.length === 0 && selectedBranches.length === 0"
+        [disabled]="isSaving || (selectedCities.length === 0 && selectedBranches.length === 0)"
       >
-        Save Preferences
+        <ion-spinner *ngIf="isSaving" name="crescent"></ion-spinner>
+        <span *ngIf="!isSaving">Save Preferences</span>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
