@@ -5,8 +5,7 @@ import { authGuard, requireRolesGuard } from './auth/auth.guard';
 const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
-    pathMatch: 'full',
+    loadComponent: () => import('./landing/landing.page').then((m) => m.LandingPage),
   },
   {
     path: 'login',

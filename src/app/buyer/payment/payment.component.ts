@@ -364,6 +364,14 @@ export class PaymentComponent implements OnInit, OnDestroy {
   }
 
   private async processGatewayPayment(): Promise<void> {
+    // FIX: Open the popup synchronously, as the very first action, so it is still
+    // tied to the original click event. Firefox (and other browsers) treat a
+    // window.open() call as "user-initiated" only if it happens without any
+    // intervening async work (awaits / network calls). Opening it here, before
+    // any await, and filling in its location later once we have the gateway URL,
+    // avoids the "payment window was blocked by your browser" error.
+    const paymentWindow = window.open('', '_blank');
+
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('PAYMENT.REDIRECTING'),
       spinner: 'dots'
@@ -371,6 +379,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
     await loading.present();
 
     try {
+      if (!paymentWindow) {
+        throw new Error(this.translate.instant('PAYMENT.GATEWAY_WINDOW_BLOCKED'));
+      }
+
       await this.ensureCheckoutSession();
       if (!this.checkoutSessionId) {
         throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
@@ -413,13 +425,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
         const paymentUrl = this.gatewayUrlForBrowser(response.data.payment_url);
         const paymentOrderId = response.data.order_id;
 
-        // We need the returned window handle here to distinguish a real popup block
-        // from a successful gateway launch. Using noopener/noreferrer can return null
-        // even when the popup opens, which breaks the gateway flow.
-        const paymentWindow = window.open(paymentUrl, '_blank');
-        if (!paymentWindow) {
-          throw new Error(this.translate.instant('PAYMENT.GATEWAY_WINDOW_BLOCKED'));
-        }
+        // FIX: Redirect the window we already opened synchronously above, instead
+        // of calling window.open() again here. By this point we're well past the
+        // original click (after two network round-trips), so a fresh window.open()
+        // call here would be blocked by Firefox as an untrusted popup.
+        paymentWindow.location.href = paymentUrl;
 
         await this.pollPaymentStatus(paymentOrderId);
       } else {
@@ -427,6 +437,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
       }
     } catch (error) {
       console.error('Payment initiation error:', error);
+      // Clean up the blank window we opened if something went wrong before it
+      // could be redirected to the actual gateway URL.
+      if (paymentWindow && !paymentWindow.closed) {
+        paymentWindow.close();
+      }
       await loading.dismiss();
       this.isProcessingPayment = false;
       await this.showPaymentError(error instanceof Error ? error.message : undefined);

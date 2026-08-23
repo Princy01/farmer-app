@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { IonicModule, ToastController, AlertController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   eye, eyeOff, eyeOutline, eyeOffOutline,
@@ -98,6 +98,7 @@ export class LoginPage implements OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     private toastController: ToastController,
     private alertCtrl: AlertController,
@@ -141,6 +142,7 @@ export class LoginPage implements OnDestroy {
     }, { validators: this.passwordMatchValidator });
 
     this.initUserLanguage();
+    this.authMode = this.route.snapshot.queryParamMap.get('mode') === 'register' ? 'register' : 'login';
     this.loadStates();
     this.setupFormValueChanges();
     this.translate.onLangChange
