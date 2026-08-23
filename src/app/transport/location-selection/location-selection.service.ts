@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -26,6 +26,13 @@ export interface BusinessBranch {
 export interface LocationPreference {
   cities: number[];
   branches: number[];
+}
+
+interface DriverServiceAreasResponse {
+  driver_id: number;
+  cities: Array<{ city_id: number }>;
+  branches: Array<{ branch_id: number }>;
+  max_distance_km: number;
 }
 
 @Injectable({
@@ -78,18 +85,49 @@ export class LocationPreferenceService {
     return forkJoin(requests);
   }
 
-  // Save preferences to local storage
-  savePreferences(preferences: LocationPreference): void {
+  loadPreferencesFromServer(): Observable<LocationPreference> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<DriverServiceAreasResponse>(`${this.apiUrl}/transportation/driver/service-areas`, { headers }).pipe(
+      map(response => this.mapServiceAreasToPreferences(response)),
+      tap(preferences => this.persistPreferences(preferences))
+    );
+  }
+
+  // Save preferences to backend and cache locally after success
+  savePreferences(preferences: LocationPreference): Observable<LocationPreference> {
+    const headers = this.getAuthHeaders();
+    const body = {
+      city_ids: preferences.cities,
+      branch_ids: preferences.branches
+    };
+    return this.http.put<DriverServiceAreasResponse>(`${this.apiUrl}/transportation/driver/service-areas`, body, { headers }).pipe(
+      map(response => this.mapServiceAreasToPreferences(response)),
+      tap(savedPreferences => this.persistPreferences(savedPreferences))
+    );
+  }
+
+  private persistPreferences(preferences: LocationPreference): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(preferences));
     this.preferencesSubject.next(preferences);
+  }
+
+  private mapServiceAreasToPreferences(response: DriverServiceAreasResponse): LocationPreference {
+    return {
+      cities: Array.from(new Set((response.cities || []).map(city => city.city_id).filter(Boolean))),
+      branches: Array.from(new Set((response.branches || []).map(branch => branch.branch_id).filter(Boolean)))
+    };
   }
 
   // Load preferences from local storage
   private loadPreferencesFromStorage(): void {
     const stored = localStorage.getItem(this.STORAGE_KEY);
     if (stored) {
-      const preferences = JSON.parse(stored);
-      this.preferencesSubject.next(preferences);
+      try {
+        const preferences = JSON.parse(stored);
+        this.preferencesSubject.next(preferences);
+      } catch (error) {
+        localStorage.removeItem(this.STORAGE_KEY);
+      }
     }
   }
 
