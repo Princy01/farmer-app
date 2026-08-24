@@ -512,7 +512,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.clearPersistedCheckoutState();
-    this.router.navigate(['/buyer/cart']);
+    this.router.navigateByUrl(history.state?.helpReturnUrl || '/buyer/cart');
   }
 
   getRetailerInfo(): string {

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { alertCircleOutline, star, starOutline, carOutline } from 'ionicons/icons';
+import { alertCircleOutline, star, starOutline, carOutline, arrowBackOutline } from 'ionicons/icons';
 import { WholesalerApiService, OrderFullDetails, OrderTransportStatus } from '../services/wholesaler-api.service';
 import {
   OrderPostDeliveryStatus,
@@ -62,6 +62,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
       star,
       starOutline,
       carOutline,
+      arrowBackOutline,
     });
   }
 
@@ -478,7 +479,8 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.router.navigate(['/wholesaler/orders']);
+    const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
+    this.router.navigateByUrl(returnTo || history.state?.helpReturnUrl || '/wholesaler/orders');
   }
 
   reportIssue(): void {
@@ -492,7 +494,10 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   openMyIssues(): void {
     if (this.orderDetails?.order_id) {
       this.router.navigate(['/wholesaler/my-issues'], {
-        queryParams: { orderId: this.orderDetails.order_id },
+        queryParams: {
+          orderId: this.orderDetails.order_id,
+          returnTo: `/wholesaler/order-details/${this.orderDetails.order_id}`
+        },
       });
       return;
     }

@@ -11,7 +11,7 @@
       </ion-button>
       <ion-back-button
         *ngIf="viewMode === 'list'"
-        defaultHref="/wholesaler/home"
+        [defaultHref]="backRoute"
         color="light"
       ></ion-back-button>
     </ion-buttons>

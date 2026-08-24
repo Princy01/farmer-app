@@ -89,10 +89,9 @@ export class SettingsPage implements OnInit, OnDestroy {
         localStorage.setItem('wholesaler_settings', JSON.stringify(settings));
         this.isLoading = false;
       },
-      error: (error: any) => {
+      error: () => {
         this.isLoading = false;
         this.loadFromLocalStorage();
-        this.showToast(error.message || this.translate.instant('SETTINGS.LOAD_ERROR'), 'danger');
       }
     });
   }
@@ -100,7 +99,11 @@ export class SettingsPage implements OnInit, OnDestroy {
   loadFromLocalStorage() {
     const savedSettings = localStorage.getItem('wholesaler_settings');
     if (savedSettings) {
-      this.settingsForm.patchValue(JSON.parse(savedSettings));
+      try {
+        this.settingsForm.patchValue(JSON.parse(savedSettings));
+      } catch {
+        localStorage.removeItem('wholesaler_settings');
+      }
     }
   }
 
@@ -121,7 +124,7 @@ export class SettingsPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.isLoading = false;
-        this.showToast(error.message || this.translate.instant('SETTINGS.SAVE_ERROR'), 'danger');
+        this.showToast(this.getErrorMessage(error, 'SETTINGS.SAVE_ERROR'), 'danger');
       }
     });
   }
@@ -229,7 +232,7 @@ export class SettingsPage implements OnInit, OnDestroy {
       },
       error: async (error: any) => {
         await loading.dismiss();
-        this.showToast(error.message || this.translate.instant('SETTINGS.PASSWORD_CHANGE_ERROR'), 'danger');
+        this.showToast(this.getErrorMessage(error, 'SETTINGS.PASSWORD_CHANGE_ERROR'), 'danger');
       }
     });
   }
@@ -290,7 +293,7 @@ export class SettingsPage implements OnInit, OnDestroy {
       },
       error: async (error: any) => {
         await loading.dismiss();
-        this.showToast(error.message || this.translate.instant('SETTINGS.DELETE_ERROR'), 'danger');
+        this.showToast(this.getErrorMessage(error, 'SETTINGS.DELETE_ERROR'), 'danger');
       }
     });
   }
@@ -353,5 +356,12 @@ export class SettingsPage implements OnInit, OnDestroy {
       position: 'top'
     });
     await toast.present();
+  }
+
+  private getErrorMessage(error: { message?: string } | null, fallbackKey: string): string {
+    const message = error?.message;
+    return message && message.includes('.')
+      ? this.translate.instant(message)
+      : message || this.translate.instant(fallbackKey);
   }
 }

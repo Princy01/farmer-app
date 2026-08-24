@@ -130,7 +130,7 @@
       </div>
 
       <ion-card class="settings-card">
-        <ion-item button [disabled]="isLoading" (click)="contactSupport()" lines="full">
+        <ion-item button (click)="contactSupport()" lines="full">
           <ion-icon name="chatbubbles-outline" slot="start" class="item-icon"></ion-icon>
           <ion-label>
             <h3>{{ 'SETTINGS.CONTACT_SUPPORT' | translate }}</h3>
@@ -139,7 +139,7 @@
           <ion-icon name="chevron-forward-outline" slot="end" class="chevron-icon"></ion-icon>
         </ion-item>
 
-        <ion-item button [disabled]="isLoading" (click)="openHelp()" lines="none">
+        <ion-item button (click)="openHelp()" lines="none">
           <ion-icon name="help-circle-outline" slot="start" class="item-icon"></ion-icon>
           <ion-label>
             <h3>{{ 'SETTINGS.HELP' | translate }}</h3>
@@ -176,7 +176,7 @@
       </div>
 
       <ion-card class="settings-card danger-card">
-        <ion-item button [disabled]="isLoading" (click)="deleteAccount()" lines="none">
+        <ion-item button (click)="deleteAccount()" lines="none">
           <ion-icon name="trash-outline" slot="start" class="item-icon" color="danger"></ion-icon>
           <ion-label color="danger">
             <h3>{{ 'SETTINGS.DELETE_ACCOUNT' | translate }}</h3>

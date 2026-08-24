@@ -1,10 +1,9 @@
 <ion-header>
   <ion-toolbar class="order-details-toolbar">
     <ion-buttons slot="start">
-      <ion-back-button
-        color="light"
-        defaultHref="/wholesaler/orders"
-      ></ion-back-button>
+      <ion-button (click)="goBack()" fill="clear" color="light">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title
       >{{ "ORDER_DETAILS.Order" | translate }} #{{ orderId }}</ion-title

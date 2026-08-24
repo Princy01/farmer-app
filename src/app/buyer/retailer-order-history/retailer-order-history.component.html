@@ -1,7 +1,9 @@
 <ion-header [translucent]="true" mode="ios">
   <ion-toolbar style="--background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --color: white;">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/buyer/buyer-home" style="--color: white;"></ion-back-button>
+      <ion-button (click)="goBack()" fill="clear" style="--color: white;">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title style="font-weight: 600; font-size: 1.2rem;">
       {{ 'RETAILER_ORDER_HISTORY.PAGE_TITLE' | translate }}

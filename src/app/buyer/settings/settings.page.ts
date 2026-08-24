@@ -476,7 +476,7 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   openHelp() {
-    this.router.navigate(['/retailer/help']);
+    this.router.navigate(['/buyer/help']);
   }
 
   openPrivacyPolicy() {

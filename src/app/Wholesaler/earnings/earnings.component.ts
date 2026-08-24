@@ -97,7 +97,7 @@ export class EarningsComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/wholesaler/home']);
+    this.router.navigateByUrl(history.state?.helpReturnUrl || '/wholesaler/home');
   }
 
   handleRefresh(event: any): void {

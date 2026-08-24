@@ -30,6 +30,7 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./restocking-recommendations.component.scss']
 })
 export class RestockingRecommendationsComponent implements OnInit, OnDestroy {
+  backRoute = history.state?.helpReturnUrl || '/wholesaler/home';
   products: RestockProduct[] = [];
   filteredProductsCache: RestockProduct[] = [];
   isLoading = false;
@@ -345,6 +346,6 @@ export class RestockingRecommendationsComponent implements OnInit, OnDestroy {
    * Navigates back to the wholesaler home page
    */
   goBack() {
-    this.router.navigate(['/wholesaler/home']);
+    this.router.navigateByUrl(history.state?.helpReturnUrl || '/wholesaler/home');
   }
 }

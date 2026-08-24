@@ -5,6 +5,11 @@ import { authGuard, requireRolesGuard } from './auth/auth.guard';
 const appRoutes: Routes = [
   {
     path: '',
+    redirectTo: 'login',
+    pathMatch: 'full',
+  },
+  {
+    path: 'landing',
     loadComponent: () => import('./landing/landing.page').then((m) => m.LandingPage),
   },
   {
@@ -37,6 +42,11 @@ const appRoutes: Routes = [
   {
     path: 'wholesaler/settings',
     loadComponent: () => import('./Wholesaler/settings/settings.page').then((m) => m.SettingsPage),
+  },
+  {
+    path: 'wholesaler/help',
+    loadComponent: () => import('./shared/help-center/help-center.page').then((m) => m.HelpCenterPage),
+    data: { role: 'wholesaler' },
   },
   {
     path: 'wholesaler/orders',
@@ -174,6 +184,11 @@ const appRoutes: Routes = [
       {
         path: 'settings',
         loadComponent: () => import('./buyer/settings/settings.page').then((m) => m.SettingsPage),
+      },
+      {
+        path: 'help',
+        loadComponent: () => import('./shared/help-center/help-center.page').then((m) => m.HelpCenterPage),
+        data: { role: 'buyer' },
       },
       {
         path: 'category/:categoryId',
@@ -553,6 +568,11 @@ const appRoutes: Routes = [
         loadComponent: () => import('./transport/settings/settings.page').then((m) => m.SettingsPage),
       },
       {
+        path: 'help',
+        loadComponent: () => import('./shared/help-center/help-center.page').then((m) => m.HelpCenterPage),
+        data: { role: 'transport' },
+      },
+      {
         path: 'notifications',
         loadComponent: () => import('./transport/notifications/notifications.component').then((m) => m.NotificationsComponent),
       },
@@ -576,7 +596,7 @@ const appRoutes: Routes = [
   }
 ];
 
-const publicTopLevelPaths = new Set(['', 'login', 'verify-email']);
+const publicTopLevelPaths = new Set(['', 'landing', 'login', 'verify-email']);
 
 const wholesalerRoleGuard = requireRolesGuard(['wholesaler']);
 const buyerRoleGuard = requireRolesGuard(['retailer']);

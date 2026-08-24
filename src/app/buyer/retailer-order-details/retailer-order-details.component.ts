@@ -490,7 +490,7 @@ export class RetailerOrderDetailsComponent implements OnInit, OnDestroy {
    * Navigates back to the order history page.
    */
   goBack(): void {
-    this.router.navigate(['/buyer/retailer-order-history']);
+    this.router.navigateByUrl(history.state?.helpReturnUrl || '/buyer/retailer-order-history');
   }
 
   /**

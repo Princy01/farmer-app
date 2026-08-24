@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AlertController, IonicModule, LoadingController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
@@ -20,6 +20,7 @@ import {
   helpOutline,
   cardOutline,
   arrowUndoOutline,
+  chevronBackOutline,
 } from 'ionicons/icons';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { Subject, Subscription, interval } from 'rxjs';
@@ -119,6 +120,7 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private translate: TranslateService,
     private orderService: RetailerOrderHistoryService,
     private alertController: AlertController,
@@ -141,6 +143,7 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
       helpOutline,
       cardOutline,
       arrowUndoOutline,
+      chevronBackOutline,
     });
   }
 
@@ -152,6 +155,11 @@ export class RetailerOrderHistoryComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     this.stopCheckoutCountdown();
+  }
+
+  goBack(): void {
+    const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
+    this.router.navigateByUrl(returnTo || '/buyer/buyer-home');
   }
 
   loadOrders(): void {

@@ -26,6 +26,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
 })
 export class StockDashboardComponent implements OnInit, OnDestroy {
+  backRoute = history.state?.helpReturnUrl || '/wholesaler/home';
   /** Current stock data for selected branch */
   todayStock: ProductPriceData[] = [];
 

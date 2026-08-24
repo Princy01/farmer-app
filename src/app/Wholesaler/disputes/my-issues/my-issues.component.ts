@@ -86,7 +86,8 @@ export class MyIssuesComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/wholesaler/orders']);
+    const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
+    this.router.navigateByUrl(returnTo || '/wholesaler/orders');
   }
 
   openIssue(dispute: DisputeListItem): void {
@@ -97,7 +98,10 @@ export class MyIssuesComponent implements OnInit, OnDestroy {
     if (!dispute.order_id) {
       return;
     }
-    this.router.navigate(['/wholesaler/order-details', dispute.order_id]);
+    const returnTo = this.route.snapshot.queryParamMap.get('returnTo') || '/wholesaler/my-issues';
+    this.router.navigate(['/wholesaler/order-details', dispute.order_id], {
+      queryParams: { returnTo }
+    });
   }
 
   getStatusLabel(status: string): string {

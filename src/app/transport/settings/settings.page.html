@@ -100,6 +100,15 @@
       </div>
 
       <div class="settings-group">
+        <ion-item button (click)="openHelp()" lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
+          <ion-icon name="book-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ 'HELP_CENTER.TITLE' | translate }}</h3>
+            <p>{{ 'HELP_CENTER.SUBHEADING' | translate }}</p>
+          </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+        </ion-item>
+
         <!-- Contact Support -->
         <ion-item button (click)="contactSupport()" lines="full" class="settings-item" [attr.disabled]="isTogglingNotification">
           <ion-icon name="help-circle-outline" slot="start"></ion-icon>

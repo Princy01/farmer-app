@@ -19,6 +19,7 @@ import {
   shieldCheckmarkOutline,
   trashOutline,
   helpCircleOutline,
+  bookOutline,
   mailOutline,
   documentTextOutline,
   informationCircleOutline,
@@ -104,6 +105,7 @@ export class SettingsPage implements OnInit, OnDestroy {
       shieldCheckmarkOutline,
       trashOutline,
       helpCircleOutline,
+      bookOutline,
       mailOutline,
       documentTextOutline,
       informationCircleOutline,
@@ -172,6 +174,10 @@ export class SettingsPage implements OnInit, OnDestroy {
       ]
     });
     await alert.present();
+  }
+
+  openHelp(): void {
+    this.router.navigate(['/transport/help']);
   }
 
   async toggleNotification(type: keyof NotificationSettings) {

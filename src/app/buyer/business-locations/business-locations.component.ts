@@ -196,6 +196,6 @@ export class BusinessLocationsComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.router.navigate(['/buyer/buyer-home']);
+    this.router.navigateByUrl(history.state?.helpReturnUrl || '/buyer/buyer-home');
   }
 }

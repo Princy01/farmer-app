@@ -24,11 +24,6 @@ import {
 
 export type Language = 'en' | 'hi';
 
-/**
- * Flat illustrated scene backgrounds for role cards matching your design:
- * Wholesaler (boxes/crates), Retailer (shop/awning), Driver (truck).
- * Accents match the exact landing page theme colors.
- */
 function buildRoleScene(role: 'wholesaler' | 'retailer' | 'driver'): string {
   const base = '#0f1218';
   let shapes = '';
@@ -49,7 +44,6 @@ function buildRoleScene(role: 'wholesaler' | 'retailer' | 'driver'): string {
       <line x1="245" y1="90" x2="330" y2="90" stroke="${base}" stroke-width="2" opacity="0.5"/>
     `;
   } else if (role === 'retailer') {
-    // Full-width market shop awning stretching across the top
     const c = '#c9852a';
     shapes = `
       <rect x="0" y="15" width="320" height="20" fill="${c}" opacity="0.25"/>
@@ -60,7 +54,6 @@ function buildRoleScene(role: 'wholesaler' | 'retailer' | 'driver'): string {
       <rect x="30" y="95" width="260" height="55" rx="6" fill="${c}" opacity="0.12"/>
     `;
   } else {
-    // Delivery truck driving across a full-width road banner at the top
     const c = '#56744c';
     shapes = `
       <rect x="50" y="45" width="130" height="65" rx="6" fill="${c}" opacity="0.2"/>

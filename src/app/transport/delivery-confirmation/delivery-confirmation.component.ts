@@ -470,12 +470,12 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   goBack() {
     if (this.showList) {
-      this.router.navigate(['/transport/active-deliveries']);
+      this.router.navigateByUrl(history.state?.helpReturnUrl || '/transport/active-deliveries');
     } else {
       this.showList = true;
       this.jobId = null;
       this.orders = [];
-      this.router.navigate(['/transport/delivery-confirmation']);
+      this.router.navigateByUrl(history.state?.helpReturnUrl || '/transport/delivery-confirmation');
     }
   }
 

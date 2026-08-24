@@ -409,6 +409,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.router.navigate(['/wholesaler/order-details', order.id]);
+    this.router.navigate(['/wholesaler/order-details', order.id], {
+      queryParams: { returnTo: '/wholesaler/orders' }
+    });
   }
 }

@@ -38,6 +38,7 @@ interface PickupOrder extends WholesalerOrderSummary {
   imports: [IonicModule, CommonModule, FormsModule, TranslatePipe],
 })
 export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
+  backRoute = history.state?.helpReturnUrl || '/wholesaler/home';
   orders: PickupOrder[] = [];
   groupedOrders: { date: string, orders: PickupOrder[] }[] = [];
   otpInput: { [orderId: string]: string } = {};

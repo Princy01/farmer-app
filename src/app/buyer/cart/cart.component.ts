@@ -487,7 +487,7 @@ export class CartComponent implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   goBack(): void {
-    this.router.navigate(['/buyer/buyer-home']);
+    this.router.navigateByUrl(history.state?.helpReturnUrl || '/buyer/buyer-home');
   }
 
   getSelectAllIconName(wholesalerGroups: WholesalerGroup[]): string {

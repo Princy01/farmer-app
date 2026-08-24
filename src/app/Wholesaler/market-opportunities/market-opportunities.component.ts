@@ -21,6 +21,7 @@ import { takeUntil } from 'rxjs/operators';
   imports: [IonicModule, CommonModule, TranslatePipe]
 })
 export class MarketOpportunitiesComponent implements OnInit, OnDestroy {
+  backRoute = history.state?.helpReturnUrl || '/wholesaler/home';
   isLoading = false;
   error: string | null = null;
   bulkOrders: BulkOrder[] = [];
@@ -187,7 +188,7 @@ export class MarketOpportunitiesComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.router.navigate(['/wholesaler/home']);
+    this.router.navigateByUrl(history.state?.helpReturnUrl || '/wholesaler/home');
   }
 
   // Pagination methods
