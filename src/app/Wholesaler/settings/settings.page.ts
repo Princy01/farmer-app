@@ -311,37 +311,7 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   async contactSupport() {
-    const actionSheet = await this.actionSheetCtrl.create({
-      header: this.translate.instant('SETTINGS.CONTACT_SUPPORT'),
-      buttons: [
-        {
-          text: this.translate.instant('SETTINGS.EMAIL_SUPPORT'),
-          icon: 'mail-outline',
-          handler: () => {
-            window.location.href = 'mailto:support@example.com';
-          }
-        },
-        {
-          text: this.translate.instant('SETTINGS.CALL_SUPPORT'),
-          icon: 'phone-portrait-outline',
-          handler: () => {
-            window.location.href = 'tel:+911234567890';
-          }
-        },
-        {
-          text: this.translate.instant('SETTINGS.LIVE_CHAT'),
-          icon: 'chatbubbles-outline',
-          handler: () => {
-            this.showToast(this.translate.instant('SETTINGS.CHAT_COMING_SOON'), 'primary');
-          }
-        },
-        {
-          text: this.translate.instant('SETTINGS.CANCEL'),
-          role: 'cancel'
-        }
-      ]
-    });
-    await actionSheet.present();
+    await this.router.navigate(['/wholesaler/support']);
   }
 
   goBack() {

@@ -3669,5 +3669,159 @@
     "DISPUTE_MANAGEMENT": "Dispute Management",
     "NOTIFICATIONS": "Notifications",
     "SETTINGS": "Settings"
+  },
+  "SUPPORT_CENTER": {
+    "TITLE": "Support Center",
+    "HEADING": "How can we help?",
+    "SUBHEADING": "Choose the issue that best describes your problem.",
+    "SELECT_ISSUE": "Select a specific issue",
+    "CHANGE_CATEGORY": "Change category",
+    "DESCRIPTION_LABEL": "Additional details",
+    "DESCRIPTION_PLACEHOLDER": "Add any extra details that can help us assist you faster",
+    "CALL_SUPPORT": "Call Support",
+    "EMAIL_SUPPORT": "Email Support",
+    "URGENT_NOTE": "For urgent issues, please call support directly instead of emailing.",
+
+    "ROLES": {
+      "buyer": "Buyer Support",
+      "wholesaler": "Wholesaler Support",
+      "driver": "Driver Support"
+    },
+
+    "CATEGORIES": {
+      "payment":        { "TITLE": "Payment Issues" },
+      "order":          { "TITLE": "Order Issues" },
+      "incoming-order": { "TITLE": "Incoming Order Issues" },
+      "delivery":       { "TITLE": "Delivery Issues" },
+      "dispatch":       { "TITLE": "Dispatch & Pickup" },
+      "trip":           { "TITLE": "Trip & Assignment" },
+      "goods":          { "TITLE": "Goods / Product Issues" },
+      "seller":         { "TITLE": "Wholesaler Issues" },
+      "account":        { "TITLE": "Account Issues" },
+      "technical":      { "TITLE": "App / Technical Issues" },
+      "safety":         { "TITLE": "Safety & Emergency" },
+      "other":          { "TITLE": "Other" }
+    },
+
+    "OPTIONS": {
+
+      "payment": {
+        "failed":       "Payment failed during checkout",
+        "pending":      "Payment is stuck in pending state",
+        "deducted":     "Amount was deducted but order was not confirmed",
+        "mismatch":     "Amount charged does not match the order",
+        "payout-pending": "My payout is stuck in pending state",
+        "duplicate":    "Charged more than once for the same order",
+        "refund":       "Refund not received",
+        "payout-error": "Payout amount is incorrect",
+        "dispute":      "I want to raise a payout dispute",
+        "deduction":    "Unexpected deduction from my earnings",
+        "other":        "Other payment issue"
+      },
+
+      "order": {
+        "missing":      "My order is not showing up",
+        "confirmation": "Order confirmation was not received",
+        "status":       "Order status is unclear",
+        "stuck":        "Order is stuck in processing",
+        "incorrect":    "Order details are incorrect",
+        "other":        "Other order issue"
+      },
+
+      "incoming-order": {
+        "not-appearing":     "An order placed by a buyer is not appearing",
+        "details-incorrect": "Order details are incorrect or incomplete",
+        "status-unclear":    "Order status is unclear in my dashboard",
+        "other":             "Other order issue"
+      },
+
+      "delivery": {
+        "delayed":          "Delivery is taking longer than expected",
+        "not-arrived":      "Delivery has not arrived",
+        "not-contactable":  "Unable to contact the driver",
+        "address":          "There is an issue with the delivery address",
+        "not-received":     "I did not receive my order",
+        "pickup-delayed":   "Pickup from wholesaler is delayed",
+        "goods-not-ready":  "Goods were not ready at the pickup point",
+        "customer-absent":  "Customer was absent at the delivery address",
+        "other":            "Other delivery issue"
+      },
+
+      "dispatch": {
+        "driver-not-arrived": "Driver has not arrived for pickup",
+        "pickup-delayed":     "Pickup is running late",
+        "address":            "There is an issue with the pickup address",
+        "other":              "Other dispatch issue"
+      },
+
+      "trip": {
+        "request-missing": "I'm not receiving trip requests",
+        "cannot-accept":   "Unable to accept any trip",
+        "breakdown":       "My vehicle has broken down",
+        "other":           "Other trip issue"
+      },
+
+      "goods": {
+        "damaged":         "Goods were damaged",
+        "spoiled":         "Goods have spoiled",
+        "wrong":           "Wrong item was sent",
+        "missing":         "An item is missing from the delivery",
+        "shortage":        "Quantity received is less than ordered",
+        "pickup-shortage": "Quantity picked up is less than ordered",
+        "quality":         "Quality does not meet expectations",
+        "does-not-match":  "Item does not match what was listed",
+        "other":           "Other goods issue"
+      },
+
+      "seller": {
+        "incorrect-supply": "Wrong product or quantity was sent",
+        "other":            "Other wholesaler issue"
+      },
+
+      "account": {
+        "login":        "Unable to log in",
+        "otp":          "OTP was not received",
+        "blocked":      "My account is blocked",
+        "update":       "Unable to update my account details",
+        "business":     "Business details need to be updated",
+        "verification": "Verification is pending or failed",
+        "security":     "I have a security concern about my account",
+        "documents":    "Issue uploading or verifying my documents",
+        "other":        "Other account issue"
+      },
+
+      "technical": {
+        "crash":       "The app keeps crashing",
+        "not-loading": "A screen or page is not loading",
+        "button":      "A button or action is not working",
+        "checkout":    "Checkout is not working",
+        "place-order": "Unable to place an order",
+        "history":     "Order history is not showing correctly",
+        "workflow":    "Something is not working as expected",
+        "stock":       "Unable to update stock or inventory",
+        "listing":     "Issue with a product listing",
+        "trip-status": "Trip status is not updating in the app",
+        "error":       "I am getting an error message",
+        "other":       "Other technical issue"
+      },
+
+      "safety": {
+        "emergency":              "I have an emergency",
+        "accident":               "I was involved in an accident",
+        "lost-package":           "I have lost a package",
+        "unauthorized-payment":   "A payment was made without my authorization",
+        "suspicious-transaction": "There is a suspicious transaction on my account",
+        "unauthorized-order":     "An order was placed without my authorization",
+        "account-activity":       "There is unusual activity on my account",
+        "fraud":                  "I suspect fraud",
+        "other":                  "Other safety concern"
+      },
+
+      "other": {
+        "general":             "I have a general question",
+        "previous-resolution": "I am following up on a previous issue",
+        "other":               "Something else"
+      }
+    }
   }
 }

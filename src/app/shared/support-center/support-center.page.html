@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ 'SUPPORT_CENTER.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="support-page">
+    <section class="intro">
+      <div class="intro-icon"><ion-icon name="help-circle-outline"></ion-icon></div>
+      <div>
+        <p class="eyebrow">{{ 'SUPPORT_CENTER.ROLES.' + role | translate }}</p>
+        <h1>{{ 'SUPPORT_CENTER.HEADING' | translate }}</h1>
+        <p>{{ 'SUPPORT_CENTER.SUBHEADING' | translate }}</p>
+      </div>
+    </section>
+
+    <section class="category-list" *ngIf="!selectedCategory">
+      <button type="button" class="category-card" *ngFor="let category of categories" (click)="selectCategory(category)">
+        <span class="category-icon"><ion-icon [name]="category.icon"></ion-icon></span>
+        <span class="category-copy">{{ 'SUPPORT_CENTER.CATEGORIES.' + category.id + '.TITLE' | translate }}</span>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </button>
+    </section>
+
+    <section class="issue-form" *ngIf="selectedCategory">
+      <button type="button" class="change-category" (click)="clearSelection()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        {{ 'SUPPORT_CENTER.CHANGE_CATEGORY' | translate }}
+      </button>
+      <h2>{{ 'SUPPORT_CENTER.CATEGORIES.' + selectedCategory.id + '.TITLE' | translate }}</h2>
+      <p class="section-copy">{{ 'SUPPORT_CENTER.SELECT_ISSUE' | translate }}</p>
+
+      <ion-list lines="full">
+        <ion-radio-group [(ngModel)]="selectedOption">
+          <ion-item *ngFor="let option of selectedCategory.options">
+            <ion-radio slot="start" [value]="option"></ion-radio>
+            <ion-label>{{ 'SUPPORT_CENTER.OPTIONS.' + selectedCategory.id + '.' + option | translate }}</ion-label>
+          </ion-item>
+        </ion-radio-group>
+      </ion-list>
+
+      <ion-item class="description-field">
+        <ion-label position="stacked">{{ 'SUPPORT_CENTER.DESCRIPTION_LABEL' | translate }}</ion-label>
+        <ion-textarea [(ngModel)]="description" maxlength="1000" autoGrow="true" [placeholder]="'SUPPORT_CENTER.DESCRIPTION_PLACEHOLDER' | translate"></ion-textarea>
+      </ion-item>
+
+      <div class="contact-actions">
+        <ion-button expand="block" (click)="callSupport()" [disabled]="!canContact">
+          <ion-icon name="call-outline" slot="start"></ion-icon>
+          {{ 'SUPPORT_CENTER.CALL_SUPPORT' | translate }}
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="emailSupport()" [disabled]="!canContact">
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          {{ 'SUPPORT_CENTER.EMAIL_SUPPORT' | translate }}
+        </ion-button>
+      </div>
+      <p class="urgent-note"><ion-icon name="alert-circle-outline"></ion-icon>{{ 'SUPPORT_CENTER.URGENT_NOTE' | translate }}</p>
+    </section>
+  </main>
+</ion-content>

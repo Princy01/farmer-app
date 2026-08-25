@@ -454,8 +454,7 @@ export class SettingsPage implements OnInit, OnDestroy {
   }
 
   contactSupport() {
-    const mailtoLink = 'mailto:support@go4u.app';
-    window.location.href = mailtoLink;
+    this.router.navigate(['/transport/support']);
   }
 
   viewPrivacyPolicy() {

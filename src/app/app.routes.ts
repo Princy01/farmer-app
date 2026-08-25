@@ -49,6 +49,11 @@ const appRoutes: Routes = [
     data: { role: 'wholesaler' },
   },
   {
+    path: 'wholesaler/support',
+    loadComponent: () => import('./shared/support-center/support-center.page').then((m) => m.SupportCenterPage),
+    data: { role: 'wholesaler' },
+  },
+  {
     path: 'wholesaler/orders',
     loadComponent: () => import('./Wholesaler/orders-received/orders.component').then((m) => m.OrdersComponent),
   },
@@ -188,6 +193,11 @@ const appRoutes: Routes = [
       {
         path: 'help',
         loadComponent: () => import('./shared/help-center/help-center.page').then((m) => m.HelpCenterPage),
+        data: { role: 'buyer' },
+      },
+      {
+        path: 'support',
+        loadComponent: () => import('./shared/support-center/support-center.page').then((m) => m.SupportCenterPage),
         data: { role: 'buyer' },
       },
       {
@@ -570,6 +580,11 @@ const appRoutes: Routes = [
       {
         path: 'help',
         loadComponent: () => import('./shared/help-center/help-center.page').then((m) => m.HelpCenterPage),
+        data: { role: 'transport' },
+      },
+      {
+        path: 'support',
+        loadComponent: () => import('./shared/support-center/support-center.page').then((m) => m.SupportCenterPage),
         data: { role: 'transport' },
       },
       {
