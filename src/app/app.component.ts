@@ -1,19 +1,43 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
+import { Location } from '@angular/common';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
 import { catchError } from 'rxjs/operators';
+
+interface IonicBackButtonEvent extends CustomEvent {
+  detail: {
+    register: (priority: number, handler: () => void) => void;
+  };
+}
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   imports: [IonApp, IonRouterOutlet],
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
   private readonly supportedLangs = ['en', 'hi'];
   private readonly primaryLangKey = 'preferred_language';
   private readonly legacyLangKey = 'appLang';
+  private readonly isStandalonePwa = window.matchMedia('(display-mode: standalone)').matches
+    || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+  private readonly handlePwaBackButton = (event: Event): void => {
+    const backButtonEvent = event as IonicBackButtonEvent;
+    backButtonEvent.detail.register(1, () => {
+      if (window.history.length > 1) {
+        this.location.back();
+      }
+    });
+  };
 
-  constructor(private translate: TranslateService) {
+  constructor(
+    private translate: TranslateService,
+    private location: Location,
+  ) {
+    if (this.isStandalonePwa) {
+      document.addEventListener('ionBackButton', this.handlePwaBackButton);
+    }
+
     this.translate.addLangs(this.supportedLangs);
     this.translate.setDefaultLang('en');
 
@@ -35,5 +59,11 @@ export class AppComponent {
         return this.translate.use('en');
       })
     ).subscribe();
+  }
+
+  ngOnDestroy(): void {
+    if (this.isStandalonePwa) {
+      document.removeEventListener('ionBackButton', this.handlePwaBackButton);
+    }
   }
 }

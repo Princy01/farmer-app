@@ -30,6 +30,7 @@ interface HelpCard {
 })
 export class HelpCenterPage {
   readonly role: HelpRole;
+  readonly backRoute: string;
   readonly cards: HelpCard[];
   activeCategory = 'all';
   showWalkthrough = false;
@@ -67,6 +68,11 @@ export class HelpCenterPage {
   constructor(private route: ActivatedRoute, private router: Router) {
     const requestedRole = this.route.snapshot.data['role'] as HelpRole;
     this.role = requestedRole || 'buyer';
+    this.backRoute = {
+      buyer: '/buyer/settings',
+      wholesaler: '/wholesaler/settings',
+      transport: '/transport/settings'
+    }[this.role];
     this.cards = this.catalogs[this.role];
     addIcons({
       arrowBackOutline, bookOutline, bulbOutline, cartOutline, cashOutline,

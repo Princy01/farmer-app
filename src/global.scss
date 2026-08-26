@@ -33,5 +33,85 @@
  */
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+@import "@ionic/angular/css/palettes/dark.class.css";
+// @import '@ionic/angular/css/palettes/dark.system.css';
+
+/**
+ * App-wide Font
+ * -----------------------------------------------------
+ * Self-hosted font files (in /src/assets/fonts/) so the SAME font renders
+ * identically on every device/OS/browser — no CDN dependency, no fallback
+ * to system fonts (Segoe UI on Windows, Roboto on Android, SF Pro on iOS
+ * etc. all look different). Works offline too, which matters for a PWA.
+ *
+ * Inter -> body/UI text everywhere.
+ * Download: https://rsms.me/inter/ (or Google Fonts, converted to woff2)
+ */
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * Fraunces -> "Melato" brand title only. A warm, premium serif that gives
+ * the wordmark personality without affecting the rest of the app's UI text.
+ * Download: https://fonts.google.com/specimen/Fraunces (Variable or static
+ * woff2, weight 600/700), place in /src/assets/fonts/
+ */
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/assets/fonts/Fraunces-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/assets/fonts/Fraunces-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Force Inter everywhere, overriding any component-level font-family */
+* {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* App title / brand name ("Melato") uses Fraunces for a distinctive,
+   premium wordmark — this rule comes after the * rule above, so it wins */
+.app-title,
+.brand-name {
+  font-family: 'Fraunces', serif !important;
+  font-weight: 700 !important;
+  font-optical-sizing: auto;
+  letter-spacing: 0.2px;
+}

@@ -29,10 +29,14 @@
 }
 
 .app-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: white;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.5px;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background: linear-gradient(90deg, #ffffff 0%, #e0d7ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .header-btn {
@@ -723,7 +727,7 @@ ion-menu {
 
 @media (max-width: 480px) {
   .app-title {
-    font-size: 1.3rem;
+    font-size: 1.15rem;
   }
 
   .recent-deliveries-section {
@@ -817,6 +821,14 @@ ion-menu {
     --color: white;
     --border-color: transparent;
     box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  }
+
+  .menu-toolbar-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    margin-left: 0.5rem;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
   }
 
   .menu-title {

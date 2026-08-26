@@ -435,22 +435,22 @@ export class LoginPage implements OnDestroy {
           setTimeout(() => {
             switch (userRole) {
               case 'admin':
-                this.router.navigate(['/admin/control-tower']);
+                this.router.navigate(['/admin/control-tower'], { replaceUrl: true });
                 break;
               case 'ops_l1':
-                this.router.navigate(['/ops/dashboard']);
+                this.router.navigate(['/ops/dashboard'], { replaceUrl: true });
                 break;
               case 'finance':
-                this.router.navigate(['/finance/dashboard']);
+                this.router.navigate(['/finance/dashboard'], { replaceUrl: true });
                 break;
               case 'wholesaler':
-                this.router.navigate(['/wholesaler/business-registration']);
+                this.router.navigate(['/wholesaler/business-registration'], { replaceUrl: true });
                 break;
               case 'retailer':
-                this.router.navigate(['/buyer/business-registration']);
+                this.router.navigate(['/buyer/business-registration'], { replaceUrl: true });
                 break;
               case 'driver':
-                this.router.navigate(['/transport/driver-registration']);
+                this.router.navigate(['/transport/driver-registration'], { replaceUrl: true });
                 break;
               default:
                 this.presentToast(this.translate.instant('AUTH.UNKNOWN_ROLE_ERROR'), 'danger');

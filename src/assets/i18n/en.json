@@ -1215,7 +1215,7 @@
     "FORBIDDEN_ERROR": "You don't have permission to update stock."
   },
   "AUTH": {
-    "APP_TITLE": "FarmerApp",
+    "APP_TITLE": "Melato",
     "APP_SUBTITLE": "Connecting Wholesalers & Retailers",
     "SIGN_IN": "Sign In",
     "SIGN_UP": "Sign Up",
@@ -1604,7 +1604,7 @@
     "ERROR_NO_CONNECTION": "Cannot connect to server. Please check your internet connection."
   },
   "BUYER_HOME": {
-    "APP_TITLE": "Farmer App",
+    "APP_TITLE": "Melato",
     "MENU_TITLE": "Menu",
     "PROFILE": "Profile",
     "BUSINESS_INFO": "Business Info",

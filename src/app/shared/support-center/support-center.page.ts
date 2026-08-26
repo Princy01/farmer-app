@@ -31,6 +31,7 @@ interface SupportCategory {
 })
 export class SupportCenterPage {
   readonly role: SupportRole;
+  readonly backRoute: string;
 
   readonly categoryCatalogs: Record<SupportRole, SupportCategory[]> = {
 
@@ -234,6 +235,11 @@ export class SupportCenterPage {
     // keep working without needing an immediate router change.
     const rawRole = this.route.snapshot.data['role'] as string;
     this.role = (rawRole === 'transport' ? 'driver' : rawRole) as SupportRole || 'buyer';
+    this.backRoute = {
+      buyer: '/buyer/settings',
+      wholesaler: '/wholesaler/settings',
+      driver: '/transport/settings'
+    }[this.role];
     this.categories = this.categoryCatalogs[this.role] ?? this.categoryCatalogs['buyer'];
     addIcons({
       alertCircleOutline, arrowBackOutline, callOutline, cardOutline,

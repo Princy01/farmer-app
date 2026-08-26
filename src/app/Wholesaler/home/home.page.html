@@ -35,63 +35,66 @@
 <!-- ======================== -->
 <!-- SIDE MENU                -->
 <!-- ======================== -->
-<ion-menu side="start" menuId="main-menu" contentId="main-content">
+<ion-menu side="start" menuId="main-menu" contentId="main-content" class="custom-menu">
   <ion-header>
-    <ion-toolbar>
-      <ion-title>{{ 'WHOLESALER_HOME.Menu' | translate }}</ion-title>
+    <ion-toolbar class="menu-toolbar">
+      <ion-buttons slot="start">
+        <img src="assets/images/melato-icon.png" alt="Melato" class="menu-toolbar-logo" />
+      </ion-buttons>
+      <ion-title class="menu-title">{{ 'WHOLESALER_HOME.Menu' | translate }}</ion-title>
       <ion-buttons slot="end">
-        <ion-button (click)="closeMenu()">
+        <ion-button (click)="closeMenu()" class="menu-close-btn">
           <ion-icon name="close-outline"></ion-icon>
         </ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
-  <ion-content>
-    <ion-list>
-      <ion-item button (click)="navigateToProfile()" lines="none">
+  <ion-content class="menu-content">
+    <ion-list class="menu-list">
+      <ion-item button (click)="navigateToProfile()" lines="none" class="menu-item">
         <ion-icon name="person-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Profile' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToBusinessLocations()" lines="none">
+      <ion-item button (click)="navigateToBusinessLocations()" lines="none" class="menu-item">
         <ion-icon name="business-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Business Locations' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToBusinessInfo()" lines="none">
+      <ion-item button (click)="navigateToBusinessInfo()" lines="none" class="menu-item">
         <ion-icon name="information-circle-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Business Info' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToMyOrders()" lines="none">
+      <ion-item button (click)="navigateToMyOrders()" lines="none" class="menu-item">
         <ion-icon name="receipt-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Orders Received' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToPickupOrders()" lines="none">
+      <ion-item button (click)="navigateToPickupOrders()" lines="none" class="menu-item">
         <ion-icon name="car-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Pickup Orders' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToStockDashboard()" lines="none">
+      <ion-item button (click)="navigateToStockDashboard()" lines="none" class="menu-item">
         <ion-icon name="cube-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Stock Dashboard' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToRestockingRecommendations()" lines="none">
+      <ion-item button (click)="navigateToRestockingRecommendations()" lines="none" class="menu-item">
         <ion-icon name="bulb-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Restocking Recommendations' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToMarketOpportunities()" lines="none">
+      <ion-item button (click)="navigateToMarketOpportunities()" lines="none" class="menu-item">
         <ion-icon name="analytics-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Market Opportunities' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToEarnings()" lines="none">
+      <ion-item button (click)="navigateToEarnings()" lines="none" class="menu-item">
         <ion-icon name="cash-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Earnings' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="navigateToSettings()" lines="none">
+      <ion-item button (click)="navigateToSettings()" lines="none" class="menu-item">
         <ion-icon name="settings-outline" slot="start" class="menu-icon"></ion-icon>
         <ion-label>{{ 'WHOLESALER_HOME.Settings' | translate }}</ion-label>
       </ion-item>
-      <ion-item button (click)="logout()" lines="none">
-        <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
-        <ion-label color="danger">{{ 'WHOLESALER_HOME.Logout' | translate }}</ion-label>
+      <ion-item button (click)="logout()" lines="none" class="menu-item logout-item">
+        <ion-icon name="log-out-outline" slot="start" class="menu-icon logout-icon"></ion-icon>
+        <ion-label class="logout-label">{{ 'WHOLESALER_HOME.Logout' | translate }}</ion-label>
       </ion-item>
     </ion-list>
   </ion-content>

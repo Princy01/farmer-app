@@ -114,104 +114,124 @@ $radius-xl:   20px;
 }
 
 // ============================================================
-// SIDE MENU
+// SIDE MENU - Matching Checkout Theme
 // ============================================================
-ion-menu {
-  --background: #f8f9fa;
-  --width: 300px;
-
-  ion-toolbar {
-    --background: linear-gradient(120deg, #{$brand-primary} 0%, #{$brand-dark} 100%);
+.custom-menu {
+  .menu-toolbar {
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --color: white;
-
-    ion-title {
-      font-weight: 700;
-      font-size: 1.2rem;
-      font-family: 'Poppins', 'Segoe UI', sans-serif;
-    }
-
-    ion-buttons ion-button {
-      --color: white;
-      --background: rgba(255, 255, 255, 0.15);
-      --border-radius: 50%;
-      width: 34px;
-      height: 34px;
-
-      ion-icon {
-        font-size: 1.1rem;
-      }
-    }
+    --border-color: transparent;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
   }
 
-  ion-content {
-    --background: #f8f9fa;
+  .menu-toolbar-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    margin-left: 0.5rem;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
   }
 
-  ion-list {
-    background: transparent;
-    padding: 1rem 0.75rem;
+  .menu-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   }
 
-  ion-item {
-    --background: #{$card-bg};
-    --border-radius: #{$radius-md};
-    --inner-padding-end: 0.75rem;
-    margin-bottom: 0.6rem;
-    --padding-start: 0.75rem;
-    --padding-end: 0.25rem;
-    --min-height: 56px;
-    border-radius: $radius-md;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  .menu-close-btn {
+    --color: white;
+    --background: transparent;
+    --background-activated: rgba(255, 255, 255, 0.1);
+    --border-radius: 12px;
     transition: all 0.3s ease;
 
     &:hover {
-      box-shadow: 0 4px 12px rgba($brand-primary, 0.15);
+      transform: scale(1.05);
     }
+  }
 
-    .menu-icon-wrap {
-      width: 38px;
-      height: 38px;
-      border-radius: $radius-sm;
-      background: $brand-light;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 0.75rem;
+  .menu-content {
+    --background: #f8f9fa;
+    padding: 1rem;
+  }
+
+  .menu-list {
+    background: transparent;
+    padding: 0;
+  }
+
+  .menu-item {
+    --background: white;
+    --color: var(--ion-color-dark);
+    --border-color: transparent;
+    --inner-border-width: 0;
+    --padding-start: 1.5rem;
+    --padding-end: 1.5rem;
+    --padding-top: 1rem;
+    --padding-bottom: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 16px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    font-weight: 500;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 24px rgba(102, 126, 234, 0.15);
+      --background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 
       .menu-icon {
-        color: $brand-primary;
-        font-size: 1.2rem;
-        margin: 0;
+        transform: scale(1.1);
+        color: #667eea;
       }
     }
 
-    ion-label {
-      font-weight: 500;
-      font-size: 0.95rem;
-      color: $text-primary;
+    &:active {
+      transform: scale(0.98);
     }
 
-    .menu-arrow {
-      color: #C7C5DA;
-      font-size: 1.1rem;
-    }
+    // Logout item special styling
+    &.logout-item {
+      margin-top: 2rem;
+      border-top: 2px solid var(--ion-color-light);
+      --background: #fff5f5;
 
-    &.menu-item-danger {
-      margin-top: 0.75rem;
+      &:hover {
+        --background: #ffebee;
 
-      .menu-icon-wrap-danger {
-        background: $danger-icon-bg;
+        .logout-icon {
+          color: #f44336;
+        }
 
-        .menu-icon {
-          color: $danger;
+        .logout-label {
+          color: #f44336;
         }
       }
-
-      ion-label {
-        color: $danger;
-        font-weight: 600;
-      }
     }
+  }
+
+  .menu-icon {
+    color: #667eea;
+    font-size: 1.3rem;
+    margin-right: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .logout-icon {
+    color: #f44336 !important;
+  }
+
+  .logout-label {
+    color: #f44336 !important;
+    font-weight: 500;
+  }
+
+  ion-label {
+    color: var(--ion-color-dark);
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s ease;
   }
 }
 

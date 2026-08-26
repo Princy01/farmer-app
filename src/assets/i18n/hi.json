@@ -1232,7 +1232,7 @@
     "FORBIDDEN_ERROR": "आपके पास स्टॉक अपडेट करने की अनुमति नहीं है।"
   },
   "AUTH": {
-    "APP_TITLE": "किसान ऐप",
+    "APP_TITLE": "Melato",
     "APP_SUBTITLE": "थोक और खुदरा व्यापार को जोड़ने की दिशा में",
     "SIGN_IN": "साइन इन करें",
     "SIGN_UP": "रजिस्टर करें",
@@ -1619,7 +1619,7 @@
     "ERROR_NO_CONNECTION": "सर्वर से कनेक्ट नहीं हो पा रहा है। कृपया अपना इंटरनेट कनेक्शन जांचें।"
   },
   "BUYER_HOME": {
-    "APP_TITLE": "किसान ऐप",
+    "APP_TITLE": "Melato",
     "MENU_TITLE": "मेनू",
     "PROFILE": "प्रोफ़ाइल",
     "ORDER_HISTORY": "ऑर्डर सूची",
