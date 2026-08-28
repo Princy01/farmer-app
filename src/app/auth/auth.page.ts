@@ -415,7 +415,6 @@ export class LoginPage implements OnDestroy {
             return;
           }
 
-          this.presentToast(this.translate.instant('AUTH.LOGIN_SUCCESS'), 'success');
           this.initUserLanguage();
 
           // Save language preference to database after login
@@ -432,6 +431,17 @@ export class LoginPage implements OnDestroy {
           }
 
           const userRole = this.authService.getUserRole();
+          const roleLabelKey = userRole === 'wholesaler' ? 'AUTH.ROLE_WHOLESALER'
+            : userRole === 'retailer' ? 'AUTH.ROLE_RETAILER'
+            : userRole === 'driver' ? 'AUTH.ROLE_DRIVER'
+            : null;
+
+          if (roleLabelKey) {
+            const roleName = this.translate.instant(roleLabelKey);
+            this.presentToast(this.translate.instant('AUTH.LOGIN_SUCCESS_ROLE', { role: roleName }), 'success');
+          } else {
+            this.presentToast(this.translate.instant('AUTH.LOGIN_SUCCESS'), 'success');
+          }
           setTimeout(() => {
             switch (userRole) {
               case 'admin':

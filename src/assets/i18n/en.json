@@ -1,7 +1,9 @@
 {
   "WHOLESALER_HOME": {
     "Melato": "Melato",
-    "Menu": "Menu",
+    "ROLE_NAME": "Wholesaler",
+    "APP_TITLE": "Melato Wholesaler",
+    "Menu": "Wholesaler Hub",
     "Profile": "Profile",
     "Business Locations": "Business Locations",
     "Business Info": "Business Info",
@@ -97,7 +99,7 @@
     "CANCEL": "Cancel",
     "LOGOUT_CONFIRM": "Logout",
     "LOGOUT_ERROR": "An error occurred during logout. Please try again.",
-    "TITLE": "Menu",
+    "TITLE": "Wholesaler Hub",
     "HOME_DASHBOARD": "Home Dashboard",
     "BUSINESS_LOCATIONS": "Business Locations",
     "MY_ORDERS": "My Orders",
@@ -1288,6 +1290,7 @@
     "FEATURE_DELIVERY": "Fast Delivery",
     "FEATURE_SECURE": "Secure Platform",
     "LOGIN_SUCCESS": "Login successful",
+    "LOGIN_SUCCESS_ROLE": "Welcome! Signed in as {{role}}",
     "UNKNOWN_ROLE_ERROR": "Unable to access your account. Please contact support.",
     "LOGIN_ERROR": "Unable to log in. Please check your credentials and try again.",
     "CONNECTION_ERROR": "Cannot connect to the server. Please check your internet connection.",
@@ -1605,7 +1608,9 @@
   },
   "BUYER_HOME": {
     "APP_TITLE": "Melato",
-    "MENU_TITLE": "Menu",
+    "ROLE_NAME": "Retailer",
+    "FULL_APP_TITLE": "Melato Retailer",
+    "MENU_TITLE": "My Store",
     "PROFILE": "Profile",
     "BUSINESS_INFO": "Business Info",
     "ORDER_HISTORY": "Order History",
@@ -3603,19 +3608,36 @@
     "ROLE_LABELS": { "buyer": "Buyer guide", "wholesaler": "Wholesaler guide", "transport": "Transport guide" },
     "CATEGORIES": { "all": "All", "shopping": "Shopping", "orders": "Orders", "support": "Support", "account": "Account", "stock": "Stock", "insights": "Insights", "getting-started": "Getting started", "deliveries": "Deliveries", "earnings": "Earnings" },
     "WALKTHROUGH": {
-      "welcome": { "TITLE": "Welcome to your guide", "DESCRIPTION": "Use these quick cards to learn the main tasks in your app." },
-      "browse": { "TITLE": "Find what you need", "DESCRIPTION": "Browse products and use search to quickly find an item." },
-      "cart": { "TITLE": "Review your cart", "DESCRIPTION": "Add items to your cart, check quantities, and continue to checkout." },
-      "checkout": { "TITLE": "Complete checkout", "DESCRIPTION": "Confirm your delivery details and payment to place an order." },
-      "stock": { "TITLE": "Keep stock up to date", "DESCRIPTION": "Open Stock Dashboard to add or update available products." },
-      "orders": { "TITLE": "Manage orders", "DESCRIPTION": "Open orders to review incoming requests and their current status." },
-      "pickup": { "TITLE": "Prepare pickups", "DESCRIPTION": "Use Pickup Orders to see goods that are ready for collection." },
-      "onboarding": { "TITLE": "Complete onboarding", "DESCRIPTION": "Submit your driver details and documents before taking deliveries." },
-      "requests": { "TITLE": "Review requests", "DESCRIPTION": "Open Transport Requests to see delivery work assigned to your team." },
-      "vehicles": { "TITLE": "Manage vehicles", "DESCRIPTION": "Keep vehicle details current so deliveries can be assigned correctly." },
-      "delivery": { "TITLE": "Confirm delivery", "DESCRIPTION": "Use Delivery Confirmation after the order reaches its destination." },
-      "earnings": { "TITLE": "Check your earnings", "DESCRIPTION": "View completed delivery earnings and payment information." },
-      "history": { "TITLE": "Review delivery history", "DESCRIPTION": "Use Delivery History to find previous completed deliveries." }
+      "buyer": {
+        "welcome": { "TITLE": "Welcome to your guide", "DESCRIPTION": "Use these quick cards to learn the main tasks in your app." },
+        "browse": { "TITLE": "Find what you need", "DESCRIPTION": "Browse products and use search to quickly find an item." },
+        "cart": { "TITLE": "Review your cart", "DESCRIPTION": "Add items to your cart, check quantities, and continue to checkout." },
+        "orders": { "TITLE": "Track orders", "DESCRIPTION": "Open orders to track your purchases, view delivery progress, and check current status." },
+        "issues": { "TITLE": "Report an issue", "DESCRIPTION": "Raise and follow up on an order problem." },
+        "business": { "TITLE": "Manage business info", "DESCRIPTION": "Keep your business details up to date." },
+        "locations": { "TITLE": "Manage locations", "DESCRIPTION": "Add and update your delivery locations." }
+      },
+      "wholesaler": {
+        "welcome": { "TITLE": "Welcome to your guide", "DESCRIPTION": "Use these quick cards to learn the main tasks in your app." },
+        "stock": { "TITLE": "Keep stock up to date", "DESCRIPTION": "Open Stock Dashboard to add or update available products." },
+        "orders": { "TITLE": "Manage orders", "DESCRIPTION": "Open orders to review incoming requests and their current status." },
+        "pickup": { "TITLE": "Prepare pickups", "DESCRIPTION": "Use Pickup Orders to see goods that are ready for collection." },
+        "restocking": { "TITLE": "Use restocking advice", "DESCRIPTION": "Review recommendations before replenishing stock." },
+        "market": { "TITLE": "Explore market opportunities", "DESCRIPTION": "Use insights to find new selling opportunities." },
+        "earnings": { "TITLE": "View earnings", "DESCRIPTION": "Review earnings and performance trends." },
+        "issues": { "TITLE": "Handle order issues", "DESCRIPTION": "Report and follow up on an order problem." }
+      },
+      "transport": {
+        "welcome": { "TITLE": "Welcome to your guide", "DESCRIPTION": "Use these quick cards to learn the main tasks in your app." },
+        "onboarding": { "TITLE": "Complete onboarding", "DESCRIPTION": "Submit your driver details and documents before taking deliveries." },
+        "requests": { "TITLE": "Review requests", "DESCRIPTION": "Open Transport Requests to see available delivery requests and accept them." },
+        "pickup": { "TITLE": "Pickup orders", "DESCRIPTION": "Use Pickup Orders to see orders you need to pick up today from wholesalers." },
+        "delivery": { "TITLE": "Confirm delivery", "DESCRIPTION": "Use Delivery Confirmation to manage orders to deliver today and confirm completion with customer OTP." },
+        "dashboard": { "TITLE": "Track deliveries", "DESCRIPTION": "Use Dashboard to view Active orders (delivering today), Upcoming orders (accepted for near future dates), and Completed deliveries." },
+        "earnings": { "TITLE": "Check your earnings", "DESCRIPTION": "View completed delivery earnings and payment information." },
+        "history": { "TITLE": "Review delivery history", "DESCRIPTION": "Use Delivery History to find previous completed deliveries." },
+        "issues": { "TITLE": "Report a delivery issue", "DESCRIPTION": "Raise and follow up on a delivery problem." }
+      }
     },
     "CARDS": {
       "buyer": {
@@ -3638,10 +3660,11 @@
       },
       "transport": {
         "onboarding": { "TITLE": "Complete driver onboarding", "DESCRIPTION": "Submit driver information and required documents." },
-        "requests": { "TITLE": "Review transport requests", "DESCRIPTION": "Check requests and assign available delivery resources." },
+        "requests": { "TITLE": "Review transport requests", "DESCRIPTION": "View available delivery requests and accept jobs." },
         "vehicles": { "TITLE": "Manage vehicles", "DESCRIPTION": "Add vehicles and keep their details current." },
-        "pickup": { "TITLE": "Handle pickup orders", "DESCRIPTION": "Review orders waiting for pickup." },
-        "delivery": { "TITLE": "Confirm delivery", "DESCRIPTION": "Record completion after goods reach the customer." },
+        "pickup": { "TITLE": "Pickup orders", "DESCRIPTION": "View orders you need to pick up today from wholesalers." },
+        "delivery": { "TITLE": "Confirm delivery", "DESCRIPTION": "View orders to deliver today and confirm completion with customer OTP." },
+        "dashboard": { "TITLE": "Deliveries dashboard", "DESCRIPTION": "Track Active orders (delivering today), Upcoming orders (accepted for near future dates), and Completed deliveries." },
         "earnings": { "TITLE": "View earnings", "DESCRIPTION": "Review delivery earnings and payment details." },
         "history": { "TITLE": "View delivery history", "DESCRIPTION": "Find completed deliveries and their details." },
         "issues": { "TITLE": "Report a delivery issue", "DESCRIPTION": "Raise and follow up on a delivery problem." }
@@ -3649,7 +3672,9 @@
     }
   },
   "TRANSPORT_MENU": {
-    "MENU": "Menu",
+    "MENU": "My Deliveries",
+    "ROLE_NAME": "Driver",
+    "APP_TITLE": "Melato Driver",
     "TRANSPORT": "Transport",
     "PROFILE": "Profile",
     "DASHBOARD": "Dashboard",

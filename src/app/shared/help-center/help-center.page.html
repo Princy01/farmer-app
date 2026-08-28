@@ -54,8 +54,8 @@
       </button>
       <div class="walkthrough-mark"><ion-icon name="book-outline"></ion-icon></div>
       <p class="eyebrow">{{ 'HELP_CENTER.WALKTHROUGH_STEP' | translate:{ current: walkthroughStep + 1, total: walkthroughKeys.length } }}</p>
-      <h2>{{ 'HELP_CENTER.WALKTHROUGH.' + walkthroughKeys[walkthroughStep] + '.TITLE' | translate }}</h2>
-      <p>{{ 'HELP_CENTER.WALKTHROUGH.' + walkthroughKeys[walkthroughStep] + '.DESCRIPTION' | translate }}</p>
+      <h2>{{ 'HELP_CENTER.WALKTHROUGH.' + role + '.' + walkthroughKeys[walkthroughStep] + '.TITLE' | translate }}</h2>
+      <p>{{ 'HELP_CENTER.WALKTHROUGH.' + role + '.' + walkthroughKeys[walkthroughStep] + '.DESCRIPTION' | translate }}</p>
       <div class="progress-dots">
         <span *ngFor="let step of walkthroughKeys; let index = index" [class.active]="index === walkthroughStep"></span>
       </div>

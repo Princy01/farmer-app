@@ -130,7 +130,14 @@
         <ion-buttons slot="start">
           <ion-menu-button></ion-menu-button>
         </ion-buttons>
-        <ion-title>{{ pageTitle }}</ion-title>
+        <ion-title>
+          <div class="brand-title-wrap">
+            <span class="brand-name">Melato</span>
+            <span class="brand-role-tag">{{ 'TRANSPORT_MENU.ROLE_NAME' | translate }}</span>
+            <span class="page-title-separator">·</span>
+            <span class="page-title-text">{{ pageTitle }}</span>
+          </div>
+        </ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>

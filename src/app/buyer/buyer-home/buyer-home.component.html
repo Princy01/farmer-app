@@ -6,9 +6,12 @@
       </ion-menu-button>
     </ion-buttons>
 
-    <ion-title class="app-title">{{
-      "BUYER_HOME.APP_TITLE" | translate
-    }}</ion-title>
+    <ion-title>
+      <div class="brand-title-wrap">
+        <span class="brand-name">{{ 'BUYER_HOME.APP_TITLE' | translate }}</span>
+        <span class="brand-role-tag">{{ 'BUYER_HOME.ROLE_NAME' | translate }}</span>
+      </div>
+    </ion-title>
 
     <ion-buttons slot="end">
       <ion-button

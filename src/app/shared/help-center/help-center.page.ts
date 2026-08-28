@@ -9,7 +9,7 @@ import {
   checkmarkCircleOutline, chevronForwardOutline, closeOutline, cubeOutline,
   documentTextOutline, helpCircleOutline, languageOutline, listOutline,
   personOutline, receiptOutline, refreshOutline, searchOutline, settingsOutline,
-  shieldCheckmarkOutline, storefrontOutline, timeOutline, carOutline
+  shieldCheckmarkOutline, storefrontOutline, timeOutline, carOutline, speedometerOutline
 } from 'ionicons/icons';
 
 type HelpRole = 'buyer' | 'wholesaler' | 'transport';
@@ -59,8 +59,9 @@ export class HelpCenterPage {
       { id: 'requests', category: 'deliveries', icon: 'list-outline', route: '/transport/transport-requests' },
       { id: 'pickup', category: 'deliveries', icon: 'cube-outline', route: '/transport/pickup-orders' },
       { id: 'delivery', category: 'deliveries', icon: 'checkmark-circle-outline', route: '/transport/delivery-confirmation' },
-      { id: 'earnings', category: 'earnings', icon: 'cash-outline', route: '/transport/earnings-dashboard' },
+      { id: 'dashboard', category: 'deliveries', icon: 'speedometer-outline', route: '/transport/transport-dashboard' },
       { id: 'history', category: 'earnings', icon: 'time-outline', route: '/transport/delivery-history' },
+      { id: 'earnings', category: 'earnings', icon: 'cash-outline', route: '/transport/earnings-dashboard' },
       { id: 'issues', category: 'support', icon: 'help-circle-outline', route: '/transport/my-issues' }
     ]
   };
@@ -79,13 +80,19 @@ export class HelpCenterPage {
       checkmarkCircleOutline, chevronForwardOutline, closeOutline, cubeOutline,
       documentTextOutline, helpCircleOutline, languageOutline, listOutline,
       personOutline, receiptOutline, refreshOutline, searchOutline, settingsOutline,
-      shieldCheckmarkOutline, storefrontOutline, timeOutline, carOutline
+      shieldCheckmarkOutline, storefrontOutline, timeOutline, carOutline, speedometerOutline
     });
 
     if (!localStorage.getItem(this.getWalkthroughKey())) {
       this.showWalkthrough = true;
     }
   }
+
+  private readonly walkthroughCatalog: Record<HelpRole, string[]> = {
+    buyer: ['welcome', 'browse', 'cart', 'orders'],
+    wholesaler: ['welcome', 'stock', 'orders', 'pickup'],
+    transport: ['welcome', 'onboarding', 'requests', 'pickup', 'delivery']
+  };
 
   get categories(): string[] {
     return ['all', ...Array.from(new Set(this.cards.map(card => card.category)))];
@@ -98,7 +105,7 @@ export class HelpCenterPage {
   }
 
   get walkthroughKeys(): string[] {
-    return ['welcome', ...this.cards.slice(0, 3).map(card => card.id)];
+    return this.walkthroughCatalog[this.role] || ['welcome', ...this.cards.slice(0, 3).map(card => card.id)];
   }
 
   setCategory(category: string): void {

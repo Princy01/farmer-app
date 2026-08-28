@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Melato - संक्षिप्त उपयोग गाइड</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap');
+
+@page {
+    size: A4 portrait;
+    margin: 10mm 10mm 10mm 10mm;
+    @bottom-right {
+        content: counter(page);
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    line-height: 1.38;
+    font-size: 12px;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.page {
+    page-break-after: always;
+    break-after: page;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+.page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+}
+
+/* Purple Compact Header */
+.quick-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.22);
+}
+
+.quick-title {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.quick-subtitle {
+    font-size: 11.5px;
+    color: #f1f3fd;
+}
+
+/* Sections */
+.section-banner {
+    background: #f8fafc;
+    border-left: 3.5px solid #764ba2;
+    padding: 4px 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0f172a;
+    border-radius: 0 4px 4px 0;
+    margin-top: 8px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-banner.retailer { border-left-color: #d97706; }
+.section-banner.wholesaler { border-left-color: #667eea; }
+.section-banner.driver { border-left-color: #0d9488; }
+.section-banner.support { border-left-color: #e11d48; }
+
+.section-tag {
+    font-size: 10px;
+    font-weight: 600;
+    background: #e2e8f0;
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: #475569;
+}
+
+/* Grid & Cards */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 7px 9px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.card.highlight {
+    background: #f8fafc;
+}
+
+.card-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card ul {
+    margin-left: 14px;
+    font-size: 11px;
+    color: #334155;
+}
+
+.card li {
+    margin-bottom: 2px;
+}
+
+.card p {
+    font-size: 11px;
+    color: #334155;
+    margin-bottom: 2px;
+}
+
+/* Step Flow Row */
+.step-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.step-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 6px 7px;
+    font-size: 10.5px;
+}
+
+.step-num {
+    font-weight: 800;
+    color: #764ba2;
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+
+.step-num.amber { color: #d97706; }
+.step-num.blue { color: #667eea; }
+.step-num.teal { color: #0d9488; }
+
+.step-text {
+    color: #334155;
+}
+
+/* Compact Table */
+.compact-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0;
+    font-size: 11px;
+}
+
+.compact-table th, .compact-table td {
+    border: 1px solid #cbd5e1;
+    padding: 4px 7px;
+    text-align: left;
+}
+
+.compact-table th {
+    background: #f1f5f9;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.compact-table tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9.5px;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 4px;
+    margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: SETUP, RETAILER & WHOLESALER (HINDI) -->
+<div class="page">
+  <div class="quick-header">
+    <div>
+      <div class="quick-title">Melato (मेलाटो) - संक्षिप्त उपयोग गाइड</div>
+      <div class="quick-subtitle">थोक विक्रेताओं, खुदरा विक्रेताओं (रिटेलर्स) और ड्राइवरों के लिए सरल मार्गदर्शिका</div>
+    </div>
+    <div style="font-size:11px; color:#f1f3fd; text-align:right;">
+      हिन्दी संस्करण<br>2-पृष्ठ त्वरित सारांश
+    </div>
+  </div>
+
+  <!-- SECTION 1: GETTING STARTED -->
+  <div class="section-banner">
+    <span>1. शुरुआत एवं खाता सेटअप</span>
+    <span class="section-tag">सभी उपयोगकर्ता</span>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">🔑 लॉगिन एवं साइन अप</div>
+      <p>भूमिका (थोक विक्रेता, रिटेलर, ड्राइवर) चुनें, मोबाइल नंबर/ईमेल दर्ज करें और OTP से लॉगिन करें।</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 व्यवसाय एवं KYC विवरण</div>
+      <p>व्यवसाय का नाम, मालिक का नाम, GST, PAN, आधार और सरकारी लाइसेंस नंबर दर्ज करें।</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📍 व्यावसायिक स्थान एवं भाषा</div>
+      <p>शाखा/दुकान का पता Business Locations में जोड़ें। भाषा (हिन्दी/English) सेटिंग्स में बदलें।</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: RETAILER GUIDE -->
+  <div class="section-banner retailer">
+    <span>2. रिटेलर (खरीदार) गाइड - सामान खरीदना एवं ऑर्डर प्रबंधन</span>
+    <span class="section-tag">रिटेलर</span>
+  </div>
+
+  <div class="step-grid">
+    <div class="step-item">
+      <div class="step-num amber">चरण 1: उत्पाद खोजें</div>
+      <div class="step-text">होम स्क्रीन खोलें, नाम लिखकर खोजें, श्रेणियां देखें और भाव/स्टॉक जांचें।</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num amber">चरण 2: कार्ट व इकाई</div>
+      <div class="step-text">कार्ट में जोड़ें, इकाई (KG, क्विंटल, टन, ग्राम) चुनें और डिलीवरी स्थान चुनें।</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num amber">चरण 3: चेकआउट व भुगतान</div>
+      <div class="step-text">चेकआउट पर ऑर्डर जांचें, भुगतान तरीका चुनें (ऑनलाइन / UPI / कार्ड / COD) और ऑर्डर दें।</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num amber">चरण 4: ऑर्डर व समस्याएं</div>
+      <div class="step-text">ऑर्डर स्थिति ऑर्डर इतिहास में देखें। खराब/कम माल होने पर Report Issue में शिकायत दर्ज करें।</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WHOLESALER GUIDE -->
+  <div class="section-banner wholesaler">
+    <span>3. थोक विक्रेता गाइड - स्टॉक प्रबंधन एवं ऑर्डर पूर्ति</span>
+    <span class="section-tag">थोक विक्रेता</span>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🏠 होम डैशबोर्ड एवं स्टॉक नियम</div>
+      <ul>
+        <li><strong>लाइव आंकड़े:</strong> आज की आय, इस सप्ताह की बिक्री, बकाया भुगतान, कुल स्टॉक व सक्रिय ऑर्डर देखें।</li>
+        <li><strong>ऑर्डर पर स्वतः स्टॉक कटौती:</strong> खरीदार द्वारा ऑर्डर देते ही आपके उपलब्ध स्टॉक में से उतनी मात्रा तुरंत कट जाती है।</li>
+        <li><strong>हालिया मांग:</strong> रिटेलरों द्वारा बार-बार मांगे जा रहे उत्पादों की सूची।</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">📦 स्टॉक डैशबोर्ड एवं नया स्टॉक</div>
+      <ul>
+        <li><strong>स्टॉक डैशबोर्ड:</strong> इन्वेंट्री में उपलब्ध सभी उत्पाद और उनकी स्थिति (स्टॉक में, ध्यान दें, समाप्त) देखें।</li>
+        <li><strong>स्टॉक जोड़ें (Add Stock):</strong> नई उपज का नाम, श्रेणी, इकाई (KG, ग्राम, क्विंटल, टन), दर और मात्रा दर्ज करें।</li>
+        <li><strong>स्टॉक अपडेट करें:</strong> माल बिकने पर बची हुई मात्रा या भाव तुरंत बदलें।</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📑 प्राप्त ऑर्डर एवं पिकअप</div>
+      <ul>
+        <li><strong>प्राप्त ऑर्डर:</strong> नए ऑर्डरों को देखें, उत्पाद, मात्रा व खरीदार का विवरण जांचें और पैक करके तैयार करें।</li>
+        <li><strong>पिकअप ऑर्डर:</strong> तैयार माल की सूची देखें और ड्राइवर के पहुंचने पर माल सौंपें।</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">📈 मांग जानकारी एवं आय</div>
+      <ul>
+        <li><strong>कल की मांग व रीस्टॉक सुझाव:</strong> कल की अनुमानित मांग और रीस्टॉक करने योग्य वस्तुओं के सुझाव देखें।</li>
+        <li><strong>रुझान व कमाई:</strong> बिक्री रुझान, मंडी भाव तुलना और पूरे हुए/लंबित भुगतानों का विवरण देखें।</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Melato संक्षिप्त उपयोग गाइड</span>
+    <span>पृष्ठ 1 / 2</span>
+  </div>
+</div>
+
+<!-- PAGE 2: DRIVER GUIDE & HELP/SUPPORT (HINDI) -->
+<div class="page">
+  <!-- SECTION 4: DRIVER GUIDE -->
+  <div class="section-banner driver">
+    <span>4. ड्राइवर गाइड - डिलीवरी एवं कमाई</span>
+    <span class="section-tag">ड्राइवर</span>
+  </div>
+
+  <div class="step-grid">
+    <div class="step-item">
+      <div class="step-num teal">चरण 1: पंजीकरण</div>
+      <div class="step-text">ड्राइवर जानकारी भरें, DL/पहचान पत्र अपलोड करें और वाहन विवरण दर्ज करें।</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num teal">चरण 2: अनुरोध स्वीकारें</div>
+      <div class="step-text">परिवहन अनुरोध में पिकअप, ड्रॉप और किराया देखकर <strong>स्वीकार करें (Accept)</strong>।</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num teal">चरण 3: माल पिकअप</div>
+      <div class="step-text">पिकअप ऑर्डर से थोक विक्रेता के पास जाएं, माल की गिनती जांचें और पिकअप कन्फर्म करें।</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num teal">चरण 4: डिलीवरी पुष्टि</div>
+      <div class="step-text">खरीदार को माल सौंपें और डिलीवरी कन्फर्म करें। कमाई डैशबोर्ड में किराया देखें।</div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: IN-APP HELP & SUPPORT -->
+  <div class="section-banner support">
+    <span>5. इन-ऐप सहायता केंद्र (Help Center) एवं सपोर्ट</span>
+    <span class="section-tag">सेटिंग्स &gt; सहायता केंद्र / सपोर्ट</span>
+  </div>
+
+  <div class="grid-2">
+    <div class="card highlight">
+      <div class="card-title">📖 इंटरैक्टिव सहायता केंद्र</div>
+      <ul>
+        <li><strong>वॉकथ्रू ट्यूटोरियल:</strong> मुख्य कार्यों का त्वरित ट्यूटोरियल। कभी भी <em>वॉकथ्रू फिर से देखें</em> दबाकर देखें।</li>
+        <li><strong>श्रेणी अनुसार फ़िल्टर:</strong> खरीदारी, ऑर्डर, डिलीवरी, स्टॉक और आय के अनुसार गाइड चुनें।</li>
+        <li><strong>सीधे स्क्रीन खोलना:</strong> किसी भी हेल्प कार्ड पर टैप करने से (जैसे <em>"उत्पाद खोजें", "स्टॉक अपडेट करें", "डिलीवरी पुष्टि"</em>) सीधे वही स्क्रीन खुल जाती है।</li>
+      </ul>
+    </div>
+    <div class="card highlight">
+      <div class="card-title">📞 सपोर्ट सेंटर</div>
+      <ul>
+        <li><strong>समस्या की श्रेणी चुनें:</strong> <em>भुगतान, ऑर्डर, डिलीवरी, डिस्पैच, ट्रिप, उत्पाद, विक्रेता, खाता, तकनीकी या सुरक्षा</em> चुनें।</li>
+        <li><strong>समस्या चुनें एवं सीधे संपर्क करें:</strong> सूची में से विशिष्ट समस्या चुनें, विवरण जोड़ें और तुरंत समाधान के लिए सपोर्ट टीम से सीधे संपर्क करें।</li>
+        <li><strong>ऑर्डर विवाद:</strong> किसी भी ऑर्डर में समस्या होने पर सीधे <em>समस्या बताएं (Report Issue)</em> में शिकायत दर्ज करें।</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 6: QUICK ACCESS CHEAT SHEET -->
+  <div class="section-banner">
+    <span>6. त्वरित संदर्भ सारांश तालिका</span>
+    <span class="section-tag">त्वरित सारांश</span>
+  </div>
+
+  <table class="compact-table">
+    <thead>
+      <tr>
+        <th style="width: 18%;">भूमिका</th>
+        <th style="width: 42%;">उपलब्ध मुख्य कार्य</th>
+        <th style="width: 40%;">ऐप में कैसे पहुंचें</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>रिटेलर (खरीदार)</strong></td>
+        <td>उत्पाद खोजें, कार्ट में जोड़ें, चेकआउट व भुगतान, ऑर्डर ट्रैकिंग, खर्च व विवाद</td>
+        <td>होम स्क्रीन ➔ कार्ट ➔ ऑर्डर इतिहास ➔ मेनू</td>
+      </tr>
+      <tr>
+        <td><strong>थोक विक्रेता</strong></td>
+        <td>स्टॉक डैशबोर्ड, नया स्टॉक जोड़ना/अपडेट, प्राप्त ऑर्डर, पिकअप, मांग व आय</td>
+        <td>होम डैशबोर्ड ➔ स्टॉक डैशबोर्ड ➔ ऑर्डर ➔ मेनू</td>
+      </tr>
+      <tr>
+        <td><strong>ड्राइवर</strong></td>
+        <td>परिवहन अनुरोध स्वीकार करना, पिकअप ऑर्डर, डिलीवरी पुष्टि, कमाई डैशबोर्ड व इतिहास</td>
+        <td>ड्राइवर डैशबोर्ड ➔ परिवहन अनुरोध ➔ मेनू</td>
+      </tr>
+      <tr>
+        <td><strong>सभी उपयोगकर्ता</strong></td>
+        <td>व्यावसायिक स्थान, हेल्प सेंटर वॉकथ्रू, सपोर्ट सेंटर, भाषा चयन</td>
+        <td>सेटिंग्स ➔ सहायता केंद्र / सपोर्ट सेंटर / भाषा</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card" style="background:#fbf9ff; border-color:#e9d5ff; color:#4c2d77; font-size:11px; padding:6px 9px;">
+    <strong>त्वरित टिप:</strong> किसी भी स्क्रीन पर सहायता चाहिए? <strong>सेटिंग्स &gt; सहायता केंद्र</strong> में जाकर उस स्क्रीन का गाइड देखें या सपोर्ट से सीधे बात करने के लिए <strong>सपोर्ट सेंटर</strong> पर जाएं।
+  </div>
+
+  <div class="footer">
+    <span>Melato संक्षिप्त उपयोग गाइड - संपूर्ण</span>
+    <span>पृष्ठ 2 / 2</span>
+  </div>
+</div>
+
+</body>
+</html>

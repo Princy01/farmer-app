@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Melato - Quick User Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap');
+
+@page {
+    size: A4 portrait;
+    margin: 10mm 10mm 10mm 10mm;
+    @bottom-right {
+        content: counter(page);
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    line-height: 1.38;
+    font-size: 12px;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.page {
+    page-break-after: always;
+    break-after: page;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+.page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+}
+
+/* Purple Compact Header */
+.quick-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.22);
+}
+
+.quick-title {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.quick-subtitle {
+    font-size: 11.5px;
+    color: #f1f3fd;
+}
+
+/* Sections */
+.section-banner {
+    background: #f8fafc;
+    border-left: 3.5px solid #764ba2;
+    padding: 4px 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0f172a;
+    border-radius: 0 4px 4px 0;
+    margin-top: 8px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-banner.retailer { border-left-color: #d97706; }
+.section-banner.wholesaler { border-left-color: #667eea; }
+.section-banner.driver { border-left-color: #0d9488; }
+.section-banner.support { border-left-color: #e11d48; }
+
+.section-tag {
+    font-size: 10px;
+    font-weight: 600;
+    background: #e2e8f0;
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: #475569;
+}
+
+/* Grid & Cards */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 7px 9px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.card.highlight {
+    background: #f8fafc;
+}
+
+.card-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card ul {
+    margin-left: 14px;
+    font-size: 11px;
+    color: #334155;
+}
+
+.card li {
+    margin-bottom: 2px;
+}
+
+.card p {
+    font-size: 11px;
+    color: #334155;
+    margin-bottom: 2px;
+}
+
+/* Step Flow Row */
+.step-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.step-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 6px 7px;
+    font-size: 10.5px;
+}
+
+.step-num {
+    font-weight: 800;
+    color: #764ba2;
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+
+.step-num.amber { color: #d97706; }
+.step-num.blue { color: #667eea; }
+.step-num.teal { color: #0d9488; }
+
+.step-text {
+    color: #334155;
+}
+
+/* Compact Table */
+.compact-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0;
+    font-size: 11px;
+}
+
+.compact-table th, .compact-table td {
+    border: 1px solid #cbd5e1;
+    padding: 4px 7px;
+    text-align: left;
+}
+
+.compact-table th {
+    background: #f1f5f9;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.compact-table tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9.5px;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 4px;
+    margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: SETUP, RETAILER & WHOLESALER QUICK GUIDE -->
+<div class="page">
+  <div class="quick-header">
+    <div>
+      <div class="quick-title">Melato - Quick User Guide</div>
+      <div class="quick-subtitle">Essential How-to-Use Guide for Wholesalers, Retailers, and Drivers</div>
+    </div>
+    <div style="font-size:11px; color:#f1f3fd; text-align:right;">
+      English Edition<br>2-Page Quick Summary
+    </div>
+  </div>
+
+  <!-- SECTION 1: GETTING STARTED -->
+  <div class="section-banner">
+    <span>1. Getting Started & Account Setup</span>
+    <span class="section-tag">All Users</span>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">🔑 Login & Sign Up</div>
+      <p>Select role (Wholesaler, Retailer, Driver), enter Mobile Number/Email, and verify with OTP.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Business & KYC Info</div>
+      <p>Enter Business Name, Owner Name, GST, PAN, Aadhaar, and Government License Number.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📍 Locations & Language</div>
+      <p>Add branch/shop delivery addresses under Business Locations. Switch English/Hindi in Settings.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: RETAILER GUIDE -->
+  <div class="section-banner retailer">
+    <span>2. Retailer (Buyer) Guide - How to Order & Manage Purchases</span>
+    <span class="section-tag">Retailer</span>
+  </div>
+
+  <div class="step-grid">
+    <div class="step-item">
+      <div class="step-num amber">Step 1: Browse & Search</div>
+      <div class="step-text">Open Home screen, search produce by name, browse categories, and check prices/stock.</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num amber">Step 2: Cart & Units</div>
+      <div class="step-text">Add items to Cart, choose units (KG, Quintal, Ton, gm), and select your delivery location.</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num amber">Step 3: Checkout & Pay</div>
+      <div class="step-text">Review order at Checkout, choose payment method (Online / UPI / Cards / COD), and get Order ID.</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num amber">Step 4: Orders & Disputes</div>
+      <div class="step-text">Track order status in Order History. Report any damaged or short items under Report Issue.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WHOLESALER GUIDE -->
+  <div class="section-banner wholesaler">
+    <span>3. Wholesaler Guide - Stock Management & Order Fulfillment</span>
+    <span class="section-tag">Wholesaler</span>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🏠 Home Dashboard & Stock Logic</div>
+      <ul>
+        <li><strong>Live Metrics:</strong> View Today's Earnings, This Week's Revenue, Pending Payouts, Total Stock & Active Orders.</li>
+        <li><strong>Automatic Stock Deduction:</strong> When a buyer places an order, quantity automatically deducts from your available stock in real time.</li>
+        <li><strong>Recently in Demand:</strong> View trending commodities requested by retailers.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">📦 Stock Dashboard & Add/Update</div>
+      <ul>
+        <li><strong>Stock Dashboard:</strong> View all products in your inventory with live stock levels (In Stock, Needs Attention, Out of Stock).</li>
+        <li><strong>Add Stock:</strong> Tap <em>Add Stock</em> to enter commodity name, category, unit (KG, gm, Quintal, Ton), price, and available quantity.</li>
+        <li><strong>Update Stock:</strong> Quickly adjust available quantities or prices as inventory changes.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📑 Orders Received & Pickups</div>
+      <ul>
+        <li><strong>Orders Received:</strong> View incoming retailer orders, review items, quantities, buyer details, and accept/prepare for dispatch.</li>
+        <li><strong>Pickup Orders:</strong> View packed orders ready for collection and hand them over to the driver upon arrival.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">📈 Demand Insights & Earnings</div>
+      <ul>
+        <li><strong>Next-Day Demand & Restocking:</strong> View predicted demand for tomorrow and recommendations on what to restock.</li>
+        <li><strong>Trends & Earnings:</strong> View sales/demand trends, market price comparisons, and track completed/pending payouts.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Melato Quick User Guide</span>
+    <span>Page 1 of 2</span>
+  </div>
+</div>
+
+<!-- PAGE 2: DRIVER GUIDE & HELP/SUPPORT -->
+<div class="page">
+  <!-- SECTION 4: DRIVER GUIDE -->
+  <div class="section-banner driver">
+    <span>4. Driver Guide - Deliveries & Earnings</span>
+    <span class="section-tag">Driver</span>
+  </div>
+
+  <div class="step-grid">
+    <div class="step-item">
+      <div class="step-num teal">Step 1: Registration</div>
+      <div class="step-text">Enter driver details under Driver Registration, upload DL/ID proof, and enter vehicle details.</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num teal">Step 2: Accept Requests</div>
+      <div class="step-text">Open Transport Requests to view jobs with pickup/drop locations & fare. Tap <strong>Accept</strong>.</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num teal">Step 3: Pickup Orders</div>
+      <div class="step-text">Go to wholesaler location under Pickup Orders, check package count, and confirm pickup in the app.</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num teal">Step 4: Delivery & Earnings</div>
+      <div class="step-text">Deliver goods to retailer and confirm delivery under Delivery Confirmation. View earnings in Earnings Dashboard.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: IN-APP HELP & SUPPORT -->
+  <div class="section-banner support">
+    <span>5. In-App Help Center & Support Center</span>
+    <span class="section-tag">Settings &gt; Help / Support</span>
+  </div>
+
+  <div class="grid-2">
+    <div class="card highlight">
+      <div class="card-title">📖 Interactive Help Center</div>
+      <ul>
+        <li><strong>Interactive Walkthrough:</strong> Quick tutorial explaining core tasks. Tap <em>Replay Walkthrough</em> to view anytime.</li>
+        <li><strong>Category Filters:</strong> Filter guides by role tasks (Shopping, Orders, Deliveries, Stock, Earnings).</li>
+        <li><strong>Direct Screen Jump:</strong> Tap any help card (e.g. <em>"Browse and search", "Update stock", "Confirm delivery"</em>) to open that exact screen immediately.</li>
+      </ul>
+    </div>
+    <div class="card highlight">
+      <div class="card-title">📞 Support Center</div>
+      <ul>
+        <li><strong>Select Issue Category:</strong> Choose from <em>Payment, Order, Incoming Order, Delivery, Dispatch, Trip, Goods, Seller, Account, Technical, Safety</em>.</li>
+        <li><strong>Select Problem & Contact:</strong> Pick the specific issue from the list, add details, and contact support directly for quick resolution.</li>
+        <li><strong>Order Disputes:</strong> Raise item/delivery disputes directly under <em>Report Issue</em> on any order.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 6: QUICK ACCESS CHEAT SHEET -->
+  <div class="section-banner">
+    <span>6. Quick Access Navigation Summary</span>
+    <span class="section-tag">Cheat Sheet</span>
+  </div>
+
+  <table class="compact-table">
+    <thead>
+      <tr>
+        <th style="width: 18%;">Role</th>
+        <th style="width: 42%;">Core Tasks Available</th>
+        <th style="width: 40%;">How to Access in App</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Retailer (Buyer)</strong></td>
+        <td>Browse produce, Add to Cart, Checkout & Pay, Order Tracking, Spends & Report Issues</td>
+        <td>Home Screen ➔ Cart ➔ Order History ➔ Menu</td>
+      </tr>
+      <tr>
+        <td><strong>Wholesaler</strong></td>
+        <td>Stock Dashboard, Add/Update Stock, Orders Received, Pickup Orders, Demand Insights & Earnings</td>
+        <td>Home Dashboard ➔ Stock Dashboard ➔ Orders ➔ Menu</td>
+      </tr>
+      <tr>
+        <td><strong>Driver</strong></td>
+        <td>Accept Transport Requests, Pickup Orders, Delivery Confirmation, Earnings Dashboard & History</td>
+        <td>Driver Dashboard ➔ Transport Requests ➔ Menu</td>
+      </tr>
+      <tr>
+        <td><strong>All Roles</strong></td>
+        <td>Business Locations, In-App Help Center walkthroughs, Support Center, Language toggle</td>
+        <td>Settings ➔ Help Center / Support Center / Language</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card" style="background:#fbf9ff; border-color:#e9d5ff; color:#4c2d77; font-size:11px; padding:6px 9px;">
+    <strong>Quick Tip:</strong> Need help while using any screen? Open <strong>Settings &gt; Help Center</strong> to see interactive guides for that screen, or go to <strong>Support Center</strong> to contact support directly.
+  </div>
+
+  <div class="footer">
+    <span>Melato Quick User Guide - End of Guide</span>
+    <span>Page 2 of 2</span>
+  </div>
+</div>
+
+</body>
+</html>

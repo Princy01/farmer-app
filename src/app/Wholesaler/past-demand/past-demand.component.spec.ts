@@ -1,19 +1,18 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { PastDemandComponent } from './past-demand.component';
+import { PastDemandPage } from './past-demand.component';
 
-describe('PastDemandComponent', () => {
-  let component: PastDemandComponent;
-  let fixture: ComponentFixture<PastDemandComponent>;
+describe('PastDemandPage', () => {
+  let component: PastDemandPage;
+  let fixture: ComponentFixture<PastDemandPage>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PastDemandComponent ],
-      imports: [IonicModule.forRoot()]
+      imports: [IonicModule.forRoot(), PastDemandPage]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(PastDemandComponent);
+    fixture = TestBed.createComponent(PastDemandPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
