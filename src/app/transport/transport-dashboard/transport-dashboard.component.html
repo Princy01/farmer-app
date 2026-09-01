@@ -1,16 +1,92 @@
 <ion-header mode="ios">
-  <ion-toolbar class="header-toolbar">
+  <ion-toolbar class="main-toolbar">
+    <ion-buttons slot="start">
+      <ion-menu-button (click)="openMenu()">
+        <ion-icon name="menu-outline" size="large"></ion-icon>
+      </ion-menu-button>
+    </ion-buttons>
+
+    <ion-title>
+      <div class="brand-title-wrap">
+        <span class="brand-name">{{ 'TRANSPORT_MENU.Melato' | translate }}</span>
+        <span class="brand-role-tag">{{ 'TRANSPORT_MENU.ROLE_NAME' | translate }}</span>
+      </div>
+    </ion-title>
+
     <ion-buttons slot="end">
       <ion-button (click)="openLanguagePopover($event)" class="header-btn language-btn" [disabled]="isLoading">
-        <ion-icon name="language-outline" slot="start"></ion-icon>
-        <span>{{ currentLanguage }}</span>
+        <ion-icon name="language-outline" slot="end"></ion-icon>
         <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
+      </ion-button>
+      <ion-button routerLink="/transport/notifications" class="header-btn" [disabled]="isLoading">
+        <ion-icon name="notifications-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="transport-content" [fullscreen]="true">
+<ion-menu side="start" menuId="transport-menu" contentId="transport-main-content" class="custom-menu">
+  <ion-header>
+    <ion-toolbar class="menu-toolbar">
+      <ion-buttons slot="start">
+        <img src="assets/images/melato-icon.png" alt="Melato" class="menu-toolbar-logo" />
+      </ion-buttons>
+      <ion-title class="menu-title">{{ 'TRANSPORT_MENU.MENU' | translate }}</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="closeMenu()" class="menu-close-btn">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="menu-content">
+    <ion-list class="menu-list">
+      <ion-item button (click)="navigateTo('/transport/profile')" lines="none" class="menu-item">
+        <ion-icon name="person-circle-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'TRANSPORT_MENU.PROFILE' | translate }}</ion-label>
+      </ion-item>
+      <ion-item button (click)="navigateTo('/transport/manage-vehicles')" lines="none" class="menu-item">
+        <ion-icon name="car-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'TRANSPORT_MENU.MANAGE_VEHICLES' | translate }}</ion-label>
+      </ion-item>
+      <ion-item button (click)="navigateTo('/transport/transport-requests')" lines="none" class="menu-item">
+        <ion-icon name="document-text-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'TRANSPORT_MENU.TRANSPORT_REQUESTS' | translate }}</ion-label>
+      </ion-item>
+      <ion-item button (click)="navigateTo('/transport/pickup-orders')" lines="none" class="menu-item">
+        <ion-icon name="list-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'TRANSPORT_MENU.PICKUP_ORDERS' | translate }}</ion-label>
+      </ion-item>
+      <ion-item button (click)="navigateTo('/transport/delivery-confirmation')" lines="none" class="menu-item">
+        <ion-icon name="checkmark-circle-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'TRANSPORT_MENU.DELIVERY_CONFIRMATION' | translate }}</ion-label>
+      </ion-item>
+      <ion-item button (click)="navigateTo('/transport/delivery-history')" lines="none" class="menu-item">
+        <ion-icon name="time-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'TRANSPORT_MENU.DELIVERY_HISTORY' | translate }}</ion-label>
+      </ion-item>
+      <ion-item button (click)="navigateTo('/transport/earnings-dashboard')" lines="none" class="menu-item">
+        <ion-icon name="cash-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'TRANSPORT_MENU.EARNINGS_REPORTS' | translate }}</ion-label>
+      </ion-item>
+      <ion-item button (click)="navigateTo('/transport/my-issues')" lines="none" class="menu-item">
+        <ion-icon name="alert-circle-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'TRANSPORT_MENU.DISPUTE_MANAGEMENT' | translate }}</ion-label>
+      </ion-item>
+      <ion-item button (click)="navigateTo('/transport/settings')" lines="none" class="menu-item">
+        <ion-icon name="settings-outline" slot="start" class="menu-icon"></ion-icon>
+        <ion-label>{{ 'TRANSPORT_MENU.SETTINGS' | translate }}</ion-label>
+      </ion-item>
+      <ion-item button (click)="logout()" lines="none" class="menu-item logout-item">
+        <ion-icon name="log-out-outline" slot="start" class="menu-icon logout-icon"></ion-icon>
+        <ion-label class="logout-label">{{ 'MENU.LOGOUT' | translate }}</ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-menu>
+
+<ion-content id="transport-main-content" class="transport-content" [fullscreen]="true">
 
   <!-- Segment Control -->
   <div class="segment-container">

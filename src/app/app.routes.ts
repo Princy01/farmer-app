@@ -9,10 +9,6 @@ const appRoutes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'landing',
-    loadComponent: () => import('./landing/landing.page').then((m) => m.LandingPage),
-  },
-  {
     path: 'login',
     loadComponent: () => import('./auth/auth.page').then((m) => m.LoginPage),
   },
@@ -205,10 +201,6 @@ const appRoutes: Routes = [
         loadComponent: () => import('./buyer/category/category.component').then((m) => m.CategoryPageComponent),
       },
       {
-        path: 'wishlist',
-        loadComponent: () => import('./buyer/wishlist/wishlist.component').then((m) => m.WishlistComponent),
-      },
-      {
         path: 'cart',
         loadComponent: () => import('./buyer/cart/cart.component').then((m) => m.CartComponent),
       },
@@ -257,76 +249,6 @@ const appRoutes: Routes = [
         loadComponent: () => import('./buyer/order-confirmation/order-confirmation.component').then((m) => m.OrderConfirmationComponent),
       },
 
-    ]
-  },
-  {
-    path: 'warehouse',
-    children: [
-      {
-        path: '',
-        redirectTo: 'warehouse-list',
-        pathMatch: 'full'
-      },
-      {
-        path: 'warehouse-list',
-        loadComponent: () =>
-          import('./warehouse/warehouse-list/warehouse-list.component').then((m) => m.WarehouseListComponent)
-      },
-      {
-        path: 'warehouse-list/:warehouseId/inventory',
-        loadComponent: () =>
-          import('./warehouse/inventory-list/inventory-list.component').then((m) => m.InventoryListComponent)
-      },
-      {
-        path: 'warehouse-list/:warehouseId/inventory/add',
-        loadComponent: () =>
-          import('./warehouse/add-inventory/add-inventory.component').then((m) => m.AddInventoryComponent)
-      },
-      {
-        path: 'inventory-detail/:batchNo',
-        loadComponent: () =>
-          import('./warehouse/inventory-detail/inventory-detail.component').then((m) => m.InventoryDetailComponent)
-      },
-      {
-        path: 'edit-inventory/:batchNo',
-        loadComponent: () =>
-          import('./warehouse/edit-inventory/edit-inventory.component').then((m) => m.EditInventoryComponent)
-      },
-      {
-        path: 'receiving-inspection',
-        loadComponent: () =>
-          import('./warehouse/receiving-inspection/receiving-inspection.component').then((m) => m.ReceivingInspectionComponent)
-      },
-      {
-        path: 'storage-management',
-        loadComponent: () =>
-          import('./warehouse/storage-management/storage-management.component').then((m) => m.StorageManagementComponent)
-      },
-      {
-        path: 'dispatch-order-management',
-        loadComponent: () =>
-          import('./warehouse/dispatch-order-management/dispatch-order-management.component').then((m) => m.DispatchOrderManagementComponent)
-      },
-      {
-        path: 'stock-movement-audit',
-        loadComponent: () =>
-          import('./warehouse/stock-movement-audit/stock-movement-audit.component').then((m) => m.StockMovementAuditComponent)
-      },
-      {
-        path: 'stock-movements',
-        loadComponent: () =>
-          import('./warehouse/stock-movement-audit/stock-movements/stock-movements.component').then((m) => m.StockMovementsComponent)
-      },
-      {
-        path: 'stock-audits',
-        loadComponent: () =>
-          import('./warehouse/stock-movement-audit/stock-audits/stock-audits.component').then((m) => m.StockAuditsComponent)
-      },
-      {
-        path: 'wastage-spoilage',
-        loadComponent: () =>
-          import('./warehouse/wastage-spoilage/wastage-spoilage.component').then((m) => m.WastageSpoilageComponent)
-      }
     ]
   },
   {
@@ -513,6 +435,10 @@ const appRoutes: Routes = [
         loadComponent: () => import('./transport/manage-vehicles/manage-vehicles.component').then((m) => m.ManageVehiclesComponent),
       },
       {
+        path: 'vehicles',
+        loadComponent: () => import('./transport/manage-vehicles/manage-vehicles.component').then((m) => m.ManageVehiclesComponent),
+      },
+      {
         path: 'manage-drivers',
         loadComponent: () => import('./transport/manage-drivers/manage-drivers.component').then((m) => m.ManageDriversComponent),
       },
@@ -590,10 +516,6 @@ const appRoutes: Routes = [
       {
         path: 'notifications',
         loadComponent: () => import('./transport/notifications/notifications.component').then((m) => m.NotificationsComponent),
-      },
-      {
-        path: 'live-tracking',
-        loadComponent: () => import('./transport/live-tracking/live-tracking.component').then((m) => m.LiveTrackingComponent),
       },
       {
         path: 'route-optimization',

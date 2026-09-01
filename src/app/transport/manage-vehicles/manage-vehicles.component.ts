@@ -2,11 +2,23 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController, ModalController } from '@ionic/angular';
+import { TranslatePipe, TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
-import { addOutline, createOutline, trashOutline } from 'ionicons/icons';
+import {
+  addOutline,
+  createOutline,
+  trashOutline,
+  carOutline,
+  leafOutline,
+  personOutline,
+  callOutline,
+  speedometerOutline,
+  checkmarkCircleOutline,
+  closeCircleOutline
+} from 'ionicons/icons';
 import { VehicleFormComponent } from '../vehicle-form-modal/vehicle-form-modal.component';
 
-interface Vehicle {
+export interface Vehicle {
   id: number;
   type: string;
   capacity: number;
@@ -22,7 +34,7 @@ interface Vehicle {
   templateUrl: './manage-vehicles.component.html',
   styleUrls: ['./manage-vehicles.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule],
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe, TranslateModule],
 })
 export class ManageVehiclesComponent {
   vehicles: Vehicle[] = [
@@ -35,7 +47,20 @@ export class ManageVehiclesComponent {
   constructor(
     private modalCtrl: ModalController,
     private toastCtrl: ToastController
-  ) { addIcons({ addOutline, createOutline, trashOutline }); }
+  ) {
+    addIcons({
+      addOutline,
+      createOutline,
+      trashOutline,
+      carOutline,
+      leafOutline,
+      personOutline,
+      callOutline,
+      speedometerOutline,
+      checkmarkCircleOutline,
+      closeCircleOutline
+    });
+  }
 
   /**
    * Opens the modal for adding or editing a vehicle.
@@ -45,7 +70,7 @@ export class ManageVehiclesComponent {
     const modal = await this.modalCtrl.create({
       component: VehicleFormComponent,
       componentProps: {
-        vehicle: vehicle ? { ...vehicle } : { isElectric: false, carbonCredits: 0 }, // Default values for new vehicles
+        vehicle: vehicle ? { ...vehicle } : { isElectric: false, carbonCredits: 0, available: true },
         isEdit: !!vehicle
       }
     });
@@ -60,8 +85,12 @@ export class ManageVehiclesComponent {
         this.showToast('Vehicle updated successfully!');
       } else {
         // Add new vehicle
-        data.id = this.vehicles.length ? this.vehicles[this.vehicles.length - 1].id + 1 : 1;
-        this.vehicles.push(data);
+        const nextId = this.vehicles.length ? Math.max(...this.vehicles.map(v => v.id)) + 1 : 1;
+        this.vehicles.push({
+          ...data,
+          id: nextId,
+          available: data.available !== undefined ? data.available : true
+        });
         this.showToast('Vehicle added successfully!');
       }
     }

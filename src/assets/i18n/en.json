@@ -3672,9 +3672,11 @@
     }
   },
   "TRANSPORT_MENU": {
+    "Melato": "Melato",
     "MENU": "My Deliveries",
     "ROLE_NAME": "Driver",
     "APP_TITLE": "Melato Driver",
+    "FULL_APP_TITLE": "Melato Driver",
     "TRANSPORT": "Transport",
     "PROFILE": "Profile",
     "DASHBOARD": "Dashboard",

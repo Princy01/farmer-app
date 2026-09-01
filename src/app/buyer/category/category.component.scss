@@ -293,7 +293,6 @@ ion-modal ion-content {
     justify-content: space-around;
   }
 
-  .wishlist-button,
   .cart-button {
     flex: 1;
     margin: 0 8px;
@@ -304,7 +303,6 @@ ion-modal ion-content {
     --color: $primary-color;
   }
 
-  .wishlist-button ion-icon,
   .cart-button ion-icon {
     margin-right: 5px;
     font-size: 18px;
@@ -566,21 +564,6 @@ ion-card.selected {
 .wholesaler-vertical-scroll ion-card-title {
   font-size: 1rem;
   color: $primary-color;
-}
-
-.wholesaler-vertical-scroll ion-icon[name="heart-outline"] {
-  color: $error-color;
-  font-size: 1.5em;
-}
-
-.heart-icon {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  font-size: 1.5em;
-  color: $error-color;
-  cursor: pointer;
-  z-index: 2;
 }
 
 .wholesaler-vertical-scroll ion-icon[name="star"] {

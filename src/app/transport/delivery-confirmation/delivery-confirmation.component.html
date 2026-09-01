@@ -1,3 +1,17 @@
+<ion-header mode="ios">
+  <ion-toolbar style="--background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --color: white;">
+    <ion-buttons slot="start">
+      <ion-button *ngIf="!showList" (click)="goBack()" fill="clear" color="light">
+        <ion-icon name="chevron-back" color="light"></ion-icon>
+      </ion-button>
+      <ion-back-button *ngIf="showList" defaultHref="/transport/transport-dashboard" color="light" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title style="font-weight: 600; font-size: 1.2rem; color: white;">
+      {{ 'TRANSPORT_MENU.DELIVERY_CONFIRMATION' | translate }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
 <ion-content class="delivery-content">
   <!-- List View: Active Jobs -->
   <div *ngIf="showList" class="content-container">

@@ -1,16 +1,23 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, MenuController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { addIcons } from 'ionicons';
-import { languageOutline, carOutline, timeOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import {
+  languageOutline, carOutline, timeOutline, checkmarkCircleOutline,
+  menuOutline, notificationsOutline, chevronDownOutline, personCircleOutline,
+  speedometerOutline, documentTextOutline, personAddOutline, listOutline,
+  cashOutline, alertCircleOutline, settingsOutline, logOutOutline, closeOutline
+} from 'ionicons/icons';
 import { DeliveryService } from './delivery.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PopoverController } from '@ionic/angular';
 import { LanguagePopoverComponent } from './language-popover.component';
 import { TranslateApiService } from '@/services/translate-api.service';
+import { AuthService } from 'src/app/auth/auth.service';
 
 interface Language {
   id: number;
@@ -23,7 +30,7 @@ interface Language {
   standalone: true,
   templateUrl: './transport-dashboard.component.html',
   styleUrls: ['./transport-dashboard.component.scss'],
-  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
+  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe, RouterModule]
 })
 export class TransportDashboardComponent implements OnInit, OnDestroy {
   selectedTab = 'active';
@@ -45,10 +52,18 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private popoverCtrl: PopoverController,
     private translateApiService: TranslateApiService,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private menuCtrl: MenuController,
+    private router: Router,
+    private authService: AuthService
   ) {
     this.translate.setDefaultLang('en');
-    addIcons({ languageOutline, carOutline, timeOutline, checkmarkCircleOutline });
+    addIcons({
+      languageOutline, carOutline, timeOutline, checkmarkCircleOutline,
+      menuOutline, notificationsOutline, chevronDownOutline, personCircleOutline,
+      speedometerOutline, documentTextOutline, personAddOutline, listOutline,
+      cashOutline, alertCircleOutline, settingsOutline, logOutOutline, closeOutline
+    });
   }
 
   ngOnInit() {
@@ -60,6 +75,51 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  openMenu() {
+    this.menuCtrl.open('transport-menu');
+  }
+
+  closeMenu() {
+    this.menuCtrl.close('transport-menu');
+  }
+
+  navigateTo(path: string) {
+    this.closeMenu();
+    this.router.navigate([path]);
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.menuCtrl.close('transport-menu');
+
+      const alert = await this.alertCtrl.create({
+        header: this.translate.instant('MENU.LOGOUT_TITLE'),
+        message: this.translate.instant('MENU.LOGOUT_MESSAGE'),
+        buttons: [
+          {
+            text: this.translate.instant('MENU.CANCEL'),
+            role: 'cancel'
+          },
+          {
+            text: this.translate.instant('MENU.LOGOUT_CONFIRM'),
+            handler: async () => {
+              try {
+                this.authService.logout();
+                await this.router.navigate(['/login']);
+              } catch (error) {
+                // Silently ignore logout navigation errors
+              }
+            }
+          }
+        ]
+      });
+
+      await alert.present();
+    } catch (error) {
+      // Silently ignore menu/alert errors
+    }
   }
 
   private applyStoredLanguage() {
@@ -87,16 +147,13 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-
   setLanguage(langCode: string) {
-    // Ensure language code is lowercase to match JSON files (en.json, hi.json)
     const normalizedLangCode = langCode.toLowerCase();
 
     this.translate.use(normalizedLangCode).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         const lang = this.languages.find(l => l.code.toLowerCase() === normalizedLangCode);
         this.currentLanguage = lang ? lang.name : 'English';
-        // Save to localStorage for persistence
         localStorage.setItem('preferred_language', normalizedLangCode);
       },
       error: () => {
@@ -108,12 +165,10 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
   }
 
   saveLanguagePreference(langCode: string) {
-    // Normalize to lowercase for consistency
     const normalizedLangCode = langCode.toLowerCase();
     const lang = this.languages.find(l => l.code.toLowerCase() === normalizedLangCode);
 
     if (lang) {
-      // Save to backend
       this.translateApiService.setLanguagePreference(lang.id)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
@@ -121,7 +176,6 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
             this.setLanguage(normalizedLangCode);
           },
           error: () => {
-            // Still change language locally even if backend save fails
             this.setLanguage(normalizedLangCode);
           }
         });
@@ -185,134 +239,55 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
         },
         error: (err: any) => {
           this.isLoading = false;
-          // Use translation key from error message or fallback
           this.errorMessage = err.message || 'TRANSPORT_DASHBOARD.LOAD_DELIVERIES_ERROR';
         }
       });
   }
 
   getPickupLocations(orders: any[]): string {
-
-
     const pickupLocations = new Set<string>();
 
     orders.forEach((order: any) => {
       if (order.pickup_branch && order.pickup_branch.branch_address) {
         pickupLocations.add(order.pickup_branch.branch_address);
+      } else if (order.pickup_location) {
+        pickupLocations.add(order.pickup_location);
       }
     });
-    const prefix = pickupLocations.size === 1 ? '' : 'Multiple locations [ ';
-    const suffix = pickupLocations.size === 1 ? '' : ' ]';
 
-    return prefix + Array.from(pickupLocations).join(', ') + suffix || 'Multiple locations';
+    return Array.from(pickupLocations).join(', ') || 'N/A';
   }
 
   getDropoffLocation(orders: any[]): string {
-
-
-    // Use first order's delivery address
-    const firstOrder = orders[0];
-
-    // First try retailer_branch if it exists
-    if (firstOrder.dropoff_branch &&
-      Object.keys(firstOrder.dropoff_branch).length > 0 &&
-      firstOrder.dropoff_branch.branch_address) {
-      return firstOrder.dropoff_branch.branch_address;
+    if (orders.length > 0 && orders[0].dropoff_location) {
+      return orders[0].dropoff_location;
     }
-
-    // Otherwise use delivery_address
-    return firstOrder.delivery_address || 'Address not available';
+    return 'N/A';
   }
 
   getDeliveryStatus(order: any): string {
-    const statusKey = this.getDeliveryStatusKey(order);
-    if (statusKey) {
-      return this.translate.instant(statusKey);
+    if (order.delivery_status) {
+      return order.delivery_status;
     }
-
-    return order?.display_status || order?.delivery_status || order?.job_status || '';
-  }
-
-  getDeliveryStatusNote(order: any): string {
-    const noteKey = this.getDeliveryStatusNoteKey(order);
-    if (noteKey) {
-      return this.translate.instant(noteKey);
+    if (order.status) {
+      return order.status;
     }
-
-    return order?.status_note || '';
-  }
-
-  private getDeliveryStatusKey(order: any): string {
-    if (order?.is_reassigned) {
-      return 'TRANSPORT_STATUS.REASSIGNED_BY_OPS';
-    }
-    if (order?.is_overdue && !order?.pickup_confirmed_at) {
-      return 'TRANSPORT_STATUS.OVERDUE_PICKUP_PENDING';
-    }
-    if (order?.is_overdue) {
-      return 'TRANSPORT_STATUS.OVERDUE_DELIVERY_PENDING';
-    }
-
-    const status = [
-      order?.display_status,
-      order?.delivery_status,
-      order?.job_status,
-    ].find(value => !!value)?.toString().trim().toLowerCase();
-
-    switch (status) {
-      case 'reassigned by ops':
-        return 'TRANSPORT_STATUS.REASSIGNED_BY_OPS';
-      case 'overdue - pickup pending':
-        return 'TRANSPORT_STATUS.OVERDUE_PICKUP_PENDING';
-      case 'overdue - delivery pending':
-        return 'TRANSPORT_STATUS.OVERDUE_DELIVERY_PENDING';
-      case 'picked up - delivery pending':
-      case 'picked_up':
-      case 'partially_picked':
-        return 'TRANSPORT_STATUS.PICKED_UP_DELIVERY_PENDING';
-      case 'accepted - pickup pending':
-      case 'accepted':
-      case 'pending':
-        return 'TRANSPORT_STATUS.ACCEPTED_PICKUP_PENDING';
-      case 'delivered':
-      case 'completed':
-        return 'TRANSPORT_STATUS.DELIVERED';
-      case 'cancelled':
-      case 'canceled':
-        return 'TRANSPORT_STATUS.CANCELLED';
-      default:
-        return '';
-    }
-  }
-
-  private getDeliveryStatusNoteKey(order: any): string {
-    if (order?.is_reassigned) {
-      return 'TRANSPORT_STATUS.NOTES.REASSIGNED_BY_OPS';
-    }
-    if (order?.is_overdue && !order?.pickup_confirmed_at) {
-      return 'TRANSPORT_STATUS.NOTES.OVERDUE_PICKUP_PENDING';
-    }
-    if (order?.is_overdue) {
-      return 'TRANSPORT_STATUS.NOTES.OVERDUE_DELIVERY_PENDING';
-    }
-
-    const status = order?.display_status?.toString().trim().toLowerCase();
-    if (status === 'reassigned by ops') {
-      return 'TRANSPORT_STATUS.NOTES.REASSIGNED_BY_OPS';
-    }
-    if (status === 'overdue - pickup pending') {
-      return 'TRANSPORT_STATUS.NOTES.OVERDUE_PICKUP_PENDING';
-    }
-    if (status === 'overdue - delivery pending') {
-      return 'TRANSPORT_STATUS.NOTES.OVERDUE_DELIVERY_PENDING';
-    }
-
     return '';
   }
 
-  async promptCancelDelivery(job: any): Promise<void> {
-    const jobId = job?.job_id;
-    if (!jobId || this.isCancellingJob[jobId]) {
+  getDeliveryStatusNote(order: any): string {
+    if (order.status_note) {
+      return order.status_note;
+    }
+    if (order.note) {
+      return order.note;
+    }
+    return '';
+  }
+
+  async promptCancelDelivery(order: any): Promise<void> {
+    const jobId = Number(order.job_id);
+    if (!jobId || isNaN(jobId)) {
       return;
     }
 
