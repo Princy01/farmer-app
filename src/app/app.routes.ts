@@ -431,14 +431,6 @@ const appRoutes: Routes = [
         loadComponent: () => import('./transport/transport-update-rates/transport-update-rates.component').then((m) => m.TransportUpdateRatesComponent),
       },
       {
-        path: 'manage-vehicles',
-        loadComponent: () => import('./transport/manage-vehicles/manage-vehicles.component').then((m) => m.ManageVehiclesComponent),
-      },
-      {
-        path: 'vehicles',
-        loadComponent: () => import('./transport/manage-vehicles/manage-vehicles.component').then((m) => m.ManageVehiclesComponent),
-      },
-      {
         path: 'manage-drivers',
         loadComponent: () => import('./transport/manage-drivers/manage-drivers.component').then((m) => m.ManageDriversComponent),
       },
