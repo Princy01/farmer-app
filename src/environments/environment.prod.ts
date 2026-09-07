@@ -8,7 +8,7 @@ function runtimeOverride(key: string, fallback: string): string {
     return fallback;
   }
 
-  if (isLoopbackHost(window.location.hostname) && isRuntimeEndpointKey(key) && !isLoopbackUrl(value)) {
+  if (isRuntimeEndpointKey(key) && !isProductionUrl(value)) {
     return fallback;
   }
 
@@ -19,9 +19,10 @@ function isLoopbackHost(hostname: string): boolean {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
-function isLoopbackUrl(value: string): boolean {
+function isProductionUrl(value: string): boolean {
   try {
-    return isLoopbackHost(new URL(value).hostname);
+    const url = new URL(value);
+    return url.protocol === 'https:' && !isLoopbackHost(url.hostname) && url.hostname !== '10.0.2.2';
   } catch {
     return false;
   }
@@ -37,23 +38,11 @@ function isRuntimeEndpointKey(key: string): boolean {
   ].includes(key);
 }
 
-function runtimeDefault(publicUrl: string, tunnelPort: number): string {
-  if (typeof window === 'undefined') {
-    return publicUrl;
-  }
-
-  const hostname = window.location.hostname;
-  if (isLoopbackHost(hostname)) {
-    return `http://${hostname}:${tunnelPort}`;
-  }
-
-  return publicUrl;
-}
-
-const defaultApiUrl = runtimeDefault('http://160.250.204.132:3000', 8082);
-const defaultRealtimeUrl = runtimeDefault('http://160.250.204.132:8083', 8083);
-const defaultTranslateUrl = runtimeDefault('http://160.250.204.132:8000', 8000);
-const defaultPaymentGatewayUrl = runtimeDefault('http://160.250.204.132:8081', 8081);
+const appOrigin = 'https://melato.net.in';
+const defaultApiUrl = 'https://api.melato.net.in';
+const defaultRealtimeUrl = 'https://transport.melato.net.in';
+const defaultTranslateUrl = 'https://api.melato.net.in/translate';
+const defaultPaymentGatewayUrl = appOrigin;
 
 export const environment = {
   production: true,
