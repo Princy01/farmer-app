@@ -49,7 +49,7 @@ export const environment = {
   apiUrl: runtimeOverride('apiUrl', defaultApiUrl),
   realtimeApiUrl: runtimeOverride('realtimeApiUrl', runtimeOverride('transportRealtimeUrl', defaultRealtimeUrl)),
   transportRealtimeUrl: runtimeOverride('transportRealtimeUrl', runtimeOverride('realtimeApiUrl', defaultRealtimeUrl)),
-  paymentMode: runtimeOverride('paymentMode', 'simulated'),
+  paymentMode: 'gateway',
   paymentGatewayUrl: runtimeOverride('paymentGatewayUrl', defaultPaymentGatewayUrl),
   translateApiUrl: runtimeOverride('translateApiUrl', defaultTranslateUrl),
   supportEmail: 'support@farmerapp.com',

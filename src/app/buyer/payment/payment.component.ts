@@ -122,10 +122,14 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     const navigation = this.router.getCurrentNavigation();
     const navigationState = navigation?.extras?.state as Partial<PaymentNavigationState> | undefined;
+    const querySessionId = Number(this.route.snapshot.queryParamMap.get('session_id'));
+    const queryOrderId = this.route.snapshot.queryParamMap.get('order_id');
     this.orderData = navigationState?.orderData;
-    this.checkoutSessionId = navigationState?.checkoutSessionId ?? this.orderData?.checkoutSessionId ?? null;
+    this.checkoutSessionId = navigationState?.checkoutSessionId
+      ?? this.orderData?.checkoutSessionId
+      ?? (Number.isSafeInteger(querySessionId) && querySessionId > 0 ? querySessionId : null);
 
-    if (!this.orderData && !this.checkoutSessionId) {
+    if (!this.orderData && !this.checkoutSessionId && !queryOrderId) {
       console.error('No order data found in navigation state');
       this.router.navigate(['/buyer/cart']);
       return;
@@ -148,6 +152,12 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     await this.initializePaymentContext();
+
+    const returnedOrderId = this.route.snapshot.queryParamMap.get('order_id');
+    if (returnedOrderId) {
+      this.isProcessingPayment = true;
+      await this.pollPaymentStatus(returnedOrderId);
+    }
   }
 
   ngOnDestroy() {
@@ -364,25 +374,14 @@ export class PaymentComponent implements OnInit, OnDestroy {
   }
 
   private async processGatewayPayment(): Promise<void> {
-    // FIX: Open the popup synchronously, as the very first action, so it is still
-    // tied to the original click event. Firefox (and other browsers) treat a
-    // window.open() call as "user-initiated" only if it happens without any
-    // intervening async work (awaits / network calls). Opening it here, before
-    // any await, and filling in its location later once we have the gateway URL,
-    // avoids the "payment window was blocked by your browser" error.
-    const paymentWindow = window.open('', '_blank');
-
     const loading = await this.loadingCtrl.create({
       message: this.translate.instant('PAYMENT.REDIRECTING'),
       spinner: 'dots'
     });
     await loading.present();
+    let loadingPresented = true;
 
     try {
-      if (!paymentWindow) {
-        throw new Error(this.translate.instant('PAYMENT.GATEWAY_WINDOW_BLOCKED'));
-      }
-
       await this.ensureCheckoutSession();
       if (!this.checkoutSessionId) {
         throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
@@ -416,33 +415,34 @@ export class PaymentComponent implements OnInit, OnDestroy {
       const response = await this.paymentService.initiatePayment(
         this.checkoutSessionId,
         this.selectedPaymentMethod,
-        payableAmount
+        payableAmount,
+        'cashfree'
       ).toPromise();
 
       await loading.dismiss();
+      loadingPresented = false;
 
-      if (response?.data?.payment_url && response?.data?.order_id) {
+      if (response?.data?.payment_session_id && response?.data?.order_id) {
+        await this.paymentService.launchCashfreeCheckout(
+          response.data.payment_session_id,
+          response.data.order_id,
+          response.data.environment || 'sandbox',
+          this.selectedPaymentMethod
+        );
+        await this.pollPaymentStatus(response.data.order_id);
+      } else if (response?.data?.payment_url && response?.data?.order_id) {
         const paymentUrl = this.gatewayUrlForBrowser(response.data.payment_url);
         const paymentOrderId = response.data.order_id;
-
-        // FIX: Redirect the window we already opened synchronously above, instead
-        // of calling window.open() again here. By this point we're well past the
-        // original click (after two network round-trips), so a fresh window.open()
-        // call here would be blocked by Firefox as an untrusted popup.
-        paymentWindow.location.href = paymentUrl;
-
-        await this.pollPaymentStatus(paymentOrderId);
+        window.location.assign(paymentUrl);
+        void this.pollPaymentStatus(paymentOrderId);
       } else {
-        throw new Error('Invalid payment response');
+        throw new Error(response?.message || 'Invalid payment response');
       }
     } catch (error) {
       console.error('Payment initiation error:', error);
-      // Clean up the blank window we opened if something went wrong before it
-      // could be redirected to the actual gateway URL.
-      if (paymentWindow && !paymentWindow.closed) {
-        paymentWindow.close();
+      if (loadingPresented) {
+        await loading.dismiss();
       }
-      await loading.dismiss();
       this.isProcessingPayment = false;
       await this.showPaymentError(error instanceof Error ? error.message : undefined);
     }

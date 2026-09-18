@@ -1,5 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { Capacitor } from '@capacitor/core';
+import {
+  CFEnvironment,
+  CFPaymentGateway,
+  CFSession,
+  CFUPIIntentCheckoutPayment,
+  CFWebCheckoutPayment,
+} from '@awesome-cordova-plugins/cashfree-pg';
+import { load } from '@cashfreepayments/cashfree-js';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 import { CreateBatchOrderRequest } from '../order-confirmation/order.service';
@@ -98,6 +107,28 @@ export interface PaymentStatusResponse {
   };
 }
 
+export interface InitiatePaymentData {
+  payment_id: string;
+  status: string;
+  payment_url?: string;
+  checksum?: string;
+  message?: string;
+  order_id: string;
+  checkout_session_id?: number;
+  payment_intent_id?: number;
+  gross_amount?: number;
+  payment_session_id?: string;
+  cf_order_id?: string;
+  environment?: string;
+  provider_code?: string;
+}
+
+export interface InitiatePaymentResponse {
+  success: boolean;
+  message: string;
+  data: InitiatePaymentData;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -114,21 +145,95 @@ export class PaymentService {
     return this.http.get<CheckoutSessionDetailResponse>(`${this.apiUrl}/retailer/checkout-sessions/${checkoutSessionId}`);
   }
 
-  initiatePayment(checkoutSessionId: number, paymentMethod: string, amount?: number): Observable<any> {
+  initiatePayment(
+    checkoutSessionId: number,
+    paymentMethod: string,
+    amount?: number,
+    providerCode: string = 'cashfree'
+  ): Observable<InitiatePaymentResponse> {
     const body: any = {
       checkout_session_id: checkoutSessionId,
       payment_method: paymentMethod,
-      provider_code: 'gateway'
+      provider_code: providerCode
     };
 
     if (amount !== undefined && amount > 0) {
       body.amount = amount;
     }
 
-    return this.http.post<any>(`${this.apiUrl}/payments/initiate`, body);
+    return this.http.post<InitiatePaymentResponse>(`${this.apiUrl}/payments/initiate`, body);
   }
 
-   checkPaymentStatus(orderId: string): Observable<PaymentStatusResponse> {
+  checkPaymentStatus(orderId: string): Observable<PaymentStatusResponse> {
     return this.http.get<PaymentStatusResponse>(`${this.apiUrl}/payments/status/${orderId}`);
+  }
+
+  async launchCashfreeCheckout(
+    paymentSessionId: string,
+    orderId: string,
+    environmentMode: string,
+    paymentMethod: string
+  ): Promise<unknown> {
+    if (!paymentSessionId.trim() || !orderId.trim()) {
+      throw new Error('Cashfree payment session is incomplete');
+    }
+
+    const isProduction = environmentMode.trim().toLowerCase() === 'production';
+    if (Capacitor.isNativePlatform()) {
+      return this.launchCashfreeNativeCheckout(
+        paymentSessionId,
+        orderId,
+        isProduction,
+        paymentMethod
+      );
+    }
+
+    const cashfree = await load({
+      mode: isProduction ? 'production' : 'sandbox'
+    });
+    if (!cashfree) {
+      throw new Error('Cashfree payment SDK could not be loaded');
+    }
+
+    return cashfree.checkout({
+      paymentSessionId,
+      redirectTarget: '_modal'
+    });
+  }
+
+  private launchCashfreeNativeCheckout(
+    paymentSessionId: string,
+    orderId: string,
+    isProduction: boolean,
+    paymentMethod: string
+  ): Promise<unknown> {
+    return new Promise((resolve, reject) => {
+      try {
+        const environmentMode = isProduction
+          ? CFEnvironment.PRODUCTION
+          : CFEnvironment.SANDBOX;
+        const session = new CFSession(paymentSessionId, orderId, environmentMode);
+
+        CFPaymentGateway.setCallback({
+          onVerify: (result) => resolve({ verified: true, result }),
+          // Cashfree requires final status verification from the backend even
+          // when the native SDK reports an error or the user closes checkout.
+          onError: (error) => resolve({ verified: false, error })
+        });
+
+        if (paymentMethod.trim().toUpperCase() === 'UPI') {
+          CFPaymentGateway.doUPIPayment(
+            new CFUPIIntentCheckoutPayment(session, null)
+          );
+          return;
+        }
+
+        CFPaymentGateway.doWebCheckoutPayment(
+          new CFWebCheckoutPayment(session, null)
+        );
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 }
