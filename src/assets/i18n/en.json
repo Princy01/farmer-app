@@ -1948,6 +1948,7 @@
     "WAITING_CONFIRMATION": "Waiting for payment confirmation...",
     "PAYMENT_FAILED": "Payment failed or cancelled. Please try again.",
     "TIMEOUT_ERROR": "Payment not completed within 5 minutes. Please try again.",
+    "GENERIC_METHOD": "payment",
     "PAYMENT_FAILED_HEADER": "{{method}} Failed",
     "PAYMENT_ERROR_MSG": "There was an error processing your {{method}}. Please try again or choose a different payment method.",
     "CANCEL": "Cancel",

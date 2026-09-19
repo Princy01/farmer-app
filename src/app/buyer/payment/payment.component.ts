@@ -279,7 +279,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       }
     } catch (error: any) {
       console.error('Failed to initialize payment context:', error);
-      this.paymentContextError = error?.message || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG');
+      this.paymentContextError = error?.message || this.getPaymentErrorMessage();
       await this.showPaymentError(this.paymentContextError ?? undefined);
     } finally {
       this.loadingPaymentMethods = false;
@@ -346,7 +346,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     }
 
     if (!this.canProcessCheckoutPayment()) {
-      await this.showPaymentError(this.checkoutRetryBlockReason || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG'));
+      await this.showPaymentError(this.checkoutRetryBlockReason || this.getPaymentErrorMessage());
       return;
     }
 
@@ -788,11 +788,16 @@ export class PaymentComponent implements OnInit, OnDestroy {
   private async showPaymentError(message?: string) {
     const alert = await this.alertCtrl.create({
       header: this.translate.instant('PAYMENT.PAYMENT_FAILED'),
-      message: message || this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG'),
+      message: message || this.getPaymentErrorMessage(),
       buttons: [this.translate.instant('PAYMENT.OK')]
     });
     await alert.present();
     this.isProcessingPayment = false;
+  }
+
+  private getPaymentErrorMessage(): string {
+    const method = this.getPaymentMethodName() || this.translate.instant('PAYMENT.GENERIC_METHOD');
+    return this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG', { method });
   }
 
   goBack() {
