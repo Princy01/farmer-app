@@ -100,6 +100,20 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
+  &.loading,
+  &.error {
+    cursor: default;
+  }
+
+  > ion-spinner {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 24px;
+    height: 24px;
+    --color: #{$primary-color};
+  }
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: $shadow-md;
@@ -128,6 +142,26 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
     ion-icon {
       font-size: 28px;
+    }
+  }
+
+  .evidence-item-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+
+    ion-icon {
+      font-size: 24px;
+    }
+
+    ion-button {
+      min-height: 28px;
+      margin: 0;
+      font-size: 10px;
     }
   }
 }

@@ -10,10 +10,17 @@ import { RetailerOrderService } from '../retailer-order-details.service';
 
 export interface DisputeEvidence {
   disputeId: number;
-  evidenceUrls: string[];
+  evidenceItems: EvidenceGalleryItem[];
   loading: boolean;
   error: string | null;
   uploading: boolean;
+}
+
+export interface EvidenceGalleryItem {
+  sourceUrl: string;
+  displayUrl: string | null;
+  loading: boolean;
+  error: string | null;
 }
 
 export interface EvidenceUploadItem {
@@ -58,6 +65,7 @@ export class DisputeEvidenceGalleryComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.revokePreviewUrls();
+    this.revokeEvidenceUrls();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -68,9 +76,10 @@ export class DisputeEvidenceGalleryComponent implements OnInit, OnDestroy {
   loadEvidenceGallery(): void {
     if (!this.disputeId) return;
 
+    this.revokeEvidenceUrls();
     this.disputeEvidence = {
       disputeId: this.disputeId,
-      evidenceUrls: [],
+      evidenceItems: [],
       loading: true,
       error: null,
       uploading: false
@@ -82,9 +91,19 @@ export class DisputeEvidenceGalleryComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (this.disputeEvidence) {
-            this.disputeEvidence.evidenceUrls = response.evidence_urls || [];
+            this.disputeEvidence.evidenceItems = (response.evidence_urls || []).map(
+              (sourceUrl) => ({
+                sourceUrl,
+                displayUrl: null,
+                loading: true,
+                error: null
+              })
+            );
             this.disputeEvidence.loading = false;
             this.disputeEvidence.error = null;
+            this.disputeEvidence.evidenceItems.forEach((item) => {
+              this.loadEvidenceImage(item);
+            });
           }
         },
         error: (err) => {
@@ -162,7 +181,14 @@ export class DisputeEvidenceGalleryComponent implements OnInit, OnDestroy {
 
           // Add to main gallery
           if (this.disputeEvidence) {
-            this.disputeEvidence.evidenceUrls.push(response.file_url);
+            const evidenceItem: EvidenceGalleryItem = {
+              sourceUrl: response.file_url,
+              displayUrl: null,
+              loading: true,
+              error: null
+            };
+            this.disputeEvidence.evidenceItems.push(evidenceItem);
+            this.loadEvidenceImage(evidenceItem);
           }
         },
         error: (err) => {
@@ -203,10 +229,10 @@ export class DisputeEvidenceGalleryComponent implements OnInit, OnDestroy {
   /**
    * Check if more evidence can be added.
    * Only counts items still pending/uploading — successfully uploaded ones
-   * have already been pushed into disputeEvidence.evidenceUrls.
+   * have already been pushed into disputeEvidence.evidenceItems.
    */
   get canAddMoreEvidence(): boolean {
-    const existingCount = this.disputeEvidence?.evidenceUrls.length || 0;
+    const existingCount = this.disputeEvidence?.evidenceItems.length || 0;
     const pendingCount = this.uploadingItems.filter(
       item => !item.uploadedUrl && !item.error
     ).length;
@@ -216,11 +242,15 @@ export class DisputeEvidenceGalleryComponent implements OnInit, OnDestroy {
   /**
    * Download/view evidence image
    */
-  openEvidenceImage(url: string): void {
-    // Open in new tab/window
-    if (url) {
-      window.open(url, '_blank');
+  openEvidenceImage(item: EvidenceGalleryItem): void {
+    if (item.displayUrl) {
+      window.open(item.displayUrl, '_blank');
     }
+  }
+
+  retryEvidenceImage(item: EvidenceGalleryItem, event: Event): void {
+    event.stopPropagation();
+    this.loadEvidenceImage(item);
   }
 
   /**
@@ -230,6 +260,44 @@ export class DisputeEvidenceGalleryComponent implements OnInit, OnDestroy {
     this.uploadingItems.forEach(item => {
       if (item.previewUrl) {
         URL.revokeObjectURL(item.previewUrl);
+      }
+    });
+  }
+
+  private loadEvidenceImage(item: EvidenceGalleryItem): void {
+    if (item.displayUrl) {
+      URL.revokeObjectURL(item.displayUrl);
+      item.displayUrl = null;
+    }
+
+    item.loading = true;
+    item.error = null;
+
+    this.orderService
+      .getReturnDisputeEvidenceFile(item.sourceUrl)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (blob) => {
+          if (!blob.size) {
+            item.loading = false;
+            item.error = 'DISPUTE_EVIDENCE.ERROR_LOADING';
+            return;
+          }
+          item.displayUrl = URL.createObjectURL(blob);
+          item.loading = false;
+        },
+        error: (err) => {
+          item.loading = false;
+          item.error = err?.message || 'DISPUTE_EVIDENCE.ERROR_LOADING';
+        }
+      });
+  }
+
+  private revokeEvidenceUrls(): void {
+    this.disputeEvidence?.evidenceItems.forEach((item) => {
+      if (item.displayUrl) {
+        URL.revokeObjectURL(item.displayUrl);
+        item.displayUrl = null;
       }
     });
   }

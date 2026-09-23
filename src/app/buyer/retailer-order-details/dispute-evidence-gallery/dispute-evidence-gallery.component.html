@@ -28,16 +28,25 @@
   <div *ngIf="!disputeEvidence.loading && !disputeEvidence.error" class="evidence-loaded">
 
     <!-- Existing evidence gallery -->
-    <div *ngIf="disputeEvidence.evidenceUrls.length > 0" class="existing-evidence">
+    <div *ngIf="disputeEvidence.evidenceItems.length > 0" class="existing-evidence">
       <h3 class="gallery-title">{{ 'DISPUTE_EVIDENCE.GALLERY_TITLE' | translate }}</h3>
       <div class="evidence-grid">
         <div
-          *ngFor="let url of disputeEvidence.evidenceUrls"
+          *ngFor="let item of disputeEvidence.evidenceItems"
           class="evidence-item"
-          (click)="openEvidenceImage(url)"
+          [class.loading]="item.loading"
+          [class.error]="item.error"
+          (click)="openEvidenceImage(item)"
         >
-          <img [src]="url" [alt]="'Evidence image'" loading="lazy" />
-          <div class="evidence-overlay">
+          <ion-spinner *ngIf="item.loading" name="crescent"></ion-spinner>
+          <img *ngIf="item.displayUrl" [src]="item.displayUrl" [alt]="'Evidence image'" />
+          <div *ngIf="item.error" class="evidence-item-error">
+            <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+            <ion-button fill="clear" size="small" (click)="retryEvidenceImage(item, $event)">
+              {{ 'RETRY' | translate }}
+            </ion-button>
+          </div>
+          <div *ngIf="item.displayUrl" class="evidence-overlay">
             <ion-icon name="download-outline" color="light"></ion-icon>
           </div>
         </div>
@@ -45,7 +54,7 @@
     </div>
 
     <!-- No evidence -->
-    <div *ngIf="disputeEvidence.evidenceUrls.length === 0 && uploadingItems.length === 0" class="no-evidence">
+    <div *ngIf="disputeEvidence.evidenceItems.length === 0 && uploadingItems.length === 0" class="no-evidence">
       <ion-card>
         <ion-card-content class="text-center">
           <ion-icon name="image-outline" color="medium"></ion-icon>
@@ -57,7 +66,7 @@
 
     <!-- Evidence count -->
     <p class="evidence-count">
-      {{ disputeEvidence.evidenceUrls.length }}/{{ MAX_IMAGES }}
+      {{ disputeEvidence.evidenceItems.length }}/{{ MAX_IMAGES }}
       {{ 'DISPUTE_EVIDENCE.PHOTOS_TOTAL' | translate }}
     </p>
 

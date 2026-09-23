@@ -307,6 +307,27 @@ export class RetailerOrderService {
     );
   }
 
+  getReturnDisputeEvidenceFile(fileUrl: string): Observable<Blob> {
+    return this.http.get(this.toAbsoluteApiUrl(fileUrl), {
+      responseType: 'blob'
+    }).pipe(
+      timeout(this.HTTP_TIMEOUT),
+      retry({
+        count: 2,
+        delay: (error, retryCount) => {
+          if (error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500) {
+            return throwError(() => error);
+          }
+          const delayMs = Math.pow(2, retryCount - 1) * 1000;
+          return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
+        }
+      }),
+      catchError((error: HttpErrorResponse | TimeoutError) =>
+        this.handleError(error, 'DISPUTE_EVIDENCE.ERROR_LOADING')
+      )
+    );
+  }
+
   /**
    * Fetches the currently active delivery OTP for a transport job, so the
    * retailer can view/share the same code the driver has generated in their
