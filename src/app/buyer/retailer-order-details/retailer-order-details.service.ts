@@ -274,7 +274,9 @@ export class RetailerOrderService {
           return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
         }
       }),
-      catchError((error: HttpErrorResponse | TimeoutError) => this.handleError(error))
+      catchError((error: HttpErrorResponse | TimeoutError) =>
+        this.handleError(error, 'DISPUTE_EVIDENCE.UPLOAD_FAILED')
+      )
     );
   }
 
@@ -299,7 +301,9 @@ export class RetailerOrderService {
           return new Promise<void>(resolve => setTimeout(() => resolve(), delayMs));
         }
       }),
-      catchError((error: HttpErrorResponse | TimeoutError) => this.handleError(error))
+      catchError((error: HttpErrorResponse | TimeoutError) =>
+        this.handleError(error, 'DISPUTE_EVIDENCE.ERROR_LOADING')
+      )
     );
   }
 
@@ -339,8 +343,11 @@ export class RetailerOrderService {
    * @param error The HTTP error response or timeout error
    * @returns Observable that throws an error with a translation key
    */
-  private handleError(error: HttpErrorResponse | TimeoutError): Observable<never> {
-    let translationKey = 'RETAILER_ORDER_DETAILS.ERROR_LOAD_FAILED';
+  private handleError(
+    error: HttpErrorResponse | TimeoutError,
+    defaultTranslationKey = 'RETAILER_ORDER_DETAILS.ERROR_LOAD_FAILED'
+  ): Observable<never> {
+    let translationKey = defaultTranslationKey;
 
     if (error instanceof TimeoutError) {
       translationKey = 'REQUEST_TIMEOUT_ERROR';
