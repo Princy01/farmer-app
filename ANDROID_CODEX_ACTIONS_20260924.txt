@@ -1,0 +1,93 @@
+MELATO ANDROID CODEX ACTIONS
+============================
+
+Source requirement
+------------------
+Pull the latest farmers_app_frontend main branch. It must contain commit
+647a32d (Use canonical API routes in clients).
+
+Do not add separate API URL constants in Kotlin or Java. The Android app uses
+the same Angular services and production environment as the PWA.
+
+Production endpoints
+--------------------
+Main API: https://api.melato.net.in
+Realtime REST: https://transport.melato.net.in
+Realtime WebSocket: wss://transport.melato.net.in/ws/driver
+Application origin/fallback: https://melato.net.in
+
+Canonical client routes
+-----------------------
+GET /getAllCategories
+GET /getCategories/{categoryId}
+GET /product-regional/{regionalNameId}
+GET /business-branches/{branchId}
+POST /payments/initiate
+GET /payments/status/{orderId}
+POST /disputes/{caseId}/evidence
+GET /disputes/{caseId}/evidence/{evidenceId}/file
+
+Do not introduce calls to:
+- /getCategories as a category-list endpoint
+- /getProductCategoryRegionalName/{id}
+- /getBusinessesbranch/{id}
+- Any raw server IP
+- Port 8081
+- Plain HTTP or ws:// in production
+
+Build and sync
+--------------
+npm ci
+npm run build -- --configuration production
+npx cap sync android
+
+Then open the android directory in Android Studio and build the release from
+the synchronized project.
+
+Required Android checks
+-----------------------
+1. Replace the placeholder io.ionic.starter application ID before publishing.
+   Obtain the permanent application ID from the product owner; do not invent it.
+2. Replace the placeholder farmer-app-s display name with the approved name.
+3. Set the approved versionCode and versionName.
+4. Keep android.permission.INTERNET.
+5. Do not enable cleartext traffic for old HTTP/IP endpoints.
+6. Do not store Cashfree credentials, bearer tokens, or server secrets in the APK.
+
+Authentication and evidence
+---------------------------
+Send Authorization: Bearer <access-token> to protected REST endpoints.
+
+Evidence file URLs are private. Load evidence through authenticated HttpClient
+blob requests. Do not place a protected evidence URL directly into an image
+loader that omits the Authorization header.
+
+Realtime
+--------
+Use https://transport.melato.net.in for realtime REST calls.
+Use wss://transport.melato.net.in/ws/driver?token=<encoded-token> for the
+driver WebSocket.
+
+Payments
+--------
+Call POST /payments/initiate on the main Melato API. Pass the backend-provided
+order_id, payment_session_id, and environment to the native Cashfree SDK.
+Verify final payment status through GET /payments/status/{orderId}.
+
+Never place the Cashfree app ID or secret key in the Android app.
+
+Current release blockers
+------------------------
+- The production backend is still configured for Cashfree sandbox. Do not
+  publish a live-payment release until the server is switched and verified.
+- The permanent Android application ID, display name, versionCode, and
+  versionName must be approved before signing.
+- Remote translation is not confirmed; retain bundled language assets.
+
+Server prerequisite already completed
+-------------------------------------
+Production CORS allows the Capacitor Android origin https://localhost.
+
+Detailed reference
+------------------
+See ANDROID_API_HANDOVER.txt in the repository root.
