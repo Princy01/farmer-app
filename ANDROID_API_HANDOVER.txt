@@ -1,0 +1,176 @@
+MELATO ANDROID API HANDOVER
+===========================
+
+Target
+------
+Build the Android release against PRODUCTION. Keep all base URLs without a
+trailing slash.
+
+Production URL configuration
+----------------------------
+APP_ORIGIN=https://melato.net.in
+API_BASE_URL=https://api.melato.net.in
+REALTIME_API_BASE_URL=https://transport.melato.net.in
+REALTIME_WS_BASE_URL=wss://transport.melato.net.in
+PAYMENT_GATEWAY_BASE_URL=https://melato.net.in
+PAYMENT_MODE=gateway
+
+These values correspond to the Ionic environment properties as follows:
+
+environment.apiUrl = API_BASE_URL
+environment.realtimeApiUrl = REALTIME_API_BASE_URL
+environment.transportRealtimeUrl = REALTIME_API_BASE_URL
+environment.paymentGatewayUrl = PAYMENT_GATEWAY_BASE_URL
+environment.paymentMode = PAYMENT_MODE
+
+Main API
+--------
+Base: https://api.melato.net.in
+
+Health:
+GET /
+Expected: HTTP 200
+
+Authentication examples:
+POST /auth/login
+POST /auth/refresh-token
+POST /auth/register-user
+POST /auth/forgot-password/request
+
+Authenticated API requests must send:
+Authorization: Bearer <access-token>
+
+Catalogue and branch routes
+---------------------------
+Category list:
+GET /getAllCategories
+
+Category detail:
+GET /getCategories/{categoryId}
+
+Product regional-name detail:
+GET /product-regional/{regionalNameId}
+
+Authenticated business branch detail:
+GET /business-branches/{branchId}
+
+Do not introduce new client calls to the legacy /getCategories list,
+/getProductCategoryRegionalName/{id}, or /getBusinessesbranch/{id} aliases.
+
+Transport realtime service
+--------------------------
+REST base: https://transport.melato.net.in
+WebSocket base: wss://transport.melato.net.in
+
+Open jobs:
+GET /api/driver/jobs/open
+
+Accept job:
+POST /api/driver/jobs/{rideId}/accept
+
+Reject job:
+POST /api/driver/jobs/{rideId}/reject
+
+Cancel job:
+POST /api/driver/jobs/{rideId}/cancel
+
+Driver WebSocket:
+wss://transport.melato.net.in/ws/driver?token=<URL-encoded-access-token>
+
+REST calls must use the Bearer token. The WebSocket endpoint currently uses
+the access token in the token query parameter.
+
+Payments and Cashfree
+---------------------
+Payment initiation:
+POST https://api.melato.net.in/payments/initiate
+
+Payment status verification:
+GET https://api.melato.net.in/payments/status/{orderId}
+
+The backend returns order_id, payment_session_id, and environment. Pass those
+values to the native Cashfree SDK. Always verify the final payment status with
+the backend, even when the SDK reports success, failure, or cancellation.
+
+The Android app must never contain the Cashfree app ID or secret key. It must
+not call Cashfree server APIs directly. The webhook below is server-only and
+must not be called by the Android app:
+
+https://api.melato.net.in/payments/cashfree/webhook
+
+The production backend must return environment=production before a live
+Cashfree release is published. Do not force sandbox or production mode in the
+Android client independently of the backend response.
+
+Dispute evidence
+----------------
+Create or retrieve disputes through API_BASE_URL.
+
+Upload evidence:
+POST /disputes/{caseId}/evidence
+
+Download evidence:
+GET /disputes/{caseId}/evidence/{evidenceId}/file
+
+Evidence files are private. Fetch them with Authorization: Bearer <token> as
+authenticated binary/blob data. Do not place the protected URL directly in an
+ImageView, browser, or unauthenticated image loader.
+
+Business rules enforced by the backend:
+- One open dispute per order.
+- Maximum three evidence images per dispute.
+- Evidence is virus-scanned before it is stored.
+
+Staging URLs for QA builds only
+-------------------------------
+APP_ORIGIN=https://staging.melato.net.in
+API_BASE_URL=https://api-staging.melato.net.in
+REALTIME_API_BASE_URL=https://transport-staging.melato.net.in
+REALTIME_WS_BASE_URL=wss://transport-staging.melato.net.in
+PAYMENT_GATEWAY_BASE_URL=https://staging.melato.net.in
+
+Do not use staging values in a production APK.
+
+Translation
+-----------
+The remote translation endpoint is not currently confirmed operational.
+Continue using the bundled English/Hindi assets. Do not construct
+/translate/translate. Enable remote translation only after its final endpoint
+has been separately confirmed.
+
+Forbidden and obsolete URLs
+---------------------------
+Do not use any raw server IP in the Android app.
+Do not use http://160.250.204.132 or port 8081.
+Do not use https://api.melato.net.in:8081.
+Do not use https://api.melato.net.in/transport-realtime.
+Do not use ws:// or plain HTTP for production traffic.
+
+Android and Capacitor requirements
+----------------------------------
+- Keep android.permission.INTERNET in AndroidManifest.xml.
+- Production backend CORS must allow the Capacitor origin https://localhost.
+- Use HTTPS/WSS only; do not enable cleartext traffic for old IP endpoints.
+- Choose the permanent Android applicationId before signing or Play release.
+  The current placeholder io.ionic.starter must not be published.
+- Never log bearer tokens, payment session IDs, credentials, or secrets.
+
+Expected unauthenticated checks
+-------------------------------
+https://api.melato.net.in/ returns HTTP 200.
+https://transport.melato.net.in/api/driver/jobs/open returns HTTP 401 without
+a token, which confirms that the service is reachable and protected.
+The transport WebSocket handshake returns HTTP 401 without a token, which is
+also expected.
+
+Source of truth
+---------------
+Production Ionic configuration:
+src/environments/environment.prod.ts
+
+Payment integration:
+src/app/buyer/payment/payment.service.ts
+
+Realtime integration:
+src/app/transport/transport-requests/transport-requests.service.ts
+src/app/transport/transport-requests/transport-realtime.service.ts

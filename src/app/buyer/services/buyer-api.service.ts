@@ -288,7 +288,7 @@ export class BuyerApiService {
 
   getCategories(): Observable<Category[]> {
     return this.applyRetryLogic(
-      this.http.get<Category[]>(`${this.apiUrl}/getCategories`)
+      this.http.get<Category[]>(`${this.apiUrl}/getAllCategories`)
     );
   }
 
@@ -308,7 +308,7 @@ export class BuyerApiService {
     }
 
     return this.applyRetryLogic(
-      this.http.get<ProductRegional>(`${this.apiUrl}/getProductCategoryRegionalName/${id}`)
+      this.http.get<ProductRegional>(`${this.apiUrl}/product-regional/${id}`)
     );
   }
 

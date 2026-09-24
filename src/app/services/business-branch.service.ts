@@ -34,7 +34,7 @@ export class BusinessBranchService {
   }
 
   getBusinessBranchById(id: number): Observable<BusinessBranch> {
-    return this.http.get<BusinessBranch>(`${this.apiUrl}/getBusinessesbranch/${id}`);
+    return this.http.get<BusinessBranch>(`${this.apiUrl}/business-branches/${id}`);
   }
 
   insertBusinessBranch(branch: BusinessBranch): Observable<{ message: string; b_branch_id: number }> {

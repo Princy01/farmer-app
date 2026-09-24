@@ -35,7 +35,7 @@ export class ProductService {
   }
 
   getCategories(): Observable<Product[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/getCategories`)
+    return this.http.get<any[]>(`${this.apiUrl}/getAllCategories`)
       .pipe(catchError(this.handleError));
   }
 
