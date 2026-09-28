@@ -37,6 +37,7 @@ import {
   RetailerOrderHistory,
   RetailerOrderHistoryResponse,
 } from '../retailer-order-history/retailer-order-history.service';
+import { resolveCategoryImageUrl, getCategoryFallbackByName } from '../utils/buyer-image.util';
 
 interface UserPreference {
   language: string;
@@ -417,14 +418,15 @@ export class BuyerHomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  onImageError(target: any) {
+  onImageError(event: any, category?: Category) {
+    const target = event?.target || event;
     if (target) {
-      target.src = this.DEFAULT_CATEGORY_IMAGE;
+      target.src = getCategoryFallbackByName(category?.category_name);
     }
   }
 
   getImagePath(category: Category): string {
-    return category.img_path || this.DEFAULT_CATEGORY_IMAGE;
+    return resolveCategoryImageUrl(category);
   }
 
   async openMenu() {

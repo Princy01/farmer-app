@@ -8,6 +8,7 @@ import { chevronBack, storefrontOutline, addOutline, searchOutline, cubeOutline,
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { BranchProductsService, BranchProduct } from './branch-products.service';
+import { getProductFallbackByName, normalizeImagePath } from '../../buyer/utils/buyer-image.util';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -146,6 +147,18 @@ export class BranchProductsComponent implements OnInit, OnDestroy {
     return this.products.filter(p =>
       p.name.toLowerCase().includes(term)
     );
+  }
+
+  productImageUrl(product: Product): string {
+    return normalizeImagePath(product.image_path) || getProductFallbackByName(product.name);
+  }
+
+  onProductImageError(event: Event, product: Product): void {
+    const image = event.target as HTMLImageElement;
+    const fallback = getProductFallbackByName(product.name);
+    if (image.src !== new URL(fallback, document.baseURI).href) {
+      image.src = fallback;
+    }
   }
 
   /**

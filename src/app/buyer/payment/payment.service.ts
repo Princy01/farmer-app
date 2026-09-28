@@ -215,10 +215,10 @@ export class PaymentService {
         const session = new CFSession(paymentSessionId, orderId, environmentMode);
 
         CFPaymentGateway.setCallback({
-          onVerify: (result) => resolve({ verified: true, result }),
+          onVerify: (result: unknown) => resolve({ verified: true, result }),
           // Cashfree requires final status verification from the backend even
           // when the native SDK reports an error or the user closes checkout.
-          onError: (error) => resolve({ verified: false, error })
+          onError: (error: unknown) => resolve({ verified: false, error })
         });
 
         if (paymentMethod.trim().toUpperCase() === 'UPI') {

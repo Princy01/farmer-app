@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, IonModal, AlertController, LoadingController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { chevronBack, close, search, funnelOutline, swapVerticalOutline, cartOutline, alertCircleOutline, star, refreshOutline } from 'ionicons/icons';
+import { chevronBack, close, search, funnelOutline, swapVerticalOutline, cartOutline, alertCircleOutline, star, refreshOutline, checkmarkOutline } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import { BuyerApiService, Product, ProductAll, Category } from '../services/buyer-api.service';
 import { CartService, AddCartItemRequest } from '../cart/cart.service';
@@ -13,6 +13,12 @@ import { of, Subject } from 'rxjs';
 import { Location } from '@angular/common';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MandiProduct, MandiService} from '../category/mandi-products.service';
+import {
+  resolveCategoryImageUrl,
+  resolveProductImageUrl,
+  getCategoryFallbackByName,
+  getProductFallbackByName
+} from '../utils/buyer-image.util';
 
 @Component({
   selector: 'app-category-page',
@@ -101,7 +107,7 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private mandiService: MandiService
   ) {
-    addIcons({ chevronBack, close, search, alertCircleOutline, funnelOutline, swapVerticalOutline, cartOutline, star, refreshOutline });
+    addIcons({ chevronBack, close, search, alertCircleOutline, funnelOutline, swapVerticalOutline, cartOutline, star, refreshOutline, checkmarkOutline });
   }
 
 
@@ -625,5 +631,37 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
       return;
     }
     this.router.navigate(['/buyer/product-details', product.product_id]);
+  }
+
+  getCategoryImageUrl(category?: Category | { category_id?: number; category_name?: string; img_path?: string } | null, fallbackName?: string): string {
+    return resolveCategoryImageUrl(category, fallbackName || this.categoryName);
+  }
+
+  getProductImageUrl(product?: ProductAll | { product_name?: string; image_path?: string } | null): string {
+    return resolveProductImageUrl(product);
+  }
+
+  onSubcategoryImageError(event: any, subcategory: any): void {
+    if (event?.target) {
+      event.target.src = getCategoryFallbackByName(subcategory?.category_name);
+    }
+  }
+
+  onMainCategoryImageError(event: any): void {
+    if (event?.target) {
+      event.target.src = getCategoryFallbackByName(this.categoryName);
+    }
+  }
+
+  onProductImageError(event: any, product: any): void {
+    if (event?.target) {
+      event.target.src = getProductFallbackByName(product?.product_name);
+    }
+  }
+
+  onSelectedProductImageError(event: any): void {
+    if (event?.target) {
+      event.target.src = getProductFallbackByName(this.selectedProduct?.product_name);
+    }
   }
 }

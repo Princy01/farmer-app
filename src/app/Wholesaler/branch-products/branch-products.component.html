@@ -78,9 +78,11 @@
           <div class="product-header">
             <div class="product-image">
               <img
-                [src]="product.image_path"
-                alt="Product Image"
+                [src]="productImageUrl(product)"
+                [alt]="product.name"
+                (error)="onProductImageError($event, product)"
                 class="product-img"
+                loading="lazy"
               />
             </div>
             <div class="product-info">

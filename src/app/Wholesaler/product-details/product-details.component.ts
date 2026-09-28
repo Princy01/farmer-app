@@ -12,6 +12,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { WholesalerApiService, WholesalerProductDetails } from '../services/wholesaler-api.service';
+import { getProductFallbackByName, normalizeImagePath } from '../../buyer/utils/buyer-image.util';
 
 @Component({
   selector: 'app-product-details',
@@ -27,26 +28,16 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   isUpdatingStock = false;
   isUpdatingPrice = false;
   isMarkingOutOfStock = false;
-  productImageUrl = 'assets/images/default-vegetable.jpg';
+  productImageUrl = 'assets/img/vegetables.png';
   imageLoadError = false;
 
   private destroy$ = new Subject<void>();
 
   // Getter for product image with fallback
   get displayImageUrl(): string {
-    if (this.productDetails?.image_path) {
-      // Check if it's base64 encoded
-      if (this.productDetails.image_path.startsWith('data:image')) {
-        return this.productDetails.image_path;
-      }
-      // Check if it's a full URL
-      if (this.productDetails.image_path.startsWith('http')) {
-        return this.productDetails.image_path;
-      }
-      // Assume it's a relative path
-      return this.productDetails.image_path;
-    }
-    return this.productImageUrl;
+    return normalizeImagePath(this.productDetails?.image_path)
+      || getProductFallbackByName(this.productDetails?.product_name)
+      || this.productImageUrl;
   }
 
   constructor(
@@ -705,7 +696,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLImageElement;
     if (target && !this.imageLoadError) {
       this.imageLoadError = true;
-      target.src = this.productImageUrl;
+      target.src = getProductFallbackByName(this.productDetails?.product_name);
     }
   }
 

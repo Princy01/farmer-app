@@ -53,14 +53,26 @@
         <div class="scrollable-list" *ngIf="!loadingCategories && !errorLoadingCategories">
           <ion-list>
             <!-- Main Category -->
-            <ion-item [class.selected]="selectedSubcategoryId === categoryId" (click)="
+            <ion-item
+              [class.selected]="selectedSubcategoryId === categoryId"
+              (click)="
                 selectSubcategory({
                   category_id: categoryId,
                   category_name: categoryName
                 })
-              " class="subcategory-item">
+              "
+              class="subcategory-item"
+              lines="none"
+            >
               <div class="subcategory-content">
-                <img class="subcategory-image" [src]="category?.img_path" [alt]="categoryName" />
+                <div class="subcategory-image-wrapper">
+                  <img
+                    class="subcategory-image"
+                    [src]="getCategoryImageUrl(category, categoryName)"
+                    [alt]="categoryName"
+                    (error)="onMainCategoryImageError($event)"
+                  />
+                </div>
                 <div class="subcategory-name">
                   <b>{{ "CATEGORY.ALL" | translate }} {{ categoryName }}</b>
                 </div>
@@ -68,11 +80,22 @@
             </ion-item>
 
             <!-- Subcategories -->
-            <ion-item *ngFor="let subcategory of categories" [class.selected]="
-                selectedSubcategoryId === subcategory.category_id
-              " (click)="selectSubcategory(subcategory)" class="subcategory-item">
+            <ion-item
+              *ngFor="let subcategory of categories"
+              [class.selected]="selectedSubcategoryId === subcategory.category_id"
+              (click)="selectSubcategory(subcategory)"
+              class="subcategory-item"
+              lines="none"
+            >
               <div class="subcategory-content">
-                <img class="subcategory-image" [src]="subcategory.img_path" [alt]="subcategory.category_name" />
+                <div class="subcategory-image-wrapper">
+                  <img
+                    class="subcategory-image"
+                    [src]="getCategoryImageUrl(subcategory)"
+                    [alt]="subcategory.category_name"
+                    (error)="onSubcategoryImageError($event, subcategory)"
+                  />
+                </div>
                 <div class="subcategory-name">
                   <b>{{ subcategory.category_name }}</b>
                   <p class="hindi-name" *ngIf="subcategory.category_regional_id">
@@ -108,53 +131,66 @@
         </div>
 
         <!-- Horizontal Product Scroll (works for all categories) -->
-        <div class="horizontal-scroll-container" *ngIf="
+        <div
+          class="horizontal-scroll-container"
+          *ngIf="
             !loadingProducts &&
             !errorLoadingProducts &&
             filteredAndSortedItems.length > 0
-          " style="overflow-x: auto; display: flex; gap: 12px; padding: 12px 0">
-          <div *ngFor="let product of filteredAndSortedItems" (click)="selectProduct(product)" [class.selected]="
-              selectedProduct?.product_id === product.product_id
-            " style="
-              min-width: 140px;
-              max-width: 140px;
-              cursor: pointer;
-              flex: 0 0 auto;
-            ">
-            <img [src]="product.image_path" alt="{{ product.product_name }}" style="
-                width: 100%;
-                height: 90px;
-                object-fit: contain;
-                border-radius: 6px;
-              " />
-            <div style="text-align: center">
-              <b>{{ product.product_name }}</b>
+          "
+        >
+          <div
+            *ngFor="let product of filteredAndSortedItems"
+            (click)="selectProduct(product)"
+            class="product-thumb-card"
+            [class.selected]="selectedProduct?.product_id === product.product_id"
+          >
+            <div class="product-thumb-image-wrap">
+              <img
+                [src]="getProductImageUrl(product)"
+                [alt]="product.product_name"
+                class="product-thumb-img"
+                (error)="onProductImageError($event, product)"
+              />
+              <span class="active-badge" *ngIf="selectedProduct?.product_id === product.product_id">
+                <ion-icon name="checkmark-outline"></ion-icon>
+              </span>
+            </div>
+            <div class="product-thumb-name">
+              <span>{{ product.product_name }}</span>
             </div>
           </div>
         </div>
 
         <!-- Product Details (show when a product is selected) -->
         <div *ngIf="selectedProduct" class="product-details-embedded">
-          <ion-card>
-            <img [src]="selectedProduct.image_path" alt="{{ selectedProduct.product_name }}" />
+          <ion-card class="hero-product-card">
+            <div class="hero-image-container">
+              <img
+                [src]="getProductImageUrl(selectedProduct)"
+                [alt]="selectedProduct.product_name"
+                class="hero-product-image"
+                (error)="onSelectedProductImageError($event)"
+              />
+              <div class="hero-category-tag" *ngIf="selectedProduct.cat_name">
+                {{ selectedProduct.cat_name }}
+              </div>
+            </div>
             <ion-card-header>
-              <ion-card-title>{{
+              <ion-card-title class="hero-product-title">{{
                 selectedProduct.product_name
-                }}</ion-card-title>
+              }}</ion-card-title>
             </ion-card-header>
             <ion-card-content>
-              <p>
+              <p class="hero-product-desc">
                 {{
-                selectedProduct.description ||
-                ("CATEGORY.NO_DESCRIPTION" | translate)
+                  selectedProduct.description ||
+                  ("CATEGORY.NO_DESCRIPTION" | translate)
                 }}
               </p>
-              <p>
-                <b>{{ "CATEGORY.NUTRITION" | translate }}</b>
-                {{
-                selectedProduct.nutrition_factor ||
-                ("CATEGORY.NA" | translate)
-                }}
+              <p class="hero-product-nutrition" *ngIf="selectedProduct.nutrition_factor">
+                <b>{{ "CATEGORY.NUTRITION" | translate }}:</b>
+                {{ selectedProduct.nutrition_factor }}
               </p>
             </ion-card-content>
           </ion-card>
