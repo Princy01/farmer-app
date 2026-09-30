@@ -2384,6 +2384,15 @@
     "INVALID_PRODUCT_ID": "चुना गया प्रोडक्ट सही नहीं है।",
     "INVALID_ID": "दी गई जानकारी सही नहीं है।"
   },
+  "CALL": {
+    "CONFIRM_TITLE": "सेलुलर कॉल करें?",
+    "CONFIRM_MESSAGE": "यह कॉल आपके सिम कार्ड से की जाएगी। सामान्य ऑपरेटर शुल्क लग सकता है।",
+    "DESKTOP_TITLE": "{{name}} से संपर्क करें",
+    "DESKTOP_MESSAGE": "कृपया इस नंबर पर अपने फोन से सीधे कॉल करें:\n{{phone}}",
+    "CANCEL": "रद्द करें",
+    "CALL_NOW": "अभी कॉल करें",
+    "CLOSE": "बंद करें"
+  },
   "TRANSPORT_DASHBOARD": {
     "ACTIVE": "सक्रिय",
     "UPCOMING": "आने वाली",
@@ -2420,7 +2429,9 @@
     "CANCEL_JOB_SUCCESS_MESSAGE": "डिलीवरी जॉब सफलतापूर्वक रद्द हो गया।",
     "CANCEL_JOB_ERROR_TITLE": "रद्द करना विफल",
     "CANCEL_JOB_ERROR_MESSAGE": "इस डिलीवरी को अभी रद्द नहीं किया जा सकता।",
-    "OK": "ठीक है"
+    "OK": "ठीक है",
+    "CALL_WHOLESALER": "थोक विक्रेता को कॉल करें",
+    "CALL_RETAILER": "खुदरा विक्रेता को कॉल करें"
   },
   "TRANSPORT_STATUS": {
     "REASSIGNED_BY_OPS": "ऑप्स टीम द्वारा फिर से असाइन किया गया",
@@ -2618,6 +2629,7 @@
     "PRICE": "कीमत",
     "KG": "किलो",
     "NOT_ASSIGNED": "उपलब्ध नहीं",
+    "CALL_DRIVER": "ड्राइवर को कॉल करें",
     "STATUS_ACCEPTED": "स्वीकृत",
     "STATUS_PICKED_UP": "पिकअप हो गया",
     "STATUS_PARTIALLY_PICKED": "आंशिक रूप से पिकअप हुआ",

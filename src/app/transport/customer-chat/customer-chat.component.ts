@@ -4,6 +4,7 @@ import { IonicModule, ActionSheetController, AlertController, ToastController } 
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { CallService } from 'src/app/shared/contact/call.service';
 import { addIcons } from 'ionicons';
 import {
   chevronBack, storefront, call, ellipsisVertical, carOutline, location,
@@ -74,7 +75,8 @@ export class CustomerChatComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private actionSheetCtrl: ActionSheetController,
     private alertCtrl: AlertController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private callService: CallService
   ) {
     addIcons({
       chevronBack, storefront, call, ellipsisVertical, carOutline, location,
@@ -88,7 +90,7 @@ export class CustomerChatComponent implements OnInit, OnDestroy {
     if (navigation?.extras.state) {
       this.orderId = navigation.extras.state['orderId'] || '123456';
       this.customerName = navigation.extras.state['customerName'] || 'Customer';
-      this.customerPhone = navigation.extras.state['customerPhone'] || '+91 98765 43210';
+      this.customerPhone = navigation.extras.state['customerPhone'] || '';
     }
   }
 
@@ -146,7 +148,7 @@ export class CustomerChatComponent implements OnInit, OnDestroy {
   }
 
   makeCall() {
-    window.open(`tel:${this.customerPhone}`, '_system');
+    void this.callService.placeCall(this.customerName || 'Customer', this.customerPhone);
   }
 
   async showMoreOptions() {

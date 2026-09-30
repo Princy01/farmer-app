@@ -231,8 +231,8 @@
   }
 </ion-content>
 
-<!-- ─── Footer — only shown when something is selected ──────────────────────── -->
-@if (selectedGroupCount > 0) {
+<!-- ─── Footer — shown when the cart has items ──────────────────────────────── -->
+@if (wholesalerGroups.length > 0) {
   <ion-footer class="checkout-footer">
     <div class="checkout-container">
       <div class="checkout-info">
@@ -243,7 +243,7 @@
         </span>
       </div>
 
-      <ion-button class="checkout-btn" expand="block" (click)="checkout()" [disabled]="isLoading">
+      <ion-button class="checkout-btn" expand="block" (click)="checkout()" [disabled]="isLoading || selectedGroupCount === 0">
         <ion-icon name="card-outline" slot="start"></ion-icon>
         {{ 'CART.PROCEED_TO_CHECKOUT' | translate }}
       </ion-button>

@@ -2419,6 +2419,15 @@
     "INVALID_PRODUCT_ID": "Invalid product ID provided.",
     "INVALID_ID": "Invalid ID provided."
   },
+  "CALL": {
+    "CONFIRM_TITLE": "Place cellular call?",
+    "CONFIRM_MESSAGE": "This call will be placed through your SIM card. Standard operator call charges may apply.",
+    "DESKTOP_TITLE": "Contact {{name}}",
+    "DESKTOP_MESSAGE": "Please dial this number directly from your phone:\n{{phone}}",
+    "CANCEL": "Cancel",
+    "CALL_NOW": "Call Now",
+    "CLOSE": "Close"
+  },
   "TRANSPORT_DASHBOARD": {
     "ACTIVE": "Active",
     "UPCOMING": "Upcoming",
@@ -2455,7 +2464,9 @@
     "CANCEL_JOB_SUCCESS_MESSAGE": "The delivery job was cancelled successfully.",
     "CANCEL_JOB_ERROR_TITLE": "Cancellation failed",
     "CANCEL_JOB_ERROR_MESSAGE": "Unable to cancel this delivery right now.",
-    "OK": "OK"
+    "OK": "OK",
+    "CALL_WHOLESALER": "Call Wholesaler",
+    "CALL_RETAILER": "Call Retailer"
   },
   "TRANSPORT_STATUS": {
     "REASSIGNED_BY_OPS": "Reassigned by ops",
@@ -2653,6 +2664,7 @@
     "PRICE": "Price",
     "KG": "kg",
     "NOT_ASSIGNED": "N/A",
+    "CALL_DRIVER": "Call Driver",
     "STATUS_ACCEPTED": "Accepted",
     "STATUS_PICKED_UP": "Picked Up",
     "STATUS_PARTIALLY_PICKED": "Partially Picked",

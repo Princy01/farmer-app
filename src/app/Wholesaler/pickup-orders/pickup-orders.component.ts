@@ -22,6 +22,7 @@ import {
 } from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WholesalerOrderService, WholesalerOrderSummary, WholesalerOrderDetails, OrderStatus } from './pickup-orders.service';
+import { CallService } from 'src/app/shared/contact/call.service';
 
 interface PickupOrder extends WholesalerOrderSummary {
   driverName?: string;
@@ -62,7 +63,8 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private callService: CallService
   ) {
     addIcons({
       arrowBack,
@@ -156,8 +158,8 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
             this.orders = (data || []).map(order => ({
               ...order,
               totalWeight: `${order.total_quantity} ${this.translate.instant('PICKUP_ORDERS.KG')}`,
-              driverName: this.translate.instant('PICKUP_ORDERS.NOT_ASSIGNED'),
-              driverPhone: this.translate.instant('PICKUP_ORDERS.NOT_ASSIGNED'),
+              driverName: order.driver_name || undefined,
+              driverPhone: order.driver_contact || undefined,
               canGenerateOtp: this.OTP_ALLOWED_STATUSES.includes(order.order_status_id)
             }));
             this.groupOrdersByDate();
@@ -183,6 +185,16 @@ export class WholesalerPickupOrdersComponent implements OnInit, OnDestroy {
       this.isLoading = false;
       this.hasError = true;
     }
+  }
+
+  callDriver(): void {
+    if (!this.selectedOrderDetails) {
+      return;
+    }
+    void this.callService.placeCall(
+      this.selectedOrderDetails.driver_name || this.translate.instant('PICKUP_ORDERS.DRIVER'),
+      this.selectedOrderDetails.driver_contact
+    );
   }
 
 

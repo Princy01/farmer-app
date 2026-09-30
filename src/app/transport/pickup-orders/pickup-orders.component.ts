@@ -18,9 +18,11 @@ import {
   timeOutline,
   alertCircleOutline,
   closeOutline,
-  chevronForwardOutline
+  chevronForwardOutline,
+  callOutline
 } from 'ionicons/icons';
 import { PickupService, ActiveJob, JobOrder, PickupOTP } from './pickup.service';
+import { CallService } from 'src/app/shared/contact/call.service';
 
 @Component({
   selector: 'app-pickup-orders',
@@ -56,7 +58,8 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
   constructor(
     private pickupService: PickupService,
     private translate: TranslateService,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private callService: CallService
   ) {
     addIcons({
       arrowBack,
@@ -70,7 +73,8 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
       timeOutline,
       alertCircleOutline,
       closeOutline,
-      chevronForwardOutline
+      chevronForwardOutline,
+      callOutline
     });
   }
 
@@ -102,6 +106,10 @@ export class PickupOrdersComponent implements OnInit, OnDestroy {
 
   getOrderStatusColor(order: JobOrder): string {
     return [5, 8].includes(order.order_status_id) ? 'success' : 'medium';
+  }
+
+  callWholesaler(order: JobOrder): void {
+    void this.callService.placeCall(order.wholesaler_name || 'Wholesaler', order.wholesaler_contact);
   }
 
   ngOnDestroy(): void {

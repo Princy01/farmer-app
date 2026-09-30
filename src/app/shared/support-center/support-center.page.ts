@@ -2,8 +2,11 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { IonicModule } from '@ionic/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { environment } from 'src/environments/environment';
+import { CallService } from '../contact/call.service';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline, arrowBackOutline, callOutline, cardOutline,
@@ -20,6 +23,12 @@ interface SupportCategory {
   id: string;
   icon: string;
   options: string[];
+}
+
+interface SupportContactResponse {
+  support_phone: string;
+  support_email: string;
+  support_available: boolean;
 }
 
 @Component({
@@ -229,8 +238,15 @@ export class SupportCenterPage {
   selectedCategory: SupportCategory | null = null;
   selectedOption = '';
   description = '';
+  supportPhone = '';
+  supportEmail = 'support@go4u.app';
 
-  constructor(private route: ActivatedRoute, private translate: TranslateService) {
+  constructor(
+    private route: ActivatedRoute,
+    private translate: TranslateService,
+    private http: HttpClient,
+    private callService: CallService
+  ) {
     // Normalise legacy 'transport' route data to 'driver' so existing routes
     // keep working without needing an immediate router change.
     const rawRole = this.route.snapshot.data['role'] as string;
@@ -246,6 +262,18 @@ export class SupportCenterPage {
       checkmarkCircleOutline, chevronForwardOutline, cubeOutline, documentTextOutline,
       helpCircleOutline, mailOutline, personOutline, storefrontOutline, carOutline,
       warningOutline, navigateOutline, sendOutline
+    });
+  }
+
+  ngOnInit(): void {
+    this.http.get<SupportContactResponse>(`${environment.apiUrl}/support/contact`).subscribe({
+      next: (contact) => {
+        this.supportPhone = contact.support_phone || '';
+        this.supportEmail = contact.support_email || this.supportEmail;
+      },
+      error: () => {
+        this.supportPhone = '';
+      }
     });
   }
 
@@ -265,7 +293,7 @@ export class SupportCenterPage {
   }
 
   callSupport(): void {
-    window.location.href = 'tel:+911800123456';
+    void this.callService.placeCall(this.translate.instant('SUPPORT_CENTER.TITLE'), this.supportPhone);
   }
 
   emailSupport(): void {
@@ -278,6 +306,6 @@ export class SupportCenterPage {
       `Issue: ${this.translate.instant(`SUPPORT_CENTER.OPTIONS.${category}.${issue}`)}`,
       `Description: ${this.description.trim() || '-'}`
     ].join('\n');
-    window.location.href = `mailto:support@go4u.app?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:${this.supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 }

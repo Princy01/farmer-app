@@ -334,6 +334,16 @@
         <ion-icon name="call" slot="start"></ion-icon>
         {{ "DELIVERY_CONFIRMATION.CONTACT_CUSTOMER" | translate }}
       </ion-button>
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="contact-customer-btn"
+        *ngIf="orders[0]?.retailer_contact"
+        (click)="callRetailer(orders[0])"
+      >
+        <ion-icon name="call" slot="start"></ion-icon>
+        {{ "TRANSPORT_DASHBOARD.CALL_RETAILER" | translate }}
+      </ion-button>
     </div>
 
     <!-- Emergency Actions-->
@@ -342,7 +352,7 @@
         {{ "DELIVERY_CONFIRMATION.NEED_HELP" | translate }}
       </h4>
       <div class="emergency-buttons">
-        <ion-button fill="clear" class="support-btn" (click)="callSupport()">
+        <ion-button fill="clear" class="support-btn" (click)="callSupport()" [disabled]="!supportPhone">
           <ion-icon name="headset" slot="start"></ion-icon>
           {{ "DELIVERY_CONFIRMATION.CALL_SUPPORT" | translate }}
         </ion-button>

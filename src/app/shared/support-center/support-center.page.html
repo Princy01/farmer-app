@@ -49,7 +49,7 @@
       </ion-item>
 
       <div class="contact-actions">
-        <ion-button expand="block" (click)="callSupport()" [disabled]="!canContact">
+        <ion-button expand="block" (click)="callSupport()" [disabled]="!canContact || !supportPhone">
           <ion-icon name="call-outline" slot="start"></ion-icon>
           {{ 'SUPPORT_CENTER.CALL_SUPPORT' | translate }}
         </ion-button>

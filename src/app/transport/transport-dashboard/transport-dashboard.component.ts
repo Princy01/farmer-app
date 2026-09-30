@@ -10,7 +10,8 @@ import {
   languageOutline, carOutline, timeOutline, checkmarkCircleOutline,
   menuOutline, notificationsOutline, chevronDownOutline, personCircleOutline,
   speedometerOutline, documentTextOutline, personAddOutline, listOutline,
-  cashOutline, alertCircleOutline, settingsOutline, logOutOutline, closeOutline
+  cashOutline, alertCircleOutline, settingsOutline, logOutOutline, closeOutline,
+  callOutline
 } from 'ionicons/icons';
 import { DeliveryService } from './delivery.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -18,6 +19,7 @@ import { PopoverController } from '@ionic/angular';
 import { LanguagePopoverComponent } from './language-popover.component';
 import { TranslateApiService } from '@/services/translate-api.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { CallService } from 'src/app/shared/contact/call.service';
 
 interface Language {
   id: number;
@@ -55,14 +57,16 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private menuCtrl: MenuController,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private callService: CallService
   ) {
     this.translate.setDefaultLang('en');
     addIcons({
       languageOutline, carOutline, timeOutline, checkmarkCircleOutline,
       menuOutline, notificationsOutline, chevronDownOutline, personCircleOutline,
       speedometerOutline, documentTextOutline, personAddOutline, listOutline,
-      cashOutline, alertCircleOutline, settingsOutline, logOutOutline, closeOutline
+      cashOutline, alertCircleOutline, settingsOutline, logOutOutline, closeOutline,
+      callOutline
     });
   }
 
@@ -88,6 +92,20 @@ export class TransportDashboardComponent implements OnInit, OnDestroy {
   navigateTo(path: string) {
     this.closeMenu();
     this.router.navigate([path]);
+  }
+
+  getPrimaryOrder(order: any): any | null {
+    return order?.orders?.[0] || null;
+  }
+
+  callWholesaler(order: any): void {
+    const contact = this.getPrimaryOrder(order);
+    void this.callService.placeCall(contact?.wholesaler_name || 'Wholesaler', contact?.wholesaler_contact);
+  }
+
+  callRetailer(order: any): void {
+    const contact = this.getPrimaryOrder(order);
+    void this.callService.placeCall(contact?.retailer_name || 'Retailer', contact?.retailer_contact);
   }
 
   async logout(): Promise<void> {

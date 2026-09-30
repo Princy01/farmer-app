@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { firstValueFrom } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import {
   chevronBack,
   checkmarkDoneCircle,
@@ -38,6 +39,8 @@ import {
   starOutline
 } from 'ionicons/icons';
 import { AuthService } from 'src/app/auth/auth.service';
+import { environment } from 'src/environments/environment';
+import { CallService } from 'src/app/shared/contact/call.service';
 import { DeliveryService, DeliveryDetails, DeliveryItem, ActiveJob, JobOrder } from './delivery-confirmation.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
@@ -82,6 +85,7 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
 
   // properties for job details (orders for display, but OTP/confirmation per job)
   orders: JobOrder[] = [];
+  supportPhone = '';
 
   // OTP Properties
   otpGenerated: boolean = false;
@@ -130,7 +134,9 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private http: HttpClient,
+    private callService: CallService
   ) {
     addIcons({
       'chevron-back': chevronBack,
@@ -167,6 +173,11 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.http.get<{ support_phone?: string }>(`${environment.apiUrl}/support/contact`).subscribe({
+      next: (contact) => this.supportPhone = contact.support_phone || '',
+      error: () => this.supportPhone = ''
+    });
+
     // Check authentication
     if (!this.authService.isAuthenticated()) {
       await this.showAuthError();
@@ -414,7 +425,11 @@ export class DeliveryConfirmationComponent implements OnInit, OnDestroy {
   }
 
   callSupport() {
-    window.open('tel:+911800123456');
+    void this.callService.placeCall(this.translate.instant('SUPPORT_CENTER.TITLE'), this.supportPhone);
+  }
+
+  callRetailer(order: JobOrder): void {
+    void this.callService.placeCall(order.retailer_owner || 'Retailer', order.retailer_contact);
   }
 
   async reportDeliveryIssue() {

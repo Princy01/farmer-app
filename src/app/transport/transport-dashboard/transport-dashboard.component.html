@@ -150,6 +150,26 @@
 
               <div class="card-actions">
                 <ion-button
+                  *ngIf="getPrimaryOrder(order)?.wholesaler_contact"
+                  size="small"
+                  fill="outline"
+                  color="primary"
+                  (click)="$event.stopPropagation(); callWholesaler(order)"
+                >
+                  <ion-icon name="call-outline" slot="start"></ion-icon>
+                  {{ 'TRANSPORT_DASHBOARD.CALL_WHOLESALER' | translate }}
+                </ion-button>
+                <ion-button
+                  *ngIf="getPrimaryOrder(order)?.retailer_contact"
+                  size="small"
+                  fill="outline"
+                  color="primary"
+                  (click)="$event.stopPropagation(); callRetailer(order)"
+                >
+                  <ion-icon name="call-outline" slot="start"></ion-icon>
+                  {{ 'TRANSPORT_DASHBOARD.CALL_RETAILER' | translate }}
+                </ion-button>
+                <ion-button
                   size="small"
                   fill="outline"
                   color="danger"

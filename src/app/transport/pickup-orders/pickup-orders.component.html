@@ -177,6 +177,15 @@
         <span>{{ order.delivery_address }}</span>
       </div>
 
+      <ion-button
+        expand="block"
+        fill="outline"
+        *ngIf="order.wholesaler_contact"
+        (click)="callWholesaler(order)">
+        <ion-icon name="call-outline" slot="start"></ion-icon>
+        {{ 'TRANSPORT_DASHBOARD.CALL_WHOLESALER' | translate }}
+      </ion-button>
+
       <!--  OTP not applicable to already-picked-up / delivered orders  -->
       <div class="not-eligible-note" *ngIf="!canViewOtp()">
         <ion-icon name="checkmark-done-circle"></ion-icon>

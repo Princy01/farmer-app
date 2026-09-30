@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -14,9 +15,12 @@ import {
   helpCircleOutline,
   imageOutline,
   trashOutline,
+  callOutline,
 } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
+import { environment } from 'src/environments/environment';
+import { CallService } from 'src/app/shared/contact/call.service';
 import { RetailerOrderDetails, RetailerOrderService } from '../../retailer-order-details/retailer-order-details.service';
 import {
   AddEvidencePayload,
@@ -65,6 +69,7 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
   pendingEvidence: PendingEvidenceItem[] = [];
   duplicateExistingCase: DuplicateDisputeCase | null = null;
   blockRetry = false;
+  supportPhone = '';
 
   issueTypeError: string | null = null;
   otherIssueTitleError: string | null = null;
@@ -79,7 +84,9 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private orderService: RetailerOrderService,
     private disputesService: BuyerDisputesService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private http: HttpClient,
+    private callService: CallService
   ) {
     addIcons({
       alertCircleOutline,
@@ -88,11 +95,20 @@ export class ReportIssueComponent implements OnInit, OnDestroy {
       helpCircleOutline,
       imageOutline,
       trashOutline,
+      callOutline,
     });
   }
 
   ngOnInit(): void {
+    this.http.get<{ support_phone?: string }>(`${environment.apiUrl}/support/contact`).subscribe({
+      next: (contact) => this.supportPhone = contact.support_phone || '',
+      error: () => this.supportPhone = ''
+    });
     this.loadScreenData();
+  }
+
+  callSupport(): void {
+    void this.callService.placeCall(this.translate.instant('SUPPORT_CENTER.TITLE'), this.supportPhone);
   }
 
   ngOnDestroy(): void {

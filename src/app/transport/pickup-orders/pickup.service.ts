@@ -39,6 +39,8 @@ export interface JobOrder {
   order_status_text: string;
   actual_delivery_date?: string;
   retailer_id: number;
+  wholesaler_name?: string | null;
+  wholesaler_contact?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

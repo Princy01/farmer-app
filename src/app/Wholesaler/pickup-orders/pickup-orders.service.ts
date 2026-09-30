@@ -36,6 +36,10 @@ export interface WholesalerOrderSummary {
   actual_delivery_date?: string;
   created_at: string;
   updated_at: string;
+  driver_id: number | null;
+  driver_name: string | null;
+  driver_contact: string | null;
+  driver_assignment_status: string;
 }
 
 export interface WholesalerOrderDetails {
@@ -51,6 +55,10 @@ export interface WholesalerOrderDetails {
   actual_delivery_date?: string;
   created_at: string;
   updated_at: string;
+  driver_id: number | null;
+  driver_name: string | null;
+  driver_contact: string | null;
+  driver_assignment_status: string;
   otp?: string;
   items: WholesalerOrderItem[];
 }

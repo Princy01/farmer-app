@@ -184,6 +184,16 @@
           </div>
         </div>
 
+        <ion-button
+          expand="block"
+          fill="outline"
+          *ngIf="selectedOrderDetails.driver_contact"
+          (click)="callDriver()"
+        >
+          <ion-icon name="call" slot="start"></ion-icon>
+          {{ "PICKUP_ORDERS.CALL_DRIVER" | translate }}
+        </ion-button>
+
         <div class="otp-section-details" *ngIf="selectedOrder?.canGenerateOtp">
           <ion-button
             *ngIf="!selectedOrder?.otpGenerated"
