@@ -308,7 +308,7 @@
           </div>
         </div>
 
-        <ion-button type="submit" expand="block" class="register-button" [disabled]="registerForm.invalid || isLoading" [attr.aria-busy]="isLoading">
+        <ion-button type="submit" expand="block" class="register-button" [disabled]="isLoading" [attr.aria-busy]="isLoading">
           <ion-spinner *ngIf="isLoading" name="circles" slot="start" aria-hidden="true"></ion-spinner>
           <ion-icon *ngIf="!isLoading" name="person-add-outline" slot="start" aria-hidden="true"></ion-icon>
           {{ isLoading ? ('AUTH.CREATING_ACCOUNT' | translate) : ('AUTH.CREATE_ACCOUNT' | translate) }}

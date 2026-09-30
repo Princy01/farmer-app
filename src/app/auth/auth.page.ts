@@ -124,7 +124,7 @@ export class LoginPage implements OnDestroy {
     this.registerForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       identifier: ['', [Validators.required, this.emailOrPhoneValidator]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
       state: [null, Validators.required],
       city: [null, Validators.required],
       location: [null, Validators.required],
@@ -765,8 +765,12 @@ export class LoginPage implements OnDestroy {
             this.pendingVerificationEmail = formData.identifier;
             this.authMode = 'verify-email';
             this.presentToast(
-              this.translate.instant('AUTH.VERIFICATION_EMAIL_SENT'),
-              'success'
+              this.translate.instant(
+                response.verification_sent
+                  ? 'AUTH.VERIFICATION_EMAIL_SENT'
+                  : 'AUTH.VERIFICATION_EMAIL_NOT_SENT'
+              ),
+              response.verification_sent ? 'success' : 'warning'
             );
           } else {
             // Phone registration - no verification needed
@@ -796,9 +800,22 @@ export class LoginPage implements OnDestroy {
           let errorMessage = this.translate.instant('AUTH.REGISTER_ERROR');
 
           if (error.error && typeof error.error === 'object' && error.error.error) {
-            if (error.error.error.includes('already exists')) {
+            const errorCode = String(error.error.error);
+            const serverMessage = String(error.error.message || errorCode);
+
+            if (errorCode === 'email_verification_pending') {
+              this.pendingVerificationEmail = formData.identifier;
+              this.authMode = 'verify-email';
+              this.presentToast(
+                this.translate.instant('AUTH.EMAIL_VERIFICATION_PENDING'),
+                'warning'
+              );
+              return;
+            } else if (errorCode === 'account_deactivated') {
+              errorMessage = this.translate.instant('AUTH.ACCOUNT_DEACTIVATED_ERROR');
+            } else if (errorCode === 'user_exists' || serverMessage.includes('already exists')) {
               errorMessage = this.translate.instant('AUTH.USER_EXISTS_ERROR');
-            } else if (error.error.error.includes('Invalid email')) {
+            } else if (serverMessage.includes('Invalid email')) {
               errorMessage = this.translate.instant('AUTH.INVALID_EMAIL_ERROR');
             }
           } else if (error.status === 0) {
