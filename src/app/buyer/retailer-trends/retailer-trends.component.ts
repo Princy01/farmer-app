@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline } from 'ionicons/icons';
-import { RetailerTrendsService, PriceComparisonRow } from './retailer-trends.service';  // Import the service
+import { RetailerTrendsService, PriceComparisonRow } from './retailer-trends.service';
 
 interface Product {
   id: number;
@@ -20,17 +20,15 @@ interface Product {
   styleUrls: ['./retailer-trends.component.scss']
 })
 export class RetailerTrendsComponent implements OnInit {
-  selectedProducts: number[] = [1, 2];  // Use IDs (e.g., 1 for Tomato, 2 for Onion)
+  selectedProducts: number[] = [];
   searchTerm = '';
 
-  // Hardcoded products with IDs (replace with API fetch if available)
-  products: Product[] = [
-    { id: 1, name: 'Tomato' },
-    { id: 2, name: 'Onion' },
-    { id: 3, name: 'Potato' }
-  ];
-
+  products: Product[] = [];
   filteredProducts: Product[] = [];
+  isLoadingProducts = false;
+  isLoadingPrices = false;
+  productsError = false;
+  pricesError = false;
   chartOptions: any = {
     series: [],
     chart: {
@@ -65,7 +63,7 @@ export class RetailerTrendsComponent implements OnInit {
       }
     }
   };
-   priceData: PriceComparisonRow[] = [];  // Store API response
+  priceData: PriceComparisonRow[] = [];
 
   constructor(private navController: NavController, private retailerService: RetailerTrendsService) {
     addIcons({ chevronBackOutline });
@@ -73,8 +71,6 @@ export class RetailerTrendsComponent implements OnInit {
 
   ngOnInit() {
     this.loadAvailableProducts();
-    // this.filteredProducts = [...this.products];
-    this.loadPriceData();
   }
 
   goBack() {
@@ -82,16 +78,26 @@ export class RetailerTrendsComponent implements OnInit {
   }
 
   loadAvailableProducts() {
+    this.isLoadingProducts = true;
+    this.productsError = false;
     this.retailerService.getAvailableProducts().subscribe({
       next: (data) => {
-        if (data && data.length > 0) {
-          this.products = data.map(item => ({
-            id: item.product_id,
-            name: item.product_name
-          }));
-        }
-        // If no data returned, keep hardcoded products
+        this.products = (data || []).map(item => ({
+          id: item.product_id,
+          name: item.product_name
+        }));
         this.filteredProducts = [...this.products];
+        this.selectedProducts = this.products.slice(0, 2).map(product => product.id);
+        this.isLoadingProducts = false;
+        this.loadPriceData();
+      },
+      error: (error) => {
+        console.error('Failed to load available products:', error);
+        this.products = [];
+        this.filteredProducts = [];
+        this.selectedProducts = [];
+        this.productsError = true;
+        this.isLoadingProducts = false;
       }
     });
   }
@@ -113,20 +119,25 @@ export class RetailerTrendsComponent implements OnInit {
   private loadPriceData() {
     if (this.selectedProducts.length === 0) {
       this.priceData = [];
+      this.pricesError = false;
       this.updateChart();
       return;
     }
+    this.isLoadingPrices = true;
+    this.pricesError = false;
     const productIds = this.selectedProducts.join(',');
     this.retailerService.getPriceComparison(productIds).subscribe({
       next: (data) => {
         this.priceData = data;
+        this.isLoadingPrices = false;
         this.updateChart();
       },
       error: (err) => {
         console.error('Failed to load price comparison:', err);
         this.priceData = [];
+        this.pricesError = true;
+        this.isLoadingPrices = false;
         this.updateChart();
-        // Optionally show a toast or alert
       }
     });
   }

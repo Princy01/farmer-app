@@ -196,11 +196,34 @@ export class PaymentDetailsPage implements OnInit {
   }
 
   async continue(): Promise<void> {
-    if (this.returnUrl) {
+    if (this.returnUrl && this.isSafeInternalReturnUrl(this.returnUrl)) {
       await this.router.navigateByUrl(this.returnUrl);
       return;
     }
     this.navCtrl.back();
+  }
+
+  private isSafeInternalReturnUrl(value: string): boolean {
+    if (!value.startsWith('/') || value.startsWith('//')) {
+      return false;
+    }
+
+    try {
+      const parsed = new URL(value, window.location.origin);
+      const allowedPrefixes = [
+        '/buyer',
+        '/wholesaler',
+        '/transport',
+        '/admin',
+        '/ops',
+        '/finance',
+        '/payment-details'
+      ];
+      return parsed.origin === window.location.origin &&
+        allowedPrefixes.some(prefix => parsed.pathname === prefix || parsed.pathname.startsWith(`${prefix}/`));
+    } catch {
+      return false;
+    }
   }
 
   async goBack(): Promise<void> {

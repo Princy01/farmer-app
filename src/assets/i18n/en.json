@@ -2579,7 +2579,7 @@
     "COOLDOWN_EXPIRED": "Cooldown period has ended, you can now accept deliveries",
     "CANNOT_ACCEPT_COOLDOWN": "You cannot accept offers while under cooldown (6-hour period)",
     "CANNOT_REJECT_COOLDOWN": "You cannot reject offers while under cooldown",
-    "UNDER_COOLDOWN": "You are under cooldown for {{hours}} hours",
+    "UNDER_COOLDOWN": "You cannot accept new jobs for {{hours}} hours",
     "AVAILABILITY_LOCKED": "Your availability has been locked",
     "LOCKED_TITLE": "Account Locked",
     "LOCKED_MESSAGE": "Your account has been locked by an administrator. Please contact support for assistance",
@@ -2595,12 +2595,7 @@
     "ERROR_WS_ESTABLISH": "Unable to start live updates. Trying again...",
     "ERROR_WS_RECONNECT_FAILED": "Live connection could not be restored. Please check your internet and retry.",
     "ERROR_AUTH_TOKEN_LOST": "Your session is no longer available. Please log in again.",
-    "ERROR_AUTH_TOKEN_EXPIRED_RECONNECTING": "Refreshing session for live updates...",
-    "AREA": "Area",
-    "EXPIRES_AT": "Expires At",
-    "OFFERED_RATE": "Offered Rate",
-    "RETRY": "Retry",
-    "UNDER_COOLDOWN": "You are under a {{hours}}-hour cooldown. Please wait before accepting new jobs."
+    "ERROR_AUTH_TOKEN_EXPIRED_RECONNECTING": "Refreshing your session for live updates..."
   },
   "PICKUP_ORDERS": {
     "JOBS": "Jobs",

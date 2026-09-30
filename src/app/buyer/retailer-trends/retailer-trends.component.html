@@ -19,6 +19,7 @@
             [(ngModel)]="selectedProducts"
             interface="popover"
             multiple="true"
+            [disabled]="isLoadingProducts || productsError || products.length === 0"
             (ionChange)="onProductChange()">
             <ion-select-option
               *ngFor="let product of filteredProducts"
@@ -37,7 +38,23 @@
       </ion-col>
 
       <ion-col size="12" size-md="9">
+        <ion-text color="medium" *ngIf="isLoadingProducts || isLoadingPrices">
+          <p>Loading price information...</p>
+        </ion-text>
+        <ion-text color="danger" *ngIf="productsError">
+          <p>Products could not be loaded. Please try again later.</p>
+        </ion-text>
+        <ion-text color="medium" *ngIf="!isLoadingProducts && !productsError && products.length === 0">
+          <p>No products are available for price comparison.</p>
+        </ion-text>
+        <ion-text color="danger" *ngIf="pricesError">
+          <p>Price information could not be loaded. Please try again later.</p>
+        </ion-text>
+        <ion-text color="medium" *ngIf="!isLoadingPrices && !pricesError && selectedProducts.length > 0 && priceData.length === 0">
+          <p>No price information is available for the selected products.</p>
+        </ion-text>
         <apx-chart
+          *ngIf="!isLoadingProducts && !isLoadingPrices && !productsError && !pricesError && priceData.length > 0"
           [series]="chartOptions.series"
           [chart]="chartOptions.chart"
           [xaxis]="chartOptions.xaxis"

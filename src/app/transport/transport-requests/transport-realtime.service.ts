@@ -366,8 +366,8 @@ export class TransportRealtimeService {
 
       return false;
     } catch (error) {
-      // If we can't decode, assume it's valid
-      return false;
+      // A malformed token must never keep a realtime connection alive.
+      return true;
     }
   }
 

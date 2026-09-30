@@ -144,10 +144,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.hasTransport = this.orderData?.hasTransport || navigationState?.hasTransport || false;
     this.transportInfo = this.orderData?.transportData || navigationState?.transportData;
 
-    console.log('Payment page initialized with order data:', this.orderData);
-    console.log('Checkout session ID:', this.checkoutSessionId);
-    console.log('Has transport:', this.hasTransport);
-    console.log('Transport info:', this.transportInfo);
+    this.logDebug('Payment page initialized');
   }
 
   async ngOnInit() {
@@ -300,13 +297,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
         base_price: transportData.base_price || 0
       };
 
-      console.log('Creating transport job with request:', transportRequest);
-
       const response = await this.orderService.createTransportJob(transportRequest).toPromise();
-      console.log('Transport job created successfully:', response);
+      this.logDebug('Transport job created successfully');
 
     } catch (error: any) {
-      console.error('Transport job creation failed:', error);
+      this.logError('Transport job creation failed');
       // Don't throw - order is already created, just log the transport error
       await this.showToast(
         this.translate.instant('PAYMENT.ERROR_TRANSPORT_JOB'),
@@ -397,11 +392,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
           ?? 0
       );
 
-      console.log('Payment initiation - payableAmount:', payableAmount, 'orderData:', {
-        payableAmount: this.orderData?.payableAmount,
-        grandTotal: this.orderData?.grandTotal,
-        totalPrice: this.orderData?.totalPrice,
-      });
+      this.logDebug('Payment initiation started');
 
       // Guard: ensure we have a valid positive amount before calling the gateway.
       // Previously, when payableAmount resolved to 0 (e.g. because orderData fields were
@@ -642,11 +633,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       items: this.orderData?.items || [],
     };
 
-    console.log('Checkout session created:', {
-      checkoutSessionId,
-      payableAmount: this.orderData.payableAmount,
-      responseData: response?.data
-    });
+    this.logDebug('Checkout session created');
   }
 
   private async loadCheckoutSessionDetail(checkoutSessionId: number): Promise<void> {
@@ -664,12 +651,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.checkoutRetryBlockReason = detail.retry_block_reason || null;
     this.orderData = this.mapCheckoutSessionDetailToOrderData(detail);
 
-    console.log('Checkout session loaded:', {
-      checkoutSessionId: detail.checkout_session_id,
-      payableAmount: detail.payable_amount,
-      status: detail.status,
-      orderData: this.orderData
-    });
+    this.logDebug('Checkout session loaded');
 
     // Ensure items have correct prices from wholesalerGroups
     this.ensureItemsPopulated();
@@ -798,6 +780,18 @@ export class PaymentComponent implements OnInit, OnDestroy {
   private getPaymentErrorMessage(): string {
     const method = this.getPaymentMethodName() || this.translate.instant('PAYMENT.GENERIC_METHOD');
     return this.translate.instant('PAYMENT.PAYMENT_ERROR_MSG', { method });
+  }
+
+  private logDebug(message: string): void {
+    if (!environment.production) {
+      console.debug(`[Payment] ${message}`);
+    }
+  }
+
+  private logError(message: string): void {
+    if (!environment.production) {
+      console.error(`[Payment] ${message}`);
+    }
   }
 
   goBack() {

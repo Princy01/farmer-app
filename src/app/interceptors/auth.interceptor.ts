@@ -4,15 +4,19 @@ import {
   HttpHandlerFn,
   HttpErrorResponse,
   HttpContext,
+  HttpContextToken,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError, timeout } from 'rxjs';
+import { catchError, finalize, Observable, shareReplay, switchMap, throwError, timeout } from 'rxjs';
 import { SKIP_TRANSLATION } from './translation.context';
 
 // HTTP Timeout: 30 seconds
 const HTTP_TIMEOUT_MS = 30000;
+const AUTH_RETRIED = new HttpContextToken<boolean>(() => false);
+
+let refreshRequest$: Observable<string> | null = null;
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -145,19 +149,36 @@ function handleUnauthorizedError(
   next: HttpHandlerFn,
   authService: AuthService
 ) {
-  return authService.refreshToken().pipe(
-    switchMap((response) => {
-      const newToken = response.access_token;
-      const reqWithNewToken = addTokenToRequest(request, newToken);
+  if (request.context.get(AUTH_RETRIED)) {
+    return throwError(() => new HttpErrorResponse({
+      status: 401,
+      statusText: 'Unauthorized',
+      url: request.url,
+    }));
+  }
 
-      // Preserve the SKIP_TRANSLATION context during retry
-      const finalReq = request.context.get(SKIP_TRANSLATION)
-        ? reqWithNewToken.clone({
-            context: new HttpContext().set(SKIP_TRANSLATION, true),
-          })
-        : reqWithNewToken;
+  if (!refreshRequest$) {
+    refreshRequest$ = authService.refreshToken().pipe(
+      switchMap((response) => {
+        if (!response.access_token) {
+          return throwError(() => new Error('Token refresh did not return an access token'));
+        }
+        return [response.access_token];
+      }),
+      finalize(() => {
+        refreshRequest$ = null;
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+  }
 
-      return next(finalReq);
+  return refreshRequest$.pipe(
+    switchMap((newToken) => {
+      const retryContext = request.context.set(AUTH_RETRIED, true);
+      const reqWithNewToken = addTokenToRequest(request, newToken).clone({
+        context: retryContext,
+      });
+      return next(reqWithNewToken);
     }),
     catchError((refreshError) => {
       authService.logout();

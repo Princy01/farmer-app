@@ -1,3 +1,5 @@
+import { environment } from 'src/environments/environment';
+
 /**
  * Utility functions for resolving and falling back retailer category and product photos.
  */
@@ -17,9 +19,28 @@ export function normalizeImagePath(rawPath?: string | null): string | null {
     return null;
   }
 
-  // Absolute or data URLs
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image/')) {
-    return trimmed;
+  if (trimmed.startsWith('data:image/')) {
+    const dataUrlMatch = trimmed.match(/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i);
+    if (dataUrlMatch && trimmed.length <= 5 * 1024 * 1024) {
+      return trimmed;
+    }
+    return null;
+  }
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      const url = new URL(trimmed);
+      const apiOrigin = new URL(environment.apiUrl).origin;
+      const currentOrigin = typeof window === 'undefined' ? null : window.location.origin;
+      const isLocalDevelopment = url.protocol === 'http:' &&
+        ['localhost', '127.0.0.1', '::1', '10.0.2.2'].includes(url.hostname);
+      const isApprovedOrigin = url.protocol === 'https:' &&
+        (url.origin === apiOrigin || url.origin === currentOrigin);
+
+      return isLocalDevelopment || isApprovedOrigin ? trimmed : null;
+    } catch {
+      return null;
+    }
   }
 
   // Already prefixed with assets/
