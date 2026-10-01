@@ -226,6 +226,13 @@ export class AuthService {
 
   // Enhanced logout method
   logout(): void {
+    const refreshToken = localStorage.getItem(this.refreshTokenKey);
+    if (refreshToken) {
+      this.http.post<void>(`${this.apiUrl}/auth/logout`, { refresh_token: refreshToken })
+        .pipe(catchError(() => of(undefined)))
+        .subscribe();
+    }
+
     localStorage.removeItem(this.accessTokenKey);
     localStorage.removeItem(this.refreshTokenKey);
     localStorage.removeItem(this.roleKey);
