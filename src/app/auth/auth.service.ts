@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, throwError, retry, timer, of } from 'rxjs';
+import { Observable, tap, catchError, throwError, retry, timer, of, finalize, shareReplay } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface LoginCredentials {
@@ -123,6 +123,7 @@ export class AuthService {
   private refreshTokenKey = 'refresh_token';
   private roleKey = 'user_role';
   private userIdKey = 'user_id';
+  private refreshRequest$: Observable<AuthResponse> | null = null;
 
   // Caching for reference data (24-hour TTL)
   private statesCache: Map<string, State[]> = new Map();
@@ -153,7 +154,11 @@ export class AuthService {
       return throwError(() => new Error('No refresh token available'));
     }
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/refresh-token`, { refresh_token: refreshToken })
+    if (this.refreshRequest$) {
+      return this.refreshRequest$;
+    }
+
+    this.refreshRequest$ = this.http.post<AuthResponse>(`${this.apiUrl}/auth/refresh-token`, { refresh_token: refreshToken })
       .pipe(
         tap(response => {
           if (response.access_token) {
@@ -175,8 +180,14 @@ export class AuthService {
           // If refresh fails, log the user out
           this.logout();
           return throwError(() => error);
-        })
+        }),
+        finalize(() => {
+          this.refreshRequest$ = null;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
       );
+
+    return this.refreshRequest$;
   }
 
   registerUser(userData: UserRegistration): Observable<RegistrationResponse> {

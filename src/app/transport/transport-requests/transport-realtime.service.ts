@@ -79,7 +79,7 @@ export class TransportRealtimeService {
 
     // Check if token is expired or about to expire
     if (this.isTokenExpired(token)) {
-      this.errorSubject.next('TRANSPORT_REQUESTS.ERROR_AUTH_TOKEN_EXPIRED_LOGIN');
+      this.refreshTokenAndReconnect();
       return;
     }
 
