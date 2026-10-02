@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -38,7 +38,7 @@ interface SupportContactResponse {
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, TranslatePipe]
 })
-export class SupportCenterPage {
+export class SupportCenterPage implements OnInit {
   readonly role: SupportRole;
   readonly backRoute: string;
 

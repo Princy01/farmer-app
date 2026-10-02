@@ -1,19 +1,18 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { NextDayDemandComponent } from './next-day-demand.component';
+import { NextDayDemandPage } from './next-day-demand.component';
 
-describe('NextDayDemandComponent', () => {
-  let component: NextDayDemandComponent;
-  let fixture: ComponentFixture<NextDayDemandComponent>;
+describe('NextDayDemandPage', () => {
+  let component: NextDayDemandPage;
+  let fixture: ComponentFixture<NextDayDemandPage>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ NextDayDemandComponent ],
-      imports: [IonicModule.forRoot()]
+      imports: [IonicModule.forRoot(), NextDayDemandPage]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(NextDayDemandComponent);
+    fixture = TestBed.createComponent(NextDayDemandPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

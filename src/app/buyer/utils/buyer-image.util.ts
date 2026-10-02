@@ -43,6 +43,11 @@ export function normalizeImagePath(rawPath?: string | null): string | null {
     }
   }
 
+  // Reject unsupported URL schemes instead of treating them as filenames.
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) {
+    return null;
+  }
+
   // Already prefixed with assets/
   if (trimmed.startsWith('assets/')) {
     return trimmed;
