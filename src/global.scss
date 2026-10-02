@@ -26,15 +26,97 @@
 @import "@ionic/angular/css/flex-utils.css";
 
 /**
- * Ionic Dark Mode
+ * Ionic Dark Mode - disabled
  * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
+ * Melato uses a single light palette on every platform. Keep all Ionic dark
+ * palette imports disabled so a device preference cannot change the UI.
  */
-
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
-@import "@ionic/angular/css/palettes/dark.class.css";
-// @import '@ionic/angular/css/palettes/dark.system.css';
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+@media (prefers-color-scheme: dark) {
+  :root,
+  body,
+  body.dark,
+  .ios body,
+  .md body {
+    --ion-background-color: #f8f9fa;
+    --ion-background-color-rgb: 248, 249, 250;
+    --ion-text-color: #1a1a2e;
+    --ion-text-color-rgb: 26, 26, 46;
+    --ion-toolbar-background: #ffffff;
+    --ion-toolbar-color: #1a1a2e;
+    --ion-item-background: #ffffff;
+    --ion-card-background: #ffffff;
+    --ion-color-step-50: #f3f3f4;
+    --ion-color-step-100: #e7e7e9;
+    --ion-color-step-150: #dbdcde;
+    --ion-color-step-200: #d0d0d3;
+    --ion-color-step-250: #c4c4c8;
+    --ion-color-step-300: #b8b9bd;
+    --ion-color-step-350: #adadb2;
+    --ion-color-step-400: #a1a1a7;
+    --ion-color-step-450: #95969c;
+    --ion-color-step-500: #8a8a91;
+    --ion-color-step-550: #7e7f86;
+    --ion-color-step-600: #72737b;
+    --ion-color-step-650: #676870;
+    --ion-color-step-700: #5b5c65;
+    --ion-color-step-750: #4f515a;
+    --ion-color-step-800: #44454f;
+    --ion-color-step-850: #383a44;
+    --ion-color-step-900: #2c2e39;
+    --ion-color-step-950: #212333;
+    color-scheme: light;
+  }
+
+  ion-content {
+    --background: var(--ion-background-color, #f8f9fa);
+    --color: var(--ion-text-color, #1a1a2e);
+  }
+
+  ion-item,
+  ion-input,
+  ion-textarea,
+  ion-select,
+  ion-searchbar {
+    --background: #ffffff;
+    --color: var(--ion-text-color, #1a1a2e);
+  }
+
+  ion-list,
+  ion-card,
+  ion-toolbar,
+  ion-tab-bar,
+  ion-modal,
+  ion-popover,
+  ion-action-sheet,
+  ion-menu {
+    --background: #ffffff;
+    --color: var(--ion-text-color, #1a1a2e);
+  }
+
+  ion-list {
+    --ion-item-background: #ffffff;
+    background: #ffffff;
+  }
+
+  ion-segment {
+    --background: #f0f0f0;
+  }
+
+  ion-segment-button {
+    --background-checked: #ffffff;
+    --color: var(--ion-text-color, #1a1a2e);
+    --color-checked: var(--ion-color-primary, #667eea);
+  }
+
+  ion-toggle {
+    --background: #e0e0e0;
+    --background-checked: var(--ion-color-primary, #667eea);
+  }
+}
 
 /**
  * App-wide Font
@@ -155,4 +237,100 @@
   color: rgba(255, 255, 255, 0.95) !important;
   text-transform: none !important;
   display: inline-block !important;
+}
+
+.app-toolbar-gradient {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  --color: #ffffff !important;
+  --border-color: transparent !important;
+
+  ion-back-button,
+  ion-menu-button,
+  ion-button {
+    --color: #ffffff !important;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  overscroll-behavior: none;
+}
+
+ion-content {
+  --padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+ion-tab-bar,
+ion-footer {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+ion-content.content-with-padding {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+ion-header::after {
+  background-image: none;
+}
+
+ion-card {
+  border-radius: 12px;
+  box-shadow: var(--app-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
+}
+
+ion-skeleton-text {
+  --background: #e0e0e0;
+  --background-rgb: 224, 224, 224;
+}
+
+ion-toolbar {
+  --min-height: 56px;
+
+  ion-title {
+    padding-inline-start: 48px;
+    padding-inline-end: 48px;
+  }
+
+  &.main-toolbar,
+  &.header-toolbar {
+    --padding-start: 8px;
+    --padding-end: 8px;
+
+    ion-title {
+      position: relative !important;
+      inset-inline-start: auto !important;
+      width: auto !important;
+      flex: 1 1 auto !important;
+      text-align: left !important;
+      padding-inline-start: 6px !important;
+      padding-inline-end: 6px !important;
+    }
+  }
+}
+
+.brand-title-wrap {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand-name {
+  white-space: nowrap;
+}
+
+.brand-role-tag {
+  white-space: nowrap;
+  flex-shrink: 0;
 }

@@ -1,5 +1,5 @@
 :host {
-  // CSS Custom Properties for maintainability and dark mode support
+  // CSS Custom Properties for the light-only application theme
   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --primary-gradient-hover: linear-gradient(135deg, #5568d3 0%, #68408d 100%);
   --primary-dark: #667eea;
@@ -11,15 +11,6 @@
   --text-muted: #94a3b8;
   --border-light: #e3e8ef;
   --error-color: var(--ion-color-danger);
-
-  @media (prefers-color-scheme: dark) {
-    --background-light: #1a1a2e;
-    --surface-light: #16213e;
-    --text-primary: #e8e9ec;
-    --text-secondary: #b0b3b8;
-    --text-muted: #7a7d82;
-    --border-light: #2d3748;
-  }
 
   @media (prefers-contrast: more) {
     --primary-gradient: linear-gradient(135deg, #4c3aa3 0%, #5a2d7e 100%);

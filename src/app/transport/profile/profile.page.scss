@@ -502,48 +502,6 @@ ion-button[type="submit"] {
   }
 }
 
-// Dark theme support
-@media (prefers-color-scheme: dark) {
-  ion-content {
-    --background: #1a1a1a;
-
-    ion-card {
-      background: #2d2d2d;
-
-      .info-section {
-        border-bottom-color: #3a3a3a;
-
-        .section-header {
-          background: #3a3a3a;
-
-          h3 {
-            color: #e5e5e5;
-          }
-        }
-
-        ion-list {
-          ion-item {
-            --background: #3a3a3a;
-
-            ion-label {
-              color: #a3a3a3;
-            }
-
-            ion-input,
-            ion-textarea {
-              color: #e5e5e5;
-
-              &[readonly] {
-                --background: #2d2d2d;
-                color: #9ca3af;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
 // FAB Edit / Cancel Button
 ion-fab[vertical="bottom"][horizontal="end"] {
   ion-fab-button {
@@ -573,13 +531,6 @@ ion-fab[vertical="bottom"][horizontal="end"] {
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  ion-fab[vertical="bottom"][horizontal="end"] {
-    ion-fab-button {
-      --box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6);
-    }
-  }
-}
 // Avatar Upload
 .avatar-upload {
   cursor: pointer;

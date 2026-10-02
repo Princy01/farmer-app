@@ -1141,29 +1141,6 @@ $breakpoint-desktop: 1024px;
   }
 }
 
-// DARK MODE SUPPORT
-@media (prefers-color-scheme: dark) {
-  .transport-requests-content {
-    --background: #1a1a1a;
-  }
-
-  .request-card {
-    background: #2d2d2d;
-    border-color: #3d3d3d;
-  }
-
-  .empty-state {
-    background: #2d2d2d;
-  }
-
-  .price-section {
-    background: rgba(136, 172, 140, 0.15);
-  }
-
-  .section-header .section-title {
-    color: #f0f0f0;
-  }
-}
 
 // MODAL STYLING
 // Note: Modal styles are component-scoped via Component.encapsulation

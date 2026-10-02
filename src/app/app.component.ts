@@ -34,6 +34,10 @@ export class AppComponent implements OnDestroy {
     private translate: TranslateService,
     private location: Location,
   ) {
+    // This application intentionally uses a single light theme.
+    document.body.classList.remove('dark', 'ion-palette-dark');
+    document.documentElement.classList.remove('dark', 'ion-palette-dark');
+
     if (this.isStandalonePwa) {
       document.addEventListener('ionBackButton', this.handlePwaBackButton);
     }
