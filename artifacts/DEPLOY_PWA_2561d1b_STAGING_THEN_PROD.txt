@@ -1,0 +1,88 @@
+Melato PWA deployment: Princy UI reconciliation
+Commit: 2561d1b
+Order: staging first, production only after staging is accepted
+
+STAGING
+=======
+
+From the Mac:
+
+cd /Users/harjasmeetsingh/Downloads/RMQ_tpt/farmer_backend_inspect/farmers_app_frontend
+
+scp \
+  artifacts/ekd-pwa-20261002_staging_princy_ui_2561d1b.tar.gz \
+  artifacts/deploy-staging-pwa-princy-ui-2561d1b.sh \
+  harjasmeet@ekadyu-server:/home/harjasmeet/
+
+ssh harjasmeet@ekadyu-server
+sudo -i
+chmod 700 /home/harjasmeet/deploy-staging-pwa-princy-ui-2561d1b.sh
+/home/harjasmeet/deploy-staging-pwa-princy-ui-2561d1b.sh
+
+The script prints the cancel and manual rollback commands. Keep the rollback
+timer active while performing the staging functional checks below.
+
+Staging functional checks:
+
+1. Open https://staging.melato.net.in/ in a private tab and hard refresh.
+2. Enable device dark mode and confirm that the application remains light.
+3. Confirm category and product photos render, including placeholders where
+   the source image is missing or invalid.
+4. Driver: test Delivery Confirmation, Pickup Orders, and both active-dashboard
+   call buttons (wholesaler and retailer).
+5. Buyer: test the support call on Report Issue.
+6. Wholesaler: test the driver call on Pickup Orders.
+7. Test the call action in Support Center.
+8. Confirm the call confirmation dialog appears and the phone dialer opens on
+   a real mobile device.
+
+After all staging checks pass, run the cancel script printed by the deployment
+script. Verify that no matching rollback timer remains:
+
+systemctl list-timers --all | grep 'ekd-staging-pwa-princy-ui-rollback' || \
+  echo 'No staging PWA rollback timer remains'
+
+PRODUCTION
+==========
+
+Do not continue until the staging rollback timer has been cancelled.
+
+From the Mac:
+
+cd /Users/harjasmeetsingh/Downloads/RMQ_tpt/farmer_backend_inspect/farmers_app_frontend
+
+scp \
+  artifacts/ekd-pwa-20261002_prod_princy_ui_2561d1b.tar.gz \
+  artifacts/deploy-prod-pwa-princy-ui-2561d1b.sh \
+  harjasmeet@melato-server:/home/harjasmeet/
+
+ssh harjasmeet@melato-server
+sudo -i
+chmod 700 /home/harjasmeet/deploy-prod-pwa-princy-ui-2561d1b.sh
+/home/harjasmeet/deploy-prod-pwa-princy-ui-2561d1b.sh
+
+Repeat the same functional checks at https://melato.net.in/ while the
+production rollback timer is active. After all checks pass, run the production
+cancel script printed by the deployment script.
+
+Final production verification:
+
+for svc in \
+  postgresql-17.service \
+  rabbitmq-server.service \
+  ekd-prod-evidence-storage.service \
+  ekd-mandi.service \
+  ekd-email.service \
+  ekd-transport-realtime.service \
+  ekd-transport-supervisor.service \
+  nginx.service
+do
+  printf '%-45s ' "$svc"
+  systemctl is-active "$svc"
+done
+
+readlink -f /srv/ekd/pwa/current
+curl --fail --silent https://api.melato.net.in/
+echo
+systemctl list-timers --all | grep 'melato-prod-pwa-princy-ui-rollback' || \
+  echo 'No production PWA rollback timer remains'

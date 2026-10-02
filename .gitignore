@@ -28,6 +28,8 @@ log.txt
 /tmp
 /out-tsc
 /bazel-out
+/artifacts/*.tar.gz
+/artifacts/*.tar.gz.sha256
 
 # Node
 /node_modules
