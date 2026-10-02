@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, IonModal, AlertController, LoadingController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { chevronBack, close, search, funnelOutline, swapVerticalOutline, cartOutline, alertCircleOutline, star, refreshOutline, checkmarkOutline } from 'ionicons/icons';
+import { chevronBack, close, search, funnelOutline, swapVerticalOutline, cartOutline, alertCircleOutline, informationCircleOutline, star, refreshOutline, checkmarkOutline } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import { BuyerApiService, Product, ProductAll, Category } from '../services/buyer-api.service';
 import { CartService, AddCartItemRequest } from '../cart/cart.service';
@@ -107,7 +107,7 @@ export class CategoryPageComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private mandiService: MandiService
   ) {
-    addIcons({ chevronBack, close, search, alertCircleOutline, funnelOutline, swapVerticalOutline, cartOutline, star, refreshOutline, checkmarkOutline });
+    addIcons({ chevronBack, close, search, alertCircleOutline, informationCircleOutline, funnelOutline, swapVerticalOutline, cartOutline, star, refreshOutline, checkmarkOutline });
   }
 
 

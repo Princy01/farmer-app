@@ -130,6 +130,18 @@
           </ion-button>
         </div>
 
+        <div
+          class="no-items"
+          *ngIf="
+            !loadingProducts &&
+            !errorLoadingProducts &&
+            filteredAndSortedItems.length === 0
+          "
+        >
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <p>{{ "CATEGORY.NO_PRODUCTS_AVAILABLE" | translate }}</p>
+        </div>
+
         <!-- Horizontal Product Scroll (works for all categories) -->
         <div
           class="horizontal-scroll-container"

@@ -36,4 +36,8 @@ describe('BuyerApiService', () => {
       { category_id: 15, category_name: 'Stone Fruits', img_path: 'existing-image' }
     ]);
   });
+
+  it('returns an empty category list when an empty API response is null', () => {
+    expect(mergeCategoryImages(null, undefined)).toEqual([]);
+  });
 });

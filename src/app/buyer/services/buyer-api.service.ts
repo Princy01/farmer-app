@@ -15,14 +15,17 @@ export interface Category {
   category_regional_id?: number;
 }
 
-export function mergeCategoryImages(categories: Category[], imageCategories: Category[]): Category[] {
+export function mergeCategoryImages(
+  categories: Category[] | null | undefined,
+  imageCategories: Category[] | null | undefined
+): Category[] {
   const imagesByCategoryID = new Map(
-    imageCategories
+    (imageCategories || [])
       .filter(category => Boolean(category?.category_id && category?.img_path))
       .map(category => [category.category_id, category.img_path] as const)
   );
 
-  return categories.map(category => ({
+  return (categories || []).map(category => ({
     ...category,
     img_path: category.img_path || imagesByCategoryID.get(category.category_id)
   }));
