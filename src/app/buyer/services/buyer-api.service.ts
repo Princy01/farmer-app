@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, throwError, timer } from 'rxjs';
+import { forkJoin, Observable, of, throwError, timer } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { catchError, retryWhen, concatMap, timeout } from 'rxjs/operators';
+import { catchError, retryWhen, concatMap, map, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/auth/auth.service';
 import { RetailerOrderHistoryResponse } from '../retailer-order-history/retailer-order-history.service';
@@ -13,6 +13,19 @@ export interface Category {
   img_path?: string;
   active_status?: number;
   category_regional_id?: number;
+}
+
+export function mergeCategoryImages(categories: Category[], imageCategories: Category[]): Category[] {
+  const imagesByCategoryID = new Map(
+    imageCategories
+      .filter(category => Boolean(category?.category_id && category?.img_path))
+      .map(category => [category.category_id, category.img_path] as const)
+  );
+
+  return categories.map(category => ({
+    ...category,
+    img_path: category.img_path || imagesByCategoryID.get(category.category_id)
+  }));
 }
 
 export interface PaymentMode {
@@ -261,8 +274,13 @@ export class BuyerApiService {
       return throwError(() => ({ message: 'ERRORS.INVALID_CATEGORY_ID', status: 400 }));
     }
 
-    return this.applyRetryLogic(
+    const categories$ = this.applyRetryLogic(
       this.http.get<Category[]>(`${this.apiUrl}/getCategoriesBySupID/${superCatId}`)
+    );
+    const imageCategories$ = this.getCategories().pipe(catchError(() => of([] as Category[])));
+
+    return forkJoin({ categories: categories$, imageCategories: imageCategories$ }).pipe(
+      map(({ categories, imageCategories }) => mergeCategoryImages(categories, imageCategories))
     );
   }
 
