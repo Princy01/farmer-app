@@ -174,6 +174,10 @@ export class LoginPage implements OnDestroy {
 
     this.translate.use(savedLang);
 
+    if (!this.authService.isAuthenticated()) {
+      return;
+    }
+
     this.translateApiService.getUserPreference().subscribe({
       next: (pref) => {
         const code = this.normalizeLanguageCode(pref?.code || savedLang);
