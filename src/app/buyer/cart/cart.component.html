@@ -150,45 +150,6 @@
       }
     </div>
 
-    <!-- ─── Discount card ────────────────────────────────────────────────── -->
-    <form [formGroup]="cartForm">
-      <ion-card class="discount-card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <ion-icon name="pricetag-outline" class="card-icon"></ion-icon>
-            {{ 'CART.APPLY_DISCOUNT' | translate }}
-          </h3>
-        </div>
-
-        <div class="discount-input-section">
-          <ion-item class="discount-input" lines="none">
-            <ion-input
-              formControlName="discountCode"
-              [placeholder]="'CART.ENTER_DISCOUNT_CODE' | translate"
-              class="discount-field"
-              [disabled]="isLoading">
-            </ion-input>
-          </ion-item>
-          <ion-button class="apply-discount-btn" (click)="applyDiscount()" [disabled]="isLoading">
-            {{ 'CART.APPLY' | translate }}
-          </ion-button>
-        </div>
-
-        @if (!discount) {
-          <div class="discount-suggestions">
-            <p class="suggestions-text">{{ 'CART.TRY_CODES' | translate }}</p>
-          </div>
-        }
-
-        @if (discount > 0) {
-          <div class="discount-applied">
-            <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
-            <span class="discount-text">{{ 'CART.DISCOUNT_APPLIED' | translate }}: -₹{{ discount | number:'1.2-2' }}</span>
-          </div>
-        }
-      </ion-card>
-    </form>
-
     <!-- ─── Order summary (reflects only selected groups) ───────────────── -->
     <ion-card class="summary-card">
       <div class="summary-header">
@@ -199,16 +160,10 @@
           <span class="summary-label">{{ 'CART.SUBTOTAL' | translate }}</span>
           <span class="summary-value">₹{{ selectedSubtotal | number:'1.2-2' }}</span>
         </div>
-        @if (discount > 0) {
-          <div class="summary-row">
-            <span class="summary-label discount-label">{{ 'CART.DISCOUNT' | translate }}</span>
-            <span class="summary-value discount-value">-₹{{ discount | number:'1.2-2' }}</span>
-          </div>
-        }
         <div class="summary-divider"></div>
         <div class="summary-row total-row">
           <span class="summary-label total-label">{{ 'CART.TOTAL' | translate }}</span>
-          <span class="summary-value total-value">₹{{ (selectedSubtotal - discount) | number:'1.2-2' }}</span>
+          <span class="summary-value total-value">₹{{ selectedSubtotal | number:'1.2-2' }}</span>
         </div>
       </div>
     </ion-card>
@@ -237,7 +192,7 @@
     <div class="checkout-container">
       <div class="checkout-info">
         <span class="total-label">{{ 'CART.TOTAL_AMOUNT' | translate }}</span>
-        <span class="total-amount">₹{{ (selectedSubtotal - discount) | number:'1.2-2' }}</span>
+        <span class="total-amount">₹{{ selectedSubtotal | number:'1.2-2' }}</span>
         <span class="items-info">
           {{ selectedItemCount }} {{ 'CART.ITEMS' | translate }}@if (allowMultipleSelection) { · {{ selectedGroupCount }} {{ 'CART.STORES' | translate }} }
         </span>

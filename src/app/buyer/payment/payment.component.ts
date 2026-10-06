@@ -4,6 +4,7 @@ import { IonicModule, AlertController, LoadingController, ToastController } from
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { addIcons } from 'ionicons';
 import {
   chevronBack,
@@ -16,12 +17,17 @@ import {
   timeOutline,
   walletOutline,
   cashOutline,
-  businessOutline
+  businessOutline,
+  pricetagOutline,
+  ticketOutline,
+  closeCircleOutline,
+  alertCircleOutline
 } from 'ionicons/icons';
 import { CheckoutSessionDetailResponse, PaymentService } from './payment.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { OrderService, Item, CreateBatchOrderRequest, TransportRequestWithOrders } from '../order-confirmation/order.service';
+import { CouponService, ApplyCouponResponse, AVAILABLE_COUPONS, AvailableCoupon } from '../services/coupon.service';
 import { environment } from 'src/environments/environment';
 
 type PaymentMode = 'simulated' | 'gateway';
@@ -60,6 +66,13 @@ export class PaymentComponent implements OnInit, OnDestroy {
   pollingInterval: any = null;
   pollingTimeout: any = null;
   readonly paymentMode: PaymentMode = environment.paymentMode === 'gateway' ? 'gateway' : 'simulated';
+
+  // Coupon promo state
+  appliedCoupon: ApplyCouponResponse | null = null;
+  couponCodeInput: string = '';
+  isApplyingCoupon: boolean = false;
+  couponError: string | null = null;
+  availableCoupons: AvailableCoupon[] = AVAILABLE_COUPONS;
 
   hasTransport: boolean = false;
   transportInfo: any = null;
@@ -105,6 +118,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     private paymentService: PaymentService,
     private translate: TranslateService,
     private orderService: OrderService,
+    private couponService: CouponService,
   ) {
     addIcons({
       chevronBack,
@@ -117,7 +131,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
       timeOutline,
       walletOutline,
       cashOutline,
-      businessOutline
+      businessOutline,
+      pricetagOutline,
+      ticketOutline,
+      closeCircleOutline,
+      alertCircleOutline
     });
 
     const navigation = this.router.getCurrentNavigation();
@@ -133,6 +151,13 @@ export class PaymentComponent implements OnInit, OnDestroy {
       console.error('No order data found in navigation state');
       this.router.navigate(['/buyer/cart']);
       return;
+    }
+
+    if (this.orderData?.appliedCoupon) {
+      this.appliedCoupon = this.orderData.appliedCoupon;
+      this.couponCodeInput = this.orderData.appliedCoupon.coupon_code || '';
+    } else if (this.orderData?.couponCode) {
+      this.couponCodeInput = this.orderData.couponCode;
     }
 
     // Always ensure items are properly populated from wholesalerGroups
@@ -360,12 +385,144 @@ export class PaymentComponent implements OnInit, OnDestroy {
   }
 
   private async processSimulatedPayment(): Promise<void> {
-    await this.showToast(
-      this.translate.instant('PAYMENT.SIMULATED_GATEWAY_NOTICE'),
-      'warning'
-    );
+    const loading = await this.loadingCtrl.create({
+      message: this.translate.instant('PAYMENT.PROCESSING_SIMULATED'),
+      spinner: 'dots'
+    });
+    await loading.present();
 
-    await this.processGatewayPayment();
+    try {
+      await this.ensureCheckoutSession();
+      // Brief simulated delay for realism
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const batchRequest = this.buildCheckoutSessionRequest(this.orderData);
+      this.logDebug(`Placing simulated order via CreateRetailerOrder: ${JSON.stringify(batchRequest)}`);
+
+      const response = await firstValueFrom(this.orderService.createOrder(batchRequest));
+      if (!response || !response.order_ids || response.order_ids.length === 0) {
+        throw new Error(this.translate.instant('PAYMENT.ERROR_ORDER_CREATION'));
+      }
+
+      const orderIds = response.order_ids;
+      const updatedOrderData = {
+        ...this.orderData,
+        checkoutSessionId: this.checkoutSessionId,
+        orderIds,
+        orderId: orderIds[0],
+        ordersTotal: response.orders_total,
+        deliveryCost: response.delivery_cost,
+        grandTotal: response.grand_total,
+        couponCode: this.appliedCoupon?.coupon_code || this.orderData?.couponCode || undefined
+      };
+      this.orderData = updatedOrderData;
+
+      if (this.hasTransport && this.transportInfo) {
+        await this.createTransportJob(orderIds, this.transportInfo);
+      }
+
+      await loading.dismiss();
+      await this.showToast(
+        this.translate.instant('PAYMENT.PAYMENT_SUCCESS'),
+        'success'
+      );
+      this.navigateToOrderConfirmation(updatedOrderData);
+    } catch (error: any) {
+      await loading.dismiss();
+      console.error('Simulated payment error:', error);
+      this.isProcessingPayment = false;
+      const errorMsg = error?.error?.error || error?.error?.message || error?.message;
+      await this.showPaymentError(errorMsg);
+    }
+  }
+
+  async applyCoupon(code?: string): Promise<void> {
+    const targetCode = (code || this.couponCodeInput || '').trim().toUpperCase();
+    if (!targetCode) {
+      this.couponError = this.translate.instant('COUPONS.INVALID_CODE');
+      return;
+    }
+
+    const goodsAmount = Number(this.orderData?.totalPrice) || 0;
+    if (goodsAmount <= 0) {
+      this.couponError = this.translate.instant('COUPONS.PLEASE_ADD_ITEMS');
+      return;
+    }
+
+    this.isApplyingCoupon = true;
+    this.couponError = null;
+
+    try {
+      const response = await firstValueFrom(this.couponService.applyCoupon(targetCode, goodsAmount));
+      if (response && response.valid) {
+        this.appliedCoupon = response;
+        this.couponCodeInput = response.coupon_code;
+
+        const baseHandling = this.orderData?.originalHandlingFee ?? response.original_handling_fee;
+        const previousHandling = this.orderData?.handlingChargeAmount ?? baseHandling;
+        const handlingDiff = previousHandling - response.final_handling_fee;
+        const newGrandTotal = Math.max((this.orderData?.grandTotal ?? 0) - handlingDiff, 0);
+
+        this.orderData = {
+          ...this.orderData,
+          appliedCoupon: response,
+          couponCode: response.coupon_code,
+          couponDiscountAmount: response.discount_amount,
+          originalHandlingFee: response.original_handling_fee,
+          handlingChargeAmount: response.final_handling_fee,
+          grandTotal: newGrandTotal,
+          payableAmount: newGrandTotal
+        };
+
+        await this.showToast(
+          `${this.translate.instant('COUPONS.COUPON_APPLIED_SUCCESS')} ${this.translate.instant('COUPONS.YOU_SAVED')} ₹${response.discount_amount.toFixed(2)}`,
+          'success'
+        );
+      } else {
+        this.couponError = response?.message || this.translate.instant('COUPONS.INVALID_CODE');
+        await this.showToast(this.couponError || this.translate.instant('COUPONS.FAILED_TO_APPLY'), 'danger');
+      }
+    } catch (error: any) {
+      console.error('Payment coupon apply error:', error);
+      const serverMessage = error?.error?.error || error?.error?.message || error?.message || this.translate.instant('COUPONS.INVALID_CODE');
+      this.couponError = serverMessage;
+      await this.showToast(serverMessage, 'danger');
+    } finally {
+      this.isApplyingCoupon = false;
+    }
+  }
+
+  async removeCoupon(): Promise<void> {
+    if (!this.appliedCoupon) return;
+    const previousCode = this.appliedCoupon.coupon_code;
+    const discountAmount = this.appliedCoupon.discount_amount;
+    const originalHandlingFee = this.appliedCoupon.original_handling_fee;
+
+    const newGrandTotal = (this.orderData?.grandTotal ?? 0) + discountAmount;
+
+    this.appliedCoupon = null;
+    this.couponCodeInput = '';
+    this.couponError = null;
+
+    this.orderData = {
+      ...this.orderData,
+      appliedCoupon: null,
+      couponCode: undefined,
+      couponDiscountAmount: 0,
+      handlingChargeAmount: originalHandlingFee,
+      grandTotal: newGrandTotal,
+      payableAmount: newGrandTotal
+    };
+
+    await this.showToast(
+      `${this.translate.instant('COUPONS.COUPON_REMOVED')} (${previousCode})`,
+      'dark'
+    );
+  }
+
+  selectQuickCoupon(code: string): void {
+    this.couponCodeInput = code;
+    void this.applyCoupon(code);
   }
 
   private async processGatewayPayment(): Promise<void> {
@@ -518,6 +675,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
               ?? 0,
             deliveryCost: this.orderData?.transporterCost ?? 0,
             grandTotal: this.orderData?.grandTotal ?? 0,
+            couponCode: this.appliedCoupon?.coupon_code || this.orderData?.couponCode || undefined
           };
           this.orderData = updatedOrderData;
 
@@ -588,6 +746,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       order_groups: orderGroups,
       delivery_amount: orderData.transporterCost ?? 0,
       checkout_session_id: orderData.checkoutSessionId ?? this.checkoutSessionId ?? undefined,
+      coupon_code: this.appliedCoupon?.coupon_code || orderData?.couponCode || undefined,
     };
   }
 

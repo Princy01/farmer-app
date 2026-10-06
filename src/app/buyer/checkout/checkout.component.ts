@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
+import { FormsModule } from '@angular/forms';
+import { IonicModule, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { Router, NavigationEnd } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
@@ -21,7 +22,11 @@ import {
   informationCircleOutline,
   calculatorOutline,
   arrowForwardOutline,
-  checkmarkCircle
+  checkmarkCircle,
+  pricetagOutline,
+  ticketOutline,
+  closeCircleOutline,
+  alertCircleOutline
 } from 'ionicons/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, firstValueFrom } from 'rxjs';
@@ -31,6 +36,7 @@ import { CheckoutService, BusinessBranch } from './checkout.service';
 import { CheckoutSessionService, CreateCheckoutSessionRequest } from '../services/checkout-session.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { BuyerApiService } from '../services/buyer-api.service';
+import { CouponService, ApplyCouponResponse, AvailableCoupon, AVAILABLE_COUPONS } from '../services/coupon.service';
 
 interface CartItem {
   selected_id?: number;
@@ -98,7 +104,7 @@ const CHECKOUT_STATE_TTL_MS = 30 * 60 * 1000;
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, IonicModule, TranslatePipe],
+  imports: [CommonModule, IonicModule, FormsModule, TranslatePipe],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
 })
@@ -111,13 +117,19 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   totalPrice = 0;
   discount = 0;
 
-  // Checkout preview mirrors the current backend policy:
-  // retailer pays only their own commission share; wholeseller and transporter
-  // deductions stay backend-side and do not change retailer payable.
+  // Handling charges & coupon state
   handlingCharges = 0;
+  originalHandlingFee = 0;
+  couponDiscount = 0;
   platformFee = 0;
-
   grandTotal = 0;
+
+  // Coupon promo state
+  couponCodeInput = '';
+  appliedCoupon: ApplyCouponResponse | null = null;
+  isApplyingCoupon = false;
+  couponError: string | null = null;
+  availableCoupons: AvailableCoupon[] = AVAILABLE_COUPONS;
 
   businessBranches: BusinessBranch[] = [];
   selectedBranch: BusinessBranch | null = null;
@@ -139,11 +151,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     private router: Router,
     private alertCtrl: AlertController,
     private loadingController: LoadingController,
+    private toastController: ToastController,
     private checkoutService: CheckoutService,
     private authService: AuthService,
     private translate: TranslateService,
     private buyerApiService: BuyerApiService,
-    private checkoutSessionService: CheckoutSessionService
+    private checkoutSessionService: CheckoutSessionService,
+    private couponService: CouponService
   ) {
     addIcons({
       chevronBack,
@@ -163,7 +177,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       informationCircleOutline,
       calculatorOutline,
       arrowForwardOutline,
-      checkmarkCircle
+      checkmarkCircle,
+      pricetagOutline,
+      ticketOutline,
+      closeCircleOutline,
+      alertCircleOutline
     });
 
     this.handleNavigationState();
@@ -234,6 +252,14 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       this.selectedBranch = state['selectedBranch'];
     }
 
+    if (state['appliedCoupon']) {
+      this.appliedCoupon = state['appliedCoupon'];
+      this.couponCodeInput = this.appliedCoupon?.coupon_code || '';
+      this.originalHandlingFee = this.appliedCoupon?.original_handling_fee || 0;
+      this.couponDiscount = this.appliedCoupon?.discount_amount || 0;
+      this.handlingCharges = this.appliedCoupon?.final_handling_fee || 0;
+    }
+
     this.calculateGroupPricing();
     this.persistCheckoutState(state);
   }
@@ -266,7 +292,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           totalPrice: this.totalPrice,
           hasRideRequest: true,
           hasTransport: true,
-          transportData: this.transportData ?? state['transportData'] ?? null
+          transportData: this.transportData ?? state['transportData'] ?? null,
+          appliedCoupon: this.appliedCoupon,
+          couponCode: this.appliedCoupon?.coupon_code || null,
+          couponDiscount: this.couponDiscount
         }
       }));
     } catch {
@@ -452,6 +481,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         retailer_branch_id: this.selectedBranch.branch_id,
         order_groups: orderGroups,
         delivery_amount: this.getTransportCostForCheckout(),
+        coupon_code: this.appliedCoupon?.coupon_code || undefined,
       };
 
       const checkoutResponse = await firstValueFrom(
@@ -475,9 +505,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
             totalPrice: checkoutResponse?.data?.goods_amount ?? this.totalPrice,
             discount: this.discount,
             platformFeeAmount: checkoutResponse?.data?.platform_fee_amount ?? this.platformFee,
-            handlingChargeAmount: checkoutResponse?.data?.handling_charge_amount ?? this.handlingCharges,
-            payableAmount: checkoutResponse?.data?.payable_amount ?? this.grandTotal,
-            grandTotal: checkoutResponse?.data?.payable_amount ?? this.grandTotal,
+            handlingChargeAmount: this.handlingCharges,
+            originalHandlingFee: this.originalHandlingFee,
+            couponDiscountAmount: this.couponDiscount,
+            couponCode: this.appliedCoupon?.coupon_code || undefined,
+            appliedCoupon: this.appliedCoupon,
+            payableAmount: this.grandTotal,
+            grandTotal: this.grandTotal,
             hasTransport: this.hasRideRequest,
             transportData: finalTransportData,
             transporterCost: checkoutResponse?.data?.delivery_amount ?? (this.hasRideRequest ? this.estimatedRidePrice : 0),
@@ -678,7 +712,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     if (this.wholesalerGroups.length === 0) {
       const goodsAmount = Math.max(this.totalPrice - this.discount, 0);
       this.applyPaymentQuote(goodsAmount);
-      this.grandTotal = goodsAmount + this.platformFee +
+      this.grandTotal = goodsAmount + this.handlingCharges + this.platformFee +
         (this.hasRideRequest ? this.estimatedRidePrice : 0);
       return;
     }
@@ -694,14 +728,96 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
     const ordersTotal = this.wholesalerGroups.reduce((sum, group) => sum + group.finalAmount, 0);
     this.applyPaymentQuote(ordersTotal);
-    this.grandTotal = ordersTotal + this.platformFee +
+    this.grandTotal = ordersTotal + this.handlingCharges + this.platformFee +
       (this.hasRideRequest ? this.estimatedRidePrice : 0);
   }
 
   private applyPaymentQuote(goodsAmount: number): void {
     const normalizedGoodsAmount = Math.max(goodsAmount, 0);
-    this.handlingCharges = 0;
+    this.originalHandlingFee = Math.round(normalizedGoodsAmount * 0.02 * 100) / 100;
     this.platformFee = this.calculateRetailerPlatformFeeShare(normalizedGoodsAmount);
+
+    if (this.appliedCoupon) {
+      this.handlingCharges = this.appliedCoupon.final_handling_fee;
+      this.couponDiscount = this.appliedCoupon.discount_amount;
+    } else {
+      this.handlingCharges = this.originalHandlingFee;
+      this.couponDiscount = 0;
+    }
+  }
+
+  async applyCoupon(code?: string): Promise<void> {
+    const targetCode = (code || this.couponCodeInput || '').trim().toUpperCase();
+    if (!targetCode) {
+      this.couponError = this.translate.instant('COUPONS.INVALID_CODE');
+      return;
+    }
+
+    if (this.totalPrice <= 0) {
+      this.couponError = this.translate.instant('COUPONS.PLEASE_ADD_ITEMS');
+      return;
+    }
+
+    this.isApplyingCoupon = true;
+    this.couponError = null;
+
+    try {
+      const response = await firstValueFrom(this.couponService.applyCoupon(targetCode, this.totalPrice));
+      if (response && response.valid) {
+        this.appliedCoupon = response;
+        this.couponCodeInput = response.coupon_code;
+        this.originalHandlingFee = response.original_handling_fee;
+        this.couponDiscount = response.discount_amount;
+        this.handlingCharges = response.final_handling_fee;
+        this.calculateGroupPricing();
+        this.persistCheckoutState(history.state);
+
+        await this.showToast(
+          `${this.translate.instant('COUPONS.COUPON_APPLIED_SUCCESS')} ${this.translate.instant('COUPONS.YOU_SAVED')} ₹${response.discount_amount.toFixed(2)}`,
+          'success'
+        );
+      } else {
+        this.couponError = response?.message || this.translate.instant('COUPONS.INVALID_CODE');
+        await this.showToast(this.couponError || this.translate.instant('COUPONS.FAILED_TO_APPLY'), 'danger');
+      }
+    } catch (error: any) {
+      console.error('Failed to apply coupon:', error);
+      const serverMessage = error?.error?.error || error?.error?.message || error?.message || this.translate.instant('COUPONS.INVALID_CODE');
+      this.couponError = serverMessage;
+      await this.showToast(serverMessage, 'danger');
+    } finally {
+      this.isApplyingCoupon = false;
+    }
+  }
+
+  async removeCoupon(): Promise<void> {
+    const prev = this.appliedCoupon?.coupon_code;
+    this.appliedCoupon = null;
+    this.couponDiscount = 0;
+    this.couponCodeInput = '';
+    this.couponError = null;
+    this.calculateGroupPricing();
+    this.persistCheckoutState(history.state);
+
+    await this.showToast(
+      `${this.translate.instant('COUPONS.COUPON_REMOVED')} ${prev ? '(' + prev + ')' : ''}`,
+      'dark'
+    );
+  }
+
+  selectQuickCoupon(code: string): void {
+    this.couponCodeInput = code;
+    void this.applyCoupon(code);
+  }
+
+  private async showToast(message: string, color: string = 'dark'): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'bottom'
+    });
+    await toast.present();
   }
 
   private calculateRetailerPlatformFeeShare(goodsAmount: number): number {

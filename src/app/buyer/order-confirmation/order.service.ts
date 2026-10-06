@@ -36,6 +36,7 @@ export interface CreateBatchOrderRequest {
   delivery_amount: number;
   retailer_branch_id: number;
   checkout_session_id?: number;
+  coupon_code?: string;
 }
 
 export interface CreateBatchOrderResponse {

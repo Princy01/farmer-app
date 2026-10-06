@@ -47,6 +47,11 @@
           <span class="detail-value">{{ getOrderGrandTotal() | currency:'INR':'symbol':'1.2-2' }}</span>
         </div>
 
+        <div class="detail-row" *ngIf="orderData.couponCode">
+          <span class="detail-label">{{ 'CHECKOUT.COUPON_CODE' | translate }}:</span>
+          <span class="detail-value text-success" style="color: #16a34a; font-weight: 700;">{{ orderData.couponCode }}</span>
+        </div>
+
         <div class="detail-row" *ngIf="usedSimulatedPayment()">
           <span class="detail-label">{{ 'ORDER_CONFIRMATION.PAYMENT_MODE' | translate }}:</span>
           <span class="detail-value">{{ 'ORDER_CONFIRMATION.PAYMENT_MODE_SIMULATED' | translate }}</span>

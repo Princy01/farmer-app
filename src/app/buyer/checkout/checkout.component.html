@@ -176,6 +176,107 @@
       </div>
     </div>
 
+    <!-- Coupons & Offers Card -->
+    <div class="card coupon-card" role="region" aria-label="Coupons and Offers">
+      <div class="card-head">
+        <div class="card-head-left">
+          <div class="card-icon icon-purple">
+            <ion-icon name="ticket-outline"></ion-icon>
+          </div>
+          <div class="coupon-header-text">
+            <span class="card-title">{{ "COUPONS.TITLE" | translate }}</span>
+            <span class="card-subtitle-small">{{ "COUPONS.SUBTITLE" | translate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <!-- State 1: Coupon successfully applied -->
+        <div class="applied-coupon-box" *ngIf="appliedCoupon">
+          <div class="applied-coupon-left">
+            <div class="applied-icon-wrap">
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </div>
+            <div class="applied-coupon-details">
+              <div class="applied-coupon-code-row">
+                <span class="coupon-tag-badge">{{ appliedCoupon.coupon_code }}</span>
+                <span class="discount-percent-badge">{{ appliedCoupon.discount_percentage }}% OFF</span>
+              </div>
+              <span class="applied-coupon-desc">
+                {{ "COUPONS.YOU_SAVED" | translate }} ₹{{ appliedCoupon.discount_amount | number:'1.2-2' }} {{ "COUPONS.ON_HANDLING_FEE" | translate }}
+              </span>
+            </div>
+          </div>
+          <button type="button" class="remove-coupon-btn" (click)="removeCoupon()">
+            <ion-icon name="close-circle-outline"></ion-icon>
+            <span>{{ "COUPONS.REMOVE" | translate }}</span>
+          </button>
+        </div>
+
+        <!-- State 2: No coupon applied (input + offers) -->
+        <div class="coupon-input-section" *ngIf="!appliedCoupon">
+          <div class="coupon-input-group">
+            <div class="input-icon-wrapper">
+              <ion-icon name="pricetag-outline"></ion-icon>
+              <input
+                type="text"
+                class="coupon-input"
+                [placeholder]="'COUPONS.ENTER_COUPON_CODE' | translate"
+                [(ngModel)]="couponCodeInput"
+                (keyup.enter)="applyCoupon()"
+                (input)="couponError = null"
+                maxlength="20"
+              />
+            </div>
+            <ion-button
+              class="apply-coupon-btn"
+              [disabled]="isApplyingCoupon || !couponCodeInput.trim()"
+              (click)="applyCoupon()"
+            >
+              <ion-spinner name="crescent" *ngIf="isApplyingCoupon"></ion-spinner>
+              <span *ngIf="!isApplyingCoupon">{{ "COUPONS.APPLY" | translate }}</span>
+            </ion-button>
+          </div>
+
+          <!-- Error message if invalid/already used -->
+          <div class="coupon-error-banner" *ngIf="couponError">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ couponError }}</span>
+          </div>
+
+          <!-- Quick pick available coupons -->
+          <div class="available-offers-block">
+            <div class="offers-header">
+              <ion-icon name="ticket-outline"></ion-icon>
+              <span>{{ "COUPONS.AVAILABLE_OFFERS" | translate }}</span>
+            </div>
+            <div class="offer-cards-list">
+              <div
+                class="offer-item"
+                *ngFor="let offer of availableCoupons"
+                (click)="selectQuickCoupon(offer.code)"
+              >
+                <div class="offer-item-content">
+                  <div class="offer-top-row">
+                    <span class="offer-code">{{ offer.code }}</span>
+                    <span class="offer-badge">{{ offer.badgeText }}</span>
+                  </div>
+                  <span class="offer-desc">{{ offer.description }}</span>
+                </div>
+                <button
+                  type="button"
+                  class="offer-apply-action"
+                  (click)="$event.stopPropagation(); selectQuickCoupon(offer.code)"
+                >
+                  {{ "COUPONS.APPLY" | translate }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="card summary-card" role="region" aria-label="Order Summary">
       <div class="card-head">
         <div class="card-head-left">
@@ -201,9 +302,18 @@
           </div>
 
           <!-- Handling Charges -->
-          <div class="sum-row" *ngIf="handlingCharges > 0">
+          <div class="sum-row" *ngIf="originalHandlingFee > 0 || handlingCharges > 0">
             <span class="sum-label">{{ "CHECKOUT.HANDLING_CHARGES" | translate }}</span>
-            <span class="sum-val">₹{{ handlingCharges | number:'1.2-2' }}</span>
+            <span class="sum-val">₹{{ (appliedCoupon ? originalHandlingFee : handlingCharges) | number:'1.2-2' }}</span>
+          </div>
+
+          <!-- Coupon Discount (Handling Fee Discount) -->
+          <div class="sum-row coupon-discount-row" *ngIf="appliedCoupon && couponDiscount > 0">
+            <span class="sum-label discount-text">
+              <ion-icon name="pricetag-outline"></ion-icon>
+              {{ "CHECKOUT.COUPON_DISCOUNT" | translate }} ({{ appliedCoupon.coupon_code }})
+            </span>
+            <span class="sum-val discount-text">-₹{{ couponDiscount | number:'1.2-2' }}</span>
           </div>
 
           <!-- Platform Fee -->

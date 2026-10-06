@@ -53,6 +53,7 @@ interface OrderConfirmationData {
   grand_total?: number;
   grandTotal?: number;
   items?: OrderConfirmationItem[];
+  couponCode?: string;
 }
 
 interface OrderConfirmationNavigationState {

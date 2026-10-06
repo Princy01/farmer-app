@@ -34,6 +34,7 @@ export interface CreateCheckoutSessionRequest {
   order_groups: CheckoutSessionOrderGroup[];
   delivery_amount: number;
   retailer_branch_id: number;
+  coupon_code?: string;
 }
 
 export interface CreateCheckoutSessionResponse {
